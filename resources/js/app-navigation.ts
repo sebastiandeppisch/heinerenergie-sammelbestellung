@@ -13,8 +13,8 @@ export default [
         path: "/profile"
       },
       {
-        text: "Tasks",
-        path: "/tasks"
+        text: "Bestellungen",
+        path: "/orders"
       }
     ]
   }
