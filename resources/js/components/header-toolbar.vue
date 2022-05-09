@@ -20,7 +20,7 @@
         location="before"
         css-class="header-title dx-toolbar-label"
       >
-        <div>{{ title }}</div>
+        <div><img src="img/logo.png" style="height:2em;"></div>
       </dx-item>
 
       <dx-item
