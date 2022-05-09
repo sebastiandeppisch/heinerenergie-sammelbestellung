@@ -3,7 +3,7 @@ import { createRouter, createWebHashHistory } from "vue-router";
 
 import Home from "./views/home-page";
 import Profile from "./views/profile-page";
-import Tasks from "./views/tasks-page";
+import Orders from "./views/Orders";
 import defaultLayout from "./layouts/side-nav-outer-toolbar";
 import simpleLayout from "./layouts/single-card";
 
@@ -32,13 +32,13 @@ const router = new createRouter({
       component: Profile
     },
     {
-      path: "/tasks",
-      name: "tasks",
+      path: "/orders",
+      name: "orders",
       meta: {
         requiresAuth: true,
         layout: defaultLayout
       },
-      component: Tasks
+      component: Orders
     },
     {
       path: "/login-form",
