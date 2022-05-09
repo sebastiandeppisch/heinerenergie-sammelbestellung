@@ -1649,7 +1649,7 @@
   padding: 0;
   outline: 0;
   -webkit-print-color-adjust: exact;
-  color-adjust: exact;
+  print-color-adjust: exact;
   color: #fff;
   font-weight: 400;
   font-size: 14px;
