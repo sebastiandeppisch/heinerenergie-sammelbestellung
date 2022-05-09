@@ -1,0 +1,15 @@
+{
+	"compilerOptions": {
+		"target": "es6",
+		"module": "es6",
+		"sourceMap": true,
+		"experimentalDecorators": true,
+		"esModuleInterop": true,
+		"moduleResolution": "node",
+		"importHelpers": true,
+		"allowJs": true
+	},
+	"baseUrl": "./resources/js",
+	"include": ["./resources/js/**/*", "./resources/js/tests/**/*"],
+    "exclude": ["node_modules"]
+}
