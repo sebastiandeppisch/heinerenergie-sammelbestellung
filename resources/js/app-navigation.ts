@@ -15,6 +15,10 @@ export default [
       {
         text: "Bestellungen",
         path: "/orders"
+      },
+      {
+        text: "Produkte",
+        path: "/products"
       }
     ]
   }

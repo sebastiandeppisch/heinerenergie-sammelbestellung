@@ -4,6 +4,8 @@ import { createRouter, createWebHashHistory } from "vue-router";
 import Home from "./views/home-page";
 import Profile from "./views/profile-page";
 import Orders from "./views/Orders";
+import Products from "./views/Products";
+
 import defaultLayout from "./layouts/side-nav-outer-toolbar";
 import simpleLayout from "./layouts/single-card";
 
@@ -39,6 +41,14 @@ const router = new createRouter({
         layout: defaultLayout
       },
       component: Orders
+    },{
+      path: "/products",
+      name: "products",
+      meta: {
+        requiresAuth: true,
+        layout: defaultLayout
+      },
+      component: Products
     },
     {
       path: "/login-form",
