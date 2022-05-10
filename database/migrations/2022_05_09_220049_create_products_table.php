@@ -18,10 +18,10 @@ class CreateProductsTable extends Migration
             $table->timestamps();
 
             $table->string('name');
-            $table->text('description');
-            $table->string('url');
+            $table->text('description')->nullable();
+            $table->string('url')->nullable();
             $table->float('price');
-            $table->string('sku');
+            $table->string('sku')->nullable();
             $table->unsignedInteger('panelsCount');
         });
     }
