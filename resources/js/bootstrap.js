@@ -26,3 +26,9 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 //     cluster: process.env.MIX_PUSHER_APP_CLUSTER,
 //     forceTLS: true
 // });
+
+
+const localization = require('devextreme/localization');
+
+localization.loadMessages(require('devextreme/localization/messages/de.json'));
+localization.locale('de');
