@@ -5,21 +5,22 @@ export default [
     icon: "home"
   },
   {
-    text: "Examples",
-    icon: "folder",
-    items: [
-      {
-        text: "Profile",
-        path: "/profile"
-      },
-      {
-        text: "Bestellungen",
-        path: "/orders"
-      },
-      {
-        text: "Produkte",
-        path: "/products"
-      }
-    ]
+    text: "Profile",
+    path: "/profile"
+  },
+  {
+    text: "Bestellungen",
+    path: "/orders",
+    icon: "textdocument"
+  },
+  {
+    text: "Produkte",
+    path: "/products",
+    icon: "box"
+  },
+  {
+    text: "Neue Bestellung",
+    path: "/neworder",
+    icon: "cart"
   }
-  ];
+];
