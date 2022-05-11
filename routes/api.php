@@ -22,3 +22,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::resource('orders', OrderController::class);
 Route::resource('products', ProductController::class);
+
+Route::get('validateorderform', [OrderController::class, 'validateorderform']);

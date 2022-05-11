@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
+use Illuminate\Http\Request;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
-use App\Models\Order;
 
 class OrderController extends Controller
 {
@@ -82,5 +83,19 @@ class OrderController extends Controller
     public function destroy(Order $order)
     {
         //
+    }
+
+    public function validateorderform(Request $request){
+        $request->validate([
+            'firstName' => 'required|string',
+            'lastName' => 'required|string',
+            'email' => 'required|email|confirmed',
+            'email_confirmation' => 'required|email',
+            'phone' => 'required|string',
+            'street' => 'required|string',
+            'streetNumber' => 'required|string',
+            'zip' => 'required|digits:5',
+            'city' => 'required|string',
+        ]);
     }
 }
