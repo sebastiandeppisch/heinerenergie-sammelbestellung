@@ -3,7 +3,7 @@ export default [
     text: "Neue Bestellung",
     path: "/neworder",
     icon: "cart"
-  }
+  },
   {
     text: "Bestellungen",
     path: "/orders",
