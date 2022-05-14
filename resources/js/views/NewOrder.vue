@@ -112,7 +112,7 @@
         mode="cell"
       />
       <DxColumn
-        caption="Produkt"
+        caption="Artikel"
         data-field="product.name"
         :allow-sorting="false"
         :allow-editing="false"

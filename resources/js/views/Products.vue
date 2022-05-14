@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2 class="content-block">Produkte</h2>
+    <h2 class="content-block">Artikel</h2>
 
     <DxDataGrid
       class="dx-card wide-card"
@@ -19,7 +19,7 @@
       <DxColumn data-field="sku" caption="SKU" />
       <DxColumn data-field="panelsCount" caption="Panels" :editor-options="panelsCountEditorOptions"/>
       <DxColumn data-field="url" caption="URL" />
-      <DxColumn data-field="description" caption="description" width="600px"/>
+      <DxColumn data-field="description" caption="Beschreibung" width="600px"/>
     </DxDataGrid>
   </div>
 </template>

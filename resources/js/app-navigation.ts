@@ -10,7 +10,7 @@ export default [
     icon: "textdocument"
   },
   {
-    text: "Produkte",
+    text: "Artikel",
     path: "/products",
     icon: "box"
   }
