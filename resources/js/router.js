@@ -2,7 +2,6 @@ import auth from "./auth";
 import { createRouter, createWebHashHistory } from "vue-router";
 
 import Home from "./views/home-page";
-import Profile from "./views/profile-page";
 import Orders from "./views/Orders";
 import Products from "./views/Products";
 import NewOrder from "./views/NewOrder"
@@ -24,15 +23,6 @@ const router = new createRouter({
         layout: defaultLayout
       },
       component: Home
-    },
-    {
-      path: "/profile",
-      name: "profile",
-      meta: {
-        requiresAuth: true,
-        layout: defaultLayout
-      },
-      component: Profile
     },
     {
       path: "/orders",

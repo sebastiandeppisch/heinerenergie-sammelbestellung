@@ -1,13 +1,9 @@
 export default [
   {
-    text: "Home",
-    path: "/home",
-    icon: "home"
-  },
-  {
-    text: "Profile",
-    path: "/profile"
-  },
+    text: "Neue Bestellung",
+    path: "/neworder",
+    icon: "cart"
+  }
   {
     text: "Bestellungen",
     path: "/orders",
@@ -17,10 +13,5 @@ export default [
     text: "Produkte",
     path: "/products",
     icon: "box"
-  },
-  {
-    text: "Neue Bestellung",
-    path: "/neworder",
-    icon: "cart"
   }
 ];
