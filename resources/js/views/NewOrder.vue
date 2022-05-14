@@ -256,9 +256,6 @@ const state: State = reactive({
   order: null
 })
 
-axios.get('api/orders/13').then((response) => {
-  state.order = response.data as Order;
-});
 
 function saveOrder(){
   axios.post('api/orders', {
@@ -267,7 +264,7 @@ function saveOrder(){
   }).then((response) => {
     state.order = response.data as Order;
   });
-  //TOdo handle error
+  //TODO handle error
 }
 
 
