@@ -1,9 +1,9 @@
 {
-    "name": "laravel/laravel",
+    "name": "sebastiandeppisch/heinerenergie-sammelbestellung",
     "type": "project",
-    "description": "The Laravel Framework.",
+    "description": "Software for the collection of bulk orders for balcony solar panels",
     "keywords": ["framework", "laravel"],
-    "license": "MIT",
+    "license": "TODO",
     "require": {
         "php": "^7.3|^8.0",
         "based/laravel-typescript": "^0.0.3",
