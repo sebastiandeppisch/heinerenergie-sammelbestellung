@@ -3,7 +3,7 @@
     <div v-if="state.order === null">
       <h2 class="content-block">Neue Bestellung</h2>
       <DxForm
-        id="form"
+        ref="form"
         label-mode="floating"
         :col-count="2"
         :form-data="formData"
@@ -235,13 +235,14 @@ import { DxRequiredRule, DxEmailRule, DxAsyncRule } from 'devextreme-vue/form';
 
 import axios, {AxiosError} from 'axios';
 import { ValidationCallbackData } from 'devextreme/ui/validation_rules';
-import {ref, reactive} from 'vue';
+import {ref, reactive, computed} from 'vue';
 
 import DataSource from "devextreme/data/data_source";
 import CustomStore from 'devextreme/data/custom_store';
 import { resolveSoa } from "dns";
 import { CustomSummaryInfo } from "devextreme/ui/data_grid";
 import notify from 'devextreme/ui/notify';
+import dxForm from 'devextreme/ui/form';
 
 
 type Product = App.Models.Product;
@@ -250,6 +251,12 @@ type Order = App.Models.Order;
 let formData: any = ref({});
 
 let citySuggestions = ref([]);
+
+const formRef = 'form';
+
+const form = ref(null);
+
+let orderItems: Array<OrderItem> = [];
 
 interface State{
   order: null|Order
@@ -260,15 +267,33 @@ const state: State = reactive({
 })
 
 
+function articlesAreEmpty(): boolean{
+  const count = orderItems.reduce(
+    (sum, orderItem) => sum + orderItem.quantity,
+    0)
+  return count <= 0;
+}
+
 function saveOrder(){
-  axios.post('api/orders', {
-    orderItems, 
-    ...(formData.value)
-  }).then((response) => {
-    state.order = response.data as Order;
-  }).catch(error => {
-    notifyError(error)
-  })
+  const formInstance = form.value.instance as dxForm;
+  formInstance.validate().complete.then(result => {
+    if(!result.isValid){
+      notify('Bitte fülle zuerst alle Felder aus', 'error');
+      return;
+    }
+    if(articlesAreEmpty()){
+      notify('Deine Bestellung ist aktuell noch leer. Bitte füge Artikel hinzu', 'error');
+      return;
+    }
+    axios.post('api/orders', {
+      orderItems, 
+      ...(formData.value)
+    }).then((response) => {
+      state.order = response.data as Order;
+    }).catch(error => {
+      notifyError(error)
+    })
+  });
 }
 
 
@@ -290,7 +315,6 @@ function validateAsync(params: ValidationCallbackData){
   const data = {...formData.value};
   const field: string = params.formItem.dataField;
   data[field] = params.value;
-  console.log(data);
   return axios.get('api/validateorderform', {
     params: data
   }).catch(error => {
@@ -299,7 +323,6 @@ function validateAsync(params: ValidationCallbackData){
 }
 
 function notifyError(error: AxiosError): void{
-  console.log(error.response);
   if(error.response && error.response.status === 422){
     let validationErrors: Array<String> = [];
     for(const prop in error.response.data.errors){
@@ -355,7 +378,6 @@ interface OrderItem{
 }
 
 
-let orderItems: Array<OrderItem> = [];
 
 let orderItemsDatasource = new DataSource({
   store: new CustomStore({
