@@ -244,6 +244,8 @@ import { CustomSummaryInfo } from "devextreme/ui/data_grid";
 import notify from 'devextreme/ui/notify';
 import dxForm from 'devextreme/ui/form';
 
+import {formatPrice, formatPriceCell} from './../helpers'
+
 
 type Product = App.Models.Product;
 type Order = App.Models.Order;
@@ -294,15 +296,6 @@ function saveOrder(){
       notifyError(error)
     })
   });
-}
-
-
-function formatPriceCell(cell): string{
-  return formatPrice(parseFloat(cell.value));
-}
-
-function formatPrice(price: number): string{
-  return price.toFixed(2).replace(".", ",") + " €";
 }
 
 function calculateSummary(options: CustomSummaryInfo){
