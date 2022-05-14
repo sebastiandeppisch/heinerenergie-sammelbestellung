@@ -1,9 +1,7 @@
 <template>
   <div class="content-block">
     <footer class="footer">
-      Copyright © 2011-{{new Date().getFullYear()}} {{this.$appInfo.title}} Inc.
-      <br />All trademarks or registered trademarks are property of their
-      respective owners.
+      <a href="https://github.com/sebastiandeppisch/heinerenergie-sammelbestellung" ><img src="img/github.svg" alt="Github" style="height:1em;"></a>
     </footer>
   </div>
 </template>
