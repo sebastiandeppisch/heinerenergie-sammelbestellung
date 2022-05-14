@@ -240,6 +240,8 @@ import DataSource from "devextreme/data/data_source";
 import CustomStore from 'devextreme/data/custom_store';
 import { resolveSoa } from "dns";
 import { CustomSummaryInfo } from "devextreme/ui/data_grid";
+import notify from 'devextreme/ui/notify';
+
 
 type Product = App.Models.Product;
 type Order = App.Models.Order;
@@ -263,8 +265,9 @@ function saveOrder(){
     ...(formData.value)
   }).then((response) => {
     state.order = response.data as Order;
-  });
-  //TODO handle error
+  }).catch(error => {
+    notifyError(error)
+  })
 }
 
 
@@ -292,6 +295,19 @@ function validateAsync(params: ValidationCallbackData){
   }).catch(error => {
     formatError(error, field);
   })
+}
+
+function notifyError(error: AxiosError): void{
+  console.log(error.response);
+  if(error.response && error.response.status === 422){
+    let validationErrors: Array<String> = [];
+    for(const prop in error.response.data.errors){
+      validationErrors = validationErrors.concat(error.response.data.errors[prop] as Array<String>);
+    }
+    notify(validationErrors.join(","), 'error')
+  }else{
+    notify(error, 'error');
+  }
 }
 
 function formatError(error: AxiosError, field: string): void{
