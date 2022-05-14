@@ -131,6 +131,7 @@
         :allow-sorting="false"
         data-type="number"
         :editor-options="{defaultValue: 0, min: 0, showSpinButtons: true, showClearButton: true}"
+        :show-editor-always="true"
       />
       <DxSummary
         :recalculate-while-editing="true"
