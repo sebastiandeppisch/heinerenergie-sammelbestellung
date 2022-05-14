@@ -1,7 +1,6 @@
 import auth from "./auth";
 import { createRouter, createWebHashHistory } from "vue-router";
 
-import Home from "./views/home-page";
 import Orders from "./views/Orders";
 import Products from "./views/Products";
 import NewOrder from "./views/NewOrder"
@@ -15,15 +14,6 @@ function loadView(view) {
 
 const router = new createRouter({
   routes: [
-    {
-      path: "/home",
-      name: "home",
-      meta: {
-        requiresAuth: true,
-        layout: defaultLayout
-      },
-      component: Home
-    },
     {
       path: "/orders",
       name: "orders",
@@ -94,7 +84,7 @@ const router = new createRouter({
     },
     {
       path: "/",
-      redirect: "/home"
+      redirect: "/neworder"
     },
     {
       path: "/recovery",
