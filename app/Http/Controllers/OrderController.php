@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Mail\OrderCreated;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 
@@ -56,6 +58,9 @@ class OrderController extends Controller
         $order->orderItems->each(function(OrderItem $orderItem){
             $orderItem->load('product');
         });
+
+        Mail::to($order->email)->send(new OrderCreated($order));
+
         return $order;
     }
 
