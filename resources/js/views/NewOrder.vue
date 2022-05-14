@@ -120,7 +120,7 @@
       <DxColumn
         caption="Preis"
         data-field="product.price"
-        :customize-text="formatPrice"
+        :customize-text="formatPriceCell"
         :allow-sorting="false"
         :allow-editing="false"
 
@@ -200,7 +200,7 @@
         </table>
         <div class="dx-field-label">Gesamtpreis</div>
           <div class="dx-field-value-static">
-             {{state.order.price.toFixed(2).replace(".", ",") + " €"}}
+             {{formarPrice(state.order.price)}}
           </div>
       </div>
     </div>
@@ -268,14 +268,18 @@ function saveOrder(){
 }
 
 
-function formatPrice(price){
-  return parseFloat(price.value).toFixed(2).replace(".", ",") + " €";
+function formatPriceCell(cell): string{
+  return formatPrice(parseFloat(cell.value));
+}
+
+function formatPrice(price: number): string{
+  return price.toFixed(2).replace(".", ",") + " €";
 }
 
 function calculateSummary(options: CustomSummaryInfo){
-  options.totalValue = orderItems.reduce(
+  options.totalValue = formatPrice(orderItems.reduce(
     (sum, orderItem) => sum + orderItem.quantity*orderItem.product.price,
-    0).toFixed(2).replace(".", ",") + " €";
+    0))
 }
 
 function validateAsync(params: ValidationCallbackData){
