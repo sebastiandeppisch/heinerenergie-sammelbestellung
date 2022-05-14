@@ -201,7 +201,7 @@
         </table>
         <div class="dx-field-label">Gesamtpreis</div>
           <div class="dx-field-value-static">
-             {{formarPrice(state.order.price)}}
+             {{formatPrice(state.order.price)}}
           </div>
       </div>
     </div>
