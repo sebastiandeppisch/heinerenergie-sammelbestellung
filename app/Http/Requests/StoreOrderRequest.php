@@ -33,6 +33,7 @@ class StoreOrderRequest extends FormRequest
             'streetNumber' => 'required|string',
             'zip' => 'required|digits:5',
             'city' => 'required|string',
+            'orderItems' => 'array'
         ];
     }
 }

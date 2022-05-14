@@ -1,157 +1,211 @@
 <template>
   <div>
-    <h2 class="content-block">Neue Bestellung</h2>
-    <DxForm
-      id="form"
-      label-mode="floating"
-      :col-count="2"
-      :form-data="formData"
+    <div v-if="state.order === null">
+      <h2 class="content-block">Neue Bestellung</h2>
+      <DxForm
+        id="form"
+        label-mode="floating"
+        :col-count="2"
+        :form-data="formData"
+      >
+        <DxGroupItem
+          caption="Persönliche Daten"
+        >
+          <DxSimpleItem
+            data-field="firstName"
+            :label="{ text: 'Vorname'}"
+          >
+              <DxAsyncRule
+                  :validation-callback="validateAsync"
+                />
+          </DxSimpleItem>
+          <DxSimpleItem
+            data-field="lastName"
+            :label="{ text: 'Nachname'}"
+          >
+              <DxAsyncRule
+                  :validation-callback="validateAsync"
+                />
+          </DxSimpleItem>
+          <DxSimpleItem
+            data-field="email_confirmation"
+            :label="{ text: 'E-Mail'}"
+          >
+              <DxAsyncRule
+                  :validation-callback="validateAsync"
+                />
+          </DxSimpleItem>
+          <DxSimpleItem
+            data-field="email"
+            :label="{ text: 'E-Mail Wiederholung'}"
+          >
+              <DxAsyncRule
+                  :validation-callback="validateAsync"
+                />
+          </DxSimpleItem>
+        
+          <DxSimpleItem
+            data-field="phone"
+            :label="{ text: 'Telefonnummer'}"
+          >
+              <DxAsyncRule
+                  :validation-callback="validateAsync"
+                />
+          </DxSimpleItem>
+        </DxGroupItem>
+
+        <DxGroupItem
+          caption="Adresse"
+        >
+          <DxSimpleItem
+            data-field="street"
+            :label="{ text: 'Straße'}"
+          >
+              <DxAsyncRule
+                  :validation-callback="validateAsync"
+                />
+          </DxSimpleItem>
+          <DxSimpleItem
+            data-field="streetNumber"
+            :label="{ text: 'Hausnummer'}"
+          >
+              <DxAsyncRule
+                  :validation-callback="validateAsync"
+                />
+          </DxSimpleItem>
+          <DxSimpleItem
+            data-field="zip"
+            :label="{ text: 'Postleitzahl'}"
+            editor-type="dxAutocomplete"
+            :editor-options="{items: ['64283', '64285', '64287', '64289', '64293', '64295',  '64291', '64297'], minSearchLength: 0, searchTimeout: 0, onChange: zipChanged}"
+          >
+              <DxAsyncRule
+                  :validation-callback="validateAsync"
+                />
+          </DxSimpleItem>
+          <DxSimpleItem
+            data-field="city"
+            :label="{ text: 'Stadt'}"
+            editor-type="dxAutocomplete"
+            :editor-options="{
+                items: citySuggestions,
+                minSearchLength: 0,
+                searchTimeout: 0
+            }"
+          >
+              <DxAsyncRule
+                  :validation-callback="validateAsync"
+                />
+          </DxSimpleItem>
+        </DxGroupItem>
+
+      </DxForm>
+
+
+    <DxDataGrid
+      :data-source="orderItemsDatasource"
     >
-      <DxGroupItem
-        caption="Persönliche Daten"
-      >
-        <DxSimpleItem
-          data-field="firstName"
-          :label="{ text: 'Vorname'}"
-        >
-            <DxAsyncRule
-                :validation-callback="validateAsync"
-              />
-        </DxSimpleItem>
-        <DxSimpleItem
-          data-field="lastName"
-          :label="{ text: 'Nachname'}"
-        >
-            <DxAsyncRule
-                :validation-callback="validateAsync"
-              />
-        </DxSimpleItem>
-         <DxSimpleItem
-          data-field="email_confirmation"
-          :label="{ text: 'E-Mail'}"
-        >
-            <DxAsyncRule
-                :validation-callback="validateAsync"
-              />
-        </DxSimpleItem>
-        <DxSimpleItem
-          data-field="email"
-          :label="{ text: 'E-Mail Wiederholung'}"
-        >
-            <DxAsyncRule
-                :validation-callback="validateAsync"
-              />
-        </DxSimpleItem>
-       
-        <DxSimpleItem
-          data-field="phone"
-          :label="{ text: 'Telefonnummer'}"
-        >
-            <DxAsyncRule
-                :validation-callback="validateAsync"
-              />
-        </DxSimpleItem>
-      </DxGroupItem>
+      <DxEditing
+        :allow-updating="true"
+        :allow-adding="false"
+        :allow-deleting="false"
+        mode="cell"
+      />
+      <DxColumn
+        caption="Produkt"
+        data-field="product.name"
+        :allow-sorting="false"
+        :allow-editing="false"
+      />
+      <DxColumn
+        caption="Preis"
+        data-field="product.price"
+        :customize-text="formatPrice"
+        :allow-sorting="false"
+        :allow-editing="false"
 
-      <DxGroupItem
-        caption="Adresse"
-      >
-        <DxSimpleItem
-          data-field="street"
-          :label="{ text: 'Straße'}"
+      />
+      <DxColumn
+        caption="Anzahl"
+        data-field="quantity"
+        :allow-sorting="false"
+        data-type="number"
+        :editor-options="{defaultValue: 0, min: 0, showSpinButtons: true, showClearButton: true}"
+      />
+      <DxSummary
+        :recalculate-while-editing="true"
+        :calculate-custom-summary="calculateSummary"
         >
-            <DxAsyncRule
-                :validation-callback="validateAsync"
-              />
-        </DxSimpleItem>
-        <DxSimpleItem
-          data-field="streetNumber"
-          :label="{ text: 'Hausnummer'}"
-        >
-            <DxAsyncRule
-                :validation-callback="validateAsync"
-              />
-        </DxSimpleItem>
-        <DxSimpleItem
-          data-field="zip"
-          :label="{ text: 'Postleitzahl'}"
-          editor-type="dxAutocomplete"
-           :editor-options="{items: ['64283', '64285', '64287', '64289', '64293', '64295',  '64291', '64297'], minSearchLength: 0, searchTimeout: 0, onChange: zipChanged}"
-        >
-            <DxAsyncRule
-                :validation-callback="validateAsync"
-              />
-        </DxSimpleItem>
-        <DxSimpleItem
-          data-field="city"
-          :label="{ text: 'Stadt'}"
-          editor-type="dxAutocomplete"
-          :editor-options="{
-              items: citySuggestions,
-              minSearchLength: 0,
-              searchTimeout: 0
-          }"
-        >
-            <DxAsyncRule
-                :validation-callback="validateAsync"
-              />
-        </DxSimpleItem>
-      </DxGroupItem>
+          <DxTotalItem
+            name="priceSum"
+            summary-type="custom"
+            display-format="Gesamtpreis: {0}"
+            show-in-column="quantity"
+          />
+      </DxSummary>
+    </DxDataGrid>
 
-    </DxForm>
+  <br><br>
 
-
-  <DxDataGrid
-    :data-source="orderItemsDatasource"
-  >
-    <DxEditing
-      :allow-updating="true"
-      :allow-adding="false"
-      :allow-deleting="false"
-      mode="cell"
+    <DxButton 
+      text="Bestellung absenden"
+      type="default"
+      width="100%"
+      @click="saveOrder"
     />
-    <DxColumn
-      caption="Produkt"
-      data-field="product.name"
-      :allow-sorting="false"
-      :allow-editing="false"
-    />
-    <DxColumn
-      caption="Preis"
-      data-field="product.price"
-      :customize-text="formatPrice"
-      :allow-sorting="false"
-      :allow-editing="false"
+  </div>
+  <div v-else>
+    <h2 class="content-block">Bestellung gespeichert</h2>
+    <p>Deine Bestellung wurde gespeichert und wird bald an unseren Lieferanten weitergeleitet. Eine Bestätigung wurde an Deine E-Mail Adresse gesendet.</p>
 
-    />
-    <DxColumn
-      caption="Anzahl"
-      data-field="quantity"
-      :allow-sorting="false"
-      data-type="number"
-      :editor-options="{defaultValue: 0, min: 0, showSpinButtons: true, showClearButton: true}"
-    />
-    <DxSummary
-      :recalculate-while-editing="true"
-      :calculate-custom-summary="calculateSummary"
-      >
-        <DxTotalItem
-          name="priceSum"
-          summary-type="custom"
-          display-format="Gesamtpreis: {0}"
-          show-in-column="quantity"
-        />
-    </DxSummary>
-  </DxDataGrid>
+    <div style="display: flex;">
+      <div class="dx-card" style="min-width: 400px;">
+        <h6>Kontakt-Daten</h6>
+        <div class="dx-field">
+          <div class="dx-field-label">Name</div>
+          <div class="dx-field-value-static">{{state.order.firstName}} {{state.order.lastName}}</div>
+        </div>
 
-<br><br>
+        <div class="dx-field">
+          <div class="dx-field-label">Adresse</div>
+          <div class="dx-field-value-static">{{state.order.street}} {{state.order.streetNumber}}<br> {{state.order.zip}} {{state.order.city}}</div>
+        </div>
 
-  <DxButton 
-    text="Bestellung absenden"
-    type="default"
-    width="100%"
-    @click="saveOrder"
-  />
+        <div class="dx-field">
+          <div class="dx-field-label">Kontakt</div>
+          <div class="dx-field-value-static">
+            <i class="dx-icon-email"></i> {{state.order.email}} <br>
+            <i class="dx-icon-tel"></i> {{state.order.phone}}
+          </div>
+        </div>
+      </div>
+
+      <div class="dx-card" style="min-width: 400px;">
+        <h6>Bestellung</h6>
+        <table style="width: 100%">
+          <thead>
+            <tr>
+              <th style="text-align: left">Artikel</th>
+              <th style="text-align: right">Anzahl</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr v-for="productItem in state.order.order_items">
+              <td>{{productItem.product.name}}</td>
+              <td style="text-align: right">{{productItem.quantity}}</td>
+            </tr>
+          </tbody>
+
+        </table>
+        <div class="dx-field-label">Gesamtpreis</div>
+          <div class="dx-field-value-static">
+             {{state.order.price.toFixed(2).replace(".", ",") + " €"}}
+          </div>
+      </div>
+    </div>
+    
+  </div>
 
   <div style="display:none;">
     <!-- otherwise vue will not auto import DxAutocomplete-->
@@ -180,7 +234,7 @@ import { DxRequiredRule, DxEmailRule, DxAsyncRule } from 'devextreme-vue/form';
 
 import axios, {AxiosError} from 'axios';
 import { ValidationCallbackData } from 'devextreme/ui/validation_rules';
-import {ref} from 'vue';
+import {ref, reactive} from 'vue';
 
 import DataSource from "devextreme/data/data_source";
 import CustomStore from 'devextreme/data/custom_store';
@@ -188,14 +242,32 @@ import { resolveSoa } from "dns";
 import { CustomSummaryInfo } from "devextreme/ui/data_grid";
 
 type Product = App.Models.Product;
+type Order = App.Models.Order;
 
 let formData: any = ref({});
 
 let citySuggestions = ref([]);
 
+interface State{
+  order: null|Order
+}
+
+const state: State = reactive({
+  order: null
+})
+
+axios.get('api/orders/13').then((response) => {
+  state.order = response.data as Order;
+});
 
 function saveOrder(){
-  console.log("saveOrder");
+  axios.post('api/orders', {
+    orderItems, 
+    ...(formData.value)
+  }).then((response) => {
+    state.order = response.data as Order;
+  });
+  //TOdo handle error
 }
 
 

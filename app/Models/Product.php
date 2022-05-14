@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Order;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Product extends Model
 {
@@ -19,4 +20,12 @@ class Product extends Model
         'url' => 'string',
         'description' => 'string'
     ]; 
+
+    public function orderItems(): HasMany{
+        return $this->hasMany(OrderItem::class);
+    }
+
+    public function order(): BelongsTo{
+        return $this->belongsTo(Order::class)->using(OrderItem::class);
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
@@ -37,7 +38,25 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request)
     {
-        //
+        $order = new Order($request->all());
+        $order->save();
+
+        foreach($request->orderItems as $orderItem){
+            $quantity = $orderItem["quantity"];
+            if($quantity <= 0){
+                continue;
+            }
+            $item = new OrderItem();
+            $item->product_id = $orderItem["product"]["id"];
+            $item->quantity = $quantity;
+            $item->order_id = $order->id;
+            $item->save();
+        }
+        $order =  Order::with('orderItems')->findOrFail($order->id);
+        $order->orderItems->each(function(OrderItem $orderItem){
+            $orderItem->load('product');
+        });
+        return $order;
     }
 
     /**
@@ -48,7 +67,11 @@ class OrderController extends Controller
      */
     public function show(Order $order)
     {
-        //
+        $order->load('orderItems');
+        $order->orderItems->each(function(OrderItem $orderItem){
+            $orderItem->load('product');
+        });
+        return $order;
     }
 
     /**

@@ -17,6 +17,9 @@ declare namespace App.Models {
         city: string;
         email: string;
         phone: string;
+        order_items?: Array<App.Models.OrderItem> | null;
+        order_items_count?: number | null;
+        readonly price?: number;
     }
 
     export interface Product {
@@ -40,6 +43,17 @@ declare namespace App.Models {
         remember_token: string | null;
         created_at: string | null;
         updated_at: string | null;
+    }
+
+    export interface OrderItem {
+        id: number;
+        created_at: string | null;
+        updated_at: string | null;
+        quantity: number;
+        order_id: number;
+        product_id: number;
+        order?: App.Models.Order | null;
+        product?: App.Models.Product | null;
     }
 
 }
