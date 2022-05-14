@@ -187,6 +187,8 @@ import CustomStore from 'devextreme/data/custom_store';
 import { resolveSoa } from "dns";
 import { CustomSummaryInfo } from "devextreme/ui/data_grid";
 
+type Product = App.Models.Product;
+
 let formData: any = ref({});
 
 let citySuggestions = ref([]);
@@ -256,18 +258,8 @@ function zipChanged(e){
   })
 }
 
-interface Product{
-  name: string;
-  price: number;
-  sku: string;
-  panels: number;
-  url: string;
-  description: string;
-  id: number;
-}
-
 interface OrderItem{
-  product: Product, 
+  product: Product,
   quantity: number,
   id: number
 }
