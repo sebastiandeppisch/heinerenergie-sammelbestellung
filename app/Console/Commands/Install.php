@@ -36,7 +36,7 @@ class Install extends Command
     {
         try{
             $this->artisan('migrate');
-            $this->cmd(['npm', 'install']);
+            $this->cmd(['npm', 'install', '--only=prod']);
             $this->cmd(['npm', 'run', 'prod']);
         }catch(UpdateException $e){
             $this->error('Command failed');
