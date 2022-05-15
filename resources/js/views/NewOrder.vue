@@ -86,19 +86,13 @@ import DxDataGrid, {
 } from "devextreme-vue/data-grid";
 
 
-import {DxForm, DxSimpleItem, DxGroupItem,} from 'devextreme-vue/form';
-
-import { DxRequiredRule, DxEmailRule, DxAsyncRule } from 'devextreme-vue/form';
-
-import axios, {AxiosError} from 'axios';
-import { ValidationCallbackData } from 'devextreme/ui/validation_rules';
-import {ref, reactive, computed, onMounted} from 'vue';
+import axios from 'axios';
+import {ref, reactive, } from 'vue';
 
 import DataSource from "devextreme/data/data_source";
 import CustomStore from 'devextreme/data/custom_store';
 import { CustomSummaryInfo } from "devextreme/ui/data_grid";
 import notify from 'devextreme/ui/notify';
-import dxForm from 'devextreme/ui/form';
 
 import OrderForm from '../components/OrderForm.vue'
 import OrderSaved from '../components/OrderSaved.vue'
