@@ -62,56 +62,7 @@
     />
   </div>
   <div v-else>
-    <h2 class="content-block">Bestellung gespeichert</h2>
-    <p>Deine Bestellung wurde gespeichert und wird bald an unseren Lieferanten weitergeleitet. Eine Bestätigung wurde an Deine E-Mail Adresse gesendet.</p>
-
-    <div style="display: flex;">
-      <div class="dx-card" style="min-width: 400px;">
-        <h6>Kontakt-Daten</h6>
-        <div class="dx-field">
-          <div class="dx-field-label">Name</div>
-          <div class="dx-field-value-static">{{state.order.firstName}} {{state.order.lastName}}</div>
-        </div>
-
-        <div class="dx-field">
-          <div class="dx-field-label">Adresse</div>
-          <div class="dx-field-value-static">{{state.order.street}} {{state.order.streetNumber}}<br> {{state.order.zip}} {{state.order.city}}</div>
-        </div>
-
-        <div class="dx-field">
-          <div class="dx-field-label">Kontakt</div>
-          <div class="dx-field-value-static">
-            <i class="dx-icon-email"></i> {{state.order.email}} <br>
-            <i class="dx-icon-tel"></i> {{state.order.phone}}
-          </div>
-        </div>
-      </div>
-
-      <div class="dx-card" style="min-width: 400px;">
-        <h6>Bestellung</h6>
-        <table style="width: 100%">
-          <thead>
-            <tr>
-              <th style="text-align: left">Artikel</th>
-              <th style="text-align: right">Anzahl</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr v-for="productItem in state.order.order_items">
-              <td>{{productItem.product.name}}</td>
-              <td style="text-align: right">{{productItem.quantity}}</td>
-            </tr>
-          </tbody>
-
-        </table>
-        <div class="dx-field-label">Gesamtpreis</div>
-          <div class="dx-field-value-static">
-             {{formatPrice(state.order.price)}}
-          </div>
-      </div>
-    </div>
-    
+    <OrderSaved :order="state.order" />
   </div>
   </div>
 </template>
@@ -144,6 +95,7 @@ import notify from 'devextreme/ui/notify';
 import dxForm from 'devextreme/ui/form';
 
 import OrderForm from '../components/OrderForm.vue'
+import OrderSaved from '../components/OrderSaved.vue'
 
 import {formatPrice, formatPriceCell, notifyError} from './../helpers'
 import { ValidationResult } from 'devextreme/ui/validation_group';
