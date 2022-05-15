@@ -1,7 +1,7 @@
 <template>
   <div>
     <h2 class="content-block">Bestellungen</h2>
-
+    <div style="margin: 30px 40px 30px 40px;">
     <DxDataGrid
       class="dx-card wide-card"
       :data-source="ordersStore"
@@ -51,6 +51,7 @@
       />
     </template>
     </DxDataGrid>
+    </div>
   </div>
 </template>
 

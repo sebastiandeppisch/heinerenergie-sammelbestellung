@@ -1,6 +1,6 @@
 <template>
   <div class="flex-row">
-    <div style="flex: 1;" class="dx-card">
+    <div class="dx-card flex-cell">
       <DxDataGrid
         :data-source="orderItemsDatasource"
         :show-borders="false"
@@ -43,7 +43,7 @@
         </DxSummary>
     </DxDataGrid>
     </div>
-     <div style="flex: 1;" class="dx-card">
+     <div class="dx-card flex-cell">
       <OrderForm
         :order="order"
         :confirm-email="false"
@@ -97,5 +97,9 @@ function updateData() {
   flex-direction: row;
   display: flex;
   width: 100%;
+}
+.flex-cell{
+  padding: 30px;
+  flex: 1;
 }
 </style>

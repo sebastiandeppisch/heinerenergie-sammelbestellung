@@ -87,7 +87,7 @@
         data-field="zip"
         :label="{ text: 'Postleitzahl'}"
         editor-type="dxAutocomplete"
-        :editor-options="{items: ['64283', '64285', '64287', '64289', '64293', '64295',  '64291', '64297'], minSearchLength: 0, searchTimeout: 0, onChange: zipChanged}"
+        :editor-options="{items: ['64283', '64285', '64287', '64289', '64293', '64295',  '64291', '64297'], minSearchLength: 0, searchTimeout: 0, onChange: zipChanged, maxLength: 5}"
       >
         <DxAsyncRule
           :validation-callback="validateAsync"

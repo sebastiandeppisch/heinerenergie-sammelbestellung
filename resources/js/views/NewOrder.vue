@@ -2,12 +2,16 @@
   <div>
     <div v-if="state.order === null">
       <h2 class="content-block">Neue Bestellung</h2>
-      <OrderForm
-        :order="formData"
-        :confirm-email="true"
-        :update-button="false"
-        ref="orderForm"
-      />
+      <div style="margin:30px;">
+      <div class="dx-card" style="padding:30px;margin: 10px;">
+        <OrderForm
+          :order="formData"
+          :confirm-email="true"
+          :update-button="false"
+          ref="orderForm"
+        />
+      </div>
+    <div class="dx-card" style="padding:30px;margin: 10px;">
     <DxDataGrid
       :data-source="orderItemsDatasource"
     >
@@ -51,16 +55,19 @@
           />
       </DxSummary>
     </DxDataGrid>
+    </div>
 
-  <br><br>
 
-    <DxButton 
+<div style="margin: 10px;margin-top:20px">
+<DxButton 
       text="Bestellung absenden"
       type="default"
       width="100%"
       @click="saveOrder"
     />
-  </div>
+</div>
+    
+  </div></div>
   <div v-else>
     <OrderSaved :order="state.order" />
   </div>
