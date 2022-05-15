@@ -26,7 +26,7 @@
           <DxTotalItem
             column="panelsCount"
             summary-type="sum"
-            display-format="Panels gesamt: {0}"
+            display-format="Module gesamt: {0}"
           />
       </DxSummary>
     </DxDataGrid>

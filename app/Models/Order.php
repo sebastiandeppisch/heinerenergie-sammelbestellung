@@ -14,7 +14,7 @@ class Order extends Model
 
     protected $fillable = ['firstName', 'lastName', 'street', 'streetNumber', 'zip', 'city', 'email', 'phone'];
 
-    protected $appends = ['price'];
+    protected $appends = ['price', 'panelsCount'];
 
     protected $casts = [
         'firstName' => 'string',
@@ -39,6 +39,12 @@ class Order extends Model
     public function getPriceAttribute(): float{
         return $this->orderItems->reduce(fn(float $sum, OrderItem $item) => 
             $sum + $item->quantity*$item->product->price
+        , 0);
+    }
+
+    public function getPanelsCountAttribute(): int{
+        return $this->orderItems->reduce(fn(int $sum, OrderItem $item) => 
+            $sum + $item->product->panelsCount
         , 0);
     }
 }
