@@ -44,7 +44,12 @@
     </DxDataGrid>
     </div>
      <div style="flex: 1;" class="dx-card">
-      <OrderForm :form-data="order" :confirm-email="false" v-on:update="updateData"/>
+      <OrderForm
+        :order="order"
+        :confirm-email="false"
+        v-on:update="updateData"
+        :update-button="true"
+      />
     </div>
   </div>
 </template>

@@ -3,7 +3,7 @@
     ref="form"
     label-mode="floating"
     :col-count="2"
-    :form-data="formData"
+    :form-data="order"
     @submit="submit"
   >
     <DxGroupItem
@@ -108,8 +108,15 @@
         />
       </DxSimpleItem>
     </DxGroupItem>
-    <DxButtonItem :button-options="submitButtonOptions"/>
+    <DxButtonItem
+      v-if="updateButton"
+      :button-options="submitButtonOptions"
+    />
   </DxForm>
+  <div style="display:none;">
+  <!-- otherwise vue will not auto import DxAutocomplete-->
+  <DxAutocomplete />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -128,21 +135,23 @@ import dxForm from 'devextreme/ui/form';
 
 import {notifyError} from '../helpers'
 import notify from 'devextreme/ui/notify';
+import { ValidationResult } from 'devextreme/ui/validation_group';
 
 const emit = defineEmits(['update'])
 
 interface Props {
-  formData: App.Models.Order
-  confirmEmail: boolean
+  order: App.Models.Order
+  confirmEmail: boolean,
+  updateButton: boolean,
 }
-const {formData, confirmEmail = true} = defineProps<Props>();
+const {order, confirmEmail = true, updateButton} = defineProps<Props>();
 
 let citySuggestions = ref([]);
 
 const form = ref(null);
 
 function validateAsync(params: ValidationCallbackData){
-  const data = {...formData};
+  const data = {...order};
   const field: string = params.formItem.dataField;
   data[field] = params.value;
   return axios.get('api/validateeditorderform', {
@@ -172,7 +181,7 @@ const subUrbZips = {
 
 function zipChanged(e){
   let suggestion = [];
-  let zip = parseInt(formData.zip + "");
+  let zip = parseInt(order.zip + "");
 
   if(cityZips.includes(zip)){
     suggestion.push('Darmstadt');
@@ -181,7 +190,7 @@ function zipChanged(e){
     suggestion = suggestion.concat(subUrbZips[zip])
   }
   if(suggestion.length === 1){
-    formData.city = suggestion[0];
+    order.city = suggestion[0];
   }
   citySuggestions.value.length = 0;
   suggestion.forEach((s) => {
@@ -198,8 +207,8 @@ const submitButtonOptions = {
     const formInstance = form.value.instance as dxForm;
     formInstance.validate().complete.then(result => {
       if(result.isValid){
-         axios.put('api/orders/' + formData.id, {
-            ...formData
+         axios.put('api/orders/' + order.id, {
+            ...order
           }).then((response) => {
             notify('Daten wurden gespeichert', 'success');
             emit('update');
@@ -214,5 +223,14 @@ const submitButtonOptions = {
 function submit(){
   console.log("submit")
 }
+
+const validate: () => Promise<ValidationResult> = () => {
+  const formInstance = form.value.instance as dxForm;
+  return formInstance.validate().complete
+}
+
+defineExpose({
+  validate
+})
 
 </script>
