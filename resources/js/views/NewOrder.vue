@@ -96,7 +96,6 @@ import {ref, reactive, computed, onMounted} from 'vue';
 
 import DataSource from "devextreme/data/data_source";
 import CustomStore from 'devextreme/data/custom_store';
-import { resolveSoa } from "dns";
 import { CustomSummaryInfo } from "devextreme/ui/data_grid";
 import notify from 'devextreme/ui/notify';
 import dxForm from 'devextreme/ui/form';
