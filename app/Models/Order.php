@@ -43,7 +43,7 @@ class Order extends Model
 
     public function getPanelsCountAttribute(): int{
         return $this->orderItems->reduce(fn(int $sum, OrderItem $item) => 
-            $sum + $item->product->panelsCount
+            $sum + $item->product->panelsCount * $item->quantity
         , 0);
     }
 
