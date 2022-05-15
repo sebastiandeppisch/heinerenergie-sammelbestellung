@@ -36,6 +36,7 @@
       <template #orderTemplate="{ data }">
         <OrderDetail
           :order="data.data"
+          v-on:update="update"
         />
       </template>
     </DxDataGrid>
@@ -60,5 +61,10 @@ import DxDataGrid, {
 type Order = App.Models.Order;
 
 const ordersStore = new LaravelDataSource("api/orders");
+
+function update(){
+  console.log("update from order");
+  ordersStore.reload();
+}
 
 </script>
