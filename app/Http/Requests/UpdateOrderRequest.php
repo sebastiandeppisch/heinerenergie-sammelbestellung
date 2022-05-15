@@ -24,7 +24,14 @@ class UpdateOrderRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'firstName' => 'string',
+            'lastName' => 'string',
+            'email' => 'email',
+            'phone' => 'string',
+            'street' => 'string',
+            'streetNumber' => 'string',
+            'zip' => 'numeric|digits:5',
+            'city' => 'string'
         ];
     }
 }

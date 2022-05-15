@@ -31,7 +31,7 @@ class StoreOrderRequest extends FormRequest
             'phone' => 'required|string',
             'street' => 'required|string',
             'streetNumber' => 'required|string',
-            'zip' => 'required|digits:5',
+            'zip' => 'required|numeric|digits:5',
             'city' => 'required|string',
             'orderItems' => 'array'
         ];

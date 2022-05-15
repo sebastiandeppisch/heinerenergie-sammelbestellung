@@ -43,8 +43,8 @@
         </DxSummary>
     </DxDataGrid>
     </div>
-     <div style="flex: 1;">
-      User Daten
+     <div style="flex: 1;" class="dx-card">
+      <OrderForm :form-data="order" :confirm-email="false" v-on:update="updateData"/>
     </div>
   </div>
 </template>
@@ -64,6 +64,7 @@ import DataSource from 'devextreme/data/data_source';
 import axios from 'axios'
 import { CustomSummaryInfo } from "devextreme/ui/data_grid";
 import {formatPrice} from '../helpers'
+import OrderForm from '../components/OrderForm.vue'
 
 const emit = defineEmits(['update'])
 

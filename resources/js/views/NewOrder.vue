@@ -244,7 +244,7 @@ import { CustomSummaryInfo } from "devextreme/ui/data_grid";
 import notify from 'devextreme/ui/notify';
 import dxForm from 'devextreme/ui/form';
 
-import {formatPrice, formatPriceCell} from './../helpers'
+import {formatPrice, formatPriceCell, notifyError} from './../helpers'
 
 
 type Product = App.Models.Product;
@@ -315,17 +315,6 @@ function validateAsync(params: ValidationCallbackData){
   })
 }
 
-function notifyError(error: AxiosError): void{
-  if(error.response && error.response.status === 422){
-    let validationErrors: Array<String> = [];
-    for(const prop in error.response.data.errors){
-      validationErrors = validationErrors.concat(error.response.data.errors[prop] as Array<String>);
-    }
-    notify(validationErrors.join(","), 'error')
-  }else{
-    notify(error, 'error');
-  }
-}
 
 function formatError(error: AxiosError, field: string): void{
   if(error.response && error.response.status === 422){

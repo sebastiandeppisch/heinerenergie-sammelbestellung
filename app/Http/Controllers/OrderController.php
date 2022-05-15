@@ -23,16 +23,6 @@ class OrderController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param  \App\Http\Requests\StoreOrderRequest  $request
@@ -80,17 +70,6 @@ class OrderController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Order $order)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \App\Http\Requests\UpdateOrderRequest  $request
@@ -99,7 +78,9 @@ class OrderController extends Controller
      */
     public function update(UpdateOrderRequest $request, Order $order)
     {
-        //
+        $order->fill($request->all());
+        $order->save();
+        return $order;
     }
 
     /**
@@ -114,5 +95,7 @@ class OrderController extends Controller
     }
 
     public function validateorderform(StoreOrderRequest $request){
+    }
+    public function validateEditOrderForm(UpdateOrderRequest $request){
     }
 }
