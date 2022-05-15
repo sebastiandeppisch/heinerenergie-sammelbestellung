@@ -33,12 +33,23 @@
         :enabled="true"
         template="orderTemplate"
       />
+      <DxToolbar>
+        <DxItem
+          template="exportTemplate"
+        />
+      </DxToolbar>
       <template #orderTemplate="{ data }">
         <OrderDetail
           :order="data.data"
           v-on:update="update"
         />
       </template>
+      <template #exportTemplate>
+      <DxButton
+        icon="exportxlsx"
+        @click="exportOrders"
+      />
+    </template>
     </DxDataGrid>
   </div>
 </template>
@@ -50,12 +61,16 @@ import OrderDetail from './../components/OrderDetail.vue'
 import {formatPriceCell, formatPrice} from '../helpers'
 import { ref, onMounted } from 'vue'
 import { CustomSummaryInfo } from "devextreme/ui/data_grid";
+import { DxButton } from 'devextreme-vue/button';
+
 import DxDataGrid, {
   DxColumn,
   DxEditing, 
   DxSummary,
   DxTotalItem,
-  DxMasterDetail
+  DxMasterDetail,
+  DxToolbar,
+  DxItem
 } from "devextreme-vue/data-grid";
 
 type Order = App.Models.Order;
@@ -65,6 +80,10 @@ const ordersStore = new LaravelDataSource("api/orders");
 function update(){
   console.log("update from order");
   ordersStore.reload();
+}
+
+function exportOrders(){
+  window.open('/orderexport', '_blank').focus();
 }
 
 </script>

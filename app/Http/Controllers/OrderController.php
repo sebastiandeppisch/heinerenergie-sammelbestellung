@@ -6,7 +6,10 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Mail\OrderCreated;
 use Illuminate\Http\Request;
+use App\Exports\OrdersExport;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 
@@ -97,5 +100,11 @@ class OrderController extends Controller
     public function validateorderform(StoreOrderRequest $request){
     }
     public function validateEditOrderForm(UpdateOrderRequest $request){
+    }
+
+    public function export(){
+        $date = Carbon::now()->format('Y-m-d H:i:s');
+        $filename = sprintf("%s Bestellungen heinerenergie.xlsx", $date);
+        return Excel::download(new OrdersExport, $filename);
     }
 }

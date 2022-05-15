@@ -47,6 +47,10 @@ class Order extends Model
         , 0);
     }
 
+    public function getStreetWithNumberAttribute(): string{
+        return sprintf("%s %s", $this->street, $this->streetNumber);
+    }
+
     public function normalize(): void{
         OrderItem::normalize($this);
     }

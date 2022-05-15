@@ -32,3 +32,4 @@ Route::scopeBindings()->group(function(){
 Route::get('validateorderform', [OrderController::class, 'validateorderform']);
 Route::get('validateeditorderform', [OrderController::class, 'validateEditOrderForm']);
 
+Route::get('export', [OrderController::class, 'export']);
