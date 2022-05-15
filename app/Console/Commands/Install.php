@@ -35,7 +35,6 @@ class Install extends Command
     public function handle()
     {
         try{
-            $this->cmd(['composer', 'install']);
             $this->artisan('migrate');
             $this->cmd(['npm', 'install']);
             $this->cmd(['npm', 'run', 'prod']);
