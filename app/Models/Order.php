@@ -21,7 +21,6 @@ class Order extends Model
         'lastName' => 'string',
         'street' => 'string',
         'streetNumber' => 'string',
-        'url' => 'string',
         'zip' => 'integer',
         'city' => 'string',
         'email' => 'string',
@@ -46,5 +45,9 @@ class Order extends Model
         return $this->orderItems->reduce(fn(int $sum, OrderItem $item) => 
             $sum + $item->product->panelsCount
         , 0);
+    }
+
+    public function normalize(): void{
+        OrderItem::normalize($this);
     }
 }

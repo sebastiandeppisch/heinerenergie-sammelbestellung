@@ -29,6 +29,15 @@
             display-format="Module gesamt: {0}"
           />
       </DxSummary>
+      <DxMasterDetail
+        :enabled="true"
+        template="orderTemplate"
+      />
+      <template #orderTemplate="{ data }">
+        <OrderDetail
+          :order="data.data"
+        />
+      </template>
     </DxDataGrid>
   </div>
 </template>
@@ -36,6 +45,7 @@
 <script setup lang="ts">
 
 import LaravelDataSource from '../LaravelDataSource'
+import OrderDetail from './../components/OrderDetail.vue'
 import {formatPriceCell, formatPrice} from '../helpers'
 import { ref, onMounted } from 'vue'
 import { CustomSummaryInfo } from "devextreme/ui/data_grid";
@@ -43,7 +53,8 @@ import DxDataGrid, {
   DxColumn,
   DxEditing, 
   DxSummary,
-  DxTotalItem
+  DxTotalItem,
+  DxMasterDetail
 } from "devextreme-vue/data-grid";
 
 type Order = App.Models.Order;

@@ -2,20 +2,31 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
+use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Builder;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
-use App\Models\Product;
 
 class ProductController extends Controller
 {
+
+    private function dxFilter(Request $request, Builder $builder): Builder{
+        if(isset($request->searchOperation) && isset($request->searchValue) && isset($request->searchExpr)){
+			if($request->searchOperation === "contains"){
+				$builder = $builder->where($request->searchExpr, 'like', "%".$request->searchValue."%");
+			}
+		}
+        return $builder;
+    }
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return Product::all();
+        return $this->dxFilter($request, Product::query())->get();
     }
 
     /**
@@ -52,5 +63,9 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         $product->delete();
+    }
+
+    public function show(Product $product){
+        return $product;
     }
 }
