@@ -10,21 +10,21 @@ class UpdateException extends Exception{
 
 }
 
-class Update extends Command
+class Install extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'update';
+    protected $signature = 'install';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'pulls from repo and updates this application';
+    protected $description = 'install & updates the application';
 
     /**
      * Execute the console command.
@@ -34,7 +34,6 @@ class Update extends Command
     public function handle()
     {
         try{
-            $this->cmd(['git', 'pull']);
             $this->cmd(['composer', 'install']);
             $this->cmd(['php', 'artisan', 'migrate']);
             $this->cmd(['npm', 'install']);
