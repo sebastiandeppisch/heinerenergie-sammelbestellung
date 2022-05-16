@@ -1,9 +1,12 @@
 <template>
   <div>
     <div v-if="state.order === null">
-      <h2 class="content-block">Neue Bestellung</h2>
-      <div style="margin:30px;">
-      <div class="dx-card" style="padding:30px;margin: 10px;">
+      <h2 class="content-block">Sammelbestellung</h2>
+      <div class="main">
+      <p class="dx-card content" style="padding:30px">
+        Wenn Du an der Sammelbestellung teilnehmen möchtest, kannst Du hier Deine Bestellung eintragen. Wir leiten sie im Anschluss an unseren Lieferanten weiter. Bitte beachte, dass wir vorab keine Liefertermine garantieren können. Auch die Preise können sich noch ändern. 
+      </p>
+      <div class="dx-card content">
         <OrderForm
           :order="formData"
           :confirm-email="true"
@@ -11,9 +14,10 @@
           ref="orderForm"
         />
       </div>
-    <div class="dx-card" style="padding:30px;margin: 10px;">
+    <div class="dx-card content">
     <DxDataGrid
       :data-source="orderItemsDatasource"
+      :column-hiding-enabled="true"
     >
       <DxEditing
         :allow-updating="true"
@@ -26,6 +30,7 @@
         data-field="product.name"
         :allow-sorting="false"
         :allow-editing="false"
+        :hiding-priority="1"
       />
       <DxColumn
         caption="Preis"
@@ -33,15 +38,16 @@
         :customize-text="formatPriceCell"
         :allow-sorting="false"
         :allow-editing="false"
-
+        :hiding-priority="0"
       />
       <DxColumn
         caption="Anzahl"
         data-field="quantity"
         :allow-sorting="false"
         data-type="number"
-        :editor-options="{defaultValue: 0, min: 0, showSpinButtons: true, showClearButton: true}"
+        :editor-options="{defaultValue: 0, min: 0, showSpinButtons: true, showClearButton: !state.hideElements}"
         :show-editor-always="true"
+        :hiding-priority="1"
       />
       <DxSummary
         :recalculate-while-editing="true"
@@ -50,11 +56,13 @@
           <DxTotalItem
             name="priceSum"
             summary-type="custom"
-            display-format="Gesamtpreis: {0}"
+            :display-format="state.hideElements?'{0}':'Summe: {0}'"
             show-in-column="quantity"
           />
       </DxSummary>
     </DxDataGrid>
+
+    <p style="text-align:right;font-size:0.7em;float:right" >Bitte beachte, dass sich die Preise noch ändern können. Den verbindlichen Preis erhälst Du von unserem Lieferanten, nachdem wir die Sammelbestellung übermittelt haben.</p>
     </div>
 
 
@@ -87,7 +95,7 @@ import DxDataGrid, {
 
 
 import axios from 'axios';
-import {ref, reactive, } from 'vue';
+import {ref, reactive, computed} from 'vue';
 
 import DataSource from "devextreme/data/data_source";
 import CustomStore from 'devextreme/data/custom_store';
@@ -109,11 +117,13 @@ let formData: any = ref({});
 let orderItems: Array<OrderItem> = [];
 
 interface State{
-  order: null|Order
+  order: null|Order,
+  hideElements: boolean
 }
 
 const state: State = reactive({
-  order: null
+  order: null,
+  hideElements: false
 })
 
 const orderForm = ref(null);
@@ -208,4 +218,23 @@ let orderItemsDatasource = new DataSource({
   })
 })
 
+function checkWidth(){
+  state.hideElements = window.innerWidth < 550;
+}
+window.onresize = () => {
+  checkWidth();
+}
+checkWidth();
 </script>
+<style scoped>
+@media screen and (min-width:680px) {
+  .main{
+    margin:30px;
+  }
+  .content{
+    padding:30px;
+    margin: 10px;
+  }
+}
+
+</style>
