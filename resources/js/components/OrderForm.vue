@@ -154,7 +154,13 @@ function validateAsync(params: ValidationCallbackData){
   const data = {...order};
   const field: string = params.formItem.dataField;
   data[field] = params.value;
-  return axios.get('api/validateeditorderform', {
+  let url = '';
+  if('id' in order && order.id > 0){
+    url = 'api/validateeditorderform';
+  }else{
+    url = 'api/validateorderform';
+  }
+  return axios.get(url, {
     params: data
   }).catch(error => {
     formatError(error, field);
