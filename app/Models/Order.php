@@ -12,7 +12,7 @@ class Order extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['firstName', 'lastName', 'street', 'streetNumber', 'zip', 'city', 'email', 'phone'];
+    protected $fillable = ['firstName', 'lastName', 'street', 'streetNumber', 'zip', 'city', 'email', 'phone', 'commentary'];
 
     protected $appends = ['price', 'panelsCount'];
 
@@ -53,5 +53,9 @@ class Order extends Model
 
     public function normalize(): void{
         OrderItem::normalize($this);
+    }
+
+    public function advisor(): BelongsTo{
+        return $this->belongsTo(User::class);
     }
 }

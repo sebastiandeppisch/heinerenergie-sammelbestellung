@@ -108,6 +108,30 @@
         />
       </DxSimpleItem>
     </DxGroupItem>
+    <DxGroupItem
+      caption="Sonstiges"
+    >
+      <DxSimpleItem
+        data-field="advisorEmail"
+        :label="{ text: 'Berater*in E-Mail'}"
+      >
+        <DxAsyncRule
+          :validation-callback="validateAsync"
+        />
+      </DxSimpleItem>
+      <DxSimpleItem
+        data-field="commentary"
+        :label="{ text: 'Kommentar'}"
+        editor-type="dxTextArea"
+        :editor-options="{
+          autoResizeEnabled: true
+        }"
+      >
+        <DxAsyncRule
+          :validation-callback="validateAsync"
+        />
+      </DxSimpleItem>
+    </DxGroupItem>
     <DxButtonItem
       v-if="updateButton"
       :button-options="submitButtonOptions"
@@ -116,12 +140,15 @@
   <div style="display:none;">
   <!-- otherwise vue will not auto import DxAutocomplete-->
   <DxAutocomplete />
+  <DxTextArea />
   </div>
 </template>
 
 <script setup lang="ts">
 
 import { DxAutocomplete } from 'devextreme-vue/autocomplete';
+import DxTextArea from 'devextreme-vue/text-area';
+
 
 import {DxForm, DxSimpleItem, DxGroupItem, DxButtonItem} from 'devextreme-vue/form';
 

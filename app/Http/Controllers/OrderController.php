@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Mail\OrderCreated;
@@ -33,7 +34,9 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request)
     {
+        $advisor = User::where('email', $request->advisorEmail)->firstOrFail();
         $order = new Order($request->all());
+        $order->advisor_id = $advisor->id;
         $order->save();
 
         foreach($request->orderItems as $orderItem){
