@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Support\Str;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreOrderRequest extends FormRequest
@@ -24,16 +25,45 @@ class StoreOrderRequest extends FormRequest
     public function rules()
     {
         return [
-            'firstName' => 'required|string',
-            'lastName' => 'required|string',
-            'email' => 'required|email|confirmed',
-            'email_confirmation' => 'required|email',
-            'phone' => 'required|string',
-            'street' => 'required|string',
-            'streetNumber' => 'required|string',
+            'firstName' => 'required|string|max:100',
+            'lastName' => 'required|string|max:100',
+            'email' => 'required|email|confirmed|max:100',
+            'email_confirmation' => 'required|email|max:100',
+            'phone' => 'required|string|max:100',
+            'street' => 'required|string|max:100',
+            'streetNumber' => 'required|string|max:100',
             'zip' => 'required|numeric|digits:5',
-            'city' => 'required|string',
-            'orderItems' => 'array'
+            'city' => 'required|string|max:100',
+            'orderItems' => 'array',
+            'advisorEmail' => 'required|email|exists:users,email|max:100',
+            'commentary' => 'nullable|string|max:65535'
+        ];
+    }
+
+    protected function prepareForValidation(){
+        $this->merge([
+            'advisorEmail' => Str::lower($this->advisorEmail)
+        ]);
+    }
+
+    public function attributes(){
+        return [
+            'firstName' => 'Vorname',
+            'lastName' => 'Nachname',
+            'email' => 'E-Mail Wiederholung',
+            'email_confirmation' => 'E-Mail',
+            'phone' => 'Telefonnummer',
+            'street' => 'Straße',
+            'streetNumber' => 'Hausnummer',
+            'zip' => 'Postleitzahl',
+            'city' => 'Darmstadt',
+            'advisorEmail' => 'Berater*in E-Mail'
+        ];
+    }
+
+    public function messages(){
+        return [
+            'advisorEmail.exists' => 'Die angebene Berater*in E-Mail wurde nicht gefunden. Bitte verwende den Link, den Dir Dein*e Berater*in gesendet hat, dann ist die korrekte E-Mail bereits vorausgefüllt.'
         ];
     }
 }
