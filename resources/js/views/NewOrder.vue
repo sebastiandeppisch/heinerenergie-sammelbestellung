@@ -95,7 +95,7 @@ import DxDataGrid, {
 
 
 import axios from 'axios';
-import {ref, reactive, computed} from 'vue';
+import {ref, reactive, computed, onMounted} from 'vue';
 
 import DataSource from "devextreme/data/data_source";
 import CustomStore from 'devextreme/data/custom_store';
@@ -108,11 +108,32 @@ import OrderSaved from '../components/OrderSaved.vue'
 import {formatPrice, formatPriceCell, notifyError} from './../helpers'
 import { ValidationResult } from 'devextreme/ui/validation_group';
 
+import { useRoute } from 'vue-router'
+
 
 type Product = App.Models.Product;
 type Order = App.Models.Order;
 
 let formData: any = ref({});
+
+try{
+  const route = useRoute();
+  if(typeof route.query.formdata ==='string'){
+    const defaultData = JSON.parse(route.query.formdata) as Order;
+    formData.value = defaultData;
+    if(Object.keys(defaultData).length > 1){
+      window.setTimeout(() =>  {
+        notify('Unten gibt es einen Link zu Github, dort findest Du heraus, welche Parameter Du in der URL verwenden kannst ;)', 'info');
+      }, 1000);
+    }
+  }
+}catch(e){
+  window.setTimeout(() =>  {
+    notify('Ungültige URL-Parameter', 'error');
+  }, 1000);
+}
+
+
 
 let orderItems: Array<OrderItem> = [];
 
