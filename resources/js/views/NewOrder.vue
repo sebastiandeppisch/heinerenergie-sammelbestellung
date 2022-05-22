@@ -31,6 +31,7 @@
         :allow-sorting="false"
         :allow-editing="false"
         :hiding-priority="1"
+        cell-template="orderTemplate"
       />
       <DxColumn
         caption="Preis"
@@ -49,6 +50,10 @@
         :show-editor-always="true"
         :hiding-priority="1"
       />
+      <template #orderTemplate="{ data }">
+        <ProductDetail :product="data.data.product" />
+      </template>
+
       <DxSummary
         :recalculate-while-editing="true"
         :calculate-custom-summary="calculateSummary"
@@ -101,6 +106,7 @@ import DataSource from "devextreme/data/data_source";
 import CustomStore from 'devextreme/data/custom_store';
 import { CustomSummaryInfo } from "devextreme/ui/data_grid";
 import notify from 'devextreme/ui/notify';
+import ProductDetail from '../components/ProductDetail.vue'
 
 import OrderForm from '../components/OrderForm.vue'
 import OrderSaved from '../components/OrderSaved.vue'
