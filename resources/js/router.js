@@ -4,6 +4,8 @@ import { createRouter, createWebHashHistory } from "vue-router";
 import Orders from "./views/Orders";
 import Products from "./views/Products";
 import NewOrder from "./views/NewOrder"
+import Impress from "./views/static/Impress"
+import DataPolicy from "./views/static/DataPolicy"
 
 import defaultLayout from "./layouts/side-nav-outer-toolbar";
 import simpleLayout from "./layouts/single-card";
@@ -93,7 +95,25 @@ const router = new createRouter({
     {
       path: "/:pathMatch(.*)*",
       redirect: "/home"
-    }
+    },
+    {
+      path: "/impress",
+      name: "impress",
+      meta: {
+        requiresAuth: false,
+        layout: defaultLayout
+      },
+      component: Impress
+    },
+    {
+      path: "/datapolicy",
+      name: "datapolicy",
+      meta: {
+        requiresAuth: false,
+        layout: defaultLayout
+      },
+      component: DataPolicy
+    },
   ],
   history: createWebHashHistory()
 });

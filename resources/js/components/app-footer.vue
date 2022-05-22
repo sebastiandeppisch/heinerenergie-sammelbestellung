@@ -2,6 +2,10 @@
   <div class="content-block">
     <footer class="footer">
       <a href="https://github.com/sebastiandeppisch/heinerenergie-sammelbestellung" ><img src="img/github.svg" alt="Github" style="height:1em;"></a>
+      &nbsp;&nbsp;
+      <router-link to="/impress">Impressum</router-link>
+       &nbsp;&nbsp;
+      <router-link to="/datapolicy">Datenschutzerkklärung</router-link>
     </footer>
   </div>
 </template>
