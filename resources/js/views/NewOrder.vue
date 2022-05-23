@@ -40,6 +40,7 @@
         :allow-sorting="false"
         :allow-editing="false"
         :hiding-priority="0"
+        :width="100"
       />
       <DxColumn
         caption="Anzahl"
@@ -49,6 +50,7 @@
         :editor-options="{defaultValue: 0, min: 0, showSpinButtons: true, showClearButton: !state.hideElements}"
         :show-editor-always="true"
         :hiding-priority="1"
+        :width="150"
       />
       <template #orderTemplate="{ data }">
         <ProductDetail :product="data.data.product" />
