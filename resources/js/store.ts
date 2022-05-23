@@ -18,7 +18,10 @@ export const store = createStore<State>({
 			return state.user !== null;
 		},
 		email(state): string|null{
-			return state.user?.email;
+			if(state.user === null){
+				return null;
+			}
+			return state.user.email;
 		}
 	},
 	mutations: {

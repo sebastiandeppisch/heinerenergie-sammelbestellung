@@ -4,7 +4,13 @@
       <h2 class="content-block">Sammelbestellung</h2>
       <div class="main">
       <p class="dx-card content" style="padding:30px">
-        Wenn Du an der Sammelbestellung teilnehmen möchtest, kannst Du hier Deine Bestellung eintragen. Wir leiten sie im Anschluss an unseren Lieferanten weiter. Bitte beachte, dass wir vorab keine Liefertermine garantieren können. Auch die Preise können sich noch ändern. 
+        <div v-if="email === null">
+          Wenn Du an der Sammelbestellung teilnehmen möchtest, kannst Du hier Deine Bestellung eintragen. Wir leiten sie im Anschluss an unseren Lieferanten weiter. Bitte beachte, dass wir vorab keine Liefertermine garantieren können. Auch die Preise können sich noch ändern. 
+        </div>
+        <div v-else>
+          Sende folgenden Link an Deine Interessent*innen, damit der Berater*in E-Mail bereits vorausgefüllt ist: <br>
+          <b> {{ advisorUrl }}</b>
+        </div>
       </p>
       <div class="dx-card content">
         <OrderForm
@@ -117,6 +123,7 @@ import {formatPrice, formatPriceCell, notifyError} from './../helpers'
 import { ValidationResult } from 'devextreme/ui/validation_group';
 
 import { useRoute } from 'vue-router'
+import { useStore } from '../store';
 
 
 type Product = App.Models.Product;
@@ -140,6 +147,15 @@ try{
     notify('Ungültige URL-Parameter', 'error');
   }, 1000);
 }
+
+const email = computed(() => {
+  console.log(useStore().getters.email);
+  return useStore().getters.email;
+})
+
+const advisorUrl = computed(() => {
+  return window.location.protocol + "//" + window.location.hostname + "/sammelbestellung?" + (new URLSearchParams({formdata: JSON.stringify({advisorEmail: useStore().getters.email})}).toString()) 
+})
 
 
 
