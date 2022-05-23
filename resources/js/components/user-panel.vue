@@ -1,25 +1,40 @@
 <template>
   <div class="user-panel">
-    <div class="user-info">
-      <div class="user-name">{{email}}</div>
+    <div v-if="email">
+      <div class="user-info">
+        <div class="image-container">
+          <i class="dx-icon-user"></i>
+        </div>
+        <div class="user-name">{{email}}</div>
+      </div>
+      <dx-context-menu
+        v-if="menuMode === 'context'"
+        target=".user-button"
+        :items="menuItems"
+        :width="210"
+        show-event="dxclick"
+        css-class="user-menu"
+      >
+        <dx-position my="top center" at="bottom center" />
+      </dx-context-menu>
+
+      <dx-list
+        v-if="menuMode === 'list'"
+        class="dx-toolbar-menu-action"
+        :items="menuItems"
+      />
     </div>
-
-    <dx-context-menu
-      v-if="menuMode === 'context'"
-      target=".user-button"
-      :items="menuItems"
-      :width="210"
-      show-event="dxclick"
-      css-class="user-menu"
-    >
-      <dx-position my="top center" at="bottom center" />
-    </dx-context-menu>
-
-    <dx-list
-      v-if="menuMode === 'list'"
-      class="dx-toolbar-menu-action"
-      :items="menuItems"
-    />
+    <div v-else>
+      <router-link to="login-form">
+        <div class="user-info">
+          <div class="image-container">
+            <i class="dx-icon-user"></i>
+          </div>
+          <div class="user-name">Login</div>
+        </div>
+      </router-link>
+    </div>
+    
   </div>
 </template>
 

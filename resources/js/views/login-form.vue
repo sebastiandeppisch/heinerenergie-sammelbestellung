@@ -37,17 +37,10 @@
       <dx-item>
         <template #default>
           <div class="link">
-            <router-link to="/reset-password">Forgot password?</router-link>
+            <router-link to="/reset-password">Passwort vergessen</router-link>
           </div>
         </template>
       </dx-item>
-      <dx-button-item>
-        <dx-button-options
-          text="Create an account"
-          width="100%"
-          :on-click="onCreateAccountClick"
-        />
-      </dx-button-item>
       <template #signInTemplate>
         <div>
           <span class="dx-button-text">
@@ -91,6 +84,12 @@ export default {
     function onCreateAccountClick() {
       router.push("/create-account");
     }
+
+    auth.initLogin().then(done => {
+      if(auth.loggedIn()){
+        router.push(route.query.redirect || "/home");
+      }
+    });
 
     async function onSubmit() {
       const { email, password } = formData;

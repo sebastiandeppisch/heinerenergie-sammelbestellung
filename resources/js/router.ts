@@ -1,20 +1,22 @@
 import auth from "./auth";
-import { createRouter, createWebHashHistory } from "vue-router";
+import { createRouter, createWebHistory } from "vue-router";
 
-import Orders from "./views/Orders";
-import Products from "./views/Products";
-import NewOrder from "./views/NewOrder"
-import Impress from "./views/static/Impress"
-import DataPolicy from "./views/static/DataPolicy"
+import Orders from "./views/Orders.vue";
+import Products from "./views/Products.vue";
+import NewOrder from "./views/NewOrder.vue"
+import Impress from "./views/static/Impress.vue"
+import DataPolicy from "./views/static/DataPolicy.vue"
 
-import defaultLayout from "./layouts/side-nav-outer-toolbar";
-import simpleLayout from "./layouts/single-card";
+import defaultLayout from "./layouts/side-nav-outer-toolbar.vue";
+import simpleLayout from "./layouts/single-card.vue";
+import LoginForm from './views/login-form.vue'
+import ResetPasswordForm from './views/reset-password-form.vue'
+import ChangePasswordForm from './views/change-password-form.vue'
 
-function loadView(view) {
-  return () => import (/* webpackChunkName: "login" */ `./views/${view}.vue`)
-}
+import { store } from "./store";
 
-const router = new createRouter({
+const router = createRouter({
+  history: createWebHistory(),
   routes: [
     {
       path: "/orders",
@@ -38,7 +40,7 @@ const router = new createRouter({
       path: "/neworder",
       name: "neworder",
       meta: {
-        requiresAuth: true,
+        requiresAuth: false,
         layout: defaultLayout
       },
       component: NewOrder
@@ -49,9 +51,9 @@ const router = new createRouter({
       meta: {
         requiresAuth: false,
         layout: simpleLayout,
-        title: "Sign In"
+        title: "Login"
       },
-      component: loadView("login-form")
+      component: LoginForm
     },
     {
       path: "/reset-password",
@@ -59,12 +61,12 @@ const router = new createRouter({
       meta: {
         requiresAuth: false,
         layout: simpleLayout,
-        title: "Reset Password",
-        description: "Please enter the email address that you used to register, and we will send you a link to reset your password via Email."
+        title: "Neues Passwort",
+        description: "Trage hier Deine E-Mail Adresse ein, um ein neues Passwort zu erhalten"
       },
-      component: loadView("reset-password-form")
+      component: ResetPasswordForm
     },
-    {
+    /*{
       path: "/create-account",
       name: "create-account",
       meta: {
@@ -73,16 +75,16 @@ const router = new createRouter({
         title: "Sign Up"
       },
       component: loadView("create-account-form"),
-    },
+    },*/
     {
-      path: "/change-password/:recoveryCode",
+      path: "/change-password",
       name: "change-password",
       meta: {
         requiresAuth: false,
         layout: simpleLayout,
-        title: "Change Password"
+        title: "Neues Passwort setzen"
       },
-      component: loadView("change-password-form")
+      component: ChangePasswordForm
     },
     {
       path: "/",
@@ -90,11 +92,11 @@ const router = new createRouter({
     },
     {
       path: "/recovery",
-      redirect: "/home"
+      redirect: "/"
     },
     {
       path: "/:pathMatch(.*)*",
-      redirect: "/home"
+      redirect: "/"
     },
     {
       path: "/impress",
@@ -114,17 +116,13 @@ const router = new createRouter({
       },
       component: DataPolicy
     },
-  ],
-  history: createWebHashHistory()
+  ]
 });
 
 router.beforeEach((to, from, next) => {
-
   if (to.name === "login-form" && auth.loggedIn()) {
-    next({ name: "home" });
-  }
-
-  if (to.matched.some(record => record.meta.requiresAuth)) {
+    next({ path: "/" });
+  }else  if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!auth.loggedIn()) {
       next({
         name: "login-form",

@@ -4,19 +4,19 @@
       <dx-item
         data-field="password"
         editor-type="dxTextBox"
-        :editor-options="{ stylingMode: 'filled', placeholder: 'Password', mode: 'password' }"
+        :editor-options="{ stylingMode: 'filled', placeholder: 'Passwort', mode: 'password' }"
       >
-        <dx-required-rule message="Password is required" />
+        <dx-required-rule message="Gib bitte Dein neues Passwort ein" />
         <dx-label :visible="false" />
       </dx-item>
       <dx-item
         data-field="confirmedPassword"
         editor-type="dxTextBox"
-        :editor-options="{ stylingMode: 'filled', placeholder: 'Confirm Password', mode: 'password' }"
+        :editor-options="{ stylingMode: 'filled', placeholder: 'Passwort bestätigen', mode: 'password' }"
       >
-        <dx-required-rule message="Password is required" />
+        <dx-required-rule message="Gib bitte Dein neues Passwort ein" />
         <dx-custom-rule
-          message="Passwords do not match"
+          message="Die Passwort stimmen nicht überein"
           :validation-callback="confirmPassword"
         />
         <dx-label :visible="false" />
@@ -74,30 +74,30 @@ components: {
     const router = useRouter();
     const route = useRoute();
 
-    const recoveryCode = ref("");
+    const recoveryCode = route.query.token;
+    const email = route.query.email;
+
     const loading = ref(false);
     const formData = reactive({
       password:""
     });
 
-    recoveryCode.value = route.params.recoveryCode;
-
     async function onSubmit() {
-      const { password } = formData;
+      const { password , confirmedPassword } = formData;
       loading.value = true;
   
-      const result = await auth.changePassword(password, recoveryCode.value);
+      const result = await auth.changePassword(email, password, confirmedPassword, recoveryCode);
       loading.value = false;
-  
       if (result.isOk) {
         router.push("/login-form");
+        notify('Dein Passwort wurde geändert', 'success');
       } else {
         notify(result.message, 'error', 2000);
       }
     }
 
     function confirmPassword (e) {
-      return e.value === formData.password;
+      return e.value.toString() === formData.password.toString();
     }
 
     return {

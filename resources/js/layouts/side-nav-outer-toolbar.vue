@@ -26,7 +26,9 @@
         <side-nav-menu
           :compact-mode="!menuOpened"
           @click="handleSideBarClick"
+          v-if="isLoggedIn"
         />
+        <div v-else></div>
       </template>
     </dx-drawer>
   </div>
@@ -41,6 +43,7 @@ import HeaderToolbar from "../components/header-toolbar";
 import SideNavMenu from "../components/side-nav-menu";
 import { computed, ref, watch} from 'vue';
 import { useRoute } from 'vue-router';
+import { useStore } from './../store'
 
 export default {
   props: {
@@ -103,13 +106,18 @@ export default {
       }
     );
 
+    const isLoggedIn = computed(() => {
+      return useStore().getters.isLoggedIn;
+    })
+
     return {
       menuOpened,
       menuItems,
       toggleMenu,
       handleSideBarClick,
       drawerOptions,
-      scrollViewRef
+      scrollViewRef,
+      isLoggedIn
     };
   },
   components: {

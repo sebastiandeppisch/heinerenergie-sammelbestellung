@@ -1,82 +1,89 @@
-const defaultUser = {
-  email: 'mail@example.com'
-};
-
+import axios, { AxiosError } from 'axios'
+import notify from 'devextreme/ui/notify';
+import { store } from './store'
 export default {
-  _user: defaultUser,
-  loggedIn() {
-    return !!this._user;
-  },
-
   async logIn(email, password) {
     try {
       // Send request
-      console.log(email, password);
-      this._user = { ...defaultUser, email };
-
+      await axios.post('api/login', {
+        email, password
+      }).then(response => response.data).then(response => {
+        store.commit('setUser', {
+          user: response.user as App.Models.User
+        })
+      });
       return {
         isOk: true,
-        data: this._user
-      };
+        data: store.state.user
+      }
     }
     catch {
       return {
         isOk: false,
-        message: "Authentication failed"
+        message: "Ungültige Zugangsdaten"
       };
     }
   },
 
   async logOut() {
-    this._user = null;
-  },
-
-  async getUser() {
-    try {
-      // Send request
-
-      return {
-        isOk: true,
-        data: this._user
-      };
-    }
-    catch {
-      return {
-        isOk: false
-      };
-    }
+    await axios.post('api/logout').then(response => {
+      notify('Du wurdest ausgeloggt', 'success');
+      store.commit('unsetUser');
+    }).catch(error =>  {
+      notify('Fehler beim ausloggen', 'error');
+    })
   },
 
   async resetPassword(email) {
-    try {
-      // Send request
-      console.log(email);
-
+    try{
+      await axios.post('api/forgot-password', {
+        email
+      })
       return {
         isOk: true
       };
-    }
-    catch {
-      return {
+    }catch(error){
+      let message = '';
+      if(error.response && error.response.status === 422){
+        for(const prop in error.response.data.errors){
+          if(prop === 'email'){
+            const validationErrors  = error.response.data.errors[prop] as Array<String>;
+            message = validationErrors.join(",");
+          }
+        }
+      }else{
+        message = error
+      }
+      return{
         isOk: false,
-        message: "Failed to reset password"
-      };
+        message
+      }
     }
   },
-
-  async changePassword(email, recoveryCode) {
+  async changePassword(email, password, password_confirmation, token) {
     try {
-      // Send request
-      console.log(email, recoveryCode);
-
+      await axios.post('api/reset-password', {
+        email,
+        password,
+        password_confirmation,
+        token
+      })
       return {
         isOk: true
       };
-    }
-    catch {
-      return {
+    }catch(error){
+      let message = '';
+      if(error.response && error.response.status === 422){
+        for(const prop in error.response.data.errors){
+          const validationErrors  = error.response.data.errors[prop] as Array<String>;
+          message += validationErrors.join(",");
+        }
+      }else{
+        message = error
+      }
+      return{
         isOk: false,
-        message: "Failed to change password"
+        message
       }
     }
   },
@@ -96,5 +103,26 @@ export default {
         message: "Failed to create account"
       };
     }
+  },
+
+  async initLogin(){
+    await axios.get('api/login').then(response => response.data).then(response => {
+      if(store !== undefined){
+        if(response.isLoggedIn){
+          store.commit('setUser', {
+            user: response.user as App.Models.User
+          })
+        }else{
+          store.commit('unsetUser');
+        }
+      }
+    })
+  },
+
+  loggedIn(){
+    if(store !== undefined){
+      return store.getters.isLoggedIn;
+    }
+    return false;
   }
 };

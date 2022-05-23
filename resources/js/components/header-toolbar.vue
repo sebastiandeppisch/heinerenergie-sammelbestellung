@@ -2,6 +2,7 @@
   <header class="header-component">
     <dx-toolbar class="header-toolbar">
       <dx-item
+        v-if="isLoggedIn"
         :visible="menuToggleEnabled"
         location="before"
         css-class="menu-button"
@@ -20,7 +21,7 @@
         location="before"
         css-class="header-title dx-toolbar-label"
       >
-        <div><img src="img/logo.png" style="height:2em;"></div>
+        <div><router-link to="/"><img src="img/logo.png" style="height:2em;"></router-link></div>
       </dx-item>
 
       <dx-item
@@ -58,9 +59,11 @@ import DxButton from "devextreme-vue/button";
 import DxToolbar, { DxItem } from "devextreme-vue/toolbar";
 import auth from "../auth";
 import { useRouter, useRoute } from 'vue-router';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import { useStore } from './../store'
 
 import UserPanel from "./user-panel";
+import notify from 'devextreme/ui/notify';
 
 export default {
   props: {
@@ -73,14 +76,24 @@ export default {
     const router = useRouter();
     const route = useRoute();
 
-    const email = ref("");
-    auth.getUser().then((e) => email.value = e.data.email);
+    const store = useStore();
+
+
+    const email = computed(() => {
+      return store.getters.email;
+    })
+
+    const isLoggedIn = computed(() => {
+      return store.getters.isLoggedIn;
+    });
     
-    const userMenuItems = [{
+    
+    
+    const userMenuItems = [/*{
         text: "Profile",
         icon: "user",
         onClick: onProfileClick
-      },
+      },*/
       {
         text: "Logout",
         icon: "runner",
@@ -88,11 +101,13 @@ export default {
     }];
       
     function onLogoutClick() {
-      auth.logOut();
-      router.push({
-        path: "/login-form",
-        query: { redirect: route.path }
-      });
+      auth.logOut().then(response => {
+        router.push({
+          path: "/",
+          query: { redirect: route.path }
+        });
+      })
+     
     }
 
     function onProfileClick() {
@@ -104,7 +119,8 @@ export default {
 
     return {
       email,
-      userMenuItems
+      userMenuItems,
+      isLoggedIn
     };
   },
   components: {

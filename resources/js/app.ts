@@ -7,8 +7,10 @@ import router from "./router";
 
 import App from "./App.vue";
 import appInfo from "./app-info";
+import { store, key } from './store';
 
 const app = createApp(App);
+app.use(store, key);
 app.use(router);
 app.config.globalProperties.$appInfo = appInfo;
 app.mount('#app');
