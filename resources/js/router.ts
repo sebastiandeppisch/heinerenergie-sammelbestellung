@@ -9,6 +9,7 @@ import DataPolicy from "./views/static/DataPolicy.vue"
 
 import defaultLayout from "./layouts/side-nav-outer-toolbar.vue";
 import simpleLayout from "./layouts/single-card.vue";
+import PublicLayout from './layouts/PublicLayout.vue';
 import LoginForm from './views/login-form.vue'
 import ResetPasswordForm from './views/reset-password-form.vue'
 import ChangePasswordForm from './views/change-password-form.vue'
@@ -37,10 +38,19 @@ const router = createRouter({
       component: Products
     },
     {
+      path: "/sammelbestellung",
+      name: "sammelbestellung",
+      meta: {
+        requiresAuth: false,
+        layout: PublicLayout
+      },
+      component: NewOrder
+    },
+    {
       path: "/neworder",
       name: "neworder",
       meta: {
-        requiresAuth: false,
+        requiresAuth: true,
         layout: defaultLayout
       },
       component: NewOrder
@@ -88,6 +98,10 @@ const router = createRouter({
     },
     {
       path: "/",
+      redirect: "/sammelbestellung"
+    },
+    {
+      path: '/backend',
       redirect: "/neworder"
     },
     {
@@ -103,7 +117,7 @@ const router = createRouter({
       name: "impress",
       meta: {
         requiresAuth: false,
-        layout: defaultLayout
+        layout: PublicLayout
       },
       component: Impress
     },
@@ -112,7 +126,7 @@ const router = createRouter({
       name: "datapolicy",
       meta: {
         requiresAuth: false,
-        layout: defaultLayout
+        layout: PublicLayout
       },
       component: DataPolicy
     },
@@ -121,7 +135,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   if (to.name === "login-form" && auth.loggedIn()) {
-    next({ path: "/" });
+    next({ path: "/backend" });
   }else  if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!auth.loggedIn()) {
       next({

@@ -30,7 +30,7 @@
           <div class="image-container">
             <i class="dx-icon-user"></i>
           </div>
-          <div class="user-name">Login</div>
+          <div class="user-name">Berater*innen Zugang</div>
         </div>
       </router-link>
     </div>

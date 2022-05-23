@@ -87,7 +87,7 @@ export default {
 
     auth.initLogin().then(done => {
       if(auth.loggedIn()){
-        router.push(route.query.redirect || "/home");
+        router.push(route.query.redirect || "/backend");
       }
     });
 
@@ -99,7 +99,7 @@ export default {
         loading.value = false;
         notify(result.message, "error", 2000);
       } else {
-        router.push(route.query.redirect || "/home");
+        router.push(route.query.redirect || "/backend");
       }
     }
 
