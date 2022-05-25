@@ -6,7 +6,7 @@
         <div class="article-detail">
             <i class="dx-icon-info" v-if="product.description !== null" @mouseenter="togglePopover" @mouseleave="togglePopover" :id="popoverId" style="cursor:pointer;"></i>
             &nbsp;
-            <a :href="product.url" v-if="product.url !== null">
+            <a :href="product.url" v-if="product.url !== null" target="_blank">
                 <i class="dx-icon-link"></i>
             </a>
             <DxPopover
