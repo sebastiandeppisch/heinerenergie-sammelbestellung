@@ -2,6 +2,7 @@
 
 namespace App\Rules;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Contracts\Validation\Rule;
 
 class OrderPassword implements Rule
@@ -15,6 +16,9 @@ class OrderPassword implements Rule
      */
     public function passes($attribute, $value)
     {
+        if(Auth::user() !== null){
+            return true;
+        }
         return $value === env('ORDER_PASSWORD', 'You must set ORDER_PASSWORD in .env');
     }
 

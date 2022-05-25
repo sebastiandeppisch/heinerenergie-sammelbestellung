@@ -139,7 +139,7 @@ import { ValidationResult } from 'devextreme/ui/validation_group';
 
 import { useRoute } from 'vue-router'
 import { useStore } from '../store';
-
+import auth from '../auth';
 
 type Product = App.Models.Product;
 type Order = App.Models.Order;
@@ -149,6 +149,12 @@ let formData: any = ref({});
 const blocked = ref(true);
 
 let password = "";
+
+auth.initLogin().then(done => {
+  if(auth.loggedIn()){
+    blocked.value = false;
+  }
+});
 
 try{
   const route = useRoute();
