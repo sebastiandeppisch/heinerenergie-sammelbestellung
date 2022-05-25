@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Support\Str;
+use App\Rules\OrderPassword;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreOrderRequest extends FormRequest
@@ -36,7 +37,8 @@ class StoreOrderRequest extends FormRequest
             'city' => 'required|string|max:100',
             'orderItems' => 'array',
             'advisorEmail' => 'required|email|exists:users,email|max:100',
-            'commentary' => 'nullable|string|max:65535'
+            'commentary' => 'nullable|string|max:65535',
+            'password' => [new OrderPassword()]
         ];
     }
 

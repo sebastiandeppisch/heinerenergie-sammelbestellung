@@ -36,7 +36,6 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request)
     {
-        $this->checkPassword($request);
         $advisor = User::where('email', $request->advisorEmail)->firstOrFail();
         $order = new Order($request->all());
         $order->advisor_id = $advisor->id;
