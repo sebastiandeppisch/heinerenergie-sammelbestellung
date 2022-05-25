@@ -9,8 +9,16 @@
       :column-auto-width="true"
       :column-hiding-enabled="true"
     >
+      <DxFilterRow  :visible="true"/>
       <DxColumn data-field="firstName" caption="Vorname" />
       <DxColumn data-field="lastName" caption="Nachname" />
+      <DxColumn data-field="advisor_id" caption="Berater*in">
+        <DxLookup
+            :data-source="advisors"
+            display-expr="name"
+            value-expr="id"
+          />
+      </DxColumn>
       <DxColumn data-field="panelsCount" caption="Anzahl Module" />
       <DxColumn data-field="price" caption="Gesamtpreis" :customize-text="formatPriceCell" />
 
@@ -61,7 +69,7 @@ import LaravelDataSource from '../LaravelDataSource'
 import OrderDetail from './../components/OrderDetail.vue'
 import {formatPriceCell, formatPrice} from '../helpers'
 import { ref, onMounted } from 'vue'
-import { CustomSummaryInfo } from "devextreme/ui/data_grid";
+import { CustomSummaryInfo , } from "devextreme/ui/data_grid";
 import { DxButton } from 'devextreme-vue/button';
 
 import DxDataGrid, {
@@ -71,12 +79,17 @@ import DxDataGrid, {
   DxTotalItem,
   DxMasterDetail,
   DxToolbar,
-  DxItem
+  DxItem,
+  DxLookup,
+  DxFilterRow
 } from "devextreme-vue/data-grid";
+import LaravelLookupSource from '../LaravelLookupSource';
 
 type Order = App.Models.Order;
 
 const ordersStore = new LaravelDataSource("api/orders");
+const advisors  = new LaravelLookupSource("api/users");
+
 
 function update(){
   console.log("update from order");
