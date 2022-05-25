@@ -37,3 +37,4 @@ Route::get('products', [ProductController::class, 'index']);
 Route::post('orders', [OrderController::class, 'store']);
 Route::get('validateorderform', [OrderController::class, 'validateorderform']);
 //});
+Route::get('checkpassword', [OrderController::class, 'checkPassword']);

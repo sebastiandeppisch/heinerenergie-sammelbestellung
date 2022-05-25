@@ -6,6 +6,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
 use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\RequireOrderPassword;
 use App\Http\Requests\UpdateProductRequest;
 
 class ProductController extends Controller
@@ -24,7 +25,7 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(RequireOrderPassword $request)
     {
         return $this->dxFilter($request, Product::query())->get();
     }

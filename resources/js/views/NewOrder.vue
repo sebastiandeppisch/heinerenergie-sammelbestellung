@@ -3,7 +3,19 @@
     <div v-if="state.order === null">
       <h2 class="content-block">Sammelbestellung</h2>
       <div class="main">
-      <p class="dx-card content" style="padding:30px">
+      <Transition name="slide-up">
+      <div class="dx-card content" style="padding: 30px" v-if="blocked">
+        <DxTextBox
+            mode="password"
+            value-change-event="keyup"
+            @value-changed="passwordChanged"
+            :is-valid="!blocked"
+            :element-attr="{autocomplete: 'off'}"
+            placeholder="Gib bitte das Passwort ein, um Zugriff zum Bestellformular zu erhalten"
+        />
+      </div>
+      <div v-else>
+      <p class="dx-card content" style="padding:30px" >
         <div v-if="email === null">
           Wenn Du an der Sammelbestellung teilnehmen möchtest, kannst Du hier Deine Bestellung eintragen. Wir leiten sie im Anschluss an unseren Lieferanten weiter. Bitte beachte, dass wir vorab keine Liefertermine garantieren können. Auch die Preise können sich noch ändern. 
         </div>
@@ -87,6 +99,8 @@
       @click="saveOrder"
     />
 </div>
+</div>
+</Transition>
     
   </div></div>
   <div v-else>
@@ -96,6 +110,7 @@
 </template>
 
 <script setup lang="ts">
+import DxTextBox from 'devextreme-vue/text-box';
 
 import DxButton from 'devextreme-vue/button';
 
@@ -130,6 +145,10 @@ type Product = App.Models.Product;
 type Order = App.Models.Order;
 
 let formData: any = ref({});
+
+const blocked = ref(true);
+
+let password = "";
 
 try{
   const route = useRoute();
@@ -193,7 +212,8 @@ function saveOrder(){
     }
     axios.post('api/orders', {
       orderItems, 
-      ...(formData.value)
+      ...(formData.value),
+      password
     }).then((response) => {
       state.order = response.data as Order;
     }).catch(error => {
@@ -223,7 +243,7 @@ let orderItemsDatasource = new DataSource({
     load: (options) => {
       if(orderItems.length === 0){
         return axios.get('api/products',{
-          params: options
+          params: {...options, password}
         }).then(response =>  {
           return orderItems = (response.data as Array<Product>).map(product => {
             return {
@@ -270,6 +290,17 @@ window.onresize = () => {
   checkWidth();
 }
 checkWidth();
+
+function passwordChanged(data){
+  axios.get('api/checkpassword', {
+    params: {
+      password : data.value
+    }
+  }).then(response => {
+    password = data.value;
+    blocked.value = false;
+  }).catch(e =>  {});
+}
 </script>
 <style scoped>
 @media screen and (min-width:680px) {
@@ -281,5 +312,18 @@ checkWidth();
     margin: 10px;
   }
 }
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.25s ease-out;
+}
 
+.slide-up-enter-from {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(-30px);
+}
 </style>

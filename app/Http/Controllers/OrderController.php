@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
+use App\Http\Requests\RequireOrderPassword;
+use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
 {
@@ -34,6 +36,7 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request)
     {
+        $this->checkPassword($request);
         $advisor = User::where('email', $request->advisorEmail)->firstOrFail();
         $order = new Order($request->all());
         $order->advisor_id = $advisor->id;
@@ -109,5 +112,8 @@ class OrderController extends Controller
         $date = Carbon::now()->format('Y-m-d H:i:s');
         $filename = sprintf("%s Bestellungen heinerenergie.xlsx", $date);
         return Excel::download(new OrdersExport, $filename);
+    }
+
+    public function checkPassword(RequireOrderPassword $request){
     }
 }
