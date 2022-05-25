@@ -1,5 +1,6 @@
 <template>
   <div>
+    <Transition name="slide-up">
     <div v-if="state.order === null">
       <h2 class="content-block">Sammelbestellung</h2>
       <div class="main">
@@ -20,8 +21,8 @@
           Wenn Du an der Sammelbestellung teilnehmen möchtest, kannst Du hier Deine Bestellung eintragen. Wir leiten sie im Anschluss an unseren Lieferanten weiter. Bitte beachte, dass wir vorab keine Liefertermine garantieren können. Auch die Preise können sich noch ändern. 
         </div>
         <div v-else>
-          Sende folgenden Link an Deine Interessent*innen, damit der Berater*in E-Mail bereits vorausgefüllt ist: <br>
-          <b> {{ advisorUrl }}</b>
+          Sende folgenden Link an Deine Interessent*innen, damit die Berater*in E-Mail Adresse bereits vorausgefüllt ist: <br>
+          <a :href="advisorUrl"><b>{{ advisorUrl }}</b></a>
         </div>
       </p>
       <div class="dx-card content">
@@ -106,6 +107,7 @@
   <div v-else>
     <OrderSaved :order="state.order" />
   </div>
+  </Transition>
   </div>
 </template>
 
