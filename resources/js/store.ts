@@ -14,11 +14,11 @@ export const store = createStore<State>({
 		user: null
 	},
 	getters: {
-		isLoggedIn(state): boolean{
+		isLoggedIn(state: State): boolean{
 			return state.user !== null;
 		},
-		email(state): string|null{
-			if(state.user === null){
+		email(state: State): string|null{
+			if(state.user === null || state.user === undefined){
 				return null;
 			}
 			return state.user.email;

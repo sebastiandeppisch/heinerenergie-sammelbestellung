@@ -13,8 +13,7 @@ export default {
         })
       });
       return {
-        isOk: true,
-        data: store.state.user
+        isOk: true
       }
     }
     catch {
