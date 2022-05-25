@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use Illuminate\Database\Eloquent\Builder;
 
 class UserController extends Controller
@@ -36,6 +38,7 @@ class UserController extends Controller
     public function store(StoreUserRequest $request)
     {
         $user = new User($request->all());
+        $user->password = '';
         $user->save();
     }
 

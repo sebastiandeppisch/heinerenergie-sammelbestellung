@@ -13,5 +13,10 @@ export default [
     text: "Artikel",
     path: "/products",
     icon: "box"
+  },
+  {
+    text: "Berater*innen",
+    path: "/users",
+    icon: "user"
   }
 ];

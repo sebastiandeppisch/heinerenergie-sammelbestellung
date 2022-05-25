@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from "vue-router";
 
 import Orders from "./views/Orders.vue";
 import Products from "./views/Products.vue";
+import Users from "./views/Users.vue";
 import NewOrder from "./views/NewOrder.vue"
 import Impress from "./views/static/Impress.vue"
 import DataPolicy from "./views/static/DataPolicy.vue"
@@ -130,6 +131,15 @@ const router = createRouter({
       },
       component: DataPolicy
     },
+    {
+      path: "/users",
+      name: "users",
+      meta: {
+        requiresAuth: true,
+        layout: defaultLayout
+      },
+      component: Users
+    }
   ]
 });
 
