@@ -46,3 +46,8 @@ const localization = require('devextreme/localization');
 
 localization.loadMessages(require('devextreme/localization/messages/de.json'));
 localization.locale('de');
+import config from "devextreme/core/config";
+ 
+config({
+    defaultCurrency: 'EUR'
+});
