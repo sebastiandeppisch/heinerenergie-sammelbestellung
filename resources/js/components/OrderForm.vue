@@ -5,7 +5,6 @@
     :col-count="2"
     :form-data="order"
     @submit="submit"
-    :paging="false"
   >
     <DxGroupItem
       caption="Persönliche Daten"

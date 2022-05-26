@@ -37,6 +37,7 @@
     <DxDataGrid
       :data-source="orderItemsDatasource"
       :column-hiding-enabled="true"
+      :paging="false"
     >
       <DxEditing
         :allow-updating="true"
