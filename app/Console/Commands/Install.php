@@ -49,11 +49,11 @@ class Install extends Command
     private function cmd(array $cmds): void{
         $process = new Process($cmds);
         $process->run();
+        $this->info($process->getOutput());
         if (!$process->isSuccessful()) {
             $this->error($process->getErrorOutput());
             throw new UpdateException();
         }
-        $this->info($process->getOutput());
     }
 
     private function artisan(string $cmd): void{
