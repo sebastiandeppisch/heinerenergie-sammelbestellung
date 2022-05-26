@@ -31,7 +31,7 @@
               height="100%"
               styling-mode="text"
             >
-              <user-panel :email="email" :menu-items="userMenuItems" menu-mode="context" />
+              <user-panel :email="null" :menu-items="[]" menu-mode="context" />
             </dx-button>
           </div>
         </template>
