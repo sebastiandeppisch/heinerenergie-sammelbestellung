@@ -111,9 +111,23 @@
     <DxGroupItem
       caption="Sonstiges"
     >
-      <DxSimpleItem
+      <DxSimpleItem v-if="confirmEmail"
         data-field="advisorEmail"
         :label="{ text: 'Berater*in E-Mail'}"
+      >
+        <DxAsyncRule
+          :validation-callback="validateAsync"
+        />
+      </DxSimpleItem>
+      <DxSimpleItem v-else
+        data-field="advisor_id"
+        :label="{ text: 'Berater*in'}"
+        editor-type="dxLookup"
+        :editor-options="{
+            dataSource: new LaravelLookupSource('api/users'),
+            displayExpr: 'name',
+            valueExpr: 'id'
+        }"
       >
         <DxAsyncRule
           :validation-callback="validateAsync"
@@ -141,6 +155,8 @@
   <!-- otherwise vue will not auto import DxAutocomplete-->
   <DxAutocomplete />
   <DxTextArea />
+  <DxLookup />
+
   </div>
 </template>
 
@@ -148,6 +164,7 @@
 
 import { DxAutocomplete } from 'devextreme-vue/autocomplete';
 import DxTextArea from 'devextreme-vue/text-area';
+import { DxLookup} from 'devextreme-vue/lookup';
 
 
 import {DxForm, DxSimpleItem, DxGroupItem, DxButtonItem} from 'devextreme-vue/form';
@@ -163,6 +180,7 @@ import dxForm from 'devextreme/ui/form';
 import {notifyError} from '../helpers'
 import notify from 'devextreme/ui/notify';
 import { ValidationResult } from 'devextreme/ui/validation_group';
+import LaravelLookupSource from '../LaravelLookupSource';
 
 const emit = defineEmits(['update'])
 
