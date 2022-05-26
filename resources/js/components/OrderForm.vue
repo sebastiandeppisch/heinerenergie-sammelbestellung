@@ -124,7 +124,7 @@
         :label="{ text: 'Berater*in'}"
         editor-type="dxLookup"
         :editor-options="{
-            dataSource: new LaravelLookupSource('api/users'),
+            dataSource: loadUsers(),
             displayExpr: 'name',
             valueExpr: 'id'
         }"
@@ -210,6 +210,10 @@ function validateAsync(params: ValidationCallbackData){
   }).catch(error => {
     formatError(error, field);
   })
+}
+
+function loadUsers(): LaravelLookupSource{
+  return new LaravelLookupSource('api/users');
 }
 
 function formatError(error: AxiosError, field: string): void{
