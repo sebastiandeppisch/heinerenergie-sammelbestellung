@@ -59,9 +59,5 @@ class AdaptTableHeight{
 		return this.r;
 	}
 }
-
-function adaptTableHeight(ref: Ref): {
-
-}
   
 export {formatPrice, formatPriceCell, notifyError, formatDate, AdaptTableHeight}
