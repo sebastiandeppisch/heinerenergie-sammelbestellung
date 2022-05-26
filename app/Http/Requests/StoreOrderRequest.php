@@ -58,7 +58,7 @@ class StoreOrderRequest extends FormRequest
             'street' => 'Straße',
             'streetNumber' => 'Hausnummer',
             'zip' => 'Postleitzahl',
-            'city' => 'Darmstadt',
+            'city' => 'Stadt',
             'advisorEmail' => 'Berater*in E-Mail'
         ];
     }

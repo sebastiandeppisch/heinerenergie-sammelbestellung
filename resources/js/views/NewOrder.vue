@@ -18,7 +18,7 @@
       <div v-else>
       <p class="dx-card content" style="padding:30px" >
         <div v-if="email === null">
-          Wenn Du an der Sammelbestellung teilnehmen möchtest, kannst Du hier Deine Bestellung eintragen. Wir leiten sie im Anschluss an unseren Lieferanten weiter. Bitte beachte, dass wir vorab keine Liefertermine garantieren können. Auch die Preise können sich noch ändern. 
+          Wenn Du an der Sammelbestellung teilnehmen möchtest, kannst Du hier Deine Bestellung eintragen. Wir leiten sie im Anschluss an unseren Lieferanten weiter. Bitte beachte, dass wir vorab keine Liefertermine garantieren können. Auch die Preise können sich noch ändern. <br>Du schließt keinen Kaufvertrag mit heiner*energie ab. Der Kaufvertrag kommt erst später zwischen Dir und unserem Lieferanten zustande, hierzu erhälst Du von diesem im Anschluss weitere Infos. 
         </div>
         <div v-else>
           Sende folgenden Link an Deine Interessent*innen, damit die Berater*in E-Mail Adresse bereits vorausgefüllt ist: <br>
@@ -69,7 +69,7 @@
         :editor-options="{defaultValue: 0, min: 0, showSpinButtons: true, showClearButton: !state.hideElements}"
         :show-editor-always="true"
         :hiding-priority="1"
-        :width="150"
+        :width="160"
       />
       <template #orderTemplate="{ data }">
         <ProductDetail :product="data.data.product" />
@@ -94,7 +94,7 @@
 
 <div style="margin: 10px;margin-top:20px">
 <DxButton 
-      text="Bestellung absenden"
+      text="An der Sammelbestellung teilnehmen"
       type="default"
       width="100%"
       @click="saveOrder"
