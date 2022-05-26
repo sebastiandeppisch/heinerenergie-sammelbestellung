@@ -20,7 +20,8 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
         'email',
         'password',
     ];
@@ -44,7 +45,15 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    protected $appends = [
+        'name'
+    ];
+
     public function orders(): HasMany{
         return $this->hasMany(Order::class, 'advisor_id');
+    }
+
+    public function getNameAttribute(){
+        return sprintf("%s %s", $this->first_name, $this->last_name);
     }
 }

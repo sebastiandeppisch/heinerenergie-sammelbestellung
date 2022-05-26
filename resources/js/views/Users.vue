@@ -14,7 +14,8 @@
           :allow-deleting="true"
           mode="cell"
         />
-        <DxColumn data-field="name" caption="Name" />
+        <DxColumn data-field="first_name" caption="Vorname" />
+        <DxColumn data-field="last_name" caption="Nachname" sort-order="asc"/>
         <DxColumn data-field="email" caption="E-Mail Adresse" :editor-options="{mode: 'email'}"/>
       </DxDataGrid>
     </div>
