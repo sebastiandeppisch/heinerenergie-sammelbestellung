@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div ref="outer">
     <h2 class="content-block">Artikel</h2>
     <div style="margin: 30px 40px 30px 40px;">
     <DxDataGrid
@@ -7,7 +7,12 @@
       :data-source="productStore"
       :show-borders="false"
       :column-auto-width="true"
+      :height="r.height"
+		  min-height="450px"
     >
+      <DxScrolling
+        mode="virtual"
+      />
       <DxEditing
         :allow-updating="true"
         :allow-adding="true"
@@ -28,9 +33,13 @@
 <script setup>
 import DxDataGrid, {
   DxColumn,
-  DxEditing
+  DxEditing,
+  DxScrolling
 } from "devextreme-vue/data-grid";
 import LaravelDataSource from '../LaravelDataSource'
+import { ref, onMounted } from 'vue'
+import {AdaptTableHeight} from '../helpers'
+
 
 const productStore = new LaravelDataSource("api/products");
 
@@ -46,4 +55,13 @@ const panelsCountEditorOptions = {
 function formatPrice(price){
   return parseFloat(price.value).toFixed(2).replace(".", ",") + " €";
 }
+
+const outer = ref(null);
+
+const tableHeight = new AdaptTableHeight(outer);
+const r = tableHeight.getReactive();
+
+onMounted(() => {
+  tableHeight.calcHeight();
+});
 </script>

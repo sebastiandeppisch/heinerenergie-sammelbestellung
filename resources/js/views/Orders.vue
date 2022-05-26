@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div ref="outer">
     <h2 class="content-block">Bestellungen</h2>
     <div style="margin: 30px 40px 30px 40px;">
     <DxDataGrid
@@ -8,7 +8,12 @@
       :show-borders="false"
       :column-auto-width="true"
       :column-hiding-enabled="true"
+      :height="r.height"
+		  min-height="450px"
     >
+      <DxScrolling
+        mode="virtual"
+      />
       <DxFilterRow  :visible="true"/>
       <DxColumn data-field="firstName" caption="Vorname" />
       <DxColumn data-field="lastName" caption="Nachname" />
@@ -26,6 +31,10 @@
        <DxSummary
         :recalculate-while-editing="true"
         >
+          <DxTotalItem
+            column="firstName"
+            summary-type="count"
+          />
           <DxTotalItem
             column="price"
             summary-type="sum"
@@ -68,7 +77,7 @@
 
 import LaravelDataSource from '../LaravelDataSource'
 import OrderDetail from './../components/OrderDetail.vue'
-import {formatPriceCell, formatPrice, formatDate} from '../helpers'
+import {formatPriceCell, formatPrice, formatDate, AdaptTableHeight} from '../helpers'
 import { ref, onMounted } from 'vue'
 import { CustomSummaryInfo , } from "devextreme/ui/data_grid";
 import { DxButton } from 'devextreme-vue/button';
@@ -82,7 +91,8 @@ import DxDataGrid, {
   DxToolbar,
   DxItem,
   DxLookup,
-  DxFilterRow
+  DxFilterRow,
+  DxScrolling
 } from "devextreme-vue/data-grid";
 import LaravelLookupSource from '../LaravelLookupSource';
 
@@ -101,4 +111,13 @@ function exportOrders(){
   window.open('/orderexport', '_blank').focus();
 }
 
+
+const outer = ref(null);
+
+const tableHeight = new AdaptTableHeight(outer);
+const r = tableHeight.getReactive();
+
+onMounted(() => {
+  tableHeight.calcHeight();
+});
 </script>
