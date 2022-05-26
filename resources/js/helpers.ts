@@ -1,5 +1,6 @@
 import { AxiosError } from 'axios';
 import notify from 'devextreme/ui/notify';
+import moment from 'moment';
 
 function formatPriceCell(cell): string{
 	return formatPrice(parseFloat(cell.value));
@@ -20,5 +21,10 @@ function notifyError(error: AxiosError): void{
 	  notify(error, 'error');
 	}
   }
+
+function formatDate(dateString: string): string{
+	const date = moment(dateString);
+	return date.format("DD.MM.YY");
+}
   
-export {formatPrice, formatPriceCell, notifyError}
+export {formatPrice, formatPriceCell, notifyError, formatDate}
