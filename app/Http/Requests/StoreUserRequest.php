@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreUserRequest extends FormRequest
@@ -13,7 +14,7 @@ class StoreUserRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return Auth::user()->is_admin;
     }
 
     /**
@@ -25,7 +26,8 @@ class StoreUserRequest extends FormRequest
     {
         return [
             'name' => 'string|required',
-            'email' => 'email|required|unique:users,email'
+            'email' => 'email|required|unique:users,email',
+            'is_admin' => 'boolean'
         ];
     }
 }

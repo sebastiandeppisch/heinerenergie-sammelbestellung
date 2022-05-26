@@ -9,6 +9,7 @@ use App\Mail\OrderCreated;
 use Illuminate\Http\Request;
 use App\Exports\OrdersExport;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Requests\StoreOrderRequest;
@@ -18,6 +19,10 @@ use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
 {
+
+    public function __construct(){
+        $this->authorizeResource(Order::class, 'order');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -25,7 +30,10 @@ class OrderController extends Controller
      */
     public function index()
     {
-        return Order::all();
+        if(Auth::user()->is_admin){
+            return Order::all();
+        }
+        return Auth::user()->orders;
     }
 
     /**

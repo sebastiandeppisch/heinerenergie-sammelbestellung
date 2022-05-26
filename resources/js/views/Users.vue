@@ -16,6 +16,7 @@
         />
         <DxColumn data-field="name" caption="Name" />
         <DxColumn data-field="email" caption="E-Mail Adresse" :editor-options="{mode: 'email'}"/>
+        <DxColumn data-field="is_admin" caption="Admin" />
       </DxDataGrid>
     </div>
   </div>
