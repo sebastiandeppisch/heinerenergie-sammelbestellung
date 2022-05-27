@@ -16,14 +16,12 @@
         />
       </div>
       <div v-else>
+      <p class="dx-card content" style="padding:30px" v-if="email !== null">
+        Sende folgenden Link an Deine Interessent*innen, damit die Berater*in E-Mail Adresse bereits vorausgefüllt ist: <br>
+        <a :href="advisorUrl"><b>{{ advisorUrl }}</b></a>
+      </p>
       <p class="dx-card content" style="padding:30px" >
-        <div v-if="email === null">
-          <OrderInfo /> 
-        </div>
-        <div v-else>
-          Sende folgenden Link an Deine Interessent*innen, damit die Berater*in E-Mail Adresse bereits vorausgefüllt ist: <br>
-          <a :href="advisorUrl"><b>{{ advisorUrl }}</b></a>
-        </div>
+        <OrderInfo /> 
       </p>
       <div class="dx-card content">
         <OrderForm
