@@ -18,11 +18,12 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::middleware('auth')->group(function () {
+    Route::get('orderexport', [OrderController::class, 'export']);
+});
+
 Route::get('/{any}', function () {
     return view('welcome');
 })->where('any', '^(?!api).*$');
-
-
-Route::get('orderexport', [OrderController::class, 'export']);
 
 Route::get('/change-password')->name('password.reset');
