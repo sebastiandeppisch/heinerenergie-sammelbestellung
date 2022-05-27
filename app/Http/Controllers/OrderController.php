@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Mail\OrderCreated;
+use App\Events\OrderCreated;
 use Illuminate\Http\Request;
 use App\Exports\OrdersExport;
 use Illuminate\Support\Carbon;
@@ -57,7 +57,7 @@ class OrderController extends Controller
             $orderItem->load('product');
         });
 
-        Mail::to($order->email)->send(new OrderCreated($order));
+        OrderCreated::dispatch($order);
 
         return $order;
     }

@@ -8,7 +8,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class OrderCreated extends Mailable
+class OrderCreatedAdvisor extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -29,6 +29,7 @@ class OrderCreated extends Mailable
      */
     public function build()
     {
-        return $this->markdown('emails.ordercreated')->replyTo($this->order->advisor->email, $this->order->advisor->name)->subject('heiner*energie Sammelbestellung');
+        $subject = sprintf('heiner*energie Bestellung von %s', $this->order->name);
+        return $this->markdown('emails.ordercreatedadvisor')->replyTo($this->order->email, $this->order->name)->subject($subject);
     }
 }
