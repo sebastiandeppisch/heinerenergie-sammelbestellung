@@ -22,7 +22,7 @@
       />
       <DxColumn data-field="product_category_id" caption="Kategorie">
         <DxLookup
-          :data-source="(new LaravelLookupSource('api/productcategories'))"
+          :data-source="productCategories"
           display-expr="name"
           value-expr="id"
         />
@@ -55,6 +55,8 @@ import {AdaptTableHeight} from '../helpers'
 
 
 const productStore = new LaravelDataSource("api/products");
+
+const productCategories = (new LaravelLookupSource('api/productcategories'))
 
 const priceEditorOptions = {
   format: { style: "currency", currency: "EUR", useGrouping: true },
