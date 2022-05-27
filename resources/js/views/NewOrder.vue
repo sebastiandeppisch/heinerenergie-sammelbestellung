@@ -44,6 +44,17 @@
         mode="cell"
       />
       <DxColumn
+        caption="Kategorie"
+        :group-index="0"
+        data-field="product.product_category_id"
+      >
+        <DxLookup
+          :data-source="productCategories"
+          display-expr="name"
+          value-expr="id"
+        />
+      </DxColumn>
+      <DxColumn
         caption="Artikel"
         data-field="product.name"
         :allow-sorting="false"
@@ -112,6 +123,7 @@
 
 <script setup lang="ts">
 import DxTextBox from 'devextreme-vue/text-box';
+import LaravelLookupSource from '../LaravelLookupSource'
 
 import DxButton from 'devextreme-vue/button';
 
@@ -119,7 +131,8 @@ import DxDataGrid, {
   DxColumn,
   DxEditing,
   DxSummary,
-  DxTotalItem
+  DxTotalItem,
+  DxLookup
 } from "devextreme-vue/data-grid";
 
 
@@ -290,6 +303,8 @@ let orderItemsDatasource = new DataSource({
     }
   })
 })
+
+let productCategories = () => new LaravelLookupSource('api/productcategories?password=' + password)
 
 function checkWidth(){
   state.hideElements = window.innerWidth < 550;

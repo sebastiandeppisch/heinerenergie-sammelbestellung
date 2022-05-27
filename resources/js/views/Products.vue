@@ -13,12 +13,20 @@
       <DxScrolling
         mode="virtual"
       />
+      <DxFilterRow  :visible="true"/>
       <DxEditing
         :allow-updating="true"
         :allow-adding="true"
         :allow-deleting="true"
         mode="cell"
       />
+      <DxColumn data-field="product_category_id" caption="Kategorie">
+        <DxLookup
+          :data-source="(new LaravelLookupSource('api/productcategories'))"
+          display-expr="name"
+          value-expr="id"
+        />
+      </DxColumn>
       <DxColumn data-field="name" caption="Name" />
       <DxColumn data-field="price" caption="Preis" :editor-options="priceEditorOptions" :customize-text="formatPrice" />
       <DxColumn data-field="sku" caption="SKU" />
@@ -34,9 +42,14 @@
 import DxDataGrid, {
   DxColumn,
   DxEditing,
-  DxScrolling
+  DxScrolling,
+  DxLookup,
+  DxItem,
+  DxToolbar,
+  DxFilterRow
 } from "devextreme-vue/data-grid";
 import LaravelDataSource from '../LaravelDataSource'
+import LaravelLookupSource from '../LaravelLookupSource'
 import { ref, onMounted } from 'vue'
 import {AdaptTableHeight} from '../helpers'
 

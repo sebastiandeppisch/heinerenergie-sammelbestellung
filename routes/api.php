@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\OrderItemController;
+use App\Http\Controllers\ProductCategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,6 +25,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('orders', OrderController::class);
     Route::resource('products', ProductController::class);
     Route::resource('users', UserController::class);
+    Route::resource('productcategories', ProductCategoryController::class);
     
     Route::scopeBindings()->group(function(){
         Route::resource('orders.orderitems', OrderItemController::class);
@@ -36,6 +38,8 @@ Route::middleware('auth')->group(function () {
 
 //Route::middleware('guest')->group(function () {
 Route::get('products', [ProductController::class, 'index']);
+Route::get('productcategories', [ProductCategoryController::class, 'index']);
+
 Route::post('orders', [OrderController::class, 'store']);
 Route::get('validateorderform', [OrderController::class, 'validateorderform']);
 //});

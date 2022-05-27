@@ -3,14 +3,16 @@
 namespace App\Models;
 
 use App\Models\Order;
+use App\Models\ProductCategory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Product extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'price', 'sku', 'panelsCount', 'url', 'description']; 
+    protected $fillable = ['name', 'price', 'sku', 'panelsCount', 'url', 'description', 'product_category_id']; 
 
     protected $casts = [
         'name' => 'string',
@@ -28,4 +30,8 @@ class Product extends Model
     public function order(): BelongsTo{
         return $this->belongsTo(Order::class)->using(OrderItem::class);
     }
+
+    public function productCategory(): BelongsTo{
+        return $this->belongsTo(ProductCategory::class);
+    } 
 }
