@@ -25,7 +25,7 @@
           />
       </DxColumn>
       <DxColumn data-field="panelsCount" caption="Anzahl Module" />
-      <DxColumn data-field="created_at" caption="Eingegangen" :customize-text="formatDate"/>
+      <DxColumn data-field="created_at" caption="Eingegangen" :customize-text="formatDateCell"/>
       <DxColumn data-field="price" caption="Gesamtpreis" :customize-text="formatPriceCell" />
 
        <DxSummary
@@ -77,7 +77,7 @@
 
 import LaravelDataSource from '../LaravelDataSource'
 import OrderDetail from './../components/OrderDetail.vue'
-import {formatPriceCell, formatPrice, formatDate, AdaptTableHeight} from '../helpers'
+import {formatPriceCell, formatPrice, formatDateCell, AdaptTableHeight} from '../helpers'
 import { ref, onMounted } from 'vue'
 import { CustomSummaryInfo , } from "devextreme/ui/data_grid";
 import { DxButton } from 'devextreme-vue/button';

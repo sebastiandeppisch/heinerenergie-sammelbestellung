@@ -24,9 +24,8 @@ function notifyError(error: AxiosError): void{
 	}
   }
 
-function formatDate(dateString: string): string{
-	const date = moment(dateString);
-	return date.format("DD.MM.YY");
+function formatDateCell(row): string{
+	return moment(row.value).format("DD.MM.YY");
 }
 
 class AdaptTableHeight{
@@ -60,4 +59,4 @@ class AdaptTableHeight{
 	}
 }
   
-export {formatPrice, formatPriceCell, notifyError, formatDate, AdaptTableHeight}
+export {formatPrice, formatPriceCell, notifyError, formatDateCell, AdaptTableHeight}
