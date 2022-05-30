@@ -44,6 +44,8 @@ const popoverId = "popover-product" + product.id;
 .article{
     display: flex;
     flex-direction: row;
+    /*width: 100px;*/
+    /*max-width: 40vw;*/
 }
 .article-name{
     width: 100%;
