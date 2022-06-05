@@ -13,3 +13,12 @@
 @endforeach
 
 **Gesamtpreis**: {{(new \NumberFormatter( 'de_DE', NumberFormatter::CURRENCY ))->formatCurrency($order->price, 'EUR')}}
+---
+
+@if($order->commentary != null)
+**Kommentar**:
+
+{!! nl2br(e($order->commentary), false) !!}
+@else
+**Kommentar**: *Kein Kommentar*
+@endif
