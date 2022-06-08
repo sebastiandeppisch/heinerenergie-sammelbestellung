@@ -99,7 +99,10 @@ class OrderController extends Controller
      */
     public function destroy(Order $order)
     {
-        //
+        foreach($order->orderItems as $item){
+            $item->delete();
+        }
+        $order->delete();
     }
 
     public function validateorderform(StoreOrderRequest $request){

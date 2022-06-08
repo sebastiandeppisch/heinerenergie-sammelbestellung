@@ -50,6 +50,13 @@
         v-on:update="updateData"
         :update-button="true"
       />
+      <div style="float: right;">
+        <DxButton
+          icon="trash"
+          @click="deleteOrder"
+          type="danger"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -70,6 +77,9 @@ import axios from 'axios'
 import { CustomSummaryInfo } from "devextreme/ui/data_grid";
 import {formatPrice} from '../helpers'
 import OrderForm from '../components/OrderForm.vue'
+import DxButton from "devextreme-vue/button";
+
+import {confirm} from 'devextreme/ui/dialog';
 
 const emit = defineEmits(['update'])
 
@@ -89,6 +99,17 @@ function calculateSummary(options: CustomSummaryInfo){
 
 function updateData() {
   emit('update')
+}
+
+function deleteOrder() {
+  confirm('Möchtest Du die Bestellung wirklich löschen?', 'Bestellung löschen')
+    .then(() => {
+      axios.delete('api/orders/' + props.order.id)
+        .then(() => {
+          emit('update')
+        })
+    })
+  
 }
 
 </script>
