@@ -50,6 +50,22 @@
         v-on:update="updateData"
         :update-button="true"
       />
+      <div>
+        <DxButton
+          v-if="!order.checked"
+          icon="check"
+          @click="checkOrder"
+          text="Bestellung als geprüft markieren"
+          type="success"
+        />
+        <DxButton
+          v-if="order.checked"
+          icon="revert"
+          @click="uncheckOrder"
+          text="Prüfung zurücksetzen"
+          type="danger"
+        />
+      </div>
       <div style="float: right;">
         <DxButton
           icon="trash"
@@ -110,6 +126,20 @@ function deleteOrder() {
         })
     })
   
+}
+
+function checkOrder() {
+  axios.post('api/orders/' + props.order.id + '/check')
+    .then(() => {
+      emit('update')
+    })
+}
+
+function uncheckOrder() {
+  axios.post('api/orders/' + props.order.id + '/uncheck')
+    .then(() => {
+      emit('update')
+    })
 }
 
 </script>

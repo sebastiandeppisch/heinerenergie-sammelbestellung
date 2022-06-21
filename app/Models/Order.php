@@ -25,7 +25,10 @@ class Order extends Model
         'zip' => 'integer',
         'city' => 'string',
         'email' => 'string',
-        'phone' => 'string'
+        'phone' => 'string',
+        'commentary' => 'string',
+        'advisor_id' => 'integer',
+        'checked' => 'boolean',
     ];
 
     public function orderItems(): HasMany{

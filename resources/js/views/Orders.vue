@@ -26,6 +26,7 @@
       </DxColumn>
       <DxColumn data-field="panelsCount" caption="Anzahl Module" />
       <DxColumn data-field="created_at" caption="Eingegangen" :customize-text="formatDateCell"/>
+      <DxColumn data-field="checked" caption="Geprüft" />
       <DxColumn data-field="price" caption="Gesamtpreis" :customize-text="formatPriceCell" />
 
        <DxSummary

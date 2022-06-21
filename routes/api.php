@@ -34,6 +34,9 @@ Route::middleware('auth')->group(function () {
     Route::get('validateeditorderform', [OrderController::class, 'validateEditOrderForm']);
 
     Route::get('export', [OrderController::class, 'export']);
+
+    Route::post('orders/{order}/check', [OrderController::class, 'setChecked']);
+    Route::post('orders/{order}/uncheck', [OrderController::class, 'setUnchecked']);
 });
 
 //Route::middleware('guest')->group(function () {

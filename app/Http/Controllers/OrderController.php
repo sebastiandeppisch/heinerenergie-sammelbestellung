@@ -87,6 +87,7 @@ class OrderController extends Controller
     public function update(UpdateOrderRequest $request, Order $order)
     {
         $order->fill($request->all());
+        $order->checked = false;
         $order->save();
         return $order;
     }
@@ -117,5 +118,15 @@ class OrderController extends Controller
     }
 
     public function checkPassword(RequireOrderPassword $request){
+    }
+
+    public function setChecked(Order $order){
+        $order->checked = true;
+        $order->save();
+    }
+
+    public function setUnchecked(Order $order){
+        $order->checked = false;
+        $order->save();
     }
 }
