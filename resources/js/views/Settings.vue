@@ -2,7 +2,7 @@
   <div>
     <h2 class="content-block">Einstellungen</h2>
      <DxAccordion
-      :data-source="new LaravelDataSource('api/settings')"
+      :data-source="dataSource"
       :collapsible="true"
       :multiple="false"
     >
@@ -22,5 +22,7 @@ import DxAccordion from 'devextreme-vue/accordion';
 import LaravelDataSource from '../LaravelDataSource';
 
 import Setting from './../components/Setting.vue';
+
+let dataSource = new LaravelDataSource('api/settings');
 
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <div v-html="state.setting.html">
+  <div v-html="state.setting">
   </div>
 </template>
 
@@ -15,7 +15,7 @@ const props = defineProps<Props>();
 const state = reactive({ setting: 'Wird geladen...'});
 
 axios.get('/api/html/' + props.setting).then(response => {
-  state.setting = response.data;
+  state.setting = response.data.html;
 });
 
 </script>
