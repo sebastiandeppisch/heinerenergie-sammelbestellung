@@ -16,12 +16,12 @@
         />
       </div>
       <div v-else>
-      <p class="dx-card content" style="padding:30px" v-if="email !== null">
+      <p class="dx-card content" style="padding:30px" v-if="email !== null && email !== undefined">
         Sende folgenden Link an Deine Interessent*innen, damit die Berater*in E-Mail Adresse bereits vorausgefüllt ist: <br>
         <a :href="advisorUrl"><b>{{ advisorUrl }}</b></a>
       </p>
       <p class="dx-card content" style="padding:30px" >
-        <OrderInfo /> 
+        <SettingHtml :setting="orderFormText()" />
       </p>
       <div class="dx-card content">
         <OrderForm
@@ -147,7 +147,6 @@ import ProductDetail from '../components/ProductDetail.vue'
 
 import OrderForm from '../components/OrderForm.vue'
 import OrderSaved from '../components/OrderSaved.vue'
-import OrderInfo from '../views/static/OrderInfo.vue'
 
 import {formatPrice, formatPriceCell, notifyError} from './../helpers'
 import { ValidationResult } from 'devextreme/ui/validation_group';
@@ -155,6 +154,7 @@ import { ValidationResult } from 'devextreme/ui/validation_group';
 import { useRoute } from 'vue-router'
 import { useStore } from '../store';
 import auth from '../auth';
+import SettingHtml from '../components/SettingHtml.vue';
 
 type Product = App.Models.Product;
 type Order = App.Models.Order;
@@ -305,6 +305,8 @@ let orderItemsDatasource = new DataSource({
 })
 
 let productCategories = () => new LaravelLookupSource('api/productcategories?password=' + password)
+
+let orderFormText = () => 'orderFormText?password=' + password;
 
 function checkWidth(){
   state.hideElements = window.innerWidth < 550;

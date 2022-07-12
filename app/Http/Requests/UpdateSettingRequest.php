@@ -2,10 +2,9 @@
 
 namespace App\Http\Requests;
 
-use App\Rules\OrderPassword;
 use Illuminate\Foundation\Http\FormRequest;
 
-class RequireOrderPassword extends FormRequest
+class UpdateSettingRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,7 +24,7 @@ class RequireOrderPassword extends FormRequest
     public function rules()
     {
         return [
-            'password' => ['required', new OrderPassword()]
+            'value' => 'required'
         ];
     }
 }

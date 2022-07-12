@@ -43,6 +43,16 @@ declare namespace App.Models {
         product_category?: App.Models.ProductCategory | null;
     }
 
+    export interface Setting {
+        id: number;
+        created_at: string | null;
+        updated_at: string | null;
+        name: string;
+        key: string;
+        value: string;
+        type: string;
+    }
+
     export interface ProductCategory {
         id: number;
         created_at: string | null;

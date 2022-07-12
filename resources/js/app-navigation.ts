@@ -19,4 +19,10 @@ export default [
     path: "/users",
     icon: "user"
   }
+  ,
+  {
+    text: "Einstellungen",
+    path: "/settings",
+    icon: "preferences"
+  }
 ];

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\OrderItemController;
 use App\Http\Controllers\ProductCategoryController;
 
@@ -34,6 +35,7 @@ Route::middleware('auth')->group(function () {
     Route::get('validateeditorderform', [OrderController::class, 'validateEditOrderForm']);
 
     Route::get('export', [OrderController::class, 'export']);
+    Route::apiResource('settings', SettingController::class)->except(['store', 'destroy']);
 
     Route::post('orders/{order}/check', [OrderController::class, 'setChecked']);
     Route::post('orders/{order}/uncheck', [OrderController::class, 'setUnchecked']);
@@ -47,3 +49,7 @@ Route::post('orders', [OrderController::class, 'store']);
 Route::get('validateorderform', [OrderController::class, 'validateorderform']);
 //});
 Route::get('checkpassword', [OrderController::class, 'checkPassword']);
+
+Route::get('html/impress', [SettingController::class, 'impress']);
+Route::get('html/datapolicy', [SettingController::class, 'datapolicy']);
+Route::get('html/orderFormText', [SettingController::class, 'orderFormText']);
