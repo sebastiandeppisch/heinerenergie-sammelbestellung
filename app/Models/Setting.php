@@ -13,6 +13,8 @@ class Setting extends Model
         'key'
     ];
 
+    protected $appends = ['type', 'name'];
+
     protected static function defaultConfig(){
         
         return [
