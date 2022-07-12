@@ -7,7 +7,9 @@
 		"esModuleInterop": true,
 		"moduleResolution": "node",
 		"importHelpers": true,
-		"allowJs": true
+		"allowJs": true,
+		"resolveJsonModule": true,
+		"jsx": "preserve"
 	},
 	"baseUrl": "./resources/js",
 	"include": ["./resources/js/**/*", "./resources/js/tests/**/*"],
