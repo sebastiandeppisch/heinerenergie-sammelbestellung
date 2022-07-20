@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Rules\OrderPassword;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\FormRequest;
 
 class RequireOrderPassword extends FormRequest
