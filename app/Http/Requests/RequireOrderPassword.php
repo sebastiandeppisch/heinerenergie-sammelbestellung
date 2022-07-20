@@ -24,6 +24,9 @@ class RequireOrderPassword extends FormRequest
      */
     public function rules()
     {
+        if(Auth::check()){
+            return [];
+        }
         return [
             'password' => ['required', new OrderPassword()]
         ];
