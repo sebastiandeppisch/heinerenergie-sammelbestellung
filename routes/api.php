@@ -4,10 +4,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\UploadController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\OrderItemController;
 use App\Http\Controllers\ProductCategoryController;
+use App\Http\Controllers\ProductDownloadController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,6 +41,12 @@ Route::middleware('auth')->group(function () {
 
     Route::post('orders/{order}/check', [OrderController::class, 'setChecked']);
     Route::post('orders/{order}/uncheck', [OrderController::class, 'setUnchecked']);
+
+    Route::scopeBindings()->group(function(){
+        Route::resource('products.productdownloads', ProductDownloadController::class);
+    });
+
+    Route::post('upload', UploadController::class);
 });
 
 //Route::middleware('guest')->group(function () {

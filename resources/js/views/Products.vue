@@ -33,6 +33,13 @@
       <DxColumn data-field="panelsCount" caption="Panels" :editor-options="panelsCountEditorOptions"/>
       <DxColumn data-field="url" caption="URL" />
       <DxColumn data-field="description" caption="Beschreibung" width="600px"/>
+      <DxMasterDetail
+        :enabled="true"
+        template="masterDetailTemplate"
+      />
+      <template #masterDetailTemplate="{data}">
+        <ProductTableDetail :product="data.data" />
+      </template>
     </DxDataGrid>
     </div>
   </div>
@@ -46,12 +53,14 @@ import DxDataGrid, {
   DxLookup,
   DxItem,
   DxToolbar,
-  DxFilterRow
+  DxFilterRow,
+  DxMasterDetail
 } from "devextreme-vue/data-grid";
 import LaravelDataSource from '../LaravelDataSource'
 import LaravelLookupSource from '../LaravelLookupSource'
 import { ref, onMounted } from 'vue'
 import {AdaptTableHeight} from '../helpers'
+import ProductTableDetail from "./ProductTableDetail.vue";
 
 
 const productStore = new LaravelDataSource("api/products");
