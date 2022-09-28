@@ -27,7 +27,7 @@ class ProductController extends Controller
      */
     public function index(RequireOrderPassword $request)
     {
-        return $this->dxFilter($request, Product::query())->get();
+        return $this->dxFilter($request, Product::query())->with('downloads')->get();
     }
 
     /**
@@ -67,6 +67,6 @@ class ProductController extends Controller
     }
 
     public function show(Product $product){
-        return $product;
+        return $product->with('downloads');
     }
 }

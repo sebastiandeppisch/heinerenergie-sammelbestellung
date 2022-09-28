@@ -11,7 +11,7 @@ class ProductDownloadController extends Controller
 {
     public function index(Product $product)
     {
-        return $product->productDownloads;
+        return $product->downloads;
     }
 
     public function store(Product $product, StoreProductDownloadRequest $request)

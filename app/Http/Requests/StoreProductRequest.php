@@ -28,7 +28,6 @@ class StoreProductRequest extends FormRequest
             'price' => 'required|numeric',
             'panelsCount' => 'required|integer|min:0',
             'sku' => 'nullable|string',
-            'url' => 'nullable|url',
             'description' => 'nullable|string'
         ];
     }

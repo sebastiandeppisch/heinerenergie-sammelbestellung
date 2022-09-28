@@ -13,14 +13,13 @@ class Product extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'price', 'sku', 'panelsCount', 'url', 'description', 'product_category_id']; 
+    protected $fillable = ['name', 'price', 'sku', 'panelsCount', 'description', 'product_category_id']; 
 
     protected $casts = [
         'name' => 'string',
         'price' => 'float',
         'sku' => 'string',
         'panelsCount' => 'integer',
-        'url' => 'string',
         'description' => 'string'
     ]; 
 
@@ -36,7 +35,7 @@ class Product extends Model
         return $this->belongsTo(ProductCategory::class);
     } 
 
-    public function productDownloads(): HasMany{
+    public function downloads(): HasMany{
         return $this->hasMany(ProductDownload::class);
     }
 }

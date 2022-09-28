@@ -1,8 +1,9 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use App\Models\Product;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
@@ -21,6 +22,18 @@ return new class extends Migration
             $table->unsignedBigInteger('product_id');
             $table->foreign('product_id')->references('id')->on('products');
         });
+
+        foreach(Product::all() as $product) {
+            if($product->url !== null) {
+                $product->downloads()->create([
+                    'name' => 'url',
+                    'url' => $product->url
+                ]);
+            }
+        }
+        Schema::table('products', function (Blueprint $table) {
+            $table->dropColumn('url');
+        });
     }
 
     /**
@@ -30,6 +43,16 @@ return new class extends Migration
      */
     public function down()
     {
+        Schema::table('products', function (Blueprint $table) {
+            $table->string('url')->nullable();
+        });
+
+        foreach(Product::all() as $product) {
+            if($product->downloads()->count() > 0) {
+                $product->url = $product->downloads()->first()->url;
+                $product->save();
+            }
+        }
         Schema::dropIfExists('product_downloads');
     }
 };
