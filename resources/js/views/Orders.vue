@@ -15,6 +15,13 @@
         mode="virtual"
       />
       <DxFilterRow  :visible="true"/>
+      <DxColumn data-field="bulk_order_id" caption="Sammelbestellung">
+        <DxLookup
+          :data-source="bulkorders"
+          display-expr="name"
+          value-expr="id"
+        />
+      </DxColumn>
       <DxColumn data-field="firstName" caption="Vorname" />
       <DxColumn data-field="lastName" caption="Nachname" />
       <DxColumn data-field="advisor_id" caption="Berater*in">
@@ -101,6 +108,8 @@ type Order = App.Models.Order;
 
 const ordersStore = new LaravelDataSource("api/orders");
 const advisors  = new LaravelLookupSource("api/users");
+const bulkorders  = new LaravelLookupSource("api/bulkorders");
+
 
 
 function update(){
