@@ -4,10 +4,10 @@
     <div style="margin: 30px 40px 30px 40px;">
     <DxDataGrid
       class="dx-card wide-card"
-      :data-source="productStore"
+      :data-source="r.productStore"
       :show-borders="false"
       :column-auto-width="true"
-      :height="r.height"
+      :height="reactiveHeight.height"
 		  min-height="450px"
     >
       <DxScrolling
@@ -20,9 +20,38 @@
         :allow-deleting="true"
         mode="cell"
       />
+      <DxToolbar>
+        <DxItem
+          location="before"
+          template="bulkorders"
+        />
+        <DxItem
+          location="before"
+          template="selectBulkOrder"
+        />
+        <DxItem
+          location="after"
+          name="addRowButton"
+        />
+      </DxToolbar>
+      <template #selectBulkOrder>
+        <DxSelectBox
+          :data-source="bulkOrders"
+          display-expr="name"
+          value-expr="id"
+          v-model="r.selectedBulkOrder"
+          :on-value-changed="bulkOrderChanged"
+        />        
+      </template>
+      <template #bulkorders>
+        <DxButton
+          icon="fields"
+          @click="openBulkOrders"
+        />        
+      </template>
       <DxColumn data-field="product_category_id" caption="Kategorie">
         <DxLookup
-          :data-source="productCategories"
+          :data-source="r.productCategories"
           display-expr="name"
           value-expr="id"
         />
@@ -40,6 +69,14 @@
         <ProductTableDetail :product="data.data" />
       </template>
     </DxDataGrid>
+    <DxPopup
+      v-model:visible="r.popupVisible"
+      title="Sammelbestellungen"
+      hide-on-outside-click="true"
+      :show-close-button="true"
+    >
+      <BulkOrders />
+    </DxPopup>
     </div>
   </div>
 </template>
@@ -53,18 +90,21 @@ import DxDataGrid, {
   DxItem,
   DxToolbar,
   DxFilterRow,
-  DxMasterDetail
+  DxMasterDetail,
+  DxFormItem,
+  DxForm,
 } from "devextreme-vue/data-grid";
 import LaravelDataSource from '../LaravelDataSource'
 import LaravelLookupSource from '../LaravelLookupSource'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, reactive } from 'vue'
 import {AdaptTableHeight} from '../helpers'
 import ProductTableDetail from "./ProductTableDetail.vue";
+import BulkOrders from "./BulkOrders.vue";
+import DxPopup from 'devextreme-vue/popup';
+import DxButton from "devextreme-vue/button";
+import DxSelectBox from 'devextreme-vue/select-box';
 
-
-const productStore = new LaravelDataSource("api/products");
-
-const productCategories = (new LaravelLookupSource('api/productcategories'))
+const bulkOrders = new LaravelDataSource("api/bulkorders");
 
 const priceEditorOptions = {
   format: { style: "currency", currency: "EUR", useGrouping: true },
@@ -82,9 +122,29 @@ function formatPrice(price){
 const outer = ref(null);
 
 const tableHeight = new AdaptTableHeight(outer);
-const r = tableHeight.getReactive();
+const reactiveHeight = tableHeight.getReactive();
+
+const r = reactive({
+  popupVisible: false,
+  selectedBulkOrder: null,
+  productStore: null,
+  productCategories: null
+});
 
 onMounted(() => {
   tableHeight.calcHeight();
 });
+
+function openBulkOrders(){
+  r.popupVisible = true;
+}
+
+function bulkOrderChanged(){
+  const bulkOrder = r.selectedBulkOrder;
+  if(bulkOrder !== null){
+    r.productStore = new LaravelDataSource('api/bulkorders/'+ bulkOrder + '/products');
+    r.productCategories = new LaravelLookupSource('api/bulkorders/'+ bulkOrder + '/productcategories');
+  }
+ 
+}
 </script>

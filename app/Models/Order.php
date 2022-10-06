@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Product;
+use App\Models\BulkOrder;
 use App\Models\OrderItem;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -65,5 +66,9 @@ class Order extends Model
 
     public function getNameAttribute(){
         return sprintf("%s %s", $this->firstName, $this->lastName);
+    }
+
+    public function bulkOrder(): BelongsTo{
+        return $this->belongsTo(BulkOrder::class);
     }
 }

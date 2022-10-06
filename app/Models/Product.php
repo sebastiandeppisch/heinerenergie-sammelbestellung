@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Order;
+use App\Models\BulkOrder;
 use App\Models\ProductCategory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -37,5 +38,31 @@ class Product extends Model
 
     public function downloads(): HasMany{
         return $this->hasMany(ProductDownload::class);
+    }
+
+    public function bulkOrder(): BelongsTo{
+        return $this->belongsTo(BulkOrder::class);
+    }
+
+    public function copy(BulkOrder $bulkOrder, ?int $categoryId): self{
+        $newProduct = new Product();
+        $newProduct->name = $this->name;
+        $newProduct->price = $this->price;
+        $newProduct->sku = $this->sku;
+        $newProduct->panelsCount = $this->panelsCount;
+        $newProduct->description = $this->description;
+        $newProduct->product_category_id = $categoryId;
+        $newProduct->bulk_order_id = $bulkOrder->id;
+        $newProduct->save();
+
+        foreach($this->downloads as $download){
+            $newDownload = new ProductDownload();
+            $newDownload->name = $download->name;
+            $newDownload->url = $download->url;
+            $newDownload->product_id = $newProduct->id;
+            $newDownload->save();
+        }
+
+        return $newProduct;
     }
 }

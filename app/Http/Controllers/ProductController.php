@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\RequireOrderPassword;
 use App\Http\Requests\UpdateProductRequest;
+use App\Models\BulkOrder;
 
 class ProductController extends Controller
 {
@@ -36,9 +37,10 @@ class ProductController extends Controller
      * @param  \App\Http\Requests\StoreProductRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreProductRequest $request)
+    public function store(StoreProductRequest $request, BulkOrder $bulkOrder)
     {
-        $product = new Product($request->all());
+        $product = new Product($request->validated());
+        $product->bulk_order_id = $bulkOrder->id;
         $product->save();
     }
 
@@ -51,7 +53,7 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, Product $product)
     {
-        $product->fill($request->all());
+        $product->fill($request->validated());
         $product->save();
     }
 
