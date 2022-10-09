@@ -12,7 +12,8 @@
         "laravel/framework": "^9.0",
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
-        "maatwebsite/excel": "^3.1"
+        "maatwebsite/excel": "^3.1",
+        "plesk/composer-command-info": "~1.1.0"
     },
     "require-dev": {
         "spatie/laravel-ignition": "^1.0",
@@ -60,7 +61,8 @@
         "preferred-install": "dist",
         "sort-packages": true,
         "allow-plugins": {
-            "pestphp/pest-plugin": true
+            "pestphp/pest-plugin": true,
+            "plesk/composer-command-info": true
         }
     },
     "minimum-stability": "dev",
