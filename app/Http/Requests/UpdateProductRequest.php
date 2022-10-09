@@ -29,7 +29,8 @@ class UpdateProductRequest extends FormRequest
             'panelsCount' => 'integer|min:0',
             'sku' => 'string',
             'url' => 'url',
-            'description' => 'string'
+            'description' => 'string',
+            'product_category_id' => 'integer'
         ];
     }
 }

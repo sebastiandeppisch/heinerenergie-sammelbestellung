@@ -44,14 +44,14 @@ class Product extends Model
         return $this->belongsTo(BulkOrder::class);
     }
 
-    public function copy(BulkOrder $bulkOrder, ?int $categoryId): self{
+    public function copy(BulkOrder $bulkOrder, ?ProductCategory $productCategory = null): self{
         $newProduct = new Product();
         $newProduct->name = $this->name;
         $newProduct->price = $this->price;
         $newProduct->sku = $this->sku;
         $newProduct->panelsCount = $this->panelsCount;
         $newProduct->description = $this->description;
-        $newProduct->product_category_id = $categoryId;
+        $newProduct->product_category_id = $productCategory?->id;
         $newProduct->bulk_order_id = $bulkOrder->id;
         $newProduct->save();
 

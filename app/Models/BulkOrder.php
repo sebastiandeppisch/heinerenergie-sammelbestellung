@@ -51,10 +51,10 @@ class BulkOrder extends Model
             $newCategory->save();
 
             foreach($category->products as $product){
-                $product->copy($this, $category->id);
+                $product->copy($this, $newCategory);
             }
         }
-        foreach($this->products()->whereNull('product_category_id')->get() as $product){
+        foreach($old->products()->whereNull('product_category_id')->get() as $product){
             $product->copy($this);
         }
     }

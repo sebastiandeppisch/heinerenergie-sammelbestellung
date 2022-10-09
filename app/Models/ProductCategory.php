@@ -19,7 +19,7 @@ class ProductCategory extends Model
         return $this->hasMany(Product::class);
     }
 
-    public function bulkOrders(): BelongsTo{
+    public function bulkOrder(): BelongsTo{
         return $this->belongsTo(BulkOrder::class);
     }
 }

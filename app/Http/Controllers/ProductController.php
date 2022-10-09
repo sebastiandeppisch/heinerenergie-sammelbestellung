@@ -26,9 +26,13 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(RequireOrderPassword $request)
+    public function index(Bulkorder $bulkorder, RequireOrderPassword $request)
     {
-        return $this->dxFilter($request, Product::query())->with('downloads')->get();
+        if($bulkorder->id === null){
+            $bulkorder = BulkOrder::getCurrentBulkOrder();
+        }
+        $query = Product::where('bulk_order_id', $bulkorder->id);
+        return $this->dxFilter($request, $query)->with('downloads')->get();
     }
 
     /**
@@ -37,10 +41,10 @@ class ProductController extends Controller
      * @param  \App\Http\Requests\StoreProductRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreProductRequest $request, BulkOrder $bulkOrder)
+    public function store(BulkOrder $bulkorder, StoreProductRequest $request)
     {
         $product = new Product($request->validated());
-        $product->bulk_order_id = $bulkOrder->id;
+        $product->bulk_order_id = $bulkorder->id;
         $product->save();
     }
 
@@ -51,7 +55,7 @@ class ProductController extends Controller
      * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateProductRequest $request, Product $product)
+    public function update(BulkOrder $bulkorder, Product $product, UpdateProductRequest $request)
     {
         $product->fill($request->validated());
         $product->save();

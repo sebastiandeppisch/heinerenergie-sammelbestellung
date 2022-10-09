@@ -31,10 +31,11 @@ class BulkOrderController extends Controller
         return $bulkOrder;
     }
 
-    public function update(UpdateBulkOrderRequest $request, BulkOrder $bulkOrder)
+    public function update(UpdateBulkOrderRequest $request, BulkOrder $bulkorder)
     {
-        $bulkOrder->update($request->validated());
-        return $bulkOrder;
+        $bulkorder->fill($request->validated());
+        $bulkorder->save();
+        return $bulkorder;
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Order;
+use App\Models\BulkOrder;
 use App\Models\OrderItem;
 use App\Events\OrderCreated;
 use Illuminate\Http\Request;
@@ -39,6 +40,7 @@ class OrderController extends Controller
         $advisor = User::where('email', $request->advisorEmail)->firstOrFail();
         $order = new Order($request->all());
         $order->advisor_id = $advisor->id;
+        $order->bulk_order_id = BulkOrder::getCurrentBulkOrder()->id;
         $order->save();
 
         foreach($request->orderItems as $orderItem){
