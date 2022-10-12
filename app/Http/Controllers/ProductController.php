@@ -67,7 +67,7 @@ class ProductController extends Controller
      * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Product $product)
+    public function destroy(BulkOrder $bulkorder, Product $product)
     {
         $product->delete();
     }
