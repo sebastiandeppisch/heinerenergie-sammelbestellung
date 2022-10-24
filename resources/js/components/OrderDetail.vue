@@ -9,9 +9,9 @@
 			  @row-inserted="updateData"
       >
         <DxEditing
-          :allow-updating="true"
-          :allow-adding="true"
-          :allow-deleting="true"
+          :allow-updating="!order.archived"
+          :allow-adding="!order.archived"
+          :allow-deleting="!order.archived"
           mode="cell"
         />
         <DxColumn
@@ -49,6 +49,7 @@
         :confirm-email="false"
         v-on:update="updateData"
         :update-button="true"
+        :allow-editing="!order.archived"
       />
       <div>
         <DxButton
@@ -57,6 +58,7 @@
           @click="checkOrder"
           text="Bestellung als geprüft markieren"
           type="success"
+          :disabled="order.archived"
         />
         <DxButton
           v-if="order.checked"
@@ -64,6 +66,7 @@
           @click="uncheckOrder"
           text="Prüfung zurücksetzen"
           type="danger"
+          :disabled="order.archived"
         />
       </div>
       <div style="float: right;">
@@ -71,6 +74,7 @@
           icon="trash"
           @click="deleteOrder"
           type="danger"
+          :disabled="order.archived"
         />
       </div>
     </div>
@@ -107,7 +111,7 @@ interface Props {
 const props = defineProps<Props>();
 
 const orderItemsDatasource = new LaravelDataSource('api/orders/' + props.order.id + '/orderitems');
-const products = new LaravelLookupSource('api/products');
+const products = new LaravelLookupSource('api/bulkorders/' + props.order.bulk_order_id + '/products');
 
 function calculateSummary(options: CustomSummaryInfo){
   options.totalValue = formatPrice(props.order.price);

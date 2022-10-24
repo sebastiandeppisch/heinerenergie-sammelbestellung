@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Product;
 use App\Models\BulkOrder;
 use App\Models\OrderItem;
+use Doctrine\Common\Cache\Psr6\InvalidArgument;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,7 +17,7 @@ class Order extends Model
 
     protected $fillable = ['firstName', 'lastName', 'street', 'streetNumber', 'zip', 'city', 'email', 'phone', 'commentary', 'advisor_id'];
 
-    protected $appends = ['price', 'panelsCount'];
+    protected $appends = ['price', 'panelsCount', 'archived'];
 
     protected $casts = [
         'firstName' => 'string',
@@ -70,5 +71,16 @@ class Order extends Model
 
     public function bulkOrder(): BelongsTo{
         return $this->belongsTo(BulkOrder::class);
+    }
+
+    public function getArchivedAttribute(): bool{
+        return $this->bulkOrder->archived;
+    }
+
+    public function save(array $options = [])
+    {
+        if($this->archived){
+            throw new InvalidArgument("An archived order can not be changed");
+        }
     }
 }

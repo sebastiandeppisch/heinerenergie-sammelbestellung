@@ -29,6 +29,7 @@
           :confirm-email="true"
           :update-button="false"
           ref="orderForm"
+          :allow-editing="true"
         />
       </div>
     <div class="dx-card content">

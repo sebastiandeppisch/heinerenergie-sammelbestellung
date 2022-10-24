@@ -5,6 +5,7 @@
     :col-count="2"
     :form-data="order"
     @submit="submit"
+    :disabled="! allowEditing"
   >
     <DxGroupItem
       caption="Persönliche Daten"
@@ -188,8 +189,9 @@ interface Props {
   order: App.Models.Order
   confirmEmail: boolean,
   updateButton: boolean,
+  allowEditing: boolean
 }
-const {order, confirmEmail = true, updateButton} = defineProps<Props>();
+const {order, confirmEmail = true, updateButton, allowEditing = true} = defineProps<Props>();
 
 let citySuggestions = ref([]);
 

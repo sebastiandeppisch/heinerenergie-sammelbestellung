@@ -16,6 +16,7 @@ use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Http\Requests\RequireOrderPassword;
 use Illuminate\Validation\ValidationException;
+use Doctrine\Common\Cache\Psr6\InvalidArgument;
 
 class OrderController extends Controller
 {
@@ -102,6 +103,9 @@ class OrderController extends Controller
      */
     public function destroy(Order $order)
     {
+        if($this->archived){
+            throw new InvalidArgument("An archived order can not be changed");
+        }
         foreach($order->orderItems as $item){
             $item->delete();
         }
