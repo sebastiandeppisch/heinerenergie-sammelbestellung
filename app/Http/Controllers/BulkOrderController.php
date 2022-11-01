@@ -26,9 +26,9 @@ class BulkOrderController extends Controller
         });
     }
 
-    public function show(BulkOrder $bulkOrder)
+    public function show(BulkOrder $bulkorder)
     {
-        return $bulkOrder;
+        return $bulkorder;
     }
 
     public function update(UpdateBulkOrderRequest $request, BulkOrder $bulkorder)
