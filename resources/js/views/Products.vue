@@ -133,6 +133,12 @@ const r = reactive({
 
 onMounted(() => {
   tableHeight.calcHeight();
+  bulkOrders.load().then((data) => {
+    const notArchivedBulkOrders = data.filter(item => !item.archived);
+    if(notArchivedBulkOrders.length === 1) {
+      r.selectedBulkOrder= notArchivedBulkOrders[0].id;
+    }
+  });
 });
 
 function openBulkOrders(){

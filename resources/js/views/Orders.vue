@@ -15,7 +15,7 @@
         mode="virtual"
       />
       <DxFilterRow  :visible="true"/>
-      <DxColumn data-field="bulk_order_id" caption="Sammelbestellung">
+      <DxColumn data-field="bulk_order_id" caption="Sammelbestellung" :filter-value="state.bulkOrderId">
         <DxLookup
           :data-source="bulkorders"
           display-expr="name"
@@ -86,7 +86,7 @@
 import LaravelDataSource from '../LaravelDataSource'
 import OrderDetail from './../components/OrderDetail.vue'
 import {formatPriceCell, formatPrice, formatDateCell, AdaptTableHeight} from '../helpers'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, reactive } from 'vue'
 import { CustomSummaryInfo , } from "devextreme/ui/data_grid";
 import { DxButton } from 'devextreme-vue/button';
 
@@ -111,6 +111,11 @@ const advisors  = new LaravelLookupSource("api/users");
 const bulkorders  = new LaravelLookupSource("api/bulkorders");
 
 
+interface State{
+  bulkOrderId: number | null;
+}
+
+const state: State = reactive({bulkOrderId: null})
 
 function update(){
   console.log("update from order");
@@ -129,5 +134,11 @@ const r = tableHeight.getReactive();
 
 onMounted(() => {
   tableHeight.calcHeight();
+  bulkorders.load().then((data) => {
+    const notArchivedBulkOrders = data.filter(item => !item.archived);
+    if(notArchivedBulkOrders.length === 1) {
+      state.bulkOrderId = notArchivedBulkOrders[0].id;
+    }
+  });
 });
 </script>
