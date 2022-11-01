@@ -1,6 +1,10 @@
 <template>
   <div class="flex-row">
     <div class="dx-card flex-cell">
+      <div v-if="order.archived">
+        <h2 class="content-block">Bestellung archiviert</h2>
+        <p>Die Bestellung wurde archiviert und kann nicht mehr bearbeitet werden.</p>
+      </div>
       <DxDataGrid
         :data-source="orderItemsDatasource"
         :show-borders="false"
