@@ -82,5 +82,6 @@ class Order extends Model
         if($this->archived){
             throw new InvalidArgument("An archived order can not be changed");
         }
+        parent::save($options);
     }
 }
