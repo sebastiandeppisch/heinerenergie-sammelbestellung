@@ -5,6 +5,11 @@ export default [
     icon: "cart"
   },
   {
+    text: "Beratungen",
+    path: "/advices",
+    icon: "home"
+  },
+  {
     text: "Bestellungen",
     path: "/orders",
     icon: "textdocument"
@@ -18,8 +23,7 @@ export default [
     text: "Berater*innen",
     path: "/users",
     icon: "user"
-  }
-  ,
+  },
   {
     text: "Einstellungen",
     path: "/settings",

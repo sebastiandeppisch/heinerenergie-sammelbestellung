@@ -2,6 +2,7 @@ import auth from "./auth";
 import { createRouter, createWebHistory } from "vue-router";
 
 import Orders from "./views/Orders.vue";
+import Advices from "./views/Advices.vue";
 import Products from "./views/Products.vue";
 import Users from "./views/Users.vue";
 import NewOrder from "./views/NewOrder.vue"
@@ -149,6 +150,15 @@ const router = createRouter({
         layout: defaultLayout
       },
       component: Settings
+    },
+    {
+      path: "/advices",
+      name: "advices",
+      meta: {
+        requiresAuth: true,
+        layout: defaultLayout
+      },
+      component: Advices
     }
   ]
 });

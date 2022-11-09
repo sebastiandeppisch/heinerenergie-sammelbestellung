@@ -110,6 +110,7 @@ class OrderController extends Controller
             $item->delete();
         }
         $order->delete();
+        return response()->noContent();
     }
 
     public function validateorderform(StoreOrderRequest $request){

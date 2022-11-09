@@ -53,6 +53,10 @@ class User extends Authenticatable
         return $this->hasMany(Order::class, 'advisor_id');
     }
 
+    public function advices(): HasMany{
+        return $this->hasMany(Advice::class);
+    }
+
     public function getNameAttribute(){
         return sprintf("%s %s", $this->first_name, $this->last_name);
     }

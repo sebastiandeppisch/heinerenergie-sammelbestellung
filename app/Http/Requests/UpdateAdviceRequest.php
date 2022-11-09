@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class UpdateAdviceRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, mixed>
+     */
+    public function rules()
+    {
+        return [
+            'firstName' => 'string|max:100',
+            'lastName' => 'string|max:100',
+            'email' => 'email|max:100',
+            'phone' => 'string|max:100',
+            'street' => 'string|max:100',
+            'streetNumber' => 'string|max:100',
+            'zip' => 'numeric|digits:5',
+            'city' => 'string|max:100',
+            'advisor_id' => 'integer|exists:users,id',
+            'commentary' => 'string|max:65535',
+        ];
+    }
+}

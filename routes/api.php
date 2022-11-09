@@ -4,11 +4,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\AdviceController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\BulkOrderController;
 use App\Http\Controllers\OrderItemController;
+use App\Http\Controllers\AdviceStatusController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductDownloadController;
 
@@ -28,6 +30,9 @@ require_once(__DIR__."/api.auth.php");
 Route::middleware('auth')->group(function () {
     Route::resource('orders', OrderController::class);
     Route::resource('users', UserController::class);
+    Route::resource('advices', AdviceController::class);
+    Route::resource('advicestatus', AdviceStatusController::class);
+
     
     Route::scopeBindings()->group(function(){
         Route::resource('orders.orderitems', OrderItemController::class);
