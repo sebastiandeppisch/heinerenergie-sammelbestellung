@@ -23,7 +23,7 @@
       <dx-item>
         <template #default>
           <div class="login-link">
-            Zurück zum <router-link to="/login-form">Login</router-link>
+            <router-link to="/login-form">Zurück zum Login</router-link>
           </div>
         </template>
       </dx-item>
@@ -109,9 +109,13 @@ export default {
   }
 
   .login-link {
-    color: $base-accent;
-    font-size: 16px;
     text-align: center;
+    font-size: 16px;
+    font-style: normal;
+
+    a {
+      text-decoration: none;
+    }
   }
 }
 </style>
