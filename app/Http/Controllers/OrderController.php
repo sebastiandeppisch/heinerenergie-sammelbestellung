@@ -103,7 +103,7 @@ class OrderController extends Controller
      */
     public function destroy(Order $order)
     {
-        if($this->archived){
+        if($order->archived){
             throw new InvalidArgument("An archived order can not be changed");
         }
         foreach($order->orderItems as $item){
