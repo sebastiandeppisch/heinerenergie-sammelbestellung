@@ -12,6 +12,8 @@ const mix = require('laravel-mix');
  */
 
 const app = mix.ts('resources/js/app.ts', 'public/js').vue();
+const helper = mix.ts('resources/js/helper.ts', 'public/js').vue();
+
 //mix.sass('resources/sass/app.scss', 'public/css');
 
 mix.version();
@@ -19,4 +21,5 @@ mix.version();
 if (! mix.inProduction()) {
     mix.browserSync('localhost:8000');
     app.sourceMaps();
+    helper.sourceMaps();
 }
