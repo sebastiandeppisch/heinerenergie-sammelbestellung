@@ -12,6 +12,10 @@
     "dependencies": {
         "@babel/core": "^7.12.16",
         "@babel/eslint-parser": "^7.12.16",
+        "@fortawesome/fontawesome-svg-core": "^6.2.0",
+        "@fortawesome/free-regular-svg-icons": "^6.2.0",
+        "@fortawesome/free-solid-svg-icons": "^6.2.0",
+        "@fortawesome/vue-fontawesome": "^3.0.1",
         "axios": "^0.21",
         "core-js": "^3.8.3",
         "devextreme": "^21.2.4",
