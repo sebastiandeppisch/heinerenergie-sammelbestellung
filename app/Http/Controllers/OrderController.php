@@ -25,8 +25,11 @@ class OrderController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Bulkorder $bulkorder)
     {
+        if($bulkorder->id !== null){
+            return $bulkorder->orders;
+        }
         return Order::all();
     }
 
@@ -117,10 +120,19 @@ class OrderController extends Controller
     public function validateEditOrderForm(UpdateOrderRequest $request){
     }
 
-    public function export(){
+    public function export(BulkOrder $bulkorder){
+        if($bulkorder->id === null){
+            $bulkorder = null;
+            $name = "Alle Sammelbestellungen";
+        }else{
+            $name = sprintf("Sammelbestellung %s", $bulkorder->name);
+        }
         $date = Carbon::now()->format('Y-m-d H:i:s');
-        $filename = sprintf("%s Bestellungen heinerenergie.xlsx", $date);
-        return Excel::download(new OrdersExport, $filename);
+        $filename = sprintf("%s %s heinerenergie.xlsx", $name, $date);
+        $export = new OrdersExport();
+        $export->bulkorder = $bulkorder;
+
+        return Excel::download($export, $filename);
     }
 
     public function checkPassword(RequireOrderPassword $request){

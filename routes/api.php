@@ -44,6 +44,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('bulkorders', BulkOrderController::class);
     Route::scopeBindings()->group(function(){
         Route::resource('bulkorders.products', ProductController::class);
+        Route::resource('bulkorders.orders', OrderController::class);
+
     });
 
     Route::scopeBindings()->group(function(){

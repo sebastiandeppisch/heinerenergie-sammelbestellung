@@ -3,8 +3,10 @@
 namespace App\Exports;
 
 use App\Models\Order;
+use App\Models\BulkOrder;
 use App\Models\OrderItem;
 use Illuminate\Support\Str;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
@@ -14,6 +16,8 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class OrdersExport implements FromCollection, WithHeadings, WithStyles, ShouldAutoSize
 {
+
+    public ?BulkOrder $bulkorder = null;
 
     private $structure = [
         ['key' => 'id', 'heading' => 'Fortlaufende Nummer'],
@@ -30,22 +34,26 @@ class OrdersExport implements FromCollection, WithHeadings, WithStyles, ShouldAu
         ['key' => 'product.price', 'heading' => 'Gesamtpreis'],
     ];
 
-    /**
-    * @return \Illuminate\Support\Collection
-    */
-    public function collection()
+    public function collection(): Collection
     {
         $rows = collect();
-        foreach(Order::all() as $order){
+        foreach($this->getOrders() as $order){
             foreach($order->orderItems as $orderItem){
                 $row = collect();
                 foreach(collect($this->structure)->pluck('key') as $key){
-                    $row->push($this->getData($key, $order, $orderItem));
+                    $row->push($this->getData((string) $key, $order, $orderItem));
                 }
                 $rows->push($row);
             }
         }
         return $rows;
+    }
+
+    private function getOrders(): Collection{
+        if($this->bulkorder !== null){
+            return $this->bulkorder->orders;
+        }
+        return Order::all();
     }
 
     private function getData(string $key, Order $order, OrderItem $orderItem){
