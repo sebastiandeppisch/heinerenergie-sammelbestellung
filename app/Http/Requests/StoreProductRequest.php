@@ -29,7 +29,8 @@ class StoreProductRequest extends FormRequest
             'panelsCount' => 'required|integer|min:0',
             'sku' => 'nullable|string',
             'description' => 'nullable|string',
-            'product_category_id' => 'nullable|integer'
+            'product_category_id' => 'nullable|integer',
+            'is_supplier_product' => 'nullable|boolean
         ];
     }
 }

@@ -120,7 +120,7 @@ class OrderController extends Controller
     public function validateEditOrderForm(UpdateOrderRequest $request){
     }
 
-    public function export(BulkOrder $bulkorder){
+    public function export(BulkOrder $bulkorder, Request $request){
         if($bulkorder->id === null){
             $bulkorder = null;
             $name = "Alle Sammelbestellungen";
@@ -128,10 +128,21 @@ class OrderController extends Controller
             $name = sprintf("Sammelbestellung %s", $bulkorder->name);
         }
         $date = Carbon::now()->format('Y-m-d H:i:s');
-        $filename = sprintf("%s %s heinerenergie.xlsx", $name, $date);
         $export = new OrdersExport();
         $export->bulkorder = $bulkorder;
 
+        $products = 'Alle Artikel';
+
+        if($request->has('products')){
+            $export->products = $request->products;
+            $products = [
+                'all' => 'Alle Artikel',
+                'supplier' => 'Lieferanten-Artikel',
+                'own' => 'heinerenergie-Artikel'
+            ][$request->products];
+        }
+
+        $filename = sprintf("%s %s %s.xlsx", $name, $date, $products);
         return Excel::download($export, $filename);
     }
 

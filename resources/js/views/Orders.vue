@@ -77,9 +77,14 @@
         />        
       </template>
       <template #exportTemplate>
-        <DxButton
+        <DxDropDownButton
+          :drop-down-options="{ width: 150 }"
+          :items="exportTypes"
           icon="exportxlsx"
-          @click="exportOrders"
+          hint="Bestellungen exportieren"
+          @item-click="exportOrders"
+          display-expr="name"
+          key-expr="id"
         />
       </template>
     </DxDataGrid>
@@ -96,6 +101,7 @@ import { ref, onMounted, reactive } from 'vue'
 import { CustomSummaryInfo , } from "devextreme/ui/data_grid";
 import { DxButton } from 'devextreme-vue/button';
 import DxSelectBox from 'devextreme-vue/select-box';
+import DxDropDownButton from 'devextreme-vue/drop-down-button';
 
 import DxDataGrid, {
   DxColumn,
@@ -116,7 +122,16 @@ type Order = App.Models.Order;
 //const ordersStore = new LaravelDataSource("api/orders");
 const advisors  = new LaravelLookupSource("api/users");
 const bulkorders  = new LaravelLookupSource("api/bulkorders");
-
+const exportTypes = [{
+  id: 'supplier',
+  name: 'Lieferanten-Artikel'
+}, {
+  id: 'own',
+  name: 'heiner*energie Artikel'
+}, {
+  id: 'all',
+  name: 'Alle Artikel'
+}];
 
 interface State{
   bulkOrderId: number | null;
@@ -133,8 +148,8 @@ function update(){
   state.ordersStore.reload();
 }
 
-function exportOrders(){
-  window.open('bulkorders/'+ state.bulkOrderId + '/orderexport', '_blank').focus();
+function exportOrders(e){
+  window.open('bulkorders/'+ state.bulkOrderId + '/orderexport?products=' + e.itemData.id, '_blank').focus();
 }
 
 

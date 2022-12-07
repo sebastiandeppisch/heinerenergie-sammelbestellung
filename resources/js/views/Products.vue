@@ -59,6 +59,7 @@
       <DxColumn data-field="name" caption="Name" />
       <DxColumn data-field="price" caption="Preis" :editor-options="priceEditorOptions" :customize-text="formatPrice" />
       <DxColumn data-field="sku" caption="SKU" />
+      <DxColumn data-field="is_supplier_product" caption="Von Lieferant" />
       <DxColumn data-field="panelsCount" caption="Panels" :editor-options="panelsCountEditorOptions"/>
       <DxColumn data-field="description" caption="Beschreibung" width="600px"/>
       <DxMasterDetail

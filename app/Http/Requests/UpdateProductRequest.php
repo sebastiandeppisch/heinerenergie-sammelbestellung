@@ -30,7 +30,8 @@ class UpdateProductRequest extends FormRequest
             'sku' => 'string',
             'url' => 'url',
             'description' => 'string',
-            'product_category_id' => 'integer'
+            'product_category_id' => 'integer',
+            'is_supplier_product' => 'boolean'
         ];
     }
 }

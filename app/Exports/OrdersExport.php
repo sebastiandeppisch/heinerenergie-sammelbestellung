@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\BulkOrder;
 use App\Models\OrderItem;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -18,6 +19,8 @@ class OrdersExport implements FromCollection, WithHeadings, WithStyles, ShouldAu
 {
 
     public ?BulkOrder $bulkorder = null;
+
+    public string $products = 'all';
 
     private $structure = [
         ['key' => 'id', 'heading' => 'Fortlaufende Nummer'],
@@ -38,7 +41,7 @@ class OrdersExport implements FromCollection, WithHeadings, WithStyles, ShouldAu
     {
         $rows = collect();
         foreach($this->getOrders() as $order){
-            foreach($order->orderItems as $orderItem){
+            foreach($this->getOrderItems($order) as $orderItem){
                 $row = collect();
                 foreach(collect($this->structure)->pluck('key') as $key){
                     $row->push($this->getData((string) $key, $order, $orderItem));
@@ -54,6 +57,23 @@ class OrdersExport implements FromCollection, WithHeadings, WithStyles, ShouldAu
             return $this->bulkorder->orders;
         }
         return Order::all();
+    }
+
+    private function getOrderItems(Order $order): Collection{
+        if($this->products === 'all'){
+            return $order->orderItems;
+        }
+        if($this->products === 'supplier'){
+            return $order->orderItems->filter(function($orderItem){
+                return $orderItem->product->is_supplier_product;
+            });
+        }
+        if($this->products === 'own'){
+            return $order->orderItems->filter(function($orderItem){
+                return !$orderItem->product->is_supplier_product;
+            });
+        }
+        throw new InvalidArgumentException('Invalid value for $products');
     }
 
     private function getData(string $key, Order $order, OrderItem $orderItem){
