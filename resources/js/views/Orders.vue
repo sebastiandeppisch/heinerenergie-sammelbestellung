@@ -79,7 +79,7 @@
       </template>
       <template #exportTemplate>
         <DxDropDownButton
-          :drop-down-options="{ width: 150 }"
+          :drop-down-options="{ width: 180 }"
           :items="exportTypes"
           icon="exportxlsx"
           hint="Bestellungen exportieren"
