@@ -23,11 +23,11 @@
       <DxToolbar>
         <DxItem
           location="before"
-          template="bulkorders"
+          template="selectBulkOrder"
         />
         <DxItem
           location="before"
-          template="selectBulkOrder"
+          template="bulkorders"
         />
         <DxItem
           location="after"
@@ -46,6 +46,7 @@
       <template #bulkorders>
         <DxButton
           icon="fields"
+          text="Sammelbestellungen editieren"
           @click="openBulkOrders"
         />        
       </template>
@@ -75,6 +76,8 @@
       title="Sammelbestellungen"
       hide-on-outside-click="true"
       :show-close-button="true"
+      :width="800"
+      :height="600"
     >
       <BulkOrders />
     </DxPopup>
