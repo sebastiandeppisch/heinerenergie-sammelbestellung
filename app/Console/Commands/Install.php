@@ -35,7 +35,7 @@ class Install extends Command
     public function handle()
     {
         try{
-            $this->artisan('migrate --force');
+            $this->artisan('migrate --force --seed');
             $this->cmd(['npm', 'install', '--only=prod']);
             $this->cmd(['npm', 'run', 'production']);
         }catch(UpdateException $e){

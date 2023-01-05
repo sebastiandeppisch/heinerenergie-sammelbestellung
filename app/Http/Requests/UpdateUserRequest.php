@@ -26,9 +26,10 @@ class UpdateUserRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'string',
-            'email' => ['email', Rule::unique('users')->ignoreModel($this->user())],
-            'is_admin' => 'boolean'
+            'is_admin' => 'boolean',
+            'first_name' => 'string',
+            'last_name' => 'string',
+            'email' => ['email', Rule::unique('users')->ignoreModel($this->user())]
         ];
     }
 }

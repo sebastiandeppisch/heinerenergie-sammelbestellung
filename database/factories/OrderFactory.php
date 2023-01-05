@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\User;
+use App\Models\BulkOrder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class OrderFactory extends Factory
@@ -19,6 +20,11 @@ class OrderFactory extends Factory
             $advisorId = User::factory()->create()->id;
         }
 
+        $bulkOrderId = $this->faker->randomElement(BulkOrder::pluck("id"));
+        if($bulkOrderId === null){
+            $bulkOrderId = BulkOrder::factory()->create()->id;
+        }
+
         return [
             'firstName' =>  $this->faker->firstName(),
             'lastName' =>  $this->faker->lastName(),
@@ -28,7 +34,8 @@ class OrderFactory extends Factory
             'city' => $this->faker->city(),
             'email' => $this->faker->email(),
             'phone' => $this->faker->phoneNumber(),
-            'advisor_id' => $advisorId
+            'advisor_id' => $advisorId,
+            'bulk_order_id' => $bulkOrderId
         ];
     }
 }

@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Http\Requests\StoreOrderItemRequest;
 use App\Http\Requests\UpdateOrderItemRequest;
+use Doctrine\Common\Cache\Psr6\InvalidArgument;
 
 class OrderItemController extends Controller
 {
@@ -20,6 +21,9 @@ class OrderItemController extends Controller
 
     public function store(Order $order, StoreOrderItemRequest $request)
     {
+        if($order->archived){
+            throw new InvalidArgument("An archived order can not be changed");
+        }
         $orderItem = new OrderItem($request->all());
         $orderItem->order_id = $order->id;
         $orderItem->save();
@@ -29,6 +33,9 @@ class OrderItemController extends Controller
 
     public function update(Order $order, OrderItem $orderitem, UpdateOrderItemRequest $request)
     {
+        if($order->archived){
+            throw new InvalidArgument("An archived order can not be changed");
+        }
         $orderitem->fill($request->all());
         $orderitem->save();
         $order->normalize();

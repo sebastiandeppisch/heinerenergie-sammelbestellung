@@ -1,6 +1,10 @@
 <template>
   <div class="flex-row">
     <div class="dx-card flex-cell">
+      <div v-if="order.archived">
+        <h2 class="content-block">Bestellung archiviert</h2>
+        <p>Die Bestellung wurde archiviert und kann nicht mehr bearbeitet werden.</p>
+      </div>
       <DxDataGrid
         :data-source="orderItemsDatasource"
         :show-borders="false"
@@ -9,9 +13,9 @@
 			  @row-inserted="updateData"
       >
         <DxEditing
-          :allow-updating="true"
-          :allow-adding="true"
-          :allow-deleting="true"
+          :allow-updating="!order.archived"
+          :allow-adding="!order.archived"
+          :allow-deleting="!order.archived"
           mode="cell"
         />
         <DxColumn
@@ -49,7 +53,34 @@
         :confirm-email="false"
         v-on:update="updateData"
         :update-button="true"
+        :allow-editing="!order.archived"
       />
+      <div>
+        <DxButton
+          v-if="!order.checked"
+          icon="check"
+          @click="checkOrder"
+          text="Bestellung als geprüft markieren"
+          type="success"
+          :disabled="order.archived"
+        />
+        <DxButton
+          v-if="order.checked"
+          icon="revert"
+          @click="uncheckOrder"
+          text="Prüfung zurücksetzen"
+          type="danger"
+          :disabled="order.archived"
+        />
+      </div>
+      <div style="float: right;">
+        <DxButton
+          icon="trash"
+          @click="deleteOrder"
+          type="danger"
+          :disabled="order.archived"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -70,6 +101,9 @@ import axios from 'axios'
 import { CustomSummaryInfo } from "devextreme/ui/data_grid";
 import {formatPrice} from '../helpers'
 import OrderForm from '../components/OrderForm.vue'
+import DxButton from "devextreme-vue/button";
+
+import {confirm} from 'devextreme/ui/dialog';
 
 const emit = defineEmits(['update'])
 
@@ -81,7 +115,7 @@ interface Props {
 const props = defineProps<Props>();
 
 const orderItemsDatasource = new LaravelDataSource('api/orders/' + props.order.id + '/orderitems');
-const products = new LaravelLookupSource('api/products');
+const products = new LaravelLookupSource('api/bulkorders/' + props.order.bulk_order_id + '/products');
 
 function calculateSummary(options: CustomSummaryInfo){
   options.totalValue = formatPrice(props.order.price);
@@ -89,6 +123,31 @@ function calculateSummary(options: CustomSummaryInfo){
 
 function updateData() {
   emit('update')
+}
+
+function deleteOrder() {
+  confirm('Möchtest Du die Bestellung wirklich löschen?', 'Bestellung löschen')
+    .then(() => {
+      axios.delete('api/orders/' + props.order.id)
+        .then(() => {
+          emit('update')
+        })
+    })
+  
+}
+
+function checkOrder() {
+  axios.post('api/orders/' + props.order.id + '/check')
+    .then(() => {
+      emit('update')
+    })
+}
+
+function uncheckOrder() {
+  axios.post('api/orders/' + props.order.id + '/uncheck')
+    .then(() => {
+      emit('update')
+    })
 }
 
 </script>

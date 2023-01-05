@@ -5,6 +5,7 @@
     :col-count="2"
     :form-data="order"
     @submit="submit"
+    :disabled="! allowEditing"
   >
     <DxGroupItem
       caption="Persönliche Daten"
@@ -124,7 +125,7 @@
         :label="{ text: 'Berater*in'}"
         editor-type="dxLookup"
         :editor-options="{
-            dataSource: new LaravelLookupSource('api/users'),
+            dataSource: loadUsers(),
             displayExpr: 'name',
             valueExpr: 'id'
         }"
@@ -188,8 +189,9 @@ interface Props {
   order: App.Models.Order
   confirmEmail: boolean,
   updateButton: boolean,
+  allowEditing: boolean
 }
-const {order, confirmEmail = true, updateButton} = defineProps<Props>();
+const {order, confirmEmail = true, updateButton, allowEditing = true} = defineProps<Props>();
 
 let citySuggestions = ref([]);
 
@@ -210,6 +212,10 @@ function validateAsync(params: ValidationCallbackData){
   }).catch(error => {
     formatError(error, field);
   })
+}
+
+function loadUsers(): LaravelLookupSource{
+  return new LaravelLookupSource('api/users');
 }
 
 function formatError(error: AxiosError, field: string): void{

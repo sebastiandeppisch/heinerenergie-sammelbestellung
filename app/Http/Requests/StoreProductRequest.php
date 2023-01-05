@@ -29,8 +29,9 @@ class StoreProductRequest extends FormRequest
             'price' => 'required|numeric',
             'panelsCount' => 'required|integer|min:0',
             'sku' => 'nullable|string',
-            'url' => 'nullable|url',
-            'description' => 'nullable|string'
+            'description' => 'nullable|string',
+            'product_category_id' => 'nullable|integer',
+            'is_supplier_product' => 'nullable|boolean
         ];
     }
 }

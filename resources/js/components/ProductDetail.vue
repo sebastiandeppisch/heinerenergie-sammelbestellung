@@ -4,18 +4,27 @@
             {{product.name}}
         </div>
         <div class="article-detail">
-            <i class="dx-icon-info" v-if="product.description !== null" @mouseenter="togglePopover" @mouseleave="togglePopover" :id="popoverId" style="cursor:pointer;"></i>
-            &nbsp;
-            <a :href="product.url" v-if="product.url !== null" target="_blank">
-                <i class="dx-icon-link"></i>
-            </a>
+            <DxButton
+                icon="info"
+                @click="openPopover"
+                :id="popoverId" 
+            />
             <DxPopover
-                :width="300"
+                :width="400"
                 :visible="r.popoverVisible"
                 :target="'#' + popoverId"
-                position="top"
+                position="left"
             >
-                {{product.description}}
+                <div>
+                    {{product.description}}
+                </div>
+                <div style="margin-top:10px">
+                    <div v-for="download in product.downloads">
+                        <a :href="download.url" target="_blank">
+                            {{download.name}}
+                        </a>
+                    </div>
+                </div>
             </DxPopover>
         </div>
     </div>
@@ -23,7 +32,7 @@
 <script setup lang="ts">
 import { reactive } from '@vue/reactivity';
 import { DxPopover } from 'devextreme-vue/popover';
-
+import DxButton from 'devextreme-vue/button';
 interface Props {
   product: App.Models.Product
 }
@@ -33,8 +42,8 @@ const r = reactive({
     popoverVisible : false
 });
 
-function togglePopover(){
-    r.popoverVisible = !r.popoverVisible;
+function openPopover(){
+    r.popoverVisible = true;
 }
 
 const popoverId = "popover-product" + product.id;
@@ -44,6 +53,8 @@ const popoverId = "popover-product" + product.id;
 .article{
     display: flex;
     flex-direction: row;
+    /*width: 100px;*/
+    /*max-width: 40vw;*/
 }
 .article-name{
     width: 100%;

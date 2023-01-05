@@ -5,8 +5,8 @@ import Orders from "./views/Orders.vue";
 import Products from "./views/Products.vue";
 import Users from "./views/Users.vue";
 import NewOrder from "./views/NewOrder.vue"
-import Impress from "./views/static/Impress.vue"
-import DataPolicy from "./views/static/DataPolicy.vue"
+import Impress from "./views/Impress.vue"
+import DataPolicy from "./views/DataPolicy.vue"
 
 import defaultLayout from "./layouts/side-nav-outer-toolbar.vue";
 import simpleLayout from "./layouts/single-card.vue";
@@ -14,6 +14,7 @@ import PublicLayout from './layouts/PublicLayout.vue';
 import LoginForm from './views/login-form.vue'
 import ResetPasswordForm from './views/reset-password-form.vue'
 import ChangePasswordForm from './views/change-password-form.vue'
+import Settings from './views/Settings.vue'
 
 import { store } from "./store";
 
@@ -139,6 +140,15 @@ const router = createRouter({
         layout: defaultLayout
       },
       component: Users
+    },
+    {
+      path: "/settings",
+      name: "settings",
+      meta: {
+        requiresAuth: true,
+        layout: defaultLayout
+      },
+      component: Settings
     }
   ]
 });

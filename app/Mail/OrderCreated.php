@@ -29,6 +29,6 @@ class OrderCreated extends Mailable
      */
     public function build()
     {
-        return $this->markdown('emails.ordercreated')->subject('Bestellung erhalten');
+        return $this->markdown('emails.ordercreated')->replyTo($this->order->advisor->email, $this->order->advisor->name)->subject('heiner*energie Sammelbestellung');
     }
 }

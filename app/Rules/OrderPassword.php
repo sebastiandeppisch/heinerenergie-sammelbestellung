@@ -2,6 +2,7 @@
 
 namespace App\Rules;
 
+use App\Models\Setting;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Contracts\Validation\Rule;
 
@@ -19,7 +20,7 @@ class OrderPassword implements Rule
         if(Auth::user() !== null){
             return true;
         }
-        return $value === env('ORDER_PASSWORD', 'You must set ORDER_PASSWORD in .env');
+        return $value === Setting::get('orderFormPassword');
     }
 
     /**

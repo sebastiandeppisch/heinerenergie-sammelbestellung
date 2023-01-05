@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\RequireOrderPassword;
 use App\Http\Requests\UpdateProductRequest;
+use App\Models\BulkOrder;
 
 class ProductController extends Controller
 {
@@ -25,9 +26,13 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(RequireOrderPassword $request)
+    public function index(Bulkorder $bulkorder, RequireOrderPassword $request)
     {
-        return $this->dxFilter($request, Product::query())->get();
+        if($bulkorder->id === null){
+            $bulkorder = BulkOrder::getCurrentBulkOrder();
+        }
+        $query = Product::where('bulk_order_id', $bulkorder->id);
+        return $this->dxFilter($request, $query)->with('downloads')->get();
     }
 
     /**
@@ -36,9 +41,10 @@ class ProductController extends Controller
      * @param  \App\Http\Requests\StoreProductRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreProductRequest $request)
+    public function store(BulkOrder $bulkorder, StoreProductRequest $request)
     {
-        $product = new Product($request->all());
+        $product = new Product($request->validated());
+        $product->bulk_order_id = $bulkorder->id;
         $product->save();
     }
 
@@ -49,9 +55,9 @@ class ProductController extends Controller
      * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateProductRequest $request, Product $product)
+    public function update(BulkOrder $bulkorder, Product $product, UpdateProductRequest $request)
     {
-        $product->fill($request->all());
+        $product->fill($request->validated());
         $product->save();
     }
 
@@ -61,12 +67,12 @@ class ProductController extends Controller
      * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Product $product)
+    public function destroy(BulkOrder $bulkorder, Product $product)
     {
         $product->delete();
     }
 
     public function show(Product $product){
-        return $product;
+        return $product->with('downloads');
     }
 }

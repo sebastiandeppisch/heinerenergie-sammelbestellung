@@ -9,7 +9,13 @@ import App from "./App.vue";
 import appInfo from "./app-info";
 import { store, key } from './store';
 
+import library from './fontawesome'
+library.add()
+
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
 const app = createApp(App);
+app.component('font-awesome-icon', FontAwesomeIcon)
 app.use(store, key);
 app.use(router);
 app.config.globalProperties.$appInfo = appInfo;

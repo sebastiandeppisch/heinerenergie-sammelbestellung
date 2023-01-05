@@ -16,14 +16,12 @@
         />
       </div>
       <div v-else>
+      <p class="dx-card content" style="padding:30px" v-if="email !== null && email !== undefined">
+        Sende folgenden Link an Deine Interessent*innen, damit die Berater*in E-Mail Adresse bereits vorausgefüllt ist: <br>
+        <a :href="advisorUrl"><b>{{ advisorUrl }}</b></a>
+      </p>
       <p class="dx-card content" style="padding:30px" >
-        <div v-if="email === null">
-          Wenn Du an der Sammelbestellung teilnehmen möchtest, kannst Du hier Deine Bestellung eintragen. Wir leiten sie im Anschluss an unseren Lieferanten weiter. Bitte beachte, dass wir vorab keine Liefertermine garantieren können. Auch die Preise können sich noch ändern. <br>Du schließt keinen Kaufvertrag mit heiner*energie ab. Der Kaufvertrag kommt erst später zwischen Dir und unserem Lieferanten zustande, hierzu erhälst Du von diesem im Anschluss weitere Infos. 
-        </div>
-        <div v-else>
-          Sende folgenden Link an Deine Interessent*innen, damit die Berater*in E-Mail Adresse bereits vorausgefüllt ist: <br>
-          <a :href="advisorUrl"><b>{{ advisorUrl }}</b></a>
-        </div>
+        <SettingHtml :setting="orderFormText()" />
       </p>
       <div class="dx-card content">
         <OrderForm
@@ -31,13 +29,14 @@
           :confirm-email="true"
           :update-button="false"
           ref="orderForm"
+          :allow-editing="true"
         />
       </div>
     <div class="dx-card content">
     <DxDataGrid
       :data-source="orderItemsDatasource"
       :column-hiding-enabled="true"
-      :paging="false"
+      :paging="{enabled: false}"
     >
       <DxEditing
         :allow-updating="true"
@@ -45,6 +44,17 @@
         :allow-deleting="false"
         mode="cell"
       />
+      <DxColumn
+        caption="Kategorie"
+        :group-index="0"
+        data-field="product.product_category_id"
+      >
+        <DxLookup
+          :data-source="productCategories"
+          display-expr="name"
+          value-expr="id"
+        />
+      </DxColumn>
       <DxColumn
         caption="Artikel"
         data-field="product.name"
@@ -114,6 +124,7 @@
 
 <script setup lang="ts">
 import DxTextBox from 'devextreme-vue/text-box';
+import LaravelLookupSource from '../LaravelLookupSource'
 
 import DxButton from 'devextreme-vue/button';
 
@@ -121,7 +132,8 @@ import DxDataGrid, {
   DxColumn,
   DxEditing,
   DxSummary,
-  DxTotalItem
+  DxTotalItem,
+  DxLookup
 } from "devextreme-vue/data-grid";
 
 
@@ -143,6 +155,7 @@ import { ValidationResult } from 'devextreme/ui/validation_group';
 import { useRoute } from 'vue-router'
 import { useStore } from '../store';
 import auth from '../auth';
+import SettingHtml from '../components/SettingHtml.vue';
 
 type Product = App.Models.Product;
 type Order = App.Models.Order;
@@ -291,6 +304,10 @@ let orderItemsDatasource = new DataSource({
     }
   })
 })
+
+let productCategories = () => new LaravelLookupSource('api/productcategories?password=' + password)
+
+let orderFormText = () => 'orderFormText?password=' + password;
 
 function checkWidth(){
   state.hideElements = window.innerWidth < 550;
