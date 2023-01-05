@@ -59,6 +59,7 @@
         />
         <DxItem
           template="exportTemplate"
+          v-if="isAdmin"
         />
       </DxToolbar>
       <template #orderTemplate="{ data }">
@@ -102,6 +103,7 @@ import { CustomSummaryInfo , } from "devextreme/ui/data_grid";
 import { DxButton } from 'devextreme-vue/button';
 import DxSelectBox from 'devextreme-vue/select-box';
 import DxDropDownButton from 'devextreme-vue/drop-down-button';
+import { store } from "../store";
 
 import DxDataGrid, {
   DxColumn,
@@ -117,6 +119,7 @@ import DxDataGrid, {
 } from "devextreme-vue/data-grid";
 import LaravelLookupSource from '../LaravelLookupSource';
 
+const isAdmin = store.state.user.is_admin;
 type Order = App.Models.Order;
 
 //const ordersStore = new LaravelDataSource("api/orders");

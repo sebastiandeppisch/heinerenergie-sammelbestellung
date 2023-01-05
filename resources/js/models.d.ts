@@ -67,6 +67,7 @@ declare namespace App.Models {
         panelsCount: number;
         product_category_id: number | null;
         bulk_order_id: number;
+        is_supplier_product: boolean;
         order_items?: Array<App.Models.OrderItem> | null;
         product_category?: App.Models.ProductCategory | null;
         downloads?: Array<App.Models.ProductDownload> | null;
@@ -107,6 +108,7 @@ declare namespace App.Models {
         updated_at: string | null;
         first_name: string;
         last_name: string;
+        is_admin: boolean;
         orders?: Array<App.Models.Order> | null;
         orders_count?: number | null;
         readonly name?: any;

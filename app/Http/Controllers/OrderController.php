@@ -131,6 +131,9 @@ class OrderController extends Controller
     }
 
     public function export(BulkOrder $bulkorder, Request $request){
+        if(! Auth::user()->can('export', Order::class)){
+            abort(403, "Du hast keine Berechtigung, um Bestellungen zu exportieren");
+        }
         if($bulkorder->id === null){
             $bulkorder = null;
             $name = "Alle Sammelbestellungen";
@@ -160,11 +163,17 @@ class OrderController extends Controller
     }
 
     public function setChecked(Order $order){
+        if(! Auth::user()->can('update', $order)){
+            abort(403, "Du hast keine Berechtigung, um Bestellungen zu ändern");
+        }
         $order->checked = true;
         $order->save();
     }
 
     public function setUnchecked(Order $order){
+        if(! Auth::user()->can('update', $order)){
+            abort(403, "Du hast keine Berechtigung, um Bestellungen zu ändern");
+        }
         $order->checked = false;
         $order->save();
     }
