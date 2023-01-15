@@ -41,6 +41,7 @@
           value-expr="id"
           v-model="r.selectedBulkOrder"
           :on-value-changed="bulkOrderChanged"
+          label="Sammelbestellung"
         />        
       </template>
       <template #bulkorders>

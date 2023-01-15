@@ -34,12 +34,15 @@ declare namespace App.Models {
         order_items?: Array<App.Models.OrderItem> | null;
         advisor?: App.Models.User | null;
         bulk_order?: App.Models.BulkOrder | null;
+        shares?: Array<App.Models.User> | null;
         order_items_count?: number | null;
+        shares_count?: number | null;
         readonly price?: number;
         readonly panels_count?: number;
         readonly street_with_number?: string;
         readonly name?: any;
         readonly archived?: boolean;
+        readonly shares_ids?: Array<any>;
     }
 
     export interface BulkOrder {

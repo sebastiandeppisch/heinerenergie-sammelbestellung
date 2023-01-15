@@ -75,6 +75,7 @@
           value-expr="id"
           v-model="state.bulkOrderId"
           :on-value-changed="bulkOrderChanged"
+          label="Sammelbestellung"
         />        
       </template>
       <template #exportTemplate>

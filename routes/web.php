@@ -19,8 +19,7 @@ Route::get('/', function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('orderexport', [OrderController::class, 'export']);
-    Route::get('bulkorders/{bulkorder}/orderexport', [OrderController::class, 'export']);
+    Route::get('bulkorders/{bulkorder}/orderexport', [OrderController::class, 'export'])->name('orderexport');
 });
 
 Route::get('/{any}', function () {

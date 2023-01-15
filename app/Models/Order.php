@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\User;
 use App\Models\Product;
 use App\Models\BulkOrder;
 use App\Models\OrderItem;
-use Doctrine\Common\Cache\Psr6\InvalidArgument;
 use Illuminate\Database\Eloquent\Model;
+use Doctrine\Common\Cache\Psr6\InvalidArgument;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Order extends Model
 {
@@ -17,7 +19,7 @@ class Order extends Model
 
     protected $fillable = ['firstName', 'lastName', 'street', 'streetNumber', 'zip', 'city', 'email', 'phone', 'commentary', 'advisor_id'];
 
-    protected $appends = ['price', 'panelsCount', 'archived'];
+    protected $appends = ['price', 'panelsCount', 'archived', 'shares_ids'];
 
     protected $casts = [
         'firstName' => 'string',
@@ -83,5 +85,13 @@ class Order extends Model
             throw new InvalidArgument("An archived order can not be changed");
         }
         parent::save($options);
+    }
+
+    public function shares(): MorphToMany{
+        return $this->morphToMany(User::class, 'sharing', 'sharings', 'sharing_id', 'advisor_id');
+    }
+
+    public function getSharesIdsAttribute(): array{
+        return $this->shares->pluck('id')->toArray();
     }
 }

@@ -23,7 +23,7 @@ class OrderController extends Controller
 {
 
     public function __construct(){
-        $this->authorizeResource(Order::class, 'order');
+        //$this->authorizeResource(Order::class, 'order');
     }
     /**
      * Display a listing of the resource.
@@ -134,13 +134,11 @@ class OrderController extends Controller
         if(! Auth::user()->can('export', Order::class)){
             abort(403, "Du hast keine Berechtigung, um Bestellungen zu exportieren");
         }
+
         if($bulkorder->id === null){
-            $bulkorder = null;
-            $name = "Alle Sammelbestellungen";
-        }else{
-            $name = sprintf("Sammelbestellung %s", $bulkorder->name);
+            abort(404, "Sammelbestellung fehlt");
         }
-        $date = Carbon::now()->format('Y-m-d H:i:s');
+
         $export = new OrdersExport();
         $export->bulkorder = $bulkorder;
 
@@ -155,7 +153,13 @@ class OrderController extends Controller
             ][$request->products];
         }
 
-        $filename = sprintf("%s %s %s.xlsx", $name, $date, $products);
+        if($request->has('filename')){
+            $filename = $request->filename;
+        }else{
+            $name = sprintf("Sammelbestellung %s", $bulkorder->name);
+            $date = Carbon::now()->format('Y-m-d H:i:s');
+            $filename = sprintf("%s %s %s.xlsx", $name, $date, $products);
+        }
         return Excel::download($export, $filename);
     }
 
@@ -163,18 +167,25 @@ class OrderController extends Controller
     }
 
     public function setChecked(Order $order){
-        if(! Auth::user()->can('update', $order)){
-            abort(403, "Du hast keine Berechtigung, um Bestellungen zu ändern");
-        }
+        $this->auth($order, 'update');
         $order->checked = true;
         $order->save();
     }
 
     public function setUnchecked(Order $order){
-        if(! Auth::user()->can('update', $order)){
-            abort(403, "Du hast keine Berechtigung, um Bestellungen zu ändern");
-        }
+        $this->auth($order, 'update');
         $order->checked = false;
         $order->save();
+    }
+
+    public function setAdvisors(Order $order, Request $request){
+        $this->auth($order, 'addAdvisors');
+        $order->shares()->sync($request->advisors);
+    }
+
+    private function auth(Order $order, string $ability){
+        if(! Auth::user()->can($ability, $order)){
+            abort(403, "Du hast keine Berechtigung, diese Bestellung zu sehen");
+        }
     }
 }

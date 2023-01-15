@@ -45,7 +45,16 @@
               show-in-column="quantity"
             />
         </DxSummary>
-    </DxDataGrid>
+      </DxDataGrid>
+      <DxTagBox
+        :data-source="advisors"
+        display-expr="name"
+        value-expr="id"
+        :on-value-changed="updateAdvisors"
+        label="Teilen mit"
+        v-model="order.shares_ids"
+      ></DxTagBox>
+
     </div>
      <div class="dx-card flex-cell">
       <OrderForm
@@ -103,6 +112,8 @@ import {formatPrice} from '../helpers'
 import OrderForm from '../components/OrderForm.vue'
 import DxButton from "devextreme-vue/button";
 
+import DxTagBox from "devextreme-vue/tag-box";
+
 import {confirm} from 'devextreme/ui/dialog';
 
 const emit = defineEmits(['update'])
@@ -116,6 +127,8 @@ const props = defineProps<Props>();
 
 const orderItemsDatasource = new LaravelDataSource('api/orders/' + props.order.id + '/orderitems');
 const products = new LaravelLookupSource('api/bulkorders/' + props.order.bulk_order_id + '/products');
+
+const advisors = new LaravelLookupSource('api/users');
 
 function calculateSummary(options: CustomSummaryInfo){
   options.totalValue = formatPrice(props.order.price);
@@ -148,6 +161,13 @@ function uncheckOrder() {
     .then(() => {
       emit('update')
     })
+}
+
+function updateAdvisors(e: any) {
+  axios.post('api/orders/' + props.order.id + '/advisors', {advisors: e.value})
+    .then(() => {
+      emit('update')
+  })
 }
 
 </script>

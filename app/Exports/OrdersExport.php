@@ -18,7 +18,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 class OrdersExport implements FromCollection, WithHeadings, WithStyles, ShouldAutoSize
 {
 
-    public ?BulkOrder $bulkorder = null;
+    public BulkOrder $bulkorder;
 
     public string $products = 'all';
 
@@ -40,23 +40,16 @@ class OrdersExport implements FromCollection, WithHeadings, WithStyles, ShouldAu
     public function collection(): Collection
     {
         $rows = collect();
-        foreach($this->getOrders() as $order){
+        foreach($this->bulkorder->orders as $order){
             foreach($this->getOrderItems($order) as $orderItem){
                 $row = collect();
                 foreach(collect($this->structure)->pluck('key') as $key){
-                    $row->push($this->getData((string) $key, $order, $orderItem));
+                    $row[$key] = $this->getData((string) $key, $order, $orderItem);
                 }
                 $rows->push($row);
             }
         }
         return $rows;
-    }
-
-    private function getOrders(): Collection{
-        if($this->bulkorder !== null){
-            return $this->bulkorder->orders;
-        }
-        return Order::all();
     }
 
     private function getOrderItems(Order $order): Collection{
