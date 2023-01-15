@@ -184,11 +184,13 @@ function updateData() {
 
 function deleteOrder() {
   confirm('Möchtest Du die Bestellung wirklich löschen?', 'Bestellung löschen')
-    .then(() => {
-      axios.delete('api/orders/' + props.order.id)
-        .then(() => {
-          emit('update')
-        })
+    .then((result) => {
+      if (result) {
+        axios.delete('api/orders/' + props.order.id)
+          .then(() => {
+            emit('update')
+          })
+      }
     })
   
 }
