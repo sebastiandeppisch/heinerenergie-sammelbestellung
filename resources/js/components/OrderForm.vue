@@ -172,7 +172,7 @@ import {DxForm, DxSimpleItem, DxGroupItem, DxButtonItem} from 'devextreme-vue/fo
 
 import { DxAsyncRule } from 'devextreme-vue/form';
 
-import axios, {AxiosError} from 'axios';
+import axios, {AxiosError, AxiosResponse} from 'axios';
 import { ValidationCallbackData } from 'devextreme/ui/validation_rules';
 import {ref, reactive} from 'vue';
 
@@ -207,12 +207,23 @@ function validateAsync(params: ValidationCallbackData){
   }else{
     url = 'api/validateorderform';
   }
-  return axios.get(url, {
-    params: data
-  }).catch(error => {
+  return cachedValidationRequest(url, data).catch(error => {
     formatError(error, field);
   })
 }
+
+const validationCache = new Map();
+
+function cachedValidationRequest(url, data): Promise<AxiosResponse>{
+  const key = url + JSON.stringify(data);
+  if(! validationCache.has(key)){
+    validationCache.set(key, axios.get(url, {
+      params: data
+    }))
+  }
+  return validationCache.get(key);
+}
+
 
 function loadUsers(): LaravelLookupSource{
   return new LaravelLookupSource('api/users');
