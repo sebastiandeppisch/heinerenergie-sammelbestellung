@@ -40,6 +40,7 @@ Route::middleware('auth')->group(function () {
     Route::post('orders/{order}/check', [OrderController::class, 'setChecked']);
     Route::post('orders/{order}/uncheck', [OrderController::class, 'setUnchecked']);
     Route::post('orders/{order}/advisors', [OrderController::class, 'setAdvisors']);
+    Route::post('orders/{order}/sendmail', [OrderController::class, 'sendMail']);
 
     Route::resource('bulkorders', BulkOrderController::class);
     Route::scopeBindings()->group(function(){

@@ -16,6 +16,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Http\Requests\RequireOrderPassword;
+use App\Mail\OrderChecking;
 use Illuminate\Validation\ValidationException;
 use Doctrine\Common\Cache\Psr6\InvalidArgument;
 
@@ -181,6 +182,11 @@ class OrderController extends Controller
     public function setAdvisors(Order $order, Request $request){
         $this->auth($order, 'addAdvisors');
         $order->shares()->sync($request->advisors);
+    }
+
+    public function sendMail(Order $order, Request $request){
+        $this->auth($order, 'update');
+        Mail::to($order->email)->send(new OrderChecking($order, $request->reason));
     }
 
     private function auth(Order $order, string $ability){

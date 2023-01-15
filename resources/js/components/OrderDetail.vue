@@ -81,6 +81,43 @@
           type="danger"
           :disabled="order.archived"
         />
+        <br>
+        <br>
+        <DxButton
+          icon="email"
+          @click="openMailReasonDialog"
+          text="Bestellübersicht erneut versenden"
+          type="info"
+        />
+        <DxPopup
+          :visible="mailReasonDialogVisible"
+          title="Bestellübersicht versenden"
+          :show-title="true"
+          :drag-enabled="false"
+          :close-on-outside-click="true"
+          :show-close-button="true"
+          width="450px"
+          height="auto"
+        >
+          <div style="margin:5px">
+            <DxTextBox
+                v-model="mailReason"
+                placeholder="Grund für die erneute Versendung"
+                width="100%"
+                validation="required"
+                label="Grund für die erneute Versendung"
+              />
+
+              <DxButton
+                icon="email"
+                @click="sendMail"
+                text="Bestellübersicht erneut versenden"
+                type="default"
+                width="100%"
+                style="margin-top: 20px;"
+              />
+          </div>
+        </DxPopup>
       </div>
       <div style="float: right;">
         <DxButton
@@ -115,6 +152,10 @@ import DxButton from "devextreme-vue/button";
 import DxTagBox from "devextreme-vue/tag-box";
 
 import {confirm} from 'devextreme/ui/dialog';
+import { defineEmits, defineProps, ref } from "vue";
+import DxTextBox from "devextreme-vue/text-box";
+import DxPopup from "devextreme-vue/popup";
+import notify from "devextreme/ui/notify";
 
 const emit = defineEmits(['update'])
 
@@ -124,6 +165,9 @@ interface Props {
   order: App.Models.Order
 }
 const props = defineProps<Props>();
+
+const mailReasonDialogVisible = ref(false);
+const mailReason = ref('');
 
 const orderItemsDatasource = new LaravelDataSource('api/orders/' + props.order.id + '/orderitems');
 const products = new LaravelLookupSource('api/bulkorders/' + props.order.bulk_order_id + '/products');
@@ -168,6 +212,19 @@ function updateAdvisors(e: any) {
     .then(() => {
       emit('update')
   })
+}
+
+function openMailReasonDialog() {
+  mailReasonDialogVisible.value = true
+}
+
+function sendMail() {
+  axios.post('api/orders/' + props.order.id + '/sendmail', {reason: mailReason.value})
+    .then(() => {
+      mailReasonDialogVisible.value = false
+      mailReason.value = ''
+      notify('Bestellübersicht wurde versendet', 'success', 3000)
+    })
 }
 
 </script>
