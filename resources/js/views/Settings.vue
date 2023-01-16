@@ -1,18 +1,20 @@
 <template>
   <div>
     <h2 class="content-block">Einstellungen</h2>
-     <DxAccordion
-      :data-source="dataSource"
-      :collapsible="true"
-      :multiple="false"
-    >
-      <template #title="{ data }">
-        <div style="font-size: 1.5em;">{{ data.name}}</div>
-      </template>
-      <template #item="{ data }">
-        <Setting :setting="data"/>
-      </template>
-    </DxAccordion>
+    <div style="margin: 30px 40px 30px 40px;">
+      <DxAccordion
+        :data-source="dataSource"
+        :collapsible="true"
+        :multiple="false"
+      >
+        <template #title="{ data }">
+          <div style="font-size: 1.5em;">{{ data.name}}</div>
+        </template>
+        <template #item="{ data }">
+          <Setting :setting="data"/>
+        </template>
+      </DxAccordion>
+    </div>
   </div>
 </template>
 

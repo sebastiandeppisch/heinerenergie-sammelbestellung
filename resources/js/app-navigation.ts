@@ -2,31 +2,37 @@ export default [
   {
     text: "Neue Bestellung",
     path: "/neworder",
-    icon: "cart"
+    icon: "cart",
+    admin: false
   },
   {
     text: "Beratungen",
     path: "/advices",
-    icon: "home"
+    icon: "home",
+    admin: false
   },
   {
     text: "Bestellungen",
     path: "/orders",
-    icon: "textdocument"
+    icon: "textdocument",
+    admin: false
   },
   {
     text: "Artikel",
     path: "/products",
-    icon: "box"
+    icon: "box",
+    admin: true
   },
   {
     text: "Berater*innen",
     path: "/users",
-    icon: "user"
+    icon: "user",
+    admin: true
   },
   {
     text: "Einstellungen",
     path: "/settings",
-    icon: "preferences"
+    icon: "preferences",
+    admin: true
   }
 ];

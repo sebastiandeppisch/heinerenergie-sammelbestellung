@@ -11,7 +11,7 @@ class BulkOrderFactory extends Factory
     {
         return [
             'name' => $this->faker->name,
-            'archived' => $this->faker->boolean
+            'archived' => false//$this->faker->boolean
         ];
     }
 }

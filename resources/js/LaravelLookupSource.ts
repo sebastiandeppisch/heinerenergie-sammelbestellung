@@ -6,6 +6,7 @@ export default class LaravelLookupSource extends CustomStore{
 	constructor(url: string){
 		super({
 				key: 'id',
+				loadMode: 'raw',
 				load: (options) => {
 					return axios.get(url,{
 						params: options

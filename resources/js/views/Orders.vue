@@ -4,7 +4,7 @@
     <div style="margin: 30px 40px 30px 40px;">
     <DxDataGrid
       class="dx-card wide-card"
-      :data-source="ordersStore"
+      :data-source="state.ordersStore"
       :show-borders="false"
       :column-auto-width="true"
       :column-hiding-enabled="true"
@@ -15,13 +15,6 @@
         mode="virtual"
       />
       <DxFilterRow  :visible="true"/>
-      <DxColumn data-field="bulk_order_id" caption="Sammelbestellung" :filter-value="state.bulkOrderId">
-        <DxLookup
-          :data-source="bulkorders"
-          display-expr="name"
-          value-expr="id"
-        />
-      </DxColumn>
       <DxColumn data-field="firstName" caption="Vorname" />
       <DxColumn data-field="lastName" caption="Nachname" />
       <DxColumn data-field="advisor_id" caption="Berater*in">
@@ -61,7 +54,12 @@
       />
       <DxToolbar>
         <DxItem
+          location="before"
+          template="selectBulkOrder"
+        />
+        <DxItem
           template="exportTemplate"
+          v-if="isAdmin"
         />
       </DxToolbar>
       <template #orderTemplate="{ data }">
@@ -70,12 +68,27 @@
           v-on:update="update"
         />
       </template>
+      <template #selectBulkOrder>
+        <DxSelectBox
+          :data-source="bulkorders"
+          display-expr="name"
+          value-expr="id"
+          v-model="state.bulkOrderId"
+          :on-value-changed="bulkOrderChanged"
+          label="Sammelbestellung"
+        />        
+      </template>
       <template #exportTemplate>
-      <DxButton
-        icon="exportxlsx"
-        @click="exportOrders"
-      />
-    </template>
+        <DxDropDownButton
+          :drop-down-options="{ width: 180 }"
+          :items="exportTypes"
+          icon="exportxlsx"
+          hint="Bestellungen exportieren"
+          @item-click="exportOrders"
+          display-expr="name"
+          key-expr="id"
+        />
+      </template>
     </DxDataGrid>
     </div>
   </div>
@@ -89,6 +102,9 @@ import {formatPriceCell, formatPrice, formatDateCell, AdaptTableHeight} from '..
 import { ref, onMounted, reactive } from 'vue'
 import { CustomSummaryInfo , } from "devextreme/ui/data_grid";
 import { DxButton } from 'devextreme-vue/button';
+import DxSelectBox from 'devextreme-vue/select-box';
+import DxDropDownButton from 'devextreme-vue/drop-down-button';
+import { store } from "../store";
 
 import DxDataGrid, {
   DxColumn,
@@ -104,26 +120,40 @@ import DxDataGrid, {
 } from "devextreme-vue/data-grid";
 import LaravelLookupSource from '../LaravelLookupSource';
 
+const isAdmin = store.state.user.is_admin;
 type Order = App.Models.Order;
 
-const ordersStore = new LaravelDataSource("api/orders");
+//const ordersStore = new LaravelDataSource("api/orders");
 const advisors  = new LaravelLookupSource("api/users");
 const bulkorders  = new LaravelLookupSource("api/bulkorders");
-
+const exportTypes = [{
+  id: 'supplier',
+  name: 'Lieferanten-Artikel'
+}, {
+  id: 'own',
+  name: 'heiner*energie Artikel'
+}, {
+  id: 'all',
+  name: 'Alle Artikel'
+}];
 
 interface State{
   bulkOrderId: number | null;
+  ordersStore: LaravelDataSource | null;
 }
 
-const state: State = reactive({bulkOrderId: null})
+const state: State = reactive({
+  bulkOrderId: null,
+  ordersStore: null
+})
 
 function update(){
   console.log("update from order");
-  ordersStore.reload();
+  state.ordersStore.reload();
 }
 
-function exportOrders(){
-  window.open('/orderexport', '_blank').focus();
+function exportOrders(e){
+  window.open('bulkorders/'+ state.bulkOrderId + '/orderexport?products=' + e.itemData.id, '_blank').focus();
 }
 
 
@@ -135,10 +165,19 @@ const r = tableHeight.getReactive();
 onMounted(() => {
   tableHeight.calcHeight();
   bulkorders.load().then((data) => {
+    console.log(data);
     const notArchivedBulkOrders = data.filter(item => !item.archived);
     if(notArchivedBulkOrders.length === 1) {
       state.bulkOrderId = notArchivedBulkOrders[0].id;
+      console.log(state.bulkOrderId);
     }
   });
 });
+
+function bulkOrderChanged(){
+  const bulkOrder = state.bulkOrderId;
+  if(bulkOrder !== null){
+    state.ordersStore = new LaravelDataSource('api/bulkorders/'+ bulkOrder + '/orders');
+  }
+}
 </script>

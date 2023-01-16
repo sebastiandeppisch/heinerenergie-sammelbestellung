@@ -14,14 +14,15 @@ class Product extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'price', 'sku', 'panelsCount', 'description', 'product_category_id']; 
+    protected $fillable = ['name', 'price', 'sku', 'panelsCount', 'description', 'product_category_id', 'is_supplier_product']; 
 
     protected $casts = [
         'name' => 'string',
         'price' => 'float',
         'sku' => 'string',
         'panelsCount' => 'integer',
-        'description' => 'string'
+        'description' => 'string',
+        'is_supplier_product' => 'boolean'
     ]; 
 
     public function orderItems(): HasMany{

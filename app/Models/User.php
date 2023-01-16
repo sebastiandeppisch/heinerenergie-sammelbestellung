@@ -8,6 +8,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
@@ -24,6 +25,7 @@ class User extends Authenticatable
         'last_name',
         'email',
         'password',
+        'is_admin'
     ];
 
     /**
@@ -43,6 +45,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'is_admin' => 'bool'
     ];
 
     protected $appends = [
@@ -59,5 +62,9 @@ class User extends Authenticatable
 
     public function getNameAttribute(){
         return sprintf("%s %s", $this->first_name, $this->last_name);
+    }
+
+    public function sharedOrders(): MorphMany{
+        return $this->morphMany(Order::class, 'sharings');
     }
 }

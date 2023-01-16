@@ -23,11 +23,11 @@
       <DxToolbar>
         <DxItem
           location="before"
-          template="bulkorders"
+          template="selectBulkOrder"
         />
         <DxItem
           location="before"
-          template="selectBulkOrder"
+          template="bulkorders"
         />
         <DxItem
           location="after"
@@ -41,11 +41,13 @@
           value-expr="id"
           v-model="r.selectedBulkOrder"
           :on-value-changed="bulkOrderChanged"
+          label="Sammelbestellung"
         />        
       </template>
       <template #bulkorders>
         <DxButton
           icon="fields"
+          text="Sammelbestellungen editieren"
           @click="openBulkOrders"
         />        
       </template>
@@ -59,6 +61,7 @@
       <DxColumn data-field="name" caption="Name" />
       <DxColumn data-field="price" caption="Preis" :editor-options="priceEditorOptions" :customize-text="formatPrice" />
       <DxColumn data-field="sku" caption="SKU" />
+      <DxColumn data-field="is_supplier_product" caption="Von Lieferant" />
       <DxColumn data-field="panelsCount" caption="Panels" :editor-options="panelsCountEditorOptions"/>
       <DxColumn data-field="description" caption="Beschreibung" width="600px"/>
       <DxMasterDetail
@@ -74,6 +77,8 @@
       title="Sammelbestellungen"
       hide-on-outside-click="true"
       :show-close-button="true"
+      :width="800"
+      :height="600"
     >
       <BulkOrders />
     </DxPopup>

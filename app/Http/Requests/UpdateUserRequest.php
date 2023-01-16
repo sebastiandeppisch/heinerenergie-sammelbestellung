@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateUserRequest extends FormRequest
@@ -14,7 +15,7 @@ class UpdateUserRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return true;//return Auth::user()->is_admin;
     }
 
     /**
@@ -25,6 +26,7 @@ class UpdateUserRequest extends FormRequest
     public function rules()
     {
         return [
+            'is_admin' => 'boolean',
             'first_name' => 'string',
             'last_name' => 'string',
             'email' => ['email', Rule::unique('users')->ignoreModel($this->user())]

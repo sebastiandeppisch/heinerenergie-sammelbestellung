@@ -45,7 +45,16 @@
               show-in-column="quantity"
             />
         </DxSummary>
-    </DxDataGrid>
+      </DxDataGrid>
+      <DxTagBox
+        :data-source="advisors"
+        display-expr="name"
+        value-expr="id"
+        :on-value-changed="updateAdvisors"
+        label="Teilen mit"
+        v-model="order.shares_ids"
+      ></DxTagBox>
+
     </div>
      <div class="dx-card flex-cell">
       <OrderForm
@@ -72,6 +81,43 @@
           type="danger"
           :disabled="order.archived"
         />
+        <br>
+        <br>
+        <DxButton
+          icon="email"
+          @click="openMailReasonDialog"
+          text="Bestellübersicht erneut versenden"
+          type="info"
+        />
+        <DxPopup
+          :visible="mailReasonDialogVisible"
+          title="Bestellübersicht versenden"
+          :show-title="true"
+          :drag-enabled="false"
+          :close-on-outside-click="true"
+          :show-close-button="true"
+          width="450px"
+          height="auto"
+        >
+          <div style="margin:5px">
+            <DxTextBox
+                v-model="mailReason"
+                placeholder="Grund für die erneute Versendung"
+                width="100%"
+                validation="required"
+                label="Grund für die erneute Versendung"
+              />
+
+              <DxButton
+                icon="email"
+                @click="sendMail"
+                text="Bestellübersicht erneut versenden"
+                type="default"
+                width="100%"
+                style="margin-top: 20px;"
+              />
+          </div>
+        </DxPopup>
       </div>
       <div style="float: right;">
         <DxButton
@@ -103,7 +149,13 @@ import {formatPrice} from '../helpers'
 import OrderForm from '../components/OrderForm.vue'
 import DxButton from "devextreme-vue/button";
 
+import DxTagBox from "devextreme-vue/tag-box";
+
 import {confirm} from 'devextreme/ui/dialog';
+import { defineEmits, defineProps, ref } from "vue";
+import DxTextBox from "devextreme-vue/text-box";
+import DxPopup from "devextreme-vue/popup";
+import notify from "devextreme/ui/notify";
 
 const emit = defineEmits(['update'])
 
@@ -114,8 +166,13 @@ interface Props {
 }
 const props = defineProps<Props>();
 
+const mailReasonDialogVisible = ref(false);
+const mailReason = ref('');
+
 const orderItemsDatasource = new LaravelDataSource('api/orders/' + props.order.id + '/orderitems');
 const products = new LaravelLookupSource('api/bulkorders/' + props.order.bulk_order_id + '/products');
+
+const advisors = new LaravelLookupSource('api/users');
 
 function calculateSummary(options: CustomSummaryInfo){
   options.totalValue = formatPrice(props.order.price);
@@ -127,11 +184,13 @@ function updateData() {
 
 function deleteOrder() {
   confirm('Möchtest Du die Bestellung wirklich löschen?', 'Bestellung löschen')
-    .then(() => {
-      axios.delete('api/orders/' + props.order.id)
-        .then(() => {
-          emit('update')
-        })
+    .then((result) => {
+      if (result) {
+        axios.delete('api/orders/' + props.order.id)
+          .then(() => {
+            emit('update')
+          })
+      }
     })
   
 }
@@ -147,6 +206,26 @@ function uncheckOrder() {
   axios.post('api/orders/' + props.order.id + '/uncheck')
     .then(() => {
       emit('update')
+    })
+}
+
+function updateAdvisors(e: any) {
+  axios.post('api/orders/' + props.order.id + '/advisors', {advisors: e.value})
+    .then(() => {
+      emit('update')
+  })
+}
+
+function openMailReasonDialog() {
+  mailReasonDialogVisible.value = true
+}
+
+function sendMail() {
+  axios.post('api/orders/' + props.order.id + '/sendmail', {reason: mailReason.value})
+    .then(() => {
+      mailReasonDialogVisible.value = false
+      mailReason.value = ''
+      notify('Bestellübersicht wurde versendet', 'success', 3000)
     })
 }
 

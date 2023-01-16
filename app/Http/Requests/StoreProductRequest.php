@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreProductRequest extends FormRequest
@@ -13,7 +14,7 @@ class StoreProductRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return Auth::user()->is_admin;
     }
 
     /**
@@ -29,7 +30,8 @@ class StoreProductRequest extends FormRequest
             'panelsCount' => 'required|integer|min:0',
             'sku' => 'nullable|string',
             'description' => 'nullable|string',
-            'product_category_id' => 'nullable|integer'
+            'product_category_id' => 'nullable|integer',
+            'is_supplier_product' => 'nullable|boolean'
         ];
     }
 }

@@ -105,17 +105,25 @@ export default {
   },
 
   async initLogin(){
-    await axios.get('api/login').then(response => response.data).then(response => {
-      if(store !== undefined){
-        if(response.isLoggedIn){
-          store.commit('setUser', {
-            user: response.user as App.Models.User
-          })
-        }else{
-          store.commit('unsetUser');
+    if('user' in window){
+      const user = (window as any).user as App.Models.User;
+      store.commit('setUser', {
+        user
+      })
+    }else{
+      await axios.get('api/login').then(response => response.data).then(response => {
+        if(store !== undefined){
+          if(response.isLoggedIn){
+            store.commit('setUser', {
+              user: response.user as App.Models.User
+            })
+          }else{
+            store.commit('unsetUser');
+          }
         }
-      }
-    })
+      })
+    }
+   
   },
 
   loggedIn(){

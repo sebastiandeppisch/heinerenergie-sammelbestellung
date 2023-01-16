@@ -13,6 +13,9 @@
       <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
     <div id="app"></div>
+    @auth
+      <script>window.user = @json(Auth::user());</script>
+    @endauth
     <script src="{{ mix('/js/app.js') }}"></script>
   </body>
 </html>

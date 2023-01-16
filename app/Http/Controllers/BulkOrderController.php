@@ -11,7 +11,7 @@ class BulkOrderController extends Controller
 {
     public function index()
     {
-        return BulkOrder::all();
+        return BulkOrder::orderBy('created_at', 'desc')->get();
     }
 
     public function store(StoreBulkOrderRequest $request)

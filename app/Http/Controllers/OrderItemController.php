@@ -10,6 +10,10 @@ use Doctrine\Common\Cache\Psr6\InvalidArgument;
 
 class OrderItemController extends Controller
 {
+    public function __construct(){
+        $this->authorizeResource(Order::class, 'order');
+    }
+
     public function index(Order $order)
     {
         return $order->orderItems;

@@ -4,24 +4,24 @@
       <dx-item
         data-field="email"
         editor-type="dxTextBox"
-        :editor-options="{ stylingMode: 'filled', placeholder: 'Email', mode: 'email' }"
+        :editor-options="{ stylingMode: 'filled', placeholder: 'Email', mode: 'email', validationMessageMode: 'always'}"
       >
-        <dx-required-rule message="Email is required" />
-        <dx-email-rule message="Email is invalid" />
+        <dx-required-rule message="Gib bitte Deine E-Mail Adresse ein" />
+        <dx-email-rule message="Gib bitte eine gültige E-Mail Adresse ein" />
         <dx-label :visible="false" />
       </dx-item>
       <dx-item
         data-field='password'
         editor-type='dxTextBox'
-        :editor-options="{ stylingMode: 'filled', placeholder: 'Password', mode: 'password' }"
+        :editor-options="{ stylingMode: 'filled', placeholder: 'Password', mode: 'password', validationMessageMode: 'always' }"
       >
-        <dx-required-rule message="Password is required" />
+        <dx-required-rule message="Gib bitte Dein Passwort ein" />
         <dx-label :visible="false" />
       </dx-item>
       <dx-item
         data-field="rememberMe"
         editor-type="dxCheckBox"
-        :editor-options="{ text: 'Remember me', elementAttr: { class: 'form-text' } }"
+        :editor-options="{ text: 'Eingeloggt bleiben', elementAttr: { class: 'form-text' } }"
       >
         <dx-label :visible="false" />
       </dx-item>
@@ -45,7 +45,7 @@
         <div>
           <span class="dx-button-text">
             <dx-load-indicator v-if="loading" width="24px" height="24px" :visible="true" />
-            <span v-if="!loading">Sign In</span>
+            <span v-if="!loading">Login</span>
           </span>
         </div>
       </template>
