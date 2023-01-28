@@ -22,6 +22,12 @@ export const store = createStore<State>({
 				return null;
 			}
 			return state.user.email;
+		},
+		user(state: State): User|null{
+			if(state.user === null || state.user === undefined){
+				return null;
+			}
+			return state.user;
 		}
 	},
 	mutations: {

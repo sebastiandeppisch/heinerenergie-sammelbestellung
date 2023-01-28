@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\AdviceType;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
 
 class UpdateAdviceRequest extends FormRequest
 {
@@ -32,8 +34,10 @@ class UpdateAdviceRequest extends FormRequest
             'streetNumber' => 'string|max:100',
             'zip' => 'numeric|digits:5',
             'city' => 'string|max:100',
-            'advisor_id' => 'integer|exists:users,id',
+            'advisor_id' => 'nullable|integer|exists:users,id',
             'commentary' => 'string|max:65535',
+            'type' => [new Enum(AdviceType::class)],
+            'advice_status_id' => 'integer|exists:advice_status,id',
         ];
     }
 }

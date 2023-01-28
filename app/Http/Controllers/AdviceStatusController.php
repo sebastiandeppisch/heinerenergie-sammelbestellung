@@ -21,14 +21,14 @@ class AdviceStatusController extends Controller
         return $advicestatus;
     }
 
-    public function show(AdviceStatus $advice){
-        return $advice;
+    public function show(AdviceStatus $advicestatus){
+        return $advicestatus;
     }
 
-    public function update(UpdateAdviceRequest $request, AdviceStatus $advicestatus){
+    public function update(UpdateAdviceStatusRequest $request, AdviceStatus $advicestatus){
         $advicestatus->fill($request->validated());
         $advicestatus->save();
-        return $advice;
+        return $advicestatus;
     }
 
     public function destroy(AdviceStatus $advicestatus){

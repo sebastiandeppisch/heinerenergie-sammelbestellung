@@ -13,4 +13,9 @@ class AdviceStatus extends Model
     protected $table = 'advice_status';
 
     protected $fillable = ['name'];
+
+    public function adivces(): BelongsTo
+    {
+        return $this->belongsTo(Advice::class);
+    }
 }

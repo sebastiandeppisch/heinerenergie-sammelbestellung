@@ -10,6 +10,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\BulkOrderController;
 use App\Http\Controllers\OrderItemController;
+use App\Http\Controllers\AdviceTypeController;
 use App\Http\Controllers\AdviceStatusController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductDownloadController;
@@ -78,3 +79,5 @@ Route::get('checkpassword', [OrderController::class, 'checkPassword']);
 Route::get('html/impress', [SettingController::class, 'impress']);
 Route::get('html/datapolicy', [SettingController::class, 'datapolicy']);
 Route::get('html/orderFormText', [SettingController::class, 'orderFormText']);
+
+Route::resource('advicetypes', AdviceTypeController::class)->only(['index', 'show']);

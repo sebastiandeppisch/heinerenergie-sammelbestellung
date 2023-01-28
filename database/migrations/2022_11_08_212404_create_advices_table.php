@@ -13,6 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::create('advice_status', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
+
+            $table->string("name");
+        });
+        
         Schema::create('advices', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
@@ -42,12 +49,7 @@ return new class extends Migration
 
         });
 
-        Schema::create('advice_status', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
 
-            $table->string("name");
-        });
 
         Schema::table('users', function (Blueprint $table) {
             $table->decimal('long', 10, 7)->nullable()->default(null);

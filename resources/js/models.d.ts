@@ -59,6 +59,37 @@ declare namespace App.Models {
         product_categories_count?: number | null;
     }
 
+    export interface Advice {
+        id: number;
+        created_at: string | null;
+        updated_at: string | null;
+        firstName: string;
+        lastName: string;
+        street: string;
+        streetNumber: string;
+        zip: number;
+        city: string;
+        email: string;
+        phone: string;
+        commentary: string | null;
+        advisor_id: number | null;
+        long: number | null;
+        lat: number | null;
+        advice_status_id: number | null;
+        type: number;
+        advisor?: App.Models.User | null;
+        status?: App.Models.AdviceStatus | null;
+        readonly distance?: number | null;
+    }
+
+    export interface AdviceStatus {
+        id: number;
+        created_at: string | null;
+        updated_at: string | null;
+        name: string;
+        adivces?: App.Models.Advice | null;
+    }
+
     export interface Product {
         id: number;
         created_at: string | null;
@@ -112,8 +143,15 @@ declare namespace App.Models {
         first_name: string;
         last_name: string;
         is_admin: boolean;
+        long: number | null;
+        lat: number | null;
+        picture: string | null;
         orders?: Array<App.Models.Order> | null;
+        advices?: Array<App.Models.Advice> | null;
+        shared_orders?: Array<App.Models.Order> | null;
         orders_count?: number | null;
+        advices_count?: number | null;
+        shared_orders_count?: number | null;
         readonly name?: any;
     }
 

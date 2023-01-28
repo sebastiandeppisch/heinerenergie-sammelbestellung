@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\AdviceType;
+use App\Models\AdviceStatus;
 use App\Events\AdviceCreated;
 use App\Events\AdviceUpdated;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -15,7 +18,22 @@ class Advice extends Model
 
     use HasFactory;
 
-    protected $fillable = ['firstName', 'lastName', 'street', 'streetNumber', 'zip', 'city', 'email', 'phone', 'commentary', 'advisor_id'];
+    protected $fillable = [
+        'firstName',
+        'lastName',
+        'street',
+        'streetNumber',
+        'zip',
+        'city',
+        'email',
+        'phone',
+        'commentary',
+        'advisor_id',
+        'advice_status_id',
+        'long',
+        'lat',
+        'type',
+    ];
 
     protected $appends = ['distance'];
 
@@ -36,7 +54,9 @@ class Advice extends Model
         'commentary' => 'string',
         'advisor_id' => 'integer',
         'long' => 'float',
-        'lat' => 'float'
+        'lat' => 'float',
+        'advice_status_id' => 'integer',
+        'type' => AdviceType::class,
     ];
 
     public function advisor(): BelongsTo{
@@ -54,7 +74,6 @@ class Advice extends Model
     private function haversineGreatCircleDistance(
         $latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371000): float
       {
-        // convert from degrees to radians
         $latFrom = deg2rad($latitudeFrom);
         $lonFrom = deg2rad($longitudeFrom);
         $latTo = deg2rad($latitudeTo);
@@ -67,4 +86,8 @@ class Advice extends Model
           cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
         return $angle * $earthRadius;
       }
+
+    public function status(): HasOne{
+        return $this->hasOne(AdviceStatus::class);
+    }
 }
