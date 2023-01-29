@@ -8,4 +8,3 @@ Zur Kontrolle ist Deine Bestellung nochmal aufgeführt:
 @include('emails.order')
 
 @endcomponent
-@endcomponent

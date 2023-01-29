@@ -7,4 +7,3 @@
 @include('emails.order')
 
 @endcomponent
-@endcomponent

@@ -8,4 +8,3 @@ Grund für die erneue Versendung der E-Mail:
 @include('emails.order')
 
 @endcomponent
-@endcomponent

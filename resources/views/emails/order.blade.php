@@ -11,6 +11,7 @@
 @foreach($order->orderItems as $orderItem)
 | {{$orderItem->product->name}} | {{$orderItem->quantity}} |
 @endforeach
+@endcomponent
 
 **Gesamtpreis**: {{(new \NumberFormatter( 'de_DE', NumberFormatter::CURRENCY ))->formatCurrency($order->price, 'EUR')}}
 ---
