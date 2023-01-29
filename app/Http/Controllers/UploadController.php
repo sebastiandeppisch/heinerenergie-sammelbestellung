@@ -22,7 +22,7 @@ class UploadController extends Controller
         $path = $request->file('file')->storeAs('', $name, 'uploads');
         $path = str_replace('//', '/', $path);
         return [
-            'url' => url($path)
+            'url' => url('uploads/'.$path)
         ];
     }
 }
