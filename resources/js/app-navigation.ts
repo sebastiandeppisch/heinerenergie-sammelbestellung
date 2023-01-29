@@ -8,7 +8,7 @@ export default [
   {
     text: "Beratungen",
     path: "/advices",
-    icon: "home",
+    icon: "group",
     admin: false
   },
   {

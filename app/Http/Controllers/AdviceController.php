@@ -4,11 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Advice;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreAdviceRequest;
 use App\Http\Requests\UpdateAdviceRequest;
 
 class AdviceController extends Controller
 {
+    public function __construct(){
+        $this->authorizeResource(Order::class, 'advice');
+    }
+
     public function index()
     {
         return Advice::all();
@@ -34,5 +39,16 @@ class AdviceController extends Controller
     public function destroy(Advice $advice){
         $advice->delete();
         return response()->noContent();
+    }
+
+    public function setAdvisors(Advice $advice, Request $request){
+        $this->auth($advice, 'addAdvisors');
+        $advice->shares()->sync($request->advisors);
+    }
+
+    private function auth(Advice $advice, string $ability){
+        if(! Auth::user()->can($ability, $advice)){
+            abort(403, "Du hast keine Berechtigung, diese Beratung zu sehen");
+        }
     }
 }

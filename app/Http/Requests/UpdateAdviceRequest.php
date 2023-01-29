@@ -35,7 +35,7 @@ class UpdateAdviceRequest extends FormRequest
             'zip' => 'numeric|digits:5',
             'city' => 'string|max:100',
             'advisor_id' => 'nullable|integer|exists:users,id',
-            'commentary' => 'string|max:65535',
+            'commentary' => 'nullable|string|max:65535',
             'type' => [new Enum(AdviceType::class)],
             'advice_status_id' => 'integer|exists:advice_status,id',
         ];

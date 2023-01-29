@@ -63,16 +63,20 @@
             :col-span="2"
           />
         </DxForm>
-        <DxRadioGroup
-          :items="[{id: 1, name: 'Test1'}, {id: 2, name: 'Test2'}]"
-          displayExpr="name"
-          valueExpr="id"
-          v-if="false"
+      </div>
+      <div class="dx-card" style="max-width:600px;padding:20px;margin-top:20px;">
+        <DxTagBox
+          :data-source="advisors"
+          display-expr="name"
+          value-expr="id"
+          :on-value-changed="updateAdvisors"
+          label="Teilen mit"
+          v-model="advice.shares_ids"
         />
+        <div style="padding-top:5px;opacity:0.5;">Du kannst diese Beratung mit anderen Berater*innen teilen, um die Beratung gemeinsam duchzuführen</div>
       </div>
     </div>
     <div v-else style="height:100%;width:100%;min-height:300px" id="advice-loading" >
-      {{ adviceId }}
       <DxLoadPanel
         :visible="true"
         :show-indicator="true"
@@ -83,7 +87,12 @@
   </div>
   <div v-else>
     <h1>Keine Beratung ausgewählt</h1>
-    
+    <DxRadioGroup
+      :items="[{id: 1, name: 'Test1'}, {id: 2, name: 'Test2'}]"
+      displayExpr="name"
+      valueExpr="id"
+      v-if="false"
+    />
   </div>
 </template>
 
@@ -95,6 +104,8 @@ import { DxLoadPanel } from 'devextreme-vue/load-panel';
 import { ref, onMounted, reactive, defineProps, PropType, watch } from "vue";
 import LaravelDataSource from "../LaravelDataSource";
 import notify from 'devextreme/ui/notify';
+import axios from 'axios';
+import DxTagBox from 'devextreme-vue/tag-box';
 
 type Advice = App.Models.Advice;
 
@@ -112,6 +123,7 @@ const props = defineProps({
 
 const adviceStatus = new LaravelDataSource('/api/advicestatus');
 const adviceTypes = new LaravelDataSource('/api/advicetypes');
+const advisors = new LaravelDataSource('/api/users');
 
 watch(props, (newVal, oldVal) => {
     console.log("watch adviceId", newVal.adviceId, oldVal.adviceId);
@@ -158,5 +170,12 @@ function onSubmit(){
 
 if(props.adviceId !== null){
   fetchAdvice(props.adviceId);
+}
+
+function updateAdvisors(e: any) {
+  axios.post('api/advices/' + props.adviceId + '/advisors', {advisors: e.value})
+    .then(() => {
+      notify('Teilung aktualisiert', 'success', 2000);
+  })
 }
 </script>

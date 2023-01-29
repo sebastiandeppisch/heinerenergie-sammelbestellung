@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Advice extends Model
 {
@@ -35,7 +36,7 @@ class Advice extends Model
         'type',
     ];
 
-    protected $appends = ['distance'];
+    protected $appends = ['distance', 'shares_ids'];
 
     protected $dispatchesEvents = [
         'created' => AdviceCreated::class,
@@ -89,5 +90,13 @@ class Advice extends Model
 
     public function status(): HasOne{
         return $this->hasOne(AdviceStatus::class);
+    }
+
+    public function shares(): MorphToMany{
+        return $this->morphToMany(User::class, 'sharing', 'sharings', 'sharing_id', 'advisor_id');
+    }
+
+    public function getSharesIdsAttribute(): array{
+        return $this->shares->pluck('id')->toArray();
     }
 }

@@ -36,6 +36,14 @@
             @click="openStatus"
           />        
         </template>
+        <DxColumn type="buttons" caption="Öffnen">
+          <DxTableButton
+            hint="Beratung öffnen"
+            icon="user"
+            text="Öffnen"
+            @click="openAdvice"
+          />
+        </DxColumn>
         <DxColumn data-field="advice_status_id" caption="Status">
           <DxLookup
             :data-source="adviceStatus"
@@ -50,7 +58,7 @@
             value-expr="id"
           />
         </DxColumn>
-        <DxColumn data-field="distance" caption="Luftlinie" cell-template="distance" :allow-editing="false" />
+        <DxColumn data-field="distance" caption="Luftlinie" cell-template="distance" :allow-editing="false"/>
         <DxColumn data-field="type" caption="Beratungstyp">
           <DxLookup
             :data-source="adviceTypes"
@@ -58,20 +66,22 @@
             value-expr="id"
           />
         </DxColumn>
-        <DxColumn data-field="firstName" caption="Vorname" />
-        <DxColumn data-field="lastName" caption="Nachname" />
-       <DxColumn data-field="email" caption="E-Mail Adresse" />
-        <DxColumn data-field="phone" caption="Telefonnummer" />
-        <DxColumn data-field="street" caption="Straße" />
-        <DxColumn data-field="streetNumber" caption="Straße" />
-      <!--   <DxColumn data-field="zip" caption="Plz" />
-        <DxColumn data-field="city" caption="Stadt" />-->
+        <DxColumn data-field="firstName"    caption="Vorname"         :allow-editing="false"/>
+        <DxColumn data-field="lastName"     caption="Nachname"        :allow-editing="false" />
+        <DxColumn data-field="email"        caption="E-Mail Adresse"  :allow-editing="false" />
+        <DxColumn data-field="phone"        caption="Telefonnummer"   :allow-editing="false"/>
+        <DxColumn data-field="street"       caption="Straße"          :allow-editing="false"/>
+        <DxColumn data-field="zip"          caption="Plz"             :allow-editing="false"/>
+        <DxColumn data-field="city"         caption="Stadt"           :allow-editing="false"/>
 
         <DxSummary :recalculate-while-editing="true">
           <DxTotalItem column="advice_status_id" summary-type="count" />
         </DxSummary>
         <template #distance="{data}">
           <PhysicalValue :value="data.data.distance" unit="m" />   
+        </template>
+        <template #street="{data}">
+          <div>{{ data.data.street }}  {{ data.data.streetNumber }}</div>
         </template>
       </DxDataGrid>
       <DxPopup
@@ -91,7 +101,7 @@
 <script setup lang="ts">
 import LaravelDataSource from "../LaravelDataSource";
 import { AdaptTableHeight } from "../helpers";
-import { ref, onMounted, reactive } from "vue";
+import { ref, onMounted, reactive, defineEmits } from "vue";
 import DxPopup from 'devextreme-vue/popup';
 import AdviceStatus from "./AdviceStatus.vue";
 import PhysicalValue from "./PhysicalValue.vue";
@@ -107,10 +117,12 @@ import DxDataGrid, {
   DxLookup,
   DxFilterRow,
   DxScrolling,
+  DxButton as DxTableButton
 } from "devextreme-vue/data-grid";
 import LaravelLookupSource from "../LaravelLookupSource";
 import DxButton from "devextreme-vue/button";
 
+const emit = defineEmits(["selectAdviceId"])
 
 const advices = new LaravelDataSource("api/advices");
 const advisors = new LaravelLookupSource("api/users");
@@ -129,6 +141,10 @@ const r = reactive({
 
 function openStatus(){
   r.popupVisible = true;
+}
+
+function openAdvice(e){
+  emit('selectAdviceId', e.row.data.id);
 }
 
 onMounted(() => {

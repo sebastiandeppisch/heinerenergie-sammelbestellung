@@ -89,11 +89,11 @@ export default {
     
     
     
-    const userMenuItems = [/*{
+    const userMenuItems = [{
         text: "Profile",
         icon: "user",
         onClick: onProfileClick
-      },*/
+      },
       {
         text: "Logout",
         icon: "runner",
@@ -104,7 +104,7 @@ export default {
       auth.logOut().then(response => {
         router.push({
           path: "/",
-          query: { redirect: route.path }
+          //query: { redirect: route.path }
         });
       })
      
@@ -113,7 +113,7 @@ export default {
     function onProfileClick() {
       router.push({
         path: "/profile",
-        query: { redirect: route.path }
+        //query: { redirect: route.path }
       });
     }
 

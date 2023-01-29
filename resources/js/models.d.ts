@@ -79,7 +79,10 @@ declare namespace App.Models {
         type: number;
         advisor?: App.Models.User | null;
         status?: App.Models.AdviceStatus | null;
+        shares?: Array<App.Models.User> | null;
+        shares_count?: number | null;
         readonly distance?: number | null;
+        readonly shares_ids?: Array<any>;
     }
 
     export interface AdviceStatus {
@@ -146,6 +149,10 @@ declare namespace App.Models {
         long: number | null;
         lat: number | null;
         picture: string | null;
+        street: string;
+        streetNumber: string;
+        zip: number;
+        city: string;
         orders?: Array<App.Models.Order> | null;
         advices?: Array<App.Models.Advice> | null;
         shared_orders?: Array<App.Models.Order> | null;

@@ -82,4 +82,34 @@ class UserController extends Controller
         $user->save();
         return $user;
     }
+
+    public function address(SetAddressRequest $request){
+        $user = Auth::user();
+        $user->fill($request->validated());
+        $user->save();
+        $this->fetchCoordinates($user);
+        return $user;
+    }
+
+    private function fetchCoordinates(User $user){
+        if($user->street === null || $user->streetNumber === null || $user->zip === null){
+            $user->lat = null;
+            $user->long = null;
+            $user->save();
+            return;
+        }
+        $nominatim = new Nominatim('https://nominatim.openstreetmap.org/');
+        $street = sprintf("%s %s", $user->street, $user->streetNumber);
+        $search = $nominatim->newSearch()
+            ->country('Deutschland')
+            ->postalCode($user->zip)
+            ->street($street);
+        $result = $nominatim->find($search);
+        if(count($result) > 0){
+            $result = $result[0];
+            $user->lat = $result['lat'];
+            $user->long = $result['lon'];
+            $user->save();
+        }
+    }
 }

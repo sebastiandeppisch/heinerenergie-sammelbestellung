@@ -16,7 +16,8 @@ import LoginForm from './views/login-form.vue'
 import ResetPasswordForm from './views/reset-password-form.vue'
 import ChangePasswordForm from './views/change-password-form.vue'
 import Settings from './views/Settings.vue'
-
+import Profile from './views/Profile.vue'
+import AdvicesMap from './views/AdvicesMap.vue'
 import { store } from "./store";
 
 const router = createRouter({
@@ -159,7 +160,16 @@ const router = createRouter({
         layout: defaultLayout
       },
       component: Advices
-    }
+    },
+    {
+      path: "/profile",
+      name: "profile",
+      meta: {
+        requiresAuth: true,
+        layout: defaultLayout
+      },
+      component: Profile
+    },
   ]
 });
 

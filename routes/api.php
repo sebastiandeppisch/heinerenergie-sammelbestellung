@@ -34,6 +34,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('advices', AdviceController::class);
     Route::resource('advicestatus', AdviceStatusController::class);
 
+    Route::post('advices/{advice}/advisors', [AdviceController::class, 'setAdvisors']);
+
     
     Route::scopeBindings()->group(function(){
         Route::resource('orders.orderitems', OrderItemController::class);
@@ -67,6 +69,7 @@ Route::middleware('auth')->group(function () {
     Route::post('upload', UploadController::class);
     Route::post('profile/picture', [UserController::class, 'picture']);
 
+    Route::post('profile/address', [UserController::class, 'address']);
 });
 
 //Route::middleware('guest')->group(function () {
