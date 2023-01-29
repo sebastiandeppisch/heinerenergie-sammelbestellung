@@ -13,6 +13,7 @@ import library from './fontawesome'
 library.add()
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import auth from './auth';
 
 const app = createApp(App);
 app.component('font-awesome-icon', FontAwesomeIcon)
@@ -20,3 +21,5 @@ app.use(store, key);
 app.use(router);
 app.config.globalProperties.$appInfo = appInfo;
 app.mount('#app');
+
+auth.initLogin();

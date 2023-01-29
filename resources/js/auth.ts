@@ -1,17 +1,16 @@
 import axios, { AxiosError } from 'axios'
 import notify from 'devextreme/ui/notify';
-import { store } from './store'
+import {store} from './store';
 export default {
   async logIn(email, password) {
     try {
       // Send request
-      await axios.post('api/login', {
+      const user = await axios.post('api/login', {
         email, password
-      }).then(response => response.data).then(response => {
-        store.commit('setUser', {
-          user: response.user as App.Models.User
-        })
-      });
+      }).then(response => response.data);
+      store.commit('setUser', {
+        user: user as App.Models.User
+      })
       return {
         isOk: true
       }
@@ -105,6 +104,9 @@ export default {
   },
 
   async initLogin(){
+    if(store.getters.isLoggedIn){
+      return;
+    }
     if('user' in window){
       const user = (window as any).user as App.Models.User;
       store.commit('setUser', {

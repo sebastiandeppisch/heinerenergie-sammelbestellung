@@ -16,6 +16,9 @@
     @auth
       <script>window.user = @json(Auth::user());</script>
     @endauth
+    @guest
+      <script>window.user = null;</script>
+    @endguest
     <script src="{{ mix('/js/app.js') }}"></script>
   </body>
 </html>
