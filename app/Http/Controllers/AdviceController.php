@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Advice;
+use App\Mail\SendOrderLink;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use App\Http\Requests\StoreAdviceRequest;
 use App\Http\Requests\UpdateAdviceRequest;
 
@@ -50,5 +52,10 @@ class AdviceController extends Controller
         if(! Auth::user()->can($ability, $advice)){
             abort(403, "Du hast keine Berechtigung, diese Beratung zu sehen");
         }
+    }
+
+    public function sendOrderLink(Advice $advice){
+        Mail::to($advice->email)->send(new SendOrderLink($advice));
+        return response()->noContent(202);
     }
 }

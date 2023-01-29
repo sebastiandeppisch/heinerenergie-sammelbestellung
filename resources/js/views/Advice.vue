@@ -75,6 +75,15 @@
         />
         <div style="padding-top:5px;opacity:0.5;">Du kannst diese Beratung mit anderen Berater*innen teilen, um die Beratung gemeinsam duchzuführen</div>
       </div>
+      <div style="margin-top:20px;">
+        <DxButton
+          text="Bestelllink versenden"
+          @click="sendOrderLink"
+          icon="email"
+        />
+      </div>
+
+   
     </div>
     <div v-else style="height:100%;width:100%;min-height:300px" id="advice-loading" >
       <DxLoadPanel
@@ -106,7 +115,7 @@ import LaravelDataSource from "../LaravelDataSource";
 import notify from 'devextreme/ui/notify';
 import axios from 'axios';
 import DxTagBox from 'devextreme-vue/tag-box';
-
+import DxButton from 'devextreme-vue/button';
 type Advice = App.Models.Advice;
 
 const advice = ref(null as Advice | null);
@@ -177,5 +186,12 @@ function updateAdvisors(e: any) {
     .then(() => {
       notify('Teilung aktualisiert', 'success', 2000);
   })
+}
+
+function sendOrderLink() {
+  axios.post('api/advices/' + props.adviceId + '/sendorderlink')
+    .then(() => {
+      notify('Bestelllink versendet', 'success', 2000);
+    })
 }
 </script>
