@@ -14,9 +14,9 @@
         <DxScrolling mode="virtual" />
         <DxFilterRow :visible="true" />
         <DxEditing
-          :allow-updating="true"
-          :allow-adding="true"
-          :allow-deleting="true"
+          :allow-updating="rowCanBeEdited"
+          :allow-adding="false"
+          :allow-deleting="false"
           mode="cell"
         />
         <DxToolbar>
@@ -42,6 +42,7 @@
             icon="user"
             text="Öffnen"
             @click="openAdvice"
+            :visible="isOpenVisible"
           />
         </DxColumn>
         <DxColumn data-field="advice_status_id" caption="Status">
@@ -51,13 +52,14 @@
             value-expr="id"
           />
         </DxColumn>
-        <DxColumn data-field="advisor_id" caption="Berater*in">
+        <DxColumn data-field="advisor_id" caption="Berater*in" v-if="isAdmin">
           <DxLookup
-            :data-source="advisors"
+            :data-source="advisors.store()"
             display-expr="name"
             value-expr="id"
           />
         </DxColumn>
+        <DxColumn caption="Berater*in" :allow-editing="false" cell-template="simpleadvisorassignment" v-if="!isAdmin"/>
         <DxColumn data-field="distance" caption="Luftlinie" cell-template="distance" :allow-editing="false"/>
         <DxColumn data-field="type" caption="Beratungstyp">
           <DxLookup
@@ -82,6 +84,16 @@
         </template>
         <template #street="{data}">
           <div>{{ data.data.street }}  {{ data.data.streetNumber }}</div>
+        </template>
+        <template #simpleadvisorassignment="{data}">
+          <div v-if="data.data.advisor_id !== null">{{r.advisorNames.get(data.data.advisor_id)}}</div>
+          <div v-else>
+            <DxButton
+              text="Beratung übernehmen"
+              @click="assignAdvice(data.data.id)"
+              type="default"
+            />
+          </div>
         </template>
       </DxDataGrid>
       <DxPopup
@@ -121,11 +133,13 @@ import DxDataGrid, {
 } from "devextreme-vue/data-grid";
 import LaravelLookupSource from "../LaravelLookupSource";
 import DxButton from "devextreme-vue/button";
+import {store} from "../store";
+import axios from "axios";
 
 const emit = defineEmits(["selectAdviceId"])
 
 const advices = new LaravelDataSource("api/advices");
-const advisors = new LaravelLookupSource("api/users");
+const advisors = new LaravelDataSource("api/users");
 const adviceStatus = new LaravelLookupSource('api/advicestatus');
 const adviceTypes = new LaravelLookupSource('api/advicetypes');
 
@@ -134,9 +148,19 @@ const outer = ref(null);
 const tableHeight = new AdaptTableHeight(outer);
 const reactiveHeight = tableHeight.getReactive();
 
+const isAdmin = store.state.user.is_admin;
+
 const r = reactive({
   popupVisible: false,
-  selectedBulkOrder: null
+  selectedBulkOrder: null,
+  advisorNames: new Map<number, string>()
+});
+
+advisors.load().then(() => {
+  advisors.items().forEach((a) => {
+    r.advisorNames.set(a.id, a.name);
+    console.log(a.name);
+  });
 });
 
 function openStatus(){
@@ -150,4 +174,34 @@ function openAdvice(e){
 onMounted(() => {
   tableHeight.calcHeight();
 });
+
+function assignAdvice(id){
+  axios.post('api/advices/' + id + '/assign').then(response => response.data).then((advice) => {
+    advices.store().push([{ type: "update", data: advice, key: advice.id }]);
+  });
+}
+
+function isOpenVisible(e){
+  const advice = e.row.data as App.Models.Advice;
+  return userCanEdit(advice);
+}
+
+function rowCanBeEdited(e){
+  const advice = e.row.data as App.Models.Advice;
+  return userCanEdit(advice);
+}
+
+function userCanEdit(advice){
+  const userId = store.state.user.id;
+  if(isAdmin){
+    return true;
+  }
+  if(advice.advisor_id === userId){
+    return true;
+  }
+  if(advice.shares_ids.includes(userId)){
+    return true;
+  }
+  return false;
+}
 </script>

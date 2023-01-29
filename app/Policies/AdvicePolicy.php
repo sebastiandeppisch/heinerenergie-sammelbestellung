@@ -20,6 +20,11 @@ class AdvicePolicy
         return $this->permission($user, $advice);
     }
 
+    public function viewDataProtected(User $user, Advice $advice)
+    {
+        return $this->permission($user, $advice) || $advice->advisor_id === null;
+    }
+
     public function create(User $user)
     {
         return true;

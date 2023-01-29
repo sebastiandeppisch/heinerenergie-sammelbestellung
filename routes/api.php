@@ -71,6 +71,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('profile/address', [UserController::class, 'address']);
     Route::post('advices/{advice}/sendorderlink', [AdviceController::class, 'sendOrderLink']);
+    Route::post('advices/{advice}/assign', [AdviceController::class, 'assign']);
 });
 
 //Route::middleware('guest')->group(function () {

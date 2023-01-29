@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Requests\StoreAdviceRequest;
 use App\Http\Requests\UpdateAdviceRequest;
+use App\Http\Resources\DataProtectedAdvice;
 
 class AdviceController extends Controller
 {
@@ -18,7 +19,10 @@ class AdviceController extends Controller
 
     public function index()
     {
-        return Advice::all();
+        $isAdmin = Auth::user()->is_admin;
+        return Advice::all()->filter(function(Advice $advice){
+            return Auth::user()->can('viewDataProtected', $advice);
+        })->values()->map( fn($advice) => new DataProtectedAdvice($advice) );
     }
 
     public function store(StoreAdviceRequest $request){
@@ -57,5 +61,16 @@ class AdviceController extends Controller
     public function sendOrderLink(Advice $advice){
         Mail::to($advice->email)->send(new SendOrderLink($advice));
         return response()->noContent(202);
+    }
+
+    public function assign(Advice $advice){
+        if($advice->advisor_id === null){
+            $advice->advisor_id = Auth::user()->id;
+            $advice->save();
+        }else{
+            abort(403, "Diese Beratung wurde bereits einem Berater zugewiesen");
+        }
+        
+        return $advice;
     }
 }
