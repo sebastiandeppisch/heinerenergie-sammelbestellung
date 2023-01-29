@@ -65,6 +65,8 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::post('upload', UploadController::class);
+    Route::post('profile/picture', [UserController::class, 'picture']);
+
 });
 
 //Route::middleware('guest')->group(function () {
