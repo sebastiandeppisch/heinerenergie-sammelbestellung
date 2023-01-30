@@ -71,7 +71,7 @@
           value-expr="id"
           :on-value-changed="updateAdvisors"
           label="Teilen mit"
-          v-model="advice.shares_ids"
+          v-model="sharedIds"
         />
         <div style="padding-top:5px;opacity:0.5;">Du kannst diese Beratung mit anderen Berater*innen teilen, um die Beratung gemeinsam duchzuführen</div>
       </div>
@@ -134,6 +134,8 @@ const adviceStatus = new LaravelDataSource('/api/advicestatus');
 const adviceTypes = new LaravelDataSource('/api/advicetypes');
 const advisors = new LaravelDataSource('/api/users');
 
+const sharedIds = ref([] as number[]);
+
 watch(props, (newVal, oldVal) => {
     console.log("watch adviceId", newVal.adviceId, oldVal.adviceId);
     if (newVal.adviceId !== null) {
@@ -166,6 +168,7 @@ function fetchAdvice(id: number) {
       advices.forEach((a: Advice) => {
         if (a.id === id) {
           advice.value = a;
+          sharedIds.value = a.shares_ids;
         }
       });
     });
