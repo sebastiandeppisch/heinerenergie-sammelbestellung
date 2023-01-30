@@ -54,7 +54,7 @@
         </DxColumn>
         <DxColumn data-field="advisor_id" caption="Berater*in" v-if="isAdmin">
           <DxLookup
-            :data-source="advisors.store()"
+            :data-source="sortedAdvisors"
             display-expr="name"
             value-expr="id"
           />
@@ -135,6 +135,7 @@ import LaravelLookupSource from "../LaravelLookupSource";
 import DxButton from "devextreme-vue/button";
 import {store} from "../store";
 import axios from "axios";
+import CustomStore from "devextreme/data/custom_store";
 
 const emit = defineEmits(["selectAdviceId"])
 
@@ -203,5 +204,19 @@ function userCanEdit(advice){
     return true;
   }
   return false;
+}
+
+function sortedAdvisors(e){
+  console.log(e);
+  if(!e.data){
+    return advisors.store();
+  }
+  return new CustomStore({
+    loadMode: 'raw',
+    cacheRawData: true,
+    load: (options) => {
+      return axios.get('api/advices/' + e.data.id + '/advisors').then(response => response.data);
+    }
+  });
 }
 </script>

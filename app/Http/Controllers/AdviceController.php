@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Advice;
 use App\Mail\SendOrderLink;
 use Illuminate\Http\Request;
@@ -73,4 +74,58 @@ class AdviceController extends Controller
         
         return $advice;
     }
+
+    public function sortedAdvisors(Advice $advice){
+        return User::all()->map(function(User $user) use ($advice){
+            $name = $user->name;
+            $distance = $advice->getDistanceToUser($user);
+            if($distance !== null){
+                $name = $name . " (" . $this->formatValue($distance, 'm') . ")";
+            }
+            if($distance === null){
+                //max float value
+                $distance = 1e6;
+            }
+
+            return [
+                'id' => $user->id,
+                'name' => $name,
+                'distance' => $distance
+            ];
+        })->sortBy('distance')->values();
+    }
+
+    private function formatValue(float $n, string $unit, int $significant = 3): string {
+
+		$ranges = [
+			["divider" => 1e18 , "suffix" => 'P' ],
+			["divider" => 1e15 , "suffix" =>'E' ],
+			["divider" => 1e12 , "suffix" => 'T' ],
+			["divider" => 1e9 , "suffix" => 'G' ],
+			["divider" => 1e6 , "suffix" => 'M' ],
+			["divider" => 1e3 , "suffix" => 'k' ]
+		];
+		foreach($ranges as $range){
+			if ($n >= $range["divider"]) {
+				$number = $n / $range["divider"];
+				$number = $this->roundSigDigs($number, $significant);
+				return ((string) $number)." ".$range["suffix"].$unit;
+			}
+		}
+		$number = $this->roundSigDigs($n, $significant);
+        return ((string) $number)." ".$unit;
+    }
+
+    private function roundSigDigs(float $number, int $sigdigs): float {
+		$multiplier = 1;
+		while ($number < 0.1) {
+			$number *= 10;
+			$multiplier /= 10;
+		}
+		while ($number >= 1) {
+			$number /= 10;
+			$multiplier *= 10;
+		}
+		return round($number, $sigdigs) * $multiplier;
+	} 
 }

@@ -65,7 +65,10 @@ class Advice extends Model
     }
 
     public function getDistanceAttribute(): ?float{
-        $user = Auth::user();
+        return $this->getDistanceToUser(Auth::user());
+    }
+
+    public function getDistanceToUser(User $user): ?float{
         if($this->lat === null || $this->long === null || $user->long === null || $user->lat === null){
             return null;
         }
