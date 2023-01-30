@@ -177,11 +177,6 @@ try{
   if(typeof route.query.formdata ==='string'){
     const defaultData = JSON.parse(route.query.formdata) as Order;
     formData.value = defaultData;
-    if(Object.keys(defaultData).length > 1){
-      window.setTimeout(() =>  {
-        notify('Unten gibt es einen Link zu Github, dort findest Du heraus, welche Parameter Du in der URL verwenden kannst ;)', 'info');
-      }, 1000);
-    }
   }
 }catch(e){
   window.setTimeout(() =>  {
