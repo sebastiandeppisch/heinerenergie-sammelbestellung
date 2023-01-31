@@ -9,6 +9,10 @@ use App\Http\Requests\UpdateAdviceStatusRequest;
 
 class AdviceStatusController extends Controller
 {
+    public function __construct(){
+        $this->authorizeResource(AdviceStatus::class, 'advicestatus');
+    }
+
     public function index()
     {
         return AdviceStatus::all();

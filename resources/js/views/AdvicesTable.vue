@@ -34,6 +34,7 @@
             icon="fields"
             text="Status editieren"
             @click="openStatus"
+            v-if="isAdmin"
           />        
         </template>
         <DxColumn type="buttons" caption="Öffnen">
