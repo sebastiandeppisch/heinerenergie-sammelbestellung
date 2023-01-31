@@ -52,7 +52,14 @@
             value-expr="id"
           />
         </DxColumn>
-        <DxColumn data-field="advisor_id" caption="Berater*in" v-if="isAdmin">
+        <DxColumn data-field="advisor_id" caption="Berater*in" v-if="isAdmin" width="350px">
+          <DxLookup
+            :data-source="sortedAdvisors"
+            display-expr="name"
+            value-expr="id"
+          />
+        </DxColumn>
+        <DxColumn data-field="advisor_id" caption="Berater*in" :allow-editing="false" cell-template="simpleadvisorassignment" v-if="!isAdmin">
           <DxLookup
             :data-source="sortedAdvisors"
             display-expr="name"
