@@ -80,6 +80,7 @@
               @click="openAdvice(advice)"
               width="100%"
               style="margin-top:10px;"
+              v-if="userCanOpen(advice)"
             />
           </div>
         </LPopup>
@@ -123,6 +124,8 @@ import L from "leaflet";
 import { latLng } from "leaflet";
 import { store } from "../store";
 import AdviceTypes from "../AdviceTypes";
+import axios from "axios";
+const isAdmin = store.state.user.is_admin;
 
 const emit = defineEmits(["selectAdviceId"])
 const advice = ref(null);
@@ -172,11 +175,25 @@ function ownId(){
 }
 
 function addAdvice(advice) {
-  advicesDataSource.store().update(advice.id, {
-    advisor_id: ownId(),
+  axios.post('api/advices/' + advice.id + '/assign').then(response => response.data).then((advice) => {
+    advicesDataSource.store().push([{ type: "update", data: advice, key: advice.id }]);
   });
   advices.value = [];
   loadAdvices();
+}
+
+function userCanOpen(advice){
+  const userId = store.state.user.id;
+  if(isAdmin){
+    return true;
+  }
+  if(advice.advisor_id === userId){
+    return true;
+  }
+  if(advice.shares_ids.includes(userId)){
+    return true;
+  }
+  return false;
 }
 
 onMounted(() => {
