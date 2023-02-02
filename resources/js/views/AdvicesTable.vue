@@ -67,9 +67,8 @@
             value-expr="id"
           />
         </DxColumn>
-        <DxColumn caption="Berater*in" :allow-editing="false" cell-template="simpleadvisorassignment" v-if="!isAdmin"/>
         <DxColumn data-field="distance" caption="Luftlinie" cell-template="distance" :allow-editing="false"/>
-        <DxColumn data-field="type" caption="Beratungstyp">
+        <DxColumn data-field="type" caption="Typ" cell-template="typeIcon">
           <DxLookup
             :data-source="adviceTypes"
             display-expr="name"
@@ -97,7 +96,7 @@
           <div v-if="data.data.advisor_id !== null">{{r.advisorNames.get(data.data.advisor_id)}}</div>
           <div v-else>
             <DxButton
-              text="Beratung übernehmen"
+              text="Übernehmen"
               @click="assignAdvice(data.data.id)"
               type="default"
             />
