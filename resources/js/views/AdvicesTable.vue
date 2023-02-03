@@ -102,6 +102,12 @@
             />
           </div>
         </template>
+        <template #typeIcon="{data}">
+          <div v-if="data.data.type === 0">    <i class="dx-icon dx-icon-home"></i></div>
+          <div v-else-if="data.data.type === 1"> <i class="dx-icon dx-icon-tel"></i></div>
+          <div v-else-if="data.data.type === 2"> <i class="dx-icon dx-icon-cart"></i></div>
+          <div v-else>??</div>
+        </template>
       </DxDataGrid>
       <DxPopup
         v-model:visible="r.popupVisible"
