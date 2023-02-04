@@ -55,7 +55,7 @@ const props = defineProps<Props>();
 
 const productDownloadsGrid = ref(null);
 
-const productDownloads = new LaravelDataSource('api/products/' + props.product.id + '/productdownloads');
+const productDownloads = new LaravelDataSource('api/products/' + props.product.id + '/downloads');
 
 let url = null;
 

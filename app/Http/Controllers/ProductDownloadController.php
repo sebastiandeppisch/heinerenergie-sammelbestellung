@@ -16,27 +16,25 @@ class ProductDownloadController extends Controller
 
     public function store(Product $product, StoreProductDownloadRequest $request)
     {
-        $productDownload = new ProductDownload($request->validated());
-        $productDownload->product_id = $product->id;
-        $productDownload->save();
-        return $productDownload;
+        $download = new ProductDownload($request->validated());
+        $product->downloads()->save($download);
+        return $download;
     }
 
-    public function show(Product $product, ProductDownload $productdownload)
+    public function show(Product $product, ProductDownload $download)
     {
-        return $productdownload;
+        return $download;
     }
 
-    public function update(Product $product, UpdateProductDownloadRequest $request, ProductDownload $productdownload)
+    public function update(Product $product, UpdateProductDownloadRequest $request, ProductDownload $download)
     {
-        $productdownload->fill($request->validated());
-        $productdownload->save();
-        return $productdownload;
+        $download->update($request->validated());
+        return $download;
     }
 
-    public function destroy(Product $product, ProductDownload $productDownload)
+    public function destroy(Product $product, ProductDownload $download)
     {
-        $productDownload->delete();
+        $download->delete();
         return response()->noContent();
     }
 }
