@@ -22,6 +22,9 @@
         <DxColumn data-field="last_name" caption="Nachname" sort-order="asc"/>
         <DxColumn data-field="email" caption="E-Mail Adresse" :editor-options="{mode: 'email'}"/>
         <DxColumn data-field="is_admin" caption="Admin" />
+        <DxSummary>
+          <DxTotalItem column="first_name" summary-type="count" />
+        </DxSummary>
       </DxDataGrid>
     </div>
   </div>
@@ -34,6 +37,8 @@ import DxDataGrid, {
   DxColumn,
   DxEditing,
   DxScrolling,
+  DxSummary,
+  DxTotalItem
 } from "devextreme-vue/data-grid";
 import LaravelLookupSource from '../LaravelLookupSource';
 import { ref, onMounted } from "vue";
