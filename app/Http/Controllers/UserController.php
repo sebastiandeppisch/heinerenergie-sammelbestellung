@@ -15,6 +15,10 @@ use Illuminate\Database\Eloquent\Builder;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(User::class, 'user');
+    }
 
     private function dxFilter(Request $request, Builder $builder): Builder{
         if(isset($request->searchOperation) && isset($request->searchValue) && isset($request->searchExpr)){

@@ -15,7 +15,7 @@
         <DxEditing
           :allow-updating="true"
           :allow-adding="true"
-          :allow-deleting="true"
+          :allow-deleting="false"
           mode="cell"
         />
         <DxColumn data-field="first_name" caption="Vorname" />
