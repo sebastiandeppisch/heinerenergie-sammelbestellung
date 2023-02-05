@@ -63,7 +63,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('products', ProductController::class)->except(['index']);
     Route::scopeBindings()->group(function(){
-        Route::resource('products.productdownloads', ProductDownloadController::class);
+        Route::resource('products.downloads', ProductDownloadController::class);
     });
 
     Route::post('upload', UploadController::class);
