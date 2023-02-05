@@ -10,12 +10,16 @@
         :column-hiding-enabled="true"
         :height="reactiveHeight.height"
         min-height="450px"
+        :allow-column-reordering="true"
+        :remote-operations="false"
       >
+        <DxGroupPanel :visible="true" empty-panel-text="Spalten hierher ziehen, zum Gruppieren"/>
+        <DxGrouping :auto-expand-all="r.autoExpand"/>
         <DxScrolling mode="virtual" />
         <DxFilterRow :visible="true" />
         <DxEditing
           :allow-updating="rowCanBeEdited"
-          :allow-adding="false"
+          :allow-adding="true"
           :allow-deleting="false"
           mode="cell"
         />
@@ -23,6 +27,14 @@
           <DxItem
             location="before"
             template="test"
+          />
+          <DxItem
+            location="before"
+            name="groupPanel"
+          />
+          <DxItem
+            location="before"
+            template="autoexpand"
           />
           <DxItem
             location="after"
@@ -36,6 +48,16 @@
             @click="openStatus"
             v-if="isAdmin"
           />        
+        </template>
+        <template #autoexpand>
+          <div>
+            <DxSwitch
+              v-model:value="r.autoExpand"
+            />
+            <span style="position:relative;top:-8px;opacity:60%">
+              Gruppen aufklappen
+            </span>
+          </div>
         </template>
         <DxColumn type="buttons" caption="Öffnen">
           <DxTableButton
@@ -85,6 +107,10 @@
 
         <DxSummary :recalculate-while-editing="true">
           <DxTotalItem column="advice_status_id" summary-type="count" />
+          <DxGroupItem
+            summary-type="count"
+            display-format="{0} Beratungen"
+          />
         </DxSummary>
         <template #distance="{data}">
           <PhysicalValue :value="data.data.distance" unit="m" />   
@@ -142,13 +168,17 @@ import DxDataGrid, {
   DxLookup,
   DxFilterRow,
   DxScrolling,
-  DxButton as DxTableButton
+  DxButton as DxTableButton,
+  DxGroupPanel,
+  DxGrouping,
+  DxGroupItem
 } from "devextreme-vue/data-grid";
 import LaravelLookupSource from "../LaravelLookupSource";
 import DxButton from "devextreme-vue/button";
 import {store} from "../store";
 import axios from "axios";
 import CustomStore from "devextreme/data/custom_store";
+import { DxSwitch } from "devextreme-vue";
 
 const emit = defineEmits(["selectAdviceId"])
 
@@ -167,7 +197,8 @@ const isAdmin = store.state.user.is_admin;
 const r = reactive({
   popupVisible: false,
   selectedBulkOrder: null,
-  advisorNames: new Map<number, string>()
+  advisorNames: new Map<number, string>(),
+  autoExpand: false
 });
 
 advisors.load().then(() => {
