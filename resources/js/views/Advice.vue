@@ -75,12 +75,21 @@
         />
         <div style="padding-top:5px;opacity:0.5;">Du kannst diese Beratung mit anderen Berater*innen teilen, um die Beratung gemeinsam duchzuführen</div>
       </div>
-      <div style="margin-top:20px;">
-        <DxButton
-          text="Bestelllink versenden"
-          @click="sendOrderLink"
-          icon="email"
-        />
+          <div style="margin-top:20px;display:flex;gap:20px;">
+            <DxButton
+              text="Bestelllink versenden"
+              @click="sendOrderLink"
+              icon="email"
+            />
+            <DxDropDownButton
+              :items="navigationTypes"
+              icon="map"
+              text="Navigation öffnen"
+              @item-click="openNavigation"
+              display-expr="name"
+              key-expr="id"
+            />
+          </div>
       </div>
 
    
@@ -116,6 +125,8 @@ import notify from 'devextreme/ui/notify';
 import axios from 'axios';
 import DxTagBox from 'devextreme-vue/tag-box';
 import DxButton from 'devextreme-vue/button';
+import { store } from '../store';
+import DxDropDownButton from 'devextreme-vue/drop-down-button';
 type Advice = App.Models.Advice;
 
 const advice = ref(null as Advice | null);
@@ -135,6 +146,14 @@ const adviceTypes = new LaravelDataSource('/api/advicetypes');
 const advisors = new LaravelDataSource('/api/users');
 
 const sharedIds = ref([] as number[]);
+
+const advisor = store.state.user;
+
+const navigationTypes = [
+  { id: 'google', name: 'Google Maps' },
+  { id: 'apple', name: 'Apple Maps' },
+  { id: 'osm', name: 'Open Streep Maps' },
+];
 
 watch(props, (newVal, oldVal) => {
     console.log("watch adviceId", newVal.adviceId, oldVal.adviceId);
@@ -196,5 +215,22 @@ function sendOrderLink() {
     .then(() => {
       notify('Bestelllink versendet', 'success', 2000);
     })
+}
+
+function openNavigation(e){
+  const type = e.itemData.id;
+  const address = advice.value?.street + ' ' + advice.value?.streetNumber + ', ' + advice.value?.zip + ' ' + advice.value?.city;
+  console.log(type, address)
+  switch(type){
+    case 'google':
+      window.open('https://www.google.com/maps/dir/?api=1&destination=' + address + '&travelmode=bicycling', '_blank');
+      break;
+    case 'apple':
+      window.open('https://maps.apple.com/?daddr=' + address + '&dirflg=w', '_blank');
+      break;
+    case 'osm':
+      window.open('https://www.openstreetmap.org/directions?engine=graphhopper_bicycle&route=' + advisor.lat + '%2C' + advisor.long + '%3B' + advice.value?.lat + '%2C' + advice.value?.long, '_blank');
+      break;
+  }
 }
 </script>
