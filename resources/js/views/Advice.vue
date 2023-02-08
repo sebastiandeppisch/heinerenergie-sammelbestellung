@@ -89,6 +89,8 @@
               display-expr="name"
               key-expr="id"
             />
+            <a :href="phoneLink"><DxButton text="Anrufen" icon="tel" /></a>
+            <a :href="mailLink"><DxButton text="E-Mail verfassen" icon="email" /></a>
           </div>
       </div>
 
@@ -119,7 +121,7 @@ import DxTextArea from 'devextreme-vue/text-area';
 import DxRadioGroup from 'devextreme-vue/radio-group';
 import { DxForm, DxItem, DxSimpleItem, DxGroupItem, DxButtonItem} from 'devextreme-vue/form';
 import { DxLoadPanel } from 'devextreme-vue/load-panel';
-import { ref, onMounted, reactive, defineProps, PropType, watch } from "vue";
+import { ref, onMounted, reactive, defineProps, PropType, watch, computed } from "vue";
 import LaravelDataSource from "../LaravelDataSource";
 import notify from 'devextreme/ui/notify';
 import axios from 'axios';
@@ -233,4 +235,16 @@ function openNavigation(e){
       break;
   }
 }
+
+const mailLink = computed(() => {
+  const body = 'Hallo ' + advice.value?.firstName + ',%0D%0A%0D%0A' + 'TEXT' + '%0D%0A%0D%0A' + 'Gruß,%0D%0A' + advisor.first_name;
+  const subject = 'heiner*energie%20Beratung';
+   
+  return 'mailto:' + advice.value?.email + '?subject=' + subject + '&body=' + body
+});
+
+const phoneLink = computed(() => {
+  return 'tel:' + advice.value?.phone;
+});
+
 </script>
