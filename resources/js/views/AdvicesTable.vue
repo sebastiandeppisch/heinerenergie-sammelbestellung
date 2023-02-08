@@ -101,7 +101,7 @@
         <DxColumn data-field="lastName"     caption="Nachname"        :allow-editing="false" />
         <DxColumn data-field="email"        caption="E-Mail Adresse"  :allow-editing="false" />
         <DxColumn data-field="phone"        caption="Telefonnummer"   :allow-editing="false"/>
-        <DxColumn data-field="street"       caption="Straße"          :allow-editing="false"/>
+        <DxColumn data-field="street"       caption="Straße & Nr."          :allow-editing="false" cell-template="street"/>
         <DxColumn data-field="zip"          caption="Plz"             :allow-editing="false"/>
         <DxColumn data-field="city"         caption="Stadt"           :allow-editing="false"/>
 
