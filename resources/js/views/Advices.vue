@@ -9,10 +9,10 @@
       :animation-enabled="false"
       :swipe-enabled="false"
     >
-        <DxItem title="Tabellenansicht" icon="detailslayout">
+        <DxItem title="Tabelle" icon="detailslayout">
           <AdvicesTable @selectAdviceId="onSelectAdvice"/>
         </DxItem>
-        <DxItem title="Kartenansicht" icon="map">
+        <DxItem title="Karte" icon="map">
           <AdvicesMap @selectAdviceId="onSelectAdvice"/>
         </DxItem>
         <DxItem title="Beratung" icon="user" :disabled="selectedAdviceId === null">
