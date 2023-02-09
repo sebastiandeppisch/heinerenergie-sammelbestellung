@@ -14,6 +14,7 @@ use App\Http\Controllers\AdviceTypeController;
 use App\Http\Controllers\AdviceStatusController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductDownloadController;
+use App\Http\Controllers\StoreOrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -79,7 +80,7 @@ Route::middleware('auth')->group(function () {
 Route::get('products', [ProductController::class, 'index']);
 Route::get('productcategories', [ProductCategoryController::class, 'index']);
 
-Route::post('orders', [OrderController::class, 'store']);
+Route::post('orders', StoreOrderController::class);
 Route::get('validateorderform', [OrderController::class, 'validateorderform']);
 //});
 Route::get('checkpassword', [OrderController::class, 'checkPassword']);
