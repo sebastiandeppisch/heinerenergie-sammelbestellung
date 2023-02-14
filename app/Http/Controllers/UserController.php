@@ -116,4 +116,15 @@ class UserController extends Controller
             $user->save();
         }
     }
+
+    public function actAsAdmin(){
+        if(Auth::user()->is_admin === false){
+            abort(403,'Du hast keine Berechtigung um als Administrator zu agieren.');
+        }
+        session()->put('isAdmin', true);
+    }
+
+    public function stopActAsAdmin(){
+        session()->forget('isAdmin');
+    }
 }

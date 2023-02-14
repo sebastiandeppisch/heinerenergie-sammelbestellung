@@ -20,7 +20,7 @@ class AdviceController extends Controller
 
     public function index()
     {
-        $isAdmin = Auth::user()->is_admin;
+        $isAdmin = Auth::user()->isActingAsAdmin();
         return Advice::all()->filter(function(Advice $advice){
             return Auth::user()->can('viewDataProtected', $advice);
         })->values()->map( fn($advice) => new DataProtectedAdvice($advice) );

@@ -4,11 +4,12 @@ namespace App\Models;
 
 use App\Models\Order;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
@@ -53,7 +54,8 @@ class User extends Authenticatable
     ];
 
     protected $appends = [
-        'name'
+        'name',
+        'isActingAsAdmin'
     ];
 
     public function orders(): HasMany{
@@ -70,5 +72,13 @@ class User extends Authenticatable
 
     public function sharedOrders(): MorphMany{
         return $this->morphMany(Order::class, 'sharings');
+    }
+
+    public function getIsActingAsAdminAttribute(): bool{
+        return $this->isActingAsAdmin();
+    }
+
+    public function isActingAsAdmin(): bool{
+        return $this->is_admin && Auth::user()->id === $this->id && session()->get('isAdmin') === true;
     }
 }

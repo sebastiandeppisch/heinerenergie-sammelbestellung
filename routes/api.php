@@ -74,6 +74,9 @@ Route::middleware('auth')->group(function () {
     Route::post('advices/{advice}/sendorderlink', [AdviceController::class, 'sendOrderLink']);
     Route::post('advices/{advice}/assign', [AdviceController::class, 'assign']);
     Route::get('advices/{advice}/advisors', [AdviceController::class, 'sortedAdvisors']);
+
+    Route::post('actAsAdmin', [UserController::class, 'actAsAdmin']);
+    Route::post('stopActAsAdmin', [UserController::class, 'stopActAsAdmin']);
 });
 
 //Route::middleware('guest')->group(function () {

@@ -16,17 +16,17 @@ class UserPolicy
 
     public function view(User $user, User $model)
     {
-        return $user->is_admin || $model->id === $user->id;
+        return $user->isActingAsAdmin() || $model->id === $user->id;
     }
 
     public function create(User $user)
     {
-        return $user->is_admin;
+        return $user->isActingAsAdmin();
     }
 
     public function update(User $user, User $model)
     {
-        return $user->is_admin;
+        return $user->isActingAsAdmin();
     }
 
     public function delete(User $user, User $model)

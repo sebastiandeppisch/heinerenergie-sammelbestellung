@@ -33,9 +33,16 @@ export const store = createStore<State>({
 	mutations: {
 		setUser(state: State, payload){
 			state.user = payload.user;
+			state.user.is_admin = payload.user.isActingAsAdmin;
 		},
 		unsetUser(state: State){
 			state.user = null;
+		},
+		actAsNonAdmin(state: State){
+			state.user.is_admin = false;
+		},
+		actAsAdmin(state: State){
+			state.user.is_admin = true;
 		}
 	}
 })

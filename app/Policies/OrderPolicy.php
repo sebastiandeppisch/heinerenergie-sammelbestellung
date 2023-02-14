@@ -32,12 +32,12 @@ class OrderPolicy
 
     public function delete(User $user, Order $order)
     {
-        return $user->is_admin || $order->advisor_id === $user->id;
+        return $user->isActingAsAdmin() || $order->advisor_id === $user->id;
     }
 
     public function export(User $user)
     {
-        return $user->is_admin;
+        return $user->isActingAsAdmin();
     }
 
     public function addAdvisors(User $user, Order $order)
@@ -47,6 +47,6 @@ class OrderPolicy
 
     private function permission(User $user, Order $order)
     {
-        return $user->is_admin || $order->advisor_id === $user->id || $order->shares->contains($user->id);
+        return $user->isActingAsAdmin() || $order->advisor_id === $user->id || $order->shares->contains($user->id);
     }
 }

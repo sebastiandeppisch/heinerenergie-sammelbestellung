@@ -49,6 +49,6 @@ class AdvicePolicy
 
     private function permission(User $user, Advice $advice)
     {
-        return $user->is_admin || $advice->advisor_id === $user->id || $advice->shares->contains($user->id);
+        return $user->isActingAsAdmin() || $advice->advisor_id === $user->id || $advice->shares->contains($user->id);
     }
 }

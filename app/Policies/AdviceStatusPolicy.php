@@ -24,17 +24,17 @@ class AdviceStatusPolicy
 
     public function create(User $user)
     {
-        return $user->is_admin;
+        return $user->isActingAsAdmin();
     }
 
     public function update(User $user, AdviceStatus $adviceStatus)
     {
-        return $user->is_admin;
+        return $user->isActingAsAdmin();
     }
 
     public function delete(User $user, AdviceStatus $adviceStatus)
     {
-        return $user->is_admin;
+        return $user->isActingAsAdmin();
     }
 
 

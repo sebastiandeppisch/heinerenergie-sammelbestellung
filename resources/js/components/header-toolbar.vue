@@ -64,6 +64,8 @@ import { useStore } from './../store'
 
 import UserPanel from "./user-panel";
 import notify from 'devextreme/ui/notify';
+import { statement } from "@babel/template";
+import axios from "axios";
 
 export default {
   props: {
@@ -85,12 +87,10 @@ export default {
 
     const isLoggedIn = computed(() => {
       return store.getters.isLoggedIn;
-    });
-    
-    
-    
-    const userMenuItems = [{
-        text: "Profile",
+    }); 
+    const userMenuItems = computed(() => {
+      const items = [{
+        text: "Profil",
         icon: "user",
         onClick: onProfileClick
       },
@@ -98,7 +98,40 @@ export default {
         text: "Logout",
         icon: "runner",
         onClick: onLogoutClick
-    }];
+      }];
+      if(store.getters.user.is_admin){
+        items.push( {
+          text: 'Berater*innen Ansicht',
+          icon: 'key',
+          onClick: () => {
+            axios.post('/api/stopActAsAdmin').then(response => {
+              notify('Du bist jetzt als Berater*in angemeldet', 'success', 2000);
+              store.commit('actAsNonAdmin')
+              const current = router.currentRoute.value.path
+              router.push({path: '/backend' }).then(() => {
+                router.push({ path: current})
+              })
+            })
+          }
+        });
+      }else{
+        items.push( {
+          text: 'Admin Ansicht',
+          icon: 'key',
+          onClick: () => {
+            axios.post('/api/actAsAdmin').then(response => {
+              notify('Du bist jetzt als Admin angemeldet', 'success', 2000);
+              store.commit('actAsAdmin')
+              const current = router.currentRoute.value.path
+              router.push({ path: '/backend' }).then(() => {
+                router.push({ path: current})
+              })
+            })
+          }
+        });
+      }
+      return items;
+    });
       
     function onLogoutClick() {
       auth.logOut().then(response => {
