@@ -1,7 +1,7 @@
 <template>
   <div ref="outer">
     <h2 class="content-block">Bestellungen</h2>
-    <div style="margin: 30px 40px 30px 40px;">
+    <div class="main-table">
     <DxDataGrid
       class="dx-card wide-card"
       :data-source="state.ordersStore"
@@ -181,3 +181,11 @@ function bulkOrderChanged(){
   }
 }
 </script>
+<style scoped>
+@media screen and (min-width:680px) {
+  .main-table{
+    margin: 30px 40px 30px 40px
+  }
+
+}
+</style>
