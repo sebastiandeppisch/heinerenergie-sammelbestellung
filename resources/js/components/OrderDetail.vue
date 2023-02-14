@@ -235,9 +235,11 @@ function sendMail() {
   flex-direction: row;
   display: flex;
   width: 100%;
+  flex-wrap: wrap;
 }
 .flex-cell{
   padding: 30px;
   flex: 1;
+  min-width: 400px;
 }
 </style>
