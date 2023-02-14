@@ -75,26 +75,23 @@
         />
         <div style="padding-top:5px;opacity:0.5;">Du kannst diese Beratung mit anderen Berater*innen teilen, um die Beratung gemeinsam duchzuführen</div>
       </div>
-          <div style="margin-top:20px;display:flex;gap:20px;">
-            <DxButton
-              text="Bestelllink versenden"
-              @click="sendOrderLink"
-              icon="email"
-            />
-            <DxDropDownButton
-              :items="navigationTypes"
-              icon="map"
-              text="Navigation öffnen"
-              @item-click="openNavigation"
-              display-expr="name"
-              key-expr="id"
-            />
-            <a :href="phoneLink"><DxButton text="Anrufen" icon="tel" /></a>
-            <a :href="mailLink"><DxButton text="E-Mail verfassen" icon="email" /></a>
-          </div>
+      <div style="margin-top:20px;display:flex;gap:20px;">
+        <DxButton
+          text="Bestelllink versenden"
+          @click="sendOrderLink"
+          icon="email"
+        />
+        <DxDropDownButton
+          :items="navigationTypes"
+          icon="map"
+          text="Navigation öffnen"
+          @item-click="openNavigation"
+          display-expr="name"
+          key-expr="id"
+        />
+        <a :href="phoneLink"><DxButton text="Anrufen" icon="tel" /></a>
+        <a :href="mailLink"><DxButton text="E-Mail verfassen" icon="email" /></a>
       </div>
-
-   
     </div>
     <div v-else style="height:100%;width:100%;min-height:300px" id="advice-loading" >
       <DxLoadPanel
