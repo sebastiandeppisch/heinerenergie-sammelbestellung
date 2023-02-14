@@ -162,6 +162,24 @@ const router = createRouter({
       component: Advices
     },
     {
+      path: "/advices/:id",
+      name: "advicesid",
+      meta: {
+        requiresAuth: true,
+        layout: defaultLayout
+      },
+      component: Advices
+    },
+    {
+      path: "/advicesmap",
+      name: "advicesmap",
+      meta: {
+        requiresAuth: true,
+        layout: defaultLayout
+      },
+      component: Advices
+    },
+    {
       path: "/profile",
       name: "profile",
       meta: {

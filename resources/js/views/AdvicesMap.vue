@@ -1,9 +1,12 @@
 <template>
-  <div style="height: 1000px; width: 100%">
+  <div ref="outer">
+  <div :style="{height: reactiveHeight.height+122 + 'px', width: '100%'}">
     <LMap
       ref="map"
       :zoom="map.zoom"
+      @update:zoom="zoomChanged"
       :center="map.center"
+      @update:center="centerChanged"
       :minZoom="3"
       :maxZoom="18"
     >
@@ -99,13 +102,13 @@
       </LMarker>
     </LMap>
   </div>
-
+</div>
 
 </template>
 
 <script setup lang="ts">
 
-import { ref, onMounted, reactive, defineEmits } from "vue";
+import { ref, onMounted, reactive, defineEmits, watch} from "vue";
 import {DxButton} from "devextreme-vue/button";
 import "leaflet/dist/leaflet.css";
 
@@ -125,6 +128,8 @@ import { latLng } from "leaflet";
 import { store } from "../store";
 import AdviceTypes from "../AdviceTypes";
 import axios from "axios";
+import { AdaptTableHeight } from "../helpers";
+import { useRouter, useRoute } from "vue-router";
 const isAdmin = store.state.user.is_admin;
 
 const emit = defineEmits(["selectAdviceId"])
@@ -132,15 +137,25 @@ const advice = ref(null);
 
 const advicesDataSource = new LaravelDataSource("/api/advices");
 const advices = ref([]);
+const user = store.state.user;
 
 const map = reactive({
-  center: latLng(49.8728, 8.6512),
+  center: latLng(49.8728, 8.6512) as { lat: number; lng: number},
   zoom: 15,
 });
 
-const user = store.state.user;
-if(user.lat !== null && user.long !== null){
-  map.center = latLng(user.lat, user.long);
+const route = useRoute();
+if(route.hash !== ''){
+  const hash = route.hash.substr(1);
+  const parts = hash.split('/');
+  map.zoom = parseInt(parts[0]);
+  map.center.lat = parseFloat(parts[1]);
+  map.center.lng = parseFloat(parts[2]);
+  console.log('hash', hash, parts, map);
+}else{
+  if(user.lat !== null && user.long !== null){
+    map.center = latLng(user.lat, user.long);
+  }
 }
 
 function loadAdvices(){
@@ -196,6 +211,29 @@ function userCanOpen(advice){
   return false;
 }
 
+const router = useRouter();
+
+function zoomChanged(e){
+  map.zoom = e;
+}
+
+function centerChanged(e){
+  if('lat' in e === false || 'lng' in e === false){
+    return;
+  }
+  map.center.lat = e.lat;
+  map.center.lng = e.lng;
+}
+
+
+const outer = ref(null);
+const tableHeight = new AdaptTableHeight(outer);
+const reactiveHeight = tableHeight.getReactive();
 onMounted(() => {
+  tableHeight.calcHeight();
 });
+
+watch(map, () => {
+  router.push({name: 'advicesmap', hash: '#' + map.zoom + '/' + map.center.lat + '/' + map.center.lng});
+})
 </script>
