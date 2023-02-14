@@ -57,7 +57,6 @@ import DxToolbar, { DxItem } from "devextreme-vue/toolbar";
 
 import HeaderToolbar from "../components/header-toolbar";
 import SideNavMenu from "../components/side-nav-menu";
-import menuItems from "../app-navigation";
 import { ref, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -133,7 +132,6 @@ export default {
       scrollViewRef,
       menuOpened,
       drawerOptions,
-      menuItems,
       headerMenuTogglerEnabled,
       toggleMenu,
       handleSideBarClick

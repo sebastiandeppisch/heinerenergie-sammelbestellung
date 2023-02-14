@@ -20,7 +20,6 @@ import DxToolbar, { DxItem } from "devextreme-vue/toolbar";
 import HeaderToolbar from "../components/header-toolbar";
 import SideNavMenu from "../components/side-nav-menu";
 import SmallToolbar from '../components/SmallToolbar.vue'
-import menuItems from "../app-navigation";
 import { ref, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
 

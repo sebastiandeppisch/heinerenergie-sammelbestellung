@@ -20,7 +20,7 @@
     >
       <dx-scroll-view ref="scrollViewRef" class="with-footer">
         <slot />
-        <slot name="footer" />
+        <slot name="footer"  v-if="!isLoggedIn"/>
       </dx-scroll-view>
       <template #menuTemplate>
         <side-nav-menu
@@ -38,7 +38,6 @@
 import DxDrawer from "devextreme-vue/drawer";
 import DxScrollView from "devextreme-vue/scroll-view";
 
-import menuItems from "../app-navigation";
 import HeaderToolbar from "../components/header-toolbar";
 import SideNavMenu from "../components/side-nav-menu";
 import { computed, ref, watch} from 'vue';
@@ -112,7 +111,6 @@ export default {
 
     return {
       menuOpened,
-      menuItems,
       toggleMenu,
       handleSideBarClick,
       drawerOptions,
