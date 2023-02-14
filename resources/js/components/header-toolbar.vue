@@ -99,6 +99,9 @@ export default {
         icon: "runner",
         onClick: onLogoutClick
       }];
+      if(!store.getters.canActAsAdmin){
+        return items;
+      }
       if(store.getters.user.is_admin){
         items.push( {
           text: 'Berater*innen Ansicht',
@@ -111,6 +114,8 @@ export default {
               router.push({path: '/backend' }).then(() => {
                 router.push({ path: current})
               })
+            }).catch(error => {
+              notify('Es ist ein Fehler aufgetreten', 'error', 2000);
             })
           }
         });
@@ -126,6 +131,8 @@ export default {
               router.push({ path: '/backend' }).then(() => {
                 router.push({ path: current})
               })
+            }).catch(error => {
+              notify('Du bist kein Admin', 'error', 2000);
             })
           }
         });

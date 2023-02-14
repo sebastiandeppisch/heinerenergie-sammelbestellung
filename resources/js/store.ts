@@ -4,14 +4,16 @@ import { createStore, Store, useStore as baseUseStore } from 'vuex'
 
 type User = App.Models.User
 export interface State {
-  user: User|null
+  user: User|null,
+  canActAsAdmin: boolean
 }
 
 export const key: InjectionKey<Store<State>> = Symbol()
 
 export const store = createStore<State>({
 	state: {
-		user: null
+		user: null,
+		canActAsAdmin: false
 	},
 	getters: {
 		isLoggedIn(state: State): boolean{
@@ -28,11 +30,15 @@ export const store = createStore<State>({
 				return null;
 			}
 			return state.user;
+		},
+		canActAsAdmin(state: State): boolean{
+			return state.canActAsAdmin;
 		}
 	},
 	mutations: {
 		setUser(state: State, payload){
 			state.user = payload.user;
+			state.canActAsAdmin = payload.user.is_admin;
 			state.user.is_admin = payload.user.isActingAsAdmin;
 		},
 		unsetUser(state: State){
