@@ -79,6 +79,6 @@ class User extends Authenticatable
     }
 
     public function isActingAsAdmin(): bool{
-        return $this->is_admin && Auth::user()->id === $this->id && session()->get('isAdmin') === true;
+        return $this->is_admin && Auth::user()?->id === $this->id && session()->get('isAdmin') === true;
     }
 }
