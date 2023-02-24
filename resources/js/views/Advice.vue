@@ -76,11 +76,6 @@
         <div style="padding-top:5px;opacity:0.5;">Du kannst diese Beratung mit anderen Berater*innen teilen, um die Beratung gemeinsam duchzuführen</div>
       </div>
       <div style="margin-top:20px;display:flex;gap:20px;">
-        <DxButton
-          text="Bestelllink versenden"
-          @click="sendOrderLink"
-          icon="email"
-        />
         <DxDropDownButton
           :items="navigationTypes"
           icon="map"
@@ -91,6 +86,14 @@
         />
         <a :href="phoneLink"><DxButton text="Anrufen" icon="tel" /></a>
         <a :href="mailLink"><DxButton text="E-Mail verfassen" icon="email" /></a>
+      </div>
+      <div style="margin-top:20px;display:flex;gap:20px;">
+        <a :href="orderMailLink"><DxButton text="E-Mail mit Bestelllink verfassen" icon="email" /></a>
+        <DxButton
+          text="Bestelllink kopieren"
+          icon="copy"
+          @click="copyOrderLink"
+        />
       </div>
     </div>
     <div v-else style="height:100%;width:100%;min-height:300px" id="advice-loading" >
@@ -210,7 +213,7 @@ function updateAdvisors(e: any) {
 }
 
 function sendOrderLink() {
-  axios.post('api/advices/' + props.adviceId + '/sendorderlink')
+  axios.post('/api/advices/' + props.adviceId + '/sendorderlink')
     .then(() => {
       notify('Bestelllink versendet', 'success', 2000);
     })
@@ -239,6 +242,40 @@ const mailLink = computed(() => {
    
   return 'mailto:' + advice.value?.email + '?subject=' + subject + '&body=' + body
 });
+
+const orderLink = computed(() => {
+  const data =  {
+    advisorEmail: advisor.email,
+    firstName: advice.value?.firstName,
+    lastName: advice.value?.lastName,
+    street: advice.value?.street,
+    streetNumber: advice.value?.streetNumber,
+    zip: advice.value?.zip,
+    city: advice.value?.city,
+    email: advice.value?.email,
+    phone: advice.value?.phone,
+    email_confirmation: advice.value?.email,
+  }
+  return 'https://balkon.heinerenergie.de/sammelbestellung?formdata=' + JSON.stringify(data);
+})
+
+const orderMailLink = computed(() => {
+  const url = orderLink.value;
+  const body = 'Hallo ' + advice.value?.firstName + ',%0D%0A%0D%0A' + url + '%0D%0A%0D%0A' + 'HIER MUSST DU NOCH DAS PASSWORT EINTRAGEN' + '%0D%0A%0D%0AGruß,%0D%0A' + advisor.first_name;
+  const subject = 'heiner*energie%20Sammelbestellung';
+   
+  return 'mailto:' + advice.value?.email + '?subject=' + subject + '&body=' + body
+});
+
+function copyOrderLink() {
+  const el = document.createElement('textarea');
+  el.value = orderLink.value;
+  document.body.appendChild(el);
+  el.select();
+  document.execCommand('copy');
+  document.body.removeChild(el);
+  notify('Bestelllink wurde in die Zwischenablage kopiert', 'success', 2000);
+}
 
 const phoneLink = computed(() => {
   return 'tel:' + advice.value?.phone;
