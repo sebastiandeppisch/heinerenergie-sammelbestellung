@@ -19,7 +19,7 @@
         <DxFilterRow :visible="true" />
         <DxEditing
           :allow-updating="rowCanBeEdited"
-          :allow-adding="true"
+          :allow-adding="false"
           :allow-deleting="false"
           mode="cell"
         />
@@ -38,7 +38,7 @@
           />
           <DxItem
             location="after"
-            name="addRowButton"
+            template="newadvice"
           />
         </DxToolbar>
         <template #test>
@@ -48,6 +48,12 @@
             @click="openStatus"
             v-if="isAdmin"
           />        
+        </template>
+        <template #newadvice>
+          <DxButton
+            icon="add"
+            @click="openNewAdvice"
+          />
         </template>
         <template #autoexpand>
           <div>
@@ -145,6 +151,76 @@
       >
         <AdviceStatus />
       </DxPopup>  
+
+      <DxPopup
+        v-model:visible="r.newAdvicePopupVisible"
+        title="Neue Beratung"
+        hide-on-outside-click="true"
+        :show-close-button="true"
+        width="600px"
+        height="800px"
+      >
+      <DxForm
+          label-mode="floating"
+          :col-count="2"
+          :form-data="newadvice"
+        >
+          <DxFormGroupItem
+            caption="Name"
+          >
+            <DxFormItem data-field="firstName" :label="{ text: 'Vorname'}" />
+            <DxFormItem data-field="lastName" :label="{ text: 'Nachname'}"/>
+          </DxFormGroupItem>
+
+          <DxFormGroupItem
+            caption="Kontakt"
+          >
+            <DxFormItem data-field="phone" :label="{ text: 'Telefonnummer'}"/>
+            <DxFormItem data-field="email" :label="{ text: 'E-Mail Adresse'}"/>
+          </DxFormGroupItem>
+
+          <DxFormGroupItem
+            caption="Adresse"
+          >
+            <DxFormItem data-field="street" :label="{ text: 'Straße'}"/>
+            <DxFormItem data-field="streetNumber" :label="{ text: 'Hausnummer'}"/>
+            <DxFormItem data-field="zip" :label="{ text: 'Postleitzahl'}"/>
+            <DxFormItem data-field="city" :label="{ text: 'Stadt'}"/>
+          </DxFormGroupItem>
+
+          <DxFormGroupItem
+            caption="Beratung"
+          >
+            <DxFormItem
+              data-field="advice_status_id"
+              :label="{ text: 'Status'}"
+              editor-type="dxSelectBox"
+              :editor-options="{
+                dataSource: adviceStatus,
+                displayExpr: 'name',
+                valueExpr: 'id' }"
+            />
+            <DxFormItem
+              data-field="type"
+              :label="{ text: 'Typ'}"
+              editor-type="dxRadioGroup"
+              :editor-options="{
+                dataSource: adviceTypes,
+                displayExpr: 'name',
+                valueExpr: 'id',
+                layout: 'horizontal',
+                itemTemplate: radioBoxLayout
+              }"
+            />
+            <DxFormItem data-field="commentary" :label="{ text: 'Kommentar'}" editor-type="dxTextArea" :editor-options="{ autoResizeEnabled: true}"/>
+          </DxFormGroupItem>
+          
+          <DxButtonItem
+            :button-options="{ text: 'Speichern', type: 'success', useSubmitBehavior: true, width: '100%', onClick: saveNewAdvice }"
+            :col-span="2"
+          />
+        </DxForm>
+      </DxPopup>
     </div>
   </div>
 </template>
@@ -156,6 +232,7 @@ import { ref, onMounted, reactive, defineEmits } from "vue";
 import DxPopup from 'devextreme-vue/popup';
 import AdviceStatus from "./AdviceStatus.vue";
 import PhysicalValue from "./PhysicalValue.vue";
+import Advice from "./Advice.vue";
 
 import DxDataGrid, {
   DxColumn,
@@ -171,7 +248,7 @@ import DxDataGrid, {
   DxButton as DxTableButton,
   DxGroupPanel,
   DxGrouping,
-  DxGroupItem
+  DxGroupItem,
 } from "devextreme-vue/data-grid";
 import LaravelLookupSource from "../LaravelLookupSource";
 import DxButton from "devextreme-vue/button";
@@ -179,6 +256,8 @@ import {store} from "../store";
 import axios from "axios";
 import CustomStore from "devextreme/data/custom_store";
 import { DxSwitch } from "devextreme-vue";
+import { DxForm, DxItem as DxFormItem, DxSimpleItem, DxGroupItem as DxFormGroupItem, DxButtonItem} from 'devextreme-vue/form';
+import notify from "devextreme/ui/notify";
 
 const emit = defineEmits(["selectAdviceId"])
 
@@ -194,11 +273,43 @@ const reactiveHeight = tableHeight.getReactive();
 
 const isAdmin = store.state.user.is_admin;
 
+const newadvice = reactive({
+  firstName: '',
+  lastName: '',
+  phone: '',
+  email: '',
+  street: '',
+  streetNumber: '',
+  zip: '',
+  city: '',
+  advice_status_id: 1,
+  type: 0,
+  commentary: '',
+  advisor_id: store.state.user.id,
+});
+
+function radioBoxLayout(data: any) {
+  const icons = {
+    Home: 'home',
+    Virtual: 'tel',
+    DirectOrder: 'cart'
+  }
+
+  const helpText = {
+    Home: 'Beratung vor Ort',
+    Virtual: 'Beratung per Telefon',
+    DirectOrder: 'Direktbestellung'
+  }
+
+  return `<i style="font-size:1.5em;" class="dx-icon-${icons[data.name]}" title='${helpText[data.name]}'></i>`;
+};
+
 const r = reactive({
   popupVisible: false,
   selectedBulkOrder: null,
   advisorNames: new Map<number, string>(),
-  autoExpand: false
+  autoExpand: false,
+  newAdvicePopupVisible: false,
 });
 
 advisors.load().then(() => {
@@ -244,7 +355,7 @@ function userCanEdit(advice){
   if(advice.advisor_id === userId){
     return true;
   }
-  if(advice.shares_ids.includes(userId)){
+  if('shares_ids' in advice && advice.shares_ids.includes(userId)){
     return true;
   }
   return false;
@@ -261,6 +372,32 @@ function sortedAdvisors(e){
     load: (options) => {
       return axios.get('api/advices/' + e.data.id + '/advisors').then(response => response.data);
     }
+  });
+}
+
+function openNewAdvice(){
+  r.newAdvicePopupVisible = true;
+}
+
+function saveNewAdvice(){
+  axios.post('api/advices', newadvice).then(response => response.data).then((advice) => {
+    notify('Beratung erfolgreich angelegt', 'success', 3000);
+    advices.store().push([{ type: "insert", data: advice, key: advice.id }]);
+    r.newAdvicePopupVisible = false;
+    newadvice.firstName = '';
+    newadvice.lastName = '';
+    newadvice.phone = '';
+    newadvice.email = '';
+    newadvice.street = '';
+    newadvice.streetNumber = '';
+    newadvice.zip = '';
+    newadvice.city = '';
+    newadvice.advice_status_id = 1;
+    newadvice.type = 0;
+    newadvice.commentary = '';
+    newadvice.advisor_id = store.state.user.id
+  }).catch((error) => {
+    notify(error.response.data.message, 'error', 3000);
   });
 }
 </script>

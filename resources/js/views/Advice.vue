@@ -198,6 +198,8 @@ function fetchAdvice(id: number) {
 function onSubmit(){
   advicesDataSource.store().update(props.adviceId, advice.value).then((result) => {
     notify("Beratung gespeichert", "success", 2000);
+  }).catch((error) => {
+    notify(error, "error", 2000);
   });
 }
 
