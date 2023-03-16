@@ -5,7 +5,7 @@
       &nbsp;&nbsp;
       <router-link to="/impress">Impressum</router-link>
        &nbsp;&nbsp;
-      <router-link to="/datapolicy">Datenschutzerkklärung</router-link>
+      <router-link to="/datapolicy">Datenschutzerklärung</router-link>
     </footer>
   </div>
 </template>
