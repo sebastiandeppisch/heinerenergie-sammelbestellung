@@ -121,7 +121,7 @@ import DxTextArea from 'devextreme-vue/text-area';
 import DxRadioGroup from 'devextreme-vue/radio-group';
 import { DxForm, DxItem, DxSimpleItem, DxGroupItem, DxButtonItem} from 'devextreme-vue/form';
 import { DxLoadPanel } from 'devextreme-vue/load-panel';
-import { ref, onMounted, reactive, defineProps, PropType, watch, computed } from "vue";
+import { ref, onMounted, reactive, PropType, watch, computed } from "vue";
 import LaravelDataSource from "../LaravelDataSource";
 import notify from 'devextreme/ui/notify';
 import axios from 'axios';
