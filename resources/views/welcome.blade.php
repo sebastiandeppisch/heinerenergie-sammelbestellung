@@ -7,6 +7,7 @@
     <link rel="icon" href="{{ asset('favicon.ico') }}">
     <title>Heinerenergie Sammelbestellung</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    @vite(['resources/js/app.ts'])
   </head>
   <body class="dx-viewport">
     <noscript>
@@ -18,7 +19,6 @@
     @endauth
     @guest
       <script>window.user = null;</script>
-    @endguest
-    <script src="{{ mix('/js/app.js') }}"></script>
+    @endguest 
   </body>
 </html>

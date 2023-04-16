@@ -108,7 +108,7 @@
 
 <script setup lang="ts">
 
-import { ref, onMounted, reactive, defineEmits, watch} from "vue";
+import { ref, onMounted, reactive, watch} from "vue";
 import {DxButton} from "devextreme-vue/button";
 import "leaflet/dist/leaflet.css";
 

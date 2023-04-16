@@ -17,8 +17,8 @@ import DxDrawer from "devextreme-vue/drawer";
 import DxScrollView from "devextreme-vue/scroll-view";
 import DxToolbar, { DxItem } from "devextreme-vue/toolbar";
 
-import HeaderToolbar from "../components/header-toolbar";
-import SideNavMenu from "../components/side-nav-menu";
+import HeaderToolbar from "../components/header-toolbar.vue";
+import SideNavMenu from "../components/side-nav-menu.vue";
 import SmallToolbar from '../components/SmallToolbar.vue'
 import { ref, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';

@@ -18,3 +18,4 @@ public/mix-manifest.json
 public/uploads/**
 public/css/**
 public/images/vendor/**
+public/build/**
