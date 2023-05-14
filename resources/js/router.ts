@@ -19,7 +19,7 @@ import Settings from './views/Settings.vue'
 import Profile from './views/Profile.vue'
 import AdvicesMap from './views/AdvicesMap.vue'
 import { store } from "./store";
-
+import NewAdvice from "./views/NewAdvice.vue";
 const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -188,6 +188,15 @@ const router = createRouter({
       },
       component: Profile
     },
+    {
+      path: "/newadvice",
+      name: "newadvice",
+      meta: {
+        requiresAuth: false,
+        layout: PublicLayout
+      },
+      component: NewAdvice
+    }
   ]
 });
 

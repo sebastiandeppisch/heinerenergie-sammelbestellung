@@ -1,0 +1,95 @@
+<template>
+  <div style="display: flex;flex-direction: column;height:100%">
+      <span style="font-size:1.2em">Um Dich zu kontaktieren, brauchen wir Deine Kontaktdaten</span>
+      <div style="flex-grow: 1"></div>
+      
+      <DxTextBox
+        v-model="advice.email"
+        placeholder="max@mustermann.de"
+        mode="email"
+        label="E-Mail"
+        validation-message-mode="always"
+        @change="change"
+        @key-up="checkForm"
+        :value-change-event="valueChangeEvent"
+      >
+        <DxValidator  @validated="contactValidated" name="email">
+          <DxRequiredRule message="Ohne E-Mail-Adresse können wir Dich nicht kontaktieren"/>
+          <DxEmailRule message="Die eingegebene E-Mail Adresse ist ungültig"/>
+        </DxValidator>
+      </DxTextBox>
+      <div style="flex-grow: 1"></div>
+      <DxTextBox
+        v-model="advice.phone"
+        placeholder="06151/12345"
+        mode="tel"
+        label="Telefon"
+        validation-message-mode="always"
+        @change="change"
+        @key-up="checkForm"
+        :value-change-event="valueChangeEvent"
+      >
+        <DxValidator @validated="contactValidated" name="phone">
+          <DxRequiredRule message="Ohne Telefonnummer können wir Dich nicht kontaktieren"/>
+        </DxValidator> 
+      </DxTextBox>
+      <div style="flex-grow: 1"></div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import DxTextBox from "devextreme-vue/text-box";
+
+import { computed, reactive, ref } from "vue";
+
+import {
+  DxValidator,
+  DxRequiredRule,
+  DxEmailRule
+} from 'devextreme-vue/validator';
+
+interface Props {
+  modelValue: App.Models.Advice
+}
+
+const props = defineProps<Props>();
+const emit = defineEmits(["allowForward"])
+const valueChangeEvent = ref('change');
+
+const r = reactive({
+  mailValid: false,
+  phoneValid: false
+})
+
+function contactValidated(e){
+  if(e.name === 'email'){
+    r.mailValid = e.isValid;
+  }
+
+  if(e.name === 'phone'){
+    r.phoneValid = e.isValid;
+  }
+}
+
+function checkForm(){
+  if(r.mailValid === false || r.phoneValid === false || advice.value.email === '' || advice.value.phone === ''){
+    emit('allowForward', false)
+  }else{
+    emit('allowForward', true)
+  }
+}
+
+function change(){
+  valueChangeEvent.value = 'keyup';
+  checkForm();
+}
+
+const advice = computed<App.Models.Advice>({
+  get() {
+    return props.modelValue
+  },
+  set(value) {
+  }
+})
+
+</script>

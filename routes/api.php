@@ -15,6 +15,7 @@ use App\Http\Controllers\AdviceStatusController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductDownloadController;
 use App\Http\Controllers\StoreOrderController;
+use App\Http\Controllers\StoreAdviceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -93,3 +94,5 @@ Route::get('html/datapolicy', [SettingController::class, 'datapolicy']);
 Route::get('html/orderFormText', [SettingController::class, 'orderFormText']);
 
 Route::resource('advicetypes', AdviceTypeController::class)->only(['index', 'show']);
+
+Route::post('newadvice', StoreAdviceController::class);
