@@ -1,5 +1,6 @@
 <?php
 
+use App\AdviceType;
 use App\HouseType;
 use App\Models\User;
 use App\Models\Advice;
@@ -35,6 +36,34 @@ test('advice can be saved', function () {
     foreach($data as $key => $value) {
         if($key === 'houseType'){
             expect($advice->$key)->toBe(HouseType::cases()[$value]);
+            continue;
+        }
+        expect($advice->$key)->toBe($value);
+    }
+});
+
+
+test('direct order advice can be saved', function () {
+    $data = [
+        'firstName' => fake()->firstName(),
+        'lastName' => fake()->lastName(),
+        'email' => fake()->email(),
+        'phone' => fake()->phoneNumber(),
+        'zip' => (int) fake()->postcode(),
+        'city' => fake()->city(),
+        'street' => fake()->streetName(),
+        'streetNumber' => fake()->buildingNumber(),
+        'type' => AdviceType::DirectOrder->value,
+    ];
+    $response = $this->post('api/newadvice', $data);
+    $response->assertStatus(200);
+
+    $advice = Advice::firstOrFail();
+
+    
+    foreach($data as $key => $value) {
+        if($key === 'type'){
+            expect($advice->$key)->toBe(AdviceType::cases()[$value]);
             continue;
         }
         expect($advice->$key)->toBe($value);

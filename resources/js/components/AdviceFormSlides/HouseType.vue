@@ -12,7 +12,7 @@
           @selection-changed="houseTypeChanged"
         />
       </div>
-      <div style="flex: 1;margin-top:8px">
+      <div style="flex: 1;margin-top:32px;">
         <div v-show="advice.houseType !== null">
           <span style="font-size: 1.2em">Musst Du bauliche Veränderungen mit einer WEG oder Vermieter*in absprechen?</span>
           <DxButtonGroup
@@ -28,13 +28,13 @@
       </div>
       </div>
     </div>
-    <div style="flex: 1;margin-top:8px">
+    <div style="flex: 1;margin-top:32px;">
       <div v-show="advice.landlordExists !== null">
-        <span style="font-size: 1.2em">Wo möchtest Du ein Steckersolargerät installieren?</span>
+        <span style="font-size: 1.2em">Wo möchtest Du Dein Steckersolargerät installieren?</span>
         <DxTextArea
           v-model="advice.placeNotes"
           placeholder="Garage, Dach, Gartenhaus, ..."
-          height="100px"
+          height="70px"
           @change="checkForm"
           @key-up="checkForm"
           value-change-event="keyup"

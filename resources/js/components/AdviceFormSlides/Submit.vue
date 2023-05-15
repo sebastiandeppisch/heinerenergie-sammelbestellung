@@ -6,13 +6,14 @@
       placeholder="Ich habe noch eine Frage zur Balkonhalterung..."
       height="calc(100% - 100px)"
     />
-    <div style="height: 16px;display:block;"></div>
+    <div style="height: 32px;display:block;"></div>
     <DxButton
       text="Beratungsanfrage abschicken"
       icon="fas fa-paper-plane"
       type="success"
       @click="submit"
       :disabled="loading"
+      height="48px"
     />
     <div style="align-items: center;display:flex; flex-direction: column;padding-top:8px;">
       <DxLoadIndicator

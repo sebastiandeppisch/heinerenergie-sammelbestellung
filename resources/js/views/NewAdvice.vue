@@ -7,23 +7,18 @@
       :selected-index="r.selectedSlide"
     >
       <DxItem>
-        <SlideCard @forward="forward" @backward="backward" :show-backward="false" v-slot="scope">
-          <Name v-model="r.advice" @allow-forward="scope.allowForward"/>
-        </SlideCard>
-      </DxItem>
-      <DxItem>
-        <SlideCard @forward="forward" @backward="backward" v-slot="scope">
-          <HelpType v-model="r.advice" @allow-forward="scope.allowForward"/>
-        </SlideCard>
-      </DxItem>
-      <DxItem>
-        <SlideCard @forward="forward" @backward="backward" v-slot="scope">
+        <SlideCard @forward="forward" @backward="backward" v-slot="scope" :show-backward="false" >
           <Contact v-model="r.advice" @allow-forward="scope.allowForward"/>
         </SlideCard>
       </DxItem>
       <DxItem>
         <SlideCard @forward="forward" @backward="backward" v-slot="scope">
           <Place v-model="r.advice" @allow-forward="scope.allowForward"/>
+        </SlideCard>
+      </DxItem>
+      <DxItem>
+        <SlideCard @forward="forward" @backward="backward" v-slot="scope">
+          <HelpType v-model="r.advice" @allow-forward="scope.allowForward"/>
         </SlideCard>
       </DxItem>
       <DxItem>
@@ -49,7 +44,6 @@
 
 import { DxMultiView, DxItem } from 'devextreme-vue/multi-view';
 import SlideCard from '../components/AdviceFormSlides/SlideCard.vue';
-import Name from '../components/AdviceFormSlides/Name.vue';
 import HelpType from '../components/AdviceFormSlides/HelpType.vue';
 import Contact from '../components/AdviceFormSlides/Contact.vue';
 import Place from '../components/AdviceFormSlides/Place.vue';
@@ -67,20 +61,18 @@ const r = reactive({
     helpType_bureaucracy: false,
     helpType_other: false,
     houseType: null,
-    other: false,
     firstName: "",
     lastName: "",
     email: "",
     phone: "",
-    zip: "",
+    zip: null,
     city: "",
     street: "",
     streetNumber: "",
     placeNotes: "",
-    landlordExists: null
+    landlordExists: null,
+    type: null
   },
-  contact: null,
-  saving: false,
   selectedSlide: 0
 });
 
@@ -88,10 +80,20 @@ const multiView = ref(null);
 
 function forward(){
   r.selectedSlide++;
+  if( isAdditionalSlide() ){
+    forward();
+  }
+}
+
+function isAdditionalSlide(){
+  return r.advice.type === 2 && ( r.selectedSlide === 2 || r.selectedSlide === 3 );
 }
 
 function backward(){
   r.selectedSlide--;
+  if( isAdditionalSlide() ){
+    backward();
+  }
 }
 
 function submit(){

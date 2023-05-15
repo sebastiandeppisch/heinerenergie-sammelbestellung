@@ -1,7 +1,6 @@
 <template>
-  <div style="display: flex; flex-direction: column">
+  <div style="display: flex; flex-direction: column; gap:32px;">
     <span style="font-size: 1.2em">Bei was benötigst Du Beratung, {{ advice.firstName }}?</span>
-    <div style="flex-grow: 1"></div>
 
     <div style="display: flex; flex-direction: row">
       <div style="width: 45px">
@@ -18,7 +17,6 @@
         </div>
       </div>
     </div>
-    <div style="flex-grow: 1"></div>
     <div style="display: flex; flex-direction: row">
       <div style="width: 45px">
         <font-awesome-icon icon="fa fa-file-signature" style="font-size: 2em" />
@@ -35,7 +33,6 @@
         </div>
       </div>
     </div>
-    <div style="flex-grow: 1"></div>
     <div style="display: flex; flex-direction: row">
       <div style="width: 45px">
         <font-awesome-icon icon="fa fa-wrench" style="font-size: 2em" />
@@ -51,7 +48,6 @@
         </div>
       </div>
     </div>
-    <div style="flex-grow: 1"></div>
     <div style="display: flex; flex-direction: row">
       <div style="width: 45px">
         <!-- TODO fix path -->

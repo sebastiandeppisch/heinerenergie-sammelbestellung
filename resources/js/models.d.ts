@@ -83,6 +83,7 @@ declare namespace App.Models {
         helpType_technical: boolean;
         helpType_bureaucracy: boolean;
         helpType_other: boolean;
+        landlordExists: boolean | null;
         advisor?: App.Models.User | null;
         status?: App.Models.AdviceStatus | null;
         shares?: Array<App.Models.User> | null;
