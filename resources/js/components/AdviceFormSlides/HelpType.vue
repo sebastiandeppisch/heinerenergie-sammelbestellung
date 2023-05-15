@@ -9,7 +9,7 @@
       </div>
       <div>
         <DxCheckBox
-          v-model="advice.helpType.place"
+          v-model="advice.helpType_place"
           text="Ort (Balkon, Garten, Terrasse, etc.)"
           @value-changed="checkForm"
         />
@@ -25,7 +25,7 @@
       </div>
       <div>
         <DxCheckBox
-          v-model="advice.helpType.bureaucracy"
+          v-model="advice.helpType_bureaucracy"
           text="Bürokratie (Anmeldung, Förderung, etc.)"
           @value-changed="checkForm"
         />
@@ -42,7 +42,7 @@
       </div>
       <div>
         <DxCheckBox
-          v-model="advice.helpType.technical"
+          v-model="advice.helpType_technical"
           text="Technisches (Anschluss, Befestigung, etc.)"
           @value-changed="checkForm"
         />
@@ -62,7 +62,7 @@
       </div>
       <div>
         <DxCheckBox
-          v-model="advice.helpType.other"
+          v-model="advice.helpType_other"
           text="Sonstiges"
           @value-changed="checkForm"
         />
@@ -88,7 +88,7 @@ const props = defineProps<Props>();
 const emit = defineEmits(["allowForward"]);
 
 function checkForm() {
-  if (advice.value.helpType.place || advice.value.helpType.bureaucracy || advice.value.helpType.technical || advice.value.helpType.other) {
+  if (advice.value.helpType_place || advice.value.helpType_bureaucracy || advice.value.helpType_technical || advice.value.helpType_other) {
     emit("allowForward", true);
   } else {
     emit("allowForward", false);

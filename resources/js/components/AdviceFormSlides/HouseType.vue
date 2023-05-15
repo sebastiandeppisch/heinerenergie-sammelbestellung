@@ -12,7 +12,7 @@
           @selection-changed="houseTypeChanged"
         />
       </div>
-      <div style="flex: 1">
+      <div style="flex: 1;margin-top:8px">
         <div v-show="advice.houseType !== null">
           <span style="font-size: 1.2em">Musst Du bauliche Veränderungen mit einer WEG oder Vermieter*in absprechen?</span>
           <DxButtonGroup
@@ -28,7 +28,7 @@
       </div>
       </div>
     </div>
-    <div style="flex: 1">
+    <div style="flex: 1;margin-top:8px">
       <div v-show="advice.landlordExists !== null">
         <span style="font-size: 1.2em">Wo möchtest Du ein Steckersolargerät installieren?</span>
         <DxTextArea
