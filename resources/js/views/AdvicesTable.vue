@@ -290,7 +290,7 @@ const newadvice = reactive({
   advice_status_id: 1,
   type: 0,
   commentary: '',
-  advisor_id: store.state.user.id,
+ // advisor_id: store.state.user.id,
 });
 
 function radioBoxLayout(data: any) {
@@ -400,7 +400,7 @@ function saveNewAdvice(){
     newadvice.advice_status_id = 1;
     newadvice.type = 0;
     newadvice.commentary = '';
-    newadvice.advisor_id = store.state.user.id
+   // newadvice.advisor_id = store.state.user.id
   }).catch((error) => {
     notify(error.response.data.message, 'error', 3000);
   });
