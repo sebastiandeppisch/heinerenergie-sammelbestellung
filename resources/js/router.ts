@@ -116,7 +116,7 @@ const router = createRouter({
     },
     {
       path: '/backend',
-      redirect: "/neworder"
+      redirect: "/dashboard"
     },
     {
       path: "/recovery",
