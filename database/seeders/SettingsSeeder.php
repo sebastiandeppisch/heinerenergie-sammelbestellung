@@ -30,6 +30,10 @@ class SettingsSeeder extends Seeder
             [
                 'key' => 'datapolicy',
                 'value' => 'Datenschutzerklärung',
+            ],
+            [
+                'key' => 'advisorInfo',
+                'value' => 'Berater*innen Info',
             ]
         ];
         

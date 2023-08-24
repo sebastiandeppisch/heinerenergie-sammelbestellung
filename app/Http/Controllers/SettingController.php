@@ -62,4 +62,10 @@ class SettingController extends Controller
             "html" => Setting::get('orderFormText')
         ];
     }
+
+    public function advisorInfo(){
+        return [
+            "html" => Setting::get('advisorInfo')
+        ];
+    }
 }
