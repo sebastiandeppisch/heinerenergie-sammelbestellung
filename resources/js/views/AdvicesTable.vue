@@ -74,6 +74,11 @@
             :visible="isOpenVisible"
           />
         </DxColumn>
+        <DxColumn
+          data-field="created_at"
+          caption="Erstellt am"
+          :allow-editing="false"
+        />
         <DxColumn data-field="advice_status_id" caption="Status">
           <DxLookup
             :data-source="adviceStatus"
