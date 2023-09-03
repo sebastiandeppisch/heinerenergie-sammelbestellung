@@ -162,69 +162,73 @@
         title="Neue Beratung"
         hide-on-outside-click="true"
         :show-close-button="true"
-        width="600px"
-        height="800px"
+        max-width="900px"
       >
-      <DxForm
-          label-mode="floating"
-          :col-count="2"
-          :form-data="newadvice"
+        <DxScrollView
+          width="100%"
+          height="100%"
         >
-          <DxFormGroupItem
-            caption="Name"
+          <DxForm
+            label-mode="floating"
+            :col-count="2"
+            :form-data="newadvice"
           >
-            <DxFormItem data-field="firstName" :label="{ text: 'Vorname'}" />
-            <DxFormItem data-field="lastName" :label="{ text: 'Nachname'}"/>
-          </DxFormGroupItem>
+            <DxFormGroupItem
+              caption="Name"
+            >
+              <DxFormItem data-field="firstName" :label="{ text: 'Vorname'}" />
+              <DxFormItem data-field="lastName" :label="{ text: 'Nachname'}"/>
+            </DxFormGroupItem>
 
-          <DxFormGroupItem
-            caption="Kontakt"
-          >
-            <DxFormItem data-field="phone" :label="{ text: 'Telefonnummer'}"/>
-            <DxFormItem data-field="email" :label="{ text: 'E-Mail Adresse'}"/>
-          </DxFormGroupItem>
+            <DxFormGroupItem
+              caption="Kontakt"
+            >
+              <DxFormItem data-field="phone" :label="{ text: 'Telefonnummer'}"/>
+              <DxFormItem data-field="email" :label="{ text: 'E-Mail Adresse'}"/>
+            </DxFormGroupItem>
 
-          <DxFormGroupItem
-            caption="Adresse"
-          >
-            <DxFormItem data-field="street" :label="{ text: 'Straße'}"/>
-            <DxFormItem data-field="streetNumber" :label="{ text: 'Hausnummer'}"/>
-            <DxFormItem data-field="zip" :label="{ text: 'Postleitzahl'}"/>
-            <DxFormItem data-field="city" :label="{ text: 'Stadt'}"/>
-          </DxFormGroupItem>
+            <DxFormGroupItem
+              caption="Adresse"
+            >
+              <DxFormItem data-field="street" :label="{ text: 'Straße'}"/>
+              <DxFormItem data-field="streetNumber" :label="{ text: 'Hausnummer'}"/>
+              <DxFormItem data-field="zip" :label="{ text: 'Postleitzahl'}"/>
+              <DxFormItem data-field="city" :label="{ text: 'Stadt'}"/>
+            </DxFormGroupItem>
 
-          <DxFormGroupItem
-            caption="Beratung"
-          >
-            <DxFormItem
-              data-field="advice_status_id"
-              :label="{ text: 'Status'}"
-              editor-type="dxSelectBox"
-              :editor-options="{
-                dataSource: adviceStatus,
-                displayExpr: 'name',
-                valueExpr: 'id' }"
+            <DxFormGroupItem
+              caption="Beratung"
+            >
+              <DxFormItem
+                data-field="advice_status_id"
+                :label="{ text: 'Status'}"
+                editor-type="dxSelectBox"
+                :editor-options="{
+                  dataSource: adviceStatus,
+                  displayExpr: 'name',
+                  valueExpr: 'id' }"
+              />
+              <DxFormItem
+                data-field="type"
+                :label="{ text: 'Typ'}"
+                editor-type="dxRadioGroup"
+                :editor-options="{
+                  dataSource: adviceTypes,
+                  displayExpr: 'name',
+                  valueExpr: 'id',
+                  layout: 'horizontal',
+                  itemTemplate: radioBoxLayout
+                }"
+              />
+              <DxFormItem data-field="commentary" :label="{ text: 'Kommentar'}" editor-type="dxTextArea" :editor-options="{ autoResizeEnabled: true}"/>
+            </DxFormGroupItem>
+            
+            <DxButtonItem
+              :button-options="{ text: 'Speichern', type: 'success', useSubmitBehavior: true, width: '100%', onClick: saveNewAdvice }"
+              :col-span="2"
             />
-            <DxFormItem
-              data-field="type"
-              :label="{ text: 'Typ'}"
-              editor-type="dxRadioGroup"
-              :editor-options="{
-                dataSource: adviceTypes,
-                displayExpr: 'name',
-                valueExpr: 'id',
-                layout: 'horizontal',
-                itemTemplate: radioBoxLayout
-              }"
-            />
-            <DxFormItem data-field="commentary" :label="{ text: 'Kommentar'}" editor-type="dxTextArea" :editor-options="{ autoResizeEnabled: true}"/>
-          </DxFormGroupItem>
-          
-          <DxButtonItem
-            :button-options="{ text: 'Speichern', type: 'success', useSubmitBehavior: true, width: '100%', onClick: saveNewAdvice }"
-            :col-span="2"
-          />
-        </DxForm>
+          </DxForm>
+        </DxScrollView>
       </DxPopup>
     </div>
   </div>
@@ -238,6 +242,7 @@ import DxPopup from 'devextreme-vue/popup';
 import AdviceStatus from "./AdviceStatus.vue";
 import PhysicalValue from "./PhysicalValue.vue";
 import Advice from "./Advice.vue";
+import { DxScrollView } from 'devextreme-vue/scroll-view';
 
 import DxDataGrid, {
   DxColumn,
@@ -290,7 +295,7 @@ const newadvice = reactive({
   advice_status_id: 1,
   type: 0,
   commentary: '',
-  advisor_id: store.state.user.id,
+ // advisor_id: store.state.user.id,
 });
 
 function radioBoxLayout(data: any) {
@@ -400,7 +405,7 @@ function saveNewAdvice(){
     newadvice.advice_status_id = 1;
     newadvice.type = 0;
     newadvice.commentary = '';
-    newadvice.advisor_id = store.state.user.id
+   // newadvice.advisor_id = store.state.user.id
   }).catch((error) => {
     notify(error.response.data.message, 'error', 3000);
   });

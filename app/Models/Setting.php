@@ -31,6 +31,10 @@ class Setting extends Model
                 'name' => 'Datenschutzerklärung',
                 'type' => 'text'
             ],
+            'advisorInfo' => [
+                'name' => 'Berater*innen Info',
+                'type' => 'text'
+            ]
         ];
     }
 

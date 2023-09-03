@@ -6,6 +6,7 @@ use App\AdviceType;
 use App\Models\AdviceStatus;
 use App\Events\AdviceCreated;
 use App\Events\AdviceUpdated;
+use App\HouseType;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -34,6 +35,13 @@ class Advice extends Model
         'long',
         'lat',
         'type',
+        'helpType_place',
+        'helpType_technical',
+        'helpType_bureaucracy',
+        'helpType_other',
+        'houseType',
+        'landlordExists',
+        'placeNotes',
     ];
 
     protected $appends = ['distance', 'shares_ids'];
@@ -58,6 +66,14 @@ class Advice extends Model
         'lat' => 'float',
         'advice_status_id' => 'integer',
         'type' => AdviceType::class,
+        'helpType_place' => 'boolean',
+        'helpType_technical' => 'boolean',
+        'helpType_bureaucracy' => 'boolean',
+        'helpType_other' => 'boolean',
+        'houseType' => HouseType::class,
+        'landlordExists' => 'boolean',
+        'placeNotes' => 'string',
+
     ];
 
     public function advisor(): BelongsTo{
@@ -65,6 +81,9 @@ class Advice extends Model
     }
 
     public function getDistanceAttribute(): ?float{
+        if(Auth::user() === null){
+            return null;
+        }
         return $this->getDistanceToUser(Auth::user());
     }
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Order;
+use App\Models\Advice;
 use App\Models\BulkOrder;
 use App\Models\OrderItem;
 use App\Events\OrderCreated;
@@ -14,6 +15,9 @@ class StoreAdviceController extends Controller
 {
     public function __invoke(StoreAdviceRequest $request)
     {
-        var_dump($request->validated());
+        $advice = new Advice();
+        $advice->fill($request->validated());
+        $advice->save();
+        return response()->json($advice);
     }
 }

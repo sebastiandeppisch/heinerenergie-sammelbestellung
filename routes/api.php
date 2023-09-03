@@ -78,6 +78,8 @@ Route::middleware('auth')->group(function () {
 
     Route::post('actAsAdmin', [UserController::class, 'actAsAdmin']);
     Route::post('stopActAsAdmin', [UserController::class, 'stopActAsAdmin']);
+
+    Route::get('html/advisorInfo', [SettingController::class, 'advisorInfo']);
 });
 
 //Route::middleware('guest')->group(function () {

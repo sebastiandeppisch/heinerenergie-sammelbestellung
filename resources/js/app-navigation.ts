@@ -1,5 +1,11 @@
 export default [
   {
+    text: "Dashboard",
+    path: "/dashboard",
+    icon: "info",
+    admin: false
+  },
+  {
     text: "Neue Bestellung",
     path: "/neworder",
     icon: "cart",

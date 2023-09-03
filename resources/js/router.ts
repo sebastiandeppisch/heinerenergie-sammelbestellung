@@ -20,9 +20,19 @@ import Profile from './views/Profile.vue'
 import AdvicesMap from './views/AdvicesMap.vue'
 import { store } from "./store";
 import NewAdvice from "./views/NewAdvice.vue";
+import Dashboard from "./views/Dashboard.vue";
 const router = createRouter({
   history: createWebHistory(),
   routes: [
+    {
+      path: "/dashboard",
+      name: "dashboard",
+      meta: {
+        requiresAuth: true,
+        layout: defaultLayout
+      },
+      component: Dashboard
+    },
     {
       path: "/orders",
       name: "orders",
@@ -106,7 +116,7 @@ const router = createRouter({
     },
     {
       path: '/backend',
-      redirect: "/neworder"
+      redirect: "/dashboard"
     },
     {
       path: "/recovery",

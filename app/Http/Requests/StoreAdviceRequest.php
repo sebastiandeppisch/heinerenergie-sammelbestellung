@@ -34,6 +34,14 @@ class StoreAdviceRequest extends FormRequest
             'city' => 'required|string|max:100',
             'advisor_id' => 'nullable|integer|exists:users,id',
             'commentary' => 'nullable|string|max:65535',
+            'helpType_place' => 'nullable|boolean',
+            'helpType_technical' => 'nullable|boolean',
+            'helpType_bureaucracy' => 'nullable|boolean',
+            'helpType_other' => 'nullable|boolean',
+            'houseType' => 'nullable|integer|between:0,2',
+            'landlordExists' => 'nullable|boolean',
+            'placeNotes' => 'nullable|string|max:65535',
+            'type' => 'integer|between:0,2',
         ];
     }
 }
