@@ -167,7 +167,7 @@ const addressText = computed(() => {
   }else if(advice.value.type === 1){
     return "An welcher Adresse möchtest Du Dein Steckersolargerät installieren?"
   }else if(advice.value.type === 2){
-    return "Wohin soll Dein Stecker-Solargerät geliefert werden?"
+    return "Gib bitte Deine Adresse an, die wir an den Lieferanten weitergeben dürfen"
   }
 })
 
