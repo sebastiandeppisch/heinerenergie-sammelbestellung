@@ -52,7 +52,7 @@
       <div style="width: 45px">
         <!-- TODO fix path -->
         <img
-          src="http://balkon.heinerenergie.de/images/heinerenergie-hochzeitsturm.svg"
+          src="https://balkon.heinerenergie.de/images/heinerenergie-hochzeitsturm.svg"
           style="height: 2em"
         />
       </div>
