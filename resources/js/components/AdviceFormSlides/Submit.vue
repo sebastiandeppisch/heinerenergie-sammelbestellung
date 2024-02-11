@@ -50,7 +50,7 @@ function submit() {
   loadIndicatorVisible.value = true;
   loading.value = true;
   const startTime = new Date().getTime();
-  axios.post('/api/newadvice', advice.value).then((response) => {
+  axios.post('https://balkon.heinerenergie.de/api/newadvice', advice.value).then((response) => {
     const endTime = new Date().getTime();
     const timeDiff = endTime - startTime;
     setTimeout(() => {
