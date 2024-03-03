@@ -8,6 +8,6 @@ Wir haben Deinen Beratungswunsch erhalten und werden uns bald bei Dir melden.
 
 **Adresse**: {{$advice->street}} {{$advice->streetNumber}}, {{$advice->zip}} {{$advice->city}}
 
-**Beratungswunsch**: @if($advice->type == 0)Bei Dir Zuhause @elseif($advice->type == 1) Virtuell @else Nur Teilnahme an der Sammelbestellung @endif
+**Beratungswunsch**: @if($advice->type == AdviceType::Home)Bei Dir Zuhause @elseif($advice->type == AdviceType::Virtual) Virtuell @else Nur Teilnahme an der Sammelbestellung @endif
 
 @endcomponent
