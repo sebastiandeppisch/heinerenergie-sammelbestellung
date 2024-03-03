@@ -41,7 +41,15 @@ class DataProtectedAdvice extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'distance' => $this->distance,
-            'shares_ids' => $this->shares_ids
+            'shares_ids' => $this->shares_ids,
+            'placeNotes' => $this->placeNotes,
+            'houseType' => $this->houseType,
+            'landlordExists' => $this->landlordExists,
+            'helpType_place' => $this->helpType_place,
+            'helpType_technical' => $this->helpType_technical,
+            'helpType_bureaucracy' => $this->helpType_bureaucracy,
+            'helpType_other' => $this->helpType_other,
+            'placeNotes' => $this->placeNotes,
         ];
     }
 }
