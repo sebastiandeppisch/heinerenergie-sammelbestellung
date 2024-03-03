@@ -79,7 +79,7 @@
           caption="Erstellt am"
           data-type="date"
           :allow-editing="false"
-          sort-order="asc"
+          sort-order="desc"
         />
         <DxColumn data-field="advice_status_id" caption="Status">
           <DxLookup
