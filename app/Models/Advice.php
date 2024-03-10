@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\HouseType;
 use App\AdviceType;
 use App\Models\AdviceStatus;
 use App\Events\AdviceCreated;
 use App\Events\AdviceUpdated;
-use App\HouseType;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,6 +20,8 @@ class Advice extends Model
     protected $table = 'advices';
 
     use HasFactory;
+
+    use SoftDeletes;
 
     protected $fillable = [
         'firstName',
