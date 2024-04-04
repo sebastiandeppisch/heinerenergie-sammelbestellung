@@ -1,7 +1,7 @@
 <template>
   <div v-if="adviceId !==null">
     <div v-if="advice !== null" style="padding:20px;">
-      <h2>Beratung Test</h2>
+      <h2>Beratung</h2>
       <div style="display:flex;flex-direction:row;gap:32px;">
         <div>
           <div class="dx-card" style="max-width:600px;padding:20px;">
