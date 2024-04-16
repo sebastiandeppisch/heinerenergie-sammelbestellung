@@ -262,7 +262,7 @@ if(props.adviceId !== null){
 }
 
 function updateAdvisors(e: any) {
-  axios.post('api/advices/' + props.adviceId + '/advisors', {advisors: e.value})
+  axios.post('/api/advices/' + props.adviceId + '/advisors', {advisors: e.value})
     .then(() => {
       notify('Teilung aktualisiert', 'success', 2000);
   })
