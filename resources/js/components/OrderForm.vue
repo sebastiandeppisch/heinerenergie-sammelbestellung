@@ -7,9 +7,6 @@
     @submit="submit"
     :disabled="! allowEditing"
   >
-    <DxGroupItem
-      caption="Persönliche Daten"
-    >
       <DxSimpleItem
         data-field="firstName"
         :label="{ text: 'Vorname'}"
@@ -63,11 +60,6 @@
           :validation-callback="validateAsync"
         />
       </DxSimpleItem>
-    </DxGroupItem>
-
-    <DxGroupItem
-      caption="Adresse"
-    >
       <DxSimpleItem
         data-field="street"
         :label="{ text: 'Straße'}"
@@ -108,10 +100,6 @@
           :validation-callback="validateAsync"
         />
       </DxSimpleItem>
-    </DxGroupItem>
-    <DxGroupItem
-      caption="Sonstiges"
-    >
       <DxSimpleItem v-if="confirmEmail"
         data-field="advisorEmail"
         :label="{ text: 'Berater*in E-Mail'}"
@@ -146,7 +134,6 @@
           :validation-callback="validateAsync"
         />
       </DxSimpleItem>
-    </DxGroupItem>
     <DxButtonItem
       v-if="updateButton"
       :button-options="submitButtonOptions"
