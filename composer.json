@@ -64,6 +64,9 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "plesk/composer-command-info": true
+        },
+        "platform": {
+            "php": "8.1.0"
         }
     },
     "minimum-stability": "dev",

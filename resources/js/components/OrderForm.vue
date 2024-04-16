@@ -173,7 +173,7 @@ import {DxForm, DxSimpleItem, DxGroupItem, DxButtonItem} from 'devextreme-vue/fo
 import { DxAsyncRule } from 'devextreme-vue/form';
 
 import axios, {AxiosError, AxiosResponse} from 'axios';
-import { ValidationCallbackData } from 'devextreme/ui/validation_rules';
+//import { ValidationCallbackData } from 'devextreme/ui/validation_rules';
 import {ref, reactive} from 'vue';
 
 import dxForm from 'devextreme/ui/form';
@@ -197,7 +197,7 @@ let citySuggestions = ref([]);
 
 const form = ref(null);
 
-function validateAsync(params: ValidationCallbackData){
+function validateAsync(params){
   const data = {...order};
   const field: string = params.formItem.dataField;
   data[field] = params.value;

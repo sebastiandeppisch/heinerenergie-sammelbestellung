@@ -1,7 +1,8 @@
-const localization = require('devextreme/localization');
+import {loadMessages, locale } from 'devextreme/localization'
+import german from 'devextreme/localization/messages/de.json'
 
-localization.loadMessages(require('devextreme/localization/messages/de.json'));
-localization.locale('de');
+loadMessages(german);
+locale('de');
 import config from "devextreme/core/config";
  
 config({

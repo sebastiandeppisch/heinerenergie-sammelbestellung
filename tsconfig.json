@@ -9,9 +9,9 @@
 		"importHelpers": true,
 		"allowJs": true,
 		"resolveJsonModule": true,
-		"jsx": "preserve"
+		"jsx": "preserve",
+		"baseUrl": "./resources/js",
 	},
-	"baseUrl": "./resources/js",
 	"include": ["./resources/js/**/*", "./resources/js/tests/**/*"],
     "exclude": ["node_modules"]
 }
