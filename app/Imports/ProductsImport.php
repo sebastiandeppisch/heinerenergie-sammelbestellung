@@ -13,12 +13,10 @@ class ProductsImport implements ToModel, WithHeadingRow
 
     public function model(array $row)
     {	
-		ProductCategory::upsert([
-			'name' => $row['kategorie'],
+		$category = ProductCategory::firstOrCreate([
+			'name' =>  $row['kategorie'],
 			'bulk_order_id' => $this->bulkOrder->id,
-		], ['name'], ['bulk_order_id']);
-
-		$category = ProductCategory::where('name', $row['kategorie'])->where('bulk_order_id', $this->bulkOrder->id)->firstOrFail();
+		]);
 
 		$price = str_replace('€', '', $row['preis']);
 		$price = str_replace(',', '.', $price);
