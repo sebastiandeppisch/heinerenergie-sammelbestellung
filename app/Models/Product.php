@@ -66,4 +66,9 @@ class Product extends Model
 
         return $newProduct;
     }
+
+    public function delete(): bool{
+        $this->downloads()->delete();
+        return parent::delete();
+    }
 }
