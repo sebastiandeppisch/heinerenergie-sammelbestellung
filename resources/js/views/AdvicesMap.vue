@@ -70,6 +70,8 @@
             <b>{{ advice.firstName }} {{ advice.lastName }}<br />
             {{ advice.street }} {{ advice.streetNumber}}<br />
             </b>
+            <div v-if="advice.advisor_id !== null">Berater*in: {{ advisorName(advice.advisor_id )}}</div>
+            <div v-if="advice.shares_ids.length > 0">Geteilt mit: {{ advice.shares_ids.map(advisorName).join(', ') }}</div>
             <DxButton
               v-if="advice.advisor_id === null"
               type="default"
@@ -178,6 +180,14 @@ advisorsDataSource.load().then((data) => {
     (advisor) => advisor.lat !== null && advisor.long !== null
   );
 });
+
+function advisorName(advisorId){
+  const advisor = advisors.value.find((advisor) => advisor.id === advisorId);
+  if(advisor === undefined){
+    return '';
+  }
+  return advisor.name;
+}
 
 function openAdvice(advice){
   emit('selectAdviceId', advice.id);
