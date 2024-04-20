@@ -97,7 +97,7 @@ declare namespace App.Models {
         created_at: string | null;
         updated_at: string | null;
         name: string;
-        adivces?: App.Models.Advice | null;
+        advices?: App.Models.Advice | null;
     }
 
     export interface Product {

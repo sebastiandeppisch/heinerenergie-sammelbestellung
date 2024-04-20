@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\AdviceType;
+use App\Enums\AdviceType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 

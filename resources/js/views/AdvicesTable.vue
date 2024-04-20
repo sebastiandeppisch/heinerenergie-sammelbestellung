@@ -153,7 +153,7 @@
         title="Beratungsstatus"
         hide-on-outside-click="true"
         :show-close-button="true"
-        width="400px"
+        width="600px"
         height="auto"
       >
         <AdviceStatus />

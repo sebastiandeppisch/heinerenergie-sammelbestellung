@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\HouseType;
-use App\AdviceType;
+use App\Enums\HouseType;
+use App\Enums\AdviceType;
 use App\Models\AdviceStatus;
 use App\Events\AdviceCreated;
 use App\Events\AdviceUpdated;

@@ -1,7 +1,7 @@
 <?php
 
-use App\AdviceType;
-use App\HouseType;
+use App\Enums\AdviceType;
+use App\Enums\HouseType;
 use App\Models\User;
 use App\Models\Advice;
 use App\Models\Setting;

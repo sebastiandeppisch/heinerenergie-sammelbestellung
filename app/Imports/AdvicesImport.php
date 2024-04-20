@@ -2,7 +2,7 @@
 namespace App\Imports;
 
 use Exception;
-use App\AdviceType;
+use App\Enums\AdviceType;
 use App\Models\Advice;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\ToModel;
