@@ -154,7 +154,7 @@
         hide-on-outside-click="true"
         :show-close-button="true"
         width="400px"
-        height="600px"
+        height="auto"
       >
         <AdviceStatus />
       </DxPopup>  
