@@ -14,14 +14,14 @@ class OrderItemFactory extends Factory
      */
     public function definition()
     {
-        $productId = $this->faker->randomElement(Product::pluck('id'));
+        $productId = fake()->randomElement(Product::pluck('id'));
         if ($productId === null) {
             $productId = Product::factory()->create()->id;
         }
 
         return [
             'product_id' => $productId,
-            'quantity' => $this->faker->numberBetween(1, 5),
+            'quantity' => fake()->numberBetween(1, 5),
         ];
     }
 }

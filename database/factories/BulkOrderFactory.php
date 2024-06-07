@@ -9,7 +9,7 @@ class BulkOrderFactory extends Factory
     public function definition()
     {
         return [
-            'name' => $this->faker->name,
+            'name' => fake()->name,
             'archived' => false, //$this->faker->boolean
         ];
     }

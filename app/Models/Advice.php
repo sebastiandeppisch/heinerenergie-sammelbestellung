@@ -111,8 +111,8 @@ class Advice extends Model
         $latDelta = $latTo - $latFrom;
         $lonDelta = $lonTo - $lonFrom;
 
-        $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
-          cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
+        $angle = 2 * asin(sqrt(sin($latDelta / 2) ** 2 +
+          cos($latFrom) * cos($latTo) * sin($lonDelta / 2) ** 2));
 
         return $angle * $earthRadius;
     }

@@ -15,25 +15,25 @@ class OrderFactory extends Factory
      */
     public function definition()
     {
-        $advisorId = $this->faker->randomElement(User::pluck('id'));
+        $advisorId = fake()->randomElement(User::pluck('id'));
         if ($advisorId === null) {
             $advisorId = User::factory()->create()->id;
         }
 
-        $bulkOrderId = $this->faker->randomElement(BulkOrder::pluck('id'));
+        $bulkOrderId = fake()->randomElement(BulkOrder::pluck('id'));
         if ($bulkOrderId === null) {
             $bulkOrderId = BulkOrder::factory()->create()->id;
         }
 
         return [
-            'firstName' => $this->faker->firstName(),
-            'lastName' => $this->faker->lastName(),
-            'street' => $this->faker->streetName(),
-            'streetNumber' => $this->faker->buildingNumber(),
-            'zip' => $this->faker->postcode(),
-            'city' => $this->faker->city(),
-            'email' => $this->faker->email(),
-            'phone' => $this->faker->phoneNumber(),
+            'firstName' => fake()->firstName(),
+            'lastName' => fake()->lastName(),
+            'street' => fake()->streetName(),
+            'streetNumber' => fake()->buildingNumber(),
+            'zip' => fake()->postcode(),
+            'city' => fake()->city(),
+            'email' => fake()->email(),
+            'phone' => fake()->phoneNumber(),
             'advisor_id' => $advisorId,
             'bulk_order_id' => $bulkOrderId,
         ];

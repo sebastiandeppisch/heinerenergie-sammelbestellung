@@ -14,17 +14,17 @@ class ProductFactory extends Factory
      */
     public function definition()
     {
-        $bulkOrderId = $this->faker->randomElement(BulkOrder::pluck('id'));
+        $bulkOrderId = fake()->randomElement(BulkOrder::pluck('id'));
         if ($bulkOrderId === null) {
             $bulkOrderId = BulkOrder::factory()->create()->id;
         }
 
         return [
-            'name' => $this->faker->word(),
-            'description' => $this->faker->paragraph(),
-            'price' => $this->faker->randomFloat(2, 2, 500),
-            'sku' => $this->faker->uuid(),
-            'panelsCount' => $this->faker->numberBetween(0, 2),
+            'name' => fake()->word(),
+            'description' => fake()->paragraph(),
+            'price' => fake()->randomFloat(2, 2, 500),
+            'sku' => fake()->uuid(),
+            'panelsCount' => fake()->numberBetween(0, 2),
             'bulk_order_id' => $bulkOrderId,
         ];
     }
