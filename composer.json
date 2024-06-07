@@ -17,6 +17,7 @@
         "plesk/composer-command-info": "~1.1.0"
     },
     "require-dev": {
+        "driftingly/rector-laravel": "^1.2",
         "fakerphp/faker": "^1.9.1",
         "laravel/pint": "^1.16",
         "laravel/sail": "^1.0.1",
