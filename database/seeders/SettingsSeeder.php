@@ -34,11 +34,11 @@ class SettingsSeeder extends Seeder
             [
                 'key' => 'advisorInfo',
                 'value' => 'Berater*innen Info',
-            ]
+            ],
         ];
-        
+
         foreach ($settings as $setting) {
-            if(!Setting::where('key', $setting['key'])->exists()) {
+            if (! Setting::where('key', $setting['key'])->exists()) {
                 Setting::create($setting);
             }
         }

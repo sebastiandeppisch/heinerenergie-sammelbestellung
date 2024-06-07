@@ -14,8 +14,8 @@ class ProductFactory extends Factory
      */
     public function definition()
     {
-        $bulkOrderId = $this->faker->randomElement(BulkOrder::pluck("id"));
-        if($bulkOrderId === null){
+        $bulkOrderId = $this->faker->randomElement(BulkOrder::pluck('id'));
+        if ($bulkOrderId === null) {
             $bulkOrderId = BulkOrder::factory()->create()->id;
         }
 
@@ -25,22 +25,24 @@ class ProductFactory extends Factory
             'price' => $this->faker->randomFloat(2, 2, 500),
             'sku' => $this->faker->uuid(),
             'panelsCount' => $this->faker->numberBetween(0, 2),
-            'bulk_order_id' => $bulkOrderId
+            'bulk_order_id' => $bulkOrderId,
         ];
     }
 
-    public function supplierProduct(){
-        return $this->state(function(array $attributes){
+    public function supplierProduct()
+    {
+        return $this->state(function (array $attributes) {
             return [
-                'is_supplier_product' => true
+                'is_supplier_product' => true,
             ];
         });
     }
 
-    public function ownProduct(){
-        return $this->state(function(array $attributes){
+    public function ownProduct()
+    {
+        return $this->state(function (array $attributes) {
             return [
-                'is_supplier_product' => false
+                'is_supplier_product' => false,
             ];
         });
     }

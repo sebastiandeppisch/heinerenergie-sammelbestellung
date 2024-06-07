@@ -6,7 +6,6 @@ use App\Models\Advice;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Contracts\Queue\ShouldQueue;
 
 class AdviceCreated extends Mailable
 {
@@ -19,7 +18,7 @@ class AdviceCreated extends Mailable
      */
     public function __construct(public Advice $advice)
     {
-        // 
+        //
     }
 
     /**

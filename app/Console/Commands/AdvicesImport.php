@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Imports\AdvicesImport as Importer;
 use App\Models\AdviceStatus;
 use Illuminate\Console\Command;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Imports\AdvicesImport as Importer;
 
 class AdvicesImport extends Command
 {
@@ -36,7 +36,7 @@ class AdvicesImport extends Command
         );
         $statusId = AdviceStatus::where('name', $status)->first()->id;
 
-        $import = new Importer(); 
+        $import = new Importer();
         $import->statusId = $statusId;
         Excel::import($import, $this->argument('file'));
 

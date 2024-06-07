@@ -2,22 +2,21 @@
 
 namespace App\Exports;
 
-use App\Models\Order;
 use App\Models\BulkOrder;
+use App\Models\Order;
 use App\Models\OrderItem;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
-use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class OrdersExport implements FromCollection, WithHeadings, WithStyles, ShouldAutoSize
+class OrdersExport implements FromCollection, ShouldAutoSize, WithHeadings, WithStyles
 {
-
     public BulkOrder $bulkorder;
 
     public string $products = 'all';
@@ -40,64 +39,73 @@ class OrdersExport implements FromCollection, WithHeadings, WithStyles, ShouldAu
     public function collection(): Collection
     {
         $rows = collect();
-        foreach($this->bulkorder->orders as $order){
-            foreach($this->getOrderItems($order) as $orderItem){
+        foreach ($this->bulkorder->orders as $order) {
+            foreach ($this->getOrderItems($order) as $orderItem) {
                 $row = collect();
-                foreach(collect($this->structure)->pluck('key') as $key){
+                foreach (collect($this->structure)->pluck('key') as $key) {
                     $row[$key] = $this->getData((string) $key, $order, $orderItem);
                 }
                 $rows->push($row);
             }
         }
+
         return $rows;
     }
 
-    private function getOrderItems(Order $order): Collection{
-        if($this->products === 'all'){
+    private function getOrderItems(Order $order): Collection
+    {
+        if ($this->products === 'all') {
             return $order->orderItems;
         }
-        if($this->products === 'supplier'){
-            return $order->orderItems->filter(function($orderItem){
+        if ($this->products === 'supplier') {
+            return $order->orderItems->filter(function ($orderItem) {
                 return $orderItem->product->is_supplier_product;
             });
         }
-        if($this->products === 'own'){
-            return $order->orderItems->filter(function($orderItem){
-                return !$orderItem->product->is_supplier_product;
+        if ($this->products === 'own') {
+            return $order->orderItems->filter(function ($orderItem) {
+                return ! $orderItem->product->is_supplier_product;
             });
         }
         throw new InvalidArgumentException('Invalid value for $products');
     }
 
-    private function getData(string $key, Order $order, OrderItem $orderItem){
-        if(Str::of($key)->startsWith('product.')){
+    private function getData(string $key, Order $order, OrderItem $orderItem)
+    {
+        if (Str::of($key)->startsWith('product.')) {
             $productKey = Str::replace('product.', '', $key);
-            if($productKey === 'quantity'){
+            if ($productKey === 'quantity') {
                 return $orderItem->quantity;
             }
-            if($productKey === 'price'){
-                return $orderItem->quantity*$orderItem->product->price;
+            if ($productKey === 'price') {
+                return $orderItem->quantity * $orderItem->product->price;
             }
+
             return $orderItem->product->{$productKey};
         }
+
         return $order->{$key};
     }
 
-    public function headings(): array{
+    public function headings(): array
+    {
         return collect($this->structure)->pluck('heading')->toArray();
     }
 
-    public function styles(Worksheet $sheet): void{
+    public function styles(Worksheet $sheet): void
+    {
         $sheet->freezePane($this->coordinateToSheet(1, 1 + $this->getIndexByKey('lastName')));
     }
 
-    private function coordinateToSheet(int $i, int $j): string{
-		return Coordinate::stringFromColumnIndex($j + 1).($i + 1);
-	}
+    private function coordinateToSheet(int $i, int $j): string
+    {
+        return Coordinate::stringFromColumnIndex($j + 1).($i + 1);
+    }
 
-    private function getIndexByKey(string $key): int{
-        for($i=0; $i<count($this->structure); $i++){
-            if($this->structure[$i]['key'] == $key){
+    private function getIndexByKey(string $key): int
+    {
+        for ($i = 0; $i < count($this->structure); $i++) {
+            if ($this->structure[$i]['key'] == $key) {
                 return $i;
             }
         }

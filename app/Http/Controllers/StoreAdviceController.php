@@ -2,16 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Models\Order;
-use App\Models\Advice;
-use App\Models\BulkOrder;
-use App\Models\OrderItem;
-use App\Mail\AdviceCreated;
-use App\Events\OrderCreated;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 use App\Http\Requests\StoreAdviceRequest;
+use App\Mail\AdviceCreated;
+use App\Models\Advice;
+use Illuminate\Support\Facades\Mail;
 
 class StoreAdviceController extends Controller
 {

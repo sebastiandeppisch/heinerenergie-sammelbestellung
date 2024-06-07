@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 class BulkOrderFactory extends Factory
 {
@@ -11,7 +10,7 @@ class BulkOrderFactory extends Factory
     {
         return [
             'name' => $this->faker->name,
-            'archived' => false//$this->faker->boolean
+            'archived' => false, //$this->faker->boolean
         ];
     }
 }

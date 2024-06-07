@@ -1,9 +1,9 @@
 <?php
 
 use App\Models\Product;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -23,11 +23,11 @@ return new class extends Migration
             $table->foreign('product_id')->references('id')->on('products');
         });
 
-        foreach(Product::all() as $product) {
-            if($product->url !== null) {
+        foreach (Product::all() as $product) {
+            if ($product->url !== null) {
                 $product->downloads()->create([
                     'name' => 'url',
-                    'url' => $product->url
+                    'url' => $product->url,
                 ]);
             }
         }
@@ -47,8 +47,8 @@ return new class extends Migration
             $table->string('url')->nullable();
         });
 
-        foreach(Product::all() as $product) {
-            if($product->downloads()->count() > 0) {
+        foreach (Product::all() as $product) {
+            if ($product->downloads()->count() > 0) {
                 $product->url = $product->downloads()->first()->url;
                 $product->save();
             }

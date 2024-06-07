@@ -14,7 +14,7 @@ class AddCategoryToProducts extends Migration
     public function up()
     {
         Schema::table('products', function (Blueprint $table) {
-           $table->foreignId('product_category_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('product_category_id')->nullable()->constrained()->nullOnDelete();
         });
     }
 

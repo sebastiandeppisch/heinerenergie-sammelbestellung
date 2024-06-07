@@ -1,12 +1,13 @@
 <?php
-use App\Models\User;
-use App\Models\Product;
+
 use App\Models\BulkOrder;
+use App\Models\Product;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-uses()->beforeEach(function (){
+uses()->beforeEach(function () {
     $user = User::factory()->create();
     $this->be($user);
 });
@@ -16,7 +17,7 @@ test('can be created', function () {
 
     $response = $this->post('api/bulkorders', [
         'name' => 'Test',
-        'archived' => true
+        'archived' => true,
     ]);
 
     $response->assertStatus(200);
@@ -30,7 +31,7 @@ test('can be copied', function () {
     $response = $this->post('api/bulkorders', [
         'name' => 'Test copied',
         'archived' => true,
-        'copy_from' => $old->id
+        'copy_from' => $old->id,
     ]);
 
     $response->assertStatus(200);

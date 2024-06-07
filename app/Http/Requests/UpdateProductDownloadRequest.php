@@ -25,7 +25,7 @@ class UpdateProductDownloadRequest extends FormRequest
     {
         return [
             'name' => 'string',
-            'url' => 'url'
+            'url' => 'url',
         ];
     }
 }

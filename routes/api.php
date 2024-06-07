@@ -1,21 +1,20 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AdviceController;
-use App\Http\Controllers\UploadController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\SettingController;
-use App\Http\Controllers\BulkOrderController;
-use App\Http\Controllers\OrderItemController;
-use App\Http\Controllers\AdviceTypeController;
 use App\Http\Controllers\AdviceStatusController;
+use App\Http\Controllers\AdviceTypeController;
+use App\Http\Controllers\BulkOrderController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OrderItemController;
 use App\Http\Controllers\ProductCategoryController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductDownloadController;
-use App\Http\Controllers\StoreOrderController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StoreAdviceController;
+use App\Http\Controllers\StoreOrderController;
+use App\Http\Controllers\UploadController;
+use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,7 +27,7 @@ use App\Http\Controllers\StoreAdviceController;
 |
 */
 
-require_once(__DIR__."/api.auth.php");
+require_once __DIR__.'/api.auth.php';
 
 Route::middleware('auth')->group(function () {
     Route::resource('orders', OrderController::class)->except(['index', 'store']);
@@ -38,8 +37,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('advices/{advice}/advisors', [AdviceController::class, 'setAdvisors']);
 
-    
-    Route::scopeBindings()->group(function(){
+    Route::scopeBindings()->group(function () {
         Route::resource('orders.orderitems', OrderItemController::class);
     });
 
@@ -53,18 +51,18 @@ Route::middleware('auth')->group(function () {
     Route::post('orders/{order}/sendmail', [OrderController::class, 'sendMail']);
 
     Route::resource('bulkorders', BulkOrderController::class);
-    Route::scopeBindings()->group(function(){
+    Route::scopeBindings()->group(function () {
         Route::resource('bulkorders.products', ProductController::class);
         Route::resource('bulkorders.orders', OrderController::class);
 
     });
 
-    Route::scopeBindings()->group(function(){
+    Route::scopeBindings()->group(function () {
         Route::resource('bulkorders.productcategories', ProductCategoryController::class);
     });
 
     Route::resource('products', ProductController::class)->except(['index']);
-    Route::scopeBindings()->group(function(){
+    Route::scopeBindings()->group(function () {
         Route::resource('products.downloads', ProductDownloadController::class);
     });
 

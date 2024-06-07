@@ -20,9 +20,10 @@ class ProductsImport extends Command
 
         $bulkOrder = BulkOrder::where('name', $bulkOrderName)->firstOrFail();
 
-        $import = new ProductsExcelImport(); 
+        $import = new ProductsExcelImport();
         $import->bulkOrder = $bulkOrder;
         Excel::import($import, $this->argument('file'));
+
         return 0;
     }
 }

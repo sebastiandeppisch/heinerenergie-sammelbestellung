@@ -3,8 +3,8 @@
 namespace App\Http\Resources;
 
 use App\Models\Advice;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Auth;
 
 class DataProtectedAdvice extends JsonResource
 {
@@ -18,10 +18,11 @@ class DataProtectedAdvice extends JsonResource
     {
         $email = $this->email;
         $phone = $this->phone;
-        if(! Auth::user()->can('view', Advice::findOrFail($this->id))){
+        if (! Auth::user()->can('view', Advice::findOrFail($this->id))) {
             $email = null;
             $phone = null;
         }
+
         return [
             'id' => $this->id,
             'firstName' => $this->firstName,

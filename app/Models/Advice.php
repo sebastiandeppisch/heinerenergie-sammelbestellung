@@ -2,25 +2,23 @@
 
 namespace App\Models;
 
-use App\Enums\HouseType;
 use App\Enums\AdviceType;
-use App\Models\AdviceStatus;
+use App\Enums\HouseType;
 use App\Events\AdviceCreated;
 use App\Events\AdviceUpdated;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class Advice extends Model
 {
     protected $table = 'advices';
 
     use HasFactory;
-
     use SoftDeletes;
 
     protected $fillable = [
@@ -79,49 +77,58 @@ class Advice extends Model
 
     ];
 
-    public function advisor(): BelongsTo{
+    public function advisor(): BelongsTo
+    {
         return $this->belongsTo(User::class);
     }
 
-    public function getDistanceAttribute(): ?float{
-        if(Auth::user() === null){
+    public function getDistanceAttribute(): ?float
+    {
+        if (Auth::user() === null) {
             return null;
         }
+
         return $this->getDistanceToUser(Auth::user());
     }
 
-    public function getDistanceToUser(User $user): ?float{
-        if($this->lat === null || $this->long === null || $user->long === null || $user->lat === null){
+    public function getDistanceToUser(User $user): ?float
+    {
+        if ($this->lat === null || $this->long === null || $user->long === null || $user->lat === null) {
             return null;
         }
+
         return $this->haversineGreatCircleDistance($this->lat, $this->long, $user->lat, $user->long);
     }
 
     private function haversineGreatCircleDistance(
         $latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371000): float
-      {
+    {
         $latFrom = deg2rad($latitudeFrom);
         $lonFrom = deg2rad($longitudeFrom);
         $latTo = deg2rad($latitudeTo);
         $lonTo = deg2rad($longitudeTo);
-      
+
         $latDelta = $latTo - $latFrom;
         $lonDelta = $lonTo - $lonFrom;
-      
+
         $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
           cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
-        return $angle * $earthRadius;
-      }
 
-    public function status(): HasOne{
+        return $angle * $earthRadius;
+    }
+
+    public function status(): HasOne
+    {
         return $this->hasOne(AdviceStatus::class);
     }
 
-    public function shares(): MorphToMany{
+    public function shares(): MorphToMany
+    {
         return $this->morphToMany(User::class, 'sharing', 'sharings', 'sharing_id', 'advisor_id');
     }
 
-    public function getSharesIdsAttribute(): array{
+    public function getSharesIdsAttribute(): array
+    {
         return $this->shares->pluck('id')->toArray();
     }
 }

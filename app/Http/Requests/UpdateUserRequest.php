@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class UpdateUserRequest extends FormRequest
 {
@@ -29,7 +29,7 @@ class UpdateUserRequest extends FormRequest
             'is_admin' => 'boolean',
             'first_name' => 'string',
             'last_name' => 'string',
-            'email' => ['email', Rule::unique('users')->ignoreModel($this->user())]
+            'email' => ['email', Rule::unique('users')->ignoreModel($this->user())],
         ];
     }
 }

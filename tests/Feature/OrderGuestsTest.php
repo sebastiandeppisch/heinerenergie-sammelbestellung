@@ -1,6 +1,7 @@
 <?php
-use App\Models\User;
+
 use App\Models\Setting;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -25,7 +26,7 @@ test('order can be created', function () {
         'orderItems' => [],
         'advisorEmail' => $adivsor->email,
         'commentary' => fake()->text,
-        'password' => 'password'
+        'password' => 'password',
     ]);
     $response->assertStatus(200);
 });

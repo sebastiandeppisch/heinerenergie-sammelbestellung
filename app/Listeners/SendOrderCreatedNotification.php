@@ -3,11 +3,9 @@
 namespace App\Listeners;
 
 use App\Events\OrderCreated;
+use App\Mail\OrderCreated as OrderCreatedMail;
 use App\Mail\OrderCreatedAdvisor;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use App\Mail\OrderCreated as OrderCreatedMail;
 
 class SendOrderCreatedNotification
 {
@@ -24,7 +22,6 @@ class SendOrderCreatedNotification
     /**
      * Handle the event.
      *
-     * @param  \App\Events\OrderCreated  $event
      * @return void
      */
     public function handle(OrderCreated $event)

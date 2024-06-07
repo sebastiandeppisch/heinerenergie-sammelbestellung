@@ -17,17 +17,17 @@ class CreateOrdersTable extends Migration
             $table->id();
             $table->timestamps();
 
-            $table->string("firstName");
-            $table->string("lastName");
+            $table->string('firstName');
+            $table->string('lastName');
 
-            $table->string("street");
-            $table->string("streetNumber");
+            $table->string('street');
+            $table->string('streetNumber');
 
-            $table->unsignedInteger("zip");
-            $table->string("city");
+            $table->unsignedInteger('zip');
+            $table->string('city');
 
-            $table->string("email");
-            $table->string("phone");
+            $table->string('email');
+            $table->string('phone');
 
         });
     }

@@ -15,12 +15,11 @@ class AdviceStatusPolicy
         return true;
 
     }
-    
+
     public function view(User $user, AdviceStatus $adviceStatus)
     {
         return true;
     }
-
 
     public function create(User $user)
     {
@@ -36,6 +35,4 @@ class AdviceStatusPolicy
     {
         return $user->isActingAsAdmin();
     }
-
-
 }

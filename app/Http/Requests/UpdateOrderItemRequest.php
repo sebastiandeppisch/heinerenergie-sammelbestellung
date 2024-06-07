@@ -25,7 +25,7 @@ class UpdateOrderItemRequest extends FormRequest
     {
         return [
             'product_id' => 'integer|exists:products,id',
-            'quantity' => 'integer|min:1'
+            'quantity' => 'integer|min:1',
         ];
     }
 }

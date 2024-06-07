@@ -2,9 +2,7 @@
 
 use App\Enums\AdviceType;
 use App\Enums\HouseType;
-use App\Models\User;
 use App\Models\Advice;
-use App\Models\Setting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -32,16 +30,15 @@ test('advice can be saved', function () {
 
     $advice = Advice::firstOrFail();
 
-    
-    foreach($data as $key => $value) {
-        if($key === 'houseType'){
+    foreach ($data as $key => $value) {
+        if ($key === 'houseType') {
             expect($advice->$key)->toBe(HouseType::cases()[$value]);
+
             continue;
         }
         expect($advice->$key)->toBe($value);
     }
 });
-
 
 test('direct order advice can be saved', function () {
     $data = [
@@ -60,10 +57,10 @@ test('direct order advice can be saved', function () {
 
     $advice = Advice::firstOrFail();
 
-    
-    foreach($data as $key => $value) {
-        if($key === 'type'){
+    foreach ($data as $key => $value) {
+        if ($key === 'type') {
             expect($advice->$key)->toBe(AdviceType::cases()[$value]);
+
             continue;
         }
         expect($advice->$key)->toBe($value);

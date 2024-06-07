@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
-use App\Models\ProductDownload;
 use App\Http\Requests\StoreProductDownloadRequest;
 use App\Http\Requests\UpdateProductDownloadRequest;
+use App\Models\Product;
+use App\Models\ProductDownload;
 
 class ProductDownloadController extends Controller
 {
@@ -18,6 +18,7 @@ class ProductDownloadController extends Controller
     {
         $download = new ProductDownload($request->validated());
         $product->downloads()->save($download);
+
         return $download;
     }
 
@@ -29,12 +30,14 @@ class ProductDownloadController extends Controller
     public function update(Product $product, UpdateProductDownloadRequest $request, ProductDownload $download)
     {
         $download->update($request->validated());
+
         return $download;
     }
 
     public function destroy(Product $product, ProductDownload $download)
     {
         $download->delete();
+
         return response()->noContent();
     }
 }

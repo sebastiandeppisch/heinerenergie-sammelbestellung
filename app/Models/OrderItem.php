@@ -2,12 +2,10 @@
 
 namespace App\Models;
 
-use App\Models\Order;
-use App\Models\Product;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\DB;
 
 class OrderItem extends Model
 {
@@ -32,7 +30,7 @@ class OrderItem extends Model
 
         foreach ($duplicates as $productId) {
             $duplicateItems = OrderItem::where('order_id', $order->id)->where('product_id', $productId);
-            $quantity = $duplicateItems->pluck("quantity")->sum();
+            $quantity = $duplicateItems->pluck('quantity')->sum();
 
             $duplicateItems->delete();
 

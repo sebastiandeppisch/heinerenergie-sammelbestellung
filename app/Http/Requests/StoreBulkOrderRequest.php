@@ -25,7 +25,7 @@ class StoreBulkOrderRequest extends FormRequest
     {
         return [
             'name' => 'required|string',
-            'copy_from' => 'nullable|exists:bulk_orders,id'
+            'copy_from' => 'nullable|exists:bulk_orders,id',
         ];
     }
 }

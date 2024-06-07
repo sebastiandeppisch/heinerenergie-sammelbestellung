@@ -3,8 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Enums\AdviceStatusResult;
-use Illuminate\Validation\Rules\Enum;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
 
 class UpdateAdviceStatusRequest extends FormRequest
 {
@@ -12,7 +12,7 @@ class UpdateAdviceStatusRequest extends FormRequest
     {
         return [
             'name' => 'string',
-            'result' => new Enum(AdviceStatusResult::class)
+            'result' => new Enum(AdviceStatusResult::class),
         ];
     }
 }

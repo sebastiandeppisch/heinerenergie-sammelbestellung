@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\BulkOrder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ProductCategoryFactory extends Factory

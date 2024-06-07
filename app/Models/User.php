@@ -2,15 +2,13 @@
 
 namespace App\Models;
 
-use App\Models\Order;
-use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
@@ -30,7 +28,7 @@ class User extends Authenticatable
         'street',
         'streetNumber',
         'zip',
-        'city'
+        'city',
     ];
 
     /**
@@ -50,35 +48,41 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'is_admin' => 'bool'
+        'is_admin' => 'bool',
     ];
 
     protected $appends = [
         'name',
-        'isActingAsAdmin'
+        'isActingAsAdmin',
     ];
 
-    public function orders(): HasMany{
+    public function orders(): HasMany
+    {
         return $this->hasMany(Order::class, 'advisor_id');
     }
 
-    public function advices(): HasMany{
+    public function advices(): HasMany
+    {
         return $this->hasMany(Advice::class);
     }
 
-    public function getNameAttribute(){
-        return sprintf("%s %s", $this->first_name, $this->last_name);
+    public function getNameAttribute()
+    {
+        return sprintf('%s %s', $this->first_name, $this->last_name);
     }
 
-    public function sharedOrders(): MorphMany{
+    public function sharedOrders(): MorphMany
+    {
         return $this->morphMany(Order::class, 'sharings');
     }
 
-    public function getIsActingAsAdminAttribute(): bool{
+    public function getIsActingAsAdminAttribute(): bool
+    {
         return $this->isActingAsAdmin();
     }
 
-    public function isActingAsAdmin(): bool{
+    public function isActingAsAdmin(): bool
+    {
         return $this->is_admin && Auth::user()?->id === $this->id && session()->get('isAdmin') === true;
     }
 }

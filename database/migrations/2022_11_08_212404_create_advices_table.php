@@ -17,27 +17,27 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
 
-            $table->string("name");
+            $table->string('name');
         });
-        
+
         Schema::create('advices', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
 
-            $table->string("firstName");
-            $table->string("lastName");
+            $table->string('firstName');
+            $table->string('lastName');
 
-            $table->string("street");
-            $table->string("streetNumber");
+            $table->string('street');
+            $table->string('streetNumber');
 
-            $table->unsignedInteger("zip");
-            $table->string("city");
+            $table->unsignedInteger('zip');
+            $table->string('city');
 
             $table->decimal('long', 10, 7)->nullable()->default(null);
             $table->decimal('lat', 10, 7)->nullable()->default(null);
 
-            $table->string("email");
-            $table->string("phone");
+            $table->string('email');
+            $table->string('phone');
 
             $table->text('commentary')->nullable();
 
@@ -48,8 +48,6 @@ return new class extends Migration
             $table->foreign('advice_status_id')->references('id')->on('advice_status');
 
         });
-
-
 
         Schema::table('users', function (Blueprint $table) {
             $table->decimal('long', 10, 7)->nullable()->default(null);
