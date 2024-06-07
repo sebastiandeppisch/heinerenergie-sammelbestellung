@@ -131,4 +131,19 @@ class Advice extends Model
     {
         return $this->shares->pluck('id')->toArray();
     }
+
+    public function isHome(): bool
+    {
+        return $this->type === AdviceType::Home;
+    }
+
+    public function isDirectOrder(): bool
+    {
+        return $this->type === AdviceType::DirectOrder;
+    }
+
+    public function isVirtual(): bool
+    {
+        return $this->type === AdviceType::Virtual;
+    }
 }
