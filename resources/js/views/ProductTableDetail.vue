@@ -1,34 +1,3 @@
-<template>
-  <div class="dx-card content" style="width:620px;padding:10px;">
-  <DxDataGrid
-    :data-source="productDownloads"
-    :show-borders="false"
-    :column-auto-width="true"
-    width="600px"
-    ref="productDownloadsGrid"
-    @init-new-row="initNewRow"
-  >
-    <DxEditing
-      :allow-updating="true"
-      :allow-deleting="true"
-      :allow-adding="true"
-      mode="cell"
-    />
-    <DxColumn data-field="name" caption="Name" />
-    <DxColumn data-field="url" caption="URL" width="400"/>
-  </DxDataGrid>
-
-  <DxFileUploader
-    upload-mode="instantly"
-    :upload-url="'api/upload/'"
-    @uploaded="fileUploaded"
-    name="file"
-    :upload-custom-data="{path: 'products/' }"
-  />
-  </div>
-  
-</template>
-
 <script setup lang="ts">
 import DxDataGrid, {
   DxColumn,
@@ -73,3 +42,34 @@ function initNewRow(args){
   }
 }
 </script>
+
+<template>
+  <div class="dx-card content" style="width:620px;padding:10px;">
+  <DxDataGrid
+    :data-source="productDownloads"
+    :show-borders="false"
+    :column-auto-width="true"
+    width="600px"
+    ref="productDownloadsGrid"
+    @init-new-row="initNewRow"
+  >
+    <DxEditing
+      :allow-updating="true"
+      :allow-deleting="true"
+      :allow-adding="true"
+      mode="cell"
+    />
+    <DxColumn data-field="name" caption="Name" />
+    <DxColumn data-field="url" caption="URL" width="400"/>
+  </DxDataGrid>
+
+  <DxFileUploader
+    upload-mode="instantly"
+    :upload-url="'api/upload/'"
+    @uploaded="fileUploaded"
+    name="file"
+    :upload-custom-data="{path: 'products/' }"
+  />
+  </div>
+  
+</template>

@@ -1,23 +1,3 @@
-<template>
-  <div id="root">
-    <div :class="cssClasses">
-      <component
-        :is="$route.meta.layout"
-        :title="title"
-        :is-x-small="screen.getScreenSizeInfo.isXSmall"
-        :is-large="screen.getScreenSizeInfo.isLarge"
-      >
-      <div class="content">
-        <router-view></router-view>
-      </div>
-        <template #footer>
-          <app-footer />
-        </template>
-      </component>
-    </div>
-  </div>
-</template>
-
 <script>
 import AppFooter from "./components/app-footer.vue";
 import { sizes, subscribe, unsubscribe } from "./utils/media-query";
@@ -74,6 +54,26 @@ export default {
   }
 };
 </script>
+
+<template>
+  <div id="root">
+    <div :class="cssClasses">
+      <component
+        :is="$route.meta.layout"
+        :title="title"
+        :is-x-small="screen.getScreenSizeInfo.isXSmall"
+        :is-large="screen.getScreenSizeInfo.isLarge"
+      >
+      <div class="content">
+        <router-view></router-view>
+      </div>
+        <template #footer>
+          <app-footer />
+        </template>
+      </component>
+    </div>
+  </div>
+</template>
 
 <style lang="scss">
 html,

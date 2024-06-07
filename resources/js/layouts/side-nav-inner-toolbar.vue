@@ -1,54 +1,3 @@
-<template>
-  <div class="side-nav-inner-toolbar">
-    <dx-drawer
-      class="drawer"
-      position="before"
-      template="menuTemplate"
-      v-model:opened="menuOpened"
-      :opened-state-mode="drawerOptions.menuMode"
-      :reveal-mode="drawerOptions.menuRevealMode"
-      :min-size="drawerOptions.minMenuSize"
-      :max-size="drawerOptions.maxMenuSize"
-      :shading="drawerOptions.shaderEnabled"
-      :close-on-outside-click="drawerOptions.closeOnOutsideClick"
-    >
-      <div class="container">
-        <header-toolbar
-          :menu-toggle-enabled="headerMenuTogglerEnabled"
-          :toggle-menu-func="toggleMenu"
-        />
-        <dx-scroll-view ref="scrollViewRef" class="layout-body with-footer">
-          <slot />
-          <slot name="footer" />
-        </dx-scroll-view>
-      </div>
-      <template #menuTemplate>
-        <side-nav-menu
-          :compact-mode="!menuOpened"
-          @click="handleSideBarClick"
-        >
-          <dx-toolbar id="navigation-header">
-            <dx-item v-if="!isXSmall" location="before" css-class="menu-button">
-              <template #default>
-              <dx-button
-                icon="menu"
-                styling-mode="text"
-                @click="toggleMenu"
-              />
-              </template>
-            </dx-item>
-            <dx-item location="before" css-class="header-title dx-toolbar-label">
-              <template #default>
-                <div>{{ title }}</div>
-                </template>
-            </dx-item>
-          </dx-toolbar>
-        </side-nav-menu>
-      </template>
-    </dx-drawer>
-  </div>
-</template>
-
 <script>
 import DxButton from "devextreme-vue/button";
 import DxDrawer from "devextreme-vue/drawer";
@@ -148,6 +97,57 @@ export default {
   }
 };
 </script>
+
+<template>
+  <div class="side-nav-inner-toolbar">
+    <dx-drawer
+      class="drawer"
+      position="before"
+      template="menuTemplate"
+      v-model:opened="menuOpened"
+      :opened-state-mode="drawerOptions.menuMode"
+      :reveal-mode="drawerOptions.menuRevealMode"
+      :min-size="drawerOptions.minMenuSize"
+      :max-size="drawerOptions.maxMenuSize"
+      :shading="drawerOptions.shaderEnabled"
+      :close-on-outside-click="drawerOptions.closeOnOutsideClick"
+    >
+      <div class="container">
+        <header-toolbar
+          :menu-toggle-enabled="headerMenuTogglerEnabled"
+          :toggle-menu-func="toggleMenu"
+        />
+        <dx-scroll-view ref="scrollViewRef" class="layout-body with-footer">
+          <slot />
+          <slot name="footer" />
+        </dx-scroll-view>
+      </div>
+      <template #menuTemplate>
+        <side-nav-menu
+          :compact-mode="!menuOpened"
+          @click="handleSideBarClick"
+        >
+          <dx-toolbar id="navigation-header">
+            <dx-item v-if="!isXSmall" location="before" css-class="menu-button">
+              <template #default>
+              <dx-button
+                icon="menu"
+                styling-mode="text"
+                @click="toggleMenu"
+              />
+              </template>
+            </dx-item>
+            <dx-item location="before" css-class="header-title dx-toolbar-label">
+              <template #default>
+                <div>{{ title }}</div>
+                </template>
+            </dx-item>
+          </dx-toolbar>
+        </side-nav-menu>
+      </template>
+    </dx-drawer>
+  </div>
+</template>
 
 <style lang="scss">
 .side-nav-inner-toolbar {

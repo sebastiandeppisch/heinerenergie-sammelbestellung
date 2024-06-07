@@ -1,3 +1,10 @@
+<script setup lang="ts">
+import SettingHtml from '../components/SettingHtml.vue';
+
+
+let orderFormText = () => 'advisorInfo';
+</script>
+
 <template>
   <div ref="outer">
     <h2 class="content-block">Dashboard</h2>
@@ -7,13 +14,6 @@
     </p>
   </div>
 </template>
-
-<script setup lang="ts">
-import SettingHtml from '../components/SettingHtml.vue';
-
-
-let orderFormText = () => 'advisorInfo';
-</script>
 <style scoped>
 .flex-row{
   flex-direction: row;

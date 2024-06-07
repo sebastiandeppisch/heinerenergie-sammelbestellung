@@ -1,32 +1,3 @@
-<template>
-  <div style="display: flex; flex-direction: column; height: 100%">
-    <span style="font-size: 1.2em">Hast Du sonst noch Fragen oder möchtest ein Kommentar hinzufügen?</span>
-    <DxTextArea
-      v-model="advice.commentary"
-      placeholder="Ich habe noch eine Frage zur Balkonhalterung..."
-      height="calc(100% - 100px)"
-    />
-    <div style="height: 32px;display:block;"></div>
-    <DxButton
-      text="Beratungsanfrage abschicken"
-      icon="fas fa-paper-plane"
-      type="success"
-      @click="submit"
-      :disabled="loading"
-      height="48px"
-    />
-    <div style="align-items: center;display:flex; flex-direction: column;padding-top:8px;">
-      <DxLoadIndicator
-        :visible="loadIndicatorVisible"
-        height="32px"
-        width="32px"
-      />
-      <div style="display:block;height: 32px" v-if="!loadIndicatorVisible"></div>
-    </div>
-    <div style="height: 16px;display:block;"></div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import DxTextArea from "devextreme-vue/text-area";
 import DxButton from "devextreme-vue/button";
@@ -83,3 +54,32 @@ const advice = computed<App.Models.Advice>({
   },
 });
 </script>
+
+<template>
+  <div style="display: flex; flex-direction: column; height: 100%">
+    <span style="font-size: 1.2em">Hast Du sonst noch Fragen oder möchtest ein Kommentar hinzufügen?</span>
+    <DxTextArea
+      v-model="advice.commentary"
+      placeholder="Ich habe noch eine Frage zur Balkonhalterung..."
+      height="calc(100% - 100px)"
+    />
+    <div style="height: 32px;display:block;"></div>
+    <DxButton
+      text="Beratungsanfrage abschicken"
+      icon="fas fa-paper-plane"
+      type="success"
+      @click="submit"
+      :disabled="loading"
+      height="48px"
+    />
+    <div style="align-items: center;display:flex; flex-direction: column;padding-top:8px;">
+      <DxLoadIndicator
+        :visible="loadIndicatorVisible"
+        height="32px"
+        width="32px"
+      />
+      <div style="display:block;height: 32px" v-if="!loadIndicatorVisible"></div>
+    </div>
+    <div style="height: 16px;display:block;"></div>
+  </div>
+</template>

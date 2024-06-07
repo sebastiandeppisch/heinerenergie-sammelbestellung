@@ -1,3 +1,21 @@
+<script>
+import DxContextMenu, { DxPosition } from "devextreme-vue/context-menu";
+import DxList from "devextreme-vue/list";
+
+export default {
+  props: {
+    menuMode: String,
+    menuItems: Array,
+    email: String
+  },
+  components: {
+    DxContextMenu,
+    DxPosition,
+    DxList
+  }
+};
+</script>
+
 <template>
   <div class="user-panel">
     <div v-if="email">
@@ -37,24 +55,6 @@
     
   </div>
 </template>
-
-<script>
-import DxContextMenu, { DxPosition } from "devextreme-vue/context-menu";
-import DxList from "devextreme-vue/list";
-
-export default {
-  props: {
-    menuMode: String,
-    menuItems: Array,
-    email: String
-  },
-  components: {
-    DxContextMenu,
-    DxPosition,
-    DxList
-  }
-};
-</script>
 
 <style lang="scss">
 @import "../themes/generated/variables.base.scss";

@@ -1,3 +1,24 @@
+<script>
+import DxButton from "devextreme-vue/button";
+import DxToolbar, { DxItem } from "devextreme-vue/toolbar";
+import auth from "../auth";
+import { useRouter, useRoute } from 'vue-router';
+import { computed, ref } from 'vue';
+import { useStore } from '../store'
+
+import UserPanel from "./user-panel.vue";
+import notify from 'devextreme/ui/notify';
+
+export default {
+  components: {
+    DxButton,
+    DxToolbar,
+    DxItem,
+    UserPanel
+  }
+};
+</script>
+
 <template>
   <header class="header-component">
     <dx-toolbar class="header-toolbar">
@@ -39,27 +60,6 @@
     </dx-toolbar>
   </header>
 </template>
-
-<script>
-import DxButton from "devextreme-vue/button";
-import DxToolbar, { DxItem } from "devextreme-vue/toolbar";
-import auth from "../auth";
-import { useRouter, useRoute } from 'vue-router';
-import { computed, ref } from 'vue';
-import { useStore } from '../store'
-
-import UserPanel from "./user-panel.vue";
-import notify from 'devextreme/ui/notify';
-
-export default {
-  components: {
-    DxButton,
-    DxToolbar,
-    DxItem,
-    UserPanel
-  }
-};
-</script>
 
 <style lang="scss">
 @import "../themes/generated/variables.base.scss";

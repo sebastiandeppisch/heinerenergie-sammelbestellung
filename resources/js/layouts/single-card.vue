@@ -1,15 +1,3 @@
-<template>
-  <dx-scroll-view height="100%" width="100%" class="with-footer single-card">
-     <div class="dx-card content">
-      <div class="header">
-        <div class="title">{{title}}</div>
-        <div class="description">{{description}}</div>
-      </div>
-      <slot />
-    </div>
-  </dx-scroll-view>
-</template>
-
 <script>
 import DxScrollView from "devextreme-vue/scroll-view";
 
@@ -39,6 +27,18 @@ export default {
   }
 };
 </script>
+
+<template>
+  <dx-scroll-view height="100%" width="100%" class="with-footer single-card">
+     <div class="dx-card content">
+      <div class="header">
+        <div class="title">{{title}}</div>
+        <div class="description">{{description}}</div>
+      </div>
+      <slot />
+    </div>
+  </dx-scroll-view>
+</template>
 
 <style lang="scss">
 @import "../themes/generated/variables.base.scss";

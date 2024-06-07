@@ -1,38 +1,3 @@
-<template>
-  <div>
-    <div v-if="props.setting.type==='text'">
-      <DxHtmlEditor
-        v-model:value="state.value" 
-        :on-value-changed="onValueChanged"
-        :allow-soft-line-break="true"
-      >
-        <DxMediaResizing :enabled="true"/>
-        <DxToolbar :multiline="true" :items="toolbar" />
-        <template #saveButton>
-          <DxButton 
-            type="default"
-            @click="save"
-            :disabled="!state.dirty"
-            icon="save"
-          />
-        </template>
-      </DxHtmlEditor>
-    </div>
-    <div v-else-if="props.setting.type==='integer'">
-      <DxNumberBox
-        v-model:value="state.value" :on-value-changed="save"/>
-    </div>
-    <div v-else-if="props.setting.type==='boolean'">
-      <DxSwitch
-        v-model:value="state.value" :on-value-changed="save"/>
-    </div>
-    <div v-else-if="props.setting.type==='string'">
-      <DxTextBox
-        v-model:value="state.value" :on-value-changed="save"/>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { reactive } from '@vue/reactivity';
 import DxAccordion from 'devextreme-vue/accordion';
@@ -93,3 +58,38 @@ const save = () => {
 }
 
 </script>
+
+<template>
+  <div>
+    <div v-if="props.setting.type==='text'">
+      <DxHtmlEditor
+        v-model:value="state.value" 
+        :on-value-changed="onValueChanged"
+        :allow-soft-line-break="true"
+      >
+        <DxMediaResizing :enabled="true"/>
+        <DxToolbar :multiline="true" :items="toolbar" />
+        <template #saveButton>
+          <DxButton 
+            type="default"
+            @click="save"
+            :disabled="!state.dirty"
+            icon="save"
+          />
+        </template>
+      </DxHtmlEditor>
+    </div>
+    <div v-else-if="props.setting.type==='integer'">
+      <DxNumberBox
+        v-model:value="state.value" :on-value-changed="save"/>
+    </div>
+    <div v-else-if="props.setting.type==='boolean'">
+      <DxSwitch
+        v-model:value="state.value" :on-value-changed="save"/>
+    </div>
+    <div v-else-if="props.setting.type==='string'">
+      <DxTextBox
+        v-model:value="state.value" :on-value-changed="save"/>
+    </div>
+  </div>
+</template>

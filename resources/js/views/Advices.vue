@@ -1,27 +1,3 @@
-<template>
-    <div class="dx-card" style="margin: 30px;padding: 10px;" v-if="user.long === null || user.lat === null">
-      <i class="dx-icon-info"></i> &nbsp; Trage unter <router-link to='profile'>Deinem Profil</router-link> Deine Adresse ein, um die Beratungszuteilung zu vereinfachen und um anderen Berater*innen zu zeigen, wo Du beraten möchtest.
-    </div>
-   <DxTabPanel
-      height="100%"
-      v-model:selected-index="selectedIndex"
-      :loop="false"
-      :animation-enabled="false"
-      :swipe-enabled="false"
-      @selection-changed="onTabChanged"
-    >
-        <DxItem title="Tabelle" icon="detailslayout">
-          <AdvicesTable @selectAdviceId="onSelectAdvice"/>
-        </DxItem>
-        <DxItem title="Karte" icon="map">
-          <AdvicesMap @selectAdviceId="onSelectAdvice"/>
-        </DxItem>
-        <DxItem title="Beratung" icon="user" :disabled="selectedAdviceId === null">
-          <Advice :advice-id="selectedAdviceId"/>
-        </DxItem>
-    </DxTabPanel>
-</template>
-
 <script setup lang="ts">
 import DxTabPanel, {DxItem} from 'devextreme-vue/tab-panel';
 import { ref } from 'vue';
@@ -78,3 +54,27 @@ function onTabChanged(e){
 
 
 </script>
+
+<template>
+    <div class="dx-card" style="margin: 30px;padding: 10px;" v-if="user.long === null || user.lat === null">
+      <i class="dx-icon-info"></i> &nbsp; Trage unter <router-link to='profile'>Deinem Profil</router-link> Deine Adresse ein, um die Beratungszuteilung zu vereinfachen und um anderen Berater*innen zu zeigen, wo Du beraten möchtest.
+    </div>
+   <DxTabPanel
+      height="100%"
+      v-model:selected-index="selectedIndex"
+      :loop="false"
+      :animation-enabled="false"
+      :swipe-enabled="false"
+      @selection-changed="onTabChanged"
+    >
+        <DxItem title="Tabelle" icon="detailslayout">
+          <AdvicesTable @selectAdviceId="onSelectAdvice"/>
+        </DxItem>
+        <DxItem title="Karte" icon="map">
+          <AdvicesMap @selectAdviceId="onSelectAdvice"/>
+        </DxItem>
+        <DxItem title="Beratung" icon="user" :disabled="selectedAdviceId === null">
+          <Advice :advice-id="selectedAdviceId"/>
+        </DxItem>
+    </DxTabPanel>
+</template>

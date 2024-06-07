@@ -1,3 +1,181 @@
+<script setup lang="ts">
+import LaravelDataSource from "../LaravelDataSource";
+import { AdaptTableHeight } from "../helpers";
+import { ref, onMounted, reactive, defineEmits } from "vue";
+import DxPopup from 'devextreme-vue/popup';
+import AdviceStatus from "./AdviceStatus.vue";
+import PhysicalValue from "./PhysicalValue.vue";
+import Advice from "./Advice.vue";
+import { DxScrollView } from 'devextreme-vue/scroll-view';
+
+import DxDataGrid, {
+  DxColumn,
+  DxEditing,
+  DxSummary,
+  DxTotalItem,
+  DxMasterDetail,
+  DxToolbar,
+  DxItem,
+  DxLookup,
+  DxFilterRow,
+  DxScrolling,
+  DxButton as DxTableButton,
+  DxGroupPanel,
+  DxGrouping,
+  DxGroupItem,
+} from "devextreme-vue/data-grid";
+import LaravelLookupSource from "../LaravelLookupSource";
+import DxButton from "devextreme-vue/button";
+import {store} from "../store";
+import axios from "axios";
+import CustomStore from "devextreme/data/custom_store";
+import { DxSwitch } from "devextreme-vue";
+import { DxForm, DxItem as DxFormItem, DxSimpleItem, DxGroupItem as DxFormGroupItem, DxButtonItem} from 'devextreme-vue/form';
+import notify from "devextreme/ui/notify";
+
+const emit = defineEmits(["selectAdviceId"])
+
+const advices = new LaravelDataSource("api/advices");
+const advisors = new LaravelDataSource("api/users");
+const adviceStatus = new LaravelLookupSource('api/advicestatus');
+const adviceTypes = new LaravelLookupSource('api/advicetypes');
+
+const outer = ref(null);
+
+const tableHeight = new AdaptTableHeight(outer);
+const reactiveHeight = tableHeight.getReactive();
+
+const isAdmin = store.state.user.is_admin;
+
+const newadvice = reactive({
+  firstName: '',
+  lastName: '',
+  phone: '',
+  email: '',
+  street: '',
+  streetNumber: '',
+  zip: '',
+  city: '',
+  advice_status_id: 1,
+  type: 0,
+  commentary: '',
+ // advisor_id: store.state.user.id,
+});
+
+function radioBoxLayout(data: any) {
+  const icons = {
+    Home: 'home',
+    Virtual: 'tel',
+    DirectOrder: 'cart'
+  }
+
+  const helpText = {
+    Home: 'Beratung vor Ort',
+    Virtual: 'Beratung per Telefon',
+    DirectOrder: 'Direktbestellung'
+  }
+
+  return `<i style="font-size:1.5em;" class="dx-icon-${icons[data.name]}" title='${helpText[data.name]}'></i>`;
+};
+
+const r = reactive({
+  popupVisible: false,
+  selectedBulkOrder: null,
+  advisorNames: new Map<number, string>(),
+  autoExpand: false,
+  newAdvicePopupVisible: false,
+});
+
+advisors.load().then(() => {
+  advisors.items().forEach((a) => {
+    r.advisorNames.set(a.id, a.name);
+    console.log(a.name);
+  });
+});
+
+function openStatus(){
+  r.popupVisible = true;
+}
+
+function openAdvice(e){
+  emit('selectAdviceId', e.row.data.id);
+}
+
+onMounted(() => {
+  tableHeight.calcHeight();
+});
+
+function assignAdvice(id){
+  axios.post('api/advices/' + id + '/assign').then(response => response.data).then((advice) => {
+    advices.store().push([{ type: "update", data: advice, key: advice.id }]);
+  });
+}
+
+function isOpenVisible(e){
+  const advice = e.row.data as App.Models.Advice;
+  return userCanEdit(advice);
+}
+
+function rowCanBeEdited(e){
+  const advice = e.row.data as App.Models.Advice;
+  return userCanEdit(advice);
+}
+
+function userCanEdit(advice){
+  const userId = store.state.user.id;
+  if(isAdmin){
+    return true;
+  }
+  if(advice.advisor_id === userId){
+    return true;
+  }
+  if('shares_ids' in advice && advice.shares_ids.includes(userId)){
+    return true;
+  }
+  return false;
+}
+
+function sortedAdvisors(e){
+  console.log(e);
+  if(!e.data){
+    return advisors.store();
+  }
+  return new CustomStore({
+    loadMode: 'raw',
+    cacheRawData: true,
+    load: (options) => {
+      return axios.get('api/advices/' + e.data.id + '/advisors').then(response => response.data);
+    }
+  });
+}
+
+function openNewAdvice(){
+  r.newAdvicePopupVisible = true;
+}
+
+function saveNewAdvice(){
+  axios.post('api/advices', newadvice).then(response => response.data).then((advice) => {
+    notify('Beratung erfolgreich angelegt', 'success', 3000);
+    advices.store().push([{ type: "insert", data: advice, key: advice.id }]);
+    r.newAdvicePopupVisible = false;
+    newadvice.firstName = '';
+    newadvice.lastName = '';
+    newadvice.phone = '';
+    newadvice.email = '';
+    newadvice.street = '';
+    newadvice.streetNumber = '';
+    newadvice.zip = '';
+    newadvice.city = '';
+    newadvice.advice_status_id = 1;
+    newadvice.type = 0;
+    newadvice.commentary = '';
+   // newadvice.advisor_id = store.state.user.id
+  }).catch((error) => {
+    notify(error.response.data.message, 'error', 3000);
+  });
+}
+</script>
+
 <template>
   <div ref="outer">
     <h2 class="content-block">Beratungen</h2>
@@ -235,184 +413,6 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import LaravelDataSource from "../LaravelDataSource";
-import { AdaptTableHeight } from "../helpers";
-import { ref, onMounted, reactive, defineEmits } from "vue";
-import DxPopup from 'devextreme-vue/popup';
-import AdviceStatus from "./AdviceStatus.vue";
-import PhysicalValue from "./PhysicalValue.vue";
-import Advice from "./Advice.vue";
-import { DxScrollView } from 'devextreme-vue/scroll-view';
-
-import DxDataGrid, {
-  DxColumn,
-  DxEditing,
-  DxSummary,
-  DxTotalItem,
-  DxMasterDetail,
-  DxToolbar,
-  DxItem,
-  DxLookup,
-  DxFilterRow,
-  DxScrolling,
-  DxButton as DxTableButton,
-  DxGroupPanel,
-  DxGrouping,
-  DxGroupItem,
-} from "devextreme-vue/data-grid";
-import LaravelLookupSource from "../LaravelLookupSource";
-import DxButton from "devextreme-vue/button";
-import {store} from "../store";
-import axios from "axios";
-import CustomStore from "devextreme/data/custom_store";
-import { DxSwitch } from "devextreme-vue";
-import { DxForm, DxItem as DxFormItem, DxSimpleItem, DxGroupItem as DxFormGroupItem, DxButtonItem} from 'devextreme-vue/form';
-import notify from "devextreme/ui/notify";
-
-const emit = defineEmits(["selectAdviceId"])
-
-const advices = new LaravelDataSource("api/advices");
-const advisors = new LaravelDataSource("api/users");
-const adviceStatus = new LaravelLookupSource('api/advicestatus');
-const adviceTypes = new LaravelLookupSource('api/advicetypes');
-
-const outer = ref(null);
-
-const tableHeight = new AdaptTableHeight(outer);
-const reactiveHeight = tableHeight.getReactive();
-
-const isAdmin = store.state.user.is_admin;
-
-const newadvice = reactive({
-  firstName: '',
-  lastName: '',
-  phone: '',
-  email: '',
-  street: '',
-  streetNumber: '',
-  zip: '',
-  city: '',
-  advice_status_id: 1,
-  type: 0,
-  commentary: '',
- // advisor_id: store.state.user.id,
-});
-
-function radioBoxLayout(data: any) {
-  const icons = {
-    Home: 'home',
-    Virtual: 'tel',
-    DirectOrder: 'cart'
-  }
-
-  const helpText = {
-    Home: 'Beratung vor Ort',
-    Virtual: 'Beratung per Telefon',
-    DirectOrder: 'Direktbestellung'
-  }
-
-  return `<i style="font-size:1.5em;" class="dx-icon-${icons[data.name]}" title='${helpText[data.name]}'></i>`;
-};
-
-const r = reactive({
-  popupVisible: false,
-  selectedBulkOrder: null,
-  advisorNames: new Map<number, string>(),
-  autoExpand: false,
-  newAdvicePopupVisible: false,
-});
-
-advisors.load().then(() => {
-  advisors.items().forEach((a) => {
-    r.advisorNames.set(a.id, a.name);
-    console.log(a.name);
-  });
-});
-
-function openStatus(){
-  r.popupVisible = true;
-}
-
-function openAdvice(e){
-  emit('selectAdviceId', e.row.data.id);
-}
-
-onMounted(() => {
-  tableHeight.calcHeight();
-});
-
-function assignAdvice(id){
-  axios.post('api/advices/' + id + '/assign').then(response => response.data).then((advice) => {
-    advices.store().push([{ type: "update", data: advice, key: advice.id }]);
-  });
-}
-
-function isOpenVisible(e){
-  const advice = e.row.data as App.Models.Advice;
-  return userCanEdit(advice);
-}
-
-function rowCanBeEdited(e){
-  const advice = e.row.data as App.Models.Advice;
-  return userCanEdit(advice);
-}
-
-function userCanEdit(advice){
-  const userId = store.state.user.id;
-  if(isAdmin){
-    return true;
-  }
-  if(advice.advisor_id === userId){
-    return true;
-  }
-  if('shares_ids' in advice && advice.shares_ids.includes(userId)){
-    return true;
-  }
-  return false;
-}
-
-function sortedAdvisors(e){
-  console.log(e);
-  if(!e.data){
-    return advisors.store();
-  }
-  return new CustomStore({
-    loadMode: 'raw',
-    cacheRawData: true,
-    load: (options) => {
-      return axios.get('api/advices/' + e.data.id + '/advisors').then(response => response.data);
-    }
-  });
-}
-
-function openNewAdvice(){
-  r.newAdvicePopupVisible = true;
-}
-
-function saveNewAdvice(){
-  axios.post('api/advices', newadvice).then(response => response.data).then((advice) => {
-    notify('Beratung erfolgreich angelegt', 'success', 3000);
-    advices.store().push([{ type: "insert", data: advice, key: advice.id }]);
-    r.newAdvicePopupVisible = false;
-    newadvice.firstName = '';
-    newadvice.lastName = '';
-    newadvice.phone = '';
-    newadvice.email = '';
-    newadvice.street = '';
-    newadvice.streetNumber = '';
-    newadvice.zip = '';
-    newadvice.city = '';
-    newadvice.advice_status_id = 1;
-    newadvice.type = 0;
-    newadvice.commentary = '';
-   // newadvice.advisor_id = store.state.user.id
-  }).catch((error) => {
-    notify(error.response.data.message, 'error', 3000);
-  });
-}
-</script>
 <style scoped>
 @media screen and (min-width:680px) {
   .main-table{

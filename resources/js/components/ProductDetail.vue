@@ -1,3 +1,23 @@
+<script setup lang="ts">
+import { reactive } from '@vue/reactivity';
+import { DxPopover } from 'devextreme-vue/popover';
+import DxButton from 'devextreme-vue/button';
+interface Props {
+  product: App.Models.Product
+}
+const {product} = defineProps<Props>();
+
+const r = reactive({
+    popoverVisible : false
+});
+
+function openPopover(){
+    r.popoverVisible = true;
+}
+
+const popoverId = "popover-product" + product.id;
+
+</script>
 <template>
     <div class="article">
         <div class="article-name">
@@ -29,26 +49,6 @@
         </div>
     </div>
 </template>
-<script setup lang="ts">
-import { reactive } from '@vue/reactivity';
-import { DxPopover } from 'devextreme-vue/popover';
-import DxButton from 'devextreme-vue/button';
-interface Props {
-  product: App.Models.Product
-}
-const {product} = defineProps<Props>();
-
-const r = reactive({
-    popoverVisible : false
-});
-
-function openPopover(){
-    r.popoverVisible = true;
-}
-
-const popoverId = "popover-product" + product.id;
-
-</script>
 <style scoped>
 .article{
     display: flex;

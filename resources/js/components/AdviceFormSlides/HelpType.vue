@@ -1,3 +1,33 @@
+<script setup lang="ts">
+
+import { computed } from "vue";
+
+import DxCheckBox from "devextreme-vue/check-box";
+
+interface Props {
+  modelValue: App.Models.Advice;
+}
+
+const props = defineProps<Props>();
+const emit = defineEmits(["allowForward"]);
+
+function checkForm() {
+  if (advice.value.helpType_place || advice.value.helpType_bureaucracy || advice.value.helpType_technical || advice.value.helpType_other) {
+    emit("allowForward", true);
+  } else {
+    emit("allowForward", false);
+  }
+}
+
+const advice = computed<App.Models.Advice>({
+  get() {
+    return props.modelValue;
+  },
+  set(value) {
+  },
+});
+</script>
+
 <template>
   <div style="display: flex; flex-direction: column; gap:32px;">
     <span style="font-size: 1.2em">Bei was benötigst Du Beratung, {{ advice.firstName }}?</span>
@@ -69,33 +99,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-
-import { computed } from "vue";
-
-import DxCheckBox from "devextreme-vue/check-box";
-
-interface Props {
-  modelValue: App.Models.Advice;
-}
-
-const props = defineProps<Props>();
-const emit = defineEmits(["allowForward"]);
-
-function checkForm() {
-  if (advice.value.helpType_place || advice.value.helpType_bureaucracy || advice.value.helpType_technical || advice.value.helpType_other) {
-    emit("allowForward", true);
-  } else {
-    emit("allowForward", false);
-  }
-}
-
-const advice = computed<App.Models.Advice>({
-  get() {
-    return props.modelValue;
-  },
-  set(value) {
-  },
-});
-</script>

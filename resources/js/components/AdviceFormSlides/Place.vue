@@ -1,88 +1,3 @@
-<template>
-<div style="display: flex;flex-direction: column;height:100%;">
-  <span style="font-size:1.2em">Möchtest Du beraten werden, oder ohne Beratung an der Sammelbestellung teilnehmen?</span>
-  <DxButtonGroup
-    :items="adviceOrDirectOrder"
-    key-expr="id"
-    width="100%"
-    @selection-changed="adviceOrDirectOrderChanged"
-  />
-  <DxButtonGroup
-    v-if="adviceOrDirectOrderIsSet && advice.type !== 2"
-    :items="phoneOrHome"
-    key-expr="id"
-    width="100%"
-    @selection-changed="phoneOrHomeChanged"
-    style="margin-top:16px;"
-  />
-  <div style="display: block;height:42px;" v-if="advice.type == 2"></div>
-  <div v-if="advice.type !== null" style="margin-top:16px;">
-  <span style="font-size:1.2em;">{{ addressText }}</span>
-    <div style="display:flex;flex-direction: row;">
-      <DxTextBox
-        placeholder="Luisenstraße"
-        width="100%"
-        :element-attr="{style: 'margin-right: 32px;flex:1'}"
-        label="Straße"
-        v-model="advice.street"
-        @change="checkForm"
-        @key-up="checkForm"
-        value-change-event="keyup"
-        >
-        <DxValidator>
-          <DxRequiredRule message="Gib bitte Deine Straße an"/>
-        </DxValidator>
-      </DxTextBox>
-      <DxTextBox
-        placeholder="42a"
-        width="100px"
-        label="Nr."
-        v-model="advice.streetNumber"
-        @change="checkForm"
-        @key-up="checkForm"
-        value-change-event="keyup"
-        >
-        <DxValidator>
-          <DxRequiredRule message="Gib bitte Deine Hausnummer an"/>
-        </DxValidator>
-      </DxTextBox>
-    </div>
-    <div  style="display:flex;margin-top:32px;">
-    <DxTextBox
-      placeholder="64283"
-      width="150px"
-      label="Plz"
-      v-model="advice.zip"
-      @change="checkForm"
-      @key-up="checkForm"
-      value-change-event="keyup"
-      mask="00000"
-      mask-char=""
-      mask-invalid-message="Gib bitte eine 5 stellige Postleitzahl an"
-    >
-      <DxValidator >
-        <DxRequiredRule message="Gib bitte Deine Postleitzahl an"/>
-        <DxStringLengthRule message="Gib bitte eine 5 stellige Postleitzahl an" :min="5" :max="5" />
-      </DxValidator>
-    </DxTextBox>
-    <DxTextBox
-      placeholder="Darmstadt"
-      :element-attr="{style: 'margin-left: 32px;flex:1'}"
-      label="Ort"
-      v-model="advice.city"
-      @change="checkForm"
-      @key-up="checkForm"
-      value-change-event="keyup"
-      >
-        <DxValidator>
-          <DxRequiredRule message="Gib bitte Deine Stadt an"/>
-        </DxValidator>
-      </DxTextBox>
-    </div>
-  </div>
-</div>
-</template>
-
 <script setup lang="ts">
 import DxTextBox from "devextreme-vue/text-box";
 import DxButtonGroup from "devextreme-vue/button-group";
@@ -178,3 +93,88 @@ function adviceTypeChanged(e: any) {
 
 
 </script>
+
+<template>
+<div style="display: flex;flex-direction: column;height:100%;">
+  <span style="font-size:1.2em">Möchtest Du beraten werden, oder ohne Beratung an der Sammelbestellung teilnehmen?</span>
+  <DxButtonGroup
+    :items="adviceOrDirectOrder"
+    key-expr="id"
+    width="100%"
+    @selection-changed="adviceOrDirectOrderChanged"
+  />
+  <DxButtonGroup
+    v-if="adviceOrDirectOrderIsSet && advice.type !== 2"
+    :items="phoneOrHome"
+    key-expr="id"
+    width="100%"
+    @selection-changed="phoneOrHomeChanged"
+    style="margin-top:16px;"
+  />
+  <div style="display: block;height:42px;" v-if="advice.type == 2"></div>
+  <div v-if="advice.type !== null" style="margin-top:16px;">
+  <span style="font-size:1.2em;">{{ addressText }}</span>
+    <div style="display:flex;flex-direction: row;">
+      <DxTextBox
+        placeholder="Luisenstraße"
+        width="100%"
+        :element-attr="{style: 'margin-right: 32px;flex:1'}"
+        label="Straße"
+        v-model="advice.street"
+        @change="checkForm"
+        @key-up="checkForm"
+        value-change-event="keyup"
+        >
+        <DxValidator>
+          <DxRequiredRule message="Gib bitte Deine Straße an"/>
+        </DxValidator>
+      </DxTextBox>
+      <DxTextBox
+        placeholder="42a"
+        width="100px"
+        label="Nr."
+        v-model="advice.streetNumber"
+        @change="checkForm"
+        @key-up="checkForm"
+        value-change-event="keyup"
+        >
+        <DxValidator>
+          <DxRequiredRule message="Gib bitte Deine Hausnummer an"/>
+        </DxValidator>
+      </DxTextBox>
+    </div>
+    <div  style="display:flex;margin-top:32px;">
+    <DxTextBox
+      placeholder="64283"
+      width="150px"
+      label="Plz"
+      v-model="advice.zip"
+      @change="checkForm"
+      @key-up="checkForm"
+      value-change-event="keyup"
+      mask="00000"
+      mask-char=""
+      mask-invalid-message="Gib bitte eine 5 stellige Postleitzahl an"
+    >
+      <DxValidator >
+        <DxRequiredRule message="Gib bitte Deine Postleitzahl an"/>
+        <DxStringLengthRule message="Gib bitte eine 5 stellige Postleitzahl an" :min="5" :max="5" />
+      </DxValidator>
+    </DxTextBox>
+    <DxTextBox
+      placeholder="Darmstadt"
+      :element-attr="{style: 'margin-left: 32px;flex:1'}"
+      label="Ort"
+      v-model="advice.city"
+      @change="checkForm"
+      @key-up="checkForm"
+      value-change-event="keyup"
+      >
+        <DxValidator>
+          <DxRequiredRule message="Gib bitte Deine Stadt an"/>
+        </DxValidator>
+      </DxTextBox>
+    </div>
+  </div>
+</div>
+</template>

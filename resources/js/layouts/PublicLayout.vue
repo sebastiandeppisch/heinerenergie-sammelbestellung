@@ -1,16 +1,3 @@
-<template>
-  <div class="outer">
-    <div class="public-layout">
-      <SmallToolbar/>
-    <!-- <dx-scroll-view ref="scrollViewRef" class="layout-body with-footer">-->
-        <slot />
-        <slot name="footer" />
-    <!--  </dx-scroll-view>-->
-
-    </div>
-  </div>
-</template>
-
 <script>
 import DxButton from "devextreme-vue/button";
 import DxDrawer from "devextreme-vue/drawer";
@@ -47,6 +34,19 @@ export default {
   }
 };
 </script>
+
+<template>
+  <div class="outer">
+    <div class="public-layout">
+      <SmallToolbar/>
+    <!-- <dx-scroll-view ref="scrollViewRef" class="layout-body with-footer">-->
+        <slot />
+        <slot name="footer" />
+    <!--  </dx-scroll-view>-->
+
+    </div>
+  </div>
+</template>
 
 <style lang="scss">
 .side-nav-inner-toolbar {

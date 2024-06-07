@@ -1,3 +1,91 @@
+<script setup lang="ts">
+
+import LaravelDataSource from '../LaravelDataSource'
+import OrderDetail from './../components/OrderDetail.vue'
+import {formatPriceCell, formatPrice, formatDateCell, AdaptTableHeight} from '../helpers'
+import { ref, onMounted, reactive } from 'vue'
+import { CustomSummaryInfo , } from "devextreme/ui/data_grid";
+import { DxButton } from 'devextreme-vue/button';
+import DxSelectBox from 'devextreme-vue/select-box';
+import DxDropDownButton from 'devextreme-vue/drop-down-button';
+import { store } from "../store";
+
+import DxDataGrid, {
+  DxColumn,
+  DxEditing, 
+  DxSummary,
+  DxTotalItem,
+  DxMasterDetail,
+  DxToolbar,
+  DxItem,
+  DxLookup,
+  DxFilterRow,
+  DxScrolling
+} from "devextreme-vue/data-grid";
+import LaravelLookupSource from '../LaravelLookupSource';
+
+const isAdmin = store.state.user.is_admin;
+type Order = App.Models.Order;
+
+//const ordersStore = new LaravelDataSource("api/orders");
+const advisors  = new LaravelLookupSource("api/users");
+const bulkorders  = new LaravelLookupSource("api/bulkorders");
+const exportTypes = [{
+  id: 'supplier',
+  name: 'Lieferanten-Artikel'
+}, {
+  id: 'own',
+  name: 'heiner*energie Artikel'
+}, {
+  id: 'all',
+  name: 'Alle Artikel'
+}];
+
+interface State{
+  bulkOrderId: number | null;
+  ordersStore: LaravelDataSource | null;
+}
+
+const state: State = reactive({
+  bulkOrderId: null,
+  ordersStore: null
+})
+
+function update(){
+  console.log("update from order");
+  state.ordersStore.reload();
+}
+
+function exportOrders(e){
+  window.open('bulkorders/'+ state.bulkOrderId + '/orderexport?products=' + e.itemData.id, '_blank').focus();
+}
+
+
+const outer = ref(null);
+
+const tableHeight = new AdaptTableHeight(outer);
+const r = tableHeight.getReactive();
+
+onMounted(() => {
+  tableHeight.calcHeight();
+  bulkorders.load().then((data) => {
+    console.log(data);
+    const notArchivedBulkOrders = data.filter(item => !item.archived);
+    if(notArchivedBulkOrders.length === 1) {
+      state.bulkOrderId = notArchivedBulkOrders[0].id;
+      console.log(state.bulkOrderId);
+    }
+  });
+});
+
+function bulkOrderChanged(){
+  const bulkOrder = state.bulkOrderId;
+  if(bulkOrder !== null){
+    state.ordersStore = new LaravelDataSource('api/bulkorders/'+ bulkOrder + '/orders');
+  }
+}
+</script>
+
 <template>
   <div ref="outer">
     <h2 class="content-block">Bestellungen</h2>
@@ -93,94 +181,6 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-
-import LaravelDataSource from '../LaravelDataSource'
-import OrderDetail from './../components/OrderDetail.vue'
-import {formatPriceCell, formatPrice, formatDateCell, AdaptTableHeight} from '../helpers'
-import { ref, onMounted, reactive } from 'vue'
-import { CustomSummaryInfo , } from "devextreme/ui/data_grid";
-import { DxButton } from 'devextreme-vue/button';
-import DxSelectBox from 'devextreme-vue/select-box';
-import DxDropDownButton from 'devextreme-vue/drop-down-button';
-import { store } from "../store";
-
-import DxDataGrid, {
-  DxColumn,
-  DxEditing, 
-  DxSummary,
-  DxTotalItem,
-  DxMasterDetail,
-  DxToolbar,
-  DxItem,
-  DxLookup,
-  DxFilterRow,
-  DxScrolling
-} from "devextreme-vue/data-grid";
-import LaravelLookupSource from '../LaravelLookupSource';
-
-const isAdmin = store.state.user.is_admin;
-type Order = App.Models.Order;
-
-//const ordersStore = new LaravelDataSource("api/orders");
-const advisors  = new LaravelLookupSource("api/users");
-const bulkorders  = new LaravelLookupSource("api/bulkorders");
-const exportTypes = [{
-  id: 'supplier',
-  name: 'Lieferanten-Artikel'
-}, {
-  id: 'own',
-  name: 'heiner*energie Artikel'
-}, {
-  id: 'all',
-  name: 'Alle Artikel'
-}];
-
-interface State{
-  bulkOrderId: number | null;
-  ordersStore: LaravelDataSource | null;
-}
-
-const state: State = reactive({
-  bulkOrderId: null,
-  ordersStore: null
-})
-
-function update(){
-  console.log("update from order");
-  state.ordersStore.reload();
-}
-
-function exportOrders(e){
-  window.open('bulkorders/'+ state.bulkOrderId + '/orderexport?products=' + e.itemData.id, '_blank').focus();
-}
-
-
-const outer = ref(null);
-
-const tableHeight = new AdaptTableHeight(outer);
-const r = tableHeight.getReactive();
-
-onMounted(() => {
-  tableHeight.calcHeight();
-  bulkorders.load().then((data) => {
-    console.log(data);
-    const notArchivedBulkOrders = data.filter(item => !item.archived);
-    if(notArchivedBulkOrders.length === 1) {
-      state.bulkOrderId = notArchivedBulkOrders[0].id;
-      console.log(state.bulkOrderId);
-    }
-  });
-});
-
-function bulkOrderChanged(){
-  const bulkOrder = state.bulkOrderId;
-  if(bulkOrder !== null){
-    state.ordersStore = new LaravelDataSource('api/bulkorders/'+ bulkOrder + '/orders');
-  }
-}
-</script>
 <style scoped>
 @media screen and (min-width:680px) {
   .main-table{

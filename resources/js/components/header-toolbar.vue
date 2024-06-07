@@ -1,59 +1,3 @@
-<template>
-  <header class="header-component">
-    <dx-toolbar class="header-toolbar">
-      <dx-item
-        v-if="isLoggedIn"
-        :visible="menuToggleEnabled"
-        location="before"
-        css-class="menu-button"
-      >
-        <template #default>
-          <dx-button
-            icon="menu"
-            styling-mode="text"
-            @click="toggleMenuFunc"
-          />
-        </template>
-      </dx-item>
-
-      <dx-item
-        v-if="title"
-        location="before"
-        css-class="header-title dx-toolbar-label"
-      >
-        <div><router-link to="/"><img src="img/logo.png" style="height:2em;"></router-link></div>
-      </dx-item>
-
-      <dx-item
-        location="after"
-        locate-in-menu="auto"
-        menu-item-template="menuUserItem"
-      >
-      <template #default>
-          <div>
-            <dx-button
-              class="user-button authorization"
-              :width="210"
-              height="100%"
-              styling-mode="text"
-            >
-              <user-panel :email="email" :menu-items="userMenuItems" menu-mode="context" />
-            </dx-button>
-          </div>
-        </template>
-      </dx-item>
-      
-      <template #menuUserItem>
-        <user-panel
-          :email="email"
-          :menu-items="userMenuItems"
-          menu-mode="list"
-        />
-      </template>
-    </dx-toolbar>
-  </header>
-</template>
-
 <script>
 import DxButton from "devextreme-vue/button";
 import DxToolbar, { DxItem } from "devextreme-vue/toolbar";
@@ -171,6 +115,62 @@ export default {
   }
 };
 </script>
+
+<template>
+  <header class="header-component">
+    <dx-toolbar class="header-toolbar">
+      <dx-item
+        v-if="isLoggedIn"
+        :visible="menuToggleEnabled"
+        location="before"
+        css-class="menu-button"
+      >
+        <template #default>
+          <dx-button
+            icon="menu"
+            styling-mode="text"
+            @click="toggleMenuFunc"
+          />
+        </template>
+      </dx-item>
+
+      <dx-item
+        v-if="title"
+        location="before"
+        css-class="header-title dx-toolbar-label"
+      >
+        <div><router-link to="/"><img src="img/logo.png" style="height:2em;"></router-link></div>
+      </dx-item>
+
+      <dx-item
+        location="after"
+        locate-in-menu="auto"
+        menu-item-template="menuUserItem"
+      >
+      <template #default>
+          <div>
+            <dx-button
+              class="user-button authorization"
+              :width="210"
+              height="100%"
+              styling-mode="text"
+            >
+              <user-panel :email="email" :menu-items="userMenuItems" menu-mode="context" />
+            </dx-button>
+          </div>
+        </template>
+      </dx-item>
+      
+      <template #menuUserItem>
+        <user-panel
+          :email="email"
+          :menu-items="userMenuItems"
+          menu-mode="list"
+        />
+      </template>
+    </dx-toolbar>
+  </header>
+</template>
 
 <style lang="scss">
 @import "../themes/generated/variables.base.scss";

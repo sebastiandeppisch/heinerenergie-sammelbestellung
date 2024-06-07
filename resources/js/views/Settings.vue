@@ -1,3 +1,14 @@
+<script setup lang="ts">
+import DxAccordion from 'devextreme-vue/accordion';
+
+import LaravelDataSource from '../LaravelDataSource';
+
+import Setting from './../components/Setting.vue';
+
+let dataSource = new LaravelDataSource('api/settings');
+
+</script>
+
 <template>
   <div>
     <h2 class="content-block">Einstellungen</h2>
@@ -17,14 +28,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import DxAccordion from 'devextreme-vue/accordion';
-
-import LaravelDataSource from '../LaravelDataSource';
-
-import Setting from './../components/Setting.vue';
-
-let dataSource = new LaravelDataSource('api/settings');
-
-</script>

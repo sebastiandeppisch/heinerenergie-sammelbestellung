@@ -1,3 +1,69 @@
+<script>
+import DxForm, {
+  DxItem,
+  DxLabel,
+  DxButtonItem,
+  DxButtonOptions,
+  DxCustomRule,
+  DxRequiredRule,
+  DxEmailRule
+} from 'devextreme-vue/form';
+import DxLoadIndicator from 'devextreme-vue/load-indicator';
+import notify from 'devextreme/ui/notify';
+import { useRouter } from 'vue-router';
+import { ref, reactive } from 'vue';
+
+import auth from "../auth";
+
+export default {
+  components: {
+    DxForm,
+    DxItem,
+    DxLabel,
+    DxButtonItem,
+    DxButtonOptions,
+    DxRequiredRule,
+    DxCustomRule,
+    DxEmailRule,
+    DxLoadIndicator
+  },
+  setup() {
+    const router = useRouter();
+    
+    const loading = ref(false);
+    const formData = reactive({
+      email:"",
+      password:""
+    });
+
+    const onSubmit = async () => {
+    const { email, password } = formData;
+    loading.value = true;
+
+    const result = await auth.createAccount(email, password);
+    loading.value = false;
+
+    if (result.isOk) {
+      router.push("/login-form");
+    } else {
+      notify(result.message, 'error', 2000);
+    }
+  };
+
+    function confirmPassword(e) {
+      return e.value === formData.password;
+    }
+    
+    return {
+        formData,
+        loading,
+        onSubmit,
+        confirmPassword
+    }
+  }
+}
+</script>
+
 <template>
   <form class="create-account-form" @submit.prevent="onSubmit">
     <dx-form :form-data="formData" :disabled="loading">
@@ -64,72 +130,6 @@
     </dx-form>
   </form>
 </template>
-
-<script>
-import DxForm, {
-  DxItem,
-  DxLabel,
-  DxButtonItem,
-  DxButtonOptions,
-  DxCustomRule,
-  DxRequiredRule,
-  DxEmailRule
-} from 'devextreme-vue/form';
-import DxLoadIndicator from 'devextreme-vue/load-indicator';
-import notify from 'devextreme/ui/notify';
-import { useRouter } from 'vue-router';
-import { ref, reactive } from 'vue';
-
-import auth from "../auth";
-
-export default {
-  components: {
-    DxForm,
-    DxItem,
-    DxLabel,
-    DxButtonItem,
-    DxButtonOptions,
-    DxRequiredRule,
-    DxCustomRule,
-    DxEmailRule,
-    DxLoadIndicator
-  },
-  setup() {
-    const router = useRouter();
-    
-    const loading = ref(false);
-    const formData = reactive({
-      email:"",
-      password:""
-    });
-
-    const onSubmit = async () => {
-    const { email, password } = formData;
-    loading.value = true;
-
-    const result = await auth.createAccount(email, password);
-    loading.value = false;
-
-    if (result.isOk) {
-      router.push("/login-form");
-    } else {
-      notify(result.message, 'error', 2000);
-    }
-  };
-
-    function confirmPassword(e) {
-      return e.value === formData.password;
-    }
-    
-    return {
-        formData,
-        loading,
-        onSubmit,
-        confirmPassword
-    }
-  }
-}
-</script>
 
 <style lang="scss">
 @import "../themes/generated/variables.base.scss";

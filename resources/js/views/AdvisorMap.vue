@@ -1,3 +1,28 @@
+<script setup lang="ts">
+
+import { defineProps, ref} from "vue";
+import "leaflet/dist/leaflet.css";
+
+import {
+  LMap,
+  LTileLayer,
+  LMarker,
+  LPopup,
+  LIcon,
+  LControl,
+} from "@vue-leaflet/vue-leaflet";
+import L from "leaflet";
+import { latLng } from "leaflet";
+import { store } from "../store";
+
+interface Props {
+  advisor: App.Models.User
+}
+const {advisor} = defineProps<Props>();
+const zoom = ref(15);
+
+</script>
+
 <template>
   <div style="height: 300px; width: 100%" v-if="advisor.lat !== null && advisor.long">
     <LMap
@@ -23,28 +48,3 @@
     <i>Adresse kann nicht gefunden werden. Trage bitte eine gültige Adresse ein.</i>
   </div>
 </template>
-
-<script setup lang="ts">
-
-import { defineProps, ref} from "vue";
-import "leaflet/dist/leaflet.css";
-
-import {
-  LMap,
-  LTileLayer,
-  LMarker,
-  LPopup,
-  LIcon,
-  LControl,
-} from "@vue-leaflet/vue-leaflet";
-import L from "leaflet";
-import { latLng } from "leaflet";
-import { store } from "../store";
-
-interface Props {
-  advisor: App.Models.User
-}
-const {advisor} = defineProps<Props>();
-const zoom = ref(15);
-
-</script>

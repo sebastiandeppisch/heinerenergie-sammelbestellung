@@ -1,8 +1,3 @@
-<template>
-  <div v-html="state.setting">
-  </div>
-</template>
-
 <script setup lang="ts">
 import { reactive } from '@vue/reactivity';
 import axios from 'axios';
@@ -19,3 +14,8 @@ axios.get('/api/html/' + props.setting).then(response => {
 });
 
 </script>
+
+<template>
+  <div v-html="state.setting">
+  </div>
+</template>
