@@ -1,21 +1,22 @@
 <?php
+
 use App\Models\User;
 use App\Models\Order;
 use Illuminate\Foundation\Testing\RefreshDatabase;
- 
+
 uses(RefreshDatabase::class);
 test('order can be shared', function () {
     $order = Order::factory()->create();
-	$coAdvisor = User::factory()->create();
+    $coAdvisor = User::factory()->create();
 
-	$order->shares()->attach($coAdvisor->id);
+    $order->shares()->attach($coAdvisor->id);
 
-	$this->assertTrue($coAdvisor->can('view', $order));
+    $this->assertTrue($coAdvisor->can('view', $order));
 });
 
 test('order can not be seen by other users', function () {
-	$order = Order::factory()->create();
-	$coAdvisor = User::factory()->create();
+    $order = Order::factory()->create();
+    $coAdvisor = User::factory()->create();
 
-	$this->assertFalse($coAdvisor->can('view', $order));
+    $this->assertFalse($coAdvisor->can('view', $order));
 });
