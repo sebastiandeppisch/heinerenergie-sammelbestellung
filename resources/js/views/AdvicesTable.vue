@@ -239,7 +239,7 @@
 <script setup lang="ts">
 import LaravelDataSource from "../LaravelDataSource";
 import { AdaptTableHeight } from "../helpers";
-import { ref, onMounted, reactive, defineEmits } from "vue";
+import { ref, onMounted, reactive } from "vue";
 import DxPopup from 'devextreme-vue/popup';
 import AdviceStatus from "./AdviceStatus.vue";
 import PhysicalValue from "./PhysicalValue.vue";
