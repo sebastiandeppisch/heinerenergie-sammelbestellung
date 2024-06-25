@@ -7,9 +7,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Symfony\Component\Process\Process;
 
-class UpdateException extends Exception
-{
-}
+class UpdateException extends Exception {}
 
 class Install extends Command
 {

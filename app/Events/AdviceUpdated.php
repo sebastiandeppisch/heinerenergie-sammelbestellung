@@ -16,7 +16,5 @@ class AdviceUpdated
      *
      * @return void
      */
-    public function __construct(public Advice $advice)
-    {
-    }
+    public function __construct(public Advice $advice) {}
 }

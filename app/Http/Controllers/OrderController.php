@@ -125,13 +125,9 @@ class OrderController extends Controller
         return response()->noContent();
     }
 
-    public function validateorderform(StoreOrderRequest $request)
-    {
-    }
+    public function validateorderform(StoreOrderRequest $request) {}
 
-    public function validateEditOrderForm(UpdateOrderRequest $request)
-    {
-    }
+    public function validateEditOrderForm(UpdateOrderRequest $request) {}
 
     public function export(BulkOrder $bulkorder, Request $request)
     {
@@ -168,9 +164,7 @@ class OrderController extends Controller
         return Excel::download($export, $filename);
     }
 
-    public function checkPassword(RequireOrderPassword $request)
-    {
-    }
+    public function checkPassword(RequireOrderPassword $request) {}
 
     public function setChecked(Order $order)
     {
