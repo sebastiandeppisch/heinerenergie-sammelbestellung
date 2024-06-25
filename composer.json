@@ -14,7 +14,8 @@
         "laravel/tinker": "^2.5",
         "maatwebsite/excel": "^3.1",
         "maxh/php-nominatim": "^2.3",
-        "plesk/composer-command-info": "~1.1.0"
+        "plesk/composer-command-info": "~1.1.0",
+        "plesk/ext-laravel-integration": "^7.0"
     },
     "require-dev": {
         "driftingly/rector-laravel": "^1.2",
