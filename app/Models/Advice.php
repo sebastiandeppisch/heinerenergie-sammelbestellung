@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AdviceStatusResult;
 use App\Enums\AdviceType;
 use App\Enums\HouseType;
 use App\Events\AdviceCreated;
@@ -117,9 +118,9 @@ class Advice extends Model
         return $angle * $earthRadius;
     }
 
-    public function status(): HasOne
+    public function status(): BelongsTo
     {
-        return $this->hasOne(AdviceStatus::class);
+        return $this->belongsTo(AdviceStatus::class, 'advice_status_id');
     }
 
     public function shares(): MorphToMany
@@ -145,5 +146,10 @@ class Advice extends Model
     public function isVirtual(): bool
     {
         return $this->type === AdviceType::Virtual;
+    }
+
+    public function getResultAttribute(): AdviceStatusResult
+    {
+        return $this->status?->result;
     }
 }

@@ -88,6 +88,7 @@ declare namespace App.Models {
         status?: App.Models.AdviceStatus | null;
         shares?: Array<App.Models.User> | null;
         shares_count?: number | null;
+        result: number | null;
         readonly distance?: number | null;
         readonly shares_ids?: Array<any>;
     }

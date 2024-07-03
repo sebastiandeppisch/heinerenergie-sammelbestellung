@@ -51,6 +51,7 @@ class DataProtectedAdvice extends JsonResource
             'helpType_bureaucracy' => $this->helpType_bureaucracy,
             'helpType_other' => $this->helpType_other,
             'placeNotes' => $this->placeNotes,
+            'result' => $this->result,
         ];
     }
 }

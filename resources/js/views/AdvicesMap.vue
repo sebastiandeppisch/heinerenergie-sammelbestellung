@@ -11,6 +11,8 @@ import {
   LPopup,
   LIcon,
   LControl,
+  LLayerGroup,
+  LControlLayers,
 } from "@vue-leaflet/vue-leaflet";
 
 import LaravelDataSource from "../LaravelDataSource";
@@ -150,6 +152,10 @@ watch(map, () => {
       :minZoom="3"
       :maxZoom="18"
     >
+      <LControlLayers
+        :collapsed="false"
+        :hide-single-base="true"
+      />
       <LTileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         layer-type="base"
@@ -158,90 +164,137 @@ watch(map, () => {
       <LControl
         position="bottomleft"
       >
-      <div class="dx-card" style="width:fit-content;">
-        <div style="display:flex;flex-direction:row;">
-          <div style="display:flex;flex-direction:column;margin:10px;">
-            <div><b>Freie Beratungen</b></div>
-            <div style="display:flex;flex-direction:row;justify-content:center;gap:15px;padding-top:5px;">
-              <img src="/images/markers/house_magenta.svg" style="height:3em;display:inline;" />
-              <img src="/images/markers/phone_magenta.svg" style="height:3em;display:inline;" />
+        <div class="dx-card" style="width:fit-content;">
+          <div style="display:flex;flex-direction:row;">
+            <div style="display:flex;flex-direction:column;margin:10px;">
+              <div><b>Freie Beratungen</b></div>
+              <div style="display:flex;flex-direction:row;justify-content:center;gap:15px;padding-top:5px;">
+                <img src="/images/markers/house_magenta.svg" style="height:3em;display:inline;" />
+                <img src="/images/markers/phone_magenta.svg" style="height:3em;display:inline;" />
+              </div>
             </div>
-          </div>
-          <div style="display:flex;flex-direction:column;margin:10px;">
-            <div><b>Deine Beratungen</b></div>
-            <div style="display:flex;flex-direction:row;justify-content:center;gap:15px;padding-top:5px;">
-              <img src="/images/markers/house_green.svg" style="height:3em;display:inline;" />
-              <img src="/images/markers/phone_green.svg" style="height:3em;display:inline;" />
+            <div style="display:flex;flex-direction:column;margin:10px;">
+              <div><b>Deine Beratungen</b></div>
+              <div style="display:flex;flex-direction:row;justify-content:center;gap:15px;padding-top:5px;">
+                <img src="/images/markers/house_green.svg" style="height:3em;display:inline;" />
+                <img src="/images/markers/phone_green.svg" style="height:3em;display:inline;" />
+              </div>
             </div>
-          </div>
 
-          <div style="display:flex;flex-direction:column;margin:10px;">
-            <div><b>Vergebene Beratungen</b></div>
-            <div style="display:flex;flex-direction:row;justify-content:center;gap:15px;padding-top:5px;">
-              <img src="/images/markers/house_blue.svg" style="height:3em;display:inline;" />
-              <img src="/images/markers/phone_blue.svg" style="height:3em;display:inline;" />
+            <div style="display:flex;flex-direction:column;margin:10px;">
+              <div><b>Vergebene Beratungen</b></div>
+              <div style="display:flex;flex-direction:row;justify-content:center;gap:15px;padding-top:5px;">
+                <img src="/images/markers/house_blue.svg" style="height:3em;display:inline;" />
+                <img src="/images/markers/phone_blue.svg" style="height:3em;display:inline;" />
+              </div>
             </div>
-          </div>
 
-          <div style="display:flex;flex-direction:column;margin:10px;">
-            <div><b>Berater*innen</b></div>
-            <div style="display:flex;flex-direction:row;justify-content:center;gap:15px;padding-top:5px;">
-              <img src="/images/markers/he_yellow.svg" style="height:3em;display:inline;" />
+            <div style="display:flex;flex-direction:column;margin:10px;">
+              <div><b>Berater*innen</b></div>
+              <div style="display:flex;flex-direction:row;justify-content:center;gap:15px;padding-top:5px;">
+                <img src="/images/markers/he_yellow.svg" style="height:3em;display:inline;" />
+              </div>
             </div>
-          </div>
+
+            <div style="display:flex;flex-direction:column;margin:10px;">
+              <div><b>Erledigte Beratungen</b></div>
+              <div style="display:flex;flex-direction:row;justify-content:center;gap:15px;padding-top:5px;">
+                <img src="/images/markers/gray_green.svg" style="height:3em;display:inline;" />
+                <img src="/images/markers/gray_red.svg" style="height:3em;display:inline;" />
+              </div>
+            </div>
           
           </div>
         </div>
       </LControl>
 
-      <LMarker
-        v-for="advice in advices"
-        :key="advice.id"
-        :lat-lng="latLng(advice.lat, advice.long)"
+      <LLayerGroup
+        name="Beratungen"
+        layer-type="overlay"
       >
-        <LIcon v-if="     advice.advisor_id === null &&    advice.type === AdviceTypes.Home"    icon-url="/images/markers/house_magenta.svg" :icon-size="[50, 50]" />
-        <LIcon v-else-if="advice.advisor_id === null &&    advice.type === AdviceTypes.Virtual" icon-url="/images/markers/phone_magenta.svg" :icon-size="[50, 50]" />
-        <LIcon v-else-if="advice.advisor_id === ownId() && advice.type === AdviceTypes.Home"    icon-url="/images/markers/house_green.svg" :icon-size="[50, 50]" />
-        <LIcon v-else-if="advice.advisor_id === ownId() && advice.type === AdviceTypes.Virtual" icon-url="/images/markers/phone_green.svg" :icon-size="[50, 50]" />
-        <LIcon v-else-if="advice.advisor_id !== ownId() && advice.type === AdviceTypes.Home"    icon-url="/images/markers/house_blue.svg" :icon-size="[50, 50]" />
-        <LIcon v-else-if="advice.advisor_id !== ownId() && advice.type === AdviceTypes.Virtual" icon-url="/images/markers/phone_blue.svg" :icon-size="[50, 50]" />
-        <LPopup>
-          <div>
-            <b>{{ advice.firstName }} {{ advice.lastName }}<br />
-            {{ advice.street }} {{ advice.streetNumber}}<br />
-            </b>
-            <div v-if="advice.advisor_id !== null">Berater*in: {{ advisorName(advice.advisor_id )}}</div>
-            <div v-if="advice.shares_ids.length > 0">Geteilt mit: {{ advice.shares_ids.map(advisorName).join(', ') }}</div>
-            <DxButton
-              v-if="advice.advisor_id === null"
-              type="default"
-              text="Beratung übernehmen"
-              @click="addAdvice(advice)"
-              width="100%"
-              style="margin-top:10px;"
-            />
-            <DxButton
-              text="Beratung öffnen"
-              @click="openAdvice(advice)"
-              width="100%"
-              style="margin-top:10px;"
-              v-if="userCanOpen(advice)"
-            />
-          </div>
-        </LPopup>
-      </LMarker>
-      <LMarker
-        v-for="advisor in advisors"
-        :key="advisor.id"
-        :lat-lng="latLng(advisor.lat, advisor.long)"
-      >
-        <LIcon icon-url="/images/markers/he_yellow.svg" :icon-size="[50, 50]" />
-        <LPopup>
-          <div>
-            {{ advisor.name }}
-          </div>
-        </LPopup>
-      </LMarker>
+        <LMarker
+          v-for="advice in advices.filter(advice => advice.result < 2)"
+          :key="advice.id"
+          :lat-lng="latLng(advice.lat, advice.long)"
+        >
+          <LIcon v-if="     advice.advisor_id === null &&    advice.type === AdviceTypes.Home"    icon-url="/images/markers/house_magenta.svg" :icon-size="[50, 50]" />
+          <LIcon v-else-if="advice.advisor_id === null &&    advice.type === AdviceTypes.Virtual" icon-url="/images/markers/phone_magenta.svg" :icon-size="[50, 50]" />
+          <LIcon v-else-if="advice.advisor_id === ownId() && advice.type === AdviceTypes.Home"    icon-url="/images/markers/house_green.svg" :icon-size="[50, 50]" />
+          <LIcon v-else-if="advice.advisor_id === ownId() && advice.type === AdviceTypes.Virtual" icon-url="/images/markers/phone_green.svg" :icon-size="[50, 50]" />
+          <LIcon v-else-if="advice.advisor_id !== ownId() && advice.type === AdviceTypes.Home"    icon-url="/images/markers/house_blue.svg" :icon-size="[50, 50]" />
+          <LIcon v-else-if="advice.advisor_id !== ownId() && advice.type === AdviceTypes.Virtual" icon-url="/images/markers/phone_blue.svg" :icon-size="[50, 50]" />
+          <LPopup>
+            <div>
+              <b>{{ advice.firstName }} {{ advice.lastName }}<br />
+              {{ advice.street }} {{ advice.streetNumber}}<br />
+              </b>
+              <div v-if="advice.advisor_id !== null">Berater*in: {{ advisorName(advice.advisor_id )}}</div>
+              <div v-if="advice.shares_ids.length > 0">Geteilt mit: {{ advice.shares_ids.map(advisorName).join(', ') }}</div>
+              <DxButton
+                v-if="advice.advisor_id === null"
+                type="default"
+                text="Beratung übernehmen"
+                @click="addAdvice(advice)"
+                width="100%"
+                style="margin-top:10px;"
+              />
+              <DxButton
+                text="Beratung öffnen"
+                @click="openAdvice(advice)"
+                width="100%"
+                style="margin-top:10px;"
+                v-if="userCanOpen(advice)"
+              />
+            </div>
+          </LPopup>
+        </LMarker>
+      </LLayerGroup>
+      <LLayerGroup
+          name="Erledigte Beratungen"
+          layer-type="overlay"
+          :visible="false"
+        >
+        <LMarker
+          v-for="advice in advices.filter(advice => advice.result >= 2)"
+          :key="advice.id"
+          :lat-lng="latLng(advice.lat, advice.long)"
+        >
+          <LIcon v-if="     advice.result === 2" icon-url="/images/markers/gray_green.svg" :icon-size="[50, 50]" />
+          <LIcon v-else-if="advice.result === 3" icon-url="/images/markers/gray_red.svg" :icon-size="[50, 50]" />
+          <LPopup>
+            <div>
+              <b>{{ advice.firstName }} {{ advice.lastName }}<br />
+              {{ advice.street }} {{ advice.streetNumber}}<br />
+              </b>
+              <div v-if="advice.advisor_id !== null">Berater*in: {{ advisorName(advice.advisor_id )}}</div>
+              <div v-if="advice.shares_ids.length > 0">Geteilt mit: {{ advice.shares_ids.map(advisorName).join(', ') }}</div>
+              <DxButton
+                text="Beratung öffnen"
+                @click="openAdvice(advice)"
+                width="100%"
+                style="margin-top:10px;"
+                v-if="userCanOpen(advice)"
+              />
+            </div>
+          </LPopup>
+        </LMarker>
+      </LLayerGroup>
+      <LLayerGroup
+        name="Berater*innen"
+        layer-type="overlay">
+        <LMarker
+          v-for="advisor in advisors"
+          :key="advisor.id"
+          :lat-lng="latLng(advisor.lat, advisor.long)"
+        >
+          <LIcon icon-url="/images/markers/he_yellow.svg" :icon-size="[50, 50]" />
+          <LPopup>
+            <div>
+              {{ advisor.name }}
+            </div>
+          </LPopup>
+        </LMarker>
+      </LLayerGroup>
     </LMap>
   </div>
 </div>
