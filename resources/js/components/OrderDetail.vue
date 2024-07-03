@@ -19,7 +19,7 @@ import DxButton from "devextreme-vue/button";
 import DxTagBox from "devextreme-vue/tag-box";
 
 import {confirm} from 'devextreme/ui/dialog';
-import { defineEmits, defineProps, ref } from "vue";
+import { defineEmits, ref } from "vue";
 import DxTextBox from "devextreme-vue/text-box";
 import DxPopup from "devextreme-vue/popup";
 import notify from "devextreme/ui/notify";

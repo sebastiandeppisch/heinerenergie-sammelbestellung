@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { defineProps, ref} from "vue";
+import { ref} from "vue";
 import "leaflet/dist/leaflet.css";
 
 import {
