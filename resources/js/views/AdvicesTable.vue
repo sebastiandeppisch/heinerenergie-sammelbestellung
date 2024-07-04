@@ -32,6 +32,7 @@ import CustomStore from "devextreme/data/custom_store";
 import { DxSwitch } from "devextreme-vue";
 import { DxForm, DxItem as DxFormItem, DxSimpleItem, DxGroupItem as DxFormGroupItem, DxButtonItem} from 'devextreme-vue/form';
 import notify from "devextreme/ui/notify";
+import ArrayDataSource from "devextreme/data/array_store";
 
 const emit = defineEmits(["selectAdviceId"])
 
@@ -174,6 +175,13 @@ function saveNewAdvice(){
     notify(error.response.data.message, 'error', 3000);
   });
 }
+
+const adviceStatusResult = new ArrayDataSource([
+  { id: 0, name: 'Offen' },
+  { id: 1, name: 'In Bearbeitung' },
+  { id: 2, name: 'Fertig - erfolgreich' },
+  { id: 3, name: 'Fertig - nicht erfolgreich' },
+] as any);
 </script>
 
 <template>
@@ -266,7 +274,14 @@ function saveNewAdvice(){
             value-expr="id"
           />
         </DxColumn>
-        <DxColumn data-field="advisor_id" caption="Berater*in" v-if="isAdmin" width="350px">
+        <DxColumn data-field="result" caption="Zusammenfassung" :allow-editing="false">
+          <DxLookup
+            :data-source="adviceStatusResult"
+            display-expr="name"
+            value-expr="id"
+          />
+        </DxColumn>
+         <DxColumn data-field="advisor_id" caption="Berater*in" v-if="isAdmin" width="350px">
           <DxLookup
             :data-source="sortedAdvisors"
             display-expr="name"
