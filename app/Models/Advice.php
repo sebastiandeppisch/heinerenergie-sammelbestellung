@@ -150,6 +150,6 @@ class Advice extends Model
 
     public function getResultAttribute(): AdviceStatusResult
     {
-        return $this->status?->result;
+        return $this->status?->result ?? AdviceStatusResult::New;
     }
 }
