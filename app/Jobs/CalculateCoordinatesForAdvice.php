@@ -5,9 +5,11 @@ namespace App\Jobs;
 use App\Models\Advice;
 use Illuminate\Bus\Queueable;
 use maxh\Nominatim\Nominatim;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
+use GuzzleHttp\Exception\ClientException;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 
@@ -56,9 +58,16 @@ class CalculateCoordinatesForAdvice implements ShouldQueue
             ->country('Deutschland')
             ->postalCode($zip)
             ->street(sprintf('%s %s', $street, $streetNumber));
-        $result = $nominatim->find($search);
-        if (count($result) > 0) {
-            return $result[0];
+
+        try{
+            $result = $nominatim->find($search);
+            if (count($result) > 0) {
+                return $result[0];
+            }
+            return null;
+        }catch(ClientException $e) {
+            Log::error($e->getResponse()->getBody()->getContents());
+            throw $e;
         }
         return null;
     }
