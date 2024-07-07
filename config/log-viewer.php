@@ -90,7 +90,7 @@ return [
     */
 
     'api_middleware' => [
-        'api',
+        'auth',
         \Opcodes\LogViewer\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         \Opcodes\LogViewer\Http\Middleware\AuthorizeLogViewer::class,
         CheckSysAdmin::class,
