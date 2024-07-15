@@ -10,6 +10,8 @@ Wir haben Deinen Beratungswunsch erhalten und werden uns bald bei Dir melden.
 
 **Beratungswunsch**: @if($advice->isHome())Bei Dir Zuhause @elseif($advice->isVirtual()) Virtuell @else Nur Teilnahme an der Sammelbestellung @endif
 
-**Hinweis**: Wir melden uns zwischen Anfang April und Anfang Mai bei dir für ein Beratungsgespräch. Wir führen dieses Jahr unsere Beratungen in festgelegten Zeiträumen durch. Am Ende jedes Zeitraums werden wir Sammelbestellungen durchführen. Die Bestellfrist für die nächste Sammelbestellung ist am 5. Mai 2024. Die Ausgabe für die bestellten Module (und Halterungen) wird voraussichtlich am 11. oder 18. Mai 2024 stattfinden.
+
+**Hinweis**:
+{!! $adviceInfo !!}
 
 @endcomponent

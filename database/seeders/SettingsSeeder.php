@@ -35,6 +35,10 @@ class SettingsSeeder extends Seeder
                 'key' => 'advisorInfo',
                 'value' => 'Berater*innen Info',
             ],
+            [
+                'key' => 'newAdviceMail',
+                'value' => 'Neue Beratung E-Mail',
+            ],
         ];
 
         foreach ($settings as $setting) {

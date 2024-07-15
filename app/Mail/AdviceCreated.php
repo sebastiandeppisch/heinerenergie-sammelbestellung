@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\Advice;
+use App\Models\Setting;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -12,6 +13,8 @@ class AdviceCreated extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
+    public string $adviceInfo;
+
     /**
      * Create a new message instance.
      *
@@ -19,7 +22,7 @@ class AdviceCreated extends Mailable implements ShouldQueue
      */
     public function __construct(public Advice $advice)
     {
-        //
+        $this->adviceInfo = Setting::get('newAdviceMail');
     }
 
     /**
