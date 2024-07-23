@@ -2,18 +2,20 @@
 
 namespace App\Models;
 
-use App\Enums\AdviceStatusResult;
-use App\Enums\AdviceType;
 use App\Enums\HouseType;
+use App\Enums\AdviceType;
 use App\Events\AdviceCreated;
 use App\Events\AdviceUpdated;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use App\ValueObjects\Address;
+use App\ValueObjects\Coordinate;
+use App\Enums\AdviceStatusResult;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Advice extends Model
 {
@@ -75,7 +77,10 @@ class Advice extends Model
         'houseType' => HouseType::class,
         'landlordExists' => 'boolean',
         'placeNotes' => 'string',
-
+        'address' => Address::class,
+        'coordinate' => Coordinate::class,
+        'long' => 'float',
+        'lat' => 'float',
     ];
 
     public function advisor(): BelongsTo
@@ -94,29 +99,12 @@ class Advice extends Model
 
     public function getDistanceToUser(User $user): ?float
     {
-        if ($this->lat === null || $this->long === null || $user->long === null || $user->lat === null) {
+        if($this->coordinate === null || $user->coordinate === null) {
             return null;
         }
-
-        return $this->haversineGreatCircleDistance($this->lat, $this->long, $user->lat, $user->long);
+        return $this->coordinate->distanceTo($user->coordinate);
     }
 
-    private function haversineGreatCircleDistance(
-        $latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371000): float
-    {
-        $latFrom = deg2rad($latitudeFrom);
-        $lonFrom = deg2rad($longitudeFrom);
-        $latTo = deg2rad($latitudeTo);
-        $lonTo = deg2rad($longitudeTo);
-
-        $latDelta = $latTo - $latFrom;
-        $lonDelta = $lonTo - $lonFrom;
-
-        $angle = 2 * asin(sqrt(sin($latDelta / 2) ** 2 +
-          cos($latFrom) * cos($latTo) * sin($lonDelta / 2) ** 2));
-
-        return $angle * $earthRadius;
-    }
 
     public function status(): BelongsTo
     {

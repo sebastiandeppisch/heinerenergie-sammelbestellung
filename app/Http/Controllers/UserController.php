@@ -2,21 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use Illuminate\Http\Request;
+use maxh\Nominatim\Nominatim;
+use App\Actions\FetchCoordinate;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\SetAddressRequest;
 use App\Http\Requests\SetPictureRequest;
-use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use maxh\Nominatim\Nominatim;
 
 class UserController extends Controller
 {
     public function __construct()
     {
         $this->authorizeResource(User::class, 'user');
+    }
+
+    private function user(): User
+    {
+        return Auth::user();
     }
 
     private function dxFilter(Request $request, Builder $builder): Builder
@@ -82,7 +88,7 @@ class UserController extends Controller
 
     public function picture(SetPictureRequest $request)
     {
-        $user = Auth::user();
+        $user = $this->user();
         $user->picture = $request->url;
         $user->save();
 
@@ -91,7 +97,7 @@ class UserController extends Controller
 
     public function address(SetAddressRequest $request)
     {
-        $user = Auth::user();
+        $user = $this->user();
         $user->fill($request->validated());
         $user->save();
         $this->fetchCoordinates($user);
@@ -101,31 +107,19 @@ class UserController extends Controller
 
     private function fetchCoordinates(User $user)
     {
-        if ($user->street === null || $user->streetNumber === null || $user->zip === null) {
-            $user->lat = null;
-            $user->long = null;
+        if ($user->address === null) {
+            $user->coordinate = null;
             $user->save();
-
             return;
         }
-        $nominatim = new Nominatim('https://nominatim.openstreetmap.org/');
-        $street = sprintf('%s %s', $user->street, $user->streetNumber);
-        $search = $nominatim->newSearch()
-            ->country('Deutschland')
-            ->postalCode($user->zip)
-            ->street($street);
-        $result = $nominatim->find($search);
-        if (count($result) > 0) {
-            $result = $result[0];
-            $user->lat = $result['lat'];
-            $user->long = $result['lon'];
-            $user->save();
-        }
+
+        $user->coordinate = app(FetchCoordinate::class)($user->address);
+        $user->save();
     }
 
     public function actAsAdmin()
     {
-        if (Auth::user()->is_admin === false) {
+        if ($this->user()->is_admin === false) {
             abort(403, 'Du hast keine Berechtigung um als Administrator zu agieren.');
         }
         session()->put('isAdmin', true);

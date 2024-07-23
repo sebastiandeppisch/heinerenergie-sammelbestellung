@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Actions\FetchCoordinate;
 use App\Models\Advice;
 use Illuminate\Bus\Queueable;
 use maxh\Nominatim\Nominatim;
@@ -35,40 +36,8 @@ class CalculateCoordinatesForAdvice implements ShouldQueue
     public function handle()
     {
         $advice = $this->advice->fresh();
-        $result = Cache::rememberForever($this->key(), function () use ($advice) {
-            return $this->fetchCoordinates($advice->street, $advice->streetNumber, $advice->zip);
-        });
-
-        if($result) {
-            $advice->lat = $result['lat'];
-            $advice->long = $result['lon'];
-            $advice->save();
-        }
-    }
-
-    private function key(): string
-    {
-        return 'advice.coordinates.'.md5($this->advice->street.$this->advice->streetNumber.$this->advice->zip);
-    }
-
-    private function fetchCoordinates(string $street, string $streetNumber, int $zip): ?array
-    {
-        $nominatim = new Nominatim('https://nominatim.openstreetmap.org/');
-        $search = $nominatim->newSearch()
-            ->country('Deutschland')
-            ->postalCode($zip)
-            ->street(sprintf('%s %s', $street, $streetNumber));
-
-        try{
-            $result = $nominatim->find($search);
-            if (count($result) > 0) {
-                return $result[0];
-            }
-            return null;
-        }catch(ClientException $e) {
-            Log::error($e->getResponse()->getBody()->getContents());
-            throw $e;
-        }
-        return null;
+        
+        $advice->coordinate = app(FetchCoordinate::class)($advice->address);
+        $advice->save();
     }
 }

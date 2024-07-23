@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\ValueObjects\Address;
+use App\ValueObjects\Coordinate;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Auth;
-use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
@@ -49,6 +51,10 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'is_admin' => 'bool',
+        'address' => Address::class,
+        'coordinate' => Coordinate::class,
+        'long' => 'float',
+        'lat' => 'float',
     ];
 
     protected $appends = [
