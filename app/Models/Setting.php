@@ -35,6 +35,10 @@ class Setting extends Model
                 'name' => 'Berater*innen Info',
                 'type' => 'text',
             ],
+            'newAdviceMail' => [
+                'name' => 'Neue Beratung E-Mail',
+                'type' => 'text',
+            ],
         ];
     }
 
