@@ -19,11 +19,7 @@ class FetchCoordinate
 	public function __construct(
 		
 	) {
-		$url = "http://nominatim.openstreetmap.org/";
-		$defaultHeader = [
-			'User-Agent' => 'heiner*energie CMS'
-		];
-		$this->nominatim = new Nominatim($url, $defaultHeader);
+		$this->nominatim = app(Nominatim::class);
 	}
 
 	public function __invoke(Address $address): ?Coordinate
