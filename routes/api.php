@@ -1,20 +1,21 @@
 <?php
 
-use App\Http\Controllers\AdviceController;
-use App\Http\Controllers\AdviceStatusController;
-use App\Http\Controllers\AdviceTypeController;
-use App\Http\Controllers\BulkOrderController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\OrderItemController;
-use App\Http\Controllers\ProductCategoryController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\ProductDownloadController;
-use App\Http\Controllers\SettingController;
-use App\Http\Controllers\StoreAdviceController;
-use App\Http\Controllers\StoreOrderController;
-use App\Http\Controllers\UploadController;
-use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\AdviceController;
+use App\Http\Controllers\UploadController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\SettingController;
+use App\Http\Controllers\BulkOrderController;
+use App\Http\Controllers\GeoSearchController;
+use App\Http\Controllers\OrderItemController;
+use App\Http\Controllers\AdviceTypeController;
+use App\Http\Controllers\StoreOrderController;
+use App\Http\Controllers\StoreAdviceController;
+use App\Http\Controllers\AdviceStatusController;
+use App\Http\Controllers\ProductCategoryController;
+use App\Http\Controllers\ProductDownloadController;
 
 /*
 |--------------------------------------------------------------------------
@@ -78,6 +79,8 @@ Route::middleware('auth')->group(function () {
     Route::post('stopActAsAdmin', [UserController::class, 'stopActAsAdmin']);
 
     Route::get('html/advisorInfo', [SettingController::class, 'advisorInfo']);
+
+    Route::get('map/search', GeoSearchController::class);
 });
 
 //Route::middleware('guest')->group(function () {

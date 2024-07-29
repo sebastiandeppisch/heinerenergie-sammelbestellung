@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use maxh\Nominatim\Nominatim;
-use App\Actions\FetchCoordinate;
+use App\Actions\FetchCoordinateByAddress;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\SetAddressRequest;
@@ -113,7 +113,7 @@ class UserController extends Controller
             return;
         }
 
-        $user->coordinate = app(FetchCoordinate::class)($user->address);
+        $user->coordinate = app(FetchCoordinateByAddress::class)($user->address);
         $user->save();
     }
 

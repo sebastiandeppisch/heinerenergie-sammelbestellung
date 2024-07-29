@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Actions\FetchCoordinate;
+use App\Actions\FetchCoordinateByAddress;
 use App\Models\Advice;
 use Illuminate\Bus\Queueable;
 use maxh\Nominatim\Nominatim;
@@ -37,7 +37,7 @@ class CalculateCoordinatesForAdvice implements ShouldQueue
     {
         $advice = $this->advice->fresh();
         
-        $advice->coordinate = app(FetchCoordinate::class)($advice->address);
+        $advice->coordinate = app(FetchCoordinateByAddress::class)($advice->address);
         $advice->save();
     }
 }

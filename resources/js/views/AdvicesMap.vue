@@ -24,6 +24,9 @@ import AdviceTypes from "../AdviceTypes";
 import axios from "axios";
 import { AdaptTableHeight } from "../helpers";
 import { useRouter, useRoute } from "vue-router";
+import { DxTextBox, DxButton as DxTextBoxButton } from 'devextreme-vue/text-box';
+import notify from 'devextreme/ui/notify';
+
 const isAdmin = store.state.user.is_admin;
 
 const emit = defineEmits(["selectAdviceId"])
@@ -131,6 +134,8 @@ function centerChanged(e){
 const outer = ref(null);
 const tableHeight = new AdaptTableHeight(outer);
 const reactiveHeight = tableHeight.getReactive();
+
+const search = ref('');
 onMounted(() => {
   tableHeight.calcHeight();
 });
@@ -138,6 +143,18 @@ onMounted(() => {
 watch(map, () => {
   router.push({name: 'advicesmap', hash: '#' + map.zoom + '/' + map.center.lat + '/' + map.center.lng});
 })
+
+function runSearch(){
+  axios.get('api/map/search', {params: {query: search.value}}).then(response => response.data).then((data) => {
+    if(data['lat'] === undefined || data['long'] === undefined){
+      notify('Adresse nicht gefunden', 'error');
+      return;
+    }
+    map.center = latLng(parseFloat(data.lat), parseFloat(data.long));
+    map.zoom = 18; //a better approach would be to set the bounding box
+  });
+}
+
 </script>
 
 <template>
@@ -161,6 +178,29 @@ watch(map, () => {
         layer-type="base"
         name="OpenStreetMap"
       />
+      <LControl
+        position="topleft"
+      >
+        <div class="dx-card">
+          <div style="display:flex;">
+            <DxTextBox
+              placeholder="Springe zu Adresse"
+              v-model="search"
+              value-change-event="keyup"
+              @enterKey="runSearch"
+            >
+              <DxTextBoxButton
+                :options="{
+                  icon: 'search',
+                  onClick: runSearch
+                }"
+                name="search"
+                location="after"
+              />
+            </DxTextBox>
+          </div>
+        </div>
+      </LControl>
       <LControl
         position="bottomleft"
       >

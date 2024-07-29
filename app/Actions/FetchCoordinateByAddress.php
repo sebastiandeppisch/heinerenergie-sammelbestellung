@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use GuzzleHttp\Exception\ClientException;
 
-class FetchCoordinate
+class FetchCoordinateByAddress
 {
 	private Nominatim $nominatim;
 
