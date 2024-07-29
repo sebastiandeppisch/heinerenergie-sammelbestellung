@@ -51,7 +51,7 @@ class FetchCoordinate
 
 		try{
 			$result = $this->nominatim->find($search);
-			Log::debug('Nominatim search result', ['result' => $result]);
+			Log::debug('Nominatim search result', ['result' => $result, 'address' => $address]);
 			if (count($result) > 0) {
 				$result = $result[0];
 				return Coordinate::fromArray($result);
