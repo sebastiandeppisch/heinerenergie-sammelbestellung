@@ -33,7 +33,7 @@ class ProductController extends Controller
         if ($bulkorder->id === null) {
             $bulkorder = BulkOrder::getCurrentBulkOrder();
         }
-        $query = Product::where('bulk_order_id', $bulkorder->id);
+        $query = Product::where('bulk_order_id', $bulkorder?->id);
 
         return $this->dxFilter($request, $query)->with('downloads')->get();
     }
