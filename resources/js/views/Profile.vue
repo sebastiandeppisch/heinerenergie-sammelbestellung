@@ -33,7 +33,7 @@ function saveAddress() {
         <div class="dx-card flex-cell" style="padding:30px;max-width:400px;">
          <div class="flex-row">
             <div class="flex-cell">
-                <span class="label">Adresse</span>
+                <span class="label">Beratungsgebiet</span>
                 <br>Trage hier die Adresse ein, von der Du Beratungen aus durchführen möchtest. Wenn Du Deine Adresse nicht mit anderen Berater*innen teilen möchtest, kannst Du auch eine Adresse in Deiner Nähe angeben.
                 <div class="flex-row">
                   <div class="flex-cell">
@@ -70,9 +70,20 @@ function saveAddress() {
                     />
                   </div>
                 </div>
+
+                <div class="flex-row">
+                  <div class="flex-cell">
+                    <DxNumberBox
+                      label="Beratungsgebiet (m)"
+                      style="margin: 10px;"
+                      v-model="state.user.advice_radius"
+                    />
+                  </div>
+                </div>
+
                 <DxButton
                   icon="save"
-                  text="Adresse speichern"
+                  text="Beratungsgebiet speichern"
                   @click="saveAddress"
                   width="100%"
                   type="success"

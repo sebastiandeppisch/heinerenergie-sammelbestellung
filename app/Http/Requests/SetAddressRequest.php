@@ -28,6 +28,7 @@ class SetAddressRequest extends FormRequest
             'streetNumber' => 'nullable|string',
             'zip' => 'nullable|integer',
             'city' => 'nullable|string',
+            'advice_radius' => 'nullable|integer',
         ];
     }
 }

@@ -167,6 +167,7 @@ declare namespace App.Models {
         orders_count?: number | null;
         advices_count?: number | null;
         shared_orders_count?: number | null;
+        advice_radius?: number | null;
         readonly name?: any;
         readonly is_acting_as_admin?: boolean;
     }

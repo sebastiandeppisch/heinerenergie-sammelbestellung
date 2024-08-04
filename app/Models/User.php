@@ -31,6 +31,7 @@ class User extends Authenticatable
         'streetNumber',
         'zip',
         'city',
+        'advice_radius',
     ];
 
     /**
@@ -55,6 +56,7 @@ class User extends Authenticatable
         'coordinate' => Coordinate::class,
         'long' => 'float',
         'lat' => 'float',
+        'advice_radius' => 'int',
     ];
 
     protected $appends = [

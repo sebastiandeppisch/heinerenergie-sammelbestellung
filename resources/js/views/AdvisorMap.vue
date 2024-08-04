@@ -10,6 +10,7 @@ import {
   LPopup,
   LIcon,
   LControl,
+  LCircle
 } from "@vue-leaflet/vue-leaflet";
 import L from "leaflet";
 import { latLng } from "leaflet";
@@ -42,6 +43,10 @@ const zoom = ref(15);
       >
         <LIcon icon-url="/images/markers/he_yellow.svg" :icon-size="[50, 50]" />
       </LMarker>
+      <LCircle
+        :lat-lng="latLng(advisor.lat, advisor.long)"
+        :radius="advisor.advice_radius"
+      />
     </LMap>
   </div>
   <div v-else>
