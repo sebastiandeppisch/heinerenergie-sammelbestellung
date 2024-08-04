@@ -7,6 +7,7 @@ import { DxButton, DxNumberBox } from "devextreme-vue";
 import { reactive } from "@vue/reactivity";
 import axios from "axios";
 import AdvisorMap from "./AdvisorMap.vue";
+import notify from 'devextreme/ui/notify';
 
 const state = reactive({
   user: store.getters.user as App.Models.User
@@ -20,6 +21,7 @@ function saveAddress() {
       user: response.data as App.Models.User
     });
     state.user = response.data;
+    notify("Adresse gespeichert", "success");
   });
 }
 
@@ -77,6 +79,7 @@ function saveAddress() {
                       label="Beratungsgebiet (m)"
                       style="margin: 10px;"
                       v-model="state.user.advice_radius"
+                      :show-clear-button="true"
                     />
                   </div>
                 </div>
