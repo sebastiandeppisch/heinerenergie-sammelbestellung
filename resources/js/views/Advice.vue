@@ -11,6 +11,7 @@ import DxTagBox from 'devextreme-vue/tag-box';
 import DxButton from 'devextreme-vue/button';
 import { store } from '../store';
 import DxDropDownButton from 'devextreme-vue/drop-down-button';
+import AdviceMails from '../components/AdviceMails.vue';
 type Advice = App.Models.Advice;
 
 const advice = ref(null as Advice | null);
@@ -267,7 +268,7 @@ const phoneLink = computed(() => {
             />
           </div>
         </div>
-        <div>
+        <div style="display: flex;flex-direction: column;gap:32px;">
           <div class="dx-card" style="padding:16px;display: flex;flex-direction: column;gap:16px;">
             <div>
               <b>Benötigt Hilfe bei:</b>
@@ -316,6 +317,7 @@ const phoneLink = computed(() => {
               <div v-else><i>Keine Angabe</i></div>
             </div>
           </div>
+          <AdviceMails :advice="advice" />
         </div>
       </div>
     </div>

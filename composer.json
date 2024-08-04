@@ -16,7 +16,8 @@
         "maxh/php-nominatim": "^2.3",
         "opcodesio/log-viewer": "^3.10",
         "plesk/composer-command-info": "~1.1.0",
-        "plesk/ext-laravel-integration": "^7.0"
+        "plesk/ext-laravel-integration": "^7.0",
+        "wnx/laravel-sends": "^2.4"
     },
     "require-dev": {
         "driftingly/rector-laravel": "^1.2",

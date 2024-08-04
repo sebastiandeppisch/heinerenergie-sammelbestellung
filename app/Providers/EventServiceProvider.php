@@ -2,16 +2,18 @@
 
 namespace App\Providers;
 
+use App\Events\OrderCreated;
 use App\Events\AdviceCreated;
 use App\Events\AdviceUpdated;
-use App\Events\OrderCreated;
-use App\Listeners\CalculateCoordinates;
 use App\Listeners\EmptyCoordinates;
-use App\Listeners\SendOrderCreatedNotification;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Auth\Events\Registered;
+use App\Listeners\CalculateCoordinates;
+use Illuminate\Mail\Events\MessageSent;
+use App\Listeners\SendOrderCreatedNotification;
+use Wnx\Sends\Listeners\StoreOutgoingMailListener;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Event;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -33,6 +35,9 @@ class EventServiceProvider extends ServiceProvider
         AdviceUpdated::class => [
             EmptyCoordinates::class,
             CalculateCoordinates::class,
+        ],
+        MessageSent::class => [
+            StoreOutgoingMailListener::class,
         ],
     ];
 

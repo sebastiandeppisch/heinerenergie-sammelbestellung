@@ -9,7 +9,9 @@ use App\Events\AdviceUpdated;
 use App\ValueObjects\Address;
 use App\ValueObjects\Coordinate;
 use App\Enums\AdviceStatusResult;
+use Wnx\Sends\Contracts\HasSends;
 use Illuminate\Support\Facades\Auth;
+use Wnx\Sends\Support\HasSendsTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -17,12 +19,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
-class Advice extends Model
+class Advice extends Model implements HasSends
 {
     protected $table = 'advices';
 
     use HasFactory;
     use SoftDeletes;
+    use HasSendsTrait;
 
     protected $fillable = [
         'firstName',

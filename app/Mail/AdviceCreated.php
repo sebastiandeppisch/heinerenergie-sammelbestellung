@@ -8,10 +8,11 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
+use Wnx\Sends\Support\StoreMailables;
 
 class AdviceCreated extends Mailable implements ShouldQueue
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, StoreMailables;
 
     public string $adviceInfo;
 
@@ -32,6 +33,7 @@ class AdviceCreated extends Mailable implements ShouldQueue
      */
     public function build()
     {
+        $this->storeClassName()->associateWith($this->advice);
         return $this->markdown('emails.advicecreated')->subject('heiner*energie Beratungsanfrage');
     }
 }

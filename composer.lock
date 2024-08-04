@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "387073f87da876227a9d1cf7fc510a1a",
+    "content-hash": "75a6ff188ccf24462eba29f3a3072534",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -7062,6 +7062,85 @@
                 "source": "https://github.com/webmozarts/assert/tree/1.11.0"
             },
             "time": "2022-06-03T18:03:27+00:00"
+        },
+        {
+            "name": "wnx/laravel-sends",
+            "version": "v2.4.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/stefanzweifel/laravel-sends.git",
+                "reference": "4e7f8f3ad18d24b688a3653321a09047d7d9be03"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/stefanzweifel/laravel-sends/zipball/4e7f8f3ad18d24b688a3653321a09047d7d9be03",
+                "reference": "4e7f8f3ad18d24b688a3653321a09047d7d9be03",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/contracts": "^9.0 | ^10.0 | ^11.0",
+                "php": "^8.0",
+                "spatie/laravel-package-tools": "^1.9.2"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.4",
+                "larastan/larastan": "^2.0",
+                "nunomaduro/collision": "^5.10 |^6.0 | ^7.0 | ^8.0",
+                "orchestra/testbench": "^7 | ^8 | ^9",
+                "pestphp/pest": "^1.21 | ^2.0",
+                "pestphp/pest-plugin-laravel": "^1.1 | ^2.0",
+                "phpstan/extension-installer": "^1.1",
+                "phpstan/phpstan-deprecation-rules": "^1.0",
+                "phpstan/phpstan-phpunit": "^1.0",
+                "phpunit/phpunit": "^9.4 | ^10.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Wnx\\Sends\\SendsServiceProvider"
+                    ],
+                    "aliases": {
+                        "Sends": "Wnx\\Sends\\Facades\\Sends"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Wnx\\Sends\\": "src",
+                    "Wnx\\Sends\\Database\\Factories\\": "database/factories"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Stefan Zweifel",
+                    "email": "stefan@stefanzweifel.dev",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Keep track of outgoing emails in your Laravel application.",
+            "homepage": "https://github.com/stefanzweifel/laravel-sends",
+            "keywords": [
+                "laravel",
+                "laravel-sends",
+                "mailables",
+                "wnx"
+            ],
+            "support": {
+                "issues": "https://github.com/stefanzweifel/laravel-sends/issues",
+                "source": "https://github.com/stefanzweifel/laravel-sends/tree/v2.4.2"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/stefanzweifel",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-02-03T14:53:55+00:00"
         }
     ],
     "packages-dev": [
