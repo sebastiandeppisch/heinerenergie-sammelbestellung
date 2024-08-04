@@ -14,4 +14,9 @@ return new class extends Migration
             $table->morphs('sendable');
         });
     }
+
+    public function down()
+    {
+        Schema::dropIfExists('sendables');
+    }
 };
