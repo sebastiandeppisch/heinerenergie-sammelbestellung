@@ -1,13 +1,15 @@
 <?php
 
-use App\Enums\AdviceType;
-use App\Enums\HouseType;
 use App\Models\Advice;
+use App\Enums\HouseType;
+use App\Enums\AdviceType;
+use App\Mail\AdviceCreated;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
 test('advice can be saved', function () {
+    Mail::fake();
     $data = [
         'helpType_place' => fake()->boolean(),
         'helpType_technical' => fake()->boolean(),
@@ -38,7 +40,11 @@ test('advice can be saved', function () {
         }
         expect($advice->$key)->toBe($value);
     }
-});
+
+    Mail::assertQueued(function (AdviceCreated $mail) use ($advice) {
+        return $mail->hasTo($advice->email);
+    });
+})->only();
 
 test('direct order advice can be saved', function () {
     $data = [
