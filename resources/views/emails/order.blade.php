@@ -13,7 +13,7 @@
 @endforeach
 @endcomponent
 
-**Gesamtpreis**: {{(new \NumberFormatter( 'de_DE', NumberFormatter::CURRENCY ))->formatCurrency($order->price, 'EUR')}}
+**Gesamtpreis**: {{$order->formattedPrice}} €
 ---
 
 @if($order->commentary != null)
