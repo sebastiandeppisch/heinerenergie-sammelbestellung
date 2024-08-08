@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="">
+<html lang="de">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -19,6 +19,6 @@
     @endauth
     @guest
       <script>window.user = null;</script>
-    @endguest 
+    @endguest
   </body>
 </html>

@@ -2,7 +2,8 @@
     "private": true,
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "vite build",
+        "production": "vite build"
     },
     "dependencies": {
         "@babel/core": "^7.12.16",
@@ -13,8 +14,8 @@
         "@fortawesome/vue-fontawesome": "^3.0.1",
         "axios": "^0.21",
         "core-js": "^3.8.3",
-        "devextreme": "^21.2.4",
-        "devextreme-vue": "^21.2.4",
+        "devextreme": "^21.2.12",
+        "devextreme-vue": "^21.2.12",
         "eslint": "^7.32.0",
         "eslint-plugin-vue": "^8.0.3",
         "lodash": "^4.17.19",
@@ -31,18 +32,16 @@
         "vuex": "^4.0.2"
     },
     "devDependencies": {
-        "@vitejs/plugin-vue": "^4.1.0",
+        "@vitejs/plugin-vue": "^5.0.4",
         "@vue-leaflet/vue-leaflet": "^0.7.0",
         "@vue/cli-plugin-babel": "~5.0.0",
         "@vue/cli-plugin-eslint": "~5.0.0",
         "@vue/cli-service": "~5.0.0",
-        "browser-sync": "^2.27.9",
-        "browser-sync-webpack-plugin": "^2.3.0",
         "devextreme-cli": "1.3.2",
         "devextreme-themebuilder": "^21.2.4",
-        "laravel-vite-plugin": "^0.7.4",
+        "laravel-vite-plugin": "^1.0.2",
         "leaflet": "^1.9.3",
-        "vite": "^4.2.1"
+        "vite": "^5.2.9"
     },
     "eslintConfig": {
         "root": true,
@@ -63,5 +62,6 @@
         "last 2 versions",
         "not dead",
         "not ie 11"
-    ]
+    ],
+    "type": "module"
 }

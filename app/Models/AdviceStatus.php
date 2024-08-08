@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\AdviceStatusResult;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class AdviceStatus extends Model
 {
@@ -12,9 +13,14 @@ class AdviceStatus extends Model
 
     protected $table = 'advice_status';
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'result'];
 
-    public function adivces(): BelongsTo
+    protected $casts = [
+        'name' => 'string',
+        'result' => AdviceStatusResult::class,
+    ];
+
+    public function advices(): BelongsTo
     {
         return $this->belongsTo(Advice::class);
     }

@@ -1,44 +1,3 @@
-<template>
-  <form class="reset-password-form" @submit.prevent="onSubmit">
-    <dx-form :form-data="formData" :disabled="loading">
-      <dx-item
-        data-field="email"
-        editor-type="dxTextBox"
-        :editor-options="{ stylingMode: 'filled', placeholder: 'E-Mail', mode: 'email' }"
-      >
-        <dx-required-rule message="Du musst eine E-Mail Adresse eintragan" />
-        <dx-email-rule message="Die E-Mail Adresse ist ungültig" />
-        <dx-label :visible="false" />
-      </dx-item>
-      <dx-button-item>
-        <dx-button-options
-          :element-attr="{ class: 'submit-button' }"
-          width="100%"
-          type="default"
-          template="resetTemplate"
-          :use-submit-behavior="true"
-        >
-        </dx-button-options>
-      </dx-button-item>
-      <dx-item>
-        <template #default>
-          <div class="login-link">
-            <router-link to="/login-form">Zurück zum Login</router-link>
-          </div>
-        </template>
-      </dx-item>
-      <template #resetTemplate>
-        <div>
-          <span class="dx-button-text">
-              <dx-load-indicator v-if="loading" width="24px" height="24px" :visible="true" />
-              <span v-if="!loading">Passwort zurücksetzen</span>
-          </span>
-        </div>
-      </template>
-    </dx-form>
-  </form>
-</template>
-
 <script>
 import DxForm, {
   DxItem,
@@ -99,6 +58,47 @@ export default {
   }
 }
 </script>
+
+<template>
+  <form class="reset-password-form" @submit.prevent="onSubmit">
+    <dx-form :form-data="formData" :disabled="loading">
+      <dx-item
+        data-field="email"
+        editor-type="dxTextBox"
+        :editor-options="{ stylingMode: 'filled', placeholder: 'E-Mail', mode: 'email' }"
+      >
+        <dx-required-rule message="Du musst eine E-Mail Adresse eintragan" />
+        <dx-email-rule message="Die E-Mail Adresse ist ungültig" />
+        <dx-label :visible="false" />
+      </dx-item>
+      <dx-button-item>
+        <dx-button-options
+          :element-attr="{ class: 'submit-button' }"
+          width="100%"
+          type="default"
+          template="resetTemplate"
+          :use-submit-behavior="true"
+        >
+        </dx-button-options>
+      </dx-button-item>
+      <dx-item>
+        <template #default>
+          <div class="login-link">
+            <router-link to="/login-form">Zurück zum Login</router-link>
+          </div>
+        </template>
+      </dx-item>
+      <template #resetTemplate>
+        <div>
+          <span class="dx-button-text">
+              <dx-load-indicator v-if="loading" width="24px" height="24px" :visible="true" />
+              <span v-if="!loading">Passwort zurücksetzen</span>
+          </span>
+        </div>
+      </template>
+    </dx-form>
+  </form>
+</template>
 
 <style lang="scss">
 @import "../themes/generated/variables.base.scss";

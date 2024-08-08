@@ -25,7 +25,7 @@ class UpdateBulkOrderRequest extends FormRequest
     {
         return [
             'name' => 'string',
-            'archived' => 'boolean'
+            'archived' => 'boolean',
         ];
     }
 }

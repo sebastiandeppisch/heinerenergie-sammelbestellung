@@ -6,7 +6,6 @@ use App\Models\Order;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Contracts\Queue\ShouldQueue;
 
 class OrderChecking extends Mailable
 {
@@ -19,7 +18,7 @@ class OrderChecking extends Mailable
      */
     public function __construct(public Order $order, public string $reason)
     {
-        // 
+        //
     }
 
     /**

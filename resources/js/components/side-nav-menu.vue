@@ -1,31 +1,3 @@
-<template>
-  <div
-    class="dx-swatch-additional side-navigation-menu"
-    @click="forwardClick"
-  >
-    <slot />
-    <div class="menu-container">
-      <dx-tree-view
-        ref="treeViewRef"
-        :items="items"
-        key-expr="path"
-        selection-mode="single"
-        :focus-state-enabled="false"
-        expand-event="click"
-        @item-click="handleItemClick"
-        width="100%"
-      />
-      <div>
-        <footer style="margin-left:60px;">
-          <p><a href="https://github.com/sebastiandeppisch/heinerenergie-sammelbestellung" ><img src="img/github.svg" alt="Github" style="height:1em;"></a></p>
-          <p><router-link to="/impress" style="color:white !important;text-decoration: none !important;">Impressum</router-link></p>
-          <p><router-link to="/datapolicy" style="color:white !important;text-decoration: none !important;">Datenschutzerkklärung</router-link></p>
-        </footer>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script>
 import DxTreeView from "devextreme-vue/ui/tree-view";
 import { sizes } from '../utils/media-query';
@@ -123,6 +95,34 @@ export default {
   }
 };
 </script>
+
+<template>
+  <div
+    class="dx-swatch-additional side-navigation-menu"
+    @click="forwardClick"
+  >
+    <slot />
+    <div class="menu-container">
+      <dx-tree-view
+        ref="treeViewRef"
+        :items="items"
+        key-expr="path"
+        selection-mode="single"
+        :focus-state-enabled="false"
+        expand-event="click"
+        @item-click="handleItemClick"
+        width="100%"
+      />
+      <div>
+        <footer style="margin-left:60px;">
+          <p><a href="https://github.com/sebastiandeppisch/heinerenergie-sammelbestellung" ><img src="img/github.svg" alt="Github" style="height:1em;"></a></p>
+          <p><router-link to="/impress" style="color:white !important;text-decoration: none !important;">Impressum</router-link></p>
+          <p><router-link to="/datapolicy" style="color:white !important;text-decoration: none !important;">Datenschutzerklärung</router-link></p>
+        </footer>
+      </div>
+    </div>
+  </div>
+</template>
 
 <style lang="scss">
 @import "../dx-styles.scss";

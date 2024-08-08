@@ -1,7 +1,3 @@
-<template>
-  	<span>{{formattedValue}}</span>
-</template>
-
 <script setup lang="ts">
 import { computed } from 'vue'
 interface Props {
@@ -35,3 +31,7 @@ const formattedValue = computed(() => {
   return n.toPrecision(3).toString() + " " + p.unit;
 })
 </script>
+
+<template>
+  	<span>{{formattedValue}}</span>
+</template>

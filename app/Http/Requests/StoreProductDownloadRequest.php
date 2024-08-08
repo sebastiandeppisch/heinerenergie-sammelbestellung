@@ -25,7 +25,7 @@ class StoreProductDownloadRequest extends FormRequest
     {
         return [
             'name' => 'required|string',
-            'url' => 'required|url'
+            'url' => 'required|url',
         ];
     }
 }

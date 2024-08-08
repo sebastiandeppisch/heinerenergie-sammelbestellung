@@ -30,11 +30,19 @@ class SettingsSeeder extends Seeder
             [
                 'key' => 'datapolicy',
                 'value' => 'Datenschutzerklärung',
-            ]
+            ],
+            [
+                'key' => 'advisorInfo',
+                'value' => 'Berater*innen Info',
+            ],
+            [
+                'key' => 'newAdviceMail',
+                'value' => 'Neue Beratung E-Mail',
+            ],
         ];
-        
+
         foreach ($settings as $setting) {
-            if(!Setting::where('key', $setting['key'])->exists()) {
+            if (! Setting::where('key', $setting['key'])->exists()) {
                 Setting::create($setting);
             }
         }

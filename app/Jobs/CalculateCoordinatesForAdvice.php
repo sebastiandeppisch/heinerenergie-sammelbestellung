@@ -2,14 +2,17 @@
 
 namespace App\Jobs;
 
+use App\Actions\FetchCoordinateByAddress;
 use App\Models\Advice;
 use Illuminate\Bus\Queueable;
 use maxh\Nominatim\Nominatim;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
+use GuzzleHttp\Exception\ClientException;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 
 class CalculateCoordinatesForAdvice implements ShouldQueue
 {
@@ -33,18 +36,8 @@ class CalculateCoordinatesForAdvice implements ShouldQueue
     public function handle()
     {
         $advice = $this->advice->fresh();
-        $nominatim = new Nominatim('https://nominatim.openstreetmap.org/');
-        $street = sprintf("%s %s", $advice->street, $advice->streetNumber);
-        $search = $nominatim->newSearch()
-            ->country('Deutschland')
-            ->postalCode($advice->zip)
-            ->street($street);
-        $result = $nominatim->find($search);
-        if(count($result) > 0){
-            $result = $result[0];
-            $advice->lat = $result['lat'];
-            $advice->long = $result['lon'];
-            $advice->save();
-        }
+        
+        $advice->coordinate = app(FetchCoordinateByAddress::class)($advice->address);
+        $advice->save();
     }
 }

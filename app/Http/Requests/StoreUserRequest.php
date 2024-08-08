@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class StoreUserRequest extends FormRequest
 {
@@ -28,7 +28,7 @@ class StoreUserRequest extends FormRequest
             'is_admin' => 'boolean',
             'first_name' => 'string|required',
             'last_name' => 'string|required',
-            'email' => 'email|required|unique:users,email'
+            'email' => 'email|required|unique:users,email',
         ];
     }
 }

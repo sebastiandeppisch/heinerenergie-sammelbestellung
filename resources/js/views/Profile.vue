@@ -1,3 +1,32 @@
+<script setup lang="ts">
+import DxTextBox from "devextreme-vue/text-box";
+import { store, useStore} from "./../store";
+import ProfilePictureUpload from "./ProfilePictureUpload.vue";
+import { DxGroupItem } from "devextreme-vue/form";
+import { DxButton, DxNumberBox } from "devextreme-vue";
+import { reactive } from "@vue/reactivity";
+import axios from "axios";
+import AdvisorMap from "./AdvisorMap.vue";
+import notify from 'devextreme/ui/notify';
+
+const state = reactive({
+  user: store.getters.user as App.Models.User
+});
+
+
+function saveAddress() {
+  axios.post("/api/profile/address", state.user).then((response) => {
+    console.log(response.data);
+    store.commit("setUser", {
+      user: response.data as App.Models.User
+    });
+    state.user = response.data;
+    notify("Adresse gespeichert", "success");
+  });
+}
+
+</script>
+
 <template>
   <div ref="outer">
     <h2 class="content-block">Profil {{state.user.name}}</h2>
@@ -6,7 +35,7 @@
         <div class="dx-card flex-cell" style="padding:30px;max-width:400px;">
          <div class="flex-row">
             <div class="flex-cell">
-                <span class="label">Adresse</span>
+                <span class="label">Beratungsgebiet</span>
                 <br>Trage hier die Adresse ein, von der Du Beratungen aus durchführen möchtest. Wenn Du Deine Adresse nicht mit anderen Berater*innen teilen möchtest, kannst Du auch eine Adresse in Deiner Nähe angeben.
                 <div class="flex-row">
                   <div class="flex-cell">
@@ -43,9 +72,21 @@
                     />
                   </div>
                 </div>
+
+                <div class="flex-row">
+                  <div class="flex-cell">
+                    <DxNumberBox
+                      label="Beratungsgebiet (m)"
+                      style="margin: 10px;"
+                      v-model="state.user.advice_radius"
+                      :show-clear-button="true"
+                    />
+                  </div>
+                </div>
+
                 <DxButton
                   icon="save"
-                  text="Adresse speichern"
+                  text="Beratungsgebiet speichern"
                   @click="saveAddress"
                   width="100%"
                   type="success"
@@ -69,33 +110,6 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import DxTextBox from "devextreme-vue/text-box";
-import { store, useStore} from "./../store";
-import ProfilePictureUpload from "./ProfilePictureUpload.vue";
-import { DxGroupItem } from "devextreme-vue/form";
-import { DxButton, DxNumberBox } from "devextreme-vue";
-import { reactive } from "@vue/reactivity";
-import axios from "axios";
-import AdvisorMap from "./AdvisorMap.vue";
-
-const state = reactive({
-  user: store.getters.user as App.Models.User
-});
-
-
-function saveAddress() {
-  axios.post("/api/profile/address", state.user).then((response) => {
-    console.log(response.data);
-    store.commit("setUser", {
-      user: response.data as App.Models.User
-    });
-    state.user = response.data;
-  });
-}
-
-</script>
 <style scoped>
 .flex-row{
   flex-direction: row;

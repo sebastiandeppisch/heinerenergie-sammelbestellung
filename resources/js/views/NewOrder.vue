@@ -1,127 +1,3 @@
-<template>
-  <div>
-    <Transition name="slide-up">
-    <div v-if="state.order === null">
-      <h2 class="content-block">Sammelbestellung</h2>
-      <div class="main">
-      <Transition name="slide-up">
-      <div class="dx-card content" style="padding: 30px" v-if="blocked">
-        <DxTextBox
-            mode="password"
-            value-change-event="keyup"
-            @value-changed="passwordChanged"
-            :is-valid="!blocked"
-            :element-attr="{autocomplete: 'off'}"
-            placeholder="Gib bitte das Passwort ein, um Zugriff zum Bestellformular zu erhalten"
-        />
-      </div>
-      <div v-else>
-      <p class="dx-card content" style="padding:30px" v-if="email !== null && email !== undefined">
-        Sende folgenden Link an Deine Interessent*innen, damit die Berater*in E-Mail Adresse bereits vorausgefüllt ist: <br>
-        <a :href="advisorUrl"><b>{{ advisorUrl }}</b></a>
-      </p>
-      <p class="dx-card content" style="padding:30px" >
-        <SettingHtml :setting="orderFormText()" />
-      </p>
-      <div class="dx-card content">
-        <OrderForm
-          :order="formData"
-          :confirm-email="true"
-          :update-button="false"
-          ref="orderForm"
-          :allow-editing="true"
-        />
-      </div>
-    <div class="dx-card content">
-    <DxDataGrid
-      :data-source="orderItemsDatasource"
-      :column-hiding-enabled="true"
-      :paging="{enabled: false}"
-    >
-      <DxEditing
-        :allow-updating="true"
-        :allow-adding="false"
-        :allow-deleting="false"
-        mode="cell"
-      />
-      <DxColumn
-        caption="Kategorie"
-        :group-index="0"
-        data-field="product.product_category_id"
-      >
-        <DxLookup
-          :data-source="productCategories"
-          display-expr="name"
-          value-expr="id"
-        />
-      </DxColumn>
-      <DxColumn
-        caption="Artikel"
-        data-field="product.name"
-        :allow-sorting="false"
-        :allow-editing="false"
-        :hiding-priority="1"
-        cell-template="orderTemplate"
-      />
-      <DxColumn
-        caption="Preis"
-        data-field="product.price"
-        :customize-text="formatPriceCell"
-        :allow-sorting="false"
-        :allow-editing="false"
-        :hiding-priority="0"
-        :width="100"
-      />
-      <DxColumn
-        caption="Anzahl"
-        data-field="quantity"
-        :allow-sorting="false"
-        data-type="number"
-        :editor-options="{defaultValue: 0, min: 0, showSpinButtons: true, showClearButton: !state.hideElements}"
-        :show-editor-always="true"
-        :hiding-priority="1"
-        :width="160"
-      />
-      <template #orderTemplate="{ data }">
-        <ProductDetail :product="data.data.product" />
-      </template>
-
-      <DxSummary
-        :recalculate-while-editing="true"
-        :calculate-custom-summary="calculateSummary"
-        >
-          <DxTotalItem
-            name="priceSum"
-            summary-type="custom"
-            :display-format="state.hideElements?'{0}':'Summe: {0}'"
-            show-in-column="quantity"
-          />
-      </DxSummary>
-    </DxDataGrid>
-
-    <p style="text-align:right;font-size:0.7em;float:right" >Bitte beachte, dass sich die Preise noch ändern können. Den verbindlichen Preis erhälst Du von unserem Lieferanten, nachdem wir die Sammelbestellung übermittelt haben.</p>
-    </div>
-
-
-<div style="margin: 10px;margin-top:20px">
-<DxButton 
-      text="An der Sammelbestellung teilnehmen"
-      type="default"
-      width="100%"
-      @click="saveOrder"
-    />
-</div>
-</div>
-</Transition>
-    
-  </div></div>
-  <div v-else>
-    <OrderSaved :order="state.order" />
-  </div>
-  </Transition>
-  </div>
-</template>
-
 <script setup lang="ts">
 import DxTextBox from 'devextreme-vue/text-box';
 import LaravelLookupSource from '../LaravelLookupSource'
@@ -323,6 +199,130 @@ function passwordChanged(data){
   }).catch(e =>  {});
 }
 </script>
+
+<template>
+  <div>
+    <Transition name="slide-up">
+    <div v-if="state.order === null">
+      <h2 class="content-block">Sammelbestellung</h2>
+      <div class="main">
+      <Transition name="slide-up">
+      <div class="dx-card content" style="padding: 30px" v-if="blocked">
+        <DxTextBox
+            mode="password"
+            value-change-event="keyup"
+            @value-changed="passwordChanged"
+            :is-valid="!blocked"
+            :element-attr="{autocomplete: 'off'}"
+            placeholder="Gib bitte das Passwort ein, um Zugriff zum Bestellformular zu erhalten"
+        />
+      </div>
+      <div v-else>
+      <p class="dx-card content" style="padding:30px" v-if="email !== null && email !== undefined">
+        Sende folgenden Link an Deine Interessent*innen, damit die Berater*in E-Mail Adresse bereits vorausgefüllt ist: <br>
+        <a :href="advisorUrl"><b>{{ advisorUrl }}</b></a>
+      </p>
+      <p class="dx-card content" style="padding:30px" >
+        <SettingHtml :setting="orderFormText()" />
+      </p>
+      <div class="dx-card content">
+        <OrderForm
+          :order="formData"
+          :confirm-email="true"
+          :update-button="false"
+          ref="orderForm"
+          :allow-editing="true"
+        />
+      </div>
+    <div class="dx-card content">
+    <DxDataGrid
+      :data-source="orderItemsDatasource"
+      :column-hiding-enabled="true"
+      :paging="{enabled: false}"
+    >
+      <DxEditing
+        :allow-updating="true"
+        :allow-adding="false"
+        :allow-deleting="false"
+        mode="cell"
+      />
+      <DxColumn
+        caption="Kategorie"
+        :group-index="0"
+        data-field="product.product_category_id"
+      >
+        <DxLookup
+          :data-source="productCategories"
+          display-expr="name"
+          value-expr="id"
+        />
+      </DxColumn>
+      <DxColumn
+        caption="Artikel"
+        data-field="product.name"
+        :allow-sorting="false"
+        :allow-editing="false"
+        :hiding-priority="1"
+        cell-template="orderTemplate"
+      />
+      <DxColumn
+        caption="Preis"
+        data-field="product.price"
+        :customize-text="formatPriceCell"
+        :allow-sorting="false"
+        :allow-editing="false"
+        :hiding-priority="0"
+        :width="100"
+      />
+      <DxColumn
+        caption="Anzahl"
+        data-field="quantity"
+        :allow-sorting="false"
+        data-type="number"
+        :editor-options="{defaultValue: 0, min: 0, showSpinButtons: true, showClearButton: !state.hideElements}"
+        :show-editor-always="true"
+        :hiding-priority="1"
+        :width="160"
+      />
+      <template #orderTemplate="{ data }">
+        <ProductDetail :product="data.data.product" />
+      </template>
+
+      <DxSummary
+        :recalculate-while-editing="true"
+        :calculate-custom-summary="calculateSummary"
+        >
+          <DxTotalItem
+            name="priceSum"
+            summary-type="custom"
+            :display-format="state.hideElements?'{0}':'Summe: {0}'"
+            show-in-column="quantity"
+          />
+      </DxSummary>
+    </DxDataGrid>
+
+    <p style="text-align:right;font-size:0.7em;float:right" >Bitte beachte, dass sich die Preise noch ändern können. Den verbindlichen Preis erhälst Du von unserem Lieferanten, nachdem wir die Sammelbestellung übermittelt haben.</p>
+    </div>
+
+
+<div style="margin: 10px;margin-top:20px">
+<DxButton 
+      text="An der Sammelbestellung teilnehmen"
+      type="default"
+      width="100%"
+      @click="saveOrder"
+    />
+</div>
+</div>
+</Transition>
+    
+  </div></div>
+  <div v-else>
+    <OrderSaved :order="state.order" />
+  </div>
+  </Transition>
+  </div>
+</template>
 <style scoped>
 @media screen and (min-width:680px) {
   .main{

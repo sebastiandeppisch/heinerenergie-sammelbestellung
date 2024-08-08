@@ -31,7 +31,7 @@ class UpdateOrderRequest extends FormRequest
             'street' => 'string',
             'streetNumber' => 'string',
             'zip' => 'numeric|digits:5',
-            'city' => 'string'
+            'city' => 'string',
         ];
     }
 }

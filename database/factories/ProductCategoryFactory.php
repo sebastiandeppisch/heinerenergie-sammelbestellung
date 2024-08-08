@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\BulkOrder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ProductCategoryFactory extends Factory
@@ -10,7 +9,7 @@ class ProductCategoryFactory extends Factory
     public function definition()
     {
         return [
-            'name' => $this->faker->word(),
+            'name' => fake()->word(),
         ];
     }
 }

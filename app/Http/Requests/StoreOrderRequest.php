@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Support\Str;
 use App\Rules\OrderPassword;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
 
 class StoreOrderRequest extends FormRequest
 {
@@ -38,17 +38,19 @@ class StoreOrderRequest extends FormRequest
             'orderItems' => 'array',
             'advisorEmail' => 'required|email|exists:users,email|max:100',
             'commentary' => 'nullable|string|max:65535',
-            'password' => [new OrderPassword()]
+            'password' => [new OrderPassword()],
         ];
     }
 
-    protected function prepareForValidation(){
+    protected function prepareForValidation()
+    {
         $this->merge([
-            'advisorEmail' => Str::lower($this->advisorEmail)
+            'advisorEmail' => Str::lower($this->advisorEmail),
         ]);
     }
 
-    public function attributes(){
+    public function attributes()
+    {
         return [
             'firstName' => 'Vorname',
             'lastName' => 'Nachname',
@@ -59,13 +61,14 @@ class StoreOrderRequest extends FormRequest
             'streetNumber' => 'Hausnummer',
             'zip' => 'Postleitzahl',
             'city' => 'Stadt',
-            'advisorEmail' => 'Berater*in E-Mail'
+            'advisorEmail' => 'Berater*in E-Mail',
         ];
     }
 
-    public function messages(){
+    public function messages()
+    {
         return [
-            'advisorEmail.exists' => 'Die angebene Berater*in E-Mail wurde nicht gefunden. Bitte verwende den Link, den Dir Dein*e Berater*in gesendet hat, dann ist die korrekte E-Mail bereits vorausgefüllt.'
+            'advisorEmail.exists' => 'Die angebene Berater*in E-Mail wurde nicht gefunden. Bitte verwende den Link, den Dir Dein*e Berater*in gesendet hat, dann ist die korrekte E-Mail bereits vorausgefüllt.',
         ];
     }
 }

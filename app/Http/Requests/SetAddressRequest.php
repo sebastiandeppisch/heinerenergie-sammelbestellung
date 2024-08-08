@@ -24,10 +24,11 @@ class SetAddressRequest extends FormRequest
     public function rules()
     {
         return [
-            "street" => "nullable|string",
-            "streetNumber" => "nullable|string",
-            "zip" => "nullable|integer",
-            "city" => "nullable|string",
+            'street' => 'nullable|string',
+            'streetNumber' => 'nullable|string',
+            'zip' => 'nullable|integer',
+            'city' => 'nullable|string',
+            'advice_radius' => 'nullable|integer',
         ];
     }
 }

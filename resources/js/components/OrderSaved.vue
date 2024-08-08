@@ -1,3 +1,12 @@
+<script setup lang="ts">
+import {formatPrice} from './../helpers'
+
+interface Props {
+  order: App.Models.Order
+}
+const {order} = defineProps<Props>();
+</script>
+
 <template>
   <h2 class="content-block">Bestellung gespeichert</h2>
     <p>Deine Bestellung wurde gespeichert und wird bald an unseren Lieferanten weitergeleitet. Eine Bestätigung wurde an Deine E-Mail Adresse gesendet.</p>
@@ -61,14 +70,5 @@
       
     </div>
 </template>
-
-<script setup lang="ts">
-import {formatPrice} from './../helpers'
-
-interface Props {
-  order: App.Models.Order
-}
-const {order} = defineProps<Props>();
-</script>
 <style scoped>
 </style>

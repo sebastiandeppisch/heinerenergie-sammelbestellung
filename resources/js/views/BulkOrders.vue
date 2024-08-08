@@ -1,3 +1,33 @@
+<script setup>
+import DxDataGrid, {
+  DxColumn,
+  DxEditing,
+  DxLookup,
+  DxFormItem,
+  DxForm
+} from "devextreme-vue/data-grid";
+import LaravelDataSource from '../LaravelDataSource'
+import { ref, onMounted } from 'vue'
+
+const bulkorderStore = new LaravelDataSource("api/bulkorders");
+
+let isEditing = false;
+
+function onInitNewRow(){
+  isEditing = false;
+}
+
+function onEditingStart(){
+  isEditing = true;
+}
+
+function customizeItem(item){
+  if(item.name === 'copy_from'){
+    item.visible = !isEditing;
+  }
+}
+</script>
+
 <template>
   <DxDataGrid
     :data-source="bulkorderStore"
@@ -39,33 +69,3 @@
     </DxColumn>
   </DxDataGrid>
 </template>
-
-<script setup>
-import DxDataGrid, {
-  DxColumn,
-  DxEditing,
-  DxLookup,
-  DxFormItem,
-  DxForm
-} from "devextreme-vue/data-grid";
-import LaravelDataSource from '../LaravelDataSource'
-import { ref, onMounted } from 'vue'
-
-const bulkorderStore = new LaravelDataSource("api/bulkorders");
-
-let isEditing = false;
-
-function onInitNewRow(){
-  isEditing = false;
-}
-
-function onEditingStart(){
-  isEditing = true;
-}
-
-function customizeItem(item){
-  if(item.name === 'copy_from'){
-    item.visible = !isEditing;
-  }
-}
-</script>

@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class StoreProductRequest extends FormRequest
 {
@@ -31,7 +31,7 @@ class StoreProductRequest extends FormRequest
             'sku' => 'nullable|string',
             'description' => 'nullable|string',
             'product_category_id' => 'nullable|integer',
-            'is_supplier_product' => 'nullable|boolean'
+            'is_supplier_product' => 'nullable|boolean',
         ];
     }
 }

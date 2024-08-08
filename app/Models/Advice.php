@@ -2,22 +2,30 @@
 
 namespace App\Models;
 
-use App\AdviceType;
-use App\Models\AdviceStatus;
+use App\Enums\HouseType;
+use App\Enums\AdviceType;
 use App\Events\AdviceCreated;
 use App\Events\AdviceUpdated;
+use App\ValueObjects\Address;
+use App\ValueObjects\Coordinate;
+use App\Enums\AdviceStatusResult;
+use Wnx\Sends\Contracts\HasSends;
 use Illuminate\Support\Facades\Auth;
+use Wnx\Sends\Support\HasSendsTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
-class Advice extends Model
+class Advice extends Model implements HasSends
 {
     protected $table = 'advices';
 
     use HasFactory;
+    use SoftDeletes;
+    use HasSendsTrait;
 
     protected $fillable = [
         'firstName',
@@ -34,6 +42,13 @@ class Advice extends Model
         'long',
         'lat',
         'type',
+        'helpType_place',
+        'helpType_technical',
+        'helpType_bureaucracy',
+        'helpType_other',
+        'houseType',
+        'landlordExists',
+        'placeNotes',
     ];
 
     protected $appends = ['distance', 'shares_ids'];
@@ -58,48 +73,79 @@ class Advice extends Model
         'lat' => 'float',
         'advice_status_id' => 'integer',
         'type' => AdviceType::class,
+        'helpType_place' => 'boolean',
+        'helpType_technical' => 'boolean',
+        'helpType_bureaucracy' => 'boolean',
+        'helpType_other' => 'boolean',
+        'houseType' => HouseType::class,
+        'landlordExists' => 'boolean',
+        'placeNotes' => 'string',
+        'address' => Address::class,
+        'coordinate' => Coordinate::class,
+        'long' => 'float',
+        'lat' => 'float',
     ];
 
-    public function advisor(): BelongsTo{
+    public function advisor(): BelongsTo
+    {
         return $this->belongsTo(User::class);
     }
 
-    public function getDistanceAttribute(): ?float{
+    public function getDistanceAttribute(): ?float
+    {
+        if (Auth::user() === null) {
+            return null;
+        }
+
         return $this->getDistanceToUser(Auth::user());
     }
 
-    public function getDistanceToUser(User $user): ?float{
-        if($this->lat === null || $this->long === null || $user->long === null || $user->lat === null){
+    public function getDistanceToUser(User $user): ?float
+    {
+        if($this->coordinate === null || $user->coordinate === null) {
             return null;
         }
-        return $this->haversineGreatCircleDistance($this->lat, $this->long, $user->lat, $user->long);
+        return $this->coordinate->distanceTo($user->coordinate);
     }
 
-    private function haversineGreatCircleDistance(
-        $latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371000): float
-      {
-        $latFrom = deg2rad($latitudeFrom);
-        $lonFrom = deg2rad($longitudeFrom);
-        $latTo = deg2rad($latitudeTo);
-        $lonTo = deg2rad($longitudeTo);
-      
-        $latDelta = $latTo - $latFrom;
-        $lonDelta = $lonTo - $lonFrom;
-      
-        $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
-          cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
-        return $angle * $earthRadius;
-      }
 
-    public function status(): HasOne{
-        return $this->hasOne(AdviceStatus::class);
+    public function status(): BelongsTo
+    {
+        return $this->belongsTo(AdviceStatus::class, 'advice_status_id');
     }
 
-    public function shares(): MorphToMany{
+    public function shares(): MorphToMany
+    {
         return $this->morphToMany(User::class, 'sharing', 'sharings', 'sharing_id', 'advisor_id');
     }
 
-    public function getSharesIdsAttribute(): array{
+    public function getSharesIdsAttribute(): array
+    {
         return $this->shares->pluck('id')->toArray();
+    }
+
+    public function isHome(): bool
+    {
+        return $this->type === AdviceType::Home;
+    }
+
+    public function isDirectOrder(): bool
+    {
+        return $this->type === AdviceType::DirectOrder;
+    }
+
+    public function isVirtual(): bool
+    {
+        return $this->type === AdviceType::Virtual;
+    }
+
+    public function getResultAttribute(): AdviceStatusResult
+    {
+        return $this->status?->result ?? AdviceStatusResult::New;
+    }
+
+    public function getNameAttribute(): string
+    {
+        return sprintf('%s %s', $this->firstName, $this->lastName);
     }
 }

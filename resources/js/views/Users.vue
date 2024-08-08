@@ -1,3 +1,30 @@
+<script setup lang="ts">
+
+import LaravelDataSource from '../LaravelDataSource'
+import DxDataGrid, {
+  DxColumn,
+  DxEditing,
+  DxScrolling,
+  DxSummary,
+  DxTotalItem
+} from "devextreme-vue/data-grid";
+import LaravelLookupSource from '../LaravelLookupSource';
+import { ref, onMounted } from "vue";
+import {AdaptTableHeight} from '../helpers'
+
+
+const users = new LaravelDataSource("api/users");
+
+const outer = ref(null);
+
+const tableHeight = new AdaptTableHeight(outer);
+const r = tableHeight.getReactive();
+
+onMounted(() => {
+  tableHeight.calcHeight();
+});
+</script>
+
 <template>
   <div ref="outer">
     <h2 class="content-block">Berater*innen</h2>
@@ -29,30 +56,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-
-import LaravelDataSource from '../LaravelDataSource'
-import DxDataGrid, {
-  DxColumn,
-  DxEditing,
-  DxScrolling,
-  DxSummary,
-  DxTotalItem
-} from "devextreme-vue/data-grid";
-import LaravelLookupSource from '../LaravelLookupSource';
-import { ref, onMounted } from "vue";
-import {AdaptTableHeight} from '../helpers'
-
-
-const users = new LaravelDataSource("api/users");
-
-const outer = ref(null);
-
-const tableHeight = new AdaptTableHeight(outer);
-const r = tableHeight.getReactive();
-
-onMounted(() => {
-  tableHeight.calcHeight();
-});
-</script>

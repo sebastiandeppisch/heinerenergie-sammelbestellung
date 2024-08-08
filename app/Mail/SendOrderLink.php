@@ -7,7 +7,6 @@ use App\Models\Setting;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Contracts\Queue\ShouldQueue;
 
 class SendOrderLink extends Mailable
 {
@@ -36,10 +35,9 @@ class SendOrderLink extends Mailable
             'phone' => $advice->phone,
             'email_confirmation' => $advice->email,
         ];
-        $this->url = url('/sammelbestellung?formdata=' . json_encode($data));
+        $this->url = url('/sammelbestellung?formdata='.json_encode($data));
         $this->password = Setting::get('orderFormPassword');
     }
-    
 
     /**
      * Build the message.

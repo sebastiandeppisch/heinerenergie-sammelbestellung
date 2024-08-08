@@ -1,121 +1,3 @@
-<template>
-  <div v-if="adviceId !==null">
-    <div v-if="advice !== null" style="padding:20px;">
-      <h2>Beratung</h2>
-      <div class="dx-card" style="max-width:600px;padding:20px;">
-        <DxForm
-          label-mode="floating"
-          :col-count="2"
-          :form-data="advice"
-        >
-          <DxGroupItem
-            caption="Name"
-          >
-            <DxItem data-field="firstName" :label="{ text: 'Vorname'}" />
-            <DxItem data-field="lastName" :label="{ text: 'Nachname'}"/>
-          </DxGroupItem>
-
-          <DxGroupItem
-            caption="Kontakt"
-          >
-            <DxItem data-field="phone" :label="{ text: 'Telefonnummer'}"/>
-            <DxItem data-field="email" :label="{ text: 'E-Mail Adresse'}"/>
-          </DxGroupItem>
-
-          <DxGroupItem
-            caption="Adresse"
-          >
-            <DxItem data-field="street" :label="{ text: 'Straße'}"/>
-            <DxItem data-field="streetNumber" :label="{ text: 'Hausnummer'}"/>
-            <DxItem data-field="zip" :label="{ text: 'Postleitzahl'}"/>
-            <DxItem data-field="city" :label="{ text: 'Darmstadt'}"/>
-          </DxGroupItem>
-
-          <DxGroupItem
-            caption="Beratung"
-          >
-            <DxItem
-              data-field="advice_status_id"
-              :label="{ text: 'Status'}"
-              editor-type="dxSelectBox"
-              :editor-options="{
-                dataSource: adviceStatus,
-                displayExpr: 'name',
-                valueExpr: 'id' }"
-            />
-            <DxItem
-              data-field="type"
-              :label="{ text: 'Typ'}"
-              editor-type="dxRadioGroup"
-              :editor-options="{
-                dataSource: adviceTypes,
-                displayExpr: 'name',
-                valueExpr: 'id',
-                layout: 'horizontal',
-                itemTemplate: radioBoxLayout
-              }"
-            />
-            <DxItem data-field="commentary" :label="{ text: 'Kommentar'}" editor-type="dxTextArea" :editor-options="{ autoResizeEnabled: true}"/>
-          </DxGroupItem>
-          
-          <DxButtonItem
-            :button-options="{ text: 'Speichern', type: 'success', useSubmitBehavior: true, width: '100%', onClick: onSubmit }"
-            :col-span="2"
-          />
-        </DxForm>
-      </div>
-      <div class="dx-card" style="max-width:600px;padding:20px;margin-top:20px;">
-        <DxTagBox
-          :data-source="advisors"
-          display-expr="name"
-          value-expr="id"
-          :on-value-changed="updateAdvisors"
-          label="Teilen mit"
-          v-model="sharedIds"
-        />
-        <div style="padding-top:5px;opacity:0.5;">Du kannst diese Beratung mit anderen Berater*innen teilen, um die Beratung gemeinsam duchzuführen</div>
-      </div>
-      <div style="margin-top:20px;display:flex;gap:20px;">
-        <DxDropDownButton
-          :items="navigationTypes"
-          icon="map"
-          text="Navigation öffnen"
-          @item-click="openNavigation"
-          display-expr="name"
-          key-expr="id"
-        />
-        <a :href="phoneLink"><DxButton text="Anrufen" icon="tel" /></a>
-        <a :href="mailLink"><DxButton text="E-Mail verfassen" icon="email" /></a>
-      </div>
-      <div style="margin-top:20px;display:flex;gap:20px;">
-        <a :href="orderMailLink"><DxButton text="E-Mail mit Bestelllink verfassen" icon="email" /></a>
-        <DxButton
-          text="Bestelllink kopieren"
-          icon="copy"
-          @click="copyOrderLink"
-        />
-      </div>
-    </div>
-    <div v-else style="height:100%;width:100%;min-height:300px" id="advice-loading" >
-      <DxLoadPanel
-        :visible="true"
-        :show-indicator="true"
-        :show-pane="true"
-        :position="{ of: '#advice-loading' }"
-      />
-    </div>
-  </div>
-  <div v-else>
-    <h1>Keine Beratung ausgewählt</h1>
-    <DxRadioGroup
-      :items="[{id: 1, name: 'Test1'}, {id: 2, name: 'Test2'}]"
-      displayExpr="name"
-      valueExpr="id"
-      v-if="false"
-    />
-  </div>
-</template>
-
 <script setup lang="ts">
 import DxTextArea from 'devextreme-vue/text-area';
 import DxRadioGroup from 'devextreme-vue/radio-group';
@@ -129,6 +11,7 @@ import DxTagBox from 'devextreme-vue/tag-box';
 import DxButton from 'devextreme-vue/button';
 import { store } from '../store';
 import DxDropDownButton from 'devextreme-vue/drop-down-button';
+import AdviceMails from '../components/AdviceMails.vue';
 type Advice = App.Models.Advice;
 
 const advice = ref(null as Advice | null);
@@ -192,6 +75,9 @@ function fetchAdvice(id: number) {
           sharedIds.value = a.shares_ids;
         }
       });
+      if (advice.value === null) {
+        notify("Beratung wurde nicht gefunden, oder Du hast keinen Zugriff auf die Beratung, weil sie bereits ein:e andere:r Berater:in übernommen hat", "error", 10000);
+      }
     });
 }
 
@@ -208,7 +94,7 @@ if(props.adviceId !== null){
 }
 
 function updateAdvisors(e: any) {
-  axios.post('api/advices/' + props.adviceId + '/advisors', {advisors: e.value})
+  axios.post('/api/advices/' + props.adviceId + '/advisors', {advisors: e.value})
     .then(() => {
       notify('Teilung aktualisiert', 'success', 2000);
   })
@@ -284,3 +170,176 @@ const phoneLink = computed(() => {
 });
 
 </script>
+
+<template>
+  <div v-if="adviceId !==null">
+    <div v-if="advice !== null" style="padding:20px;">
+      <h2>Beratung</h2>
+      <div style="display:flex;flex-direction:row;gap:32px;">
+        <div>
+          <div class="dx-card" style="max-width:600px;padding:20px;">
+            <DxForm
+              label-mode="floating"
+              :col-count="2"
+              :form-data="advice"
+            >
+              <DxGroupItem
+                caption="Name"
+              >
+                <DxItem data-field="firstName" :label="{ text: 'Vorname'}" />
+                <DxItem data-field="lastName" :label="{ text: 'Nachname'}"/>
+              </DxGroupItem>
+
+              <DxGroupItem
+                caption="Kontakt"
+              >
+                <DxItem data-field="phone" :label="{ text: 'Telefonnummer'}"/>
+                <DxItem data-field="email" :label="{ text: 'E-Mail Adresse'}"/>
+              </DxGroupItem>
+
+              <DxGroupItem
+                caption="Adresse"
+              >
+                <DxItem data-field="street" :label="{ text: 'Straße'}"/>
+                <DxItem data-field="streetNumber" :label="{ text: 'Hausnummer'}"/>
+                <DxItem data-field="zip" :label="{ text: 'Postleitzahl'}"/>
+                <DxItem data-field="city" :label="{ text: 'Darmstadt'}"/>
+              </DxGroupItem>
+
+              <DxGroupItem
+                caption="Beratung"
+              >
+                <DxItem
+                  data-field="advice_status_id"
+                  :label="{ text: 'Status'}"
+                  editor-type="dxSelectBox"
+                  :editor-options="{
+                    dataSource: adviceStatus,
+                    displayExpr: 'name',
+                    valueExpr: 'id' }"
+                />
+                <DxItem
+                  data-field="type"
+                  :label="{ text: 'Typ'}"
+                  editor-type="dxRadioGroup"
+                  :editor-options="{
+                    dataSource: adviceTypes,
+                    displayExpr: 'name',
+                    valueExpr: 'id',
+                    layout: 'horizontal',
+                    itemTemplate: radioBoxLayout
+                  }"
+                />
+                <DxItem data-field="commentary" :label="{ text: 'Kommentar'}" editor-type="dxTextArea" :editor-options="{ autoResizeEnabled: true}"/>
+              </DxGroupItem>
+              
+              <DxButtonItem
+                :button-options="{ text: 'Speichern', type: 'success', useSubmitBehavior: true, width: '100%', onClick: onSubmit }"
+                :col-span="2"
+              />
+            </DxForm>
+          </div>
+          <div class="dx-card" style="max-width:600px;padding:20px;margin-top:20px;">
+            <DxTagBox
+              :data-source="advisors"
+              display-expr="name"
+              value-expr="id"
+              :on-value-changed="updateAdvisors"
+              label="Teilen mit"
+              v-model="sharedIds"
+            />
+            <div style="padding-top:5px;opacity:0.5;">Du kannst diese Beratung mit anderen Berater*innen teilen, um die Beratung gemeinsam duchzuführen</div>
+          </div>
+          <div style="margin-top:20px;display:flex;gap:20px;">
+            <DxDropDownButton
+              :items="navigationTypes"
+              icon="map"
+              text="Navigation öffnen"
+              @item-click="openNavigation"
+              display-expr="name"
+              key-expr="id"
+            />
+            <a :href="phoneLink"><DxButton text="Anrufen" icon="tel" /></a>
+            <a :href="mailLink"><DxButton text="E-Mail verfassen" icon="email" /></a>
+          </div>
+          <div style="margin-top:20px;display:flex;gap:20px;">
+            <a :href="orderMailLink"><DxButton text="E-Mail mit Bestelllink verfassen" icon="email" /></a>
+            <DxButton
+              text="Bestelllink kopieren"
+              icon="copy"
+              @click="copyOrderLink"
+            />
+          </div>
+        </div>
+        <div style="display: flex;flex-direction: column;gap:32px;">
+          <div class="dx-card" style="padding:16px;display: flex;flex-direction: column;gap:16px;">
+            <div>
+              <b>Benötigt Hilfe bei:</b>
+              <div v-if="advice.helpType_place">
+                <font-awesome-icon icon="fa fa-house"  />
+                <span> Ort (Balkon, Garten, Terrasse, etc.)</span>
+              </div>
+              <div v-if="advice.helpType_bureaucracy">
+                <font-awesome-icon icon="fa fa-file-signature" />
+                <span> Bürokratie (Anmeldung, Förderung, etc.)</span>
+              </div>
+              <div v-if="advice.helpType_technical">
+                <font-awesome-icon icon="fa fa-wrench" />
+                <span> Technisches (Anschluss, Befestigung, etc.)</span>
+              </div>
+              <div v-if="advice.helpType_other">
+                <img
+                  src="https://balkon.heinerenergie.de/images/heinerenergie-hochzeitsturm.svg"
+                  style="height: 2em"
+                />
+                <span>Andere Themen</span>
+              </div>
+
+              <div v-if="!advice.helpType_place && !advice.helpType_bureaucracy && !advice.helpType_technical && !advice.helpType_other">
+                <span><i>Keine Angabe</i></span>
+              </div>
+            </div>
+            <div>
+              <b>Gebäudeart:</b>
+              <div v-if="advice.houseType === 0">
+                <font-awesome-icon icon="fa fa-home" />
+                <span>Einfamilienhaus</span>
+              </div>
+              <div v-if="advice.houseType === 1">
+                <font-awesome-icon icon="fa fa-building" />
+                <span>Mehrfamilienhaus</span>
+              </div>
+              <div v-else>
+                <span><i>Keine Angabe/Sonstiges</i></span>
+              </div>
+              <b>Vermieter*in / WEG vorhanden?</b> <div v-if="advice.landlordExists">Ja</div><div v-else>Nein</div> 
+            </div>
+            <div>
+              <b>Wo soll das Steckersolargerät installiert werden?</b>
+              <div v-if="advice.placeNotes !== null && advice.placeNotes.length > 0"> {{ advice.placeNotes }}</div>
+              <div v-else><i>Keine Angabe</i></div>
+            </div>
+          </div>
+          <AdviceMails :advice="advice" />
+        </div>
+      </div>
+    </div>
+    <div v-else style="height:100%;width:100%;min-height:300px" id="advice-loading" >
+      <DxLoadPanel
+        :visible="true"
+        :show-indicator="true"
+        :show-pane="true"
+        :position="{ of: '#advice-loading' }"
+      />
+    </div>
+  </div>
+  <div v-else>
+    <h1>Keine Beratung ausgewählt</h1>
+    <DxRadioGroup
+      :items="[{id: 1, name: 'Test1'}, {id: 2, name: 'Test2'}]"
+      displayExpr="name"
+      valueExpr="id"
+      v-if="false"
+    />
+  </div>
+</template>

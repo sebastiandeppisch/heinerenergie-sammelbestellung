@@ -14,16 +14,21 @@
         "laravel/tinker": "^2.5",
         "maatwebsite/excel": "^3.1",
         "maxh/php-nominatim": "^2.3",
-        "plesk/composer-command-info": "~1.1.0"
+        "opcodesio/log-viewer": "^3.10",
+        "plesk/composer-command-info": "~1.1.0",
+        "plesk/ext-laravel-integration": "^7.0",
+        "wnx/laravel-sends": "^2.4"
     },
     "require-dev": {
-        "spatie/laravel-ignition": "^1.0",
+        "driftingly/rector-laravel": "^1.2",
         "fakerphp/faker": "^1.9.1",
+        "laravel/pint": "^1.16",
         "laravel/sail": "^1.0.1",
         "mockery/mockery": "^1.4.4",
         "nunomaduro/collision": "^6.1",
         "pestphp/pest-plugin-laravel": "^1.2",
-        "phpunit/phpunit": "^9.5.10"
+        "phpunit/phpunit": "^9.5.10",
+        "spatie/laravel-ignition": "^1.0"
     },
     "autoload": {
         "psr-4": {
@@ -64,6 +69,9 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "plesk/composer-command-info": true
+        },
+        "platform": {
+            "php": "8.1.0"
         }
     },
     "minimum-stability": "dev",

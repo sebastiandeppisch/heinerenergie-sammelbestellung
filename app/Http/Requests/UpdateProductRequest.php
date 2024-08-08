@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class UpdateProductRequest extends FormRequest
 {
@@ -32,7 +32,7 @@ class UpdateProductRequest extends FormRequest
             'url' => 'url',
             'description' => 'string',
             'product_category_id' => 'integer',
-            'is_supplier_product' => 'boolean'
+            'is_supplier_product' => 'boolean',
         ];
     }
 }

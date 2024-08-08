@@ -1,3 +1,57 @@
+<script setup lang="ts">
+import { DxFileUploader } from 'devextreme-vue/file-uploader';
+import { DxProgressBar } from 'devextreme-vue/progress-bar';
+import { reactive } from 'vue';
+import axios from 'axios';
+import { useStore } from '../store';
+import { DxButton } from 'devextreme-vue/button';
+
+
+const r = reactive({
+  isDropZoneActive: false,
+  imageSource: null,
+  textVisible: true,
+  allowedFileExtensions: ['.jpg', '.jpeg', '.gif', '.png'],
+});
+
+r.imageSource = useStore().getters.user.picture;
+
+function onDropZoneEnter(e) {
+  if (e.dropZoneElement.id === 'dropzone-external') {
+    r.isDropZoneActive = true;
+  }
+}
+
+function onDropZoneLeave(e) {
+  if (e.dropZoneElement.id === 'dropzone-external') {
+    r.isDropZoneActive = false;
+  }
+}
+
+function onUploaded(e) {
+  const { file } = e;
+  const fileReader = new FileReader();
+  fileReader.onload = () => {
+    r.isDropZoneActive = false;
+    r.imageSource = fileReader.result;
+  };
+  fileReader.readAsDataURL(file);
+  const json = JSON.parse(e.request.response);
+  r.imageSource = json.url;
+  axios.post('/api/profile/picture', {url: json.url});
+}
+
+function onUploadStarted() {
+  r.imageSource = null;
+}
+
+function removeImage() {
+  r.imageSource = null;
+  axios.post('/api/profile/picture', {url: null});
+}
+
+
+</script>
 <template>
   <div class="widget-container flex-box">
     <span>Profilbild</span>
@@ -55,60 +109,6 @@
     />
   </div>
 </template>
-<script setup lang="ts">
-import { DxFileUploader } from 'devextreme-vue/file-uploader';
-import { DxProgressBar } from 'devextreme-vue/progress-bar';
-import { reactive } from 'vue';
-import axios from 'axios';
-import { useStore } from '../store';
-import { DxButton } from 'devextreme-vue/button';
-
-
-const r = reactive({
-  isDropZoneActive: false,
-  imageSource: null,
-  textVisible: true,
-  allowedFileExtensions: ['.jpg', '.jpeg', '.gif', '.png'],
-});
-
-r.imageSource = useStore().getters.user.picture;
-
-function onDropZoneEnter(e) {
-  if (e.dropZoneElement.id === 'dropzone-external') {
-    r.isDropZoneActive = true;
-  }
-}
-
-function onDropZoneLeave(e) {
-  if (e.dropZoneElement.id === 'dropzone-external') {
-    r.isDropZoneActive = false;
-  }
-}
-
-function onUploaded(e) {
-  const { file } = e;
-  const fileReader = new FileReader();
-  fileReader.onload = () => {
-    r.isDropZoneActive = false;
-    r.imageSource = fileReader.result;
-  };
-  fileReader.readAsDataURL(file);
-  const json = JSON.parse(e.request.response);
-  r.imageSource = json.url;
-  axios.post('/api/profile/picture', {url: json.url});
-}
-
-function onUploadStarted() {
-  r.imageSource = null;
-}
-
-function removeImage() {
-  r.imageSource = null;
-  axios.post('/api/profile/picture', {url: null});
-}
-
-
-</script>
 <style>
 #dropzone-external {
   width: 350px;

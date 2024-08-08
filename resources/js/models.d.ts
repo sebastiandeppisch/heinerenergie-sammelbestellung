@@ -77,10 +77,18 @@ declare namespace App.Models {
         lat: number | null;
         advice_status_id: number | null;
         type: number;
+        placeNotes: string | null;
+        houseType: number | null;
+        helpType_place: boolean;
+        helpType_technical: boolean;
+        helpType_bureaucracy: boolean;
+        helpType_other: boolean;
+        landlordExists: boolean | null;
         advisor?: App.Models.User | null;
         status?: App.Models.AdviceStatus | null;
         shares?: Array<App.Models.User> | null;
         shares_count?: number | null;
+        result: number | null;
         readonly distance?: number | null;
         readonly shares_ids?: Array<any>;
     }
@@ -90,7 +98,7 @@ declare namespace App.Models {
         created_at: string | null;
         updated_at: string | null;
         name: string;
-        adivces?: App.Models.Advice | null;
+        advices?: App.Models.Advice | null;
     }
 
     export interface Product {
@@ -149,17 +157,19 @@ declare namespace App.Models {
         long: number | null;
         lat: number | null;
         picture: string | null;
-        street: string;
-        streetNumber: string;
-        zip: number;
-        city: string;
+        street: string | null;
+        streetNumber: string | null;
+        zip: number | null;
+        city: string | null;
         orders?: Array<App.Models.Order> | null;
         advices?: Array<App.Models.Advice> | null;
         shared_orders?: Array<App.Models.Order> | null;
         orders_count?: number | null;
         advices_count?: number | null;
         shared_orders_count?: number | null;
+        advice_radius?: number | null;
         readonly name?: any;
+        readonly is_acting_as_admin?: boolean;
     }
 
     export interface OrderItem {

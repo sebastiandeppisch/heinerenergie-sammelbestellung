@@ -3,8 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Rules\OrderPassword;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class RequireOrderPassword extends FormRequest
 {
@@ -25,11 +25,12 @@ class RequireOrderPassword extends FormRequest
      */
     public function rules()
     {
-        if(Auth::check()){
+        if (Auth::check()) {
             return [];
         }
+
         return [
-            'password' => ['required', new OrderPassword()]
+            'password' => ['required', new OrderPassword()],
         ];
     }
 }

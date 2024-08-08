@@ -35,7 +35,6 @@ class AdvicePolicy
         return $this->permission($user, $advice);
     }
 
-
     public function delete(User $user, Advice $advice)
     {
         //a advice can not be deleted, only set to done

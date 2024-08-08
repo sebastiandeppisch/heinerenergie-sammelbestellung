@@ -1,39 +1,3 @@
-<template>
-  <div class="side-nav-outer-toolbar">
-    <header-toolbar
-      class="layout-header"
-      :menu-toggle-enabled="true"
-      :toggle-menu-func="toggleMenu"
-      :title="title"
-    />
-    <dx-drawer
-      class="layout-body"
-      position="before"
-      template="menuTemplate"
-      v-model:opened="menuOpened"
-      :opened-state-mode="drawerOptions.menuMode"
-      :reveal-mode="drawerOptions.menuRevealMode"
-      :min-size="drawerOptions.minMenuSize"
-      :max-size="drawerOptions.maxMenuSize"
-      :shading="drawerOptions.shaderEnabled"
-      :close-on-outside-click="drawerOptions.closeOnOutsideClick"
-    >
-      <dx-scroll-view ref="scrollViewRef" class="with-footer">
-        <slot />
-        <slot name="footer"  v-if="!isLoggedIn"/>
-      </dx-scroll-view>
-      <template #menuTemplate>
-        <side-nav-menu
-          :compact-mode="!menuOpened"
-          @click="handleSideBarClick"
-          v-if="isLoggedIn"
-        />
-        <div v-else></div>
-      </template>
-    </dx-drawer>
-  </div>
-</template>
-
 <script>
 import DxDrawer from "devextreme-vue/drawer";
 import DxScrollView from "devextreme-vue/scroll-view";
@@ -126,6 +90,42 @@ export default {
   }
 };
 </script>
+
+<template>
+  <div class="side-nav-outer-toolbar">
+    <header-toolbar
+      class="layout-header"
+      :menu-toggle-enabled="true"
+      :toggle-menu-func="toggleMenu"
+      :title="title"
+    />
+    <dx-drawer
+      class="layout-body"
+      position="before"
+      template="menuTemplate"
+      v-model:opened="menuOpened"
+      :opened-state-mode="drawerOptions.menuMode"
+      :reveal-mode="drawerOptions.menuRevealMode"
+      :min-size="drawerOptions.minMenuSize"
+      :max-size="drawerOptions.maxMenuSize"
+      :shading="drawerOptions.shaderEnabled"
+      :close-on-outside-click="drawerOptions.closeOnOutsideClick"
+    >
+      <dx-scroll-view ref="scrollViewRef" class="with-footer">
+        <slot />
+        <slot name="footer"  v-if="!isLoggedIn"/>
+      </dx-scroll-view>
+      <template #menuTemplate>
+        <side-nav-menu
+          :compact-mode="!menuOpened"
+          @click="handleSideBarClick"
+          v-if="isLoggedIn"
+        />
+        <div v-else></div>
+      </template>
+    </dx-drawer>
+  </div>
+</template>
 
 <style lang="scss">
 .side-nav-outer-toolbar {

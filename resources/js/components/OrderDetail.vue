@@ -1,3 +1,103 @@
+<script setup lang="ts">
+
+import DxDataGrid, {
+  DxColumn,
+  DxEditing,
+  DxSummary,
+  DxTotalItem,
+  DxLookup
+} from "devextreme-vue/data-grid";
+import LaravelDataSource from "../LaravelDataSource";
+import LaravelLookupSource from "../LaravelLookupSource";
+import DataSource from 'devextreme/data/data_source';
+import axios from 'axios'
+import { CustomSummaryInfo } from "devextreme/ui/data_grid";
+import {formatPrice} from '../helpers'
+import OrderForm from '../components/OrderForm.vue'
+import DxButton from "devextreme-vue/button";
+
+import DxTagBox from "devextreme-vue/tag-box";
+
+import {confirm} from 'devextreme/ui/dialog';
+import { ref } from "vue";
+import DxTextBox from "devextreme-vue/text-box";
+import DxPopup from "devextreme-vue/popup";
+import notify from "devextreme/ui/notify";
+
+const emit = defineEmits(['update'])
+
+type Order = App.Models.Order;
+
+interface Props {
+  order: App.Models.Order
+}
+const props = defineProps<Props>();
+
+const mailReasonDialogVisible = ref(false);
+const mailReason = ref('');
+
+const orderItemsDatasource = new LaravelDataSource('api/orders/' + props.order.id + '/orderitems');
+const products = new LaravelLookupSource('api/bulkorders/' + props.order.bulk_order_id + '/products');
+
+const advisors = new LaravelLookupSource('api/users');
+
+function calculateSummary(options: CustomSummaryInfo){
+  options.totalValue = formatPrice(props.order.price);
+}
+
+function updateData() {
+  emit('update')
+}
+
+function deleteOrder() {
+  confirm('Möchtest Du die Bestellung wirklich löschen?', 'Bestellung löschen')
+    .then((result) => {
+      if (result) {
+        axios.delete('api/orders/' + props.order.id)
+          .then(() => {
+            emit('update')
+          })
+      }
+    })
+  
+}
+
+function checkOrder() {
+  axios.post('api/orders/' + props.order.id + '/check')
+    .then(() => {
+      emit('update')
+    })
+}
+
+function uncheckOrder() {
+  axios.post('api/orders/' + props.order.id + '/uncheck')
+    .then(() => {
+      emit('update')
+    })
+}
+
+function updateAdvisors(e: any) {
+  axios.post('api/orders/' + props.order.id + '/advisors', {advisors: e.value})
+    .then(() => {
+      emit('update')
+  })
+}
+
+function openMailReasonDialog() {
+  mailReasonDialogVisible.value = true
+}
+
+function sendMail() {
+  axios.post('api/orders/' + props.order.id + '/sendmail', {reason: mailReason.value})
+    .then(() => {
+      mailReasonDialogVisible.value = false
+      mailReason.value = ''
+      notify('Bestellübersicht wurde versendet', 'success', 3000)
+    })
+}
+
+</script>
+
 <template>
   <div class="flex-row">
     <div class="dx-card flex-cell">
@@ -130,106 +230,6 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-
-import DxDataGrid, {
-  DxColumn,
-  DxEditing,
-  DxSummary,
-  DxTotalItem,
-  DxLookup
-} from "devextreme-vue/data-grid";
-import LaravelDataSource from "../LaravelDataSource";
-import LaravelLookupSource from "../LaravelLookupSource";
-import DataSource from 'devextreme/data/data_source';
-import axios from 'axios'
-import { CustomSummaryInfo } from "devextreme/ui/data_grid";
-import {formatPrice} from '../helpers'
-import OrderForm from '../components/OrderForm.vue'
-import DxButton from "devextreme-vue/button";
-
-import DxTagBox from "devextreme-vue/tag-box";
-
-import {confirm} from 'devextreme/ui/dialog';
-import { ref } from "vue";
-import DxTextBox from "devextreme-vue/text-box";
-import DxPopup from "devextreme-vue/popup";
-import notify from "devextreme/ui/notify";
-
-const emit = defineEmits(['update'])
-
-type Order = App.Models.Order;
-
-interface Props {
-  order: App.Models.Order
-}
-const props = defineProps<Props>();
-
-const mailReasonDialogVisible = ref(false);
-const mailReason = ref('');
-
-const orderItemsDatasource = new LaravelDataSource('api/orders/' + props.order.id + '/orderitems');
-const products = new LaravelLookupSource('api/bulkorders/' + props.order.bulk_order_id + '/products');
-
-const advisors = new LaravelLookupSource('api/users');
-
-function calculateSummary(options: CustomSummaryInfo){
-  options.totalValue = formatPrice(props.order.price);
-}
-
-function updateData() {
-  emit('update')
-}
-
-function deleteOrder() {
-  confirm('Möchtest Du die Bestellung wirklich löschen?', 'Bestellung löschen')
-    .then((result) => {
-      if (result) {
-        axios.delete('api/orders/' + props.order.id)
-          .then(() => {
-            emit('update')
-          })
-      }
-    })
-  
-}
-
-function checkOrder() {
-  axios.post('api/orders/' + props.order.id + '/check')
-    .then(() => {
-      emit('update')
-    })
-}
-
-function uncheckOrder() {
-  axios.post('api/orders/' + props.order.id + '/uncheck')
-    .then(() => {
-      emit('update')
-    })
-}
-
-function updateAdvisors(e: any) {
-  axios.post('api/orders/' + props.order.id + '/advisors', {advisors: e.value})
-    .then(() => {
-      emit('update')
-  })
-}
-
-function openMailReasonDialog() {
-  mailReasonDialogVisible.value = true
-}
-
-function sendMail() {
-  axios.post('api/orders/' + props.order.id + '/sendmail', {reason: mailReason.value})
-    .then(() => {
-      mailReasonDialogVisible.value = false
-      mailReason.value = ''
-      notify('Bestellübersicht wurde versendet', 'success', 3000)
-    })
-}
-
-</script>
 <style scoped>
 .flex-row{
   flex-direction: row;

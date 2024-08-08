@@ -1,3 +1,77 @@
+<script setup>
+import DxDataGrid, {
+  DxColumn,
+  DxEditing,
+  DxScrolling,
+  DxLookup,
+  DxItem,
+  DxToolbar,
+  DxFilterRow,
+  DxMasterDetail,
+  DxFormItem,
+  DxForm,
+} from "devextreme-vue/data-grid";
+import LaravelDataSource from '../LaravelDataSource'
+import LaravelLookupSource from '../LaravelLookupSource'
+import { ref, onMounted, reactive } from 'vue'
+import {AdaptTableHeight} from '../helpers'
+import ProductTableDetail from "./ProductTableDetail.vue";
+import BulkOrders from "./BulkOrders.vue";
+import DxPopup from 'devextreme-vue/popup';
+import DxButton from "devextreme-vue/button";
+import DxSelectBox from 'devextreme-vue/select-box';
+
+const bulkOrders = new LaravelDataSource("api/bulkorders");
+
+const priceEditorOptions = {
+  format: { style: "currency", currency: "EUR", useGrouping: true },
+  min: 0
+}
+
+const panelsCountEditorOptions = {
+  min: 0
+}
+
+function formatPrice(price){
+  return parseFloat(price.value).toFixed(2).replace(".", ",") + " €";
+}
+
+const outer = ref(null);
+
+const tableHeight = new AdaptTableHeight(outer);
+const reactiveHeight = tableHeight.getReactive();
+
+const r = reactive({
+  popupVisible: false,
+  selectedBulkOrder: null,
+  productStore: null,
+  productCategories: null
+});
+
+onMounted(() => {
+  tableHeight.calcHeight();
+  bulkOrders.load().then((data) => {
+    const notArchivedBulkOrders = data.filter(item => !item.archived);
+    if(notArchivedBulkOrders.length === 1) {
+      r.selectedBulkOrder= notArchivedBulkOrders[0].id;
+    }
+  });
+});
+
+function openBulkOrders(){
+  r.popupVisible = true;
+}
+
+function bulkOrderChanged(){
+  const bulkOrder = r.selectedBulkOrder;
+  if(bulkOrder !== null){
+    r.productStore = new LaravelDataSource('api/bulkorders/'+ bulkOrder + '/products');
+    r.productCategories = new LaravelLookupSource('api/bulkorders/'+ bulkOrder + '/productcategories');
+  }
+ 
+}
+</script>
+
 <template>
   <div ref="outer">
     <h2 class="content-block">Artikel</h2>
@@ -85,77 +159,3 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import DxDataGrid, {
-  DxColumn,
-  DxEditing,
-  DxScrolling,
-  DxLookup,
-  DxItem,
-  DxToolbar,
-  DxFilterRow,
-  DxMasterDetail,
-  DxFormItem,
-  DxForm,
-} from "devextreme-vue/data-grid";
-import LaravelDataSource from '../LaravelDataSource'
-import LaravelLookupSource from '../LaravelLookupSource'
-import { ref, onMounted, reactive } from 'vue'
-import {AdaptTableHeight} from '../helpers'
-import ProductTableDetail from "./ProductTableDetail.vue";
-import BulkOrders from "./BulkOrders.vue";
-import DxPopup from 'devextreme-vue/popup';
-import DxButton from "devextreme-vue/button";
-import DxSelectBox from 'devextreme-vue/select-box';
-
-const bulkOrders = new LaravelDataSource("api/bulkorders");
-
-const priceEditorOptions = {
-  format: { style: "currency", currency: "EUR", useGrouping: true },
-  min: 0
-}
-
-const panelsCountEditorOptions = {
-  min: 0
-}
-
-function formatPrice(price){
-  return parseFloat(price.value).toFixed(2).replace(".", ",") + " €";
-}
-
-const outer = ref(null);
-
-const tableHeight = new AdaptTableHeight(outer);
-const reactiveHeight = tableHeight.getReactive();
-
-const r = reactive({
-  popupVisible: false,
-  selectedBulkOrder: null,
-  productStore: null,
-  productCategories: null
-});
-
-onMounted(() => {
-  tableHeight.calcHeight();
-  bulkOrders.load().then((data) => {
-    const notArchivedBulkOrders = data.filter(item => !item.archived);
-    if(notArchivedBulkOrders.length === 1) {
-      r.selectedBulkOrder= notArchivedBulkOrders[0].id;
-    }
-  });
-});
-
-function openBulkOrders(){
-  r.popupVisible = true;
-}
-
-function bulkOrderChanged(){
-  const bulkOrder = r.selectedBulkOrder;
-  if(bulkOrder !== null){
-    r.productStore = new LaravelDataSource('api/bulkorders/'+ bulkOrder + '/products');
-    r.productCategories = new LaravelLookupSource('api/bulkorders/'+ bulkOrder + '/productcategories');
-  }
- 
-}
-</script>

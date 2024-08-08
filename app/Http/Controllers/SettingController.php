@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Setting;
-use App\Http\Resources\SettingResource;
-use App\Http\Requests\StoreSettingRequest;
 use App\Http\Requests\RequireOrderPassword;
 use App\Http\Requests\UpdateSettingRequest;
+use App\Models\Setting;
 
 class SettingController extends Controller
 {
@@ -31,12 +29,9 @@ class SettingController extends Controller
         return Setting::where('key', $key)->firstOrFail();
     }
 
-
     /**
      * Update the specified resource in storage.
      *
-     * @param  \App\Http\Requests\UpdateSettingRequest  $request
-     * @param  \App\Models\Setting  $setting
      * @return \Illuminate\Http\Response
      */
     public function update(UpdateSettingRequest $request, Setting $setting)
@@ -45,21 +40,31 @@ class SettingController extends Controller
         $setting->save();
     }
 
-    public function impress(){
+    public function impress()
+    {
         return [
-            "html" => Setting::get('impress')
+            'html' => Setting::get('impress'),
         ];
     }
 
-    public function datapolicy(){
+    public function datapolicy()
+    {
         return [
-            "html" => Setting::get('datapolicy')
+            'html' => Setting::get('datapolicy'),
         ];
     }
 
-    public function orderFormText(RequireOrderPassword $request){
+    public function orderFormText(RequireOrderPassword $request)
+    {
         return [
-            "html" => Setting::get('orderFormText')
+            'html' => Setting::get('orderFormText'),
+        ];
+    }
+
+    public function advisorInfo()
+    {
+        return [
+            'html' => Setting::get('advisorInfo'),
         ];
     }
 }

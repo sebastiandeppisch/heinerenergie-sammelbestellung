@@ -1,9 +1,9 @@
 <?php
 
 use App\Models\BulkOrder;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -27,47 +27,47 @@ return new class extends Migration
 
         Schema::table('orders', function (Blueprint $table) use ($bulkOrder) {
             $table->foreignId('bulk_order_id')
-            ->default($bulkOrder->id)
-            ->constrained()
-            ->cascadeOnUpdate()
-            ->cascadeOnDelete();
+                ->default($bulkOrder->id)
+                ->constrained()
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
         });
 
         Schema::table('orders', function (Blueprint $table) {
             $table->foreignId('bulk_order_id')
-            ->nullable(false)
-            ->default(null)
-            ->change();
+                ->nullable(false)
+                ->default(null)
+                ->change();
         });
 
-        Schema::table('products', function (Blueprint $table) use( $bulkOrder) {
+        Schema::table('products', function (Blueprint $table) use ($bulkOrder) {
             $table->foreignId('bulk_order_id')
-            ->default($bulkOrder->id)
-            ->constrained()
-            ->cascadeOnUpdate()
-            ->cascadeOnDelete();
+                ->default($bulkOrder->id)
+                ->constrained()
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
         });
 
         Schema::table('products', function (Blueprint $table) {
             $table->foreignId('bulk_order_id')
-            ->nullable(false)
-            ->default(null)
-            ->change();
+                ->nullable(false)
+                ->default(null)
+                ->change();
         });
 
-        Schema::table('product_categories', function (Blueprint $table) use( $bulkOrder) {
+        Schema::table('product_categories', function (Blueprint $table) use ($bulkOrder) {
             $table->foreignId('bulk_order_id')
-            ->default($bulkOrder->id)
-            ->constrained()
-            ->cascadeOnUpdate()
-            ->cascadeOnDelete();
+                ->default($bulkOrder->id)
+                ->constrained()
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
         });
 
         Schema::table('product_categories', function (Blueprint $table) {
             $table->foreignId('bulk_order_id')
-            ->nullable(false)
-            ->default(null)
-            ->change();
+                ->nullable(false)
+                ->default(null)
+                ->change();
         });
     }
 

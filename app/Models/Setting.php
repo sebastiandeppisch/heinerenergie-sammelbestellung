@@ -2,40 +2,49 @@
 
 namespace App\Models;
 
-use InvalidArgumentException;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use InvalidArgumentException;
 
 class Setting extends Model
 {
     protected $fillable = [
         'value',
-        'key'
+        'key',
     ];
 
     protected $appends = ['type', 'name'];
 
-    protected static function defaultConfig(){
-        
+    protected static function defaultConfig()
+    {
+
         return [
             'orderFormPassword' => 'Bestellformular Passwort',
             'orderFormText' => [
                 'name' => 'Bestellformular Text',
-                'type' => 'text'
+                'type' => 'text',
             ],
             'impress' => [
                 'name' => 'Impressum',
-                'type' => 'text'
+                'type' => 'text',
             ],
             'datapolicy' => [
                 'name' => 'Datenschutzerklärung',
-                'type' => 'text'
+                'type' => 'text',
+            ],
+            'advisorInfo' => [
+                'name' => 'Berater*innen Info',
+                'type' => 'text',
+            ],
+            'newAdviceMail' => [
+                'name' => 'Neue Beratung E-Mail',
+                'type' => 'text',
             ],
         ];
     }
 
-    public static function set(string $key, $value): void{
-        if(! static::exists($key)){
+    public static function set(string $key, $value): void
+    {
+        if (! static::exists($key)) {
             throw new InvalidArgumentException("Key $key not found");
         }
         $setting = static::firstOrCreate(['key' => $key]);
@@ -43,11 +52,13 @@ class Setting extends Model
         $setting->save();
     }
 
-    public static function get($key){
-        if(! static::exists($key)){
+    public static function get($key)
+    {
+        if (! static::exists($key)) {
             throw new InvalidArgumentException("Key $key not found");
         }
         $setting = static::where('key', $key)->firstOrFail();
+
         return $setting->value;
     }
 
@@ -55,69 +66,82 @@ class Setting extends Model
     {
         $value = $this->attributes['value'];
         settype($value, $this->nativeType());
+
         return $value;
     }
 
     public function setValueAttribute(mixed $value)
     {
-        if($value === null){
-            if(!$this->nullable()){
-                throw new InvalidArgumentException($this->key." is not nullable");
+        if ($value === null) {
+            if (! $this->nullable()) {
+                throw new InvalidArgumentException($this->key.' is not nullable');
             }
-        }else{
+        } else {
             $type = gettype($value);
-            if($type !== $this->nativeType()){
+            if ($type !== $this->nativeType()) {
                 throw new InvalidArgumentException("Invalid type: $type $value for ".$this->key);
             }
         }
         $this->attributes['value'] = $value;
     }
 
-    private function config(){
+    private function config()
+    {
         return static::defaultConfig()[$this->key];
     }
 
-    private function type(){
-        if($this->hasConfig()){
-            if(array_key_exists('type', $this->config())){
+    private function type()
+    {
+        if ($this->hasConfig()) {
+            if (array_key_exists('type', $this->config())) {
                 return $this->config()['type'];
-            } 
+            }
+
             return gettype($this->config()['default']);
         }
+
         return gettype($this->config());
     }
 
-    private function nativeType(){
-        return str_replace("text", "string", $this->type());
+    private function nativeType()
+    {
+        return str_replace('text', 'string', $this->type());
     }
 
-    private function nullable(){
-        if($this->hasConfig()){
+    private function nullable()
+    {
+        if ($this->hasConfig()) {
             $config = $this->config();
-            if(array_key_exists('nullable', $config)){
+            if (array_key_exists('nullable', $config)) {
                 return $config['nullable'];
             }
         }
+
         return false;
     }
 
-    private function hasConfig(){
+    private function hasConfig()
+    {
         return is_array($this->config());
     }
 
-    public static function exists(string $key){
+    public static function exists(string $key)
+    {
         return array_key_exists($key, static::defaultConfig());
     }
 
-    public function getNameAttribute(): string{
+    public function getNameAttribute(): string
+    {
         $config = $this->config();
-        if(is_array($config)){
+        if (is_array($config)) {
             return $config['name'];
         }
+
         return $config;
     }
 
-    public function getTypeAttribute(): string{
+    public function getTypeAttribute(): string
+    {
         return $this->type();
     }
 }

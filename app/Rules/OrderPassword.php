@@ -3,8 +3,8 @@
 namespace App\Rules;
 
 use App\Models\Setting;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 
 class OrderPassword implements Rule
 {
@@ -17,9 +17,10 @@ class OrderPassword implements Rule
      */
     public function passes($attribute, $value)
     {
-        if(Auth::user() !== null){
+        if (Auth::user() !== null) {
             return true;
         }
+
         return $value === Setting::get('orderFormPassword');
     }
 
