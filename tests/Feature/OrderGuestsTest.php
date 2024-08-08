@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 test('order can be created', function () {
+    Mail::fake();
     Setting::set('orderFormPassword', 'password');
 
     $advisor = User::factory()->create();
