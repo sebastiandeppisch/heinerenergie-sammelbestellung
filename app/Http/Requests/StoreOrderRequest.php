@@ -68,7 +68,7 @@ class StoreOrderRequest extends FormRequest
     public function messages()
     {
         return [
-            'advisorEmail.exists' => 'Die angebene Berater*in E-Mail wurde nicht gefunden. Bitte verwende den Link, den Dir Dein*e Berater*in gesendet hat, dann ist die korrekte E-Mail bereits vorausgefüllt.',
+            'advisorEmail.exists' => 'Die angegebene Berater*in E-Mail wurde nicht gefunden. Bitte verwende den Link, den Dir Dein*e Berater*in gesendet hat, dann ist die korrekte E-Mail bereits vorausgefüllt.',
         ];
     }
 }
