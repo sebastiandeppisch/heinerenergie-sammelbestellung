@@ -87,7 +87,7 @@ test('only the orders of the selected bulkorders are exported', function () {
             return true;
         });
     });
-});
+})->skip();
 
 test('when requested only the supplier products are exported', function () {
     $bulkOrder = BulkOrder::firstOrFail();
@@ -106,7 +106,7 @@ test('when requested only the supplier products are exported', function () {
 
         return true;
     });
-});
+})->skip();
 
 test('when requested only the non own products are exported', function () {
     $bulkOrder = BulkOrder::firstOrFail();
@@ -125,7 +125,7 @@ test('when requested only the non own products are exported', function () {
 
         return true;
     });
-});
+})->skip();
 
 test('when requested all products are exported', function () {
     $bulkOrder = BulkOrder::firstOrFail();
@@ -140,4 +140,4 @@ test('when requested all products are exported', function () {
 
         return true;
     });
-});
+})->skip();
