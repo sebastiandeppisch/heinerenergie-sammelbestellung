@@ -47,6 +47,7 @@ test('advice can be saved', function () {
 });
 
 test('direct order advice can be saved', function () {
+    Mail::fake();
     $data = [
         'firstName' => fake()->firstName(),
         'lastName' => fake()->lastName(),
@@ -71,4 +72,8 @@ test('direct order advice can be saved', function () {
         }
         expect($advice->$key)->toBe($value);
     }
+
+    Mail::assertQueued(function (AdviceCreated $mail) use ($advice) {
+        return $mail->hasTo($advice->email);
+    });
 });
