@@ -8,6 +8,7 @@ use App\Events\AdviceUpdated;
 use App\Listeners\EmptyCoordinates;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Auth\Events\Registered;
+use App\Listeners\AfterAdviceIsCreated;
 use App\Listeners\CalculateCoordinates;
 use Illuminate\Mail\Events\MessageSent;
 use App\Listeners\SendOrderCreatedNotification;
@@ -31,6 +32,7 @@ class EventServiceProvider extends ServiceProvider
         ],
         AdviceCreated::class => [
             CalculateCoordinates::class,
+            AfterAdviceIsCreated::class,
         ],
         AdviceUpdated::class => [
             EmptyCoordinates::class,

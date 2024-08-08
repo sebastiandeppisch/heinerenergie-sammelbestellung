@@ -93,4 +93,12 @@ class User extends Authenticatable
     {
         return $this->is_admin && Auth::user()?->id === $this->id && session()->get('isAdmin') === true;
     }
+
+    public function shouldBeNotifiedForNearbyAdvice(Advice $advice): bool
+    {
+        if($this->coordinate === null || $this->advice_radius === null || $advice->coordinate === null) {
+            return false;
+        }
+        return $this->coordinate->distanceTo($advice->coordinate) <= $this->advice_radius;
+    }
 }

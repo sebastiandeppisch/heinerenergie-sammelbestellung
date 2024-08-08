@@ -143,4 +143,9 @@ class Advice extends Model implements HasSends
     {
         return $this->status?->result ?? AdviceStatusResult::New;
     }
+
+    public function getNameAttribute(): string
+    {
+        return sprintf('%s %s', $this->firstName, $this->lastName);
+    }
 }

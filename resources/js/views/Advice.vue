@@ -75,6 +75,9 @@ function fetchAdvice(id: number) {
           sharedIds.value = a.shares_ids;
         }
       });
+      if (advice.value === null) {
+        notify("Beratung wurde nicht gefunden, oder Du hast keinen Zugriff auf die Beratung, weil sie bereits ein:e andere:r Berater:in übernommen hat", "error", 10000);
+      }
     });
 }
 

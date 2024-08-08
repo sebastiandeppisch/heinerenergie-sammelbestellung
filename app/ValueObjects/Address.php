@@ -4,8 +4,9 @@ namespace App\ValueObjects;
 
 use App\Casts\Address as AddressCast;
 use Illuminate\Contracts\Database\Eloquent\Castable;
+use Stringable;
 
-class Address implements Castable
+class Address implements Castable, Stringable
 {
 	public function __construct(
 		public string $street,
@@ -27,5 +28,10 @@ class Address implements Castable
 	public function hash(): string
 	{
 		return md5($this->street . $this->streetNumber . $this->zip . $this->city);
+	}
+
+	public function __toString(): string
+	{
+		return $this->streetWithNumber() . ', ' . $this->zip . ' ' . $this->city;
 	}
 }
