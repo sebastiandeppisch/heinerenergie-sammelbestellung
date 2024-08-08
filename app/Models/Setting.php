@@ -52,14 +52,14 @@ class Setting extends Model
         $setting->save();
     }
 
-    public static function get($key)
+    public static function get($key): mixed
     {
         if (! static::exists($key)) {
             throw new InvalidArgumentException("Key $key not found");
         }
-        $setting = static::where('key', $key)->firstOrFail();
+        $setting = static::where('key', $key)->first();
 
-        return $setting->value;
+        return $setting?->value;
     }
 
     public function getValueAttribute(): mixed

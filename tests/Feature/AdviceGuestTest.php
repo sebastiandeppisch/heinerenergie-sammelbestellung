@@ -44,7 +44,7 @@ test('advice can be saved', function () {
     Mail::assertQueued(function (AdviceCreated $mail) use ($advice) {
         return $mail->hasTo($advice->email);
     });
-})->only();
+});
 
 test('direct order advice can be saved', function () {
     $data = [
