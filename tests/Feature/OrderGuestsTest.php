@@ -9,7 +9,7 @@ uses(RefreshDatabase::class);
 test('order can be created', function () {
     Setting::set('orderFormPassword', 'password');
 
-    $adivsor = User::factory()->create();
+    $advisor = User::factory()->create();
 
     $mail = fake()->email;
 
@@ -24,7 +24,7 @@ test('order can be created', function () {
         'zip' => fake()->postcode,
         'city' => fake()->city,
         'orderItems' => [],
-        'advisorEmail' => $adivsor->email,
+        'advisorEmail' => $advisor->email,
         'commentary' => fake()->text,
         'password' => 'password',
     ]);
@@ -32,11 +32,12 @@ test('order can be created', function () {
 });
 
 test('order can not be stored with incorrect password', function () {
-    $adivsor = User::factory()->create();
+    Setting::set('orderFormPassword', 'some password');
+    $advisor = User::factory()->create();
 
     $mail = fake()->email;
 
-    $response = $this->post('api/orders', [
+    $response = $this->postJson('api/orders', [
         'firstName' => fake()->name,
         'lastName' => fake()->name,
         'email' => $mail,
@@ -47,10 +48,11 @@ test('order can not be stored with incorrect password', function () {
         'zip' => fake()->postcode,
         'city' => fake()->city,
         'orderItems' => [],
-        'advisorEmail' => $adivsor->email,
+        'advisorEmail' => $advisor->email,
         'commentary' => fake()->text,
+        'password' => 'password',
     ]);
-    $response->assertStatus(433);
+    $response->assertStatus(422);
 });
 
 test('products can not be seen without password', function () {
