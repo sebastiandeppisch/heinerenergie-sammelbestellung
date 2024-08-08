@@ -20,6 +20,7 @@
         "wnx/laravel-sends": "^2.4"
     },
     "require-dev": {
+        "barryvdh/laravel-ide-helper": "^2.15",
         "driftingly/rector-laravel": "^1.2",
         "fakerphp/faker": "^1.9.1",
         "laravel/pint": "^1.16",

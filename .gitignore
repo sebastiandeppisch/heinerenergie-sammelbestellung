@@ -12,10 +12,12 @@ Homestead.yaml
 npm-debug.log
 yarn-error.log
 /.idea
-/.vscode
+/.vscode/settings.json
 public/js
 public/mix-manifest.json
 public/uploads/**
 public/css/**
 public/images/vendor/**
 /public/build
+_ide_helper.php
+_ide_helper_models.php
