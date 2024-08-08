@@ -36,11 +36,6 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    public function products(): HasMany
-    {
-        return $this->hasManys(Product::class)->using(OrderItem::class);
-    }
-
     public function getPriceAttribute(): float
     {
         return $this->orderItems->reduce(fn (float $sum, OrderItem $item) => $sum + $item->quantity * $item->product->price, 0);
