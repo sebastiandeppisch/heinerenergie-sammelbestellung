@@ -13,6 +13,7 @@ import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 
 import auth from "../auth";
+import { Link } from '@inertiajs/vue3';
 
 const notificationText = 'Du hast eine E-Mail mit einem Passwort-Reset Link erhalten';
 
@@ -25,7 +26,8 @@ export default {
     DxButtonOptions,
     DxRequiredRule,
     DxEmailRule,
-    DxLoadIndicator
+    DxLoadIndicator,
+    Link
   },
   setup() {
     const router = useRouter();
@@ -84,7 +86,7 @@ export default {
       <dx-item>
         <template #default>
           <div class="login-link">
-            <router-link to="/login-form">Zurück zum Login</router-link>
+            <Link to="/login-form">Zurück zum Login</Link>
           </div>
         </template>
       </dx-item>

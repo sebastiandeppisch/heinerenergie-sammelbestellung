@@ -1,11 +1,14 @@
+<script setup lang="ts">
+import { Link } from '@inertiajs/vue3'
+</script>
 <template>
   <div class="content-block">
     <footer class="footer">
       <a href="https://github.com/sebastiandeppisch/heinerenergie-sammelbestellung" ><img src="img/github.svg" alt="Github" style="height:1em;"></a>
       &nbsp;&nbsp;
-      <router-link to="/impress">Impressum</router-link>
+      <link href="/impress">Impressum</link>
        &nbsp;&nbsp;
-      <router-link to="/datapolicy">Datenschutzerklärung</router-link>
+      <link href="/datapolicy">Datenschutzerklärung</link>
     </footer>
   </div>
 </template>

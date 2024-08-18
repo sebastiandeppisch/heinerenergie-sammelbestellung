@@ -10,6 +10,7 @@ import UserPanel from "./user-panel.vue";
 import notify from 'devextreme/ui/notify';
 import { statement } from "@babel/template";
 import axios from "axios";
+import { Link } from "@inertiajs/vue3";
 
 export default {
   props: {
@@ -139,7 +140,7 @@ export default {
         location="before"
         css-class="header-title dx-toolbar-label"
       >
-        <div><router-link to="/"><img src="img/logo.png" style="height:2em;"></router-link></div>
+        <div><Link href="/"><img src="img/logo.png" style="height:2em;"></Link></div>
       </dx-item>
 
       <dx-item

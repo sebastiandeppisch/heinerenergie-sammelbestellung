@@ -1,6 +1,7 @@
 <script>
 import DxContextMenu, { DxPosition } from "devextreme-vue/context-menu";
 import DxList from "devextreme-vue/list";
+import { Link } from "@inertiajs/vue3";
 
 export default {
   props: {
@@ -43,14 +44,14 @@ export default {
       />
     </div>
     <div v-else>
-      <router-link to="login-form">
+      <Link href="login-form">
         <div class="user-info">
           <div class="image-container">
             <i class="dx-icon-user"></i>
           </div>
           <div class="user-name">Berater*innen Zugang</div>
         </div>
-      </router-link>
+      </Link>
     </div>
     
   </div>

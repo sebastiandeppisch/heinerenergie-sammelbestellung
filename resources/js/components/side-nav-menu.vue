@@ -6,6 +6,7 @@ import { onMounted, ref, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router'; 
 import { store } from "../store";
 import AppFooter from './app-footer.vue';
+import { Link } from "@inertiajs/vue3";
 
 export default {
   props: {
@@ -91,7 +92,8 @@ export default {
   },
   components: {
     DxTreeView,
-    AppFooter
+    AppFooter,
+    Link
   }
 };
 </script>
@@ -116,8 +118,8 @@ export default {
       <div>
         <footer style="margin-left:60px;">
           <p><a href="https://github.com/sebastiandeppisch/heinerenergie-sammelbestellung" ><img src="img/github.svg" alt="Github" style="height:1em;"></a></p>
-          <p><router-link to="/impress" style="color:white !important;text-decoration: none !important;">Impressum</router-link></p>
-          <p><router-link to="/datapolicy" style="color:white !important;text-decoration: none !important;">Datenschutzerklärung</router-link></p>
+          <p><Link href="/impress" style="color:white !important;text-decoration: none !important;">Impressum</Link></p>
+          <p><Link href="/datapolicy" style="color:white !important;text-decoration: none !important;">Datenschutzerklärung</Link></p>
         </footer>
       </div>
     </div>

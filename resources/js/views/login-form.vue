@@ -14,6 +14,7 @@ import auth from "../auth";
 
 import { reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { Link } from "@inertiajs/vue3";
 
 export default {
   setup() {
@@ -58,7 +59,8 @@ export default {
     DxItem,
     DxLabel,
     DxButtonItem,
-    DxButtonOptions
+    DxButtonOptions,
+    Link
   }
 };
 </script>
@@ -102,7 +104,7 @@ export default {
       <dx-item>
         <template #default>
           <div class="link">
-            <router-link to="/reset-password">Passwort vergessen</router-link>
+            <Link to="/reset-password">Passwort vergessen</Link>
           </div>
         </template>
       </dx-item>

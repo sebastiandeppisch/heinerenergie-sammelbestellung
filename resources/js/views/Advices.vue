@@ -6,6 +6,7 @@ import AdvicesMap from './AdvicesMap.vue';
 import Advice from './Advice.vue';
 import { store, useStore} from "./../store";
 import { useRouter, useRoute } from 'vue-router';
+import { Link } from "@inertiajs/vue3";
 
 const defaultIndex = 0;
 const adviceIndex = 2;
@@ -57,7 +58,7 @@ function onTabChanged(e){
 
 <template>
     <div class="dx-card" style="margin: 30px;padding: 10px;" v-if="user.long === null || user.lat === null">
-      <i class="dx-icon-info"></i> &nbsp; Trage unter <router-link to='profile'>Deinem Profil</router-link> Deine Adresse ein, um die Beratungszuteilung zu vereinfachen und um anderen Berater*innen zu zeigen, wo Du beraten möchtest.
+      <i class="dx-icon-info"></i> &nbsp; Trage unter <Link href='profile'>Deinem Profil</Link> Deine Adresse ein, um die Beratungszuteilung zu vereinfachen und um anderen Berater*innen zu zeigen, wo Du beraten möchtest.
     </div>
    <DxTabPanel
       height="100%"
