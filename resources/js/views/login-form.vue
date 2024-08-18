@@ -26,10 +26,6 @@ export default {
     });
     const loading = ref(false);
 
-    function onCreateAccountClick() {
-      router.push("/create-account");
-    }
-
     auth.initLogin().then(done => {
       if(auth.loggedIn()){
         router.push(route.query.redirect || "/backend");
@@ -51,7 +47,6 @@ export default {
     return {
       formData,
       loading,
-      onCreateAccountClick,
       onSubmit
     };
   },

@@ -90,16 +90,6 @@ const router = createRouter({
       },
       component: ResetPasswordForm
     },
-    /*{
-      path: "/create-account",
-      name: "create-account",
-      meta: {
-        requiresAuth: false,
-        layout: simpleLayout,
-        title: "Sign Up"
-      },
-      component: loadView("create-account-form"),
-    },*/
     {
       path: "/change-password",
       name: "change-password",
