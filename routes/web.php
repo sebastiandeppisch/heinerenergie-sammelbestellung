@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('app');
 });
 
 Route::middleware('auth')->group(function () {
@@ -23,7 +23,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::get('/{any}', function () {
-    return view('welcome');
+    return view('app');
 })->where('any', '^(?!api).*$');
 
 Route::get('/change-password')->name('password.reset');
