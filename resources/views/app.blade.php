@@ -8,17 +8,9 @@
     <title>Heinerenergie Sammelbestellung</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/js/app.ts'])
+    @inertiaHead
   </head>
   <body class="dx-viewport">
-    <noscript>
-      <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
-    </noscript>
-    <div id="app"></div>
-    @auth
-      <script>window.user = @json(Auth::user());</script>
-    @endauth
-    @guest
-      <script>window.user = null;</script>
-    @endguest
+    @inertia
   </body>
 </html>
