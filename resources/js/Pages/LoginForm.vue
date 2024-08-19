@@ -1,4 +1,4 @@
-<script>
+<script setup lang="ts">
 import DxLoadIndicator from "devextreme-vue/load-indicator";
 import DxForm, {
   DxItem,
@@ -9,63 +9,40 @@ import DxForm, {
   DxButtonOptions
 } from "devextreme-vue/form";
 import notify from 'devextreme/ui/notify';
-
 import auth from "../auth";
-
 import { reactive, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { router } from '@inertiajs/vue3'
 import { Link } from "@inertiajs/vue3";
+import SingleCard from "../layouts/SingleCard.vue";
 
-export default {
-  setup() {
-    const route = useRoute();
-    const router = useRouter();
+const formData = reactive({
+  email:"",
+  password:""
+});
+const loading = ref(false);
 
-    const formData = reactive({
-      email:"",
-      password:""
-    });
-    const loading = ref(false);
-
-    auth.initLogin().then(done => {
-      if(auth.loggedIn()){
-        router.push(route.query.redirect || "/backend");
-      }
-    });
-
-    async function onSubmit() {
-      const { email, password } = formData;
-      loading.value = true;
-      const result = await auth.logIn(email, password);
-      if (!result.isOk) {
-        loading.value = false;
-        notify(result.message, "error", 2000);
-      } else {
-        router.push(route.query.redirect || "/backend");
-      }
-    }
-
-    return {
-      formData,
-      loading,
-      onSubmit
-    };
-  },
-  components: {
-    DxLoadIndicator,
-    DxForm,
-    DxEmailRule,
-    DxRequiredRule,
-    DxItem,
-    DxLabel,
-    DxButtonItem,
-    DxButtonOptions,
-    Link
+auth.initLogin().then(done => {
+  if(auth.loggedIn()){
+    router.get('/backend');
   }
-};
+});
+
+async function onSubmit() {
+  const { email, password } = formData;
+  loading.value = true;
+  const result = await auth.logIn(email, password);
+  if (!result.isOk) {
+    loading.value = false;
+    notify(result.message, "error", 2000);
+  } else {
+    router.get('/backend');
+  }
+}
+
 </script>
 
 <template>
+<SingleCard title="Login" description="für Berater:innen">
   <form class="login-form" @submit.prevent="onSubmit">
     <dx-form :form-data="formData" :disabled="loading">
       <dx-item
@@ -104,7 +81,7 @@ export default {
       <dx-item>
         <template #default>
           <div class="link">
-            <Link to="/reset-password">Passwort vergessen</Link>
+            <Link href="/reset-password">Passwort vergessen</Link>
           </div>
         </template>
       </dx-item>
@@ -118,6 +95,7 @@ export default {
       </template>
     </dx-form>
   </form>
+</SingleCard>
 </template>
 
 <style lang="scss">

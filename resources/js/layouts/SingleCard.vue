@@ -1,34 +1,16 @@
-<script>
+<script setup lang="ts">
 import DxScrollView from "devextreme-vue/scroll-view";
+import App from '../App.vue';
 
-import { useRoute } from 'vue-router';
-import { watch, ref } from 'vue';
+const { title, description} = defineProps<{
+  title: string;
+  description: string;
+}>();
 
-export default {
-  components: {
-    DxScrollView
-  },
-  setup() {
-    const route = useRoute();
-
-    const title = ref(route.meta.title);
-    const description = ref("");
-
-    watch(() => route.path,
-     () => {
-        title.value = route.meta.title;
-        description.value = route.meta.description;
-     }
-    )
-    return {
-      title,
-      description
-    }
-  }
-};
 </script>
 
 <template>
+<App>
   <dx-scroll-view height="100%" width="100%" class="with-footer single-card">
      <div class="dx-card content">
       <div class="header">
@@ -38,6 +20,7 @@ export default {
       <slot />
     </div>
   </dx-scroll-view>
+</App>
 </template>
 
 <style lang="scss">

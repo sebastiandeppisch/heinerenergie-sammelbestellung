@@ -22,8 +22,9 @@ Route::middleware('auth')->group(function () {
     Route::get('bulkorders/{bulkorder}/orderexport', [OrderController::class, 'export'])->name('orderexport');
 });
 
-Route::get('/{any}', function () {
+/*Route::get('/{any}', function () {
     return view('app');
-})->where('any', '^(?!api).*$');
+})->where('any', '^(?!api).*$');*/
 
 Route::get('/change-password')->name('password.reset');
+Route::get('/login', [PageController::class, 'login'])->name('login');
