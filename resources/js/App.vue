@@ -1,4 +1,4 @@
-<script>
+<script setup lang="ts">
 import AppFooter from "./components/app-footer.vue";
 import { sizes, subscribe, unsubscribe } from "./utils/media-query";
 import {
@@ -8,7 +8,6 @@ import {
   onBeforeUnmount,
   computed
 } from "vue";
-
 function getScreenSizeInfo() {
   const screenSizes = sizes();
 
@@ -19,58 +18,47 @@ function getScreenSizeInfo() {
   };
 }
 
-export default {
-  components: {
-    AppFooter
-  },
-  setup() {
-    const vm = getCurrentInstance();
+const vm = getCurrentInstance();
 
-    const title = vm.proxy.$appInfo.title;
-    const screen = reactive({ getScreenSizeInfo: {} });
-    screen.getScreenSizeInfo = getScreenSizeInfo();
-    
-    function screenSizeChanged () {
-      screen.getScreenSizeInfo = getScreenSizeInfo();
-    }
+const title = "TODO Title";
+const screen = reactive({ getScreenSizeInfo: {} });
+screen.getScreenSizeInfo = getScreenSizeInfo();
 
-    onMounted(() => {
-      subscribe(screenSizeChanged);
-    });
+function screenSizeChanged () {
+  screen.getScreenSizeInfo = getScreenSizeInfo();
+}
 
-    onBeforeUnmount(() => {
-      unsubscribe(screenSizeChanged);
-    });
+onMounted(() => {
+  subscribe(screenSizeChanged);
+});
 
-    const cssClasses = computed(() => {
-      return ["app"].concat(screen.getScreenSizeInfo.cssClasses);
-    });
+onBeforeUnmount(() => {
+  unsubscribe(screenSizeChanged);
+});
 
-    return {
-      title,
-      screen,
-      cssClasses
-    };
-  }
-};
+const cssClasses = computed(() => {
+  return ["app"].concat(screen.getScreenSizeInfo.cssClasses);
+});
 </script>
 
 <template>
   <div id="root">
+    <!-- TODO-inertia fix size, title, footer -->
     <div :class="cssClasses">
+      <!--
       <component
         :is="$route.meta.layout"
         :title="title"
         :is-x-small="screen.getScreenSizeInfo.isXSmall"
         :is-large="screen.getScreenSizeInfo.isLarge"
-      >
+      >-->
       <div class="content">
-        <router-view></router-view>
+        <slot></slot>
       </div>
-        <template #footer>
+        <!--  <template #footer>
           <app-footer />
         </template>
-      </component>
+    </component>-->
     </div>
   </div>
 </template>
