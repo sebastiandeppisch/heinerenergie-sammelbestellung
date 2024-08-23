@@ -1,4 +1,6 @@
-<script>
+<script setup lang="ts">
+import { ref, watch, computed } from 'vue';
+import App from '../App.vue';
 import DxButton from "devextreme-vue/button";
 import DxDrawer from "devextreme-vue/drawer";
 import DxScrollView from "devextreme-vue/scroll-view";
@@ -6,33 +8,9 @@ import DxToolbar, { DxItem } from "devextreme-vue/toolbar";
 
 import HeaderToolbar from "../components/header-toolbar.vue";
 import SideNavMenu from "../components/side-nav-menu.vue";
-import SmallToolbar from '../components/SmallToolbar.vue'
-import { ref, watch, computed } from 'vue';
-import { useRoute } from 'vue-router';
+import SmallToolbar from '../components/SmallToolbar.vue';
 
-export default {
-  props: {
-    title: String,
-    isXSmall: Boolean,
-    isLarge: Boolean
-  },
-  setup(props) {
 
-    return {
-      
-    };
-  },
-  components: {
-    DxButton,
-    DxDrawer,
-    DxScrollView,
-    DxToolbar,
-    DxItem,
-    HeaderToolbar,
-    SideNavMenu,
-    SmallToolbar
-  }
-};
 </script>
 
 <template>

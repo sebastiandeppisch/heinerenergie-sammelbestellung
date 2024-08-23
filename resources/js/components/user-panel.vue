@@ -12,7 +12,8 @@ export default {
   components: {
     DxContextMenu,
     DxPosition,
-    DxList
+    DxList,
+    Link
   }
 };
 </script>
