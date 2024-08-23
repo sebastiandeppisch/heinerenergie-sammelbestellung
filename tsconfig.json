@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
-		"target": "es6",
-		"module": "es6",
+		"target": "ESNext",
+		"module": "ESNext",
 		"sourceMap": true,
 		"experimentalDecorators": true,
 		"esModuleInterop": true,
@@ -10,8 +10,10 @@
 		"allowJs": true,
 		"resolveJsonModule": true,
 		"jsx": "preserve",
+		"noEmit": true,
 		"baseUrl": "./resources/js",
+		"types": ["vite/client"], 
+		"strict": true,
 	},
-	"include": ["./resources/js/**/*", "./resources/js/tests/**/*"],
-    "exclude": ["node_modules"]
+	"include": ["resources/js/**/*.ts", "resources/js/**/*.d.ts", "resources/js/**/*.vue"]
 }
