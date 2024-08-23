@@ -12,6 +12,12 @@ import DxDataGrid, {
   DxLookup
 } from "devextreme-vue/data-grid";
 
+import PublicLayout from './../layouts/PublicLayout.vue';
+
+defineOptions({
+  layout: PublicLayout
+})
+
 
 import axios from 'axios';
 import {ref, reactive, computed, onMounted} from 'vue';
@@ -25,13 +31,13 @@ import ProductDetail from '../components/ProductDetail.vue'
 import OrderForm from '../components/OrderForm.vue'
 import OrderSaved from '../components/OrderSaved.vue'
 
-import {formatPrice, formatPriceCell, notifyError} from './../helpers'
+import {formatPrice, formatPriceCell, notifyError} from '../helpers'
 import { ValidationResult } from 'devextreme/ui/validation_group';
 
-import { useRoute } from 'vue-router'
 import { useStore } from '../store';
 import auth from '../auth';
 import SettingHtml from '../components/SettingHtml.vue';
+import { usePage } from '@inertiajs/vue3';
 
 type Product = App.Models.Product;
 type Order = App.Models.Order;
@@ -49,9 +55,11 @@ auth.initLogin().then(done => {
 });
 
 try{
-  const route = useRoute();
-  if(typeof route.query.formdata ==='string'){
-    const defaultData = JSON.parse(route.query.formdata) as Order;
+  const urlParams = new URLSearchParams(window.location.search);
+  const formdata = urlParams.get('formdata');
+
+  if (formdata) {
+    const defaultData = JSON.parse(formdata) as Order;
     formData.value = defaultData;
   }
 }catch(e){
@@ -83,7 +91,7 @@ const state: State = reactive({
   hideElements: false
 })
 
-const orderForm = ref(null);
+const orderForm = ref();
 
 function articlesAreEmpty(): boolean{
   const count = orderItems.reduce(
