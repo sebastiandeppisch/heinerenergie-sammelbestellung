@@ -6,7 +6,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { computed, ref } from 'vue';
 import { useStore } from './../store'
 
-import UserPanel from "./user-panel.vue";
+import UserPanel from "./UserPanel.vue";
 import notify from 'devextreme/ui/notify';
 import { statement } from "@babel/template";
 import axios from "axios";

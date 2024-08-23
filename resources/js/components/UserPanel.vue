@@ -1,21 +1,13 @@
-<script>
+<script setup lang="ts">
 import DxContextMenu, { DxPosition } from "devextreme-vue/context-menu";
 import DxList from "devextreme-vue/list";
 import { Link } from "@inertiajs/vue3";
 
-export default {
-  props: {
-    menuMode: String,
-    menuItems: Array,
-    email: String
-  },
-  components: {
-    DxContextMenu,
-    DxPosition,
-    DxList,
-    Link
-  }
-};
+const props = defineProps<{
+  menuMode: string;
+  menuItems: any[];
+  email: string;
+}>();
 </script>
 
 <template>
