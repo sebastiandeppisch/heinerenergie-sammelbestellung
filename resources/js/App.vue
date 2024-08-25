@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import AppFooter from "./components/app-footer.vue";
-import { sizes, subscribe, unsubscribe } from "./utils/media-query";
+import AppFooter from "./components/AppFooter.vue";
+import { sizes, subscribe, unsubscribe, getScreenSizeInfo} from "./utils/media-query";
 import {
   getCurrentInstance,
   reactive,
@@ -8,20 +8,10 @@ import {
   onBeforeUnmount,
   computed
 } from "vue";
-function getScreenSizeInfo() {
-  const screenSizes = sizes();
 
-  return {
-    isXSmall: screenSizes["screen-x-small"],
-    isLarge: screenSizes["screen-large"],
-    cssClasses: Object.keys(screenSizes).filter(cl => screenSizes[cl])
-  };
-}
-
-const vm = getCurrentInstance();
 
 const title = "TODO Title";
-const screen = reactive({ getScreenSizeInfo: {} });
+const screen = reactive({ getScreenSizeInfo: {} as { isXSmall: boolean; isLarge: boolean; cssClasses: string[] } });
 screen.getScreenSizeInfo = getScreenSizeInfo();
 
 function screenSizeChanged () {

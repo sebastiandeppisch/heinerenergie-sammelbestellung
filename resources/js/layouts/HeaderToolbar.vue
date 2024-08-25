@@ -3,29 +3,37 @@ import DxButton from "devextreme-vue/button";
 import DxToolbar, { DxItem } from "devextreme-vue/toolbar";
 import auth from "../auth";
 import { computed } from 'vue';
-import { useStore } from '../store'
+import { useStore, store } from '../store'
 
-import UserPanel from "./UserPanel.vue";
+import UserPanel from "@/components/UserPanel.vue";
 import notify from 'devextreme/ui/notify';
 import axios from "axios";
-import { Link, router } from "@inertiajs/vue3";
+import { Link, router, usePage,} from "@inertiajs/vue3";
+import { PageProps } from "@inertiajs/inertia";
+
+import logo from '../../img/logo.png';
 
 const props = defineProps<{
   menuToggleEnabled: boolean;
-  title: string;
+  title?: string|undefined;
   toggleMenuFunc: Function;
-  logOutFunc: Function;
 }>();
 
-const store = useStore();
+interface CustomPageProps extends PageProps {
+  auth: {
+    user: App.Models.User;
+  }
+}
+
+const page = usePage<CustomPageProps>();
+const user = computed(() => page.props.auth.user);
+console.log(page.props.user);
+
 
 const email = computed(() => {
-  return store.getters.email;
+  return user.value.email;
 })
 
-const isLoggedIn = computed(() => {
-  return store.getters.isLoggedIn;
-}); 
 const userMenuItems = computed(() => {
   const items = [{
     text: "Profil",
@@ -37,10 +45,10 @@ const userMenuItems = computed(() => {
     icon: "runner",
     onClick: onLogoutClick
   }];
-  if(!store.getters.canActAsAdmin){
+  if(!user.value.is_admin){
     return items;
   }
-  if(store.getters.user.is_admin){
+  if(user.value.is_acting_as_admin){
     items.push( {
       text: 'Berater*innen Ansicht',
       icon: 'key',
@@ -88,7 +96,6 @@ function onProfileClick() {
   <header class="header-component">
     <dx-toolbar class="header-toolbar">
       <dx-item
-        v-if="isLoggedIn"
         :visible="menuToggleEnabled"
         location="before"
         css-class="menu-button"
@@ -103,13 +110,11 @@ function onProfileClick() {
       </dx-item>
 
       <dx-item
-        v-if="title"
         location="before"
         css-class="header-title dx-toolbar-label"
       >
-        <div><Link href="/"><img src="img/logo.png" style="height:2em;"></Link></div>
+        <Link href="/"><img :src="logo" style="height:2em;width: 6em;"></Link>
       </dx-item>
-
       <dx-item
         location="after"
         locate-in-menu="auto"
@@ -123,6 +128,7 @@ function onProfileClick() {
               height="100%"
               styling-mode="text"
             >
+          
               <user-panel :email="email" :menu-items="userMenuItems" menu-mode="context" />
             </dx-button>
           </div>

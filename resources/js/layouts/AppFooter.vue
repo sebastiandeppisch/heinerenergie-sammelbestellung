@@ -6,9 +6,9 @@ import { Link } from '@inertiajs/vue3'
     <footer class="footer">
       <a href="https://github.com/sebastiandeppisch/heinerenergie-sammelbestellung" ><img src="img/github.svg" alt="Github" style="height:1em;"></a>
       &nbsp;&nbsp;
-      <link href="/impress">Impressum</link>
+      <Link href="/impress">Impressum</Link>
        &nbsp;&nbsp;
-      <link href="/datapolicy">Datenschutzerklärung</link>
+      <Link href="/datapolicy">Datenschutzerklärung</Link>
     </footer>
   </div>
 </template>

@@ -2,8 +2,10 @@
 import DxButton from "devextreme-vue/button";
 import DxToolbar, { DxItem } from "devextreme-vue/toolbar";
 
-import UserPanel from "./user-panel.vue";
+import UserPanel from "./UserPanel.vue";
 import { Link } from "@inertiajs/vue3";
+
+import logo from '../../img/logo.png';
 </script>
 
 <template>
@@ -18,7 +20,7 @@ import { Link } from "@inertiajs/vue3";
         location="before"
         css-class="header-title dx-toolbar-label"
       >
-        <div><Link href="/"><img src="img/logo.png" style="height:2em;"></Link></div>
+      <div><Link href="/"><img :src="logo" style="height:2em;width: 6em;"></Link></div>
       </dx-item>
 
       <dx-item

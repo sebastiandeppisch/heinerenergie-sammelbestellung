@@ -1,107 +1,91 @@
-<script>
+<script setup lang="ts">
 import DxTreeView from "devextreme-vue/ui/tree-view";
 import { sizes } from '../utils/media-query';
 import navigation from '../app-navigation';
 import { onMounted, ref, watch, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router'; 
 import { store } from "../store";
-import AppFooter from './app-footer.vue';
-import { Link } from "@inertiajs/vue3";
+import { Link, usePage } from "@inertiajs/vue3";
+import { Inertia } from "@inertiajs/inertia";
+import AppFooter from "./AppFooter.vue";
 
-export default {
-  props: {
-    compactMode: Boolean
-  },
-  setup(props, context) {
-    const route = useRoute();
-    const router = useRouter();
-
-    const isLargeScreen = sizes()['screen-large'];
-
-    const items = computed(() => {
-      const isAdmin = store.state.user.is_admin;
-      return navigation.filter((item) => 
-        item.admin === false || isAdmin
-      ).map((item) => {
-        if(item.path && !(/^\//.test(item.path))){ 
-          item.path = `/${item.path}`;
-        }
-        return {...item, expanded: isLargeScreen} 
-      })
-    });
-   
-
-    const treeViewRef = ref(null);
-
-    function forwardClick (...args) {
-      context.emit("click", args);
-    }
-
-    function handleItemClick(e) {
-      if (!e.itemData.path || props.compactMode) {
-        return;
-      }
-      router.push(e.itemData.path);
-
-      const pointerEvent = e.event;
-      pointerEvent.stopPropagation();
-    }
-
-    function updateSelection () {
-      if (!treeViewRef.value || !treeViewRef.value.instance) {
-        return;
-      }
-
-      treeViewRef.value.instance.selectItem(route.path);
-      treeViewRef.value.instance.expandItem(route.path);
-    }
-
-    onMounted(() => { 
-      updateSelection();
-      if (props.compactMode) {
-        treeViewRef.value.instance.collapseAll();
-      }
-    });
-    
-
-    watch(
-      () => route.path,
-      () => {
-        updateSelection();
-      }
-    );
-    
-    watch(
-      () => props.compactMode,
-      () => {
-        if (props.compactMode) {
-          treeViewRef.value.instance.collapseAll();
-        } else {
-          updateSelection();
-        }
-      }
-    );
-
-    return {
-      treeViewRef,
-      items,
-      forwardClick,
-      handleItemClick,
-      updateSelection
-    };
-  },
-  components: {
-    DxTreeView,
-    AppFooter,
-    Link
+const isAdmin = computed(() => {
+  if(store.state.user !== null){
+    return store.state.user.is_admin;
   }
-};
+  Inertia.visit('/login');
+});
+
+const props = defineProps<{
+  compactMode: boolean;
+  isLargeScreen: boolean;
+}>();
+
+const path = computed(() => usePage().url);
+
+const items = computed(() => {
+  return navigation.filter((item) => 
+    item.admin === false || isAdmin
+  ).map((item) => {
+    if(item.path && !(/^\//.test(item.path))){ 
+      item.path = `/${item.path}`;
+    }
+    const expanded = false;
+    return {...item, expanded} 
+  })
+});
+
+const treeViewRef = ref();
+
+function handleItemClick(e: any) {
+  if (!e.itemData.path || props.compactMode) {
+    return;
+  }
+  Inertia.visit(e.itemData.path);
+
+  const pointerEvent = e.event;
+  pointerEvent.stopPropagation();
+}
+
+function updateSelection () {
+  if (!treeViewRef.value || !treeViewRef.value.instance) {
+    return;
+  }
+  treeViewRef.value.instance.selectItem(path.value);
+  treeViewRef.value.instance.expandItem(path.value);
+}
+
+onMounted(() => { 
+  updateSelection();
+  if (props.compactMode) {
+    treeViewRef.value.instance.collapseAll();
+  }
+
+});
+
+
+
+watch(
+  () => path.value,
+  () => {
+    updateSelection();
+  }
+);
+
+watch(
+  () => props.compactMode,
+  () => {
+    if (props.compactMode) {
+      treeViewRef.value.instance.collapseAll();
+    } else {
+      updateSelection();
+    }
+  }
+);
 </script>
 
 <template>
   <div
     class="dx-swatch-additional side-navigation-menu"
-    @click="forwardClick"
   >
     <slot />
     <div class="menu-container">
@@ -116,6 +100,7 @@ export default {
         width="100%"
       />
       <div>
+
         <footer style="margin-left:60px;">
           <p><a href="https://github.com/sebastiandeppisch/heinerenergie-sammelbestellung" ><img src="img/github.svg" alt="Github" style="height:1em;"></a></p>
           <p><Link href="/impress" style="color:white !important;text-decoration: none !important;">Impressum</Link></p>
@@ -191,7 +176,7 @@ export default {
       // ##
     }
 
-    // ## Selected & Focuced items customization
+    // ## Selected & Focused items customization
     .dx-treeview {
       .dx-treeview-node-container {
         .dx-treeview-node {

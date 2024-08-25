@@ -31,3 +31,13 @@ export const subscribe = handler => handlers.push(handler);
 export const unsubscribe = handler => {
   handlers = handlers.filter(item => item !== handler);
 };
+
+export const getScreenSizeInfo = () => {
+  const screenSizes = sizes();
+
+  return {
+    isXSmall: screenSizes["screen-x-small"],
+    isLarge: screenSizes["screen-large"],
+    cssClasses: Object.keys(screenSizes).filter(cl => screenSizes[cl])
+  };
+}

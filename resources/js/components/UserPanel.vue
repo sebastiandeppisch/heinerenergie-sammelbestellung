@@ -6,23 +6,23 @@ import { Link } from "@inertiajs/vue3";
 const props = defineProps<{
   menuMode: string;
   menuItems: any[];
-  email: string;
+  email?: string| undefined;
 }>();
 </script>
 
 <template>
   <div class="user-panel">
-    <div v-if="email">
+    <div v-if="props.email">
       <div class="user-info">
         <div class="image-container">
           <i class="dx-icon-user"></i>
         </div>
-        <div class="user-name">{{email}}</div>
+        <div class="user-name">{{props.email}}</div>
       </div>
       <dx-context-menu
-        v-if="menuMode === 'context'"
+        v-if="props.menuMode === 'context'"
         target=".user-button"
-        :items="menuItems"
+        :items="props.menuItems"
         :width="210"
         show-event="dxclick"
         css-class="user-menu"
@@ -31,7 +31,7 @@ const props = defineProps<{
       </dx-context-menu>
 
       <dx-list
-        v-if="menuMode === 'list'"
+        v-if="props.menuMode === 'list'"
         class="dx-toolbar-menu-action"
         :items="menuItems"
       />
