@@ -13,8 +13,6 @@ import {getScreenSizeInfo} from '../utils/media-query';
 import AppFooter from "@/layouts/AppFooter.vue";
 import { onMounted } from 'vue';
 
-let screenSizeInfo = getScreenSizeInfo();
-
 const screen = reactive({ getScreenSizeInfo: {} as { isXSmall: boolean; isLarge: boolean; cssClasses: string[] } });
 screen.getScreenSizeInfo = getScreenSizeInfo();
 
@@ -89,8 +87,7 @@ const cssClasses = computed(() => {
 
 onMounted(() => {
   window.addEventListener("resize", () => {
-    screenSizeInfo = getScreenSizeInfo();
-    screen.getScreenSizeInfo = screenSizeInfo;
+    screen.getScreenSizeInfo = getScreenSizeInfo();
   });
 });
 

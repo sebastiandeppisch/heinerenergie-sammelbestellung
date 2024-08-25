@@ -39,17 +39,6 @@
   border-left: 0;
 }
 
-.with-footer > .dx-scrollable-wrapper >
-.dx-scrollable-container > .dx-scrollable-content {
-  height: 100%;
-
-  & > .dx-scrollview-content {
-    display: flex;
-    flex-direction: column;
-    min-height: 100%;
-  }
-}
-
 #app {
   height: 100%;
  }

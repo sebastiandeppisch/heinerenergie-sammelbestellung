@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import DxScrollView from "devextreme-vue/scroll-view";
-import App from '../App.vue';
+import MainPublic from "./MainPublic.vue";
+import { Link } from "@inertiajs/vue3";
 
 const { title, description} = defineProps<{
   title: string;
@@ -10,21 +11,41 @@ const { title, description} = defineProps<{
 </script>
 
 <template>
-<App>
-  <dx-scroll-view height="100%" width="100%" class="with-footer single-card">
-     <div class="dx-card content">
-      <div class="header">
-        <div class="title">{{title}}</div>
-        <div class="description">{{description}}</div>
+<MainPublic>
+  <div class="single-card">
+    <div class="inner">
+      <div class="dx-card">
+        <div class="header">
+          <div class="title">{{title}}</div>
+          <div class="description">{{description}}</div>
+        </div>
+        <slot />
+        
       </div>
-      <slot />
+      <Link class="back-link" href="/"><i class="dx-icon-back"></i> Zurück</Link>
     </div>
-  </dx-scroll-view>
-</App>
+  </div>
+</MainPublic>
 </template>
 
 <style lang="scss">
 @import "../themes/generated/variables.base.scss";
+
+.inner{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  flex-direction: column;
+}
+
+.back-link{
+  margin-top: 20px;
+  font-size: 14px;
+  display: inline-block;
+  cursor: pointer;
+  text-decoration: none;
+}
 
 .single-card {
   width: 100%;
@@ -32,7 +53,6 @@ const { title, description} = defineProps<{
 
   .dx-card {
     width: 330px;
-    margin: auto auto;
     padding: 40px;
     flex-grow: 0;
 

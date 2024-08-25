@@ -22,5 +22,7 @@ import { Link } from '@inertiajs/vue3'
   border-top: 1px solid rgba(0, 0, 0, 0.1);
   padding-top: 20px;
   padding-bottom: 24px;
+  display: flex;
+  justify-content: center;
 }
 </style>
