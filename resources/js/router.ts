@@ -5,11 +5,11 @@ import Orders from "./views/Orders.vue";
 import Advices from "./views/Advices.vue";
 import Products from "./views/Products.vue";
 import Users from "./views/Users.vue";
-import NewOrder from "./views/NewOrder.vue"
+import NewOrder from './Pages/NewOrder.vue'
 import Impress from "./views/Impress.vue"
 import DataPolicy from "./views/DataPolicy.vue"
 
-import defaultLayout from "./layouts/side-nav-outer-toolbar.vue";
+import defaultLayout from "./layouts/SideNavOuterToolbar.vue";
 import simpleLayout from "./layouts/single-card.vue";
 import PublicLayout from './layouts/PublicLayout.vue';
 import LoginForm from './views/login-form.vue'
@@ -20,19 +20,9 @@ import Profile from './views/Profile.vue'
 import AdvicesMap from './views/AdvicesMap.vue'
 import { store } from "./store";
 import NewAdvice from "./views/NewAdvice.vue";
-import Dashboard from "./views/Dashboard.vue";
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    {
-      path: "/dashboard",
-      name: "dashboard",
-      meta: {
-        requiresAuth: true,
-        layout: defaultLayout
-      },
-      component: Dashboard
-    },
     {
       path: "/orders",
       name: "orders",
@@ -103,10 +93,6 @@ const router = createRouter({
     {
       path: "/",
       redirect: "/sammelbestellung"
-    },
-    {
-      path: '/backend',
-      redirect: "/dashboard"
     },
     {
       path: "/recovery",

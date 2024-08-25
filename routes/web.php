@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\BulkOrder;
+use App\Http\Controllers\BulkOrderController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,9 +17,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('app');
-});
+Route::get('/', BulkOrder::class);
 
 Route::middleware('auth')->group(function () {
     Route::get('bulkorders/{bulkorder}/orderexport', [OrderController::class, 'export'])->name('orderexport');
@@ -27,4 +28,10 @@ Route::middleware('auth')->group(function () {
 })->where('any', '^(?!api).*$');*/
 
 Route::get('/change-password')->name('password.reset');
-Route::get('/login', [PageController::class, 'login'])->name('login');
+Route::get('/login-form', [PageController::class, 'login'])->name('login');
+
+Route::get('/backend', function () {
+    return redirect()->route('dashboard');
+})->name('backend');
+
+Route::get('/dashboard', [PageController::class, 'dashboard'])->name('dashboard');

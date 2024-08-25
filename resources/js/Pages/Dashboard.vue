@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import SettingHtml from '../components/SettingHtml.vue';
+import SideNavOuterToolbar from '@/layouts/SideNavOuterToolbar.vue';
+import SettingHtml from '@/components/SettingHtml.vue';
 
 
 let orderFormText = () => 'advisorInfo';
+
+defineOptions({
+  layout: SideNavOuterToolbar
+})
 </script>
 
 <template>

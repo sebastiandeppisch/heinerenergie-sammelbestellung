@@ -8,6 +8,14 @@ use Illuminate\Http\Request;
 class PageController extends Controller
 {
     public function login(){
+        if(auth()->check()){
+            return redirect()->route('dashboard');
+        }
+
         return Inertia::render('LoginForm');
+    }
+
+    public function dashboard(){
+        return Inertia::render('Dashboard');
     }
 }
