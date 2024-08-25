@@ -119,7 +119,6 @@ onMounted(() => {
             <div class="content">
               <slot></slot>
             </div>
-            <app-footer />
           </dx-scroll-view>
           <template #menuTemplate>
             <side-nav-menu
