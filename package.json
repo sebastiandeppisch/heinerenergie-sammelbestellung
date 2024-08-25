@@ -2,8 +2,7 @@
     "private": true,
     "scripts": {
         "dev": "vite",
-        "build": "vite build",
-        "production": "vite build"
+        "build": "vue-tsc && vite build"
     },
     "dependencies": {
         "@babel/core": "^7.12.16",
@@ -27,7 +26,7 @@
         "sass": "^1.34.1",
         "sass-loader": "^10",
         "ts-loader": "^9.3.0",
-        "typescript": "^4.6.4",
+        "typescript": "^5.5.4",
         "vue": "^3.2.13",
         "vue-loader": "^16.8.3",
         "vuex": "^4.0.2"
@@ -42,7 +41,8 @@
         "devextreme-themebuilder": "^21.2.4",
         "laravel-vite-plugin": "^1.0.2",
         "leaflet": "^1.9.3",
-        "vite": "^5.2.9"
+        "vite": "^5.2.9",
+        "vue-tsc": "^2.0.29"
     },
     "eslintConfig": {
         "root": true,
