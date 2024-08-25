@@ -23,7 +23,7 @@ const loading = ref(false);
 
 auth.initLogin().then(done => {
   if(auth.loggedIn()){
-    router.get('/backend');
+    router.visit('/backend');
   }
 });
 
@@ -35,7 +35,7 @@ async function onSubmit() {
     loading.value = false;
     notify(result.message, "error", 2000);
   } else {
-    router.get('/backend');
+    router.visit('/backend');
   }
 }
 
