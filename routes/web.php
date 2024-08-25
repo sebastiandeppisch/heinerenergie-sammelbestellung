@@ -17,7 +17,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', BulkOrder::class);
 
 Route::middleware('auth')->group(function () {
     Route::get('bulkorders/{bulkorder}/orderexport', [OrderController::class, 'export'])->name('orderexport');
@@ -28,10 +27,11 @@ Route::middleware('auth')->group(function () {
 })->where('any', '^(?!api).*$');*/
 
 Route::get('/change-password')->name('password.reset');
-Route::get('/login-form', [PageController::class, 'login'])->name('login');
 
 Route::get('/backend', function () {
     return redirect()->route('dashboard');
 })->name('backend');
 
+Route::get('/', [PageController::class, 'newOrder'])->name('home');
+Route::get('/login-form', [PageController::class, 'login'])->name('login');
 Route::get('/dashboard', [PageController::class, 'dashboard'])->name('dashboard');
