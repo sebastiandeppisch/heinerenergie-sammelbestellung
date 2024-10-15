@@ -19,15 +19,7 @@ import NewAdvice from "./views/NewAdvice.vue";
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    {
-      path: "/products",
-      name: "products",
-      meta: {
-        requiresAuth: true,
-        layout: defaultLayout
-      },
-      component: Products
-    },
+  
     {
       path: "/sammelbestellung",
       name: "sammelbestellung",

@@ -30,4 +30,8 @@ class PageController extends Controller
     public function profile(){
         return Inertia::render('Profile');
     }
+
+    public function products(){
+        return Inertia::render('Products');
+    }
 }

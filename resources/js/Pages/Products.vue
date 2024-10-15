@@ -15,8 +15,8 @@ import LaravelDataSource from '../LaravelDataSource'
 import LaravelLookupSource from '../LaravelLookupSource'
 import { ref, onMounted, reactive } from 'vue'
 import {AdaptTableHeight} from '../helpers'
-import ProductTableDetail from "./ProductTableDetail.vue";
-import BulkOrders from "./BulkOrders.vue";
+import ProductTableDetail from "@/views/ProductTableDetail.vue";
+import BulkOrders from "@/views/BulkOrders.vue";
 import DxPopup from 'devextreme-vue/popup';
 import DxButton from "devextreme-vue/button";
 import DxSelectBox from 'devextreme-vue/select-box';

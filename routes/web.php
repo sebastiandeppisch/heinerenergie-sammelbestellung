@@ -37,3 +37,4 @@ Route::get('/login-form', [PageController::class, 'login'])->name('login');
 Route::get('/dashboard', [PageController::class, 'dashboard'])->name('dashboard');
 Route::get('/profile', [PageController::class, 'profile'])->name('profile');
 Route::get('/orders', [PageController::class, 'orders'])->name('orders');
+Route::get('/products', [PageController::class, 'products'])->name('products');
