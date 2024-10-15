@@ -166,15 +166,6 @@ const router = createRouter({
       component: Advices
     },
     {
-      path: "/profile",
-      name: "profile",
-      meta: {
-        requiresAuth: true,
-        layout: defaultLayout
-      },
-      component: Profile
-    },
-    {
       path: "/newadvice",
       name: "newadvice",
       meta: {

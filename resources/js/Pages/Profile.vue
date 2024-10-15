@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import DxTextBox from "devextreme-vue/text-box";
-import { store, useStore} from "./../store";
-import ProfilePictureUpload from "./ProfilePictureUpload.vue";
+import { store, useStore} from "../store";
+import ProfilePictureUpload from "@/views/ProfilePictureUpload.vue";
 import { DxGroupItem } from "devextreme-vue/form";
 import { DxButton, DxNumberBox } from "devextreme-vue";
 import { reactive } from "@vue/reactivity";
 import axios from "axios";
-import AdvisorMap from "./AdvisorMap.vue";
+import AdvisorMap from "@/views/AdvisorMap.vue";
 import notify from 'devextreme/ui/notify';
 
 const state = reactive({

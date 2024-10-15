@@ -22,4 +22,12 @@ class PageController extends Controller
     public function newOrder(){
         return Inertia::render('NewOrder');
     }
+
+    public function orders(){
+        return Inertia::render('Orders');
+    }
+
+    public function profile(){
+        return Inertia::render('Profile');
+    }
 }

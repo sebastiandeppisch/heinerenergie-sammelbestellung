@@ -35,3 +35,4 @@ Route::get('/backend', function () {
 Route::get('/', [PageController::class, 'newOrder'])->name('home');
 Route::get('/login-form', [PageController::class, 'login'])->name('login');
 Route::get('/dashboard', [PageController::class, 'dashboard'])->name('dashboard');
+Route::get('/profile', [PageController::class, 'profile'])->name('profile');
