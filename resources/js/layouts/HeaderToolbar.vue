@@ -13,6 +13,9 @@ import { PageProps } from "@inertiajs/inertia";
 
 import logo from '../../img/logo.png';
 
+import { email, isAdmin} from '../authHelper';
+
+
 const props = defineProps<{
   menuToggleEnabled: boolean;
   title?: string|undefined;
@@ -29,11 +32,6 @@ const page = usePage<CustomPageProps>();
 const user = computed(() => page.props.auth.user);
 console.log(page.props.user);
 
-
-const email = computed(() => {
-  return user.value.email;
-})
-
 const userMenuItems = computed(() => {
   const items = [{
     text: "Profil",
@@ -45,10 +43,10 @@ const userMenuItems = computed(() => {
     icon: "runner",
     onClick: onLogoutClick
   }];
-  if(!user.value.is_admin){
+  if(!user.value?.is_admin){
     return items;
   }
-  if(user.value.is_acting_as_admin){
+  if(isAdmin){
     items.push( {
       text: 'Berater*innen Ansicht',
       icon: 'key',
