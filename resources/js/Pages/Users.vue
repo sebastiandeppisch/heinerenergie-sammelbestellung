@@ -8,7 +8,6 @@ import DxDataGrid, {
   DxSummary,
   DxTotalItem
 } from "devextreme-vue/data-grid";
-import LaravelLookupSource from '../LaravelLookupSource';
 import { ref, onMounted } from "vue";
 import {AdaptTableHeight} from '../helpers'
 

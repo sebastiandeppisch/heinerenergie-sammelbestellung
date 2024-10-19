@@ -34,4 +34,12 @@ class PageController extends Controller
     public function products(){
         return Inertia::render('Products');
     }
+
+    public function users(){
+        return Inertia::render('Users');
+    }
+
+    public function settings(){
+        return Inertia::render('Settings');
+    }
 }

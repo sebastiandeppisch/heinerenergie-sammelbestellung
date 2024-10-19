@@ -100,24 +100,6 @@ const router = createRouter({
       component: DataPolicy
     },
     {
-      path: "/users",
-      name: "users",
-      meta: {
-        requiresAuth: true,
-        layout: defaultLayout
-      },
-      component: Users
-    },
-    {
-      path: "/settings",
-      name: "settings",
-      meta: {
-        requiresAuth: true,
-        layout: defaultLayout
-      },
-      component: Settings
-    },
-    {
       path: "/advices",
       name: "advices",
       meta: {
