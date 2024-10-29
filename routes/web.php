@@ -32,7 +32,11 @@ Route::get('/backend', function () {
     return redirect()->route('dashboard');
 })->name('backend');
 
-Route::get('/', [PageController::class, 'newOrder'])->name('home');
+Route::get('/', function () {
+    return redirect()->route('home');
+});
+
+Route::get('/sammelbestellung', [PageController::class, 'publicNewOrder'])->name('home');
 Route::get('/login-form', [PageController::class, 'login'])->name('login');
 Route::get('/reset-password', [PageController::class, 'resetPassword'])->name('reset-password');
 Route::get('/dashboard', [PageController::class, 'dashboard'])->name('dashboard');
@@ -48,3 +52,4 @@ Route::get('/advicesmap', [PageController::class, 'advicesMap'])->name('advices.
 Route::get('newadvice', [PageController::class, 'newAdvice'])->name('newadvice');
 Route::get('impress', [PageController::class, 'impress'])->name('impress');
 Route::get('datapolicy', [PageController::class, 'datapolicy'])->name('datapolicy');
+Route::get('neworder', [PageController::class, 'newOrder'])->name('neworder');

@@ -101,4 +101,8 @@ class PageController extends Controller
             'content' => Setting::get('datapolicy')
         ]);
     }
+
+    public function publicNewOrder(){
+        return Inertia::render('PublicNewOrder');
+    }
 }

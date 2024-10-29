@@ -12,13 +12,6 @@ import DxDataGrid, {
   DxLookup
 } from "devextreme-vue/data-grid";
 
-import PublicLayout from './../layouts/PublicLayout.vue';
-
-defineOptions({
-  layout: PublicLayout
-})
-
-
 import axios from 'axios';
 import {ref, reactive, computed, onMounted} from 'vue';
 

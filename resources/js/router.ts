@@ -19,37 +19,6 @@ import NewAdvice from "./views/NewAdvice.vue";
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-  
-    {
-      path: "/sammelbestellung",
-      name: "sammelbestellung",
-      meta: {
-        requiresAuth: false,
-        layout: PublicLayout
-      },
-      component: NewOrder
-    },
-    {
-      path: "/neworder",
-      name: "neworder",
-      meta: {
-        requiresAuth: true,
-        layout: defaultLayout
-      },
-      component: NewOrder
-    },
-    {
-      path: "/",
-      redirect: "/sammelbestellung"
-    },
-    {
-      path: "/recovery",
-      redirect: "/"
-    },
-    {
-      path: "/:pathMatch(.*)*",
-      redirect: "/"
-    }
   ]
 });
 
