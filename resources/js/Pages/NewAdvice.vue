@@ -10,7 +10,12 @@ import Submit from '../components/AdviceFormSlides/Submit.vue';
 import Sent from '../components/AdviceFormSlides/Sent.vue';
 
 import { ref, reactive, computed, onMounted } from "vue";
+import PublicLayout from '../layouts/PublicLayout.vue';
 
+
+defineOptions({
+  layout: PublicLayout
+});
 
 const r = reactive({
   advice: {

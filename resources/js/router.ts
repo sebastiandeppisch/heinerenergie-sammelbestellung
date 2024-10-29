@@ -67,42 +67,6 @@ const router = createRouter({
         layout: PublicLayout
       },
       component: DataPolicy
-    },
-    {
-      path: "/advices",
-      name: "advices",
-      meta: {
-        requiresAuth: true,
-        layout: defaultLayout
-      },
-      component: Advices
-    },
-    {
-      path: "/advices/:id",
-      name: "advicesid",
-      meta: {
-        requiresAuth: true,
-        layout: defaultLayout
-      },
-      component: Advices
-    },
-    {
-      path: "/advicesmap",
-      name: "advicesmap",
-      meta: {
-        requiresAuth: true,
-        layout: defaultLayout
-      },
-      component: Advices
-    },
-    {
-      path: "/newadvice",
-      name: "newadvice",
-      meta: {
-        requiresAuth: false,
-        layout: PublicLayout
-      },
-      component: NewAdvice
     }
   ]
 });
