@@ -1,5 +1,5 @@
 import { PageProps } from "@inertiajs/inertia";
-import { usePage } from "@inertiajs/vue3";
+import { router, usePage } from "@inertiajs/vue3";
 import { computed } from 'vue';
 
 interface CustomPageProps extends PageProps {
@@ -9,6 +9,16 @@ interface CustomPageProps extends PageProps {
 }
 
 const page = usePage<CustomPageProps>();
-export const user = computed(() => page.props.auth.user);
-export const email = computed(() => user.value?.email)
-export const isAdmin = computed(() => user.value !== null && user.value.is_acting_as_admin)
+
+export const isLoggedIn = computed(() => page.props.auth.user !== null);
+
+
+export const user = computed(() =>{
+  const user = page.props.auth.user;
+  if(user === null){
+    router.visit('/login');
+  }
+  return user as App.Models.User;
+} );
+export const email = computed(() => user.value?.email);
+export const isAdmin = computed(() => user !== null && user.value?.is_acting_as_admin);
