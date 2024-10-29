@@ -97,7 +97,7 @@ watch(
       <div>
 
         <footer style="margin-left:60px;">
-          <p><a href="https://github.com/sebastiandeppisch/heinerenergie-sammelbestellung" ><img src="img/github.svg" alt="Github" style="height:1em;"></a></p>
+          <p><a href="https://github.com/sebastiandeppisch/heinerenergie-sammelbestellung" ><img src="/img/github.svg" alt="Github" style="height:1em;"></a></p>
           <p><Link href="/impress" style="color:white !important;text-decoration: none !important;">Impressum</Link></p>
           <p><Link href="/datapolicy" style="color:white !important;text-decoration: none !important;">Datenschutzerklärung</Link></p>
         </footer>
