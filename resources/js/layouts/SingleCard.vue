@@ -11,21 +11,19 @@ const { title, description} = defineProps<{
 </script>
 
 <template>
-<MainPublic>
-  <div class="single-card">
-    <div class="inner">
-      <div class="dx-card">
-        <div class="header">
-          <div class="title">{{title}}</div>
-          <div class="description">{{description}}</div>
-        </div>
-        <slot />
-        
+<div class="single-card">
+  <div class="inner">
+    <div class="dx-card">
+      <div class="header">
+        <div class="title">{{title}}</div>
+        <div class="description">{{description}}</div>
       </div>
-      <Link class="back-link" href="/"><i class="dx-icon-back"></i> Zurück</Link>
+      <slot />
+      
     </div>
+    <Link class="back-link" href="/"><i class="dx-icon-back"></i> Zurück</Link>
   </div>
-</MainPublic>
+</div>
 </template>
 
 <style lang="scss">

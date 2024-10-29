@@ -14,6 +14,7 @@ import { reactive, ref } from 'vue';
 import { router } from '@inertiajs/vue3'
 import { Link } from "@inertiajs/vue3";
 import SingleCard from "../layouts/SingleCard.vue";
+import MainPublic from "../layouts/MainPublic.vue";
 
 const formData = reactive({
   email:"",
@@ -38,6 +39,10 @@ async function onSubmit() {
     router.visit('/backend');
   }
 }
+
+defineOptions({
+  layout: MainPublic
+})
 
 </script>
 
