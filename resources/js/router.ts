@@ -39,37 +39,6 @@ const router = createRouter({
       component: NewOrder
     },
     {
-      path: "/login-form",
-      name: "login-form",
-      meta: {
-        requiresAuth: false,
-        layout: simpleLayout,
-        title: "Login"
-      },
-      component: LoginForm
-    },
-    {
-      path: "/reset-password",
-      name: "reset-password",
-      meta: {
-        requiresAuth: false,
-        layout: simpleLayout,
-        title: "Neues Passwort",
-        description: "Trage hier Deine E-Mail Adresse ein, um ein neues Passwort zu erhalten"
-      },
-      component: ResetPasswordForm
-    },
-    {
-      path: "/change-password",
-      name: "change-password",
-      meta: {
-        requiresAuth: false,
-        layout: simpleLayout,
-        title: "Neues Passwort setzen"
-      },
-      component: ChangePasswordForm
-    },
-    {
       path: "/",
       redirect: "/sammelbestellung"
     },

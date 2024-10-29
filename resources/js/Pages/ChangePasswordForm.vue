@@ -1,4 +1,4 @@
-<script>
+<script lang="ts" setup>
 import DxForm, {
   DxItem,
   DxLabel,
@@ -9,63 +9,52 @@ import DxForm, {
 } from 'devextreme-vue/form';
 import DxLoadIndicator from 'devextreme-vue/load-indicator';
 import notify from 'devextreme/ui/notify';
-import { useRouter, useRoute } from 'vue-router';
 import { ref, reactive } from "vue";
-
 import auth from "../auth";
+import MainPublic from '../layouts/MainPublic.vue';
+import { router } from "@inertiajs/vue3";
+import SingleCard from '../layouts/SingleCard.vue';
 
-export default {
-components: {
-    DxForm,
-    DxItem,
-    DxLabel,
-    DxButtonItem,
-    DxButtonOptions,
-    DxRequiredRule,
-    DxCustomRule,
-    DxLoadIndicator
-  },
-  setup() {
-    const router = useRouter();
-    const route = useRoute();
+interface Props{
+  token: string;
+  email: string;
+}
 
-    const recoveryCode = route.query.token;
-    const email = route.query.email;
+const props = defineProps<Props>();
+const recoveryCode = props.token;
+const email = props.email;
 
-    const loading = ref(false);
-    const formData = reactive({
-      password:""
-    });
+const loading = ref(false);
+const formData = reactive({
+  password: "",
+  confirmedPassword: ""
+});
 
-    async function onSubmit() {
-      const { password , confirmedPassword } = formData;
-      loading.value = true;
-  
-      const result = await auth.changePassword(email, password, confirmedPassword, recoveryCode);
-      loading.value = false;
-      if (result.isOk) {
-        router.push("/login-form");
-        notify('Dein Passwort wurde geändert', 'success');
-      } else {
-        notify(result.message, 'error', 2000);
-      }
-    }
+async function onSubmit() {
+  const { password , confirmedPassword } = formData;
+  loading.value = true;
 
-    function confirmPassword (e) {
-      return e.value.toString() === formData.password.toString();
-    }
-
-    return {
-      loading,
-      formData,
-      onSubmit,
-      confirmPassword
-    }
+  const result = await auth.changePassword(email, password, confirmedPassword, recoveryCode);
+  loading.value = false;
+  if (result.isOk) {
+    router.get('login-form');
+    notify('Dein Passwort wurde geändert', 'success');
+  } else {
+    notify(result.message, 'error', 2000);
   }
 }
+
+function confirmPassword (e) {
+  return e.value.toString() === formData.password.toString();
+}
+
+defineOptions({
+  layout: MainPublic
+})
 </script>
 
 <template>
+<SingleCard title="Neues Passwort setzen">
   <form @submit.prevent="onSubmit">
     <dx-form :form-data="formData" :disabled="loading">
       <dx-item
@@ -108,6 +97,7 @@ components: {
       </template>
     </dx-form>
   </form>
+</SingleCard>
 </template>
 
 <style>

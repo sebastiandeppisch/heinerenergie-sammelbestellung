@@ -16,7 +16,7 @@ export const isLoggedIn = computed(() => page.props.auth.user !== null);
 export const user = computed(() =>{
   const user = page.props.auth.user;
   if(user === null){
-    router.visit('/login');
+    router.visit('/login-form');
   }
   return user as App.Models.User;
 } );

@@ -5,7 +5,7 @@ import { Link } from "@inertiajs/vue3";
 
 const { title, description} = defineProps<{
   title: string;
-  description: string;
+  description?: string;
 }>();
 
 </script>

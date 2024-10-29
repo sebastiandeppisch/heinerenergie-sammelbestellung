@@ -11,6 +11,8 @@ use App\Http\Resources\DataProtectedAdvice;
 
 class PageController extends Controller
 {
+    //TODO move all the pages to their own controllers
+
     public function login(){
         if(auth()->check()){
             return redirect()->route('dashboard');
@@ -58,7 +60,6 @@ class PageController extends Controller
     }
 
     public function advicesMap(){
-
         $advices = Advice::all()->filter(function (Advice $advice) {
             return Auth::user()->can('viewDataProtected', $advice);
         })->values()->map(fn ($advice) => (new DataProtectedAdvice($advice))->resolve());
@@ -67,7 +68,20 @@ class PageController extends Controller
             'advices' => $advices,
             'advisors' => User::all()
         ]);
-            
+    }
 
+    public function resetPassword(){
+        /*if(auth()->check()){
+            return redirect()->route('dashboard');
+        }*/
+
+        return Inertia::render('ResetPasswordForm');
+    }
+
+    public function changePassword(Request $request){
+        return Inertia::render('ChangePasswordForm', [
+            'token' => $request->get('token'),
+            'email' => $request->get('email')
+        ]);
     }
 }

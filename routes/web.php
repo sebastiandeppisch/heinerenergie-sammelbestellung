@@ -26,7 +26,7 @@ Route::middleware('auth')->group(function () {
     return view('app');
 })->where('any', '^(?!api).*$');*/
 
-Route::get('/change-password')->name('password.reset');
+Route::get('/change-password', [PageController::class, 'changePassword'])->name('password.reset');
 
 Route::get('/backend', function () {
     return redirect()->route('dashboard');
@@ -34,6 +34,7 @@ Route::get('/backend', function () {
 
 Route::get('/', [PageController::class, 'newOrder'])->name('home');
 Route::get('/login-form', [PageController::class, 'login'])->name('login');
+Route::get('/reset-password', [PageController::class, 'resetPassword'])->name('reset-password');
 Route::get('/dashboard', [PageController::class, 'dashboard'])->name('dashboard');
 Route::get('/profile', [PageController::class, 'profile'])->name('profile');
 Route::get('/orders', [PageController::class, 'orders'])->name('orders');
