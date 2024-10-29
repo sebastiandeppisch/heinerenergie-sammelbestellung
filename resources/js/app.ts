@@ -14,12 +14,21 @@ library.add()
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import auth from './auth';
+import SideNavOuterToolbar from './layouts/SideNavOuterToolbar.vue';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
 	title: (title) => `${title} - ${appName}`,
-	resolve: name => resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob<DefineComponent>('./Pages/**/*.vue')),
+	resolve: name => {
+		const pages = import.meta.glob<DefineComponent>('./Pages/**/*.vue', { eager: true })
+    	const page = pages[`./Pages/${name}.vue`]
+		if(!page) {
+			throw new Error(`Page ${name} not found`)
+		}
+		page.default.layout = page.default.layout || SideNavOuterToolbar
+		return page
+	},
 	setup({ el, App, props, plugin }) {
 		const app = createApp({ render: () => h(App, props) })
 		app.use(plugin)
