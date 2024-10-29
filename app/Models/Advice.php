@@ -51,7 +51,7 @@ class Advice extends Model implements HasSends
         'placeNotes',
     ];
 
-    protected $appends = ['distance', 'shares_ids'];
+    protected $appends = ['distance', 'shares_ids', 'can_edit'];
 
     protected $dispatchesEvents = [
         'created' => AdviceCreated::class,
@@ -147,5 +147,10 @@ class Advice extends Model implements HasSends
     public function getNameAttribute(): string
     {
         return sprintf('%s %s', $this->firstName, $this->lastName);
+    }
+
+    public function getCanEditAttribute(): bool
+    {
+        return Auth::user()->can('view', $this);
     }
 }

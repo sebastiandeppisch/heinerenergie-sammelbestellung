@@ -40,3 +40,6 @@ Route::get('/orders', [PageController::class, 'orders'])->name('orders');
 Route::get('/products', [PageController::class, 'products'])->name('products');
 Route::get('/users', [PageController::class, 'users'])->name('users');
 Route::get('/settings', [PageController::class, 'settings'])->name('settings');
+Route::get('/advices', [PageController::class, 'advices'])->name('advices');
+Route::get('/advices/{advice}', [PageController::class, 'showAdvice'])->name('advices.show');
+Route::get('/advicesmap', [PageController::class, 'advicesMap'])->name('advices.map');

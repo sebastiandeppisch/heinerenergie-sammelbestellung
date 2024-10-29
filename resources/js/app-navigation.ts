@@ -13,9 +13,20 @@ export default [
   },
   {
     text: "Beratungen",
-    path: "/advices",
     icon: "group",
-    admin: false
+    admin: false,
+    items: [
+      {
+        text: "Tabelle",
+        path: "/advices",
+        icon: "tableproperties"
+      },
+      {
+        text: "Karte",
+        path: "/advicesmap",
+        icon: "map"
+      }
+    ]
   },
   {
     text: "Bestellungen",

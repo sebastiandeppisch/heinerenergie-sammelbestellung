@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { ref, onMounted, reactive, watch} from "vue";
+import { ref, onMounted, reactive, watch, computed} from "vue";
 import {DxButton} from "devextreme-vue/button";
 import "leaflet/dist/leaflet.css";
 
@@ -23,87 +23,72 @@ import { store } from "../store";
 import AdviceTypes from "../AdviceTypes";
 import axios from "axios";
 import { AdaptTableHeight } from "../helpers";
-import { useRouter, useRoute } from "vue-router";
 import { DxTextBox, DxButton as DxTextBoxButton } from 'devextreme-vue/text-box';
 import notify from 'devextreme/ui/notify';
+import { usePage, router } from "@inertiajs/vue3";
+import {isAdmin, user as userRef} from '../authHelper';
 
-const isAdmin = store.state.user.is_admin;
+const user = userRef.value;
+const userId = user.id;
 
 const emit = defineEmits(["selectAdviceId"])
-const advice = ref(null);
 
-const advicesDataSource = new LaravelDataSource("/api/advices");
-const advices = ref([]);
-const user = store.state.user;
+interface Props{
+  advices: App.Models.Advice[];
+  advisors: App.Models.User[];
+}
+
+const props = defineProps<Props>();
+const advisors = props.advisors;
+
+
+const advices = computed(() => {
+  return props.advices;
+});
 
 const map = reactive({
   center: latLng(49.8728, 8.6512) as { lat: number; lng: number},
   zoom: 15,
 });
 
-const route = useRoute();
-if(route.hash !== ''){
-  const hash = route.hash.substr(1);
-  const parts = hash.split('/');
+const page = usePage();
+const hash = window.location.hash;
+
+if (hash !== '') {
+  const parts = hash.replace('#', '').split('/');
   map.zoom = parseInt(parts[0]);
   map.center.lat = parseFloat(parts[1]);
   map.center.lng = parseFloat(parts[2]);
-  console.log('hash', hash, parts, map);
-}else{
-  if(user.lat !== null && user.long !== null){
-    map.center = latLng(user.lat, user.long);
-  }
+} else if (user.lat !== null && user.long !== null && user.lat !== undefined && user.long !== undefined) {
+  map.center = latLng(user.lat, user.long);
 }
 
-function loadAdvices(){
-  advicesDataSource.load().then((data) => {
-    advices.value = data.filter(
-      (advice) => advice.lat !== null && advice.long !== null
-    );
-  });
-}
-loadAdvices();
 
-advicesDataSource.store().on("updated", (data) => {
-  console.log(data);
-});
 
-const advisorsDataSource = new LaravelDataSource("/api/users");
-const advisors = ref([]);
-advisorsDataSource.load().then((data) => {
-  advisors.value = data.filter(
-    (advisor) => advisor.lat !== null && advisor.long !== null
-  );
-});
-
-function advisorName(advisorId){
-  const advisor = advisors.value.find((advisor) => advisor.id === advisorId);
+function advisorName(advisorId: number){
+  const advisor = advisors.find((advisor) => advisor.id === advisorId);
   if(advisor === undefined){
     return '';
   }
   return advisor.name;
 }
 
-function openAdvice(advice){
-  emit('selectAdviceId', advice.id);
-  console.log('open advice', advice.id);
+function openAdvice(advice: App.Models.Advice){
+  router.get('/advices/' + advice.id);
 }
 
 
 function ownId(){
-  return store.state.user.id;
+  return user.id;
 }
 
-function addAdvice(advice) {
+function addAdvice(advice: App.Models.Advice) {
   axios.post('api/advices/' + advice.id + '/assign').then(response => response.data).then((advice) => {
-    advicesDataSource.store().push([{ type: "update", data: advice, key: advice.id }]);
+    router.visit('/advicesmap' + '#' + map.zoom + '/' + map.center.lat + '/' + map.center.lng);
   });
-  advices.value = [];
-  loadAdvices();
 }
 
-function userCanOpen(advice){
-  const userId = store.state.user.id;
+function userCanOpen(advice: App.Models.Advice){
   if(isAdmin){
     return true;
   }
@@ -115,8 +100,6 @@ function userCanOpen(advice){
   }
   return false;
 }
-
-const router = useRouter();
 
 function zoomChanged(e){
   map.zoom = e;
@@ -141,8 +124,8 @@ onMounted(() => {
 });
 
 watch(map, () => {
-  router.push({name: 'advicesmap', hash: '#' + map.zoom + '/' + map.center.lat + '/' + map.center.lng});
-})
+  window.location.hash = '#' + map.zoom + '/' + map.center.lat + '/' + map.center.lng;
+});
 
 function runSearch(){
   axios.get('api/map/search', {params: {query: search.value}}).then(response => response.data).then((data) => {
@@ -253,9 +236,9 @@ function runSearch(){
         layer-type="overlay"
       >
         <LMarker
-          v-for="advice in advices.filter(advice => advice.result < 2)"
+          v-for="advice in advices.filter(advice => advice.result < 2).filter(advice => advice.lat !== null && advice.long !== null)"
           :key="advice.id"
-          :lat-lng="latLng(advice.lat, advice.long)"
+          :lat-lng="latLng(advice.lat ?? 0, advice.long ?? 0)"
         >
           <LIcon v-if="     advice.advisor_id === null &&    advice.type === AdviceTypes.Home"    icon-url="/images/markers/house_magenta.svg" :icon-size="[50, 50]" />
           <LIcon v-else-if="advice.advisor_id === null &&    advice.type === AdviceTypes.Virtual" icon-url="/images/markers/phone_magenta.svg" :icon-size="[50, 50]" />
@@ -283,7 +266,7 @@ function runSearch(){
                 @click="openAdvice(advice)"
                 width="100%"
                 style="margin-top:10px;"
-                v-if="userCanOpen(advice)"
+                v-if="advice.can_edit"
               />
             </div>
           </LPopup>
@@ -295,9 +278,9 @@ function runSearch(){
           :visible="false"
         >
         <LMarker
-          v-for="advice in advices.filter(advice => advice.result >= 2)"
+          v-for="advice in advices.filter(advice => advice.result >= 2).filter(advice => advice.lat !== null && advice.long !== null)"
           :key="advice.id"
-          :lat-lng="latLng(advice.lat, advice.long)"
+          :lat-lng="latLng(advice.lat?? 0, advice.long ?? 0)"
         >
           <LIcon v-if="     advice.result === 2" icon-url="/images/markers/gray_green.svg" :icon-size="[50, 50]" />
           <LIcon v-else-if="advice.result === 3" icon-url="/images/markers/gray_red.svg" :icon-size="[50, 50]" />
@@ -323,9 +306,9 @@ function runSearch(){
         name="Berater*innen"
         layer-type="overlay">
         <LMarker
-          v-for="advisor in advisors"
+          v-for="advisor in advisors.filter(advice => advice.lat !== null && advice.long !== null)"
           :key="advisor.id"
-          :lat-lng="latLng(advisor.lat, advisor.long)"
+          :lat-lng="latLng(advisor.lat ?? 0, advisor.long?? 0)"
         >
           <LIcon icon-url="/images/markers/he_yellow.svg" :icon-size="[50, 50]" />
           <LPopup>

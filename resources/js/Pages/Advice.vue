@@ -14,17 +14,19 @@ import DxDropDownButton from 'devextreme-vue/drop-down-button';
 import AdviceMails from '../components/AdviceMails.vue';
 type Advice = App.Models.Advice;
 
-const advice = ref(null as Advice | null);
 
 const advicesDataSource = new LaravelDataSource('/api/advices');
 
-const props = defineProps({
-  adviceId: {
-    type: [Number, null],
-    required: true,
-    default: null
-  },
-});
+interface Props {
+  advice: Advice;
+}
+
+const props = defineProps<Props>();
+
+const advice = props.advice;
+
+console.log(advice);
+
 
 const adviceStatus = new LaravelDataSource('/api/advicestatus');
 const adviceTypes = new LaravelDataSource('/api/advicetypes');
@@ -40,13 +42,6 @@ const navigationTypes = [
   { id: 'osm', name: 'Open Streep Maps' },
 ];
 
-watch(props, (newVal, oldVal) => {
-    console.log("watch adviceId", newVal.adviceId, oldVal.adviceId);
-    if (newVal.adviceId !== null) {
-      fetchAdvice(newVal.adviceId);
-    }
-  }
-);
 
 function radioBoxLayout(data: any) {
   const icons = {
@@ -64,44 +59,24 @@ function radioBoxLayout(data: any) {
   return `<i style="font-size:1.5em;" class="dx-icon-${icons[data.name]}" title='${helpText[data.name]}'></i>`;
 };
 
-function fetchAdvice(id: number) {
-  advice.value = null;
-  advicesDataSource
-    .load()
-    .then((advices) => {
-      advices.forEach((a: Advice) => {
-        if (a.id === id) {
-          advice.value = a;
-          sharedIds.value = a.shares_ids;
-        }
-      });
-      if (advice.value === null) {
-        notify("Beratung wurde nicht gefunden, oder Du hast keinen Zugriff auf die Beratung, weil sie bereits ein:e andere:r Berater:in übernommen hat", "error", 10000);
-      }
-    });
-}
-
 function onSubmit(){
-  advicesDataSource.store().update(props.adviceId, advice.value).then((result) => {
+  advicesDataSource.store().update(advice.id, advice.value).then((result) => {
     notify("Beratung gespeichert", "success", 2000);
   }).catch((error) => {
     notify(error, "error", 2000);
   });
 }
 
-if(props.adviceId !== null){
-  fetchAdvice(props.adviceId);
-}
 
 function updateAdvisors(e: any) {
-  axios.post('/api/advices/' + props.adviceId + '/advisors', {advisors: e.value})
+  axios.post('/api/advices/' + advice.id + '/advisors', {advisors: e.value})
     .then(() => {
       notify('Teilung aktualisiert', 'success', 2000);
   })
 }
 
 function sendOrderLink() {
-  axios.post('/api/advices/' + props.adviceId + '/sendorderlink')
+  axios.post('/api/advices/' + advice.id + '/sendorderlink')
     .then(() => {
       notify('Bestelllink versendet', 'success', 2000);
     })
@@ -109,7 +84,7 @@ function sendOrderLink() {
 
 function openNavigation(e){
   const type = e.itemData.id;
-  const address = advice.value?.street + ' ' + advice.value?.streetNumber + ', ' + advice.value?.zip + ' ' + advice.value?.city;
+  const address = advice.street + ' ' + advice.streetNumber + ', ' + advice.zip + ' ' + advice.city;
   console.log(type, address)
   switch(type){
     case 'google':
@@ -119,40 +94,40 @@ function openNavigation(e){
       window.open('https://maps.apple.com/?daddr=' + address + '&dirflg=w', '_blank');
       break;
     case 'osm':
-      window.open('https://www.openstreetmap.org/directions?engine=graphhopper_bicycle&route=' + advisor.lat + '%2C' + advisor.long + '%3B' + advice.value?.lat + '%2C' + advice.value?.long, '_blank');
+      window.open('https://www.openstreetmap.org/directions?engine=graphhopper_bicycle&route=' + advisor?.lat + '%2C' + advisor?.long + '%3B' + advice.lat + '%2C' + advice.long, '_blank');
       break;
   }
 }
 
 const mailLink = computed(() => {
-  const body = 'Hallo ' + advice.value?.firstName + ',%0D%0A%0D%0A' + 'TEXT' + '%0D%0A%0D%0A' + 'Gruß,%0D%0A' + advisor.first_name;
+  const body = 'Hallo ' + advice.firstName + ',%0D%0A%0D%0A' + 'TEXT' + '%0D%0A%0D%0A' + 'Gruß,%0D%0A' + advisor?.first_name;
   const subject = 'heiner*energie%20Beratung';
    
-  return 'mailto:' + advice.value?.email + '?subject=' + subject + '&body=' + body
+  return 'mailto:' + advice.email + '?subject=' + subject + '&body=' + body
 });
 
 const orderLink = computed(() => {
   const data =  {
-    advisorEmail: advisor.email,
-    firstName: advice.value?.firstName,
-    lastName: advice.value?.lastName,
-    street: advice.value?.street,
-    streetNumber: advice.value?.streetNumber,
-    zip: advice.value?.zip,
-    city: advice.value?.city,
-    email: advice.value?.email,
-    phone: advice.value?.phone,
-    email_confirmation: advice.value?.email,
+    advisorEmail: advisor?.email,
+    firstName: advice.firstName,
+    lastName: advice.lastName,
+    street: advice.street,
+    streetNumber: advice.streetNumber,
+    zip: advice.zip,
+    city: advice.city,
+    email: advice.email,
+    phone: advice.phone,
+    email_confirmation: advice.email,
   }
   return 'https://balkon.heinerenergie.de/sammelbestellung?formdata=' + JSON.stringify(data);
 })
 
 const orderMailLink = computed(() => {
   const url = orderLink.value;
-  const body = 'Hallo ' + advice.value?.firstName + ',%0D%0A%0D%0A' + url + '%0D%0A%0D%0A' + 'HIER MUSST DU NOCH DAS PASSWORT EINTRAGEN' + '%0D%0A%0D%0AGruß,%0D%0A' + advisor.first_name;
+  const body = 'Hallo ' + advice.firstName + ',%0D%0A%0D%0A' + url + '%0D%0A%0D%0A' + 'HIER MUSST DU NOCH DAS PASSWORT EINTRAGEN' + '%0D%0A%0D%0AGruß,%0D%0A' + advisor?.first_name;
   const subject = 'heiner*energie%20Sammelbestellung';
    
-  return 'mailto:' + advice.value?.email + '?subject=' + subject + '&body=' + body
+  return 'mailto:' + advice.email + '?subject=' + subject + '&body=' + body
 });
 
 function copyOrderLink() {
@@ -166,14 +141,13 @@ function copyOrderLink() {
 }
 
 const phoneLink = computed(() => {
-  return 'tel:' + advice.value?.phone;
+  return 'tel:' + advice.phone;
 });
 
 </script>
 
 <template>
-  <div v-if="adviceId !==null">
-    <div v-if="advice !== null" style="padding:20px;">
+    <div style="padding:20px;">
       <h2>Beratung</h2>
       <div style="display:flex;flex-direction:row;gap:32px;">
         <div>
@@ -316,7 +290,7 @@ const phoneLink = computed(() => {
             </div>
             <div>
               <b>Wo soll das Steckersolargerät installiert werden?</b>
-              <div v-if="advice.placeNotes !== null && advice.placeNotes.length > 0"> {{ advice.placeNotes }}</div>
+              <div v-if="advice.placeNotes !== null && advice.placeNotes !== undefined && advice.placeNotes.length > 0"> {{ advice.placeNotes }}</div>
               <div v-else><i>Keine Angabe</i></div>
             </div>
           </div>
@@ -324,22 +298,4 @@ const phoneLink = computed(() => {
         </div>
       </div>
     </div>
-    <div v-else style="height:100%;width:100%;min-height:300px" id="advice-loading" >
-      <DxLoadPanel
-        :visible="true"
-        :show-indicator="true"
-        :show-pane="true"
-        :position="{ of: '#advice-loading' }"
-      />
-    </div>
-  </div>
-  <div v-else>
-    <h1>Keine Beratung ausgewählt</h1>
-    <DxRadioGroup
-      :items="[{id: 1, name: 'Test1'}, {id: 2, name: 'Test2'}]"
-      displayExpr="name"
-      valueExpr="id"
-      v-if="false"
-    />
-  </div>
 </template>

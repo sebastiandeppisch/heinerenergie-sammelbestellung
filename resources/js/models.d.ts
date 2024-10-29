@@ -88,9 +88,10 @@ declare namespace App.Models {
         status?: App.Models.AdviceStatus | null;
         shares?: Array<App.Models.User> | null;
         shares_count?: number | null;
-        result: number | null;
+        result: number;
         readonly distance?: number | null;
-        readonly shares_ids?: Array<any>;
+        readonly shares_ids: Array<any>;
+        readonly can_edit: boolean;
     }
 
     export interface AdviceStatus {

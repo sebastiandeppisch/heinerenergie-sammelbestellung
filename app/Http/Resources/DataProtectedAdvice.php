@@ -52,6 +52,7 @@ class DataProtectedAdvice extends JsonResource
             'helpType_other' => $this->helpType_other,
             'placeNotes' => $this->placeNotes,
             'result' => $this->result,
+            'can_edit' => $this->can_edit,
         ];
     }
 }

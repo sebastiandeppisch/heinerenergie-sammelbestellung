@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import LaravelDataSource from "../LaravelDataSource";
+import LaravelDataSource from "../LaravelDataSource"
 import { AdaptTableHeight } from "../helpers";
 import { ref, onMounted, reactive } from "vue";
 import DxPopup from 'devextreme-vue/popup';
-import AdviceStatus from "./AdviceStatus.vue";
-import PhysicalValue from "./PhysicalValue.vue";
-import Advice from "./Advice.vue";
+import AdviceStatus from "../views/AdviceStatus.vue";
+import PhysicalValue from "../views/PhysicalValue.vue";
 import { DxScrollView } from 'devextreme-vue/scroll-view';
 
 import DxDataGrid, {
@@ -26,14 +25,14 @@ import DxDataGrid, {
 } from "devextreme-vue/data-grid";
 import LaravelLookupSource from "../LaravelLookupSource";
 import DxButton from "devextreme-vue/button";
-import {store} from "../store";
 import axios from "axios";
 import CustomStore from "devextreme/data/custom_store";
 import { DxSwitch } from "devextreme-vue";
 import { DxForm, DxItem as DxFormItem, DxSimpleItem, DxGroupItem as DxFormGroupItem, DxButtonItem} from 'devextreme-vue/form';
 import notify from "devextreme/ui/notify";
 import ArrayDataSource from "devextreme/data/array_store";
-
+import { isAdmin, user } from "../authHelper";
+import { router} from "@inertiajs/vue3";
 const emit = defineEmits(["selectAdviceId"])
 
 const advices = new LaravelDataSource("api/advices");
@@ -45,8 +44,6 @@ const outer = ref(null);
 
 const tableHeight = new AdaptTableHeight(outer);
 const reactiveHeight = tableHeight.getReactive();
-
-const isAdmin = store.state.user.is_admin;
 
 const newadvice = reactive({
   firstName: '',
@@ -60,7 +57,7 @@ const newadvice = reactive({
   advice_status_id: 1,
   type: 0,
   commentary: '',
- // advisor_id: store.state.user.id,
+  advisor_id: user.value.id
 });
 
 function radioBoxLayout(data: any) {
@@ -76,7 +73,9 @@ function radioBoxLayout(data: any) {
     DirectOrder: 'Direktbestellung'
   }
 
-  return `<i style="font-size:1.5em;" class="dx-icon-${icons[data.name]}" title='${helpText[data.name]}'></i>`;
+  const name = data.name as string;
+
+  return `<i style="font-size:1.5em;" class="dx-icon-${icons[name]}" title='${helpText[name]}'></i>`;
 };
 
 const r = reactive({
@@ -90,7 +89,6 @@ const r = reactive({
 advisors.load().then(() => {
   advisors.items().forEach((a) => {
     r.advisorNames.set(a.id, a.name);
-    console.log(a.name);
   });
 });
 
@@ -99,14 +97,14 @@ function openStatus(){
 }
 
 function openAdvice(e){
-  emit('selectAdviceId', e.row.data.id);
+  router.get('/advices/' + e.row.data.id);
 }
 
 onMounted(() => {
   tableHeight.calcHeight();
 });
 
-function assignAdvice(id){
+function assignAdvice(id: number){
   axios.post('api/advices/' + id + '/assign').then(response => response.data).then((advice) => {
     advices.store().push([{ type: "update", data: advice, key: advice.id }]);
   });
@@ -122,15 +120,15 @@ function rowCanBeEdited(e){
   return userCanEdit(advice);
 }
 
-function userCanEdit(advice){
-  const userId = store.state.user.id;
+function userCanEdit(advice: App.Models.Advice){
+  const userId = user.value.id;
   if(isAdmin){
     return true;
   }
   if(advice.advisor_id === userId){
     return true;
   }
-  if('shares_ids' in advice && advice.shares_ids.includes(userId)){
+  if('shares_ids' in advice && advice.shares_ids !== undefined && advice.shares_ids.includes(userId)){
     return true;
   }
   return false;
@@ -170,7 +168,7 @@ function saveNewAdvice(){
     newadvice.advice_status_id = 1;
     newadvice.type = 0;
     newadvice.commentary = '';
-   // newadvice.advisor_id = store.state.user.id
+    newadvice.advisor_id = user.value.id;
   }).catch((error) => {
     notify(error.response.data.message, 'error', 3000);
   });
