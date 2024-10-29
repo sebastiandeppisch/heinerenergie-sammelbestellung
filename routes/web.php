@@ -44,3 +44,7 @@ Route::get('/settings', [PageController::class, 'settings'])->name('settings');
 Route::get('/advices', [PageController::class, 'advices'])->name('advices');
 Route::get('/advices/{advice}', [PageController::class, 'showAdvice'])->name('advices.show');
 Route::get('/advicesmap', [PageController::class, 'advicesMap'])->name('advices.map');
+
+Route::get('newadvice', [PageController::class, 'newAdvice'])->name('newadvice');
+Route::get('impress', [PageController::class, 'impress'])->name('impress');
+Route::get('datapolicy', [PageController::class, 'datapolicy'])->name('datapolicy');

@@ -49,24 +49,6 @@ const router = createRouter({
     {
       path: "/:pathMatch(.*)*",
       redirect: "/"
-    },
-    {
-      path: "/impress",
-      name: "impress",
-      meta: {
-        requiresAuth: false,
-        layout: PublicLayout
-      },
-      component: Impress
-    },
-    {
-      path: "/datapolicy",
-      name: "datapolicy",
-      meta: {
-        requiresAuth: false,
-        layout: PublicLayout
-      },
-      component: DataPolicy
     }
   ]
 });

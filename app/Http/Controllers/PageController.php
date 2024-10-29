@@ -8,6 +8,7 @@ use App\Models\Advice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\DataProtectedAdvice;
+use App\Models\Setting;
 
 class PageController extends Controller
 {
@@ -82,6 +83,22 @@ class PageController extends Controller
         return Inertia::render('ChangePasswordForm', [
             'token' => $request->get('token'),
             'email' => $request->get('email')
+        ]);
+    }
+
+    public function newAdvice(){
+        return Inertia::render('NewAdvice');
+    }
+
+    public function impress(){
+        return Inertia::render('HtmlContent', [
+            'content' => Setting::get('impress')
+        ]);
+    }
+
+    public function dataPolicy(){
+        return Inertia::render('HtmlContent', [
+            'content' => Setting::get('datapolicy')
         ]);
     }
 }
