@@ -20,17 +20,22 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
     Route::get('bulkorders/{bulkorder}/orderexport', [OrderController::class, 'export'])->name('orderexport');
+    Route::get('/dashboard', [PageController::class, 'dashboard'])->name('dashboard');
+    Route::get('/profile', [PageController::class, 'profile'])->name('profile');
+    Route::get('/orders', [PageController::class, 'orders'])->name('orders');
+    Route::get('/products', [PageController::class, 'products'])->name('products');
+    Route::get('/users', [PageController::class, 'users'])->name('users');
+    Route::get('/settings', [PageController::class, 'settings'])->name('settings');
+    Route::get('/advices', [PageController::class, 'advices'])->name('advices');
+    Route::get('/advices/{advice}', [PageController::class, 'showAdvice'])->name('advices.show');
+    Route::get('/advicesmap', [PageController::class, 'advicesMap'])->name('advices.map');
+    Route::get('neworder', [PageController::class, 'newOrder'])->name('neworder');
+    Route::get('/backend', function () {
+        return redirect()->route('dashboard');
+    })->name('backend');
 });
 
-/*Route::get('/{any}', function () {
-    return view('app');
-})->where('any', '^(?!api).*$');*/
-
 Route::get('/change-password', [PageController::class, 'changePassword'])->name('password.reset');
-
-Route::get('/backend', function () {
-    return redirect()->route('dashboard');
-})->name('backend');
 
 Route::get('/', function () {
     return redirect()->route('home');
@@ -39,17 +44,6 @@ Route::get('/', function () {
 Route::get('/sammelbestellung', [PageController::class, 'publicNewOrder'])->name('home');
 Route::get('/login-form', [PageController::class, 'login'])->name('login');
 Route::get('/reset-password', [PageController::class, 'resetPassword'])->name('reset-password');
-Route::get('/dashboard', [PageController::class, 'dashboard'])->name('dashboard');
-Route::get('/profile', [PageController::class, 'profile'])->name('profile');
-Route::get('/orders', [PageController::class, 'orders'])->name('orders');
-Route::get('/products', [PageController::class, 'products'])->name('products');
-Route::get('/users', [PageController::class, 'users'])->name('users');
-Route::get('/settings', [PageController::class, 'settings'])->name('settings');
-Route::get('/advices', [PageController::class, 'advices'])->name('advices');
-Route::get('/advices/{advice}', [PageController::class, 'showAdvice'])->name('advices.show');
-Route::get('/advicesmap', [PageController::class, 'advicesMap'])->name('advices.map');
-
 Route::get('newadvice', [PageController::class, 'newAdvice'])->name('newadvice');
 Route::get('impress', [PageController::class, 'impress'])->name('impress');
 Route::get('datapolicy', [PageController::class, 'datapolicy'])->name('datapolicy');
-Route::get('neworder', [PageController::class, 'newOrder'])->name('neworder');
