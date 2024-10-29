@@ -4,16 +4,11 @@ import { sizes } from '../utils/media-query';
 import navigation from '../app-navigation';
 import { onMounted, ref, watch, computed } from 'vue';
 import { store } from "../store";
-import { Link, usePage } from "@inertiajs/vue3";
+import { Link, router, usePage } from "@inertiajs/vue3";
 import { Inertia } from "@inertiajs/inertia";
 import AppFooter from "./AppFooter.vue";
 
-const isAdmin = computed(() => {
-  if(store.state.user !== null){
-    return store.state.user.is_admin;
-  }
-  Inertia.visit('/login');
-});
+import { isAdmin } from "../authHelper";
 
 const props = defineProps<{
   compactMode: boolean;
@@ -24,7 +19,7 @@ const path = computed(() => usePage().url);
 
 const items = computed(() => {
   return navigation.filter((item) => 
-    item.admin === false || isAdmin
+    item.admin === false || isAdmin.value
   ).map((item) => {
     if(item.path && !(/^\//.test(item.path))){ 
       item.path = `/${item.path}`;
@@ -40,7 +35,7 @@ function handleItemClick(e: any) {
   if (!e.itemData.path || props.compactMode) {
     return;
   }
-  Inertia.visit(e.itemData.path);
+  router.visit(e.itemData.path);
 
   const pointerEvent = e.event;
   pointerEvent.stopPropagation();
