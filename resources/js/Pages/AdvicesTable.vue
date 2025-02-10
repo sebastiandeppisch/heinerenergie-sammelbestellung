@@ -27,12 +27,14 @@ import LaravelLookupSource from "../LaravelLookupSource";
 import DxButton from "devextreme-vue/button";
 import axios from "axios";
 import CustomStore from "devextreme/data/custom_store";
+import { LoadOptions } from 'devextreme/data/load_options';
 import { DxSwitch } from "devextreme-vue";
 import { DxForm, DxItem as DxFormItem, DxSimpleItem, DxGroupItem as DxFormGroupItem, DxButtonItem} from 'devextreme-vue/form';
 import notify from "devextreme/ui/notify";
 import ArrayDataSource from "devextreme/data/array_store";
 import { isAdmin, user } from "../authHelper";
 import { router} from "@inertiajs/vue3";
+import Store from "devextreme/data/abstract_store";
 const emit = defineEmits(["selectAdviceId"])
 
 const advices = new LaravelDataSource("api/advices");
@@ -132,16 +134,15 @@ function userCanEdit(advice: App.Models.Advice){
   return false;
 }
 
-function sortedAdvisors(e){
-  console.log(e);
-  if(!e.data){
-    return advisors.store();
+function sortedAdvisors(e: { value: any[] }): CustomStore {
+  if(!e.value){
+    throw new Error('No value provided');
   }
   return new CustomStore({
-    loadMode: 'raw',
+    key: "id",
     cacheRawData: true,
-    load: (options) => {
-      return axios.get('api/advices/' + e.data.id + '/advisors').then(response => response.data);
+    load: () => {
+      return axios.get('api/advices/' + e.value[0] + '/advisors').then(response => response.data);
     }
   });
 }

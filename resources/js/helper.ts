@@ -17,7 +17,7 @@ import library from './fontawesome'
 library.add()
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import NewAdvice from './views/NewAdvice.vue'
+import NewAdvice from './Pages/NewAdvice.vue';
 
 const newAdvice = createApp(NewAdvice);
 newAdvice.component('font-awesome-icon', FontAwesomeIcon)

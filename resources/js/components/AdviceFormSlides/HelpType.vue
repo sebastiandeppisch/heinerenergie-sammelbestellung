@@ -4,8 +4,14 @@ import { computed } from "vue";
 
 import DxCheckBox from "devextreme-vue/check-box";
 
+type HelpTypeAdvice = Pick<App.Models.Advice,
+  | 'helpType_place' | 'helpType_technical'
+  | 'helpType_bureaucracy' | 'helpType_other'
+  | 'firstName' | 'lastName'
+>;
+
 interface Props {
-  modelValue: App.Models.Advice;
+  modelValue: HelpTypeAdvice;
 }
 
 const props = defineProps<Props>();
@@ -19,12 +25,12 @@ function checkForm() {
   }
 }
 
-const advice = computed<App.Models.Advice>({
+const advice = computed<HelpTypeAdvice>({
   get() {
     return props.modelValue;
   },
   set(value) {
-  },
+  }
 });
 </script>
 

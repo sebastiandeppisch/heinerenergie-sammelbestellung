@@ -52,8 +52,7 @@ const userMenuItems = computed(() => {
       onClick: () => {
         axios.post('/api/stopActAsAdmin').then(response => {
           notify('Du bist jetzt als Berater*in angemeldet', 'success', 2000);
-          store.commit('actAsNonAdmin')
-          router.reload()
+          router.reload();
         }).catch(error => {
           notify('Es ist ein Fehler aufgetreten', 'error', 2000);
         })
@@ -66,8 +65,7 @@ const userMenuItems = computed(() => {
       onClick: () => {
         axios.post('/api/actAsAdmin').then(response => {
           notify('Du bist jetzt als Admin angemeldet', 'success', 2000);
-          store.commit('actAsAdmin')
-          router.reload()
+          router.reload();
         }).catch(error => {
           notify('Du bist kein Admin', 'error', 2000);
         })

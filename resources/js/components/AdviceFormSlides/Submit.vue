@@ -6,8 +6,20 @@ import { DxLoadIndicator } from 'devextreme-vue/load-indicator';
 import axios from 'axios';
 import notify from 'devextreme/ui/notify';
 
+type BaseAdvice = Pick<App.Models.Advice,
+  | 'firstName' | 'lastName' | 'email' | 'phone'
+  | 'street' | 'streetNumber' | 'zip' | 'city' | 'type'
+  | 'helpType_place' | 'helpType_technical' | 'helpType_bureaucracy' | 'helpType_other'
+  | 'houseType' | 'landlordExists' | 'placeNotes' | 'commentary'
+>;
+
+type SubmitAdvice = Omit<BaseAdvice, 'type' | 'zip'> & {
+  type: number | null;
+  zip: number | null;
+};
+
 interface Props {
-  modelValue: App.Models.Advice;
+  modelValue: SubmitAdvice;
 }
 
 const props = defineProps<Props>();
@@ -45,13 +57,12 @@ function submit() {
   });
 }
 
-const advice = computed<App.Models.Advice>({
+const advice = computed<Props["modelValue"]>({
   get() {
     return props.modelValue;
   },
   set(value) {
-
-  },
+  }
 });
 </script>
 

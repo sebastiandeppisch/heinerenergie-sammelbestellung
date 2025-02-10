@@ -11,8 +11,18 @@ import {
   DxStringLengthRule
 } from 'devextreme-vue/validator';
 
+type PlaceAdvice = Omit<
+  Pick<App.Models.Advice,
+    | 'street' | 'streetNumber' | 'zip' | 'city'
+    | 'type'
+  >, 'type' | 'zip'
+> & {
+  type: number | null;
+  zip: number | null;
+};
+
 interface Props {
-  modelValue: App.Models.Advice
+  modelValue: PlaceAdvice & Record<string, any>;
 }
 
 const props = defineProps<Props>();
@@ -26,7 +36,7 @@ function checkForm(){
   }
 }
 
-const advice = computed<App.Models.Advice>({
+const advice = computed<PlaceAdvice>({
   get() {
     return props.modelValue
   },

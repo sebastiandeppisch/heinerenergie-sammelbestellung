@@ -12,6 +12,16 @@ import Sent from '../components/AdviceFormSlides/Sent.vue';
 import { ref, reactive, computed, onMounted } from "vue";
 import PublicLayout from '../layouts/PublicLayout.vue';
 
+type BaseAdvice = Pick<App.Models.Advice,
+  | 'commentary' | 'helpType_place' | 'helpType_technical' | 'helpType_bureaucracy' | 'helpType_other'
+  | 'houseType' | 'firstName' | 'lastName' | 'email' | 'phone' | 'zip' | 'city' | 'street' | 'streetNumber'
+  | 'placeNotes' | 'landlordExists' | 'type'
+>;
+
+type NewAdvice = Omit<BaseAdvice, 'type' | 'zip'> & {
+  type: number | null;
+  zip: number | null;
+};
 
 defineOptions({
   layout: PublicLayout
@@ -19,6 +29,7 @@ defineOptions({
 
 const r = reactive({
   advice: {
+    commentary: null,
     helpType_place: false,
     helpType_technical: false,
     helpType_bureaucracy: false,
@@ -34,8 +45,8 @@ const r = reactive({
     streetNumber: "",
     placeNotes: "",
     landlordExists: null,
-    type: null
-  },
+    type: null,
+  } as NewAdvice,
   selectedSlide: 0
 });
 

@@ -3,19 +3,20 @@
 		"target": "ESNext",
 		"module": "ESNext",
 		"sourceMap": true,
-		"experimentalDecorators": true,
 		"esModuleInterop": true,
-		"moduleResolution": "node",
-		"importHelpers": true,
-		"allowJs": true,
 		"resolveJsonModule": true,
-		"jsx": "preserve",
-		"noEmit": true,
-		"types": ["vite/client"], 
+		"moduleResolution": "bundler",
 		"strict": true,
+		"jsx": "preserve",
+		"isolatedModules": true,
+		"lib": ["ESNext", "DOM"],
+		"skipLibCheck": true,
+		"noEmit": true,
+		"baseUrl": "./resources/js",
 		"paths": {
-            "@/*": ["./resources/js"]
-        }
+			"@/*": ["./*"],
+		},
+		"types": ["vite/client"]
 	},
-	"include": ["resources/js/**/*.ts", "resources/js/**/*.d.ts", "resources/js/**/*.vue"]
+	"include": ["resources/js/**/*.ts", "resources/js/**/*.d.ts", "resources/js/**/*.tsx", "resources/js/**/*.vue"],
 }

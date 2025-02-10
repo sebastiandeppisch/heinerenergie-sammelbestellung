@@ -10,7 +10,7 @@ import {
 } from 'devextreme-vue/validator';
 
 interface Props {
-  modelValue: App.Models.Advice
+  modelValue: Pick<App.Models.Advice, 'firstName' | 'lastName' | 'email' | 'phone'>
 }
 
 const props = defineProps<Props>();
@@ -45,7 +45,7 @@ function contactValidated(e: { name: string; isValid: boolean }){
 
 function checkForm(){
   notTypedYet.value = false;
-  if(r.mailValid === false || r.phoneValid === false || advice.value.email === '' || advice.value.phone === '' || r.firstNameValid === false || r.lastNameValid === false || advice.value.firstName === '' || advice.value.lastName === ''){
+  if(r.mailValid === false || r.phoneValid === false || props.modelValue.email === '' || props.modelValue.phone === '' || r.firstNameValid === false || r.lastNameValid === false || props.modelValue.firstName === '' || props.modelValue.lastName === ''){
     emit('allowForward', false)
   }else{
     emit('allowForward', true)
@@ -57,7 +57,7 @@ function change(){
   checkForm();
 }
 
-const advice = computed<App.Models.Advice>({
+const advice = computed<Props["modelValue"]>({
   get() {
     return props.modelValue
   },

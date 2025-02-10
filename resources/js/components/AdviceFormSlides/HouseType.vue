@@ -4,8 +4,12 @@ import DxTextArea from "devextreme-vue/text-area";
 
 import { computed, reactive, ref } from "vue";
 
+type HouseTypeAdvice = Pick<App.Models.Advice,
+  | 'placeNotes' | 'houseType' | 'landlordExists'
+>;
+
 interface Props {
-  modelValue: App.Models.Advice;
+  modelValue: HouseTypeAdvice;
 }
 
 const houseTypes = [
@@ -47,12 +51,12 @@ function handleLandlordChange(e: { addedItems: Array<{ id: number }> }) {
   advice.value.landlordExists = e.addedItems[0].id === 0;
 }
 
-const advice = computed<App.Models.Advice>({
+const advice = computed<HouseTypeAdvice>({
   get() {
     return props.modelValue;
   },
   set(value) {
-  },
+  }
 });
 </script>
 
