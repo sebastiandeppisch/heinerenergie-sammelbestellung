@@ -14,7 +14,6 @@ import {
 } from "@vue-leaflet/vue-leaflet";
 import L from "leaflet";
 import { latLng } from "leaflet";
-import { store } from "../store";
 
 interface Props {
   advisor: App.Models.User
@@ -29,7 +28,7 @@ const zoom = ref(15);
     <LMap
       ref="map"
       :zoom="zoom"
-      :center="latLng(advisor.lat, advisor.long)"
+      :center="[advisor.lat, advisor.long]"
       :minZoom="3"
       :maxZoom="18"
     >
@@ -44,6 +43,7 @@ const zoom = ref(15);
         <LIcon icon-url="/images/markers/he_yellow.svg" :icon-size="[50, 50]" />
       </LMarker>
       <LCircle
+        v-if="advisor.advice_radius"
         :lat-lng="latLng(advisor.lat, advisor.long)"
         :radius="advisor.advice_radius"
       />

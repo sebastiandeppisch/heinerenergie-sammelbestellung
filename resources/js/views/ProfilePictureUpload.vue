@@ -3,37 +3,41 @@ import { DxFileUploader } from 'devextreme-vue/file-uploader';
 import { DxProgressBar } from 'devextreme-vue/progress-bar';
 import { reactive } from 'vue';
 import axios from 'axios';
-import { useStore } from '../store';
 import { DxButton } from 'devextreme-vue/button';
+import { user } from '../authHelper';
 
+interface State {
+  isDropZoneActive: boolean;
+  imageSource: string | null;
+  textVisible: boolean;
+  allowedFileExtensions: string[];
+}
 
-const r = reactive({
+const r = reactive<State>({
   isDropZoneActive: false,
-  imageSource: null,
+  imageSource: user.value?.profile_picture || null,
   textVisible: true,
   allowedFileExtensions: ['.jpg', '.jpeg', '.gif', '.png'],
 });
 
-r.imageSource = useStore().getters.user.picture;
-
-function onDropZoneEnter(e) {
+function onDropZoneEnter(e: any) {
   if (e.dropZoneElement.id === 'dropzone-external') {
     r.isDropZoneActive = true;
   }
 }
 
-function onDropZoneLeave(e) {
+function onDropZoneLeave(e: any) {
   if (e.dropZoneElement.id === 'dropzone-external') {
     r.isDropZoneActive = false;
   }
 }
 
-function onUploaded(e) {
+function onUploaded(e: any) {
   const { file } = e;
   const fileReader = new FileReader();
   fileReader.onload = () => {
     r.isDropZoneActive = false;
-    r.imageSource = fileReader.result;
+    r.imageSource = fileReader.result?.toString() || null;
   };
   fileReader.readAsDataURL(file);
   const json = JSON.parse(e.request.response);

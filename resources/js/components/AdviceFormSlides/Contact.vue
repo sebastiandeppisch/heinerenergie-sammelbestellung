@@ -25,7 +25,7 @@ const r = reactive({
   lastNameValid: false
 })
 
-function contactValidated(e){
+function contactValidated(e: { name: string; isValid: boolean }){
   if(e.name === 'email'){
     r.mailValid = e.isValid;
   }

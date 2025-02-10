@@ -29,14 +29,21 @@ interface Props {
 }
 const {order, confirmEmail = true, updateButton, allowEditing = true} = defineProps<Props>();
 
-let citySuggestions = ref([]);
+let citySuggestions = ref<string[]>([]);
 
-const form = ref(null);
+const form = ref<{ instance: dxForm }>();
 
-function validateAsync(params){
-  const data = {...order};
+interface FormData {
+    [key: string]: any;
+}
+
+const data = order as FormData;
+
+function validateAsync(params: any){
   const field: string = params.formItem.dataField;
-  data[field] = params.value;
+  if (field in data) {
+    data[field] = params.value;
+  }
   let url = '';
   if('id' in order && order.id > 0){
     url = 'api/validateeditorderform';
@@ -50,7 +57,7 @@ function validateAsync(params){
 
 const validationCache = new Map();
 
-function cachedValidationRequest(url, data): Promise<AxiosResponse>{
+function cachedValidationRequest(url: string, data: any): Promise<AxiosResponse>{
   const key = url + JSON.stringify(data);
   if(! validationCache.has(key)){
     validationCache.set(key, axios.get(url, {
@@ -77,13 +84,18 @@ function formatError(error: AxiosError, field: string): void{
 }
 
 const cityZips = [64283, 64285, 64287, 64293, 64295, 64289];
-const subUrbZips = {
+
+interface SubUrbZips {
+  [key: number]: string[];
+}
+
+const subUrbZips: SubUrbZips = {
   64289: ['Darmstadt-Kranichstein'],
   64291: ['Darmstadt-Arheilgen', 'Darmstadt-Wixhausen'],
   64297: ['Darmstadt-Eberstadt']
-}
+};
 
-function zipChanged(e){
+function zipChanged(e: { value: number }){
   let suggestion = [];
   let zip = parseInt(order.zip + "");
 
@@ -91,47 +103,50 @@ function zipChanged(e){
     suggestion.push('Darmstadt');
   }
   if(zip in subUrbZips){
-    suggestion = suggestion.concat(subUrbZips[zip])
+    suggestion = suggestion.concat(subUrbZips[zip]);
   }
   if(suggestion.length === 1){
     order.city = suggestion[0];
   }
   citySuggestions.value.length = 0;
-  suggestion.forEach((s) => {
+  suggestion.forEach((s: string) => {
     citySuggestions.value.push(s);
-  })
+  });
 }
 
 const submitButtonOptions = {
   text: "Besteller*in-Daten Speichern",
   useSubmitBehavior: false,
-  type: 'default',
+  type: 'default' as const,
   width: "100%",
-  onClick: () => {
-    const formInstance = form.value.instance as dxForm;
-    formInstance.validate().complete.then(result => {
+  onClick: async () => {
+    const formInstance = form.value?.instance;
+    if (formInstance) {
+      const result = await formInstance.validate();
       if(result.isValid){
-         axios.put('api/orders/' + order.id, {
-            ...order
-          }).then((response) => {
-            notify('Daten wurden gespeichert', 'success');
-            emit('update');
-          }).catch(error => {
-            notifyError(error)
-          })
+        try {
+          await axios.put('api/orders/' + order.id, order);
+          notify('Daten wurden gespeichert', 'success');
+          emit('update');
+        } catch (error: any) {
+          notifyError(error?.response?.data?.message || 'Ein Fehler ist aufgetreten');
+        }
       }
-    });
+    }
   }
-}
+};
 
 function submit(){
   console.log("submit")
 }
 
-const validate: () => Promise<ValidationResult> = () => {
-  const formInstance = form.value.instance as dxForm;
-  return formInstance.validate().complete
-}
+const validate = async (): Promise<ValidationResult> => {
+  const formInstance = form.value?.instance;
+  if (!formInstance) {
+    throw new Error('Form instance not initialized');
+  }
+  return formInstance.validate();
+};
 
 defineExpose({
   validate

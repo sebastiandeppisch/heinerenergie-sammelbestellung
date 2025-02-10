@@ -3,7 +3,6 @@ import DxButton from "devextreme-vue/button";
 import DxToolbar, { DxItem } from "devextreme-vue/toolbar";
 import auth from "../auth";
 import { computed } from 'vue';
-import { useStore, store } from '../store'
 
 import UserPanel from "@/components/UserPanel.vue";
 import notify from 'devextreme/ui/notify';

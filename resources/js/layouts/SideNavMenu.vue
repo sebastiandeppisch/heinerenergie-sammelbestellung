@@ -1,12 +1,8 @@
 <script setup lang="ts">
 import DxTreeView from "devextreme-vue/ui/tree-view";
-import { sizes } from '../utils/media-query';
 import navigation from '../app-navigation';
 import { onMounted, ref, watch, computed } from 'vue';
-import { store } from "../store";
 import { Link, router, usePage } from "@inertiajs/vue3";
-import { Inertia } from "@inertiajs/inertia";
-import AppFooter from "./AppFooter.vue";
 
 import { isAdmin } from "../authHelper";
 

@@ -4,10 +4,10 @@ import moment from 'moment';
 import { Ref } from 'vue';
 import { reactive } from '@vue/reactivity';
 
-function formatPriceCell(cell): string{
-	return formatPrice(parseFloat(cell.value));
+function formatPriceCell(cell: { value: number| string }): string{
+	return formatPrice(parseFloat(cell.value.toString()));
 }
-  
+
 function formatPrice(price: number): string{
 	return price.toFixed(2).replace(".", ",") + " €";
 }
@@ -24,7 +24,7 @@ function notifyError(error: AxiosError): void{
 	}
   }
 
-function formatDateCell(row): string{
+function formatDateCell(row: { value: Date }): string{
 	return moment(row.value).format("DD.MM.YY");
 }
 

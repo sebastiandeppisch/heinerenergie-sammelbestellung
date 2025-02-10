@@ -171,6 +171,7 @@ declare namespace App.Models {
         advice_radius?: number | null;
         readonly name?: any;
         readonly is_acting_as_admin?: boolean;
+        profile_picture?: string | null;
     }
 
     export interface OrderItem {

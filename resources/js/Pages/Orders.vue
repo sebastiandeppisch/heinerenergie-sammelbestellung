@@ -4,11 +4,8 @@ import LaravelDataSource from '../LaravelDataSource'
 import OrderDetail from './../components/OrderDetail.vue'
 import {formatPriceCell, formatPrice, formatDateCell, AdaptTableHeight} from '../helpers'
 import { ref, onMounted, reactive } from 'vue'
-import { CustomSummaryInfo , } from "devextreme/ui/data_grid";
-import { DxButton } from 'devextreme-vue/button';
 import DxSelectBox from 'devextreme-vue/select-box';
 import DxDropDownButton from 'devextreme-vue/drop-down-button';
-import { store } from "../store";
 import { isAdmin } from '../authHelper';
 import DxDataGrid, {
   DxColumn,
@@ -52,11 +49,15 @@ const state: State = reactive({
 
 function update(){
   console.log("update from order");
-  state.ordersStore.reload();
+  if (state.ordersStore) {
+    state.ordersStore.reload();
+  }
 }
 
-function exportOrders(e){
-  window.open('bulkorders/'+ state.bulkOrderId + '/orderexport?products=' + e.itemData.id, '_blank').focus();
+function exportOrders(e: { itemData: { id: number } }){
+  if (state.bulkOrderId) {
+    window.open('bulkorders/'+ state.bulkOrderId + '/orderexport?products=' + e.itemData.id, '_blank')?.focus();
+  }
 }
 
 

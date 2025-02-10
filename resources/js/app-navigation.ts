@@ -6,39 +6,16 @@ export default [
     admin: false
   },
   {
-    text: "Neue Bestellung",
-    path: "/neworder",
-    icon: "cart",
+    text: "Beratungen - Tabelle",
+    icon: "tableproperties",
+    path: "/advices",
     admin: false
   },
   {
-    text: "Beratungen",
-    icon: "group",
-    admin: false,
-    items: [
-      {
-        text: "Tabelle",
-        path: "/advices",
-        icon: "tableproperties"
-      },
-      {
-        text: "Karte",
-        path: "/advicesmap",
-        icon: "map"
-      }
-    ]
-  },
-  {
-    text: "Bestellungen",
-    path: "/orders",
-    icon: "textdocument",
+    text: "Beratungen - Karte",
+    icon: "map",
+    path: "/advicesmap",
     admin: false
-  },
-  {
-    text: "Artikel",
-    path: "/products",
-    icon: "box",
-    admin: true
   },
   {
     text: "Berater*innen",

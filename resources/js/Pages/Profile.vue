@@ -1,26 +1,21 @@
 <script setup lang="ts">
 import DxTextBox from "devextreme-vue/text-box";
-import { store, useStore} from "../store";
 import ProfilePictureUpload from "@/views/ProfilePictureUpload.vue";
 import { DxGroupItem } from "devextreme-vue/form";
 import { DxButton, DxNumberBox } from "devextreme-vue";
-import { reactive } from "@vue/reactivity";
+import { reactive, ref } from "@vue/reactivity";
 import axios from "axios";
 import AdvisorMap from "@/views/AdvisorMap.vue";
 import notify from 'devextreme/ui/notify';
+import {user as userData} from '../authHelper';
 
-const state = reactive({
-  user: store.getters.user as App.Models.User
-});
-
+const user = ref(userData.value);
 
 function saveAddress() {
-  axios.post("/api/profile/address", state.user).then((response) => {
+  axios.post("/api/profile/address", user.value).then((response) => {
     console.log(response.data);
-    store.commit("setUser", {
-      user: response.data as App.Models.User
-    });
-    state.user = response.data;
+
+    user.value = response.data;
     notify("Adresse gespeichert", "success");
   });
 }
@@ -29,7 +24,7 @@ function saveAddress() {
 
 <template>
   <div ref="outer">
-    <h2 class="content-block">Profil {{state.user.name}}</h2>
+    <h2 class="content-block">Profil {{user.name}}</h2>
     <div style="margin: 30px 40px 30px 40px;">
       <div class="flex-row">
         <div class="dx-card flex-cell" style="padding:30px;max-width:400px;">
@@ -42,7 +37,7 @@ function saveAddress() {
                     <DxTextBox
                       label="Straße"
                       style="margin: 10px;"
-                      v-model="state.user.street"
+                      v-model="user.street"
                     />
                   </div>
                   <div>
@@ -50,7 +45,7 @@ function saveAddress() {
                       label="Nr."
                       width="100px"
                       style="margin: 10px;"
-                      v-model="state.user.streetNumber"
+                      v-model="user.streetNumber"
                     />
                   </div>
                 </div>
@@ -61,14 +56,14 @@ function saveAddress() {
                       label="PLZ"
                       width="100px"
                       style="margin: 10px;"
-                      v-model="state.user.zip"
+                      v-model="user.zip"
                     />
                   </div>
                   <div class="flex-cell">
                     <DxTextBox
                       label="Stadt"
                       style="margin: 10px;"
-                      v-model="state.user.city"
+                      v-model="user.city"
                     />
                   </div>
                 </div>
@@ -78,7 +73,7 @@ function saveAddress() {
                     <DxNumberBox
                       label="Beratungsgebiet (m)"
                       style="margin: 10px;"
-                      v-model="state.user.advice_radius"
+                      v-model="user.advice_radius"
                       :show-clear-button="true"
                     />
                   </div>
@@ -92,7 +87,7 @@ function saveAddress() {
                   type="success"
                 />
 
-                <AdvisorMap :advisor="state.user" style="padding-top:30px;"/>
+                <AdvisorMap :advisor="user" style="padding-top:30px;"/>
             </div>
             <div class="flex-cell" style="display:none;">
               <ProfilePictureUpload />
@@ -100,12 +95,12 @@ function saveAddress() {
           </div>
         </div>
         <div class="dx-card flex-cell" style="padding:30px;display:none;">
-          
+
 
         </div>
    <!--  <div class="dx-card flex-cell" style="padding:30px;">
           Test
-        </div>-->   
+        </div>-->
       </div>
     </div>
   </div>

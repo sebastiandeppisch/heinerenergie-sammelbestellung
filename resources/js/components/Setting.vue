@@ -31,7 +31,7 @@ toolbar.push({
 const state = reactive({ value: props.setting.value, dirty: false, toolbar, saving: false });
 
 
-const onValueChanged = (e) => {
+const onValueChanged = (e: { value: string }) => {
   state.dirty = true;
 };
 

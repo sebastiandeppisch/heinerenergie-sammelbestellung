@@ -10,7 +10,12 @@ const props = defineProps<{
 	advice: App.Models.Advice;
 }>();
 
-const emails = ref([]);
+interface Email {
+	id: number;
+	opened: boolean;
+}
+
+const emails = ref<Email[]>([]);
 
 axios.get('/api/advices/' + props.advice.id + '/mails')
 .then(response => {
@@ -21,15 +26,14 @@ axios.get('/api/advices/' + props.advice.id + '/mails')
 	console.error(error);
 });
 
-
-function toggleEmail(id) {
-	const email = this.emails.find(email => email.id === id);
+function toggleEmail(id: number) {
+	const email = emails.value.find(email => email.id === id);
 	if (email) {
 		email.opened = !email.opened;
 	}
 }
 
-function parseEmail(emailString) {
+function parseEmail(emailString: Record<string, string | null>) {
 	return Object.entries(emailString)
 		.map(([email, name]) => name ? `${name} <${email}>` : email)
 		.join(', ');

@@ -5,7 +5,7 @@ const Breakpoints = {
   Large: "(min-width: 1280px)"
 };
 
-let handlers = [];
+let handlers: any[] = [];
 const xSmallMedia = window.matchMedia(Breakpoints.XSmall);
 const smallMedia = window.matchMedia(Breakpoints.Small);
 const mediumMedia = window.matchMedia(Breakpoints.Medium);
@@ -24,13 +24,8 @@ export const sizes = () => {
     "screen-medium": mediumMedia.matches,
     "screen-large": largeMedia.matches
   };
-};
+}
 
-export const subscribe = handler => handlers.push(handler);
-
-export const unsubscribe = handler => {
-  handlers = handlers.filter(item => item !== handler);
-};
 
 export const getScreenSizeInfo = () => {
   const screenSizes = sizes();
@@ -38,6 +33,6 @@ export const getScreenSizeInfo = () => {
   return {
     isXSmall: screenSizes["screen-x-small"],
     isLarge: screenSizes["screen-large"],
-    cssClasses: Object.keys(screenSizes).filter(cl => screenSizes[cl])
+    cssClasses: Object.keys(screenSizes).filter(cl => (screenSizes as any)[cl])
   };
 }

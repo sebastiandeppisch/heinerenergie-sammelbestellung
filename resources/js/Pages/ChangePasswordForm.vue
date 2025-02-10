@@ -40,11 +40,13 @@ async function onSubmit() {
     router.get('login-form');
     notify('Dein Passwort wurde geändert', 'success');
   } else {
-    notify(result.message, 'error', 2000);
+    if (!result.isOk && 'message' in result) {
+      notify(result.message, 'error', 2000);
+    }
   }
 }
 
-function confirmPassword (e) {
+function confirmPassword (e: { value: string | number }) {
   return e.value.toString() === formData.password.toString();
 }
 

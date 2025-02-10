@@ -65,11 +65,11 @@ const adviceOrDirectOrderIsSet = ref(false);
 
 function adviceOrDirectOrderChanged(e: any) {
   if(e.addedItems[0].id === 2){
-    advice.value.type = 2
-  }else{
-    advice.value.type = null;
+    advice.value.type = 2;
+  } else {
+    advice.value.type = 0;
   }
-  adviceOrDirectOrderIsSet.value = true
+  adviceOrDirectOrderIsSet.value = true;
 }
 
 function phoneOrHomeChanged(e: any) {

@@ -41,7 +41,7 @@ import logo from '../../img/logo.png';
               height="100%"
               styling-mode="text"
             >
-              <user-panel :email="null" :menu-items="[]" menu-mode="context" />
+              <user-panel :email="''" :menu-items="[]" menu-mode="context" />
             </dx-button>
           </div>
         </template>

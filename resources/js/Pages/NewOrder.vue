@@ -27,10 +27,10 @@ import OrderSaved from '../components/OrderSaved.vue'
 import {formatPrice, formatPriceCell, notifyError} from '../helpers'
 import { ValidationResult } from 'devextreme/ui/validation_group';
 
-import { useStore } from '../store';
 import auth from '../auth';
 import SettingHtml from '../components/SettingHtml.vue';
 import { usePage } from '@inertiajs/vue3';
+import { email as emailReactive } from '../authHelper';
 
 type Product = App.Models.Product;
 type Order = App.Models.Order;
@@ -41,11 +41,9 @@ const blocked = ref(true);
 
 let password = "";
 
-auth.initLogin().then(done => {
-  if(auth.loggedIn()){
-    blocked.value = false;
-  }
-});
+if(auth.loggedIn()){
+  blocked.value = false;
+}
 
 try{
   const urlParams = new URLSearchParams(window.location.search);
@@ -61,13 +59,10 @@ try{
   }, 1000);
 }
 
-const email = computed(() => {
-  console.log(useStore().getters.email);
-  return useStore().getters.email;
-})
+const email = emailReactive.value;
 
 const advisorUrl = computed(() => {
-  return window.location.protocol + "//" + window.location.hostname + "/sammelbestellung?" + (new URLSearchParams({formdata: JSON.stringify({advisorEmail: useStore().getters.email})}).toString()) 
+  return window.location.protocol + "//" + window.location.hostname + "/sammelbestellung?" + (new URLSearchParams({formdata: JSON.stringify({advisorEmail: email})}).toString()) 
 })
 
 
@@ -158,10 +153,9 @@ let orderItemsDatasource = new DataSource({
         if(item === undefined){
           reject("item not found");
         }
-        if(values.quantity === null){
-          values.quantity = 0;
+        if (item && values.quantity !== undefined) {
+          item.quantity = values.quantity;
         }
-        item.quantity = values.quantity;
         return resolve(item);
       })
     },
@@ -189,7 +183,7 @@ window.onresize = () => {
 }
 checkWidth();
 
-function passwordChanged(data){
+function passwordChanged(data: { value: string }){
   axios.get('api/checkpassword', {
     params: {
       password : data.value

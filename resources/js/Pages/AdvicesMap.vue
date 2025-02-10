@@ -19,7 +19,6 @@ import LaravelDataSource from "../LaravelDataSource";
 //import 'leaflet/dist/leaflet.css';
 import L from "leaflet";
 import { latLng } from "leaflet";
-import { store } from "../store";
 import AdviceTypes from "../AdviceTypes";
 import axios from "axios";
 import { AdaptTableHeight } from "../helpers";
@@ -101,14 +100,19 @@ function userCanOpen(advice: App.Models.Advice){
   return false;
 }
 
-function zoomChanged(e){
+function zoomChanged(e: number){
   map.zoom = e;
 }
 
-function centerChanged(e){
+function centerChanged(e: { lat?: number; lng?: number }){
   if('lat' in e === false || 'lng' in e === false){
     return;
   }
+
+  if(e.lat === undefined || e.lng === undefined){
+    return;
+  }
+
   map.center.lat = e.lat;
   map.center.lng = e.lng;
 }
@@ -142,12 +146,12 @@ function runSearch(){
 
 <template>
   <div ref="outer">
-  <div :style="{height: reactiveHeight.height+122 + 'px', width: '100%'}">
+  <div :style="{height: reactiveHeight.height+170 + 'px', width: '100%'}">
     <LMap
       ref="map"
       :zoom="map.zoom"
       @update:zoom="zoomChanged"
-      :center="map.center"
+      :center="[map.center.lat, map.center.lng]"
       @update:center="centerChanged"
       :minZoom="3"
       :maxZoom="18"

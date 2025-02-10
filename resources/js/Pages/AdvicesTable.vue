@@ -60,7 +60,7 @@ const newadvice = reactive({
   advisor_id: user.value.id
 });
 
-function radioBoxLayout(data: any) {
+function radioBoxLayout({ name }: { name: 'Home'|'Virtual'|'DirectOrder' }) {
   const icons = {
     Home: 'home',
     Virtual: 'tel',
@@ -72,8 +72,6 @@ function radioBoxLayout(data: any) {
     Virtual: 'Beratung per Telefon',
     DirectOrder: 'Direktbestellung'
   }
-
-  const name = data.name as string;
 
   return `<i style="font-size:1.5em;" class="dx-icon-${icons[name]}" title='${helpText[name]}'></i>`;
 };
@@ -96,7 +94,7 @@ function openStatus(){
   r.popupVisible = true;
 }
 
-function openAdvice(e){
+function openAdvice(e: { row: any }){
   router.get('/advices/' + e.row.data.id);
 }
 
@@ -110,12 +108,12 @@ function assignAdvice(id: number){
   });
 }
 
-function isOpenVisible(e){
+function isOpenVisible(e: { row: any }): boolean {
   const advice = e.row.data as App.Models.Advice;
   return userCanEdit(advice);
 }
 
-function rowCanBeEdited(e){
+function rowCanBeEdited(e: { row: any }): boolean {
   const advice = e.row.data as App.Models.Advice;
   return userCanEdit(advice);
 }

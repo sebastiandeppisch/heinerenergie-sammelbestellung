@@ -5,12 +5,10 @@ import DxScrollView from "devextreme-vue/scroll-view";
 import HeaderToolbar from "@/layouts/HeaderToolbar.vue";
 import SideNavMenu from "@/layouts/SideNavMenu.vue";
 import { computed, ref, watch, reactive} from 'vue';
-import { store } from '../store'
 import { usePage } from "@inertiajs/vue3";
 
 import {getScreenSizeInfo} from '../utils/media-query';
 
-import AppFooter from "@/layouts/AppFooter.vue";
 import { onMounted } from 'vue';
 
 const screen = reactive({ getScreenSizeInfo: {} as { isXSmall: boolean; isLarge: boolean; cssClasses: string[] } });
@@ -30,7 +28,7 @@ const scrollViewRef = ref();
 const menuOpened = ref(isLarge.value);
 const menuTemporaryOpened = ref(false);
 
-function toggleMenu(e) {
+function toggleMenu(e: { event: PointerEvent }) {
   const pointerEvent = e.event;
   pointerEvent.stopPropagation();
   if (menuOpened.value) {

@@ -53,7 +53,7 @@ const {order} = defineProps<Props>();
 
             <tbody>
               <tr v-for="productItem in order.order_items">
-                <td>{{productItem.product.name}}</td>
+                <td>{{productItem.product?.name ?? 'Unbekanntes Produkt'}}</td>
                 <td style="text-align: right">{{productItem.quantity}}</td>
               </tr>
             </tbody>
@@ -62,7 +62,7 @@ const {order} = defineProps<Props>();
           <div class="dx-field">
             <div class="dx-field-label">Gesamtpreis</div>
             <div class="dx-field-value-static">
-              {{formatPrice(order.price)}}
+              {{formatPrice(order.price ?? 0)}}
             </div>
           </div>
         </div>

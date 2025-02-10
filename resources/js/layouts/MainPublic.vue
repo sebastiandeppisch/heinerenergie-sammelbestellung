@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { subscribe, unsubscribe, getScreenSizeInfo} from "../utils/media-query";
+import { getScreenSizeInfo} from "../utils/media-query";
 import {
   reactive,
   onMounted,

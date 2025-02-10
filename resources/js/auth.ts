@@ -1,16 +1,13 @@
 import axios, { AxiosError } from 'axios'
 import notify from 'devextreme/ui/notify';
-import {store} from './store';
+import { isLoggedIn } from './authHelper';
 export default {
-  async logIn(email, password) {
+  async logIn(email: string, password: string) {
     try {
       // Send request
       const user = await axios.post('api/login', {
         email, password
       }).then(response => response.data);
-      store.commit('setUser', {
-        user: user as App.Models.User
-      })
       return {
         isOk: true
       }
@@ -26,21 +23,19 @@ export default {
   async logOut() {
     await axios.post('api/logout').then(response => {
       notify('Du wurdest ausgeloggt', 'success');
-      store.commit('unsetUser');
     }).catch(error =>  {
       notify('Fehler beim ausloggen', 'error');
     })
   },
 
-  async resetPassword(email) {
-    try{
-      await axios.post('api/forgot-password', {
-        email
-      })
+  async resetPassword(email: string) {
+    return axios.post('api/forgot-password', {
+      email
+    }).then(() => {
       return {
         isOk: true
-      };
-    }catch(error){
+      }
+    }).catch(error => {
       let message = '';
       if(error.response && error.response.status === 422){
         for(const prop in error.response.data.errors){
@@ -56,20 +51,19 @@ export default {
         isOk: false,
         message
       }
-    }
+    })
   },
-  async changePassword(email, password, password_confirmation, token) {
-    try {
-      await axios.post('api/reset-password', {
-        email,
-        password,
-        password_confirmation,
-        token
-      })
+  async changePassword(email: string, password: string, password_confirmation: string, token: string) {
+    return axios.post('api/reset-password', {
+      email,
+      password,
+      password_confirmation,
+      token
+    }).then(() => {
       return {
         isOk: true
       };
-    }catch(error){
+    }).catch((error) => {
       let message = '';
       if(error.response && error.response.status === 422){
         for(const prop in error.response.data.errors){
@@ -84,9 +78,10 @@ export default {
         message
       }
     }
+  );
   },
 
-  async createAccount(email, password) {
+  async createAccount(email: string, password: string) {
     try {
       // Send request
       console.log(email, password);
@@ -102,36 +97,7 @@ export default {
       };
     }
   },
-
-  async initLogin(){
-    if(store.getters.isLoggedIn){
-      return;
-    }
-    if('user' in window){
-      const user = (window as any).user as App.Models.User;
-      store.commit('setUser', {
-        user
-      })
-    }else{
-      await axios.get('api/login').then(response => response.data).then(response => {
-        if(store !== undefined){
-          if(response.isLoggedIn){
-            store.commit('setUser', {
-              user: response.user as App.Models.User
-            })
-          }else{
-            store.commit('unsetUser');
-          }
-        }
-      })
-    }
-   
-  },
-
   loggedIn(){
-    if(store !== undefined){
-      return store.getters.isLoggedIn;
-    }
-    return false;
+    return isLoggedIn.value;
   }
 };

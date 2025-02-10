@@ -38,9 +38,13 @@ function checkForm() {
   }
 }
 
-function houseTypeChanged(e) {
+function houseTypeChanged(e: { addedItems: Array<{ id: number }> }) {
   console.log(e.addedItems[0].id);
   advice.value.houseType = e.addedItems[0].id;
+}
+
+function handleLandlordChange(e: { addedItems: Array<{ id: number }> }) {
+  advice.value.landlordExists = e.addedItems[0].id === 0;
 }
 
 const advice = computed<App.Models.Advice>({
@@ -76,7 +80,7 @@ const advice = computed<App.Models.Advice>({
             ]"
             key-expr="id"
             width="100%"
-            @selection-changed="(e) => (advice.landlordExists = e.addedItems[0].id === 0)"
+            @selection-changed="handleLandlordChange"
           />
         </div>
       </div>

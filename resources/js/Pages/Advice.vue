@@ -9,9 +9,10 @@ import notify from 'devextreme/ui/notify';
 import axios from 'axios';
 import DxTagBox from 'devextreme-vue/tag-box';
 import DxButton from 'devextreme-vue/button';
-import { store } from '../store';
 import DxDropDownButton from 'devextreme-vue/drop-down-button';
 import AdviceMails from '../components/AdviceMails.vue';
+import { router } from '@inertiajs/vue3';
+import { user } from '../authHelper';
 type Advice = App.Models.Advice;
 
 
@@ -34,7 +35,7 @@ const advisors = new LaravelDataSource('/api/users');
 
 const sharedIds = ref([] as number[]);
 
-const advisor = store.state.user;
+const advisor = user.value;
 
 const navigationTypes = [
   { id: 'google', name: 'Google Maps' },
@@ -43,7 +44,7 @@ const navigationTypes = [
 ];
 
 
-function radioBoxLayout(data: any) {
+function radioBoxLayout({ name }: { name: 'Home'|'Virtual'|'DirectOrder' }) {
   const icons = {
     Home: 'home',
     Virtual: 'tel',
@@ -56,12 +57,13 @@ function radioBoxLayout(data: any) {
     DirectOrder: 'Direktbestellung'
   }
 
-  return `<i style="font-size:1.5em;" class="dx-icon-${icons[data.name]}" title='${helpText[data.name]}'></i>`;
+  return `<i style="font-size:1.5em;" class="dx-icon-${icons[name]}" title='${helpText[name]}'></i>`;
 };
 
 function onSubmit(){
-  advicesDataSource.store().update(advice.id, advice.value).then((result) => {
+  advicesDataSource.store().update(advice.id, advice).then((result) => {
     notify("Beratung gespeichert", "success", 2000);
+    router.reload();
   }).catch((error) => {
     notify(error, "error", 2000);
   });
@@ -82,7 +84,7 @@ function sendOrderLink() {
     })
 }
 
-function openNavigation(e){
+function openNavigation(e: any){
   const type = e.itemData.id;
   const address = advice.street + ' ' + advice.streetNumber + ', ' + advice.zip + ' ' + advice.city;
   console.log(type, address)

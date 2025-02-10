@@ -22,21 +22,21 @@ interface Props {
 const props = defineProps<Props>();
 
 
-const productDownloadsGrid = ref(null);
+const productDownloadsGrid = ref();
 
 const productDownloads = new LaravelDataSource('api/products/' + props.product.id + '/downloads');
 
-let url = null;
+let url: string|null = null;
 
-function fileUploaded(e){
+function fileUploaded(e: any){
   const json = JSON.parse(e.request.response);
   url = json.url;
 
-  const grid = productDownloadsGrid.value.instance ;
+  const grid = productDownloadsGrid.value.instance;
   grid.addRow()
 }
 
-function initNewRow(args){
+function initNewRow(args: any){
   if(url !== null){
     args.data.url = url;
   }

@@ -22,12 +22,6 @@ const formData = reactive({
 });
 const loading = ref(false);
 
-auth.initLogin().then(done => {
-  if(auth.loggedIn()){
-    router.visit('/backend');
-  }
-});
-
 async function onSubmit() {
   const { email, password } = formData;
   loading.value = true;

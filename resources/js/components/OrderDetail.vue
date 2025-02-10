@@ -42,7 +42,7 @@ const products = new LaravelLookupSource('api/bulkorders/' + props.order.bulk_or
 const advisors = new LaravelLookupSource('api/users');
 
 function calculateSummary(options: CustomSummaryInfo){
-  options.totalValue = formatPrice(props.order.price);
+  options.totalValue = formatPrice(props.order.price ?? 0);
 }
 
 function updateData() {

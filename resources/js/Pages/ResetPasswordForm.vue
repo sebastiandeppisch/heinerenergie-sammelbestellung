@@ -35,7 +35,9 @@ async function onSubmit() {
     router.get('login-form');
     notify(notificationText, "success", 2500);
   } else {
-    notify(result.message, "error", 2000);
+    if (!result.isOk && 'message' in result) {
+      notify(result.message, "error", 2000);
+    }
   }
 }
 
