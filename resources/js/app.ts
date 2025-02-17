@@ -5,9 +5,9 @@ import './themes/generated/theme.base.css';
 import './themes/generated/theme.additional.css';
 import { createApp, h, DefineComponent } from 'vue'
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import { ZiggyVue } from 'ziggy-js';
 
 import { createInertiaApp } from '@inertiajs/vue3'
-
 
 import library from './fontawesome'
 library.add()
@@ -31,6 +31,7 @@ createInertiaApp({
 	setup({ el, App, props, plugin }) {
 		const app = createApp({ render: () => h(App, props) })
 		app.use(plugin)
+		app.use(ZiggyVue)
 		app.mount(el)
 		//TODO add Ziggy
 

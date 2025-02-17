@@ -8,6 +8,7 @@
     <title>Heinerenergie Sammelbestellung</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/js/app.ts'])
+    @routes
     @inertiaHead
   </head>
   <body class="dx-viewport">
