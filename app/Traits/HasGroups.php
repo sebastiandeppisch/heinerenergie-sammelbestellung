@@ -13,7 +13,7 @@ trait HasGroups
      */
     public function groups(): BelongsToMany
     {
-        return $this->belongsToMany(Group::class, 'groups_users')
+        return $this->belongsToMany(Group::class)
             ->withPivot('is_admin')
             ->withTimestamps();
     }
@@ -23,7 +23,7 @@ trait HasGroups
      */
     public function administeredGroups(): BelongsToMany
     {
-        return $this->belongsToMany(Group::class, 'groups_users')
+        return $this->belongsToMany(Group::class)
             ->wherePivot('is_admin', true)
             ->withTimestamps();
     }

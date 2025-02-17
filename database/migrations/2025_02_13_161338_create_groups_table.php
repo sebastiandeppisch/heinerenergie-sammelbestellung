@@ -24,7 +24,7 @@ return new class extends Migration
             $table->boolean('accepts_transfers')->default(true);
         });
 
-        Schema::create('groups_users', function (Blueprint $table) {
+        Schema::create('group_user', function (Blueprint $table) {
             $table->id();
 
             $table->foreignIdFor(Group::class)->constrained();
@@ -50,7 +50,7 @@ return new class extends Migration
             $table->dropColumn('group_id');
         });
 
-        Schema::dropIfExists('groups_users');
+        Schema::dropIfExists('group_user');
         Schema::dropIfExists('groups');
     }
 };

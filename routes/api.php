@@ -16,6 +16,7 @@ use App\Http\Controllers\StoreAdviceController;
 use App\Http\Controllers\AdviceStatusController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductDownloadController;
+use App\Http\Controllers\Api\GroupUserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,6 +36,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('users', UserController::class);
     Route::resource('advices', AdviceController::class);
     Route::resource('advicestatus', AdviceStatusController::class);
+
+    Route::apiResource('groups.users', GroupUserController::class);
 
     Route::post('advices/{advice}/advisors', [AdviceController::class, 'setAdvisors']);
 

@@ -30,7 +30,7 @@ class Group extends Model
      */
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'groups_users')
+        return $this->belongsToMany(User::class)
             ->withPivot('is_admin')
             ->withTimestamps();
     }
@@ -40,7 +40,7 @@ class Group extends Model
      */
     public function admins(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'groups_users')
+        return $this->belongsToMany(User::class)
             ->wherePivot('is_admin', true)
             ->withTimestamps();
     }
