@@ -3,7 +3,9 @@
 namespace App\Data;
 
 use Spatie\LaravelData\Data;
+use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
+#[TypeScript]
 class GroupUserData extends Data
 {
     public function __construct(
@@ -13,4 +15,4 @@ class GroupUserData extends Data
         public bool $is_admin,
     ) {
     }
-} 
+}

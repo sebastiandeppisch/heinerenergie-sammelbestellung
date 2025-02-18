@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Data\GroupData;
+use App\Http\Requests\Group\StoreGroupRequest;
+use App\Http\Requests\Group\UpdateGroupRequest;
 use App\Models\Group;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -15,70 +17,99 @@ class GroupController extends Controller
         $this->authorizeResource(Group::class);
     }
 
-    /**
-     * Show the groups management page
-     */
-    public function index()
+    private function showPage(iterable $groups, bool $canCreateRootGroup, ?GroupData $selectedGroup)
     {
         return Inertia::render('Groups/Index', [
-            'groups' => Group::with(['parent', 'children', 'users'])
-                ->withCount(['users', 'advices'])
-                ->get()
-                ->map(fn (Group $group) => [
-                    'id' => $group->id,
-                    'name' => $group->name,
-                    'description' => $group->description,
-                    'logo_path' => $group->logo_path ? $group->logo_path : null,
-                    'parent_id' => $group->parent_id,
-                    'accepts_transfers' => $group->accepts_transfers,
-                    'users_count' => $group->users_count,
-                    'advices_count' => $group->advices_count,
-                ]),
+            'groups' => $groups,
+            'canCreateRootGroup' => $canCreateRootGroup,
+            'selectedGroup' => $selectedGroup
         ]);
     }
-
-    /**
-     * Show a specific group
-     */
-    public function show(Group $group)
+    public function index(Request $request)
     {
-        return Inertia::render('Groups/Index', [
-            'groups' => Group::with(['parent', 'children', 'users'])
+        return $this->showPage(
+            Group::with(['parent', 'children', 'users'])
                 ->withCount(['users', 'advices'])
                 ->get()
-                ->map(fn (Group $group) => [
-                    'id' => $group->id,
-                    'name' => $group->name,
-                    'description' => $group->description,
-                    'logo_path' => $group->logo_path ? $group->logo_path : null,
-                    'parent_id' => $group->parent_id,
-                    'accepts_transfers' => $group->accepts_transfers,
-                    'users_count' => $group->users_count,
-                    'advices_count' => $group->advices_count,
-                ]),
-            'selectedGroup' => [
-                'id' => $group->id,
-                'name' => $group->name,
-                'description' => $group->description,
-                'logo_path' => $group->logo_path ? $group->logo_path : null,
-                'parent_id' => $group->parent_id,
-                'accepts_transfers' => $group->accepts_transfers,
-            ],
-        ]);
+                ->map(fn (Group $group) => GroupData::fromModel($group)),
+            $request->user()->can('create', [Group::class]),
+            null
+        );
     }
 
-    /**
-     * Delete a group
-     */
+    public function show(Group $group, Request $request)
+    {
+        $expandGroups = collect();
+        $currentGroup = $group;
+
+        while ($currentGroup->parent_id) {
+            $expandGroups->push($currentGroup->parent_id);
+            $currentGroup = $currentGroup->parent;
+        }
+
+        $groups = Group::with(['parent', 'children', 'users'])
+            ->withCount(['users', 'advices'])
+            ->get()
+            ->map(fn (Group $group) => GroupData::fromModel($group));
+
+        $groups = $groups->map(function (GroupData $groupData) use ($expandGroups, $group) {
+            $groupData = $groupData->toArray();
+            $groupData['isExpanded'] = $expandGroups->contains($groupData['id']);
+            $groupData['isSelected'] = $groupData['id'] === $group->id;
+            return $groupData;
+        });
+
+        return $this->showPage(
+            $groups,
+            $request->user()->can('create', [Group::class]),
+            GroupData::fromModel($group)
+        );
+    }
+
+    public function store(StoreGroupRequest $request)
+    {
+        $validated = $request->validated();
+
+        $group = Group::create($validated);
+
+        return redirect()->route('groups.show', $group)->with('success', 'Initiative erfolgreich erstellt.');
+    }
+
+    public function update(UpdateGroupRequest $request, Group $group)
+    {
+        $validated = $request->validated();
+
+        if ($request->hasFile('logo')) {
+            if ($group->logo_path) {
+                Storage::disk('public')->delete($group->logo_path);
+            }
+            $validated['logo_path'] = $request->file('logo')->store('group-logos', 'public');
+        }
+
+        if ($request->remove_logo) {
+            if ($group->logo_path) {
+                Storage::disk('public')->delete($group->logo_path);
+            }
+            $validated['logo_path'] = null;
+        }
+
+        $group->update($validated);
+
+        return redirect()->back()->with('success', 'Initiative erfolgreich aktualisiert.');
+    }
+
     public function destroy(Group $group)
     {
-        // Delete logo if exists
-        if ($group->logo_path) {
-            Storage::disk('public')->delete($group->logo_path);
-        }
+        $parent = $group->parent;
 
         $group->delete();
 
-        return redirect()->back()->with('success', 'Initiative erfolgreich gelöscht.');
+        if ($parent) {
+            $route = redirect()->route('groups.show', $parent);
+        } else {
+            $route = redirect()->route('groups.index');
+        }
+
+        return $route->with('success', 'Initiative erfolgreich gelöscht.');
     }
-} 
+}

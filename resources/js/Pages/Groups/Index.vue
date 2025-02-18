@@ -1,0 +1,116 @@
+<template>
+    <div class="py-12">
+      <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <!-- Title section -->
+        <div class="flex justify-between items-center">
+          <h2 class="text-xl font-semibold text-gray-800">Initiativen-Struktur</h2>
+          <div class="flex items-center gap-4">
+            <DxButton
+              text="Neue Initiative anlegen"
+              icon="plus"
+              stylingMode="contained"
+              @click="showCreateModal = true"
+            />
+          </div>
+        </div>
+
+        <!-- Content section -->
+        <div class="flex gap-6">
+          <!-- Tree view card -->
+          <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg shrink-0">
+            <div class="p-6">
+              <GroupTree
+                :groups="groups"
+                :selected-group="selectedGroup"
+              />
+            </div>
+          </div>
+
+          <!-- Details card -->
+          <div v-if="selectedGroup" class="bg-white overflow-hidden shadow-sm sm:rounded-lg flex-grow">
+            <div class="p-6">
+              <DxTabPanel
+                :selected-index="selectedTabIndex"
+                @selection-changed="onTabSelectionChanged"
+              >
+                <DxItem 
+                  title="Stammdaten"
+                  icon="info"
+                >
+                  <template #default>
+                    <GroupDetails
+                      :group="selectedGroup"
+                    />
+                  </template>
+                </DxItem>
+                <DxItem 
+                  title="Berater:innen"
+                  icon="user"
+                >
+                  <template #default>
+                    <GroupUsers
+                      :group="selectedGroup"
+                    />
+                  </template>
+                </DxItem>
+                <DxItem 
+                  title="Beratungsgebiet"
+                  icon="map"
+                >
+                  <template #default>
+                    <div class="p-6">
+                      TODO: Beratungsgebiet
+                    </div>
+                  </template>
+                </DxItem>
+              </DxTabPanel>
+            </div>
+          </div>
+          <div v-else class="bg-white overflow-hidden shadow-sm sm:rounded-lg flex-grow">
+            <div class="p-6 text-gray-500 text-center">
+              Bitte wähle eine Initiative aus.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <DxPopup
+      v-model:visible="showCreateModal"
+      :title="'Neue Initiative anlegen'"
+      :show-title="true"
+      :width="600"
+      :height="'auto'"
+      :show-close-button="true"
+    >
+      <CreateGroupForm
+        :parent-groups="groups"
+        :parent-required="!canCreateRootGroup"
+        @close="showCreateModal = false"
+      />
+    </DxPopup>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import { DxTabPanel, DxItem } from 'devextreme-vue/tab-panel'
+import { DxPopup } from 'devextreme-vue/popup'
+import GroupTree from '@/Components/Groups/GroupTree.vue'
+import GroupDetails from '@/Components/Groups/GroupDetails.vue'
+import GroupUsers from '@/Components/Groups/GroupUsers.vue'
+import { DxButton } from 'devextreme-vue'
+import CreateGroupForm from '@/Components/Groups/CreateGroupForm.vue'
+type GroupData = App.Data.GroupData;
+
+const props = defineProps<{
+  groups: GroupData[],
+  selectedGroup: GroupData | null,
+  canCreateRootGroup: boolean,
+}>();
+
+const showCreateModal = ref(false)
+const selectedTabIndex = ref(0)
+
+const onTabSelectionChanged = (e: any) => {
+  selectedTabIndex.value = e.component.option('selectedIndex')
+}
+</script>

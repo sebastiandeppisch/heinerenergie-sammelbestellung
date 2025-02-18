@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Data\GroupUserData;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreGroupUserRequest;
+use App\Http\Requests\UpdateGroupUserRequest;
 use App\Models\Group;
 use App\Models\User;
-use Illuminate\Http\Request;
-use Spatie\LaravelData\DataCollection;
 
 class GroupUserController extends Controller
 {
@@ -51,28 +51,15 @@ class GroupUserController extends Controller
     /**
      * Add a user to a group
      */
-    public function store(Request $request, Group $group)
+    public function store(StoreGroupUserRequest $request, Group $group)
     {
-        $this->authorize('manageUsers', $group);
+        $validated = $request->validated();
 
-        $validated = $request->validate([
-            'user_id' => [
-                'required',
-                'exists:users,id',
-                function ($attribute, $value, $fail) use ($group) {
-                    if ($group->users()->where('users.id', $value)->exists()) {
-                        $fail('The user is already a member of this group.');
-                    }
-                },
-            ],
-            'is_admin' => 'boolean',
-        ]);
-
-        $group->users()->attach($validated['user_id'], [
+        $group->users()->attach($validated['id'], [
             'is_admin' => $validated['is_admin'] ?? false,
         ]);
 
-        $user = User::findOrFail($validated['user_id']);
+        $user = User::findOrFail($validated['id']);
         $user->load(['groups' => function($query) use ($group) {
             $query->where('groups.id', $group->id);
         }]);
@@ -83,13 +70,9 @@ class GroupUserController extends Controller
     /**
      * Update a user's role in a group
      */
-    public function update(Request $request, Group $group, User $user): GroupUserData
+    public function update(UpdateGroupUserRequest $request, Group $group, User $user): GroupUserData
     {
-        $this->authorize('manageUsers', $group);
-
-        $validated = $request->validate([
-            'is_admin' => 'required|boolean',
-        ]);
+        $validated = $request->validated();
 
         $group->users()->updateExistingPivot($user->id, [
             'is_admin' => $validated['is_admin'],

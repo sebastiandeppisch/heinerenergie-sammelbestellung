@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\Api\GroupUserController;
 use App\Http\Controllers\BulkOrder;
 use App\Http\Controllers\BulkOrderController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\GroupController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -33,6 +35,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/backend', function () {
         return redirect()->route('dashboard');
     })->name('backend');
+
+    Route::resource('groups', GroupController::class);
 });
 
 Route::get('/change-password', [PageController::class, 'changePassword'])->name('password.reset');

@@ -1,3 +1,5 @@
+import { route } from "ziggy-js"
+
 export default [
   {
     text: "Dashboard",
@@ -15,6 +17,12 @@ export default [
     text: "Beratungen - Karte",
     icon: "map",
     path: "/advicesmap",
+    admin: false
+  },
+  {
+    text: "Initiativen",
+    path: "/groups",
+    icon: "group",
     admin: false
   },
   {

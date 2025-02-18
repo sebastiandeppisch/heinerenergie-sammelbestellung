@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Group extends Model
 {
@@ -108,5 +109,18 @@ class Group extends Model
         }
 
         return $descendants;
+    }
+
+    public function getFullLogoPathAttribute()
+    {
+        return $this->logo_path ? Storage::url($this->logo_path) : null;
+    }
+
+    public function delete()
+    {
+        if ($this->logo_path) {
+            Storage::delete($this->logo_path);
+        }
+        parent::delete();
     }
 }
