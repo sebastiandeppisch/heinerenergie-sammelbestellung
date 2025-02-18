@@ -35,6 +35,7 @@ import ArrayDataSource from "devextreme/data/array_store";
 import { isAdmin, user } from "../authHelper";
 import { router} from "@inertiajs/vue3";
 import Store from "devextreme/data/abstract_store";
+import ArrayStore from "devextreme/data/array_store";
 const emit = defineEmits(["selectAdviceId"])
 
 const advices = new LaravelDataSource("api/advices");
@@ -134,9 +135,11 @@ function userCanEdit(advice: App.Models.Advice){
   return false;
 }
 
-function sortedAdvisors(e: { value: any[] }): CustomStore {
+function sortedAdvisors(e: { value: any[] }): Store {
   if(!e.value){
-    throw new Error('No value provided');
+    return new ArrayStore({
+      data: [],
+    });
   }
   return new CustomStore({
     key: "id",
