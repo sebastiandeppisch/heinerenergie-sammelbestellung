@@ -23,16 +23,12 @@ beforeEach(function () {
     ]);
 });
 
-test('can create group with logo', function () {
+test('can create group', function () {
     actingAs($this->admin);
-
-    $logo = UploadedFile::fake()->image('logo.jpg');
 
     $response = post(route('groups.store'), [
         'name' => 'New Group',
         'description' => 'New Description',
-        'accepts_transfers' => true,
-        'logo' => $logo,
     ]);
 
     $response->assertRedirect();
@@ -40,12 +36,7 @@ test('can create group with logo', function () {
 
     expect(Group::where('name', 'New Group')->first())
         ->name->toBe('New Group')
-        ->description->toBe('New Description')
-        ->logo_path->not->toBeNull();
-
-    Storage::disk('public')->assertExists(
-        Group::where('name', 'New Group')->first()->logo_path
-    );
+        ->description->toBe('New Description');
 });
 
 test('can update group with new logo', function () {
@@ -90,7 +81,7 @@ test('validates logo file size and type', function () {
     // Test file too large (over 1MB)
     $largeLogo = UploadedFile::fake()->image('large-logo.jpg')->size(2000);
 
-    $response = post(route('groups.store'), [
+    $response = put(route('groups.update', $this->group), [
         'name' => 'New Group',
         'description' => 'New Description',
         'logo' => $largeLogo,
@@ -101,7 +92,7 @@ test('validates logo file size and type', function () {
     // Test invalid file type
     $invalidFile = UploadedFile::fake()->create('document.pdf', 500, 'application/pdf');
 
-    $response = post(route('groups.store'), [
+    $response = put(route('groups.update', $this->group), [
         'name' => 'New Group',
         'description' => 'New Description',
         'logo' => $invalidFile,
@@ -118,6 +109,8 @@ test('deleting group removes logo', function () {
         'logo_path' => $logo->store('group-logos', 'public'),
     ]);
     $logoPath = $this->group->logo_path;
+
+    Storage::disk('public')->assertExists($logoPath);
 
     $response = delete(route('groups.destroy', $this->group));
 

@@ -52,7 +52,7 @@ test('non-admin cannot list users in a group', function () {
 test('admin can add user to group', function () {
     actingAs($this->admin)
         ->post("/api/groups/{$this->group->id}/users", [
-            'user_id' => $this->user->id,
+            'id' => $this->user->id,
             'is_admin' => false
         ])
         ->assertOk()
@@ -77,7 +77,7 @@ test('admin can add user to group', function () {
 test('admin can add user as admin to group', function () {
     actingAs($this->admin)
         ->post("/api/groups/{$this->group->id}/users", [
-            'user_id' => $this->user->id,
+            'id' => $this->user->id,
             'is_admin' => true
         ])
         ->assertOk()

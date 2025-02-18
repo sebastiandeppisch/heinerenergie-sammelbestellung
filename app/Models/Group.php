@@ -119,7 +119,7 @@ class Group extends Model
     public function delete()
     {
         if ($this->logo_path) {
-            Storage::delete($this->logo_path);
+            Storage::disk('public')->delete($this->logo_path);
         }
         parent::delete();
     }
