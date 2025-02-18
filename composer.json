@@ -19,6 +19,7 @@
         "plesk/composer-command-info": "~1.1.0",
         "plesk/ext-laravel-integration": "^7.0",
         "spatie/laravel-data": "^3.12",
+        "spatie/laravel-typescript-transformer": "^2.5",
         "tightenco/ziggy": "^2.5",
         "wnx/laravel-sends": "^2.4"
     },
