@@ -17,12 +17,21 @@ class AdvicePolicy
 
     public function view(User $user, Advice $advice)
     {
-        return $this->permission($user, $advice);
+        // Global admins can view any advice
+        if ($user->isActingAsAdmin()) {
+            return true;
+        }
+
+        // Get all groups the user belongs to
+        $userGroups = $user->groups()->select('groups.id')->pluck('groups.id');
+
+        // Check if the advice belongs to any of the user's groups
+        return $userGroups->contains($advice->group_id);
     }
 
     public function viewDataProtected(User $user, Advice $advice)
     {
-        return $this->permission($user, $advice) || $advice->advisor_id === null;
+        return $this->view($user, $advice) || $advice->advisor_id === null;
     }
 
     public function create(User $user)
@@ -32,7 +41,24 @@ class AdvicePolicy
 
     public function update(User $user, Advice $advice)
     {
-        return $this->permission($user, $advice);
+        // Global admins can update any advice
+        if ($user->isActingAsAdmin()) {
+            return true;
+        }
+
+        // Get the user's role in the advice's group
+        $userGroup = $user->groups()
+            ->select('groups.id', 'group_user.is_admin')
+            ->where('groups.id', $advice->group_id)
+            ->first();
+
+        // If user is an admin in this group, they can update
+        if ($userGroup && $userGroup->pivot->is_admin) {
+            return true;
+        }
+
+        // Advisors can only update their own advices
+        return $advice->advisor_id === $user->id;
     }
 
     public function delete(User $user, Advice $advice)
@@ -43,11 +69,6 @@ class AdvicePolicy
 
     public function addAdvisors(User $user, Advice $advice)
     {
-        return $this->permission($user, $advice);
-    }
-
-    private function permission(User $user, Advice $advice)
-    {
-        return $user->isActingAsAdmin() || $advice->advisor_id === $user->id || $advice->shares->contains($user->id);
+        return $this->update($user, $advice);
     }
 }

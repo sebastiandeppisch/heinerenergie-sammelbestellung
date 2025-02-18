@@ -51,7 +51,7 @@ class Advice extends Model implements HasSends
         'placeNotes',
     ];
 
-    protected $appends = ['distance', 'shares_ids', 'can_edit'];
+    protected $appends = ['shares_ids'];
 
     protected $dispatchesEvents = [
         'created' => AdviceCreated::class,
@@ -91,24 +91,6 @@ class Advice extends Model implements HasSends
         return $this->belongsTo(User::class);
     }
 
-    public function getDistanceAttribute(): ?float
-    {
-        if (Auth::user() === null) {
-            return null;
-        }
-
-        return $this->getDistanceToUser(Auth::user());
-    }
-
-    public function getDistanceToUser(User $user): ?float
-    {
-        if($this->coordinate === null || $user->coordinate === null) {
-            return null;
-        }
-        return $this->coordinate->distanceTo($user->coordinate);
-    }
-
-
     public function status(): BelongsTo
     {
         return $this->belongsTo(AdviceStatus::class, 'advice_status_id');
@@ -147,10 +129,5 @@ class Advice extends Model implements HasSends
     public function getNameAttribute(): string
     {
         return sprintf('%s %s', $this->firstName, $this->lastName);
-    }
-
-    public function getCanEditAttribute(): bool
-    {
-        return Auth::user()->can('view', $this);
     }
 }

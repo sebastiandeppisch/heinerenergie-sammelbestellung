@@ -17,7 +17,17 @@ class AdviceFactory extends Factory
     public function definition()
     {
         return [
-            //
+            'firstName' => fake()->firstName(),
+            'lastName' => fake()->lastName(),
+            'street' => fake()->streetName(),
+            'streetNumber' => fake()->buildingNumber(),
+            'zip' => fake()->numberBetween(10000, 99999),
+            'city' => fake()->city(),
+            'email' => fake()->email(),
+            'phone' => fake()->phoneNumber(),
+            'commentary' => fake()->optional()->text(),
+            'long' => fake()->optional()->longitude(),
+            'lat' => fake()->optional()->latitude(),
         ];
     }
 }
