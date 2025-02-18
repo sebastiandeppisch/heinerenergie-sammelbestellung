@@ -68,7 +68,7 @@
           </div>
           <div v-else class="bg-white overflow-hidden shadow-sm sm:rounded-lg flex-grow">
             <div class="p-6 text-gray-500 text-center">
-              Bitte wähle eine Initiative aus.
+              Bitte wähle eine Initiative aus, um die Details anzuzeigen
             </div>
           </div>
         </div>
