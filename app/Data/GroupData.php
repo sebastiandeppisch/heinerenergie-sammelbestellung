@@ -19,6 +19,7 @@ class GroupData extends Data
         public ?string $logo_path,
         public ?int $parent_id,
         public bool $accepts_transfers,
+        public bool $userCanActAsAdmin,
         ?int $users_count,
         ?int $advices_count,
     ) {
@@ -28,13 +29,18 @@ class GroupData extends Data
 
     public static function fromModel(Group $group): self
     {
+        $currentUser = auth()->user();
+
+        $canActAsAdmin = $group->admins()->where('user_id', $currentUser->id)->exists();
+
         return new self(
             id: $group->id,
             name: $group->name,
             description: $group->description,
-            logo_path: $group->full_logo_path,
+            logo_path: $group->full_logo_path ? url($group->full_logo_path) : null,
             parent_id: $group->parent_id,
             accepts_transfers: $group->accepts_transfers,
+            userCanActAsAdmin: $canActAsAdmin,
             users_count: $group->users_count,
             advices_count: $group->advices_count,
         );

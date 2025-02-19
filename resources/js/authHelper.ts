@@ -1,4 +1,4 @@
-import { PageProps } from "@inertiajs/inertia";
+import { PageProps } from "@inertiajs/core";
 import { router, usePage } from "@inertiajs/vue3";
 import { computed } from 'vue';
 

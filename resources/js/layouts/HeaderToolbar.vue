@@ -1,19 +1,19 @@
 <script setup lang="ts">
 import DxButton from "devextreme-vue/button";
 import DxToolbar, { DxItem } from "devextreme-vue/toolbar";
-import auth from "../auth";
 import { computed } from 'vue';
-
 import UserPanel from "@/components/UserPanel.vue";
-import notify from 'devextreme/ui/notify';
-import axios from "axios";
-import { Link, router, usePage,} from "@inertiajs/vue3";
-import { PageProps } from "@inertiajs/inertia";
+import { Link, usePage } from "@inertiajs/vue3";
+import { PageProps } from "@inertiajs/core";
+import genericLogo from '../../img/logo.png';
 
-import logo from '../../img/logo.png';
-
-import { email, isAdmin} from '../authHelper';
-
+interface CustomPageProps extends PageProps {
+  auth: {
+    user: App.Models.User;
+    currentGroup?: App.Data.GroupData;
+    availableGroups?: App.Data.GroupData[];
+  }
+}
 
 const props = defineProps<{
   menuToggleEnabled: boolean;
@@ -21,123 +21,84 @@ const props = defineProps<{
   toggleMenuFunc: Function;
 }>();
 
-interface CustomPageProps extends PageProps {
-  auth: {
-    user: App.Models.User;
-  }
-}
-
 const page = usePage<CustomPageProps>();
 const user = computed(() => page.props.auth.user);
-console.log(page.props.user);
+const currentGroup = computed(() => page.props.auth.currentGroup);
+const availableGroups = computed(() => page.props.auth.availableGroups || []);
 
-const userMenuItems = computed(() => {
-  const items = [{
-    text: "Profil",
-    icon: "user",
-    onClick: onProfileClick
-  },
-  {
-    text: "Logout",
-    icon: "runner",
-    onClick: onLogoutClick
-  }];
-  if(!user.value?.is_admin){
-    return items;
+const logo = computed(() => {
+  if (currentGroup.value) {
+    return currentGroup.value.logo_path || genericLogo;
   }
-  if(isAdmin){
-    items.push( {
-      text: 'Berater*innen Ansicht',
-      icon: 'key',
-      onClick: () => {
-        axios.post('/api/stopActAsAdmin').then(response => {
-          notify('Du bist jetzt als Berater*in angemeldet', 'success', 2000);
-          router.reload();
-        }).catch(error => {
-          notify('Es ist ein Fehler aufgetreten', 'error', 2000);
-        })
-      }
-    });
-  }else{
-    items.push( {
-      text: 'Admin Ansicht',
-      icon: 'key',
-      onClick: () => {
-        axios.post('/api/actAsAdmin').then(response => {
-          notify('Du bist jetzt als Admin angemeldet', 'success', 2000);
-          router.reload();
-        }).catch(error => {
-          notify('Du bist kein Admin', 'error', 2000);
-        })
-      }
-    });
-  }
-  return items;
+  return genericLogo;
 });
-  
-function onLogoutClick() {
-  auth.logOut().then(response => {
-    router.visit('/login-form');
-  })
-  
-}
 
-function onProfileClick() {
-  router.visit('/profile');
-}
 </script>
 
 <template>
   <header class="header-component">
-    <dx-toolbar class="header-toolbar">
-      <dx-item
+    <DxToolbar class="header-toolbar">
+      <DxItem
         :visible="menuToggleEnabled"
         location="before"
         css-class="menu-button"
       >
         <template #default>
-          <dx-button
+          <DxButton
             icon="menu"
             styling-mode="text"
             @click="toggleMenuFunc"
           />
         </template>
-      </dx-item>
+      </DxItem>
 
-      <dx-item
+      <DxItem
         location="before"
-        css-class="header-title dx-toolbar-label"
       >
-        <Link href="/"><img :src="logo" style="height:2em;width: 6em;"></Link>
-      </dx-item>
-      <dx-item
+      <div>
+        <Link href="/"><img :src="logo" style="height: 100%;width: auto;max-height: 3em;object-fit: contain;"></Link>
+      </div>
+      </DxItem>
+      <DxItem
+        location="before"
+      >
+       <span class="p-2" style="font-size: 1.5em;font-weight: bold;">{{ currentGroup?.name }}</span>
+      </DxItem>
+      <DxItem
         location="after"
         locate-in-menu="auto"
         menu-item-template="menuUserItem"
       >
-      <template #default>
+        <template #default>
           <div>
-            <dx-button
+            <DxButton
               class="user-button authorization"
               :width="210"
               height="100%"
               styling-mode="text"
             >
-          
-              <user-panel :email="email" :menu-items="userMenuItems" menu-mode="context" />
-            </dx-button>
+              <UserPanel 
+                :email="user.email"
+                :user="user"
+                :current-group="currentGroup"
+                :available-groups="availableGroups"
+                menu-mode="context"
+              />
+            </DxButton>
           </div>
         </template>
-      </dx-item>
+      </DxItem>
       
       <template #menuUserItem>
-        <user-panel
-          :email="email"
-          :menu-items="userMenuItems"
+        <UserPanel
+          :email="user.email"
+          :user="user"
+          :current-group="currentGroup"
+          :available-groups="availableGroups"
           menu-mode="list"
         />
       </template>
-    </dx-toolbar>
+    </DxToolbar>
   </header>
 </template>
 

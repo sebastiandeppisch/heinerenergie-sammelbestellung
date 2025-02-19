@@ -3,9 +3,14 @@ import DxButton from "devextreme-vue/button";
 import DxToolbar, { DxItem } from "devextreme-vue/toolbar";
 
 import UserPanel from "./UserPanel.vue";
-import { Link } from "@inertiajs/vue3";
+import { Link, router } from "@inertiajs/vue3";
 
 import logo from '../../img/logo.png';
+
+
+const openBackend = () => {
+  router.visit('/backend');
+}
 </script>
 
 <template>
@@ -37,11 +42,14 @@ import logo from '../../img/logo.png';
           <div>
             <dx-button
               class="user-button authorization"
-              :width="210"
+              :width="250"
               height="100%"
+              text="Berater:innen Zugang"
               styling-mode="text"
+              icon="user"
+              type="default"
+              @click="openBackend"
             >
-              <user-panel :email="''" :menu-items="[]" menu-mode="context" />
             </dx-button>
           </div>
         </template>
@@ -76,5 +84,6 @@ import logo from '../../img/logo.png';
   width: $side-panel-min-width;
   text-align: center;
 }
+
 
 </style>

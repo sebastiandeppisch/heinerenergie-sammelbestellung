@@ -1,12 +1,13 @@
 <?php
 
-use App\Http\Controllers\Api\GroupUserController;
 use App\Http\Controllers\BulkOrder;
-use App\Http\Controllers\BulkOrderController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\PageController;
-use App\Http\Controllers\GroupController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\GroupController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\BulkOrderController;
+use App\Http\Controllers\Api\GroupUserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,6 +38,9 @@ Route::middleware('auth')->group(function () {
     })->name('backend');
 
     Route::resource('groups', GroupController::class);
+
+    Route::post('actAsGroup/{group}', [UserController::class, 'actAsGroup']);
+    Route::post('actAsSystemAdmin', [UserController::class, 'actAsSystemAdmin']);
 });
 
 Route::get('/change-password', [PageController::class, 'changePassword'])->name('password.reset');

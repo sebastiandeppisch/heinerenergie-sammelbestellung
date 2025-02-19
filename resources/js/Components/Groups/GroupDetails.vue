@@ -116,7 +116,7 @@ const logoSrc = computed(() => {
 })
 
 
-type FormData = Omit<GroupData, 'id' | 'logo_path' | 'parent_id' | 'users_count' | 'advices_count'> & {
+type FormData = Omit<GroupData, 'id' | 'logo_path' | 'parent_id' | 'users_count' | 'advices_count' | 'userCanActAsAdmin'> & {
   logo: File | null
   remove_logo: boolean,
   _method: string

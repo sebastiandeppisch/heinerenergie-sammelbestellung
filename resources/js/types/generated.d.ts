@@ -8,6 +8,7 @@ description: string;
 logo_path: string;
 parent_id: number;
 accepts_transfers: boolean;
+userCanActAsAdmin: boolean;
 };
 export type GroupUserData = {
 id: number;

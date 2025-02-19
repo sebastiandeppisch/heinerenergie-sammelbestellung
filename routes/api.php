@@ -79,9 +79,6 @@ Route::middleware('auth')->group(function () {
     Route::get('advices/{advice}/advisors', [AdviceController::class, 'sortedAdvisors']);
     Route::get('advices/{advice}/mails', [AdviceController::class, 'mails']);
 
-    Route::post('actAsAdmin', [UserController::class, 'actAsAdmin']);
-    Route::post('stopActAsAdmin', [UserController::class, 'stopActAsAdmin']);
-
     Route::get('html/advisorInfo', [SettingController::class, 'advisorInfo']);
 
     Route::get('map/search', GeoSearchController::class);

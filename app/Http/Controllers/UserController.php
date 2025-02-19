@@ -3,14 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Group;
 use Illuminate\Http\Request;
 use maxh\Nominatim\Nominatim;
-use App\Actions\FetchCoordinateByAddress;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\SetAddressRequest;
 use App\Http\Requests\SetPictureRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Actions\FetchCoordinateByAddress;
 use Illuminate\Database\Eloquent\Builder;
 
 class UserController extends Controller
@@ -117,16 +118,18 @@ class UserController extends Controller
         $user->save();
     }
 
-    public function actAsAdmin()
+    public function actAsGroup(Request $request, Group $group)
+    {
+        session()->put('actAsGroupId', $group->id);
+        session()->put('actAsGroupAdmin', $request->asAdmin);
+        return redirect()->back();
+    }
+
+    public function actAsSystemAdmin()
     {
         if ($this->user()->is_admin === false) {
             abort(403, 'Du hast keine Berechtigung um als Administrator zu agieren.');
         }
-        session()->put('isAdmin', true);
-    }
-
-    public function stopActAsAdmin()
-    {
-        session()->forget('isAdmin');
+        session()->put('actAsSystemAdmin', true);
     }
 }
