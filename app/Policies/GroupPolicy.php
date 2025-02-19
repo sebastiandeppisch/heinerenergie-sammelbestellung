@@ -2,13 +2,20 @@
 
 namespace App\Policies;
 
-use App\Models\Group;
 use App\Models\User;
+use App\Models\Group;
+use Illuminate\Support\Facades\Log;
+use App\Context\GroupContextContract;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class GroupPolicy
 {
     use HandlesAuthorization;
+
+    public function __construct(private GroupContextContract $groupContext)
+    {
+    }
+
 
     /**
      * Determine whether the user can view any models.
@@ -70,13 +77,11 @@ class GroupPolicy
      */
     public function update(User $user, Group $group): bool
     {
-        // Global admins can update any group
-        if ($user->isGlobalAdmin()) {
+        if($this->groupContext->actsAsSystemAdmin($user, $group)) {
             return true;
         }
 
-        // Group admins can update their group and subgroups
-        return $user->isGroupAdmin($group);
+        return $this->groupContext->actsAsGroupAdmin($user, $group);
     }
 
     /**
@@ -104,5 +109,28 @@ class GroupPolicy
     {
         // Same rules as update
         return $this->update($user, $group);
+    }
+
+    public function canActAsGroupAdmin(User $user, Group $group): bool
+    {
+        if($this->actAsGroup($user, $group)) {
+            return true;
+        }
+
+
+        if ($user->belongsToGroup($group)) {
+            return $group->users()->where('user_id', $user->id)->where('is_admin', true)->exists();
+        }
+
+        return false;
+    }
+
+    public function actAsGroup(User $user, Group $group): bool
+    {
+        if ($user->isGlobalAdmin()) {
+            return true;
+        }
+
+        return $user->belongsToGroup($group);
     }
 }

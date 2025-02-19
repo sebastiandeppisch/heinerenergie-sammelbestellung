@@ -22,9 +22,10 @@ class GroupController extends Controller
         return Inertia::render('Groups/Index', [
             'groups' => $groups,
             'canCreateRootGroup' => $canCreateRootGroup,
-            'selectedGroup' => $selectedGroup
+            'selectedGroup' => $selectedGroup,
         ]);
     }
+
     public function index(Request $request)
     {
         return $this->showPage(
@@ -56,6 +57,7 @@ class GroupController extends Controller
             $groupData = $groupData->toArray();
             $groupData['isExpanded'] = $expandGroups->contains($groupData['id']);
             $groupData['isSelected'] = $groupData['id'] === $group->id;
+
             return $groupData;
         });
 

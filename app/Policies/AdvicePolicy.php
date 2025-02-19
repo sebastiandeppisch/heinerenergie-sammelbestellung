@@ -2,13 +2,19 @@
 
 namespace App\Policies;
 
-use App\Models\Advice;
 use App\Models\User;
+use App\Models\Advice;
+use Illuminate\Support\Facades\Log;
+use App\Context\GroupContextContract;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class AdvicePolicy
 {
     use HandlesAuthorization;
+
+    public function __construct(private GroupContextContract $groupContext)
+    {
+    }
 
     public function viewAny(User $user)
     {
@@ -17,16 +23,20 @@ class AdvicePolicy
 
     public function view(User $user, Advice $advice)
     {
-        // Global admins can view any advice
-        if ($user->isActingAsAdmin()) {
+        if($this->groupContext->actsAsSystemAdmin($user)) {
             return true;
         }
 
-        // Get all groups the user belongs to
-        $userGroups = $user->groups()->select('groups.id')->pluck('groups.id');
+        if($advice->advisor_id === $user->id) {
+            return true;
+        }
 
-        // Check if the advice belongs to any of the user's groups
-        return $userGroups->contains($advice->group_id);
+        $shared = $advice->shares()->where('advisor_id', $user->id)->first();
+
+        if($shared) {
+            return true;
+        }
+        return $this->groupContext->hasAccessToGroup($user, $advice->group);
     }
 
     public function viewDataProtected(User $user, Advice $advice)

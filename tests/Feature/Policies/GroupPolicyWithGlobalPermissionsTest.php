@@ -1,7 +1,9 @@
 <?php
 
-use App\Models\Group;
 use App\Models\User;
+use App\Models\Group;
+use App\Context\GlobalGroupContext;
+use App\Context\GroupContextContract;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -33,6 +35,8 @@ beforeEach(function () {
         'description' => 'Other Sub Group Description',
         'parent_id' => $this->otherMainGroup->id,
     ]);
+
+    app()->bind(GroupContextContract::class, GlobalGroupContext::class);
 });
 
 test('global admin can manage all groups', function () {

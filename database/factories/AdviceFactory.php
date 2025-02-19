@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Group;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -16,6 +17,13 @@ class AdviceFactory extends Factory
      */
     public function definition()
     {
+
+        if(Group::count() > 0) {
+            $group = Group::first();
+        } else {
+            $group = Group::factory();
+        }
+
         return [
             'firstName' => fake()->firstName(),
             'lastName' => fake()->lastName(),
@@ -28,6 +36,7 @@ class AdviceFactory extends Factory
             'commentary' => fake()->optional()->text(),
             'long' => fake()->optional()->longitude(),
             'lat' => fake()->optional()->latitude(),
+            'group_id' => $group,
         ];
     }
 }

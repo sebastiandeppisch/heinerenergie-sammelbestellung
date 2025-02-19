@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\DataProtectedAdvice;
 use App\Models\Setting;
-
+use Illuminate\Auth\Access\AuthorizationException;
 class PageController extends Controller
 {
     //TODO move all the pages to their own controllers
@@ -55,6 +55,12 @@ class PageController extends Controller
     }
 
     public function showAdvice(Advice $advice){
+        if(! Auth::user()->can('view', $advice)){
+            throw new AuthorizationException(
+                'You are not authorized to view this advice.'
+            );
+        }
+
         return Inertia::render('Advice', [
             'advice' => $advice
         ]);

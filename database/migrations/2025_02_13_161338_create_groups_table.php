@@ -36,7 +36,7 @@ return new class extends Migration
         });
 
         Schema::table('advices', function (Blueprint $table) {
-            $table->foreignIdFor(Group::class, 'group_id')->nullable()->constrained();
+            $table->foreignIdFor(Group::class, 'group_id')->constrained();
         });
     }
 

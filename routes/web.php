@@ -39,8 +39,8 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('groups', GroupController::class);
 
-    Route::post('actAsGroup/{group}', [UserController::class, 'actAsGroup']);
-    Route::post('actAsSystemAdmin', [UserController::class, 'actAsSystemAdmin']);
+    Route::post('actAsGroup/{group}', [UserController::class, 'actAsGroup'])->name('actAsGroup');
+    Route::post('actAsSystemAdmin', [UserController::class, 'actAsSystemAdmin'])->name('actAsSystemAdmin');
 });
 
 Route::get('/change-password', [PageController::class, 'changePassword'])->name('password.reset');

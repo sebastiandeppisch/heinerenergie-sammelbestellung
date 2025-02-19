@@ -2,22 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Models\Group;
-use Illuminate\Http\Request;
-use maxh\Nominatim\Nominatim;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\StoreUserRequest;
+use App\Actions\FetchCoordinateByAddress;
 use App\Http\Requests\SetAddressRequest;
 use App\Http\Requests\SetPictureRequest;
+use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
-use App\Actions\FetchCoordinateByAddress;
+use App\Models\Group;
+use App\Models\User;
+use App\Services\SessionService;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Log;
 
 class UserController extends Controller
 {
-    public function __construct()
-    {
+    public function __construct(
+        private readonly SessionService $sessionService
+    ) {
         $this->authorizeResource(User::class, 'user');
     }
 
@@ -111,6 +113,7 @@ class UserController extends Controller
         if ($user->address === null) {
             $user->coordinate = null;
             $user->save();
+
             return;
         }
 
@@ -120,16 +123,29 @@ class UserController extends Controller
 
     public function actAsGroup(Request $request, Group $group)
     {
-        session()->put('actAsGroupId', $group->id);
-        session()->put('actAsGroupAdmin', $request->asAdmin);
+        $user = $this->user();
+
+        if (! $user->can('actAsGroup', $group)) {
+            Log::error('User is not in group', ['user' => $user->id, 'group' => $group->id]);
+            return redirect()->back()->with('error', 'Du bist nicht in dieser Gruppe');
+        }
+
+        if ($request->boolean('asAdmin')) {
+            if (! $user->can('actAsGroupAdmin', $group)) {
+                Log::error('User is not a group admin', ['user' => $user->id, 'group' => $group->id]);
+                return redirect()->back()->with('error', 'Du bist kein Gruppenadministrator');
+            }
+        }
+
+        $this->sessionService->actAsGroup($group, $request->boolean('asAdmin'));
+
         return redirect()->back();
     }
 
     public function actAsSystemAdmin()
     {
-        if ($this->user()->is_admin === false) {
-            abort(403, 'Du hast keine Berechtigung um als Administrator zu agieren.');
-        }
-        session()->put('actAsSystemAdmin', true);
+        $this->sessionService->actAsSystemAdmin();
+
+        return redirect()->back();
     }
 }

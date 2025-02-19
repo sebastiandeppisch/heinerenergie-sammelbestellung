@@ -40,6 +40,10 @@ class HandleInertiaRequests extends Middleware
         $currentGroup = session()->get('actAsGroupId');
         $currentGroup = Group::find($currentGroup);
 
+        if($currentGroup) {
+            $currentGroup = GroupData::fromModel($currentGroup);
+        }
+
         return array_merge(parent::share($request), [
             'auth.user' => fn () => $request->user()?->only([
                 'id',
@@ -52,7 +56,7 @@ class HandleInertiaRequests extends Middleware
                 'is_admin'
             ]),
             'auth.availableGroups' => fn () => $request->user()?->groups->map(fn (Group $group) => GroupData::fromModel($group)),
-            'auth.currentGroup' => fn () => GroupData::fromModel($currentGroup),
+            'auth.currentGroup' => fn () => $currentGroup,
         ]);
     }
 }

@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateAdviceRequest;
 use App\Http\Resources\DataProtectedAdvice;
 use App\Mail\SendOrderLink;
 use App\Models\Advice;
+use App\Models\Group;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +17,7 @@ class AdviceController extends Controller
 {
     public function __construct()
     {
-        $this->authorizeResource(Order::class, 'advice');
+        $this->authorizeResource(Advice::class);
     }
 
     public function index()
@@ -35,7 +36,7 @@ class AdviceController extends Controller
 
     public function store(StoreAdviceRequest $request)
     {
-        $advice = new Advice();
+        $advice = new Advice;
         $advice->fill($request->validated());
         $advice->save();
 
@@ -103,7 +104,7 @@ class AdviceController extends Controller
                 $name = $name.' ('.$this->formatValue($distance, 'm').')';
             }
             if ($distance === null) {
-                //max float value
+                // max float value
                 $distance = 1e6;
             }
 

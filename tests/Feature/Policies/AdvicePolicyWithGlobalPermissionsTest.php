@@ -2,12 +2,13 @@
 
 namespace Tests\Feature\Policies;
 
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\Group;
+use App\Context\GlobalGroupContext;
+use App\Context\GroupContextContract;
 use App\Models\Advice;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Group;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 
 uses(RefreshDatabase::class);
 
@@ -34,14 +35,13 @@ beforeEach(function () {
     // Create an advice in the initiative
     $this->advice = Advice::factory()->create([
         'group_id' => $this->initiative->id,
-        'advisor_id' => $this->advisor->id
+        'advisor_id' => $this->advisor->id,
     ]);
+    app()->bind(GroupContextContract::class, GlobalGroupContext::class);
 });
 
 test('global admin can view any advice', function () {
-    Auth::login($this->globalAdmin);
-    session()->put('isAdmin', true);
-    
+
     expect($this->globalAdmin->can('view', $this->advice))->toBeTrue();
 });
 
@@ -51,7 +51,7 @@ test('initiative admin can view advice in their initiative', function () {
 
 test('initiative admin cannot view advice in other initiative', function () {
     $otherAdvice = Advice::factory()->create([
-        'group_id' => $this->otherInitiative->id
+        'group_id' => $this->otherInitiative->id,
     ]);
 
     expect($this->initiativeAdmin->can('view', $otherAdvice))->toBeFalse();
@@ -68,7 +68,7 @@ test('advisor cannot view advice in other initiative', function () {
 test('global admin can update any advice', function () {
     Auth::login($this->globalAdmin);
     session()->put('isAdmin', true);
-    
+
     expect($this->globalAdmin->can('update', $this->advice))->toBeTrue();
 });
 
@@ -78,7 +78,7 @@ test('initiative admin can update advice in their initiative', function () {
 
 test('initiative admin cannot update advice in other initiative', function () {
     $otherAdvice = Advice::factory()->create([
-        'group_id' => $this->otherInitiative->id
+        'group_id' => $this->otherInitiative->id,
     ]);
 
     expect($this->initiativeAdmin->can('update', $otherAdvice))->toBeFalse();
@@ -91,11 +91,11 @@ test('advisor can update their own advice', function () {
 test('advisor cannot update other advisors advice in same initiative', function () {
     $otherAdvisor = User::factory()->create();
     $this->initiative->users()->attach($otherAdvisor, ['is_admin' => false]);
-    
+
     $otherAdvice = Advice::factory()->create([
         'group_id' => $this->initiative->id,
-        'advisor_id' => $otherAdvisor->id
+        'advisor_id' => $otherAdvisor->id,
     ]);
 
     expect($this->advisor->can('update', $otherAdvice))->toBeFalse();
-}); 
+});

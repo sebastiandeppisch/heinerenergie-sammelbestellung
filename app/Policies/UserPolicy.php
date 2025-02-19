@@ -34,4 +34,9 @@ class UserPolicy
         //there is no defined behaviour for the foreign data advices & orders yet
         return false;
     }
+
+    public function canActAsSystemAdmin(User $user)
+    {
+        return $user->is_admin;
+    }
 }

@@ -48,6 +48,7 @@ class Advice extends Model implements HasSends
         'helpType_other',
         'houseType',
         'landlordExists',
+        'group_id',
         'placeNotes',
     ];
 
@@ -129,5 +130,10 @@ class Advice extends Model implements HasSends
     public function getNameAttribute(): string
     {
         return sprintf('%s %s', $this->firstName, $this->lastName);
+    }
+
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(Group::class);
     }
 }
