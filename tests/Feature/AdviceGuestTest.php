@@ -41,9 +41,7 @@ test('advice can be saved', function () {
         expect($advice->$key)->toBe($value);
     }
 
-    Mail::assertQueued(function (AdviceCreated $mail) use ($advice) {
-        return $mail->hasTo($advice->email);
-    });
+    Mail::assertQueued(fn(AdviceCreated $mail) => $mail->hasTo($advice->email));
 })->skip("TODO determine the advices group from the form");
 
 test('direct order advice can be saved', function () {
@@ -73,7 +71,5 @@ test('direct order advice can be saved', function () {
         expect($advice->$key)->toBe($value);
     }
 
-    Mail::assertQueued(function (AdviceCreated $mail) use ($advice) {
-        return $mail->hasTo($advice->email);
-    });
+    Mail::assertQueued(fn(AdviceCreated $mail) => $mail->hasTo($advice->email));
 })->skip("TODO determine the advices group from the form");

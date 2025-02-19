@@ -14,15 +14,6 @@ class Product extends Model
 
     protected $fillable = ['name', 'price', 'sku', 'panelsCount', 'description', 'product_category_id', 'is_supplier_product'];
 
-    protected $casts = [
-        'name' => 'string',
-        'price' => 'float',
-        'sku' => 'string',
-        'panelsCount' => 'integer',
-        'description' => 'string',
-        'is_supplier_product' => 'boolean',
-    ];
-
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
@@ -66,10 +57,22 @@ class Product extends Model
         return $newProduct;
     }
 
+    #[\Override]
     public function delete(): bool
     {
         $this->downloads()->delete();
 
         return parent::delete();
+    }
+    protected function casts(): array
+    {
+        return [
+            'name' => 'string',
+            'price' => 'float',
+            'sku' => 'string',
+            'panelsCount' => 'integer',
+            'description' => 'string',
+            'is_supplier_product' => 'boolean',
+        ];
     }
 }

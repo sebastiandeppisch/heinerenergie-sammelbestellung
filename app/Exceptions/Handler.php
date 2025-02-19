@@ -33,6 +33,7 @@ class Handler extends ExceptionHandler
      *
      * @return void
      */
+    #[\Override]
     public function register()
     {
         $this->reportable(function (Throwable $e) {
@@ -40,6 +41,7 @@ class Handler extends ExceptionHandler
         });
     }
 
+    #[\Override]
     protected function unauthenticated($request, AuthenticationException $exception)
     {
         if ($request->expectsJson()) {

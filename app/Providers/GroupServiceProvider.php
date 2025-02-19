@@ -10,6 +10,7 @@ use Illuminate\Support\ServiceProvider;
 
 class GroupServiceProvider extends ServiceProvider
 {
+    #[\Override]
     public function register(): void
     {
         // Register SessionService as singleton

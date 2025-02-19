@@ -33,9 +33,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/advices/{advice}', [PageController::class, 'showAdvice'])->name('advices.show');
     Route::get('/advicesmap', [PageController::class, 'advicesMap'])->name('advices.map');
     Route::get('neworder', [PageController::class, 'newOrder'])->name('neworder');
-    Route::get('/backend', function () {
-        return redirect()->route('dashboard');
-    })->name('backend');
+    Route::get('/backend', fn() => redirect()->route('dashboard'))->name('backend');
 
     Route::resource('groups', GroupController::class);
 
@@ -45,9 +43,7 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/change-password', [PageController::class, 'changePassword'])->name('password.reset');
 
-Route::get('/', function () {
-    return redirect()->route('home');
-});
+Route::get('/', fn() => redirect()->route('home'));
 
 Route::get('/sammelbestellung', [PageController::class, 'publicNewOrder'])->name('home');
 Route::get('/login-form', [PageController::class, 'login'])->name('login');

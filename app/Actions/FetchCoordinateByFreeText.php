@@ -12,7 +12,7 @@ use GuzzleHttp\Exception\ClientException;
 
 class FetchCoordinateByFreeText
 {
-	private Nominatim $nominatim;
+	private readonly Nominatim $nominatim;
 
 	private string $text;
 
@@ -26,9 +26,7 @@ class FetchCoordinateByFreeText
 	{
 		Log::debug('Fetching coordinates for text', ['text' => $text]);
 		$this->text = $text;
-		return Cache::rememberForever($this->key(), function(){
-			return $this->handle();
-		});
+		return Cache::rememberForever($this->key(), fn() => $this->handle());
 	}
 
 	private function key(): string

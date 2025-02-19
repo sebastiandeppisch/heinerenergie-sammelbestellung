@@ -31,19 +31,15 @@ class ProductFactory extends Factory
 
     public function supplierProduct()
     {
-        return $this->state(function (array $attributes) {
-            return [
-                'is_supplier_product' => true,
-            ];
-        });
+        return $this->state(fn(array $attributes) => [
+            'is_supplier_product' => true,
+        ]);
     }
 
     public function ownProduct()
     {
-        return $this->state(function (array $attributes) {
-            return [
-                'is_supplier_product' => false,
-            ];
-        });
+        return $this->state(fn(array $attributes) => [
+            'is_supplier_product' => false,
+        ]);
     }
 }

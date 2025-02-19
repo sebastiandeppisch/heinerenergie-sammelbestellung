@@ -8,6 +8,7 @@ class NewAdviceNearby extends BaseNotification
 {
     public function __construct(public Advice $advice, public float $distance) {}
 
+    #[\Override]
     public function toMail($notifiable)
     {
 

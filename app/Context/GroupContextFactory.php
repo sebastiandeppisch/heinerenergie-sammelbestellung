@@ -14,7 +14,7 @@ class GroupContextFactory
 
     public function create(?User $user = null): GroupContextContract
     {
-        $user = $user ?? Auth::user();
+        $user ??= Auth::user();
         
         return new GroupContext(
             currentGroup: $this->sessionService->getCurrentGroup(),

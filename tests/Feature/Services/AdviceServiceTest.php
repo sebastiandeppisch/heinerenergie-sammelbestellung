@@ -14,6 +14,7 @@ class AdviceServiceTest extends TestCase
 
     private AdviceService $adviceService;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

@@ -67,9 +67,7 @@ class PageController extends Controller
     }
 
     public function advicesMap(){
-        $advices = Advice::all()->filter(function (Advice $advice) {
-            return Auth::user()->can('viewDataProtected', $advice);
-        })->values()->map(fn ($advice) => (new DataProtectedAdvice($advice))->resolve());
+        $advices = Advice::all()->filter(fn(Advice $advice) => Auth::user()->can('viewDataProtected', $advice))->values()->map(fn ($advice) => (new DataProtectedAdvice($advice))->resolve());
 
         return Inertia::render('AdvicesMap', [
             'advices' => $advices,

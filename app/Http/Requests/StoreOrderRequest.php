@@ -49,6 +49,7 @@ class StoreOrderRequest extends FormRequest
         ]);
     }
 
+    #[\Override]
     public function attributes()
     {
         return [
@@ -65,6 +66,7 @@ class StoreOrderRequest extends FormRequest
         ];
     }
 
+    #[\Override]
     public function messages()
     {
         return [

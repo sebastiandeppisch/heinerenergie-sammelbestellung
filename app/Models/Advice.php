@@ -59,34 +59,6 @@ class Advice extends Model implements HasSends
         'updated' => AdviceUpdated::class,
     ];
 
-    protected $casts = [
-        'firstName' => 'string',
-        'lastName' => 'string',
-        'street' => 'string',
-        'streetNumber' => 'string',
-        'zip' => 'integer',
-        'city' => 'string',
-        'email' => 'string',
-        'phone' => 'string',
-        'commentary' => 'string',
-        'advisor_id' => 'integer',
-        'long' => 'float',
-        'lat' => 'float',
-        'advice_status_id' => 'integer',
-        'type' => AdviceType::class,
-        'helpType_place' => 'boolean',
-        'helpType_technical' => 'boolean',
-        'helpType_bureaucracy' => 'boolean',
-        'helpType_other' => 'boolean',
-        'houseType' => HouseType::class,
-        'landlordExists' => 'boolean',
-        'placeNotes' => 'string',
-        'address' => Address::class,
-        'coordinate' => Coordinate::class,
-        'long' => 'float',
-        'lat' => 'float',
-    ];
-
     public function advisor(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -135,5 +107,35 @@ class Advice extends Model implements HasSends
     public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class);
+    }
+    protected function casts(): array
+    {
+        return [
+            'firstName' => 'string',
+            'lastName' => 'string',
+            'street' => 'string',
+            'streetNumber' => 'string',
+            'zip' => 'integer',
+            'city' => 'string',
+            'email' => 'string',
+            'phone' => 'string',
+            'commentary' => 'string',
+            'advisor_id' => 'integer',
+            'long' => 'float',
+            'lat' => 'float',
+            'advice_status_id' => 'integer',
+            'type' => AdviceType::class,
+            'helpType_place' => 'boolean',
+            'helpType_technical' => 'boolean',
+            'helpType_bureaucracy' => 'boolean',
+            'helpType_other' => 'boolean',
+            'houseType' => HouseType::class,
+            'landlordExists' => 'boolean',
+            'placeNotes' => 'string',
+            'address' => Address::class,
+            'coordinate' => Coordinate::class,
+            'long' => 'float',
+            'lat' => 'float',
+        ];
     }
 }

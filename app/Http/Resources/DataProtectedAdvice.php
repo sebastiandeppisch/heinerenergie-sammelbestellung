@@ -14,6 +14,7 @@ class DataProtectedAdvice extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
      */
+    #[\Override]
     public function toArray($request)
     {
         $email = $this->email;

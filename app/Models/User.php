@@ -45,21 +45,6 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'is_admin' => 'bool',
-        'address' => Address::class,
-        'coordinate' => Coordinate::class,
-        'long' => 'float',
-        'lat' => 'float',
-        'advice_radius' => 'int',
-    ];
-
     protected $appends = [
         'name',
         'isActingAsAdmin',
@@ -101,5 +86,22 @@ class User extends Authenticatable
             return false;
         }
         return $this->coordinate->distanceTo($advice->coordinate) <= $this->advice_radius;
+    }
+    /**
+     * The attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'is_admin' => 'bool',
+            'address' => Address::class,
+            'coordinate' => Coordinate::class,
+            'long' => 'float',
+            'lat' => 'float',
+            'advice_radius' => 'int',
+        ];
     }
 }

@@ -58,14 +58,10 @@ class OrdersExport implements FromCollection, ShouldAutoSize, WithHeadings, With
             return $order->orderItems;
         }
         if ($this->products === 'supplier') {
-            return $order->orderItems->filter(function ($orderItem) {
-                return $orderItem->product->is_supplier_product;
-            });
+            return $order->orderItems->filter(fn($orderItem) => $orderItem->product->is_supplier_product);
         }
         if ($this->products === 'own') {
-            return $order->orderItems->filter(function ($orderItem) {
-                return ! $orderItem->product->is_supplier_product;
-            });
+            return $order->orderItems->filter(fn($orderItem) => ! $orderItem->product->is_supplier_product);
         }
         throw new InvalidArgumentException('Invalid value for $products');
     }

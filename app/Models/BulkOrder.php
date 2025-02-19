@@ -16,11 +16,6 @@ class BulkOrder extends Model
         'archived',
     ];
 
-    protected $casts = [
-        'name' => 'string',
-        'archived' => 'boolean',
-    ];
-
     public static function getCurrentBulkOrder(): ?BulkOrder
     {
         if (BulkOrder::where('archived', false)->count() > 1) {
@@ -60,5 +55,12 @@ class BulkOrder extends Model
         foreach ($old->products()->whereNull('product_category_id')->get() as $product) {
             $product->copy($this);
         }
+    }
+    protected function casts(): array
+    {
+        return [
+            'name' => 'string',
+            'archived' => 'boolean',
+        ];
     }
 }

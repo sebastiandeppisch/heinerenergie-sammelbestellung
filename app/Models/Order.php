@@ -18,20 +18,6 @@ class Order extends Model
 
     protected $appends = ['price', 'panelsCount', 'archived', 'shares_ids'];
 
-    protected $casts = [
-        'firstName' => 'string',
-        'lastName' => 'string',
-        'street' => 'string',
-        'streetNumber' => 'string',
-        'zip' => 'integer',
-        'city' => 'string',
-        'email' => 'string',
-        'phone' => 'string',
-        'commentary' => 'string',
-        'advisor_id' => 'integer',
-        'checked' => 'boolean',
-    ];
-
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
@@ -82,6 +68,7 @@ class Order extends Model
         return $this->bulkOrder->archived;
     }
 
+    #[\Override]
     public function save(array $options = [])
     {
         if ($this->archived) {
@@ -98,5 +85,21 @@ class Order extends Model
     public function getSharesIdsAttribute(): array
     {
         return $this->shares->pluck('id')->toArray();
+    }
+    protected function casts(): array
+    {
+        return [
+            'firstName' => 'string',
+            'lastName' => 'string',
+            'street' => 'string',
+            'streetNumber' => 'string',
+            'zip' => 'integer',
+            'city' => 'string',
+            'email' => 'string',
+            'phone' => 'string',
+            'commentary' => 'string',
+            'advisor_id' => 'integer',
+            'checked' => 'boolean',
+        ];
     }
 }

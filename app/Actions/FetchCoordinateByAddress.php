@@ -12,7 +12,7 @@ use GuzzleHttp\Exception\ClientException;
 
 class FetchCoordinateByAddress
 {
-	private Nominatim $nominatim;
+	private readonly Nominatim $nominatim;
 
 	private Address $address;
 
@@ -26,9 +26,7 @@ class FetchCoordinateByAddress
 	{
 		Log::debug('Fetching coordinates for address', ['address' => $address]);
 		$this->address = $address;
-		return Cache::rememberForever($this->key(), function(){
-			return $this->handle();
-		});
+		return Cache::rememberForever($this->key(), fn() => $this->handle());
 	}
 
 	private function key(): string

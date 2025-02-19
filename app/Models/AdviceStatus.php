@@ -15,13 +15,15 @@ class AdviceStatus extends Model
 
     protected $fillable = ['name', 'result'];
 
-    protected $casts = [
-        'name' => 'string',
-        'result' => AdviceStatusResult::class,
-    ];
-
     public function advices(): BelongsTo
     {
         return $this->belongsTo(Advice::class);
+    }
+    protected function casts(): array
+    {
+        return [
+            'name' => 'string',
+            'result' => AdviceStatusResult::class,
+        ];
     }
 }

@@ -22,10 +22,6 @@ class Group extends Model
         'accepts_transfers',
     ];
 
-    protected $casts = [
-        'accepts_transfers' => 'boolean',
-    ];
-
     /**
      * Get the users that belong to this group
      */
@@ -116,11 +112,18 @@ class Group extends Model
         return $this->logo_path ? Storage::url($this->logo_path) : null;
     }
 
+    #[\Override]
     public function delete()
     {
         if ($this->logo_path) {
             Storage::disk('public')->delete($this->logo_path);
         }
         parent::delete();
+    }
+    protected function casts(): array
+    {
+        return [
+            'accepts_transfers' => 'boolean',
+        ];
     }
 }

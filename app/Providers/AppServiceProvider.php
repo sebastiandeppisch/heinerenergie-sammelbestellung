@@ -16,6 +16,7 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
+    #[\Override]
     public function register()
     {
         //
@@ -28,9 +29,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        LogViewer::auth(function ($request) {
-            return $request->user()?->email === config('app.admin_email');
-        });
+        LogViewer::auth(fn($request) => $request->user()?->email === config('app.admin_email'));
 
         if(config('app.env') === 'testing') {
             $this->app->bind(FetchCoordinateByAddress::class, function () {

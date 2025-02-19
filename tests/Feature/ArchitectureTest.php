@@ -34,7 +34,7 @@ arch()->expect('App\Features')
 arch()->expect('App\Exceptions')
     ->classes()
     ->toImplement('Throwable')
-    ->ignoring('App\Exceptions\Handler');
+    ->ignoring(\App\Exceptions\Handler::class);
 
 arch()->expect('App')
     ->not->toImplement(Throwable::class)
@@ -46,7 +46,7 @@ arch()->expect('App\Http\Middleware')
 
 arch()->expect('App\Models')
     ->classes()
-    ->toExtend('Illuminate\Database\Eloquent\Model')
+    ->toExtend(\Illuminate\Database\Eloquent\Model::class)
     ->ignoring('App\Models\Scopes');
 
 arch()->expect('App\Models')
@@ -54,7 +54,7 @@ arch()->expect('App\Models')
     ->not->toHaveSuffix('Model');
 
 arch()->expect('App')
-    ->not->toExtend('Illuminate\Database\Eloquent\Model')
+    ->not->toExtend(\Illuminate\Database\Eloquent\Model::class)
     ->ignoring('App\Models');
 
 arch()->expect('App\Http\Requests')
@@ -62,13 +62,13 @@ arch()->expect('App\Http\Requests')
     ->toHaveSuffix('Request');
 
 arch()->expect('App\Http\Requests')
-    ->toExtend('Illuminate\Foundation\Http\FormRequest');
+    ->toExtend(\Illuminate\Foundation\Http\FormRequest::class);
 
 arch()->expect('App\Http\Requests')
     ->toHaveMethod('rules');
 
 arch()->expect('App')
-    ->not->toExtend('Illuminate\Foundation\Http\FormRequest')
+    ->not->toExtend(\Illuminate\Foundation\Http\FormRequest::class)
     ->ignoring('App\Http\Requests');
 
 arch()->expect('App\Console\Commands')
@@ -77,31 +77,31 @@ arch()->expect('App\Console\Commands')
 
 arch()->expect('App\Console\Commands')
     ->classes()
-    ->toExtend('Illuminate\Console\Command');
+    ->toExtend(\Illuminate\Console\Command::class);
 
 arch()->expect('App\Console\Commands')
     ->classes()
     ->toHaveMethod('handle');
 
 arch()->expect('App')
-    ->not->toExtend('Illuminate\Console\Command')
+    ->not->toExtend(\Illuminate\Console\Command::class)
     ->ignoring('App\Console\Commands');
 
 arch()->expect('App\Mail')
     ->classes()
-    ->toExtend('Illuminate\Mail\Mailable');
+    ->toExtend(\Illuminate\Mail\Mailable::class);
 
 arch()->expect('App\Mail')
     ->classes()
-    ->toImplement('Illuminate\Contracts\Queue\ShouldQueue');
+    ->toImplement(\Illuminate\Contracts\Queue\ShouldQueue::class);
 
 arch()->expect('App')
-    ->not->toExtend('Illuminate\Mail\Mailable')
+    ->not->toExtend(\Illuminate\Mail\Mailable::class)
     ->ignoring('App\Mail');
 
 arch()->expect('App\Jobs')
     ->classes()
-    ->toImplement('Illuminate\Contracts\Queue\ShouldQueue');
+    ->toImplement(\Illuminate\Contracts\Queue\ShouldQueue::class);
 
 arch()->expect('App\Jobs')
     ->classes()
@@ -111,23 +111,23 @@ arch()->expect('App\Listeners')
     ->toHaveMethod('handle');
 
 arch()->expect('App\Notifications')
-    ->toExtend('Illuminate\Notifications\Notification');
+    ->toExtend(\Illuminate\Notifications\Notification::class);
 
 arch()->expect('App')
-    ->not->toExtend('Illuminate\Notifications\Notification')
+    ->not->toExtend(\Illuminate\Notifications\Notification::class)
     ->ignoring('App\Notifications');
 
 arch()->expect('App\Providers')
     ->toHaveSuffix('ServiceProvider');
 
 arch()->expect('App\Providers')
-    ->toExtend('Illuminate\Support\ServiceProvider');
+    ->toExtend(\Illuminate\Support\ServiceProvider::class);
 
 arch()->expect('App\Providers')
     ->not->toBeUsed();
 
 arch()->expect('App')
-    ->not->toExtend('Illuminate\Support\ServiceProvider')
+    ->not->toExtend(\Illuminate\Support\ServiceProvider::class)
     ->ignoring('App\Providers');
 
 arch()->expect('App')

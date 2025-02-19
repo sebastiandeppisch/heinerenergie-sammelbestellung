@@ -39,9 +39,7 @@ class OrderController extends Controller
             $orders = Order::all();
         }
 
-        return $orders->filter(function (Order $order) {
-            return Auth::user()->can('view', $order);
-        })->values();
+        return $orders->filter(fn(Order $order) => Auth::user()->can('view', $order))->values();
     }
 
     /**

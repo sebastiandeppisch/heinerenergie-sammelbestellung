@@ -16,9 +16,7 @@ class AdvicesImport implements ToModel, WithHeadingRow
 
     public function __construct()
     {
-        HeadingRowFormatter::extend('custom', function ($value) {
-            return Str::lower($value);
-        });
+        HeadingRowFormatter::extend('custom', fn($value) => Str::lower($value));
     }
 
     public function model(array $row)
@@ -27,7 +25,7 @@ class AdvicesImport implements ToModel, WithHeadingRow
             return null;
         }
 
-        $street = explode(' ', $row['strasse']);
+        $street = explode(' ', (string) $row['strasse']);
         $streetNumber = array_pop($street);
         $street = implode(' ', $street);
 
