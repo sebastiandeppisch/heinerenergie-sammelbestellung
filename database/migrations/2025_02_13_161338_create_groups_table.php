@@ -34,10 +34,6 @@ return new class extends Migration
 
             $table->unique(['group_id', 'user_id']);
         });
-
-        Schema::table('advices', function (Blueprint $table) {
-            $table->foreignIdFor(Group::class, 'group_id')->constrained();
-        });
     }
 
     /**
@@ -45,11 +41,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('advices', function (Blueprint $table) {
-            $table->dropForeign(['group_id']);
-            $table->dropColumn('group_id');
-        });
-
         Schema::dropIfExists('group_user');
         Schema::dropIfExists('groups');
     }
