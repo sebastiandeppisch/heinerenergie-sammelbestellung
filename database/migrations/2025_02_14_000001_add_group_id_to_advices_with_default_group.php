@@ -10,7 +10,9 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        }
 
         Schema::table('advices', function (Blueprint $table) {
             $table->foreignIdFor(Group::class)->constrained();
@@ -43,7 +45,9 @@ return new class extends Migration
 
         DB::table('users')->update(['is_admin' => false]);
 
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        }
     }
 
     public function down(): void
