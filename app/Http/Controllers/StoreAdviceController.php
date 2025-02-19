@@ -11,7 +11,7 @@ class StoreAdviceController extends Controller
 {
     public function __invoke(StoreAdviceRequest $request)
     {
-        $advice = new Advice();
+        $advice = new Advice;
         $advice->fill($request->validated());
         $advice->save();
 

@@ -18,7 +18,7 @@ class ProductCategorySeeder extends Seeder
         if (ProductCategory::count() === 0) {
             $bulkOrder = BulkOrder::first();
             foreach (['Modulpakete', 'Montagepakete', 'Einzelzubehör'] as $name) {
-                $category = new ProductCategory();
+                $category = new ProductCategory;
                 $category->name = $name;
                 $category->bulk_order_id = $bulkOrder->id;
                 $category->save();

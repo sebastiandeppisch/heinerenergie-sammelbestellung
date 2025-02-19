@@ -21,7 +21,7 @@ class ProductCategoryController extends Controller
 
     public function store(StoreProductCategoryRequest $request)
     {
-        $productCategory = new ProductCategory();
+        $productCategory = new ProductCategory;
         $productCategory->fill($request->all());
         $productCategory->save();
 

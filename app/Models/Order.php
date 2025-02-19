@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-use NumberFormatter;
-use Illuminate\Database\Eloquent\Model;
 use Doctrine\Common\Cache\Psr6\InvalidArgument;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use NumberFormatter;
 
 class Order extends Model
 {
@@ -30,7 +30,7 @@ class Order extends Model
 
     public function getFormattedPriceAttribute(): string
     {
-        return (new NumberFormatter( 'de_DE', NumberFormatter::CURRENCY ))->formatCurrency($this->price, 'EUR');
+        return (new NumberFormatter('de_DE', NumberFormatter::CURRENCY))->formatCurrency($this->price, 'EUR');
     }
 
     public function getPanelsCountAttribute(): int
@@ -86,6 +86,7 @@ class Order extends Model
     {
         return $this->shares->pluck('id')->toArray();
     }
+
     protected function casts(): array
     {
         return [

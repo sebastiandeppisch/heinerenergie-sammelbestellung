@@ -2,18 +2,19 @@
 
 namespace App\Http\Requests\Group;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Models\Group;
+use Illuminate\Foundation\Http\FormRequest;
 
 class StoreGroupRequest extends FormRequest
 {
-
     public function authorize(): bool
     {
         if ($this->input('parent_id')) {
             $parent = Group::findOrFail($this->input('parent_id'));
+
             return $this->user()->can('create', [Group::class, $parent]);
         }
+
         return $this->user()->can('create', Group::class);
     }
 

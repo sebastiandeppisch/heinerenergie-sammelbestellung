@@ -19,6 +19,7 @@ class AdviceStatus extends Model
     {
         return $this->belongsTo(Advice::class);
     }
+
     protected function casts(): array
     {
         return [

@@ -2,14 +2,15 @@
 
 namespace App\Data;
 
-use Spatie\LaravelData\Data;
 use App\Models\Group;
+use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
 #[TypeScript]
 class GroupData extends Data
 {
     public int $users_count = 0;
+
     public int $advices_count = 0;
 
     public function __construct(

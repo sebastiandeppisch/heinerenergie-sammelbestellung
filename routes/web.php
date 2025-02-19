@@ -1,13 +1,10 @@
 <?php
 
-use App\Http\Controllers\BulkOrder;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\PageController;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\OrderController;
-use App\Http\Controllers\BulkOrderController;
-use App\Http\Controllers\Api\GroupUserController;
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,7 +16,6 @@ use App\Http\Controllers\Api\GroupUserController;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
 
 Route::middleware('auth')->group(function () {
     Route::get('bulkorders/{bulkorder}/orderexport', [OrderController::class, 'export'])->name('orderexport');
@@ -33,7 +29,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/advices/{advice}', [PageController::class, 'showAdvice'])->name('advices.show');
     Route::get('/advicesmap', [PageController::class, 'advicesMap'])->name('advices.map');
     Route::get('neworder', [PageController::class, 'newOrder'])->name('neworder');
-    Route::get('/backend', fn() => redirect()->route('dashboard'))->name('backend');
+    Route::get('/backend', fn () => redirect()->route('dashboard'))->name('backend');
 
     Route::resource('groups', GroupController::class);
 
@@ -43,7 +39,7 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/change-password', [PageController::class, 'changePassword'])->name('password.reset');
 
-Route::get('/', fn() => redirect()->route('home'));
+Route::get('/', fn () => redirect()->route('home'));
 
 Route::get('/sammelbestellung', [PageController::class, 'publicNewOrder'])->name('home');
 Route::get('/login-form', [PageController::class, 'login'])->name('login');

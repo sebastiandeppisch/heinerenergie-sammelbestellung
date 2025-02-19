@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\Services;
 
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Advice;
+use App\Models\User;
 use App\Services\AdviceService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class AdviceServiceTest extends TestCase
 {
@@ -18,15 +18,15 @@ class AdviceServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->adviceService = new AdviceService();
+        $this->adviceService = new AdviceService;
     }
 
     public function test_get_distance_returns_null_for_null_user(): void
     {
         $advice = Advice::factory()->create();
-        
+
         $distance = $this->adviceService->getDistance($advice, null);
-        
+
         $this->assertNull($distance);
     }
 
@@ -34,9 +34,9 @@ class AdviceServiceTest extends TestCase
     {
         $user = User::factory()->create();
         $advice = Advice::factory()->create();
-        
+
         $canEdit = $this->adviceService->canEdit($advice, $user);
-        
+
         $this->assertIsBool($canEdit);
     }
-} 
+}

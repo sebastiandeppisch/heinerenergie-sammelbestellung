@@ -2,16 +2,15 @@
 
 namespace App\Jobs;
 
-use App\Models\User;
 use App\Models\Advice;
-use Illuminate\Bus\Queueable;
-use Illuminate\Support\Collection;
+use App\Models\User;
 use App\Notifications\NewAdviceNearby;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Collection;
 
 class SendNewAdviceInfoToAdvisors implements ShouldQueue
 {
@@ -26,11 +25,12 @@ class SendNewAdviceInfoToAdvisors implements ShouldQueue
     {
         if ($this->advice->coordinate === null) {
             $this->release(60);
+
             return;
         }
 
-        foreach($this->advisors() as $advisor) {
-            if($advisor->shouldBeNotifiedForNearbyAdvice($this->advice)) {
+        foreach ($this->advisors() as $advisor) {
+            if ($advisor->shouldBeNotifiedForNearbyAdvice($this->advice)) {
                 $distance = $this->advice->getDistanceToUser($advisor);
                 $advisor->notify(new NewAdviceNearby($this->advice, $distance));
             }
@@ -40,7 +40,8 @@ class SendNewAdviceInfoToAdvisors implements ShouldQueue
     /**
      * @return Collection<User>
      */
-    private function advisors(): Collection{
+    private function advisors(): Collection
+    {
         return User::whereNotNull('advice_radius')->get();
     }
 }

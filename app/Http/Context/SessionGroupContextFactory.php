@@ -2,9 +2,9 @@
 
 namespace App\Http\Context;
 
-use App\Models\User;
 use App\Context\GroupContext;
 use App\Context\GroupContextContract;
+use App\Models\User;
 use App\Services\SessionService;
 use Illuminate\Support\Facades\Auth;
 
@@ -17,7 +17,7 @@ class SessionGroupContextFactory
     public function createFromSession(?User $user = null): GroupContextContract
     {
         $user ??= Auth::user();
-        
+
         return new GroupContext(
             currentGroup: $this->sessionService->getCurrentGroup(),
             actsAsSystemAdmin: $this->sessionService->actsAsSystemAdmin(),
@@ -25,4 +25,4 @@ class SessionGroupContextFactory
             actsAsGroupAdmin: $this->sessionService->actsAsGroupAdmin()
         );
     }
-} 
+}

@@ -2,16 +2,15 @@
 
 namespace App\Casts;
 
-use InvalidArgumentException;
-use Illuminate\Database\Eloquent\Model;
 use App\ValueObjects\Address as AddressValueObject;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
+use InvalidArgumentException;
 
 class Address implements CastsAttributes
 {
     public function get($model, string $key, $value, array $attributes)
     {
-        if($attributes['street'] === null || $attributes['streetNumber'] === null || $attributes['zip'] === null || $attributes['city'] === null) {
+        if ($attributes['street'] === null || $attributes['streetNumber'] === null || $attributes['zip'] === null || $attributes['city'] === null) {
             return null;
         }
 
@@ -22,13 +21,13 @@ class Address implements CastsAttributes
             city: $attributes['city']
         );
     }
-    
+
     public function set($model, string $key, $value, array $attributes)
     {
-        if(!$value instanceof AddressValueObject) {
+        if (! $value instanceof AddressValueObject) {
             throw new InvalidArgumentException('The given value is not an Address instance.');
         }
-        
+
         return [
             'street' => $value->street,
             'streetNumber' => $value->streetNumber,
@@ -36,5 +35,4 @@ class Address implements CastsAttributes
             'city' => $value->city,
         ];
     }
-    
 }

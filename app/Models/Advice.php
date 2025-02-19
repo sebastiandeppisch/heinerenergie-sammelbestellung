@@ -2,30 +2,28 @@
 
 namespace App\Models;
 
-use App\Enums\HouseType;
+use App\Enums\AdviceStatusResult;
 use App\Enums\AdviceType;
+use App\Enums\HouseType;
 use App\Events\AdviceCreated;
 use App\Events\AdviceUpdated;
 use App\ValueObjects\Address;
 use App\ValueObjects\Coordinate;
-use App\Enums\AdviceStatusResult;
-use Wnx\Sends\Contracts\HasSends;
-use Illuminate\Support\Facades\Auth;
-use Wnx\Sends\Support\HasSendsTrait;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Wnx\Sends\Contracts\HasSends;
+use Wnx\Sends\Support\HasSendsTrait;
 
 class Advice extends Model implements HasSends
 {
     protected $table = 'advices';
 
     use HasFactory;
-    use SoftDeletes;
     use HasSendsTrait;
+    use SoftDeletes;
 
     protected $fillable = [
         'firstName',
@@ -108,6 +106,7 @@ class Advice extends Model implements HasSends
     {
         return $this->belongsTo(Group::class);
     }
+
     protected function casts(): array
     {
         return [

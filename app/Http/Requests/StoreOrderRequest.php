@@ -38,7 +38,7 @@ class StoreOrderRequest extends FormRequest
             'orderItems' => 'array',
             'advisorEmail' => 'required|email|exists:users,email|max:100',
             'commentary' => 'nullable|string|max:65535',
-            'password' => [new OrderPassword()],
+            'password' => [new OrderPassword],
         ];
     }
 

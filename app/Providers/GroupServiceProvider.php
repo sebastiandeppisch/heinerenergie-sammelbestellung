@@ -2,10 +2,10 @@
 
 namespace App\Providers;
 
-use App\Context\NoGroupContext;
-use App\Services\SessionService;
 use App\Context\GlobalGroupContext;
 use App\Context\GroupContextContract;
+use App\Context\NoGroupContext;
+use App\Services\SessionService;
 use Illuminate\Support\ServiceProvider;
 
 class GroupServiceProvider extends ServiceProvider
@@ -18,6 +18,6 @@ class GroupServiceProvider extends ServiceProvider
 
         $this->app->bind(GroupContextContract::class, GlobalGroupContext::class);
 
-        //$this->app->bind(GroupContextContract::class, NoGroupContext::class);
+        // $this->app->bind(GroupContextContract::class, NoGroupContext::class);
     }
 }

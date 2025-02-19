@@ -5,14 +5,10 @@ namespace App\Jobs;
 use App\Actions\FetchCoordinateByAddress;
 use App\Models\Advice;
 use Illuminate\Bus\Queueable;
-use maxh\Nominatim\Nominatim;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
-use GuzzleHttp\Exception\ClientException;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 
 class CalculateCoordinatesForAdvice implements ShouldQueue
 {
@@ -36,7 +32,7 @@ class CalculateCoordinatesForAdvice implements ShouldQueue
     public function handle()
     {
         $advice = $this->advice->fresh();
-        
+
         $advice->coordinate = app(FetchCoordinateByAddress::class)($advice->address);
         $advice->save();
     }

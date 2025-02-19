@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
@@ -36,7 +35,7 @@ class Product extends Model
 
     public function copy(BulkOrder $bulkOrder, ?ProductCategory $productCategory = null): self
     {
-        $newProduct = new Product();
+        $newProduct = new Product;
         $newProduct->name = $this->name;
         $newProduct->price = $this->price;
         $newProduct->sku = $this->sku;
@@ -47,7 +46,7 @@ class Product extends Model
         $newProduct->save();
 
         foreach ($this->downloads as $download) {
-            $newDownload = new ProductDownload();
+            $newDownload = new ProductDownload;
             $newDownload->name = $download->name;
             $newDownload->url = $download->url;
             $newDownload->product_id = $newProduct->id;
@@ -64,6 +63,7 @@ class Product extends Model
 
         return parent::delete();
     }
+
     protected function casts(): array
     {
         return [

@@ -2,12 +2,12 @@
 
 namespace App\Data;
 
-use App\Models\User;
-use App\Models\Advice;
-use App\Services\AdviceService;
-use Spatie\LaravelData\Data;
 use App\Enums\AdviceType;
 use App\Enums\HouseType;
+use App\Models\Advice;
+use App\Models\User;
+use App\Services\AdviceService;
+use Spatie\LaravelData\Data;
 
 class AdviceData extends Data
 {
@@ -69,4 +69,4 @@ class AdviceData extends Data
             can_edit: $user ? $adviceService->canEdit($advice, $user) : false,
         );
     }
-} 
+}

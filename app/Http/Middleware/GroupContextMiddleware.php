@@ -2,11 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Context\GroupContextContract;
+use App\Http\Context\SessionGroupContextFactory;
 use Closure;
 use Illuminate\Http\Request;
-use App\Context\GroupContextContract;
-use App\Context\GroupContextInterface;
-use App\Http\Context\SessionGroupContextFactory;
 
 class GroupContextMiddleware
 {
@@ -19,7 +18,7 @@ class GroupContextMiddleware
 
         /*
         TODO use the group context
-        
+
         app()->instance(
             GroupContextContract::class,
             $this->factory->createFromSession()
@@ -27,4 +26,4 @@ class GroupContextMiddleware
 
         return $next($request);
     }
-} 
+}

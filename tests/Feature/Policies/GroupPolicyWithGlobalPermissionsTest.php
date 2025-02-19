@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\User;
-use App\Models\Group;
 use App\Context\GlobalGroupContext;
 use App\Context\GroupContextContract;
+use App\Models\Group;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -141,9 +141,9 @@ test('normal user can only view groups they belong to', function () {
 test('group admin is also a regular member of the group', function () {
     // Make normal user admin of main group
     $this->mainGroup->users()->attach($this->normalUser->id, ['is_admin' => true]);
-    
+
     // Check that the user belongs to the group
     expect($this->normalUser->belongsToGroup($this->mainGroup))->toBeTrue()
         ->and($this->mainGroup->users()->pluck('users.id'))->toContain($this->normalUser->id)
         ->and($this->mainGroup->admins()->pluck('users.id'))->toContain($this->normalUser->id);
-}); 
+});

@@ -2,11 +2,10 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Group;
 use App\Data\GroupData;
-use Inertia\Middleware;
+use App\Models\Group;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -43,7 +42,7 @@ class HandleInertiaRequests extends Middleware
         $currentGroup = session()->get('actAsGroupId');
         $currentGroup = Group::find($currentGroup);
 
-        if($currentGroup) {
+        if ($currentGroup) {
             $currentGroup = GroupData::fromModel($currentGroup);
         }
 
@@ -51,8 +50,8 @@ class HandleInertiaRequests extends Middleware
 
         $flashMessages = [];
 
-        foreach($flashKeys as $flashKey) {
-            if(session()->has($flashKey)) {
+        foreach ($flashKeys as $flashKey) {
+            if (session()->has($flashKey)) {
                 $flashMessages[$flashKey] = session()->get($flashKey);
             }
         }
@@ -66,7 +65,7 @@ class HandleInertiaRequests extends Middleware
                 'email',
                 'is_admin',
                 'is_acting_as_admin',
-                'is_admin'
+                'is_admin',
             ]),
             'auth.availableGroups' => fn () => $request->user()?->groups->map(fn (Group $group) => GroupData::fromModel($group)),
             'auth.currentGroup' => fn () => $currentGroup,

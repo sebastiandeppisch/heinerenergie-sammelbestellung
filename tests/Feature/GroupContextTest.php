@@ -2,19 +2,18 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Group;
 use App\Models\Advice;
+use App\Models\Group;
+use App\Models\User;
+use App\Services\SessionService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
+use function Pest\Laravel\post;
 use function Pest\Laravel\put;
 
-use function Pest\Laravel\post;
-use App\Services\SessionService;
-use function Pest\Laravel\actingAs;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
-
 
 test('TODO uncomment the tests')->skip('use group context in DI container to make this feature work');
 

@@ -31,7 +31,7 @@ class UserPolicy
 
     public function delete(User $user, User $model)
     {
-        //there is no defined behaviour for the foreign data advices & orders yet
+        // there is no defined behaviour for the foreign data advices & orders yet
         return false;
     }
 

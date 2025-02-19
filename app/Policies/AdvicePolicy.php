@@ -2,19 +2,16 @@
 
 namespace App\Policies;
 
-use App\Models\User;
-use App\Models\Advice;
-use Illuminate\Support\Facades\Log;
 use App\Context\GroupContextContract;
+use App\Models\Advice;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class AdvicePolicy
 {
     use HandlesAuthorization;
 
-    public function __construct(private GroupContextContract $groupContext)
-    {
-    }
+    public function __construct(private GroupContextContract $groupContext) {}
 
     public function viewAny(User $user)
     {
@@ -23,19 +20,20 @@ class AdvicePolicy
 
     public function view(User $user, Advice $advice)
     {
-        if($this->groupContext->actsAsSystemAdmin($user)) {
+        if ($this->groupContext->actsAsSystemAdmin($user)) {
             return true;
         }
 
-        if($advice->advisor_id === $user->id) {
+        if ($advice->advisor_id === $user->id) {
             return true;
         }
 
         $shared = $advice->shares()->where('advisor_id', $user->id)->first();
 
-        if($shared) {
+        if ($shared) {
             return true;
         }
+
         return $this->groupContext->hasAccessToGroup($user, $advice->group);
     }
 
@@ -73,7 +71,7 @@ class AdvicePolicy
 
     public function delete(User $user, Advice $advice)
     {
-        //a advice can not be deleted, only set to done
+        // a advice can not be deleted, only set to done
         return false;
     }
 

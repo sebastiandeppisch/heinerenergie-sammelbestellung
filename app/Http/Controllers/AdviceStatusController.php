@@ -20,7 +20,7 @@ class AdviceStatusController extends Controller
 
     public function store(StoreAdviceStatusRequest $request)
     {
-        $advicestatus = new AdviceStatus();
+        $advicestatus = new AdviceStatus;
         $advicestatus->fill($request->validated());
         $advicestatus->save();
 

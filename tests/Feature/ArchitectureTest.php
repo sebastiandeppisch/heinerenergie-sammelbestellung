@@ -1,9 +1,8 @@
 <?php
 
-
 arch()->preset()->php();
 
-//copied from https://github.com/pestphp/pest/blob/3.x/src/ArchPresets/Laravel.php
+// copied from https://github.com/pestphp/pest/blob/3.x/src/ArchPresets/Laravel.php
 // but removed Controller method naming convention
 
 arch('No debugging calls are used')
@@ -144,7 +143,6 @@ arch()->expect('App\Http\Controllers')
 
 arch()->expect('App\Http')
     ->toOnlyBeUsedIn('App\Http');
-
 
 arch()->expect([
     'dd',

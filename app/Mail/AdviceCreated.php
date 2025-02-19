@@ -34,6 +34,7 @@ class AdviceCreated extends Mailable implements ShouldQueue
     public function build()
     {
         $this->storeClassName()->associateWith($this->advice);
+
         return $this->markdown('emails.advicecreated')->subject('heiner*energie Beratungsanfrage');
     }
 }

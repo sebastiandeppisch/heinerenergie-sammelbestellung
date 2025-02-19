@@ -26,4 +26,4 @@ class GroupSeeder extends Seeder
                 });
         });
     }
-} 
+}

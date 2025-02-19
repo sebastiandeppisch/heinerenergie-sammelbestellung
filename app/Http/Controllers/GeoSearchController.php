@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Actions\FetchCoordinateByFreeText;
+use Illuminate\Http\Request;
 
 class GeoSearchController extends Controller
 {
@@ -11,6 +11,7 @@ class GeoSearchController extends Controller
     {
         $text = $request->input('query');
         $coordinate = app(FetchCoordinateByFreeText::class)($text);
+
         return response()->json($coordinate);
     }
 }

@@ -24,7 +24,7 @@ class StoreOrderController extends Controller
             if ($quantity <= 0) {
                 continue;
             }
-            $item = new OrderItem();
+            $item = new OrderItem;
             $item->product_id = $orderItem['product']['id'];
             $item->quantity = $quantity;
             $item->order_id = $order->id;

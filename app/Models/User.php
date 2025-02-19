@@ -2,20 +2,20 @@
 
 namespace App\Models;
 
+use App\Traits\HasGroups;
 use App\ValueObjects\Address;
 use App\ValueObjects\Coordinate;
-use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use App\Traits\HasGroups;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasGroups;
+    use HasApiTokens, HasFactory, HasGroups, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -82,11 +82,13 @@ class User extends Authenticatable
 
     public function shouldBeNotifiedForNearbyAdvice(Advice $advice): bool
     {
-        if($this->coordinate === null || $this->advice_radius === null || $advice->coordinate === null) {
+        if ($this->coordinate === null || $this->advice_radius === null || $advice->coordinate === null) {
             return false;
         }
+
         return $this->coordinate->distanceTo($advice->coordinate) <= $this->advice_radius;
     }
+
     /**
      * The attributes that should be cast.
      *

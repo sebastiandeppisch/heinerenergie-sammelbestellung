@@ -2,19 +2,19 @@
 
 namespace App\Providers;
 
-use App\Events\OrderCreated;
 use App\Events\AdviceCreated;
 use App\Events\AdviceUpdated;
-use App\Listeners\EmptyCoordinates;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Auth\Events\Registered;
+use App\Events\OrderCreated;
 use App\Listeners\AfterAdviceIsCreated;
 use App\Listeners\CalculateCoordinates;
-use Illuminate\Mail\Events\MessageSent;
+use App\Listeners\EmptyCoordinates;
 use App\Listeners\SendOrderCreatedNotification;
-use Wnx\Sends\Listeners\StoreOutgoingMailListener;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Illuminate\Mail\Events\MessageSent;
+use Illuminate\Support\Facades\Event;
+use Wnx\Sends\Listeners\StoreOutgoingMailListener;
 
 class EventServiceProvider extends ServiceProvider
 {

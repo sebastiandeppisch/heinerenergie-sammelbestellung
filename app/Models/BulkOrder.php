@@ -43,7 +43,7 @@ class BulkOrder extends Model
     public function copyFrom(BulkOrder $old): void
     {
         foreach ($old->productCategories as $category) {
-            $newCategory = new ProductCategory();
+            $newCategory = new ProductCategory;
             $newCategory->name = $category->name;
             $newCategory->bulk_order_id = $this->id;
             $newCategory->save();
@@ -56,6 +56,7 @@ class BulkOrder extends Model
             $product->copy($this);
         }
     }
+
     protected function casts(): array
     {
         return [

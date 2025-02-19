@@ -38,8 +38,8 @@ class GroupFactory extends Factory
      */
     public function child(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'parent_id' => Group::factory(),
         ]);
     }
-} 
+}

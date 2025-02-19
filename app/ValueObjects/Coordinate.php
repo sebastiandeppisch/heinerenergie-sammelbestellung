@@ -7,34 +7,35 @@ use Illuminate\Contracts\Database\Eloquent\Castable;
 
 class Coordinate implements Castable
 {
-	public function __construct(
-		public float $lat,
-		public float $long
-	) {}
+    public function __construct(
+        public float $lat,
+        public float $long
+    ) {}
 
-	public static function fromArray(array $data): self
-	{
-		$lat = $data['lat'];
-		$long = $data['lon'] ?? $data['long'];
-		return new self($lat, $long);
-	}
+    public static function fromArray(array $data): self
+    {
+        $lat = $data['lat'];
+        $long = $data['lon'] ?? $data['long'];
 
-	public static function castUsing(array $attributes): string
-	{
-		return CoordinateCast::class;
-	}
+        return new self($lat, $long);
+    }
 
-	public function distanceTo(self $coordinate): float
-	{
-		return $this->haversineGreatCircleDistance(
-			$this->lat,
-			$this->long,
-			$coordinate->lat,
-			$coordinate->long
-		);
-	}
+    public static function castUsing(array $attributes): string
+    {
+        return CoordinateCast::class;
+    }
 
-	private function haversineGreatCircleDistance(
+    public function distanceTo(self $coordinate): float
+    {
+        return $this->haversineGreatCircleDistance(
+            $this->lat,
+            $this->long,
+            $coordinate->lat,
+            $coordinate->long
+        );
+    }
+
+    private function haversineGreatCircleDistance(
         $latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371000): float
     {
         $latFrom = deg2rad($latitudeFrom);
@@ -50,5 +51,4 @@ class Coordinate implements Castable
 
         return $angle * $earthRadius;
     }
-
 }

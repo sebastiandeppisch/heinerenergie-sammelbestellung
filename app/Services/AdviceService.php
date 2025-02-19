@@ -18,9 +18,10 @@ class AdviceService
 
     private function getDistanceBetween(Advice $advice, User $user): ?float
     {
-        if($advice->coordinate === null || $user->coordinate === null) {
+        if ($advice->coordinate === null || $user->coordinate === null) {
             return null;
         }
+
         return $advice->coordinate->distanceTo($user->coordinate);
     }
 
@@ -28,4 +29,4 @@ class AdviceService
     {
         return $user->can('view', $advice);
     }
-} 
+}

@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Exceptions\UpdateException;
-use Symfony\Component\Process\Process;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
+use Symfony\Component\Process\Process;
 
 class InstallCommand extends Command
 {
@@ -50,14 +50,14 @@ class InstallCommand extends Command
         $this->info($process->getOutput());
         if (! $process->isSuccessful()) {
             $this->error($process->getErrorOutput());
-            throw new UpdateException();
+            throw new UpdateException;
         }
     }
 
     private function artisan(string $cmd): void
     {
         if (Artisan::call($cmd) !== 0) {
-            throw new UpdateException();
+            throw new UpdateException;
         }
     }
 }

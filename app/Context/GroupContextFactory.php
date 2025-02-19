@@ -15,7 +15,7 @@ class GroupContextFactory
     public function create(?User $user = null): GroupContextContract
     {
         $user ??= Auth::user();
-        
+
         return new GroupContext(
             currentGroup: $this->sessionService->getCurrentGroup(),
             actsAsSystemAdmin: $this->sessionService->actsAsSystemAdmin(),
@@ -23,4 +23,4 @@ class GroupContextFactory
             actsAsGroupAdmin: $this->sessionService->actsAsGroupAdmin()
         );
     }
-} 
+}

@@ -39,7 +39,7 @@ class OrderController extends Controller
             $orders = Order::all();
         }
 
-        return $orders->filter(fn(Order $order) => Auth::user()->can('view', $order))->values();
+        return $orders->filter(fn (Order $order) => Auth::user()->can('view', $order))->values();
     }
 
     /**
@@ -60,7 +60,7 @@ class OrderController extends Controller
             if ($quantity <= 0) {
                 continue;
             }
-            $item = new OrderItem();
+            $item = new OrderItem;
             $item->product_id = $orderItem['product']['id'];
             $item->quantity = $quantity;
             $item->order_id = $order->id;
@@ -137,7 +137,7 @@ class OrderController extends Controller
             abort(404, 'Sammelbestellung fehlt');
         }
 
-        $export = new OrdersExport();
+        $export = new OrdersExport;
         $export->bulkorder = $bulkorder;
 
         $products = 'Alle Artikel';

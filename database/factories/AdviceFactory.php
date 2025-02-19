@@ -18,7 +18,7 @@ class AdviceFactory extends Factory
     public function definition()
     {
 
-        if(Group::count() > 0) {
+        if (Group::count() > 0) {
             $group = Group::first();
         } else {
             $group = Group::factory();

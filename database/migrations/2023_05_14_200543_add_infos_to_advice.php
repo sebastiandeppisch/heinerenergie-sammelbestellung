@@ -21,7 +21,7 @@ return new class extends Migration
             $table->boolean('helpType_bureaucracy')->default(false);
             $table->boolean('helpType_other')->default(false);
             $table->boolean('landlordExists')->nullable()->default(null);
-            //$table->enum('houseType', ['singleFamily', 'multiFamily', 'other'])->nullable();
+            // $table->enum('houseType', ['singleFamily', 'multiFamily', 'other'])->nullable();
         });
     }
 

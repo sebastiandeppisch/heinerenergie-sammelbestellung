@@ -2,19 +2,19 @@
 
 namespace App\Context;
 
-use App\Models\User;
-use App\Models\Group;
 use App\Models\Advice;
+use App\Models\Group;
+use App\Models\User;
 
 class NoGroupContext implements GroupContextContract
 {
-
     public function getCurrentGroup(): ?Group
     {
         return null;
     }
 
-    public function actsAsSystemAdmin(User $user): bool{
+    public function actsAsSystemAdmin(User $user): bool
+    {
         return false;
     }
 

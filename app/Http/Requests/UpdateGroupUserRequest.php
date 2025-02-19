@@ -17,4 +17,4 @@ class UpdateGroupUserRequest extends FormRequest
             'is_admin' => 'required|boolean',
         ];
     }
-} 
+}

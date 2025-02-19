@@ -2,15 +2,15 @@
 
 namespace App\Casts;
 
-use InvalidArgumentException;
 use App\ValueObjects\Coordinate as ValueObjectsCoordinate;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
+use InvalidArgumentException;
 
 class Coordinate implements CastsAttributes
 {
     public function get($model, string $key, $value, array $attributes)
     {
-        if($attributes['lat'] === null || $attributes['long'] === null) {
+        if ($attributes['lat'] === null || $attributes['long'] === null) {
             return null;
         }
 
@@ -19,7 +19,7 @@ class Coordinate implements CastsAttributes
             long: $attributes['long']
         );
     }
-    
+
     public function set($model, string $key, $value, array $attributes)
     {
         if ($value === null) {
@@ -29,7 +29,7 @@ class Coordinate implements CastsAttributes
             ];
         }
 
-        if(!$value instanceof ValueObjectsCoordinate) {
+        if (! $value instanceof ValueObjectsCoordinate) {
             throw new InvalidArgumentException('The given value is not an Coordinate instance.');
         }
 

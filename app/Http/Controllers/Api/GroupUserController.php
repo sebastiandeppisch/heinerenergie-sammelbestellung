@@ -11,15 +11,14 @@ use App\Models\User;
 
 class GroupUserController extends Controller
 {
-
-	private function userToDTO(User $user): GroupUserData
+    private function userToDTO(User $user): GroupUserData
     {
-        if (!$user->relationLoaded('groups')) {
+        if (! $user->relationLoaded('groups')) {
             throw new \RuntimeException('User groups relation must be loaded before converting to DTO');
         }
 
         $group = $user->groups->first();
-        if (!$group) {
+        if (! $group) {
             throw new \RuntimeException('User must be in the group before converting to DTO');
         }
 
@@ -39,12 +38,12 @@ class GroupUserController extends Controller
         $this->authorize('manageUsers', $group);
 
         $users = $group->users;
-        $users->load(['groups' => function($query) use ($group) {
+        $users->load(['groups' => function ($query) use ($group) {
             $query->where('groups.id', $group->id);
         }]);
 
         return response()->json([
-            'data' => $users->map(fn (User $user) => $this->userToDTO($user))
+            'data' => $users->map(fn (User $user) => $this->userToDTO($user)),
         ]);
     }
 
@@ -60,7 +59,7 @@ class GroupUserController extends Controller
         ]);
 
         $user = User::findOrFail($validated['id']);
-        $user->load(['groups' => function($query) use ($group) {
+        $user->load(['groups' => function ($query) use ($group) {
             $query->where('groups.id', $group->id);
         }]);
 
@@ -78,7 +77,7 @@ class GroupUserController extends Controller
             'is_admin' => $validated['is_admin'],
         ]);
 
-        $user->load(['groups' => function($query) use ($group) {
+        $user->load(['groups' => function ($query) use ($group) {
             $query->where('groups.id', $group->id);
         }]);
 
@@ -96,4 +95,4 @@ class GroupUserController extends Controller
 
         return response()->noContent();
     }
-} 
+}

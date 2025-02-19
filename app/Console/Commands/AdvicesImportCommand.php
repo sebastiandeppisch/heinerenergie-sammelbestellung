@@ -36,7 +36,7 @@ class AdvicesImportCommand extends Command
         );
         $statusId = AdviceStatus::where('name', $status)->first()->id;
 
-        $import = new Importer();
+        $import = new Importer;
         $import->statusId = $statusId;
         Excel::import($import, $this->argument('file'));
 

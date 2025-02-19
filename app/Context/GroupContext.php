@@ -89,7 +89,7 @@ class GroupContext implements GroupContextContract
 
         // In global context, check if user is member of the group or any ancestor
         return $this->user->belongsToGroup($group) ||
-               $group->ancestors()->contains(fn($ancestor) => $this->user->belongsToGroup($ancestor));
+               $group->ancestors()->contains(fn ($ancestor) => $this->user->belongsToGroup($ancestor));
     }
 
     public function isAdmin(Group $group): bool
@@ -116,7 +116,7 @@ class GroupContext implements GroupContextContract
             ->get();
 
         // User is admin if they are admin of the target group or any of its ancestors
-        return $adminGroups->contains(fn($adminGroup) => $adminGroup->is($group) ||
+        return $adminGroups->contains(fn ($adminGroup) => $adminGroup->is($group) ||
                $group->ancestors()->contains($adminGroup));
     }
 
@@ -164,6 +164,6 @@ class GroupContext implements GroupContextContract
         $userGroups = $this->user->groups()->get();
         $advisorGroups = $advisor->groups()->get();
 
-        return $userGroups->contains(fn($group) => $advisorGroups->contains($group));
+        return $userGroups->contains(fn ($group) => $advisorGroups->contains($group));
     }
 }

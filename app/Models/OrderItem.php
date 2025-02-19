@@ -34,7 +34,7 @@ class OrderItem extends Model
 
             $duplicateItems->delete();
 
-            $item = new OrderItem();
+            $item = new OrderItem;
             $item->order_id = $order->id;
             $item->product_id = $productId;
             $item->quantity = $quantity;

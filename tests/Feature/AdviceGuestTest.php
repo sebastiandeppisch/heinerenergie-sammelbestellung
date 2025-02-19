@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\Advice;
-use App\Enums\HouseType;
 use App\Enums\AdviceType;
+use App\Enums\HouseType;
 use App\Mail\AdviceCreated;
+use App\Models\Advice;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -41,8 +41,8 @@ test('advice can be saved', function () {
         expect($advice->$key)->toBe($value);
     }
 
-    Mail::assertQueued(fn(AdviceCreated $mail) => $mail->hasTo($advice->email));
-})->skip("TODO determine the advices group from the form");
+    Mail::assertQueued(fn (AdviceCreated $mail) => $mail->hasTo($advice->email));
+})->skip('TODO determine the advices group from the form');
 
 test('direct order advice can be saved', function () {
     Mail::fake();
@@ -71,5 +71,5 @@ test('direct order advice can be saved', function () {
         expect($advice->$key)->toBe($value);
     }
 
-    Mail::assertQueued(fn(AdviceCreated $mail) => $mail->hasTo($advice->email));
-})->skip("TODO determine the advices group from the form");
+    Mail::assertQueued(fn (AdviceCreated $mail) => $mail->hasTo($advice->email));
+})->skip('TODO determine the advices group from the form');

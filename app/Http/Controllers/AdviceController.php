@@ -7,7 +7,6 @@ use App\Http\Requests\UpdateAdviceRequest;
 use App\Http\Resources\DataProtectedAdvice;
 use App\Mail\SendOrderLink;
 use App\Models\Advice;
-use App\Models\Group;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,7 +23,7 @@ class AdviceController extends Controller
     {
         $isAdmin = Auth::user()->isActingAsAdmin();
 
-        return Advice::all()->filter(fn(Advice $advice) => Auth::user()->can('viewDataProtected', $advice))->values()->map(fn ($advice) => new DataProtectedAdvice($advice));
+        return Advice::all()->filter(fn (Advice $advice) => Auth::user()->can('viewDataProtected', $advice))->values()->map(fn ($advice) => new DataProtectedAdvice($advice));
     }
 
     public function mails(Advice $advice)

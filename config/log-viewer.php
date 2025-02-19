@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Middleware\CheckSysAdmin;
-use Illuminate\Auth\Middleware\Authenticate;
 
 return [
 

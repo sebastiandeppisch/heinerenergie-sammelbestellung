@@ -30,7 +30,7 @@ class RequireOrderPasswordRequest extends FormRequest
         }
 
         return [
-            'password' => ['required', new OrderPassword()],
+            'password' => ['required', new OrderPassword],
         ];
     }
 }

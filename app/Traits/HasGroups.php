@@ -56,7 +56,7 @@ trait HasGroups
         }
 
         $administeredGroups = $this->administeredGroups()->get();
-        $allGroups = new Collection();
+        $allGroups = new Collection;
 
         foreach ($administeredGroups as $group) {
             $allGroups->push($group);

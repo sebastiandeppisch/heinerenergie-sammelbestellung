@@ -1,22 +1,22 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AdviceController;
-use App\Http\Controllers\UploadController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\SettingController;
+use App\Http\Controllers\AdviceStatusController;
+use App\Http\Controllers\AdviceTypeController;
+use App\Http\Controllers\Api\GroupUserController;
 use App\Http\Controllers\BulkOrderController;
 use App\Http\Controllers\GeoSearchController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderItemController;
-use App\Http\Controllers\AdviceTypeController;
-use App\Http\Controllers\StoreOrderController;
-use App\Http\Controllers\StoreAdviceController;
-use App\Http\Controllers\AdviceStatusController;
 use App\Http\Controllers\ProductCategoryController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductDownloadController;
-use App\Http\Controllers\Api\GroupUserController;
+use App\Http\Controllers\SettingController;
+use App\Http\Controllers\StoreAdviceController;
+use App\Http\Controllers\StoreOrderController;
+use App\Http\Controllers\UploadController;
+use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -84,13 +84,13 @@ Route::middleware('auth')->group(function () {
     Route::get('map/search', GeoSearchController::class);
 });
 
-//Route::middleware('guest')->group(function () {
+// Route::middleware('guest')->group(function () {
 Route::get('products', [ProductController::class, 'index']);
 Route::get('productcategories', [ProductCategoryController::class, 'index']);
 
 Route::post('orders', StoreOrderController::class);
 Route::get('validateorderform', [OrderController::class, 'validateorderform']);
-//});
+// });
 Route::get('checkpassword', [OrderController::class, 'checkPassword']);
 
 Route::get('html/impress', [SettingController::class, 'impress']);

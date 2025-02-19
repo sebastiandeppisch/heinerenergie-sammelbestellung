@@ -21,7 +21,7 @@ return new class extends Migration
             $table->boolean('archived')->default(false);
         });
 
-        $bulkOrder = new BulkOrder();
+        $bulkOrder = new BulkOrder;
         $bulkOrder->name = 'Standard Sammelbestellung';
         $bulkOrder->save();
 

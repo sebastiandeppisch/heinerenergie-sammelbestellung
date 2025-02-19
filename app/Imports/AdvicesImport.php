@@ -16,7 +16,7 @@ class AdvicesImport implements ToModel, WithHeadingRow
 
     public function __construct()
     {
-        HeadingRowFormatter::extend('custom', fn($value) => Str::lower($value));
+        HeadingRowFormatter::extend('custom', fn ($value) => Str::lower($value));
     }
 
     public function model(array $row)

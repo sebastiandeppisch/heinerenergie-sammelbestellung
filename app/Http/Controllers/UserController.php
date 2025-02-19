@@ -127,12 +127,14 @@ class UserController extends Controller
 
         if (! $user->can('actAsGroup', $group)) {
             Log::error('User is not in group', ['user' => $user->id, 'group' => $group->id]);
+
             return redirect()->back()->with('error', 'Du bist nicht in dieser Gruppe');
         }
 
         if ($request->boolean('asAdmin')) {
             if (! $user->can('actAsGroupAdmin', $group)) {
                 Log::error('User is not a group admin', ['user' => $user->id, 'group' => $group->id]);
+
                 return redirect()->back()->with('error', 'Du bist kein Gruppenadministrator');
             }
         }

@@ -2,20 +2,16 @@
 
 namespace App\Policies;
 
-use App\Models\User;
-use App\Models\Group;
-use Illuminate\Support\Facades\Log;
 use App\Context\GroupContextContract;
+use App\Models\Group;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class GroupPolicy
 {
     use HandlesAuthorization;
 
-    public function __construct(private GroupContextContract $groupContext)
-    {
-    }
-
+    public function __construct(private GroupContextContract $groupContext) {}
 
     /**
      * Determine whether the user can view any models.
@@ -43,8 +39,8 @@ class GroupPolicy
 
         // Group admins can view their groups and their hierarchy
         foreach ($user->administeredGroups()->get() as $administeredGroup) {
-            if ($group->id === $administeredGroup->id || 
-                $group->ancestors()->contains($administeredGroup) || 
+            if ($group->id === $administeredGroup->id ||
+                $group->ancestors()->contains($administeredGroup) ||
                 $group->descendants()->contains($administeredGroup)) {
                 return true;
             }
@@ -77,7 +73,7 @@ class GroupPolicy
      */
     public function update(User $user, Group $group): bool
     {
-        if($this->groupContext->actsAsSystemAdmin($user, $group)) {
+        if ($this->groupContext->actsAsSystemAdmin($user, $group)) {
             return true;
         }
 
@@ -113,10 +109,9 @@ class GroupPolicy
 
     public function canActAsGroupAdmin(User $user, Group $group): bool
     {
-        if($this->actAsGroup($user, $group)) {
+        if ($this->actAsGroup($user, $group)) {
             return true;
         }
-
 
         if ($user->belongsToGroup($group)) {
             return $group->users()->where('user_id', $user->id)->where('is_admin', true)->exists();
