@@ -38,7 +38,7 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $currentGroup = session()->get('actAsGroupId');
-        $currentGroup = Group::findOrFail($currentGroup);
+        $currentGroup = Group::find($currentGroup);
 
         return array_merge(parent::share($request), [
             'auth.user' => fn () => $request->user()?->only([
