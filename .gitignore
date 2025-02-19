@@ -21,3 +21,4 @@ public/images/vendor/**
 /public/build
 _ide_helper.php
 _ide_helper_models.php
+.phpunit.cache
