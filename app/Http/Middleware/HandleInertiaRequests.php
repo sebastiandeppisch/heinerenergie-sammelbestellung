@@ -6,6 +6,7 @@ use App\Models\Group;
 use App\Data\GroupData;
 use Inertia\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -44,6 +45,16 @@ class HandleInertiaRequests extends Middleware
             $currentGroup = GroupData::fromModel($currentGroup);
         }
 
+        $flashKeys = ['error', 'success', 'warning', 'info'];
+
+        $flashMessages = [];
+
+        foreach($flashKeys as $flashKey) {
+            if(session()->has($flashKey)) {
+                $flashMessages[$flashKey] = session()->get($flashKey);
+            }
+        }
+
         return array_merge(parent::share($request), [
             'auth.user' => fn () => $request->user()?->only([
                 'id',
@@ -57,6 +68,7 @@ class HandleInertiaRequests extends Middleware
             ]),
             'auth.availableGroups' => fn () => $request->user()?->groups->map(fn (Group $group) => GroupData::fromModel($group)),
             'auth.currentGroup' => fn () => $currentGroup,
+            'flashMessages' => $flashMessages,
         ]);
     }
 }

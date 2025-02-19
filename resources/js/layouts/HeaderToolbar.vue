@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import DxButton from "devextreme-vue/button";
 import DxToolbar, { DxItem } from "devextreme-vue/toolbar";
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import UserPanel from "@/components/UserPanel.vue";
 import { Link, usePage } from "@inertiajs/vue3";
 import { PageProps } from "@inertiajs/core";
 import genericLogo from '../../img/logo.png';
+import notify from "devextreme/ui/notify";
 
 interface CustomPageProps extends PageProps {
   auth: {
@@ -13,6 +14,9 @@ interface CustomPageProps extends PageProps {
     currentGroup?: App.Data.GroupData;
     availableGroups?: App.Data.GroupData[];
   }
+  flashMessages: {
+    [key: string]: string;
+  };
 }
 
 const props = defineProps<{
@@ -31,6 +35,14 @@ const logo = computed(() => {
     return currentGroup.value.logo_path || genericLogo;
   }
   return genericLogo;
+});
+
+watch(() => page.props.flashMessages, (newVal) => {
+  for (const key in newVal) {
+    if (newVal[key]) {
+      notify(newVal[key], key);
+    }
+  }
 });
 
 </script>
