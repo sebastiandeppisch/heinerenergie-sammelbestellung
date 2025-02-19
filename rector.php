@@ -16,8 +16,8 @@ return RectorConfig::configure()
         __DIR__.'/routes',
         __DIR__.'/tests',
     ])
-    ->withPhpSets(php81: true)
+    ->withPhpSets(php84: true)
     ->withRules([
     ])->withSets([
-        LaravelSetList::LARAVEL_90,
+        LaravelSetList::LARAVEL_110,
     ]);
