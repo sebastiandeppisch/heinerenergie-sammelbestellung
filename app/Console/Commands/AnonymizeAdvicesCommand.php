@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Advice;
 use Illuminate\Console\Command;
 
-class AnonymizeAdvices extends Command
+class AnonymizeAdvicesCommand extends Command
 {
     /**
      * The name and signature of the console command.

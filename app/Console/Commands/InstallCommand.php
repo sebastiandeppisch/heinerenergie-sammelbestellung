@@ -2,14 +2,12 @@
 
 namespace App\Console\Commands;
 
-use Exception;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
+use App\Exceptions\UpdateException;
 use Symfony\Component\Process\Process;
+use Illuminate\Support\Facades\Artisan;
 
-class UpdateException extends Exception {}
-
-class Install extends Command
+class InstallCommand extends Command
 {
     /**
      * The name and signature of the console command.

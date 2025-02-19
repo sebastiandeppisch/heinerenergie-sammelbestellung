@@ -7,7 +7,7 @@ use App\Models\AdviceStatus;
 use Illuminate\Console\Command;
 use Maatwebsite\Excel\Facades\Excel;
 
-class AdvicesImport extends Command
+class AdvicesImportCommand extends Command
 {
     /**
      * The name and signature of the console command.

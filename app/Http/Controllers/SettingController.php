@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\RequireOrderPassword;
+use App\Http\Requests\RequireOrderPasswordRequest;
 use App\Http\Requests\UpdateSettingRequest;
 use App\Models\Setting;
 
@@ -54,7 +54,7 @@ class SettingController extends Controller
         ];
     }
 
-    public function orderFormText(RequireOrderPassword $request)
+    public function orderFormText(RequireOrderPasswordRequest $request)
     {
         return [
             'html' => Setting::get('orderFormText'),

@@ -6,7 +6,7 @@ use App\Rules\OrderPassword;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
-class RequireOrderPassword extends FormRequest
+class RequireOrderPasswordRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\OrderCreated;
 use App\Exports\OrdersExport;
-use App\Http\Requests\RequireOrderPassword;
+use App\Http\Requests\RequireOrderPasswordRequest;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Mail\OrderChecking;
@@ -164,7 +164,7 @@ class OrderController extends Controller
         return Excel::download($export, $filename);
     }
 
-    public function checkPassword(RequireOrderPassword $request) {}
+    public function checkPassword(RequireOrderPasswordRequest $request) {}
 
     public function setChecked(Order $order)
     {

@@ -7,7 +7,7 @@ use App\Models\BulkOrder;
 use Illuminate\Console\Command;
 use Maatwebsite\Excel\Facades\Excel;
 
-class ProductsImport extends Command
+class ProductsImportCommand extends Command
 {
     protected $signature = 'products:import {file}';
 

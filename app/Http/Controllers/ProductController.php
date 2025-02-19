@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\RequireOrderPassword;
+use App\Http\Requests\RequireOrderPasswordRequest;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Models\BulkOrder;
@@ -28,7 +28,7 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Bulkorder $bulkorder, RequireOrderPassword $request)
+    public function index(Bulkorder $bulkorder, RequireOrderPasswordRequest $request)
     {
         if ($bulkorder->id === null) {
             $bulkorder = BulkOrder::getCurrentBulkOrder();
