@@ -22,6 +22,11 @@ class Group extends Model
         'accepts_transfers',
     ];
 
+    protected $casts = [
+        'consulting_area' => \App\Casts\PolygonCast::class,
+        'accepts_transfers' => 'boolean',
+    ];
+
     /**
      * Get the users that belong to this group
      */

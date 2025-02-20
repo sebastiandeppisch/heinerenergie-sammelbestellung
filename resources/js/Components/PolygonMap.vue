@@ -44,7 +44,7 @@ const mapRef = ref<typeof LMap | null>(null);
 
 const centerOfPolygon = computed<Point>(() => {
 
-  if(!polygonModel.value) {
+  if(!polygonModel.value || polygonModel.value.length === 0) {
     return [0, 0];
   }
   const polygon = polygonModel.value;

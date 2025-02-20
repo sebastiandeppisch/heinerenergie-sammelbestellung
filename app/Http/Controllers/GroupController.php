@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Data\GroupData;
 use App\Http\Requests\Group\StoreGroupRequest;
 use App\Http\Requests\Group\UpdateGroupRequest;
+use App\Http\Requests\UpdateGroupConsultingAreaRequest;
 use App\Models\Group;
+use App\ValueObjects\Polygon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -17,12 +19,14 @@ class GroupController extends Controller
         $this->authorizeResource(Group::class);
     }
 
-    private function showPage(iterable $groups, bool $canCreateRootGroup, ?GroupData $selectedGroup)
+    private function showPage(iterable $groups, bool $canCreateRootGroup, ?Group $selectedGroup)
     {
+        $polygon = $selectedGroup?->consulting_area;
         return Inertia::render('Groups/Index', [
             'groups' => $groups,
             'canCreateRootGroup' => $canCreateRootGroup,
-            'selectedGroup' => $selectedGroup,
+            'selectedGroup' => $selectedGroup ? GroupData::fromModel($selectedGroup) : null,
+            'polygon' => $polygon,
         ]);
     }
 
@@ -64,7 +68,7 @@ class GroupController extends Controller
         return $this->showPage(
             $groups,
             $request->user()->can('create', [Group::class]),
-            GroupData::fromModel($group)
+            $group
         );
     }
 
@@ -113,5 +117,20 @@ class GroupController extends Controller
         }
 
         return $route->with('success', 'Initiative erfolgreich gelöscht.');
+    }
+
+    public function updateConsultingArea(UpdateGroupConsultingAreaRequest $request, Group $group) 
+    {
+        $group->consulting_area = $request->validated('polygon');
+        $group->save();
+        
+        return redirect()->back()->with('success', 'Beratungsgebiet wurde erfolgreich gespeichert.');
+    }
+
+    public function deleteConsultingArea(Group $group)
+    {
+        $group->consulting_area = null;
+        $group->save();
+        return redirect()->back()->with('warning', 'Beratungsgebiet wurde erfolgreich gelöscht.');
     }
 }

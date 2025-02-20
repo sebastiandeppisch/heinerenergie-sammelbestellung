@@ -35,6 +35,12 @@ Route::middleware('auth')->group(function () {
 
     Route::post('actAsGroup/{group}', [UserController::class, 'actAsGroup'])->name('actAsGroup');
     Route::post('actAsSystemAdmin', [UserController::class, 'actAsSystemAdmin'])->name('actAsSystemAdmin');
+
+    Route::post('/groups/{group}/consulting-area', [GroupController::class, 'updateConsultingArea'])
+        ->name('groups.consulting-area.update');
+
+    Route::delete('/groups/{group}/consulting-area', [GroupController::class, 'deleteConsultingArea'])
+        ->name('groups.consulting-area.delete');
 });
 
 Route::get('/change-password', [PageController::class, 'changePassword'])->name('password.reset');

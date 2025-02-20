@@ -58,9 +58,10 @@
                   icon="map"
                 >
                   <template #default>
-                    <div class="p-6">
-                      TODO: Beratungsgebiet
-                    </div>
+                    <ConsultingAreaForm
+                      :group="selectedGroup"
+                      :polygon="polygon"
+                    />
                   </template>
                 </DxItem>
               </DxTabPanel>
@@ -91,12 +92,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { DxTabPanel, DxItem } from 'devextreme-vue/tab-panel'
 import { DxPopup } from 'devextreme-vue/popup'
 import GroupTree from '@/Components/Groups/GroupTree.vue'
 import GroupDetails from '@/Components/Groups/GroupDetails.vue'
 import GroupUsers from '@/Components/Groups/GroupUsers.vue'
+import ConsultingAreaForm from '@/Components/ConsultingArea/ConsultingAreaForm.vue'
 import { DxButton } from 'devextreme-vue'
 import CreateGroupForm from '@/Components/Groups/CreateGroupForm.vue'
 type GroupData = App.Data.GroupData;
@@ -105,6 +107,7 @@ const props = defineProps<{
   groups: GroupData[],
   selectedGroup: GroupData | null,
   canCreateRootGroup: boolean,
+  polygon: number[][] | null,
 }>();
 
 const showCreateModal = ref(false)
@@ -113,4 +116,13 @@ const selectedTabIndex = ref(0)
 const onTabSelectionChanged = (e: any) => {
   selectedTabIndex.value = e.component.option('selectedIndex')
 }
+
+
+const polygon = computed(() => {
+  if (props.polygon === null) {
+    return [];
+  }
+  return props.polygon
+})
+
 </script>
