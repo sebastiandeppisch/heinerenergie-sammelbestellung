@@ -33,4 +33,4 @@ class UpdateGroupConsultingAreaRequest extends FormRequest
             'polygon.*.*.between' => 'Koordinaten müssen zwischen 0 und 180 liegen.',
         ];
     }
-} 
+}

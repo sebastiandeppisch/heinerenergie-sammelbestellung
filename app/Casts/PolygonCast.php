@@ -25,7 +25,7 @@ class PolygonCast implements CastsAttributes
             $value = new Polygon($value);
         }
 
-        if (!$value instanceof Polygon) {
+        if (! $value instanceof Polygon) {
             throw new InvalidArgumentException('The given value is not a Polygon instance.');
         }
 
@@ -33,4 +33,4 @@ class PolygonCast implements CastsAttributes
             $key => $value->toJson(),
         ];
     }
-} 
+}

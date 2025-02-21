@@ -16,6 +16,7 @@ class Polygon implements JsonSerializable
             return null;
         }
         $coordinates = json_decode($json, true);
+
         return empty($coordinates) ? null : new self($coordinates);
     }
 
@@ -33,4 +34,4 @@ class Polygon implements JsonSerializable
     {
         return $this->coordinates;
     }
-} 
+}

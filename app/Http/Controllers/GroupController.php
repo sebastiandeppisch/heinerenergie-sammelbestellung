@@ -7,7 +7,6 @@ use App\Http\Requests\Group\StoreGroupRequest;
 use App\Http\Requests\Group\UpdateGroupRequest;
 use App\Http\Requests\UpdateGroupConsultingAreaRequest;
 use App\Models\Group;
-use App\ValueObjects\Polygon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -22,6 +21,7 @@ class GroupController extends Controller
     private function showPage(iterable $groups, bool $canCreateRootGroup, ?Group $selectedGroup)
     {
         $polygon = $selectedGroup?->consulting_area;
+
         return Inertia::render('Groups/Index', [
             'groups' => $groups,
             'canCreateRootGroup' => $canCreateRootGroup,
@@ -119,11 +119,11 @@ class GroupController extends Controller
         return $route->with('success', 'Initiative erfolgreich gelöscht.');
     }
 
-    public function updateConsultingArea(UpdateGroupConsultingAreaRequest $request, Group $group) 
+    public function updateConsultingArea(UpdateGroupConsultingAreaRequest $request, Group $group)
     {
         $group->consulting_area = $request->validated('polygon');
         $group->save();
-        
+
         return redirect()->back()->with('success', 'Beratungsgebiet wurde erfolgreich gespeichert.');
     }
 
@@ -131,6 +131,7 @@ class GroupController extends Controller
     {
         $group->consulting_area = null;
         $group->save();
+
         return redirect()->back()->with('warning', 'Beratungsgebiet wurde erfolgreich gelöscht.');
     }
 }
