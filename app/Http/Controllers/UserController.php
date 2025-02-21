@@ -141,13 +141,21 @@ class UserController extends Controller
 
         $this->sessionService->actAsGroup($group, $request->boolean('asAdmin'));
 
-        return redirect()->back();
+        if ($redirectTo = $this->sessionService->getRedirectAfterSelectionAndForget()) {
+            return redirect()->to($redirectTo);
+        }
+
+        return redirect()->back()->with('success', 'Du agierst jetzt als Gruppe '.$group->name);
     }
 
     public function actAsSystemAdmin()
     {
         $this->sessionService->actAsSystemAdmin();
 
-        return redirect()->back();
+        if ($redirectTo = $this->sessionService->getRedirectAfterSelectionAndForget()) {
+            return redirect()->to($redirectTo);
+        }
+
+        return redirect()->back()->with('success', 'Du agierst jetzt als Systemadministrator');
     }
 }

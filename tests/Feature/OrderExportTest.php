@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\SessionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -16,6 +17,7 @@ uses()->beforeEach(function () {
     $this->be($user);
     createBulkOrdersWithOrders();
     Excel::fake();
+    app(SessionService::class)->actWithoutSelectingGroup();
 });
 
 function dumpBulkOrders()
@@ -66,7 +68,7 @@ test('order can not be exported by non admins', function () {
         'bulkorder' => BulkOrder::firstOrFail()->id,
     ]));
 
-    $response->assertStatus(403);
+    $response->assertForbidden();
 });
 
 test('only the orders of the selected bulkorders are exported', function () {

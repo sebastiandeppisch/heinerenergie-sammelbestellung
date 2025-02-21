@@ -2,6 +2,7 @@
 
 use App\Models\Group;
 use App\Models\User;
+use App\Services\SessionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -21,6 +22,8 @@ beforeEach(function () {
         'name' => 'Test Group',
         'description' => 'Test Description',
     ]);
+
+    app(SessionService::class)->actWithoutSelectingGroup();
 });
 
 test('can create group', function () {
@@ -114,7 +117,7 @@ test('deleting group removes logo', function () {
 
     $response = delete(route('groups.destroy', $this->group));
 
-    $response->assertRedirect();
+    $response->assertRedirectToRoute('groups.index');
     $response->assertSessionHas('success');
 
     // Assert logo file is deleted

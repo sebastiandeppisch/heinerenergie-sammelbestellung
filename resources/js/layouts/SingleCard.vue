@@ -3,25 +3,29 @@ import DxScrollView from "devextreme-vue/scroll-view";
 import MainPublic from "./MainPublic.vue";
 import { Link } from "@inertiajs/vue3";
 
-const { title, description} = defineProps<{
-  title: string;
-  description?: string;
-}>();
+const props = withDefaults(defineProps<{
+  title: string
+  description?: string
+  showBackLink?: boolean
+  fixedWidth?: boolean
+}>(), {
+  showBackLink: true,
+  fixedWidth: true
+});
 
 </script>
 
 <template>
 <div class="single-card">
   <div class="inner">
-    <div class="dx-card">
+    <div class="dx-card" :class="{ 'auto-width': !fixedWidth }">
       <div class="header">
         <div class="title">{{title}}</div>
         <div class="description">{{description}}</div>
       </div>
       <slot />
-      
     </div>
-    <Link class="back-link" href="/"><i class="dx-icon-back"></i> Zurück</Link>
+    <Link v-if="showBackLink" class="back-link" href="/"><i class="dx-icon-back"></i> Zurück</Link>
   </div>
 </div>
 </template>
@@ -53,6 +57,11 @@ const { title, description} = defineProps<{
     width: 330px;
     padding: 40px;
     flex-grow: 0;
+
+    &.auto-width {
+      width: auto;
+      min-width: 330px;
+    }
 
     .screen-x-small & {
       width: 100%;

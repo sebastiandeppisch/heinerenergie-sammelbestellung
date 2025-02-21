@@ -22,7 +22,11 @@ beforeEach(function () {
 
     $this->sessionService = new SessionService;
     $this->factory = new SessionGroupContextFactory($this->sessionService);
-    $this->middleware = new GroupContextMiddleware($this->factory);
+    $this->middleware = new GroupContextMiddleware(
+        $this->factory,
+        $this->sessionService,
+        $this->user
+    );
 });
 
 test('middleware binds context to container', function () {

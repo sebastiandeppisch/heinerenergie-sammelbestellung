@@ -4,9 +4,11 @@ namespace Tests\Feature\ConsultingArea;
 
 use App\Models\Group;
 use App\Models\User;
+use App\Services\SessionService;
 use App\ValueObjects\Polygon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use function Pest\Laravel\{actingAs, post};
+
+use function Pest\Laravel\actingAs;
 
 uses(RefreshDatabase::class);
 
@@ -14,6 +16,8 @@ beforeEach(function () {
     $this->group = Group::factory()->create();
     $this->admin = User::factory()->create();
     $this->group->users()->attach($this->admin, ['is_admin' => true]);
+
+    app(SessionService::class)->actWithoutSelectingGroup();
 });
 
 test('unauthorized users cannot update consulting area', function () {
@@ -22,7 +26,7 @@ test('unauthorized users cannot update consulting area', function () {
 
     actingAs($user)
         ->post(route('groups.consulting-area.update', $group), [
-            'polygon' => [[49.8807, 8.6572], [49.8787, 8.6661]]
+            'polygon' => [[49.8807, 8.6572], [49.8787, 8.6661]],
         ])
         ->assertForbidden();
 
@@ -37,18 +41,18 @@ test('group admin can update consulting area', function () {
         [49.8731, 8.6578],
         [49.8754, 8.6525],
         [49.8782, 8.6497],
-        [49.8803, 8.6509]
+        [49.8803, 8.6509],
     ];
 
     actingAs($this->admin)
         ->post(route('groups.consulting-area.update', $this->group), [
-            'polygon' => $coordinates
+            'polygon' => $coordinates,
         ])
         ->assertRedirect()
         ->assertSessionHas('success', 'Beratungsgebiet wurde erfolgreich gespeichert.');
 
     $this->group->refresh();
-    
+
     expect($this->group->consulting_area)
         ->toBeInstanceOf(Polygon::class)
         ->and($this->group->consulting_area->getCoordinates())
@@ -59,14 +63,14 @@ test('it validates polygon format', function () {
     // Test invalid coordinate format
     actingAs($this->admin)
         ->post(route('groups.consulting-area.update', $this->group), [
-            'polygon' => [[1]] // Invalid coordinate pair
+            'polygon' => [[1]], // Invalid coordinate pair
         ])
         ->assertSessionHasErrors('polygon.*');
 
     // Test invalid coordinate values
     actingAs($this->admin)
         ->post(route('groups.consulting-area.update', $this->group), [
-            'polygon' => [[181, 200]] // Invalid lat/long values
+            'polygon' => [[181, 200]], // Invalid lat/long values
         ])
         ->assertSessionHasErrors('polygon.*.*');
 });
@@ -82,4 +86,4 @@ test('consulting area can be cleared', function () {
 
     $this->group->refresh();
     expect($this->group->consulting_area)->toBeNull();
-}); 
+});

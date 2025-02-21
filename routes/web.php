@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth')->group(function () {
     Route::get('bulkorders/{bulkorder}/orderexport', [OrderController::class, 'export'])->name('orderexport');
     Route::get('/dashboard', [PageController::class, 'dashboard'])->name('dashboard');
+    Route::get('/initiatives/select', [PageController::class, 'initiativeSelection'])->name('initiatives.select');
     Route::get('/profile', [PageController::class, 'profile'])->name('profile');
     Route::get('/orders', [PageController::class, 'orders'])->name('orders');
     Route::get('/products', [PageController::class, 'products'])->name('products');
@@ -29,7 +30,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/advices/{advice}', [PageController::class, 'showAdvice'])->name('advices.show');
     Route::get('/advicesmap', [PageController::class, 'advicesMap'])->name('advices.map');
     Route::get('neworder', [PageController::class, 'newOrder'])->name('neworder');
-    Route::get('/backend', fn () => redirect()->route('dashboard'))->name('backend');
+    Route::get('/backend', function () {
+        return redirect()->route('dashboard');
+    })->middleware('auth')->name('backend');
 
     Route::resource('groups', GroupController::class);
 

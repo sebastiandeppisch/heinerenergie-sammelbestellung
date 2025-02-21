@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Data\GroupData;
 use App\Http\Resources\DataProtectedAdvice;
 use App\Models\Advice;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -126,5 +128,13 @@ class PageController extends Controller
     public function publicNewOrder()
     {
         return Inertia::render('PublicNewOrder');
+    }
+
+    public function initiativeSelection(#[CurrentUser] User $user)
+    {
+        return Inertia::render('InitiativeSelection', [
+            'initiatives' => $user->groups->map(fn ($group) => GroupData::fromModel($group)),
+            'canActAsSystemAdmin' => $user->is_admin,
+        ]);
     }
 }
