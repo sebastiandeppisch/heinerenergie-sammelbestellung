@@ -47,7 +47,7 @@ onMounted(() => {
         <DxColumn data-field="first_name" caption="Vorname" />
         <DxColumn data-field="last_name" caption="Nachname" sort-order="asc"/>
         <DxColumn data-field="email" caption="E-Mail Adresse" :editor-options="{mode: 'email'}"/>
-        <DxColumn data-field="is_admin" caption="Admin" />
+        <DxColumn data-field="is_admin" caption="System Admin" />
         <DxSummary>
           <DxTotalItem column="first_name" summary-type="count" />
         </DxSummary>

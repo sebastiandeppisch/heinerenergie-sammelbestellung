@@ -82,9 +82,11 @@ test('initiative admin can manage their group and subgroups', function () {
     // Cannot create root groups
     expect($this->normalUser->can('create', Group::class))->toBeFalse();
 
-    // Cannot delete groups (only global admin can)
-    expect($this->normalUser->can('delete', $this->mainGroup))->toBeFalse()
-        ->and($this->normalUser->can('delete', $this->subGroup))->toBeFalse();
+    // Cannot delete groups to which they are not an admin
+    expect($this->normalUser->can('delete', $this->mainGroup))->toBeTrue()
+        ->and($this->normalUser->can('delete', $this->subGroup))->toBeTrue();
+    expect($this->normalUser->can('delete', $this->otherMainGroup))->toBeFalse();
+    expect($this->normalUser->can('delete', $this->otherSubGroup))->toBeFalse();
 });
 
 test('subgroup admin cannot manage parent groups', function () {

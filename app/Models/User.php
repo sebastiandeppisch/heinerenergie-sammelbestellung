@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\SessionService;
 use App\Traits\HasGroups;
 use App\ValueObjects\Address;
 use App\ValueObjects\Coordinate;
@@ -10,7 +11,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -77,7 +77,8 @@ class User extends Authenticatable
 
     public function isActingAsAdmin(): bool
     {
-        return $this->is_admin && Auth::user()?->id === $this->id && session()->get('isAdmin') === true;
+        // TODO this dont belong to the model
+        return app(SessionService::class)->actsAsSystemAdmin() || app(SessionService::class)->actsAsGroupAdmin();
     }
 
     public function shouldBeNotifiedForNearbyAdvice(Advice $advice): bool

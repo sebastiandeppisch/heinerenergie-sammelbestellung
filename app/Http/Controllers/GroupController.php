@@ -7,7 +7,10 @@ use App\Http\Requests\Group\StoreGroupRequest;
 use App\Http\Requests\Group\UpdateGroupRequest;
 use App\Http\Requests\UpdateGroupConsultingAreaRequest;
 use App\Models\Group;
+use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
@@ -15,35 +18,53 @@ class GroupController extends Controller
 {
     public function __construct()
     {
-        $this->authorizeResource(Group::class);
+        // $this->authorizeResource(Group::class);
     }
 
     private function showPage(iterable $groups, bool $canCreateRootGroup, ?Group $selectedGroup)
     {
         $polygon = $selectedGroup?->consulting_area;
 
+        $groups = $groups->toArray();
+
+        $user = request()->user();
+
         return Inertia::render('Groups/Index', [
-            'groups' => $groups,
+            'groups' => array_values($groups),
             'canCreateRootGroup' => $canCreateRootGroup,
             'selectedGroup' => $selectedGroup ? GroupData::fromModel($selectedGroup) : null,
             'polygon' => $polygon,
+            'canEditGroup' => $user->can('update', $selectedGroup),
+            'canCreateGroups' => $user->can('createAny', Group::class),
         ]);
     }
 
-    public function index(Request $request)
+    public function index(Request $request, #[CurrentUser] User $user)
     {
+        $this->authorize('viewAny', Group::class);
+
         return $this->showPage(
-            Group::with(['parent', 'children', 'users'])
-                ->withCount(['users', 'advices'])
-                ->get()
+            $this->listGroups($user)
                 ->map(fn (Group $group) => GroupData::fromModel($group)),
-            $request->user()->can('create', [Group::class]),
+            $request->user()->can('create', Group::class),
             null
         );
     }
 
+    private function listGroups(User $user): Collection
+    {
+        return Group::with(['parent', 'children', 'users'])
+            ->withCount(['users', 'advices'])
+            ->get()
+            ->filter(fn (Group $group) => $user->can('view', $group));
+    }
+
     public function show(Group $group, Request $request)
     {
+        if (! $request->user()->can('view', $group)) {
+            return redirect()->route('groups.index');
+        }
+
         $expandGroups = collect();
         $currentGroup = $group;
 
@@ -52,9 +73,7 @@ class GroupController extends Controller
             $currentGroup = $currentGroup->parent;
         }
 
-        $groups = Group::with(['parent', 'children', 'users'])
-            ->withCount(['users', 'advices'])
-            ->get()
+        $groups = $this->listGroups($request->user())
             ->map(fn (Group $group) => GroupData::fromModel($group));
 
         $groups = $groups->map(function (GroupData $groupData) use ($expandGroups, $group) {
@@ -67,7 +86,7 @@ class GroupController extends Controller
 
         return $this->showPage(
             $groups,
-            $request->user()->can('create', [Group::class]),
+            $request->user()->can('create', Group::class),
             $group
         );
     }
@@ -106,6 +125,7 @@ class GroupController extends Controller
 
     public function destroy(Group $group)
     {
+        $this->authorize('delete', $group);
         $parent = $group->parent;
 
         $group->delete();
@@ -121,6 +141,8 @@ class GroupController extends Controller
 
     public function updateConsultingArea(UpdateGroupConsultingAreaRequest $request, Group $group)
     {
+        $this->authorize('manageArea', $group);
+
         $group->consulting_area = $request->validated('polygon');
         $group->save();
 
@@ -129,6 +151,8 @@ class GroupController extends Controller
 
     public function deleteConsultingArea(Group $group)
     {
+        $this->authorize('manageArea', $group);
+
         $group->consulting_area = null;
         $group->save();
 

@@ -6,6 +6,7 @@
           <h2 class="text-xl font-semibold text-gray-800">Initiativen-Struktur</h2>
           <div class="flex items-center gap-4">
             <DxButton
+              v-if="canCreateGroups"
               text="Neue Initiative anlegen"
               icon="plus"
               stylingMode="contained"
@@ -40,12 +41,14 @@
                   <template #default>
                     <GroupDetails
                       :group="selectedGroup"
+                      :can-edit="canEditGroup"
                     />
                   </template>
                 </DxItem>
                 <DxItem 
                   title="Berater:innen"
                   icon="user"
+                  v-if="canEditGroup"
                 >
                   <template #default>
                     <GroupUsers
@@ -108,6 +111,8 @@ const props = defineProps<{
   selectedGroup: GroupData | null,
   canCreateRootGroup: boolean,
   polygon: number[][] | null,
+  canCreateGroups: boolean,
+  canEditGroup: boolean,
 }>();
 
 const showCreateModal = ref(false)

@@ -2,6 +2,7 @@
   <div class="group-details pt-6">
     <div class="flex justify-end mb-4">
       <DxButton
+        v-if="canEdit"
         text="Löschen"
         type="danger"
         stylingMode="text"
@@ -17,6 +18,7 @@
           label="Name"
           labelMode="floating"
           :is-valid="form.errors.name === undefined"
+          :read-only="!canEdit"
         />
         <div v-if="form.errors.name" class="text-red-500 text-sm">  {{ form.errors.name }}</div>
       </div>
@@ -28,6 +30,7 @@
           label="Beschreibung"
           labelMode="floating"
           :height="100"
+          :read-only="!canEdit"
         />
         <div v-if="form.errors.description" class="text-red-500 text-sm">  {{ form.errors.description }}</div>
       </div>
@@ -52,9 +55,10 @@
             text="Logo auswählen"
             stylingMode="outlined"
             @click="logoInput?.click()"
+            v-if="canEdit"
           />
           <DxButton
-            v-if="logoSrc && !form.remove_logo"
+            v-if="logoSrc && !form.remove_logo && canEdit"
             text="Logo Entfernen"
             stylingMode="outlined"
             type="danger"
@@ -69,12 +73,14 @@
         <DxCheckBox
           v-model="form.accepts_transfers"
           text="Beratungen von anderen Initiativen akzeptieren"
+          :read-only="!canEdit"
         />
         <div v-if="form.errors.accepts_transfers" class="text-red-500 text-sm">  {{ form.errors.accepts_transfers }}</div>
       </div>
 
       <div class="flex justify-end">
         <DxButton
+          v-if="canEdit"
           text="Speichern"
           type="default"
           stylingMode="contained"
@@ -101,6 +107,7 @@ type GroupData = App.Data.GroupData;
 
 const props = defineProps<{
   group: GroupData
+  canEdit: boolean
 }>()
 
 const logoSrc = computed(() => {

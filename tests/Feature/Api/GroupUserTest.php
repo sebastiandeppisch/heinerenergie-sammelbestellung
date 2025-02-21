@@ -1,5 +1,7 @@
 <?php
 
+use App\Context\GlobalGroupContext;
+use App\Context\GroupContextContract;
 use App\Models\Group;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -15,6 +17,8 @@ beforeEach(function () {
 
     // Make admin user a group admin
     $this->group->users()->attach($this->admin->id, ['is_admin' => true]);
+
+    app()->bind(GroupContextContract::class, GlobalGroupContext::class);
 });
 
 test('admin can list users in a group', function () {

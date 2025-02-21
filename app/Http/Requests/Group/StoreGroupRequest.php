@@ -12,7 +12,7 @@ class StoreGroupRequest extends FormRequest
         if ($this->input('parent_id')) {
             $parent = Group::findOrFail($this->input('parent_id'));
 
-            return $this->user()->can('create', [Group::class, $parent]);
+            return $this->user()->can('create', $parent);
         }
 
         return $this->user()->can('create', Group::class);

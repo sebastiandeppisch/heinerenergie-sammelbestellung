@@ -10,6 +10,10 @@ class SessionService
     {
         $currentGroup = $this->getCurrentGroup();
 
+        if ($this->actsAsSystemAdmin()) {
+            return false;
+        }
+
         if (session()->has('actWithoutSelectingGroup')) {
             return false;
         }

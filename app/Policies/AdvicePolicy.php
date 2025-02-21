@@ -49,6 +49,10 @@ class AdvicePolicy
 
     public function update(User $user, Advice $advice)
     {
+        if ($this->groupContext->actsAsSystemAdmin($user)) {
+            return true;
+        }
+
         // Global admins can update any advice
         if ($user->isActingAsAdmin()) {
             return true;

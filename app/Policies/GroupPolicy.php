@@ -27,21 +27,28 @@ class GroupPolicy
      */
     public function view(User $user, Group $group): bool
     {
-        // Global admins can view all groups
-        if ($user->isGlobalAdmin()) {
+        if ($this->groupContext->actsAsSystemAdmin($user)) {
             return true;
         }
 
-        // Users can view groups they belong to
-        if ($user->belongsToGroup($group)) {
+        if ($this->groupContext->hasAccessToGroup($user, $group)) {
             return true;
         }
 
-        // Group admins can view their groups and their hierarchy
-        foreach ($user->administeredGroups()->get() as $administeredGroup) {
-            if ($group->id === $administeredGroup->id ||
-                $group->ancestors()->contains($administeredGroup) ||
-                $group->descendants()->contains($administeredGroup)) {
+        if ($this->groupContext->actsAsGroupAdmin($user, $group)) {
+            return true;
+        } else {
+
+        }
+
+        foreach ($group->ancestors() as $ancestor) {
+            if ($this->groupContext->actsAsGroupAdmin($user, $ancestor)) {
+                return true;
+            }
+        }
+
+        foreach ($group->descendants() as $descendant) {
+            if ($this->groupContext->actsAsGroupAdmin($user, $descendant)) {
                 return true;
             }
         }
@@ -55,7 +62,7 @@ class GroupPolicy
     public function create(User $user, ?Group $parentGroup = null): bool
     {
         // Global admins can create groups anywhere
-        if ($user->isGlobalAdmin()) {
+        if ($this->groupContext->actsAsSystemAdmin($user)) {
             return true;
         }
 
@@ -64,8 +71,18 @@ class GroupPolicy
             return false;
         }
 
-        // Group admins can only create subgroups under their administered groups
-        return $user->isGroupAdmin($parentGroup);
+        return $this->groupContext->actsAsGroupAdmin($user, $parentGroup);
+    }
+
+    public function createAny(User $user): bool
+    {
+        if ($this->groupContext->actsAsSystemAdmin($user)) {
+            return true;
+        }
+
+        return $user->administeredGroups()->get()
+            ->filter(fn (Group $group) => $this->groupContext->actsAsGroupAdmin($user, $group))->isNotEmpty();
+
     }
 
     /**
@@ -73,7 +90,7 @@ class GroupPolicy
      */
     public function update(User $user, Group $group): bool
     {
-        if ($this->groupContext->actsAsSystemAdmin($user, $group)) {
+        if ($this->groupContext->actsAsSystemAdmin($user)) {
             return true;
         }
 
@@ -85,8 +102,11 @@ class GroupPolicy
      */
     public function delete(User $user, Group $group): bool
     {
-        // Only global admins can delete groups
-        return $user->isGlobalAdmin();
+        if ($this->groupContext->actsAsSystemAdmin($user)) {
+            return true;
+        }
+
+        return $this->groupContext->actsAsGroupAdmin($user, $group);
     }
 
     /**
@@ -94,7 +114,6 @@ class GroupPolicy
      */
     public function manageUsers(User $user, Group $group): bool
     {
-        // Same rules as update
         return $this->update($user, $group);
     }
 
@@ -107,17 +126,9 @@ class GroupPolicy
         return $this->update($user, $group);
     }
 
-    public function canActAsGroupAdmin(User $user, Group $group): bool
+    public function actAsGroupAdmin(User $user, Group $group): bool
     {
-        if ($this->actAsGroup($user, $group)) {
-            return true;
-        }
-
-        if ($user->belongsToGroup($group)) {
-            return $group->users()->where('user_id', $user->id)->where('is_admin', true)->exists();
-        }
-
-        return false;
+        return $group->users()->where('user_id', $user->id)->where('group_user.is_admin', true)->exists();
     }
 
     public function actAsGroup(User $user, Group $group): bool

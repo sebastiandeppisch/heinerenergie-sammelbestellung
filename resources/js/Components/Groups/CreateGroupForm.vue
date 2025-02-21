@@ -47,6 +47,7 @@
 import { DxTextBox, DxSelectBox, DxButton } from 'devextreme-vue'
 import { useForm } from '@inertiajs/vue3'
 import { route } from 'ziggy-js';
+import notify from 'devextreme/ui/notify';
 
 type GroupData = App.Data.GroupData;
 
@@ -68,6 +69,17 @@ const form = useForm<{
 });
 
 const submit = () => {
+
+  if(form.name.length === 0) {
+    notify('Bitte gib einen Namen für die Initiative ein.', 'error');
+    return;
+  }
+
+  if(form.parent_id === null && props.parentRequired) {
+    notify('Du kannst nur Untergruppen erstellen, wenn du eine übergeordnete Initiative auswählst.', 'error');
+    return;
+  }
+
   form.post(route('groups.store'), {
     onSuccess: () => {
       emit('close')
