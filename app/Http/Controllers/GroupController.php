@@ -18,7 +18,7 @@ class GroupController extends Controller
 {
     public function __construct()
     {
-        // $this->authorizeResource(Group::class);
+        // there is no authorization here, as its done in the methods themself or in the Request classes
     }
 
     private function showPage(iterable $groups, bool $canCreateRootGroup, ?Group $selectedGroup)
@@ -41,7 +41,9 @@ class GroupController extends Controller
 
     public function index(Request $request, #[CurrentUser] User $user)
     {
-        $this->authorize('viewAny', Group::class);
+        if (! $request->user()->can('viewAny', Group::class)) {
+            return redirect()->route('groups.index');
+        }
 
         return $this->showPage(
             $this->listGroups($user)
@@ -141,7 +143,6 @@ class GroupController extends Controller
 
     public function updateConsultingArea(UpdateGroupConsultingAreaRequest $request, Group $group)
     {
-        $this->authorize('manageArea', $group);
 
         $group->consulting_area = $request->validated('polygon');
         $group->save();

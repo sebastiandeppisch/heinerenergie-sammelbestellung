@@ -1,7 +1,5 @@
 <?php
 
-use App\Context\GlobalGroupContext;
-use App\Context\GroupContextContract;
 use App\Models\Group;
 use App\Models\User;
 use App\Services\SessionService;
@@ -26,8 +24,7 @@ beforeEach(function () {
     ]);
 
     app(SessionService::class)->actWithoutSelectingGroup();
-    app()->bind(GroupContextContract::class, GlobalGroupContext::class);
-
+    Config::set('app.group_context', 'global');
 });
 
 test('can create group', function () {

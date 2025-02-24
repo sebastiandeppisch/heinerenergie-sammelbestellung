@@ -43,11 +43,15 @@ class GroupContext implements GroupContextContract
             return true;
         }
 
+        if (! $this->actsAsGroupAdmin) {
+            return false;
+        }
+
         if (! $this->currentGroup) {
             return false;
         }
 
-        if ($this->actsAsGroupAdmin && $this->currentGroup->is($group)) {
+        if ($this->currentGroup->is($group)) {
             return true;
         }
 
@@ -63,12 +67,16 @@ class GroupContext implements GroupContextContract
     public function actAsSystemAdmin()
     {
         $this->actsAsSystemAdmin = true;
+        $this->currentGroup = null;
+        $this->actsAsGroupAdmin = false;
     }
 
-    public function actAsGroup(User $user, Group $group, bool $actsAsGroupAdmin = false)
+    public function actAsGroup(User $user, Group $group, bool $actsAsGroupAdmin = false): void
     {
+        $this->assertUserMatches($user);
         $this->currentGroup = $group;
         $this->actsAsGroupAdmin = $actsAsGroupAdmin;
+        $this->actsAsSystemAdmin = false;
         $this->user = $user;
     }
 
@@ -80,44 +88,34 @@ class GroupContext implements GroupContextContract
             return true;
         }
 
-        // If we're in a specific group context, check if the target group is in our hierarchy
-        if ($this->currentGroup) {
-            // Check if target group is current group or descendant of current group
-            return $group->is($this->currentGroup) ||
-                   $group->ancestors()->contains($this->currentGroup);
-        }
-
-        // In global context, check if user is member of the group or any ancestor
-        return $this->user->belongsToGroup($group) ||
-               $group->ancestors()->contains(fn ($ancestor) => $this->user->belongsToGroup($ancestor));
-    }
-
-    public function isAdmin(Group $group): bool
-    {
-        throw new \Exception('isAdmin is deprecated, use actsAsGroupAdmin instead');
-        if (! $this->user) {
-            return false;
-        }
-
-        if ($this->actsAsSystemAdmin) {
+        if ($this->actsAsGroupAdmin($user, $group)) {
             return true;
         }
 
-        // If we're in a specific group context and acting as admin
-        if ($this->currentGroup && $this->actsAsGroupAdmin($this->user, $this->currentGroup)) {
-            // Check if target group is current group or descendant of current group
-            return $group->is($this->currentGroup) ||
-                   $group->ancestors()->contains($this->currentGroup);
+        if ($this->currentGroup) {
+            if ($group->is($this->currentGroup)) {
+                return true;
+            }
+
+            if ($group->ancestors()->contains($this->currentGroup)) {
+                return true;
+            }
+
+            return $group->ancestors()->where('id', $this->currentGroup->id)->count() > 0 &&
+                   $this->currentGroup->users()->where('user_id', $user->id)->exists();
         }
 
-        // In global context or not acting as admin, check if user is admin of the group or any ancestor
-        $adminGroups = $this->user->groups()
-            ->wherePivot('is_admin', true)
-            ->get();
+        if ($this->user->belongsToGroup($group)) {
+            return true;
+        }
 
-        // User is admin if they are admin of the target group or any of its ancestors
-        return $adminGroups->contains(fn ($adminGroup) => $adminGroup->is($group) ||
-               $group->ancestors()->contains($adminGroup));
+        foreach ($group->ancestors() as $ancestor) {
+            if ($this->user->belongsToGroup($ancestor)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function hasAccessToAdvice(User $user, Advice $advice): bool
@@ -133,6 +131,7 @@ class GroupContext implements GroupContextContract
             $advice->load('group');
         }
 
+        // TODO this should be changed, it is currently undefined behavior
         if ($advice->user_id === $user->id) {
             return true;
         }

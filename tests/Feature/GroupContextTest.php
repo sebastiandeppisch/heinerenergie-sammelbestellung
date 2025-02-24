@@ -15,9 +15,6 @@ use function Pest\Laravel\put;
 
 uses(RefreshDatabase::class);
 
-test('TODO uncomment the tests')->skip('use group context in DI container to make this feature work');
-
-/*
 beforeEach(function () {
     $this->user = User::factory()->create();
     $this->group = Group::factory()->create();
@@ -47,15 +44,20 @@ test('user can access own group resources', function () {
 });
 
 test('group admin has elevated privileges', function () {
+    actingAs($this->user);
+
+    // should not be able to modify group settings
+    put(route('groups.update', $this->group->id), [
+        'name' => 'Updated Name',
+    ])->assertStatus(403);
 
     $this->group->users()->updateExistingPivot($this->user->id, ['is_admin' => true]);
 
     // Switch to group context as admin
-    actingAs($this->user)
-        ->post("/actAsGroup/{$this->group->id}", ['asAdmin' => true]);
+    post("/actAsGroup/{$this->group->id}", ['asAdmin' => true])->assertSessionHasNoErrors();
 
     // Should be able to modify group settings
-    $response = put("/groups/{$this->group->id}", [
+    $response = actingAs($this->user)->put("/groups/{$this->group->id}", [
         'name' => 'Updated Name',
     ]);
 
@@ -68,9 +70,8 @@ test('normal user cannot modify group settings', function () {
         ->post("/actAsGroup/{$this->group->id}");
 
     // Should not be able to modify group settings
-    $response = post("/groups/{$this->group->id}", [
+    $response = put("/groups/{$this->group->id}", [
         'name' => 'Updated Name',
-        '_method' => 'PUT',
     ]);
     expect($response->status())->toBe(403);
 });
@@ -82,24 +83,19 @@ test('system admin can access and modify any group', function () {
 
     // Should be able to access any group's resources
     $response = get("/advices/{$this->otherAdvice->id}");
-    expect($response->status())->not()->toBe(403);
+    expect($response->status())->toBe(200);
 
     // And modify any group
-    $response = post("/groups/{$this->otherGroup->id}", [
+    $response = put("/groups/{$this->otherGroup->id}", [
         'name' => 'Updated Name',
-        '_method' => 'PUT',
     ]);
     expect($response->status())->not()->toBe(403);
 });
 
 test('context switching changes access rights', function () {
-
-    $this->group->users()->updateExistingPivot($this->user->id, ['is_admin' => true]);
-
     // First as normal group member
     actingAs($this->user)
-        ->post("/actAsGroup/{$this->group->id}")->assertSessionHasNoErrors();
-
+        ->post("/actAsGroup/{$this->group->id}", ['asAdmin' => false])->assertSessionHasNoErrors();
 
     $response = put("/groups/{$this->group->id}", [
         'name' => 'Updated Name',
@@ -107,34 +103,39 @@ test('context switching changes access rights', function () {
 
     expect($response->status())->toBe(403);
 
+    // Make user admin of the group
+    $this->group->users()->updateExistingPivot($this->user->id, ['is_admin' => true]);
+
     // Then as group admin
     actingAs($this->user)
         ->post("/actAsGroup/{$this->group->id}", ['asAdmin' => true])->assertSessionHasNoErrors();
-    $response = post("/groups/{$this->group->id}", [
+    $response = put("/groups/{$this->group->id}", [
         'name' => 'Updated Name',
-        '_method' => 'PUT',
     ]);
     expect($response->status())->not()->toBe(403);
 
     // Then as system admin
+    $this->user->is_admin = true;
+    $this->user->save();
+
     actingAs($this->user)
         ->post('/actAsSystemAdmin')->assertSessionHasNoErrors();
 
-    $response = post("/groups/{$this->otherGroup->id}", [
+    $response = put("/groups/{$this->otherGroup->id}", [
         'name' => 'Updated Name',
-        '_method' => 'PUT',
     ]);
     expect($response->status())->not()->toBe(403);
 
     // Finally back to normal group member
-    actingAs($this->user)
-        ->post("/actAsGroup/{$this->group->id}")->assertSessionHasNoErrors();
+    $this->group->users()->updateExistingPivot($this->user->id, ['is_admin' => false]);
 
-    $response = post("/groups/{$this->group->id}", [
+    actingAs($this->user)
+        ->post("/actAsGroup/{$this->group->id}", ['asAdmin' => false])->assertSessionHasNoErrors();
+
+    $response = put("/groups/{$this->group->id}", [
         'name' => 'Updated Name',
-        '_method' => 'PUT',
     ]);
-    expect($response->status())->not()->toBe(403);
+    expect($response->status())->toBe(403);
 });
 
 test('unauthenticated user has no access', function () {
@@ -190,10 +191,10 @@ test('user cannot switch to other group', function () {
 
 test('system admin can switch to any group', function () {
     // First become system admin
-    actingAs($this->user)
-        ->post('/actAsSystemAdmin');
+    actingAs($this->systemAdmin)
+        ->post('/actAsSystemAdmin')->assertSessionHasNoErrors();
 
-    $response = actingAs($this->user)
+    $response = actingAs($this->systemAdmin)
         ->post("/actAsGroup/{$this->otherGroup->id}");
 
     expect($response->assertSessionHasNoErrors())
@@ -203,9 +204,13 @@ test('system admin can switch to any group', function () {
 });
 
 test('switching context clears previous context', function () {
+    // Make user a system admin
+    $this->user->is_admin = true;
+    $this->user->save();
+
     // First act as group admin
     actingAs($this->user)
-        ->post("/actAsGroup/{$this->group->id}", ['asAdmin' => true]);
+        ->post("/actAsGroup/{$this->group->id}", ['asAdmin' => true])->assertSessionHasNoErrors();
 
     expect(session('actAsGroupId'))->toBe($this->group->id)
         ->and(session('actAsGroupAdmin'))->toBeTrue()
@@ -213,7 +218,7 @@ test('switching context clears previous context', function () {
 
     // Then switch to system admin
     $response = actingAs($this->user)
-        ->post('/actAsSystemAdmin');
+        ->post('/actAsSystemAdmin')->assertSessionHasNoErrors();
 
     expect($response->assertSessionHasNoErrors())
         ->and(session('actAsGroupId'))->toBeNull()
@@ -222,7 +227,7 @@ test('switching context clears previous context', function () {
 
     // Then switch back to group (without admin)
     $response = actingAs($this->user)
-        ->post("/actAsGroup/{$this->group->id}");
+        ->post("/actAsGroup/{$this->group->id}")->assertSessionHasNoErrors();
 
     expect($response->assertSessionHasNoErrors())
         ->and(session('actAsGroupId'))->toBe($this->group->id)
@@ -265,4 +270,3 @@ test('clearing session removes all context information', function () {
         ->and(session('actAsGroupAdmin'))->toBeNull()
         ->and(session('actAsSystemAdmin'))->toBeNull();
 });
-*/

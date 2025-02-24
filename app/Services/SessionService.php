@@ -36,16 +36,24 @@ class SessionService
     public function actAsGroup(Group $group, bool $asAdmin = false): void
     {
         $this->clear();
-
-        session()->put('actAsGroupId', $group->id);
-        session()->put('actAsGroupAdmin', $asAdmin);
+        session([
+            'actAsGroupId' => $group->id,
+            'actAsGroupAdmin' => $asAdmin,
+            'actAsSystemAdmin' => null,
+            'actWithoutSelectingGroup' => false,
+        ]);
     }
 
     public function actAsSystemAdmin(): void
     {
         $this->clear();
 
-        session()->put('actAsSystemAdmin', true);
+        session([
+            'actAsSystemAdmin' => true,
+            'actAsGroupId' => null,
+            'actAsGroupAdmin' => null,
+            'actWithoutSelectingGroup' => false,
+        ]);
     }
 
     public function getRedirectAfterSelectionAndForget(): ?string
@@ -64,16 +72,22 @@ class SessionService
 
     public function actsAsGroupAdmin(): bool
     {
-        return session()->get('actAsGroupAdmin', false);
+        return session('actAsGroupAdmin', false) === true;
     }
 
     public function actsAsSystemAdmin(): bool
     {
-        return session()->get('actAsSystemAdmin', false);
+        return session('actAsSystemAdmin', false) === true;
     }
 
     public function clear(): void
     {
-        session()->forget(['actAsGroupId', 'actAsGroupAdmin', 'actAsSystemAdmin']);
+        session()->forget([
+            'actAsGroupId',
+            'actAsGroupAdmin',
+            'actAsSystemAdmin',
+            'actWithoutSelectingGroup',
+            'redirectAfterSelection',
+        ]);
     }
 }

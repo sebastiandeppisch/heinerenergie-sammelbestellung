@@ -59,6 +59,8 @@ class UserController extends Controller
         $user = new User($request->all());
         $user->password = '';
         $user->save();
+
+        return $user;
     }
 
     /**
@@ -82,6 +84,8 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         $user->delete();
+
+        return response()->noContent();
     }
 
     public function show(User $user)
@@ -125,21 +129,25 @@ class UserController extends Controller
     {
         $user = $this->user();
 
+        $asAdmin = $request->boolean('asAdmin');
+
         if (! $user->can('actAsGroup', $group)) {
             Log::error('User is not in group', ['user' => $user->id, 'group' => $group->id]);
+            $this->sessionService->clear();
 
-            return redirect()->back()->with('error', 'Du bist nicht in dieser Gruppe');
+            return redirect()->back()->withErrors('error', 'Du bist nicht in dieser Gruppe');
         }
 
-        if ($request->boolean('asAdmin')) {
+        if ($asAdmin) {
             if (! $user->can('actAsGroupAdmin', $group)) {
                 Log::error('User is not a group admin', ['user' => $user->id, 'group' => $group->id]);
+                $this->sessionService->clear();
 
-                return redirect()->back()->with('error', 'Du bist kein Gruppenadministrator');
+                return redirect()->back()->withErrors('error', 'Du bist kein Gruppenadministrator');
             }
         }
 
-        $this->sessionService->actAsGroup($group, $request->boolean('asAdmin'));
+        $this->sessionService->actAsGroup($group, $asAdmin);
 
         if ($redirectTo = $this->sessionService->getRedirectAfterSelectionAndForget()) {
             return redirect()->to($redirectTo);
@@ -150,6 +158,15 @@ class UserController extends Controller
 
     public function actAsSystemAdmin()
     {
+        $user = $this->user();
+
+        if (! $user->isGlobalAdmin()) {
+            Log::error('User is not a system admin', ['user' => $user->id]);
+            $this->sessionService->clear();
+
+            return redirect()->back()->withErrors(['error' => 'Du bist kein Systemadministrator']);
+        }
+
         $this->sessionService->actAsSystemAdmin();
 
         if ($redirectTo = $this->sessionService->getRedirectAfterSelectionAndForget()) {

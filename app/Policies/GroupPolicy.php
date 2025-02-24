@@ -37,20 +37,6 @@ class GroupPolicy
 
         if ($this->groupContext->actsAsGroupAdmin($user, $group)) {
             return true;
-        } else {
-
-        }
-
-        foreach ($group->ancestors() as $ancestor) {
-            if ($this->groupContext->actsAsGroupAdmin($user, $ancestor)) {
-                return true;
-            }
-        }
-
-        foreach ($group->descendants() as $descendant) {
-            if ($this->groupContext->actsAsGroupAdmin($user, $descendant)) {
-                return true;
-            }
         }
 
         return false;
@@ -80,9 +66,21 @@ class GroupPolicy
             return true;
         }
 
-        return $user->administeredGroups()->get()
-            ->filter(fn (Group $group) => $this->groupContext->actsAsGroupAdmin($user, $group))->isNotEmpty();
-
+        return $user->administeredGroups()
+            ->where(function ($query) use ($user) {
+                $query->whereIn('id', function ($subQuery) use ($user) {
+                    $subQuery->select('id')
+                        ->from('groups')
+                        ->whereExists(function ($exists) use ($user) {
+                            $exists->select('id')
+                                ->from('group_user')
+                                ->whereColumn('group_id', 'groups.id')
+                                ->where('user_id', $user->id)
+                                ->where('is_admin', true);
+                        });
+                });
+            })
+            ->exists();
     }
 
     /**
@@ -94,7 +92,12 @@ class GroupPolicy
             return true;
         }
 
-        return $this->groupContext->actsAsGroupAdmin($user, $group);
+        // Check if user is acting as group admin and has access to the group
+        if ($this->groupContext->actsAsGroupAdmin($user, $group) && $this->groupContext->hasAccessToGroup($user, $group)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -128,6 +131,10 @@ class GroupPolicy
 
     public function actAsGroupAdmin(User $user, Group $group): bool
     {
+        if ($user->isGlobalAdmin()) {
+            return true;
+        }
+
         return $group->users()->where('user_id', $user->id)->where('group_user.is_admin', true)->exists();
     }
 

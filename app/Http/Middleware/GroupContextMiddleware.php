@@ -3,9 +3,9 @@
 namespace App\Http\Middleware;
 
 use App\Context\GroupContextContract;
-use App\Context\NoGroupContext;
 use App\Http\Context\SessionGroupContextFactory;
 use Closure;
+use Config;
 use Illuminate\Http\Request;
 
 class GroupContextMiddleware
@@ -16,7 +16,8 @@ class GroupContextMiddleware
 
     public function handle(Request $request, Closure $next)
     {
-        if (app(GroupContextContract::class) instanceof NoGroupContext) {
+        $contextConfig = Config::get('app.group_context');
+        if ($contextConfig === 'group') {
             app()->instance(
                 GroupContextContract::class,
                 $this->factory->createFromSession()

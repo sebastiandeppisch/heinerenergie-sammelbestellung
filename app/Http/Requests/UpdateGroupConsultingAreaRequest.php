@@ -8,8 +8,7 @@ class UpdateGroupConsultingAreaRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // Assuming the user needs to be able to edit the group
-        return $this->user()->can('update', $this->route('group'));
+        return $this->user()->can('manageArea', $this->route('group'));
     }
 
     public function rules(): array

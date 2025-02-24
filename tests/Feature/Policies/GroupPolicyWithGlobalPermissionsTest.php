@@ -1,7 +1,5 @@
 <?php
 
-use App\Context\GlobalGroupContext;
-use App\Context\GroupContextContract;
 use App\Models\Group;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -36,7 +34,7 @@ beforeEach(function () {
         'parent_id' => $this->otherMainGroup->id,
     ]);
 
-    app()->bind(GroupContextContract::class, GlobalGroupContext::class);
+    config()->set('app.group_context', 'global');
 });
 
 test('global admin can manage all groups', function () {
@@ -126,9 +124,11 @@ test('normal user can only view groups they belong to', function () {
     // Can view groups they belong to
     expect($this->normalUser->can('view', $this->subGroup))->toBeTrue();
 
+    // can view groups in their hierarchy
+    expect($this->normalUser->can('view', $this->mainGroup))->toBeTrue();
+
     // Cannot view groups they don't belong to
-    expect($this->normalUser->can('view', $this->mainGroup))->toBeFalse()
-        ->and($this->normalUser->can('view', $this->otherMainGroup))->toBeFalse()
+    expect($this->normalUser->can('view', $this->otherMainGroup))->toBeFalse()
         ->and($this->normalUser->can('view', $this->otherSubGroup))->toBeFalse();
 
     // Cannot manage any groups

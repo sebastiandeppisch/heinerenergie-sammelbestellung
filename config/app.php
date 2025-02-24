@@ -17,6 +17,8 @@ return [
 
     'admin_email' => env('ADMIN_EMAIL', null),
 
+    'group_context' => env('GROUP_CONTEXT', 'group'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

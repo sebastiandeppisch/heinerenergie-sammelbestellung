@@ -40,7 +40,23 @@ class GlobalGroupContext implements GroupContextContract
 
     public function hasAccessToGroup(User $user, Group $group): bool
     {
-        return $user->belongsToGroup($group);
+        if ($user->belongsToGroup($group)) {
+            return true;
+        }
+
+        foreach ($group->ancestors() as $ancestor) {
+            if ($user->belongsToGroup($ancestor)) {
+                return true;
+            }
+        }
+
+        foreach ($group->descendants() as $descendant) {
+            if ($user->belongsToGroup($descendant)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function hasAccessToAdvice(User $user, Advice $advice): bool

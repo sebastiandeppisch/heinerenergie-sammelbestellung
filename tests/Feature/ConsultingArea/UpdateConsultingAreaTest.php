@@ -2,12 +2,11 @@
 
 namespace Tests\Feature\ConsultingArea;
 
-use App\Context\GlobalGroupContext;
-use App\Context\GroupContextContract;
 use App\Models\Group;
 use App\Models\User;
 use App\Services\SessionService;
 use App\ValueObjects\Polygon;
+use Config;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 use function Pest\Laravel\actingAs;
@@ -20,7 +19,7 @@ beforeEach(function () {
     $this->group->users()->attach($this->admin, ['is_admin' => true]);
 
     app(SessionService::class)->actWithoutSelectingGroup();
-    app()->bind(GroupContextContract::class, GlobalGroupContext::class);
+    Config::set('app.group_context', 'global');
 });
 
 test('unauthorized users cannot update consulting area', function () {
