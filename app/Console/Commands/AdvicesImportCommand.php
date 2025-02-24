@@ -40,5 +40,6 @@ class AdvicesImportCommand extends Command
         $import->statusId = $statusId;
         Excel::import($import, $this->argument('file'));
 
+        return Command::SUCCESS;
     }
 }

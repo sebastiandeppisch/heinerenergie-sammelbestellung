@@ -35,5 +35,7 @@ class AnonymizeAdvicesCommand extends Command
             $advice->phone = fake()->phoneNumber();
             $advice->save();
         });
+
+        return Command::SUCCESS;
     }
 }
