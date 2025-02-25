@@ -2,12 +2,17 @@
 
 namespace App\Providers;
 
+use App\Events\Advice\AdviceEventContract;
 use App\Events\AdviceCreated;
+use App\Events\AdviceSaved;
+use App\Events\AdviceSaving;
 use App\Events\AdviceUpdated;
 use App\Events\OrderCreated;
 use App\Listeners\AfterAdviceIsCreated;
 use App\Listeners\CalculateCoordinates;
 use App\Listeners\EmptyCoordinates;
+use App\Listeners\HandleAdviceEvents;
+use App\Listeners\SaveAdviceEvents;
 use App\Listeners\SendOrderCreatedNotification;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -40,6 +45,15 @@ class EventServiceProvider extends ServiceProvider
         ],
         MessageSent::class => [
             StoreOutgoingMailListener::class,
+        ],
+        AdviceSaving::class => [
+            HandleAdviceEvents::class,
+        ],
+        AdviceSaved::class => [
+            HandleAdviceEvents::class,
+        ],
+        AdviceEventContract::class => [
+            SaveAdviceEvents::class,
         ],
     ];
 

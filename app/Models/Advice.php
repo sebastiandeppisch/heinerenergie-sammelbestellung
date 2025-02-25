@@ -6,12 +6,14 @@ use App\Enums\AdviceStatusResult;
 use App\Enums\AdviceType;
 use App\Enums\HouseType;
 use App\Events\AdviceCreated;
+use App\Events\AdviceSaving;
 use App\Events\AdviceUpdated;
 use App\ValueObjects\Address;
 use App\ValueObjects\Coordinate;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Wnx\Sends\Contracts\HasSends;
@@ -55,6 +57,7 @@ class Advice extends Model implements HasSends
     protected $dispatchesEvents = [
         'created' => AdviceCreated::class,
         'updated' => AdviceUpdated::class,
+        'saving' => AdviceSaving::class,
     ];
 
     public function advisor(): BelongsTo
@@ -105,6 +108,11 @@ class Advice extends Model implements HasSends
     public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class);
+    }
+
+    public function events(): HasMany
+    {
+        return $this->hasMany(AdviceEvent::class);
     }
 
     protected function casts(): array
