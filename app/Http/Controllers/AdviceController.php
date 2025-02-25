@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\Advice\AdviceSharedAdvisorAdded;
+use App\Events\Advice\AdviceSharedAdvisorRemoved;
 use App\Http\Requests\StoreAdviceRequest;
 use App\Http\Requests\UpdateAdviceRequest;
 use App\Http\Resources\DataProtectedAdvice;
@@ -58,7 +60,37 @@ class AdviceController extends Controller
     public function setAdvisors(Advice $advice, Request $request)
     {
         $this->auth($advice, 'addAdvisors');
+
+        // Get current advisors before sync
+        $currentAdvisors = $advice->shares()->pluck('advisor_id')->toArray();
+
+        // Sync new advisors
         $advice->shares()->sync($request->advisors);
+
+        // Get new advisors after sync
+        $newAdvisors = $advice->shares()->pluck('advisor_id')->toArray();
+
+        // Find added advisors
+        $addedAdvisors = array_diff($newAdvisors, $currentAdvisors);
+        foreach ($addedAdvisors as $advisorId) {
+            $advisor = User::find($advisorId);
+            event(new AdviceSharedAdvisorAdded(
+                $advice,
+                Auth::user(),
+                $advisor
+            ));
+        }
+
+        // Find removed advisors
+        $removedAdvisors = array_diff($currentAdvisors, $newAdvisors);
+        foreach ($removedAdvisors as $advisorId) {
+            $advisor = User::find($advisorId);
+            event(new AdviceSharedAdvisorRemoved(
+                $advice,
+                Auth::user(),
+                $advisor
+            ));
+        }
     }
 
     private function auth(Advice $advice, string $ability)

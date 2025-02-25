@@ -5,6 +5,8 @@ namespace App\Casts;
 use App\Events\Advice\AdviceEventContract;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Database\Eloquent\Model;
+use InvalidArgumentException;
+use Throwable;
 
 class AdviceEventCast implements CastsAttributes
 {
@@ -15,7 +17,25 @@ class AdviceEventCast implements CastsAttributes
      */
     public function get(Model $model, string $key, mixed $value, array $attributes): AdviceEventContract
     {
-        return unserialize($value);
+        $event = unserialize($value);
+
+        if ($event instanceof AdviceEventContract) {
+            return $event;
+        }
+
+        return $this->errorEvent();
+
+    }
+
+    private function errorEvent(): AdviceEventContract
+    {
+        return new class implements AdviceEventContract
+        {
+            public function getDescription(): string
+            {
+                return 'Fehlerhafte Event-Klasse';
+            }
+        };
     }
 
     /**
@@ -23,8 +43,16 @@ class AdviceEventCast implements CastsAttributes
      *
      * @param  array<string, mixed>  $attributes
      */
-    public function set(Model $model, string $key, mixed $value, array $attributes): mixed
+    public function set(Model $model, string $key, mixed $value, array $attributes): string
     {
-        return serialize($value);
+        if (! $value instanceof AdviceEventContract) {
+            throw new InvalidArgumentException('Invalid event class');
+        }
+
+        try {
+            return serialize($value);
+        } catch (Throwable $e) {
+            return '';
+        }
     }
 }
