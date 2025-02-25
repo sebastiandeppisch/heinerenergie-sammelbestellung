@@ -2,7 +2,10 @@
 import DxButton from 'devextreme-vue/button';
 import DxDropDownButton from 'devextreme-vue/drop-down-button';
 import { computed } from 'vue';
+import { user } from '../authHelper';
 
+import { route } from 'ziggy-js';
+import { router } from '@inertiajs/vue3';
 const props = defineProps<{
   advice: App.Models.Advice;
   advisor?: {
@@ -48,6 +51,16 @@ const mailLink = computed(() => {
 const phoneLink = computed(() => {
   return 'tel:' + props.advice.phone;
 });
+
+function unassignAdvice() {
+
+  router.post(route('advices.unassign', props.advice.id))
+}
+
+const showUnassignButton = computed(() => {
+  const userId = user.value.id;
+  return props.advice.advisor_id === userId;
+});
 </script>
 
 <template>
@@ -62,5 +75,11 @@ const phoneLink = computed(() => {
     />
     <a :href="phoneLink"><DxButton text="Anrufen" icon="tel" /></a>
     <a :href="mailLink"><DxButton text="E-Mail verfassen" icon="email" /></a>
+    <DxButton 
+      v-if="showUnassignButton"
+      text="Beratung freigeben" 
+      @click="unassignAdvice"
+      hint="Beratung freigeben"
+    />
   </div>
 </template> 

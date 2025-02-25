@@ -87,6 +87,16 @@ class AdviceController extends Controller
         return $advice;
     }
 
+    public function unassign(Advice $advice)
+    {
+        $this->authorize('update', $advice);
+
+        $advice->advisor_id = null;
+        $advice->save();
+
+        return redirect()->route('advices.show', $advice);
+    }
+
     public function sortedAdvisors(Advice $advice)
     {
         return User::all()->map(function (User $user) use ($advice) {

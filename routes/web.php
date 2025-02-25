@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdviceController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\UserController;
@@ -39,6 +40,9 @@ Route::middleware('auth')->group(function () {
 
     Route::delete('/groups/{group}/consulting-area', [GroupController::class, 'deleteConsultingArea'])
         ->name('groups.consulting-area.delete');
+
+    Route::post('advices/{advice}/unassign', [AdviceController::class, 'unassign'])->name('advices.unassign');
+
 });
 
 Route::get('/change-password', [PageController::class, 'changePassword'])->name('password.reset');

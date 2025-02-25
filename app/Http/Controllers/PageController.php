@@ -8,7 +8,6 @@ use App\Http\Resources\DataProtectedAdvice;
 use App\Models\Advice;
 use App\Models\Setting;
 use App\Models\User;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -55,9 +54,7 @@ class PageController extends Controller
     public function showAdvice(Advice $advice)
     {
         if (! Auth::user()->can('view', $advice)) {
-            throw new AuthorizationException(
-                'You are not authorized to view this advice.'
-            );
+            return redirect('/advices')->withErrors('Du hast keine Berechtigung, diese Beratung zu sehen');
         }
 
         $events = $advice->events()
