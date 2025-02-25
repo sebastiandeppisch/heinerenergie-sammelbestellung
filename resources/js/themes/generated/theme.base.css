@@ -99,31 +99,36 @@
 }
 .dx-theme-material-typography h1 {
   font-weight: 300;
-  font-size: 96px;
-  letter-spacing: -1.5px;
+  font-size: 40px;
+  letter-spacing: -0.5px;
 }
+
 .dx-theme-material-typography h2 {
   font-weight: 300;
-  font-size: 60px;
-  letter-spacing: -.5px;
+  font-size: 32px;
+  letter-spacing: -0.25px;
 }
+
 .dx-theme-material-typography h3 {
   font-weight: 400;
-  font-size: 48px;
+  font-size: 28px;
 }
+
 .dx-theme-material-typography h4 {
   font-weight: 400;
-  font-size: 34px;
-  letter-spacing: .25px;
+  font-size: 24px;
+  letter-spacing: 0.15px;
 }
+
 .dx-theme-material-typography h5 {
   font-weight: 400;
-  font-size: 24px;
+  font-size: 20px;
 }
+
 .dx-theme-material-typography h6 {
   font-weight: 500;
-  font-size: 20px;
-  letter-spacing: .15px;
+  font-size: 16px;
+  letter-spacing: 0.1px;
 }
 .dx-theme-material-typography .dx-font-xl {
   font-size: 34px;
