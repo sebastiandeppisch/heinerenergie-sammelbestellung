@@ -6,6 +6,10 @@ comment: string;
 created_at: string;
 user_name: string;
 initials: string;
+type: string;
+subject: string;
+content: string;
+to: string;
 };
 export type GroupData = {
 users_count: number;

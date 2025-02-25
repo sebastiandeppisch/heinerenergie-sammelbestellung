@@ -75,12 +75,21 @@ class PageController extends Controller
             );
         }
 
-        $events = $advice->events()->oldest()->get()
+        $events = $advice->events()
+            ->get()
             ->map(fn ($event) => AdviceEventData::fromModel($event));
+
+        $mails = $advice->sends()
+            ->get()
+            ->map(fn ($mail) => AdviceEventData::fromMail($mail));
+
+        $timeline = $events->concat($mails)
+            ->sortBy(fn ($item) => $item->created_at)
+            ->values();
 
         return Inertia::render('Advice', [
             'advice' => $advice,
-            'events' => $events,
+            'events' => $timeline,
         ]);
     }
 
