@@ -10,7 +10,6 @@ import axios from 'axios';
 import DxTagBox from 'devextreme-vue/tag-box';
 import DxButton from 'devextreme-vue/button';
 import DxDropDownButton from 'devextreme-vue/drop-down-button';
-import AdviceMails from '../components/AdviceMails.vue';
 import AdviceTimeline from '../components/AdviceTimeline.vue';
 import { router } from '@inertiajs/vue3';
 import { user } from '../authHelper';
@@ -304,7 +303,6 @@ const phoneLink = computed(() => {
               <div v-else><i>Keine Angabe</i></div>
             </div>
           </div>
-          <AdviceMails :advice="advice" />
         </div>
       </div>
     </div>

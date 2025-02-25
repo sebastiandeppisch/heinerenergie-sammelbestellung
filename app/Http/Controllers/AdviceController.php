@@ -26,11 +26,6 @@ class AdviceController extends Controller
         return Advice::all()->filter(fn (Advice $advice) => Auth::user()->can('viewDataProtected', $advice))->values()->map(fn ($advice) => new DataProtectedAdvice($advice));
     }
 
-    public function mails(Advice $advice)
-    {
-        return $advice->sends()->orderBy('created_at', 'desc')->get();
-    }
-
     public function store(StoreAdviceRequest $request)
     {
         $advice = new Advice;
