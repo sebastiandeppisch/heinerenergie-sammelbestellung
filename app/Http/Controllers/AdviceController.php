@@ -13,6 +13,7 @@ use App\Mail\SendOrderLink;
 use App\Models\Advice;
 use App\Models\Group;
 use App\Models\User;
+use App\Notifications\AdviceTransferred;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -214,6 +215,9 @@ class AdviceController extends Controller
             $request->reason
         ));
 
-        return redirect()->route('advices.show', $advice);
+        $advice->notify(new AdviceTransferred($advice, $oldGroup, $targetGroup, $request->reason));
+
+        return redirect()->route('advices.show', $advice)
+            ->with('success', 'Beratung wurde erfolgreich übertragen. Eine Benachrichtigung wurde versendet.');
     }
 }

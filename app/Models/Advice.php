@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Notifications\Notifiable;
 use Wnx\Sends\Contracts\HasSends;
 use Wnx\Sends\Support\HasSendsTrait;
 
@@ -25,6 +26,7 @@ class Advice extends Model implements HasSends
 
     use HasFactory;
     use HasSendsTrait;
+    use Notifiable;
     use SoftDeletes;
 
     protected $fillable = [
