@@ -25,7 +25,7 @@ function updateAdvisors(e: { value: number[] }) {
 </script>
 
 <template>
-  <div class="dx-card" style="max-width:600px;padding:20px;">
+  <div class="sharing-container">
     <DxTagBox
       :data-source="advisors"
       display-expr="name"
@@ -34,8 +34,52 @@ function updateAdvisors(e: { value: number[] }) {
       label="Teilen mit"
       :value="sharedIds"
     />
-    <div style="padding-top:5px;opacity:0.5;">
-      Du kannst diese Beratung mit anderen Berater*innen teilen, um die Beratung gemeinsam duchzuführen
+    
+    <div class="sharing-info">
+      <div class="info-icon">
+        <font-awesome-icon icon="fa fa-info-circle" />
+      </div>
+      <p class="info-text">
+        Du kannst diese Beratung mit anderen Berater*innen teilen, um die Beratung gemeinsam durchzuführen
+      </p>
     </div>
   </div>
 </template>
+
+<style scoped>
+.sharing-container {
+  padding: 0 24px 24px;
+  padding-top: 16px;
+}
+
+.advisor-select {
+  margin-bottom: 16px;
+}
+
+.advisor-name {
+  color: #3498db;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.sharing-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+}
+
+.info-icon {
+  color: #3498db;
+  font-size: 16px;
+  margin-top: 2px;
+}
+
+.info-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #6c757d;
+}
+</style>

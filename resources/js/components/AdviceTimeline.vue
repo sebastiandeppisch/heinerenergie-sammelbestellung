@@ -9,8 +9,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div class="dx-card timeline-card">
-    <h3>Timeline</h3>
+  <div class="timeline-card">
     <div class="timeline-list">
       <TimelineItem
         v-for="event in events"

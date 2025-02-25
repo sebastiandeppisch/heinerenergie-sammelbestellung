@@ -41,7 +41,7 @@ function onSubmit(){
 </script>
 
 <template>
-  <div class="dx-card" style="max-width:600px;padding:20px;">
+  <div class="" style="padding:20px;">
     <DxForm
       label-mode="floating"
       :col-count="2"
@@ -97,7 +97,7 @@ function onSubmit(){
       <DxButtonItem
         :button-options="{ 
           text: 'Speichern', 
-          type: 'success', 
+          type: 'default', 
           useSubmitBehavior: true, 
           width: '100%', 
           onClick: onSubmit 

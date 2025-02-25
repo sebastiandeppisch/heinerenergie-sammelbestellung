@@ -7,56 +7,153 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div class="dx-card" style="padding:16px;display: flex;flex-direction: column;gap:16px;">
-    <div>
-      <b>Benötigt Hilfe bei:</b>
-      <div v-if="advice.helpType_place">
-        <font-awesome-icon icon="fa fa-house"  />
-        <span> Ort (Balkon, Garten, Terrasse, etc.)</span>
+  <div class="advice-details">
+    <div class="detail-section">
+      <h3 class="section-title">Benötigt Hilfe bei:</h3>
+      <div class="help-types">
+        <div v-if="advice.helpType_place" class="help-type">
+          <font-awesome-icon icon="fa fa-house" class="icon" />
+          <span>Ort (Balkon, Garten, Terrasse, etc.)</span>
+        </div>
+        <div v-if="advice.helpType_bureaucracy" class="help-type">
+          <font-awesome-icon icon="fa fa-file-signature" class="icon" />
+          <span>Bürokratie (Anmeldung, Förderung, etc.)</span>
+        </div>
+        <div v-if="advice.helpType_technical" class="help-type">
+          <font-awesome-icon icon="fa fa-wrench" class="icon" />
+          <span>Technisches (Anschluss, Befestigung, etc.)</span>
+        </div>
+        <div v-if="advice.helpType_other" class="help-type">
+          <img
+            src="https://balkon.heinerenergie.de/images/heinerenergie-hochzeitsturm.svg"
+            class="custom-icon"
+          />
+          <span>Andere Themen</span>
+        </div>
+        <div v-if="!advice.helpType_place && !advice.helpType_bureaucracy && !advice.helpType_technical && !advice.helpType_other" class="no-data">
+          <span>Keine Angabe</span>
+        </div>
       </div>
-      <div v-if="advice.helpType_bureaucracy">
-        <font-awesome-icon icon="fa fa-file-signature" />
-        <span> Bürokratie (Anmeldung, Förderung, etc.)</span>
-      </div>
-      <div v-if="advice.helpType_technical">
-        <font-awesome-icon icon="fa fa-wrench" />
-        <span> Technisches (Anschluss, Befestigung, etc.)</span>
-      </div>
-      <div v-if="advice.helpType_other">
-        <img
-          src="https://balkon.heinerenergie.de/images/heinerenergie-hochzeitsturm.svg"
-          style="height: 2em"
-        />
-        <span>Andere Themen</span>
+    </div>
+
+    <div class="detail-section">
+      <h3 class="section-title">Gebäudeart:</h3>
+      <div class="building-info">
+        <div v-if="advice.houseType === 0" class="info-item">
+          <font-awesome-icon icon="fa fa-home" class="icon" />
+          <span>Einfamilienhaus</span>
+        </div>
+        <div v-if="advice.houseType === 1" class="info-item">
+          <font-awesome-icon icon="fa fa-building" class="icon" />
+          <span>Mehrfamilienhaus</span>
+        </div>
+        <div v-else class="no-data">
+          <span>Keine Angabe/Sonstiges</span>
+        </div>
       </div>
 
-      <div v-if="!advice.helpType_place && !advice.helpType_bureaucracy && !advice.helpType_technical && !advice.helpType_other">
-        <span><i>Keine Angabe</i></span>
+      <h3 class="section-title">Vermieter*in / WEG vorhanden?</h3>
+      <div class="landlord-info">
+        <div :class="['status-badge', advice.landlordExists ? 'yes' : 'no']">
+          {{ advice.landlordExists ? 'Ja' : 'Nein' }}
+        </div>
       </div>
     </div>
-    <div>
-      <b>Gebäudeart:</b>
-      <div v-if="advice.houseType === 0">
-        <font-awesome-icon icon="fa fa-home" />
-        <span>Einfamilienhaus</span>
+
+    <div class="detail-section">
+      <h3 class="section-title">Wo soll das Steckersolargerät installiert werden?</h3>
+      <div class="installation-info">
+        <p v-if="advice.placeNotes" class="notes">{{ advice.placeNotes }}</p>
+        <p v-else class="no-data">Keine Angabe</p>
       </div>
-      <div v-if="advice.houseType === 1">
-        <font-awesome-icon icon="fa fa-building" />
-        <span>Mehrfamilienhaus</span>
-      </div>
-      <div v-else>
-        <span><i>Keine Angabe/Sonstiges</i></span>
-      </div>
-      <b>Vermieter*in / WEG vorhanden?</b> 
-      <div v-if="advice.landlordExists">Ja</div>
-      <div v-else>Nein</div> 
-    </div>
-    <div>
-      <b>Wo soll das Steckersolargerät installiert werden?</b>
-      <div v-if="advice.placeNotes">
-        {{ advice.placeNotes }}
-      </div>
-      <div v-else><i>Keine Angabe</i></div>
     </div>
   </div>
-</template> 
+</template>
+
+<style scoped>
+.advice-details {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.detail-section {
+  margin-bottom: 24px;
+}
+
+.detail-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 12px;
+}
+
+.help-types, .building-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.help-type, .info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.icon {
+  color: #3498db;
+  width: 16px;
+}
+
+.custom-icon {
+  height: 16px;
+  width: 16px;
+}
+
+.no-data {
+  color: #6c757d;
+  font-style: italic;
+  font-size: 14px;
+  padding: 8px 12px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.status-badge.yes {
+  background-color: #e1f0ff;
+  color: #3498db;
+}
+
+.status-badge.no {
+  background-color: #f8f9fa;
+  color: #6c757d;
+}
+
+.installation-info {
+  background: #f8f9fa;
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.notes {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #2c3e50;
+}
+</style> 

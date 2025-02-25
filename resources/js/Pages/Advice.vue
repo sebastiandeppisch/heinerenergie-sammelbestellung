@@ -21,28 +21,172 @@ const advisor = user.value;
 </script>
 
 <template>
-  <div style="padding:20px;">
-    <h2>Beratung</h2>
-    <div style="display:flex;flex-direction:row;gap:32px;">
-      <div style="display:flex;flex-direction:column;gap:20px;">
-        <AdviceForm :advice="advice" />
-        <AdviceSharing 
-          :advice-id="advice.id" 
-          v-model:shared-ids="sharedIds" 
-        />
-        <AdviceActions 
-          :advice="advice" 
-          :advisor="advisor" 
-        />
-        <AdviceOrderActions 
-          :advice="advice" 
-          :advisor="advisor" 
-        />
+  <div class="advice-container">
+    <!-- Header Section -->
+    <div class="advice-header">
+      <div class="header-content">
+        <div class="header-title-section">
+          <h2 class="advice-title">
+            Beratung für<br class="mobile-break" /> {{ advice.firstName }} {{ advice.lastName }}
+          </h2>
+        </div>
+        <div class="header-actions">
+          <AdviceActions :advice="advice" :advisor="advisor" />
+        </div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:32px;">
-        <AdviceTimeline :events="events" />
-        <AdviceDetails :advice="advice" />
+    </div>
+
+    <!-- Main Content -->
+    <div class="advice-content">
+      <!-- Left Column - Main Information -->
+      <div class="content-main">
+        <div class="content-card">
+          <h3 class="card-title">Kontaktdaten & Details</h3>
+          <AdviceForm :advice="advice" />
+        </div>
+        
+        <div class="content-card">
+          <h3 class="card-title">Beratungsteam</h3>
+          <AdviceSharing 
+            :advice-id="advice.id" 
+            v-model:shared-ids="sharedIds" 
+          />
+        </div>
+      </div>
+
+      <!-- Right Column - Timeline and Details -->
+      <div class="content-sidebar">
+        <div class="content-card">
+          <h3 class="card-title">Verlauf</h3>
+          <AdviceTimeline :events="events" />
+        </div>
+        
+        <div class="content-card">
+          <h3 class="card-title">Zusätzliche Informationen</h3>
+          <AdviceDetails :advice="advice" />
+        </div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.advice-container {
+  min-height: 100vh;
+  background-color: #f2f2f2;
+}
+
+.advice-header {
+  background-color: #f2f2f2;
+  border-bottom: 2px solid #e9ecef;
+  padding: 16px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.header-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-title-section {
+  flex: 1;
+  min-width: 0; /* Verhindert Überlauf bei langen Namen */
+}
+
+.advice-title {
+  font-size: 24px;
+  color: #2c3e50;
+  font-weight: 600;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.mobile-break {
+  display: none;
+}
+
+.header-actions {
+  display: flex;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.advice-content {
+  max-width: 1400px;
+  margin: 32px auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 32px;
+}
+
+.content-main, .content-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.content-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+  padding: 20px 24px;
+  margin: 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+@media (max-width: 1200px) {
+  .advice-content {
+    grid-template-columns: 1fr;
+  }
+
+  .header-content {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .advice-header {
+    padding: 12px 16px;
+  }
+
+  .advice-title {
+    font-size: 20px;
+    white-space: normal;
+  }
+
+  .mobile-break {
+    display: inline;
+  }
+
+  .advice-content {
+    margin: 16px auto;
+    padding: 0 16px;
+    gap: 16px;
+  }
+
+  .content-main, .content-sidebar {
+    gap: 16px;
+  }
+}
+</style>
