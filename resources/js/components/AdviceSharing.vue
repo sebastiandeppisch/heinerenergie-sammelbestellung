@@ -4,6 +4,7 @@ import LaravelDataSource from "../LaravelDataSource";
 import notify from 'devextreme/ui/notify';
 import axios from 'axios';
 import { router } from '@inertiajs/vue3';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 const props = defineProps<{
   adviceId: number

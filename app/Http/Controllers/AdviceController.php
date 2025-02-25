@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Events\Advice\AdviceSharedAdvisorAdded;
 use App\Events\Advice\AdviceSharedAdvisorRemoved;
+use App\Events\Advice\InitiativeTransferEvent;
 use App\Http\Requests\StoreAdviceRequest;
+use App\Http\Requests\TransferAdviceRequest;
 use App\Http\Requests\UpdateAdviceRequest;
 use App\Http\Resources\DataProtectedAdvice;
 use App\Mail\SendOrderLink;
 use App\Models\Advice;
+use App\Models\Group;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -187,5 +190,30 @@ class AdviceController extends Controller
         }
 
         return round($number, $sigdigs) * $multiplier;
+    }
+
+    public function transfer(Advice $advice, TransferAdviceRequest $request)
+    {
+        $this->authorize('update', $advice);
+
+        $targetGroup = Group::findOrFail($request->group_id);
+
+        if (! $targetGroup->accepts_transfers) {
+            abort(403, 'Diese Initiative akzeptiert keine Beratungsübertragungen');
+        }
+
+        $oldGroup = $advice->group;
+        $advice->group()->associate($targetGroup);
+        $advice->save();
+
+        event(new InitiativeTransferEvent(
+            $advice,
+            Auth::user(),
+            $oldGroup,
+            $targetGroup,
+            $request->reason
+        ));
+
+        return redirect()->route('advices.show', $advice);
     }
 }

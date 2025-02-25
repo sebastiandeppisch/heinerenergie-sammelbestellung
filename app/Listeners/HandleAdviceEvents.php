@@ -3,10 +3,8 @@
 namespace App\Listeners;
 
 use App\Events\Advice\AdvisorChangedEvent;
-use App\Events\Advice\InitiativeTransferEvent;
 use App\Events\Advice\StatusChangedEvent;
 use App\Events\AdviceSaving;
-use App\Models\Group;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
@@ -23,18 +21,6 @@ class HandleAdviceEvents
                 Auth::user(),
                 $advice->getOriginal('advice_status_id'),
                 $advice->advice_status_id
-            ));
-        }
-
-        if ($advice->isDirty('group_id')) {
-            $oldGroup = $advice->getOriginal('group_id') ? Group::find($advice->getOriginal('group_id')) : null;
-            $newGroup = Group::find($advice->group_id);
-
-            event(new InitiativeTransferEvent(
-                $advice,
-                Auth::user(),
-                $oldGroup,
-                $newGroup
             ));
         }
 

@@ -6,6 +6,7 @@ use App\Data\AdviceEventData;
 use App\Data\GroupData;
 use App\Http\Resources\DataProtectedAdvice;
 use App\Models\Advice;
+use App\Models\Group;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
@@ -69,9 +70,25 @@ class PageController extends Controller
             ->sortBy(fn ($item) => $item->created_at)
             ->values();
 
+        $coordinateOfAdvice = $advice->coordinate;
+
+        $transferableGroups = Group::where('accepts_transfers', true)->get()
+            ->sortBy(function (Group $group) use ($coordinateOfAdvice) {
+                $center = $group->consulting_area?->getCenter();
+
+                if ($center === null || $coordinateOfAdvice === null) {
+                    return INF;
+                }
+
+                return $coordinateOfAdvice->distanceTo($center);
+            })
+            ->map(fn (Group $group) => GroupData::fromModel($group))
+            ->values();
+
         return Inertia::render('Advice', [
             'advice' => $advice,
             'events' => $timeline,
+            'transferableGroups' => $transferableGroups,
         ]);
     }
 

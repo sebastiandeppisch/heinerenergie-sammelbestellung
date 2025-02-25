@@ -3,7 +3,7 @@ import DxButton from 'devextreme-vue/button';
 import DxDropDownButton from 'devextreme-vue/drop-down-button';
 import { computed } from 'vue';
 import { user } from '../authHelper';
-
+import AdviceTransfer from './AdviceTransfer.vue';
 import { route } from 'ziggy-js';
 import { router } from '@inertiajs/vue3';
 const props = defineProps<{
@@ -14,6 +14,7 @@ const props = defineProps<{
     lat: number | null;
     long: number | null;
   };
+  transferableGroups: App.Data.GroupData[];
 }>();
 
 const navigationTypes = [
@@ -81,5 +82,6 @@ const showUnassignButton = computed(() => {
       @click="unassignAdvice"
       hint="Beratung freigeben"
     />
+    <AdviceTransfer :advice-id="advice.id" :transferable-groups="transferableGroups" />
   </div>
 </template> 

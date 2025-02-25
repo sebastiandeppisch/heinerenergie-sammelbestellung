@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\ValueObjects\Polygon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,7 +24,7 @@ class Group extends Model
     ];
 
     protected $casts = [
-        'consulting_area' => \App\Casts\PolygonCast::class,
+        'consulting_area' => Polygon::class,
         'accepts_transfers' => 'boolean',
     ];
 

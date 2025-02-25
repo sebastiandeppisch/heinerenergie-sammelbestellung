@@ -42,7 +42,7 @@ Route::middleware('auth')->group(function () {
         ->name('groups.consulting-area.delete');
 
     Route::post('advices/{advice}/unassign', [AdviceController::class, 'unassign'])->name('advices.unassign');
-
+    Route::post('advices/{advice}/transfer', [AdviceController::class, 'transfer'])->name('advices.transfer');
 });
 
 Route::get('/change-password', [PageController::class, 'changePassword'])->name('password.reset');

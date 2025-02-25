@@ -14,6 +14,7 @@ type AdviceEvent = App.Data.AdviceEventData;
 const props = defineProps<{
   advice: Advice;
   events: AdviceEvent[];
+  transferableGroups: App.Data.GroupData[];
 }>();
 
 const sharedIds = ref(props.advice.shares_ids || []);
@@ -31,7 +32,7 @@ const advisor = user.value;
           </h2>
         </div>
         <div class="header-actions">
-          <AdviceActions :advice="advice" :advisor="advisor" />
+          <AdviceActions :advice="advice" :advisor="advisor" :transferable-groups="transferableGroups" />
         </div>
       </div>
     </div>
