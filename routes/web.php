@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\GroupController;
-use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -18,18 +17,14 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware('auth')->group(function () {
-    Route::get('bulkorders/{bulkorder}/orderexport', [OrderController::class, 'export'])->name('orderexport');
     Route::get('/dashboard', [PageController::class, 'dashboard'])->name('dashboard');
     Route::get('/initiatives/select', [PageController::class, 'initiativeSelection'])->name('initiatives.select');
     Route::get('/profile', [PageController::class, 'profile'])->name('profile');
-    Route::get('/orders', [PageController::class, 'orders'])->name('orders');
-    Route::get('/products', [PageController::class, 'products'])->name('products');
     Route::get('/users', [PageController::class, 'users'])->name('users');
     Route::get('/settings', [PageController::class, 'settings'])->name('settings');
     Route::get('/advices', [PageController::class, 'advices'])->name('advices');
     Route::get('/advices/{advice}', [PageController::class, 'showAdvice'])->name('advices.show');
     Route::get('/advicesmap', [PageController::class, 'advicesMap'])->name('advices.map');
-    Route::get('neworder', [PageController::class, 'newOrder'])->name('neworder');
     Route::get('/backend', function () {
         return redirect()->route('dashboard');
     })->middleware('auth')->name('backend');
@@ -48,9 +43,8 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/change-password', [PageController::class, 'changePassword'])->name('password.reset');
 
-Route::get('/', fn () => redirect()->route('home'));
+Route::get('/', fn () => redirect()->route('dashboard'))->name('home');
 
-Route::get('/sammelbestellung', [PageController::class, 'publicNewOrder'])->name('home');
 Route::get('/login-form', [PageController::class, 'login'])->name('login');
 Route::get('/reset-password', [PageController::class, 'resetPassword'])->name('reset-password');
 Route::get('newadvice', [PageController::class, 'newAdvice'])->name('newadvice');

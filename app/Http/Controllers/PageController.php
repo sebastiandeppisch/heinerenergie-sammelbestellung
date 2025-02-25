@@ -32,24 +32,9 @@ class PageController extends Controller
         return Inertia::render('Dashboard');
     }
 
-    public function newOrder()
-    {
-        return Inertia::render('NewOrder');
-    }
-
-    public function orders()
-    {
-        return Inertia::render('Orders');
-    }
-
     public function profile()
     {
         return Inertia::render('Profile');
-    }
-
-    public function products()
-    {
-        return Inertia::render('Products');
     }
 
     public function users()
@@ -137,11 +122,6 @@ class PageController extends Controller
         return Inertia::render('HtmlContent', [
             'content' => Setting::get('datapolicy'),
         ]);
-    }
-
-    public function publicNewOrder()
-    {
-        return Inertia::render('PublicNewOrder');
     }
 
     public function initiativeSelection(#[CurrentUser] User $user)

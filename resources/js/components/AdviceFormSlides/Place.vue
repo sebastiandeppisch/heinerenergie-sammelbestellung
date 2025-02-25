@@ -49,12 +49,7 @@ const adviceOrDirectOrder = [
     id: 0,
     text: "Beratung",
     icon: "fa fa-handshake",
-  },
-  {
-    id: 2,
-    text: "Nur Sammelbestellung",
-    icon: "cart",
-  },
+  }
 ];
 
 const phoneOrHome = [
