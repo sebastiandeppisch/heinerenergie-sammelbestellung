@@ -15,12 +15,20 @@ class StatusChangedEvent extends AdviceEvent
         public ?string $toStatus
     ) {
         parent::__construct($advice, $user);
-        $this->fromStatus = $fromStatus ? AdviceStatus::find($fromStatus)->name : 'Kein Status';
-        $this->toStatus = $toStatus ? AdviceStatus::find($toStatus)->name : 'Kein Status';
+        $this->fromStatus = AdviceStatus::find($fromStatus)?->name;
+        $this->toStatus = AdviceStatus::find($toStatus)?->name;
     }
 
     public function getDescription(): string
     {
+        if (! $this->fromStatus) {
+            return "Status wurde zu '{$this->toStatus}' geändert";
+        }
+
+        if (! $this->toStatus) {
+            return "Status wurde von '{$this->fromStatus}' zu 'Kein Status' geändert";
+        }
+
         return "Status wurde von '{$this->fromStatus}' zu '{$this->toStatus}' geändert";
     }
 
