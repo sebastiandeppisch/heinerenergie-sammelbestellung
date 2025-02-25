@@ -3,6 +3,7 @@
 import { computed } from "vue";
 
 import DxCheckBox from "devextreme-vue/check-box";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 type HelpTypeAdvice = Pick<App.Models.Advice,
   | 'helpType_place' | 'helpType_technical'

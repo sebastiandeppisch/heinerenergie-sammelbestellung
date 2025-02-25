@@ -11,10 +11,14 @@ import DxTagBox from 'devextreme-vue/tag-box';
 import DxButton from 'devextreme-vue/button';
 import DxDropDownButton from 'devextreme-vue/drop-down-button';
 import AdviceMails from '../components/AdviceMails.vue';
+import AdviceTimeline from '../components/AdviceTimeline.vue';
 import { router } from '@inertiajs/vue3';
 import { user } from '../authHelper';
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+
 type Advice = App.Models.Advice;
 
+type AdviceEvent = App.Data.AdviceEventData;
 
 const advicesDataSource = new LaravelDataSource('/api/advices');
 
@@ -22,7 +26,10 @@ interface Props {
   advice: Advice;
 }
 
-const props = defineProps<Props>();
+const props = defineProps<{
+  advice: Advice;
+  events: AdviceEvent[];
+}>();
 
 const advice = props.advice;
 
@@ -248,6 +255,7 @@ const phoneLink = computed(() => {
           </div>
         </div>
         <div style="display: flex;flex-direction: column;gap:32px;">
+          <AdviceTimeline :events="events" />
           <div class="dx-card" style="padding:16px;display: flex;flex-direction: column;gap:16px;">
             <div>
               <b>Benötigt Hilfe bei:</b>

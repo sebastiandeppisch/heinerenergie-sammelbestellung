@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Data\AdviceEventData;
 use App\Data\GroupData;
 use App\Http\Resources\DataProtectedAdvice;
 use App\Models\Advice;
@@ -74,8 +75,12 @@ class PageController extends Controller
             );
         }
 
+        $events = $advice->events()->oldest()->get()
+            ->map(fn ($event) => AdviceEventData::fromModel($event));
+
         return Inertia::render('Advice', [
             'advice' => $advice,
+            'events' => $events,
         ]);
     }
 
