@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Data\AdviceEventData;
 use App\Data\GroupData;
+use App\Data\GroupMapData;
 use App\Http\Resources\DataProtectedAdvice;
 use App\Models\Advice;
 use App\Models\Group;
@@ -96,9 +97,12 @@ class PageController extends Controller
     {
         $advices = Advice::all()->filter(fn (Advice $advice) => Auth::user()->can('viewDataProtected', $advice))->values()->map(fn ($advice) => (new DataProtectedAdvice($advice))->resolve());
 
+        $groups = Group::where('accepts_transfers', true)->get()->map(fn (Group $group) => GroupMapData::fromModel($group))->filter(fn (GroupMapData $group) => $group->polygon !== null)->values();
+
         return Inertia::render('AdvicesMap', [
             'advices' => $advices,
             'advisors' => User::all(),
+            'groups' => $groups,
         ]);
     }
 

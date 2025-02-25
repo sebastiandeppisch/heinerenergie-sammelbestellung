@@ -22,6 +22,12 @@ parent_id: number;
 accepts_transfers: boolean;
 userCanActAsAdmin: boolean;
 };
+export type GroupMapData = {
+polygon: any;
+center: any;
+name: string;
+logo_path: string;
+};
 export type GroupUserData = {
 id: number;
 name: string;

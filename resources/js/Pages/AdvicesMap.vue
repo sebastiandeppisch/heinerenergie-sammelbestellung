@@ -26,18 +26,18 @@ import { DxTextBox, DxButton as DxTextBoxButton } from 'devextreme-vue/text-box'
 import notify from 'devextreme/ui/notify';
 import { usePage, router } from "@inertiajs/vue3";
 import {isAdmin, user as userRef} from '../authHelper';
+import { LPolygon } from "@vue-leaflet/vue-leaflet";
 
 const user = userRef.value;
 const userId = user.id;
 
 const emit = defineEmits(["selectAdviceId"])
 
-interface Props{
+const props = defineProps<{
   advices: App.Models.Advice[];
   advisors: App.Models.User[];
-}
-
-const props = defineProps<Props>();
+  groups: App.Data.GroupMapData[];
+}>();
 const advisors = props.advisors;
 
 
@@ -320,6 +320,16 @@ function runSearch(){
               {{ advisor.name }}
             </div>
           </LPopup>
+        </LMarker>
+      </LLayerGroup>
+
+      <LLayerGroup
+        name="Initiativen"
+        layer-type="overlay"
+      >
+        <LPolygon v-for="(item, index) in props.groups" :key="index" :lat-lngs="item.polygon" v-if="props.groups && props.groups.length > 0" />
+        <LMarker v-for="(item, index) in props.groups" :key="index" :lat-lng="latLng(item.center.lat, item.center.long)" v-if="props.groups && props.groups.length > 0">
+          <LIcon :icon-url="item.logo_path" :icon-size="[50, 50]" v-if="item.logo_path !== null" />
         </LMarker>
       </LLayerGroup>
     </LMap>
