@@ -29,12 +29,14 @@ class GroupController extends Controller
 
         $user = request()->user();
 
+        $canEditGroup = $selectedGroup ? $user->can('update', $selectedGroup) : false;
+
         return Inertia::render('Groups/Index', [
             'groups' => array_values($groups),
             'canCreateRootGroup' => $canCreateRootGroup,
             'selectedGroup' => $selectedGroup ? GroupData::fromModel($selectedGroup) : null,
             'polygon' => $polygon,
-            'canEditGroup' => $user->can('update', $selectedGroup),
+            'canEditGroup' => $canEditGroup,
             'canCreateGroups' => $user->can('createAny', Group::class),
         ]);
     }
