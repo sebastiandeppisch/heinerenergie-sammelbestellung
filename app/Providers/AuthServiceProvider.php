@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\LaravelExtensions\StrictGates\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -22,6 +23,6 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        Gate::shouldBeStrict($this->app->isProduction());
     }
 }

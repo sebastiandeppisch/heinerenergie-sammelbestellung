@@ -37,7 +37,8 @@ arch()->expect('App\Exceptions')
 
 arch()->expect('App')
     ->not->toImplement(Throwable::class)
-    ->ignoring('App\Exceptions');
+    ->ignoring('App\Exceptions')
+    ->ignoring(\App\LaravelExtensions\StrictGates\MissingGateException::class);
 
 arch()->expect('App\Http\Middleware')
     ->classes()
@@ -123,15 +124,18 @@ arch()->expect('App\Providers')
     ->toExtend(\Illuminate\Support\ServiceProvider::class);
 
 arch()->expect('App\Providers')
-    ->not->toBeUsed();
+    ->not->toBeUsed()
+    ->ignoring(\App\LaravelExtensions\StrictGates\AuthServiceProvider::class);
 
 arch()->expect('App')
     ->not->toExtend(\Illuminate\Support\ServiceProvider::class)
-    ->ignoring('App\Providers');
+    ->ignoring('App\Providers')
+    ->ignoring(\App\LaravelExtensions\StrictGates\AuthServiceProvider::class);
 
 arch()->expect('App')
     ->not->toHaveSuffix('ServiceProvider')
-    ->ignoring('App\Providers');
+    ->ignoring('App\Providers')
+    ->ignoring(\App\LaravelExtensions\StrictGates\AuthServiceProvider::class);
 
 arch()->expect('App')
     ->not->toHaveSuffix('Controller')
