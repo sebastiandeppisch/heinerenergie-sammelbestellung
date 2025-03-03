@@ -133,4 +133,27 @@ class Group extends Model
             'accepts_transfers' => 'boolean',
         ];
     }
+
+    public function getHierarchyIds(): array
+    {
+        $ids = [$this->id];
+        $current = $this;
+
+        while ($current->parent_id) {
+            $current = $current->parent;
+            $ids[] = $current->id;
+        }
+
+        return $ids;
+    }
+
+    public function usableStatuses(): BelongsToMany
+    {
+        return $this->belongsToMany(AdviceStatus::class)->withPivot('visible_in_group')->using(AdviceStatusGroup::class);
+    }
+
+    public function ownStatuses(): HasMany
+    {
+        return $this->hasMany(AdviceStatus::class);
+    }
 }

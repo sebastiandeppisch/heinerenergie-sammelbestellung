@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Events\Advice\InitiativeTransferEvent;
 use App\Events\Advice\StatusChangedEvent;
 use App\Models\Advice;
-use App\Models\AdviceStatus;
 use App\Models\Group;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,11 +15,12 @@ beforeEach(function () {
     $this->user = User::factory()->create();
 
     // Create required statuses
-    $this->status1 = AdviceStatus::create(['id' => 1, 'name' => 'Initial']);
-    $this->status2 = AdviceStatus::create(['id' => 2, 'name' => 'In Progress']);
-    $this->status3 = AdviceStatus::create(['id' => 3, 'name' => 'Completed']);
 
     $this->group = Group::factory()->create(['name' => 'Test Initiative']);
+
+    $this->status1 = $this->group->ownStatuses()->create(['id' => 1, 'name' => 'Initial']);
+    $this->status2 = $this->group->ownStatuses()->create(['id' => 2, 'name' => 'In Progress']);
+    $this->status3 = $this->group->ownStatuses()->create(['id' => 3, 'name' => 'Completed']);
 
     $this->advice = Advice::factory()->create([
         'advice_status_id' => $this->status1->id,

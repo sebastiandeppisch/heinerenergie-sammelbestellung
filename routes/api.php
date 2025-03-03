@@ -1,10 +1,10 @@
 <?php
 
 use App\Http\Controllers\AdviceController;
-use App\Http\Controllers\AdviceStatusController;
 use App\Http\Controllers\AdviceTypeController;
 use App\Http\Controllers\Api\GroupUserController;
 use App\Http\Controllers\GeoSearchController;
+use App\Http\Controllers\GroupAdviceStatusController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StoreAdviceController;
 use App\Http\Controllers\UploadController;
@@ -27,7 +27,6 @@ require_once __DIR__.'/api.auth.php';
 Route::middleware('auth')->group(function () {
     Route::resource('users', UserController::class);
     Route::resource('advices', AdviceController::class);
-    Route::resource('advicestatus', AdviceStatusController::class);
 
     Route::apiResource('groups.users', GroupUserController::class);
 
@@ -45,6 +44,8 @@ Route::middleware('auth')->group(function () {
     Route::get('html/advisorInfo', [SettingController::class, 'advisorInfo']);
 
     Route::get('map/search', GeoSearchController::class);
+
+    Route::apiResource('groups.advicestatus', GroupAdviceStatusController::class);
 });
 
 Route::get('html/impress', [SettingController::class, 'impress']);

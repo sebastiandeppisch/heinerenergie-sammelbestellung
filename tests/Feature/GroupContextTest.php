@@ -41,7 +41,7 @@ test('user can access own group resources', function () {
     $response = get("/advices/{$this->otherAdvice->id}");
 
     $response->assertSessionHasErrors();
-    $response->assertRedirect(route('advices.index'));
+    $response->assertRedirect('/advices');
 });
 
 test('group admin has elevated privileges', function () {

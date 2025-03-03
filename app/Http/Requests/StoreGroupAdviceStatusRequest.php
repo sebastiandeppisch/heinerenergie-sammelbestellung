@@ -2,9 +2,12 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\AdviceStatusResult;
+use App\Models\AdviceStatusGroup;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
 
-class StoreAdviceStatusRequest extends FormRequest
+class StoreGroupAdviceStatusRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -13,7 +16,9 @@ class StoreAdviceStatusRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        $group = $this->route('group');
+
+        return $this->user()->can('create', [AdviceStatusGroup::class, $group]);
     }
 
     /**
@@ -25,6 +30,8 @@ class StoreAdviceStatusRequest extends FormRequest
     {
         return [
             'name' => 'required|string',
+            'result' => ['required', new Enum(AdviceStatusResult::class)],
+            'visible' => 'boolean',
         ];
     }
 }

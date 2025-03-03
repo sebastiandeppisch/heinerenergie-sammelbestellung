@@ -2,7 +2,9 @@
 
 namespace App\Policies;
 
+use App\Context\GroupContextContract;
 use App\Models\AdviceStatus;
+use App\Models\Group;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -10,29 +12,33 @@ class AdviceStatusPolicy
 {
     use HandlesAuthorization;
 
-    public function viewAny(User $user)
-    {
-        return true;
+    public function __construct(private GroupContextContract $groupContext) {}
 
+    public function create(User $user, Group $group)
+    {
+        return $this->isGroupAdmin($user, $group);
     }
 
-    public function view(User $user, AdviceStatus $adviceStatus)
+    public function update(User $user, AdviceStatus $advicestatus)
     {
-        return true;
+        return $this->isGroupAdmin($user, $advicestatus->ownerGroup);
     }
 
-    public function create(User $user)
+    public function delete(User $user, AdviceStatus $advicestatus)
     {
-        return $user->isActingAsAdmin();
+        return $this->isGroupAdmin($user, $advicestatus->ownerGroup);
     }
 
-    public function update(User $user, AdviceStatus $adviceStatus)
+    private function isGroupAdmin(User $user, Group $group)
     {
-        return $user->isActingAsAdmin();
-    }
+        if ($this->groupContext->actsAsSystemAdmin($user)) {
+            return true;
+        }
 
-    public function delete(User $user, AdviceStatus $adviceStatus)
-    {
-        return $user->isActingAsAdmin();
+        if ($this->groupContext->actsAsGroupAdmin($user, $group)) {
+            return true;
+        }
+
+        return false;
     }
 }
