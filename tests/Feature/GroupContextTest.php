@@ -40,7 +40,8 @@ test('user can access own group resources', function () {
     // But not other group's advice
     $response = get("/advices/{$this->otherAdvice->id}");
 
-    expect($response->status())->toBe(403);
+    $response->assertSessionHasErrors();
+    $response->assertRedirect(route('advices.index'));
 });
 
 test('group admin has elevated privileges', function () {
