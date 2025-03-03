@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Actions\FetchCoordinateByAddress;
 use App\ValueObjects\Address;
 use App\ValueObjects\Coordinate;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 use maxh\Nominatim\Nominatim;
 use Opcodes\LogViewer\Facades\LogViewer;
@@ -52,5 +53,6 @@ class AppServiceProvider extends ServiceProvider
             });
         }
 
+        Model::shouldBeStrict($this->app->isProduction());
     }
 }
