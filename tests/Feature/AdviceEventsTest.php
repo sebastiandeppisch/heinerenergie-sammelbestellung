@@ -7,7 +7,9 @@ use App\Events\Advice\StatusChangedEvent;
 use App\Models\Advice;
 use App\Models\Group;
 use App\Models\User;
+use App\Services\SessionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use function Pest\Laravel\post;
 
 uses(RefreshDatabase::class);
 
@@ -18,6 +20,8 @@ beforeEach(function () {
 
     $this->group = Group::factory()->create(['name' => 'Test Initiative']);
 
+    $this->group->users()->attach($this->user, ['is_admin' => true]);
+
     $this->status1 = $this->group->ownStatuses()->create(['id' => 1, 'name' => 'Initial']);
     $this->status2 = $this->group->ownStatuses()->create(['id' => 2, 'name' => 'In Progress']);
     $this->status3 = $this->group->ownStatuses()->create(['id' => 3, 'name' => 'Completed']);
@@ -26,11 +30,13 @@ beforeEach(function () {
         'advice_status_id' => $this->status1->id,
         'group_id' => $this->group,
     ]);
+
+    app(SessionService::class)->actWithoutSelectingGroup();
+    config()->set('app.group_context', 'global');
+    $this->actingAs($this->user);
 });
 
 test('it creates an event when status changes', function () {
-    $this->actingAs($this->user);
-
     $this->advice->advice_status_id = $this->status2->id;
     $this->advice->save();
 
@@ -50,8 +56,7 @@ test('it creates an event when group is transferred', function () {
 
     $newGroup = Group::factory()->create(['name' => 'New Initiative']);
 
-    $this->advice->group()->associate($newGroup);
-    $this->advice->save();
+    transferAdvice($this->advice, $newGroup);
 
     $event = $this->advice->events()->latest()->first();
 
@@ -91,8 +96,7 @@ test('events can be retrieved in chronological order', function () {
     $this->advice->save();
 
     $newGroup = Group::factory()->create(['name' => 'New Initiative']);
-    $this->advice->group()->associate($newGroup);
-    $this->advice->save();
+    transferAdvice($this->advice, $newGroup);
 
     $events = $this->advice->events()->orderBy('created_at')->get();
 
@@ -116,3 +120,14 @@ test('events retain user who triggered them', function () {
         ->not()->toBeNull()
         ->and($event->user_id)->toBe($this->user->id);
 });
+
+function transferAdvice(Advice $advice, Group $newGroup, string $reason = null)
+{
+    $response = post(route('advices.transfer', $advice), [
+        'group_id' => $newGroup->id,
+        'reason' => $reason,
+    ]);
+
+    $response->assertSessionHasNoErrors();
+    $response->assertRedirect(route('advices.show', $advice));
+}
