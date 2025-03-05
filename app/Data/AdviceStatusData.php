@@ -6,7 +6,9 @@ use App\Enums\AdviceStatusResult;
 use App\Models\AdviceStatus;
 use App\Models\Group;
 use Spatie\LaravelData\Data;
+use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
+#[TypeScript]
 class AdviceStatusData extends Data
 {
     public function __construct(

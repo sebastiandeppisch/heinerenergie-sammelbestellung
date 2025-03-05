@@ -23,7 +23,7 @@ class UpdateGroupAdviceStatusRequest extends FormRequest
     {
         $group = $this->route('group');
         $adviceStatus = $this->route('advicestatus');
-        $pivot = $adviceStatus->usingGroups()->wherePivot('group_id', $group->id)->first();
+        $pivot = $adviceStatus->usingGroups()->wherePivot('group_id', $group->id)->first()?->pivot;
 
         if ($pivot === null) {
             $pivot = new AdviceStatusGroup([
@@ -47,12 +47,7 @@ class UpdateGroupAdviceStatusRequest extends FormRequest
 
     public function isOnlySettingVisibility()
     {
-        $pivot = $this->groupAdviceStatus();
-        $group = $this->route('group');
-        if ($group->id !== $pivot->group_id) {
-            return false;
-        }
-
+        // Only check if the request is only changing the visibility status
         return count($this->all()) === 1 && isset($this->visible_in_group);
     }
 }

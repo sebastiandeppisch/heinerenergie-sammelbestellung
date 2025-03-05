@@ -44,12 +44,15 @@ class AdviceStatus extends Model
 
     public function isVisibleInGroup(Group $group): bool
     {
-        if ($this->group_id === null || $this->group_id === $group->id) {
-            return true;
-        }
-
+        // Check if there is an explicit pivot entry for this group
         $pivot = $this->usingGroups()->where('groups.id', $group->id)->first()?->pivot;
-
-        return $pivot?->visible_in_group ?? true;
+        
+        if ($pivot !== null) {
+            // If an explicit entry exists, use its visibility value
+            return $pivot->visible_in_group;
+        }
+        
+        // No entry found, visible by default
+        return true;
     }
 }

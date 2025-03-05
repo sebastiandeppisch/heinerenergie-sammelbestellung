@@ -67,6 +67,18 @@
                     />
                   </template>
                 </DxItem>
+                <DxItem 
+                  title="Beratungszustände"
+                  icon="tableproperties"
+                  v-if="canEditGroup"
+                >
+                  <template #default>
+                    <AdviceStatusGroup
+                      :group="selectedGroup"
+                      :groups="groups"
+                    />
+                  </template>
+                </DxItem>
               </DxTabPanel>
             </div>
           </div>
@@ -102,6 +114,7 @@ import GroupTree from '@/Components/Groups/GroupTree.vue'
 import GroupDetails from '@/Components/Groups/GroupDetails.vue'
 import GroupUsers from '@/Components/Groups/GroupUsers.vue'
 import ConsultingAreaForm from '@/Components/ConsultingArea/ConsultingAreaForm.vue'
+import AdviceStatusGroup from '@/views/AdviceStatusGroup.vue'
 import { DxButton } from 'devextreme-vue'
 import CreateGroupForm from '@/Components/Groups/CreateGroupForm.vue'
 type GroupData = App.Data.GroupData;
