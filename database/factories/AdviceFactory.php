@@ -19,7 +19,7 @@ class AdviceFactory extends Factory
     {
 
         if (Group::count() > 0) {
-            $group = Group::first();
+            $group = Group::inRandomOrder()->first();
         } else {
             $group = Group::factory();
         }
