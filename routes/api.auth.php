@@ -15,9 +15,4 @@ Route::post('reset-password', [NewPasswordController::class, 'store'])
     ->name('password.update');
 // });
 
-Route::middleware('auth')->group(function () {
-    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
-        ->name('logout');
-});
-
 Route::get('login', [AuthenticatedSessionController::class, 'index']);

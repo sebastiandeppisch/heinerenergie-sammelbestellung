@@ -21,11 +21,24 @@ class PageController extends Controller
 
     public function login()
     {
-        if (auth()->check()) {
+        if (Auth::check()) {
             return redirect()->route('dashboard');
         }
 
-        return Inertia::render('LoginForm');
+        $users = [];
+
+        // Nur in lokaler Umgebung Benutzer laden
+        if (app()->environment('local')) {
+            $users = User::all()->map(fn (User $user) => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ]);
+        }
+
+        return Inertia::render('LoginForm', [
+            'devUsers' => $users,
+        ]);
     }
 
     public function dashboard()

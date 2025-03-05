@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AdviceController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\DevLoginController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\UserController;
@@ -43,6 +45,10 @@ Route::middleware('auth')->group(function () {
 
     Route::post('advices/{advice}/unassign', [AdviceController::class, 'unassign'])->name('advices.unassign');
     Route::post('advices/{advice}/transfer', [AdviceController::class, 'transfer'])->name('advices.transfer');
+
+    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
+        ->name('logout');
+
 });
 
 Route::get('/change-password', [PageController::class, 'changePassword'])->name('password.reset');
@@ -54,3 +60,7 @@ Route::get('/reset-password', [PageController::class, 'resetPassword'])->name('r
 Route::get('newadvice', [PageController::class, 'newAdvice'])->name('newadvice');
 Route::get('impress', [PageController::class, 'impress'])->name('impress');
 Route::get('datapolicy', [PageController::class, 'datapolicy'])->name('datapolicy');
+
+if (app()->environment('local')) {
+    Route::get('/dev-login/{user}', [DevLoginController::class, 'login'])->name('dev.login');
+}

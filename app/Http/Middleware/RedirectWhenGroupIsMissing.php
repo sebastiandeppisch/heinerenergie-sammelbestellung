@@ -26,6 +26,7 @@ class RedirectWhenGroupIsMissing
                 'login',
                 'reset-password',
                 'actAsSystemAdmin',
+                'dev.login',
             ];
 
             if ($groups->count() === 1) {
