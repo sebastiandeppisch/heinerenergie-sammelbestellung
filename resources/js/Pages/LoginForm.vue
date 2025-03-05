@@ -15,6 +15,17 @@ import { router } from '@inertiajs/vue3'
 import { Link } from "@inertiajs/vue3";
 import SingleCard from "../layouts/SingleCard.vue";
 import MainPublic from "../layouts/MainPublic.vue";
+import { defineOptions } from "vue";
+
+interface User{
+  id: number
+  name: string
+  email: string
+}
+
+const props = defineProps<{
+  devUsers?: User[]
+}>();
 
 const formData = reactive({
   email:"",
@@ -94,6 +105,17 @@ defineOptions({
       </template>
     </dx-form>
   </form>
+  
+  <div v-if="props.devUsers && props.devUsers.length > 0" class="dev-login-section">
+    <h3 class="text-lg font-medium text-gray-600 mb-4">Direkter Login</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div v-for="user in props.devUsers" :key="user.id" class="dev-user-item">
+        <Link :href="`/dev-login/${user.id}`" class="dev-user-link" :title="user.email">
+          {{ user.name }}
+        </Link>
+      </div>
+    </div>
+  </div>
 </SingleCard>
 </template>
 
@@ -115,5 +137,15 @@ defineOptions({
     margin: 10px 0;
     color: rgba($base-text-color, alpha($base-text-color) * 0.7);
   }
+}
+
+.dev-login-section {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.dev-user-link {
+  @apply block p-3 text-sm rounded border border-gray-300 transition-colors hover:bg-gray-100 truncate w-full text-center;
 }
 </style>
