@@ -4,7 +4,7 @@ import { Link } from '@inertiajs/vue3'
 <template>
   <div class="content-block">
     <footer class="footer">
-      <a href="https://github.com/sebastiandeppisch/heinerenergie-sammelbestellung" ><img src="img/github.svg" alt="Github" style="height:1em;"></a>
+      <a href="https://github.com/sebastiandeppisch/heinerenergie-sammelbestellung" ><img src="/img/github.svg" alt="Github" style="height:1em;"></a>
       &nbsp;&nbsp;
       <Link href="/impress">Impressum</Link>
        &nbsp;&nbsp;
