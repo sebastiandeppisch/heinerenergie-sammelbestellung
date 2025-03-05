@@ -46,6 +46,16 @@ class AdviceStatusPolicy
     {
         $group = $status->ownerGroup;
 
-        return $this->groupContext->hasAccessToGroup($user, $group);
+        if ($this->groupContext->hasAccessToGroup($user, $group)) {
+            return true;
+        }
+
+        foreach ($group->parentGroups as $parentGroup) {
+            if ($this->groupContext->hasAccessToGroup($user, $parentGroup)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

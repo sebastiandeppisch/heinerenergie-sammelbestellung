@@ -8,7 +8,6 @@ use App\Events\Advice\InitiativeTransferEvent;
 use App\Http\Requests\StoreAdviceRequest;
 use App\Http\Requests\TransferAdviceRequest;
 use App\Http\Requests\UpdateAdviceRequest;
-use App\Http\Resources\DataProtectedAdvice;
 use App\Mail\SendOrderLink;
 use App\Models\Advice;
 use App\Models\Group;
@@ -23,13 +22,6 @@ class AdviceController extends Controller
     public function __construct()
     {
         $this->authorizeResource(Advice::class);
-    }
-
-    public function index()
-    {
-        $isAdmin = Auth::user()->isActingAsAdmin();
-
-        return Advice::all()->filter(fn (Advice $advice) => Auth::user()->can('viewDataProtected', $advice))->values()->map(fn ($advice) => new DataProtectedAdvice($advice));
     }
 
     public function store(StoreAdviceRequest $request)

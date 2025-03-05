@@ -61,9 +61,21 @@ class PageController extends Controller
         return Inertia::render('Settings');
     }
 
-    public function advices()
+    public function advices(SessionService $sessionService)
     {
-        return Inertia::render('AdvicesTable');
+        $onlyOneGroup = $sessionService->getCurrentGroup() !== null && ! $sessionService->actsAsSystemAdmin() && ! $sessionService->actsAsGroupAdmin();
+
+        $advices = Advice::all()->filter(fn (Advice $advice) => Auth::user()->can('viewDataProtected', $advice))->values()->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice))->toArray();
+
+        $groups = Group::all()
+        // ->filter(fn (Group $group) => Auth::user()->can('view', $group))
+            ->map(fn (Group $group) => GroupData::fromModel($group))->values()->toArray();
+
+        return Inertia::render('AdvicesTable', [
+            'onlyOneGroup' => $onlyOneGroup,
+            'advices' => $advices,
+            'groups' => $groups,
+        ]);
     }
 
     public function showAdvice(Advice $advice)

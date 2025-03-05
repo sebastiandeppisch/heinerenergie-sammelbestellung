@@ -39,7 +39,14 @@ class AdvicePolicy
 
     public function viewDataProtected(User $user, Advice $advice)
     {
-        return $this->view($user, $advice) || $advice->advisor_id === null;
+
+        if ($this->groupContext->hasAccessToGroup($user, $advice->group)) {
+            if ($advice->advisor_id === null) {
+                return true;
+            }
+        }
+
+        return $this->view($user, $advice);
     }
 
     public function create(User $user)

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import LaravelDataSource from "../LaravelDataSource"
 import { AdaptTableHeight } from "../helpers";
-import { ref, onMounted, reactive } from "vue";
+import { ref, onMounted, reactive, computed } from "vue";
 import DxPopup from 'devextreme-vue/popup';
 import AdviceStatus from "../views/AdviceStatus.vue";
 import PhysicalValue from "../views/PhysicalValue.vue";
@@ -37,7 +37,6 @@ import Store from "devextreme/data/abstract_store";
 import ArrayStore from "devextreme/data/array_store";
 const emit = defineEmits(["selectAdviceId"])
 
-const advices = new LaravelDataSource("api/advices");
 const advisors = new LaravelDataSource("api/users");
 const adviceStatus = new LaravelLookupSource('api/advicestatus');
 const adviceTypes = new LaravelLookupSource('api/advicetypes');
@@ -46,6 +45,30 @@ const outer = ref(null);
 
 const tableHeight = new AdaptTableHeight(outer);
 const reactiveHeight = tableHeight.getReactive();
+
+const props = defineProps<{
+  onlyOneGroup: boolean;
+  advices: App.Models.Advice[];
+  groups: App.Data.GroupData[];
+}>();
+console.log(props.advices);
+
+const advices = computed(() => {
+  return new ArrayStore({
+    data: props.advices,
+    key: 'id',
+  });
+});
+
+const groups = computed(() => {
+  return new ArrayStore({
+    data: props.groups,
+    key: 'id',
+  });
+});
+
+
+
 
 const newadvice = reactive({
   firstName: '',
@@ -239,6 +262,13 @@ const adviceStatusResult = new ArrayDataSource([
             text="Öffnen"
             @click="openAdvice"
             :visible="isOpenVisible"
+          />
+        </DxColumn>
+        <DxColumn v-if="!onlyOneGroup" data-field="group_id" caption="Gruppe" :allow-editing="false">
+          <DxLookup
+            :data-source="groups"
+            display-expr="name"
+            value-expr="id"
           />
         </DxColumn>
         <DxColumn
