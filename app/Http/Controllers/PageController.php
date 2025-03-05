@@ -6,7 +6,6 @@ use App\Data\AdviceEventData;
 use App\Data\DataProtectedAdviceData;
 use App\Data\GroupData;
 use App\Data\GroupMapData;
-use App\Http\Resources\DataProtectedAdvice;
 use App\Models\Advice;
 use App\Models\Group;
 use App\Models\Setting;
@@ -122,7 +121,7 @@ class PageController extends Controller
 
     public function advicesMap()
     {
-        $advices = Advice::all()->filter(fn (Advice $advice) => Auth::user()->can('viewDataProtected', $advice))->values()->map(fn ($advice) => (new DataProtectedAdvice($advice))->resolve());
+        $advices = Advice::all()->filter(fn (Advice $advice) => Auth::user()->can('viewDataProtected', $advice))->values()->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice));
 
         $groups = Group::where('accepts_transfers', true)->get()->map(fn (Group $group) => GroupMapData::fromModel($group))->filter(fn (GroupMapData $group) => $group->polygon !== null)->values();
 
