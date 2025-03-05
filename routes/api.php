@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdviceController;
+use App\Http\Controllers\AdviceStatusController;
 use App\Http\Controllers\AdviceTypeController;
 use App\Http\Controllers\Api\GroupUserController;
 use App\Http\Controllers\GeoSearchController;
@@ -46,6 +47,8 @@ Route::middleware('auth')->group(function () {
     Route::get('map/search', GeoSearchController::class);
 
     Route::apiResource('groups.advicestatus', GroupAdviceStatusController::class);
+
+    Route::apiResource('advicestatus', AdviceStatusController::class)->only(['index', 'show']);
 });
 
 Route::get('html/impress', [SettingController::class, 'impress']);

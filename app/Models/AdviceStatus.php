@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AdviceStatus extends Model
 {
     use HasFactory;
+    use SoftDeletes;
 
     protected $table = 'advice_status';
 
@@ -46,12 +48,12 @@ class AdviceStatus extends Model
     {
         // Check if there is an explicit pivot entry for this group
         $pivot = $this->usingGroups()->where('groups.id', $group->id)->first()?->pivot;
-        
+
         if ($pivot !== null) {
             // If an explicit entry exists, use its visibility value
             return $pivot->visible_in_group;
         }
-        
+
         // No entry found, visible by default
         return true;
     }

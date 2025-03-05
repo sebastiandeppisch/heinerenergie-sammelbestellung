@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::table('advice_status', function (Blueprint $table) {
             $table->foreignId('group_id')->constrained('groups');
+            $table->softDeletes();
         });
 
         Schema::create('advice_status_group', function (Blueprint $table) {
@@ -31,5 +32,8 @@ return new class extends Migration
         });
 
         Schema::dropIfExists('advice_status_group');
+        Schema::table('advice_status', function (Blueprint $table) {
+            $table->dropSoftDeletes();
+        });
     }
 };

@@ -41,4 +41,11 @@ class AdviceStatusPolicy
 
         return false;
     }
+
+    public function view(User $user, AdviceStatus $status)
+    {
+        $group = $status->ownerGroup;
+
+        return $this->groupContext->hasAccessToGroup($user, $group);
+    }
 }
