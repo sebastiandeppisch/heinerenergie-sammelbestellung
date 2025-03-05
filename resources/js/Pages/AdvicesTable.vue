@@ -27,7 +27,6 @@ import LaravelLookupSource from "../LaravelLookupSource";
 import DxButton from "devextreme-vue/button";
 import axios from "axios";
 import CustomStore from "devextreme/data/custom_store";
-import { LoadOptions } from 'devextreme/data/load_options';
 import { DxSwitch } from "devextreme-vue";
 import { DxForm, DxItem as DxFormItem, DxSimpleItem, DxGroupItem as DxFormGroupItem, DxButtonItem} from 'devextreme-vue/form';
 import notify from "devextreme/ui/notify";
@@ -80,8 +79,6 @@ function radioBoxLayout({ name }: { name: 'Home'|'Virtual'|'DirectOrder' }) {
 };
 
 const r = reactive({
-  popupVisible: false,
-  selectedBulkOrder: null,
   advisorNames: new Map<number, string>(),
   autoExpand: false,
   newAdvicePopupVisible: false,
@@ -92,10 +89,6 @@ advisors.load().then(() => {
     r.advisorNames.set(a.id, a.name);
   });
 });
-
-function openStatus(){
-  r.popupVisible = true;
-}
 
 function openAdvice(e: { row: any }){
   router.get('/advices/' + e.row.data.id);
@@ -212,10 +205,6 @@ const adviceStatusResult = new ArrayDataSource([
         <DxToolbar>
           <DxItem
             location="before"
-            template="test"
-          />
-          <DxItem
-            location="before"
             name="groupPanel"
           />
           <DxItem
@@ -227,14 +216,6 @@ const adviceStatusResult = new ArrayDataSource([
             template="newadvice"
           />
         </DxToolbar>
-        <template #test>
-          <DxButton
-            icon="fields"
-            text="Status editieren"
-            @click="openStatus"
-            v-if="isAdmin"
-          />        
-        </template>
         <template #newadvice>
           <DxButton
             icon="add"
@@ -341,16 +322,6 @@ const adviceStatusResult = new ArrayDataSource([
           <div v-else>??</div>
         </template>
       </DxDataGrid>
-      <DxPopup
-        v-model:visible="r.popupVisible"
-        title="Beratungsstatus"
-        hide-on-outside-click="true"
-        :show-close-button="true"
-        width="600px"
-        height="auto"
-      >
-        <AdviceStatus />
-      </DxPopup>  
 
       <DxPopup
         v-model:visible="r.newAdvicePopupVisible"
