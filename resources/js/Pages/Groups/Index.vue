@@ -1,6 +1,6 @@
 <template>
     <div class="py-12">
-      <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+      <div class="mx-auto sm:px-6 lg:px-8 space-y-6">
         <!-- Title section -->
         <div class="flex justify-between items-center">
           <h2 class="text-xl font-semibold text-gray-800">Initiativen-Struktur</h2>
@@ -18,7 +18,7 @@
         <!-- Content section -->
         <div class="flex gap-6">
           <!-- Tree view card -->
-          <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg shrink-0">
+          <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg shrink-0 w-180">
             <div class="p-6">
               <GroupTree
                 :groups="groups"
