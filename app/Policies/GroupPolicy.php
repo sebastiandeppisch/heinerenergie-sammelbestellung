@@ -66,20 +66,8 @@ class GroupPolicy
             return true;
         }
 
-        return $user->administeredGroups()
-            ->where(function ($query) use ($user) {
-                $query->whereIn('id', function ($subQuery) use ($user) {
-                    $subQuery->select('id')
-                        ->from('groups')
-                        ->whereExists(function ($exists) use ($user) {
-                            $exists->select('id')
-                                ->from('group_user')
-                                ->whereColumn('group_id', 'groups.id')
-                                ->where('user_id', $user->id)
-                                ->where('is_admin', true);
-                        });
-                });
-            })
+        return $user->groups()
+            ->wherePivot('is_admin', true)
             ->exists();
     }
 
