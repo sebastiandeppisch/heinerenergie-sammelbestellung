@@ -30,7 +30,7 @@
 		{
 			"label": "Export-IDE-Helper",
 			"type": "shell",
-			"command": "php artisan ide-helper:generate && php artisan ide-helper:models --nowrite",
+			"command": "php artisan ide-helper:generate && php artisan ide-helper:models --nowrite && php artisan typescript:transform",
 			"group": "build",
 			"presentation": {
 				"revealProblems": "onProblem",
