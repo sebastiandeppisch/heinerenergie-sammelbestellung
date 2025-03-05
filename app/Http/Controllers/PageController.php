@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Data\AdviceEventData;
+use App\Data\DataProtectedAdviceData;
 use App\Data\GroupData;
 use App\Data\GroupMapData;
 use App\Http\Resources\DataProtectedAdvice;
@@ -10,6 +11,7 @@ use App\Models\Advice;
 use App\Models\Group;
 use App\Models\Setting;
 use App\Models\User;
+use App\Services\SessionService;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -167,8 +169,12 @@ class PageController extends Controller
         ]);
     }
 
-    public function initiativeSelection(#[CurrentUser] User $user)
+    public function initiativeSelection(#[CurrentUser] User $user, SessionService $sessionService)
     {
+        if (! $sessionService->isGroupMissing()) {
+            return redirect()->route('dashboard');
+        }
+
         return Inertia::render('InitiativeSelection', [
             'initiatives' => $user->groups->map(fn ($group) => GroupData::fromModel($group)),
             'canActAsSystemAdmin' => $user->is_admin,
