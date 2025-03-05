@@ -85,7 +85,6 @@ watch(() => page.props.flashMessages, (newVal) => {
           <div>
             <DxButton
               class="user-button authorization"
-              :width="210"
               height="100%"
               styling-mode="text"
             >

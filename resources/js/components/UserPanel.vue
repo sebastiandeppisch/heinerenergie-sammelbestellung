@@ -128,7 +128,7 @@ const menuItems = computed<MenuItem[]>(() => {
         <div class="image-container">
           <i class="dx-icon-user"></i>
         </div>
-        <div class="user-name">{{email}}</div>
+        <div class="user-name">{{user.name}} ({{email}})</div>
       </div>
       <DxContextMenu
         v-if="menuMode === 'context'"
