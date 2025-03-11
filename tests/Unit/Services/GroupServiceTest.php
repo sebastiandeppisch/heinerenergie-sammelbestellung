@@ -79,13 +79,13 @@ test('find nearest main group', function () {
     ]);
 
     // Check if a nearby coordinate finds the nearest group
-    $nearbyCoordinate = new Coordinate(lat: 48.5, long: 8.5);  // Near the first group
+    $nearbyCoordinate = new Coordinate(lat: 8.5, long: 48.5);  // Near the first group
     $foundNearGroup = $this->groupService->findNearestMainGroup($nearbyCoordinate);
     expect($foundNearGroup)->not->toBeNull();
     expect($foundNearGroup->name)->toBe('Nearby Group');
 
     // Check if a distant coordinate finds the other group
-    $distantCoordinate = new Coordinate(lat: 60.5, long: 20.5);  // Near the second group
+    $distantCoordinate = new Coordinate(lat: 20.5, long: 60.5);  // Near the second group
     $foundDistantGroup = $this->groupService->findNearestMainGroup($distantCoordinate);
     expect($foundDistantGroup)->not->toBeNull();
     expect($foundDistantGroup->name)->toBe('Distant Group');
