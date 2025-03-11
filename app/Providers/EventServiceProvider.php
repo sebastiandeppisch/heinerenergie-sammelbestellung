@@ -8,10 +8,10 @@ use App\Events\AdviceSaved;
 use App\Events\AdviceSaving;
 use App\Events\AdviceUpdated;
 use App\Events\OrderCreated;
-use App\Listeners\AfterAdviceIsCreated;
 use App\Listeners\CalculateCoordinates;
 use App\Listeners\EmptyCoordinates;
 use App\Listeners\HandleAdviceEvents;
+use App\Listeners\InitiateAdviceAssignment;
 use App\Listeners\SaveAdviceEvents;
 use App\Listeners\SendOrderCreatedNotification;
 use Illuminate\Auth\Events\Registered;
@@ -37,7 +37,7 @@ class EventServiceProvider extends ServiceProvider
         ],
         AdviceCreated::class => [
             CalculateCoordinates::class,
-            AfterAdviceIsCreated::class,
+            //    InitiateAdviceAssignment::class, //TODO: this should be handled by an CreateAdviceAction
         ],
         AdviceUpdated::class => [
             EmptyCoordinates::class,

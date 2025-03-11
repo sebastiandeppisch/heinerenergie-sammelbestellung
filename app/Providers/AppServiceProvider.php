@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Actions\FetchCoordinateByAddress;
+use App\Actions\FetchCoordinateByFreeText;
 use App\ValueObjects\Address;
 use App\ValueObjects\Coordinate;
 use Illuminate\Database\Eloquent\Model;
@@ -41,6 +42,15 @@ class AppServiceProvider extends ServiceProvider
                 );
 
                 return fn (Address $address) => $coordinatesOfDarmstadtCenter;
+            });
+
+            $this->app->bind(FetchCoordinateByFreeText::class, function () {
+                $coordinatesOfDarmstadtCenter = new Coordinate(
+                    lat: 49.8728475,
+                    long: 8.6510204
+                );
+
+                return fn (string $text) => $coordinatesOfDarmstadtCenter;
             });
         } else {
             $this->app->bind(Nominatim::class, function () {

@@ -52,6 +52,47 @@ class Polygon implements Castable, JsonSerializable
             ];
         }, [0, 0]))->map(fn ($item) => $item / count($this->coordinates))->toArray();
 
-        return new Coordinate($center[0], $center[1]);
+        return new Coordinate(
+            lat: $center[0],
+            long: $center[1],
+        );
+    }
+
+    /**
+     * Check if a coordinate point is inside this polygon
+     */
+    public function containsPoint(Coordinate $point): bool
+    {
+        // Implementation of point-in-polygon algorithm using Ray Casting
+        $vertices = $this->coordinates;
+        $vertexCount = count($vertices);
+
+        if ($vertexCount < 3) {
+            return false; // Not a valid polygon
+        }
+
+        // Ray casting algorithm
+        $inside = false;
+        $x = $point->long;
+        $y = $point->lat;
+
+        // For each edge of the polygon
+        for ($i = 0, $j = $vertexCount - 1; $i < $vertexCount; $j = $i++) {
+            $xi = $vertices[$i][0];
+            $yi = $vertices[$i][1];
+            $xj = $vertices[$j][0];
+            $yj = $vertices[$j][1];
+
+            // Check if the ray intersects with the edge
+            $intersect = (($yi > $y) != ($yj > $y)) &&
+                ($x < ($xj - $xi) * ($y - $yi) / ($yj - $yi) + $xi);
+
+            // Flip the inside flag if an intersection is found
+            if ($intersect) {
+                $inside = ! $inside;
+            }
+        }
+
+        return $inside;
     }
 }
