@@ -50,6 +50,10 @@ class AdviceStatusPolicy
             return true;
         }
 
+        if ($group->parentGroups === null) {
+            return false;
+        }
+
         foreach ($group->parentGroups as $parentGroup) {
             if ($this->groupContext->hasAccessToGroup($user, $parentGroup)) {
                 return true;
