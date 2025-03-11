@@ -39,7 +39,9 @@ class PageController extends Controller
 
     public function dashboard()
     {
-        return Inertia::render('Dashboard');
+        return Inertia::render('Dashboard', [
+            'advisorInfo' => Setting::get('advisorInfo'),
+        ]);
     }
 
     public function profile()

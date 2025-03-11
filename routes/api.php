@@ -42,17 +42,12 @@ Route::middleware('auth')->group(function () {
     Route::post('advices/{advice}/assign', [AdviceController::class, 'assign']);
     Route::get('advices/{advice}/advisors', [AdviceController::class, 'sortedAdvisors']);
 
-    Route::get('html/advisorInfo', [SettingController::class, 'advisorInfo']);
-
     Route::get('map/search', GeoSearchController::class);
 
     Route::apiResource('groups.advicestatus', GroupAdviceStatusController::class);
 
     Route::apiResource('advicestatus', AdviceStatusController::class)->only(['index', 'show']);
 });
-
-Route::get('html/impress', [SettingController::class, 'impress']);
-Route::get('html/datapolicy', [SettingController::class, 'datapolicy']);
 
 Route::resource('advicetypes', AdviceTypeController::class)->only(['index', 'show']);
 

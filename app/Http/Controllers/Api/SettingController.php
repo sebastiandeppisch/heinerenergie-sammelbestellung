@@ -41,20 +41,6 @@ class SettingController extends Controller
         $setting->save();
     }
 
-    public function impress()
-    {
-        return [
-            'html' => Setting::get('impress'),
-        ];
-    }
-
-    public function datapolicy()
-    {
-        return [
-            'html' => Setting::get('datapolicy'),
-        ];
-    }
-
     public function orderFormText(RequireOrderPasswordRequest $request)
     {
         return [
