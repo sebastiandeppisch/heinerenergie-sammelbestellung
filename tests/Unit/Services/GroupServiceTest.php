@@ -6,6 +6,7 @@ use App\Models\Advice;
 use App\Models\Group;
 use App\Services\GroupService;
 use App\ValueObjects\Coordinate;
+use App\ValueObjects\Meter;
 use App\ValueObjects\Polygon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -172,9 +173,11 @@ test('calculate distance between groups', function () {
     $distance = $this->groupService->getDistanceBetweenGroups($group1, $group2);
     expect($distance)->not->toBeNull();
 
-    // The actual distance depends on the implementation of the distanceTo method
-    // Here we only check if a value is returned
-    expect($distance)->toBeFloat();
+    // Check that a Meter object is returned
+    expect($distance)->toBeInstanceOf(Meter::class);
+
+    // Check that the value is in the expected range
+    expect($distance->getValue())->toBeGreaterThan(1000000); // Should be more than 1000km
 
     // Group without polygon should return null
     $groupWithoutArea = Group::factory()->create();

@@ -25,14 +25,14 @@ class Coordinate implements Castable
         return CoordinateCast::class;
     }
 
-    public function distanceTo(self $coordinate): float
+    public function distanceTo(self $coordinate): Meter
     {
-        return $this->haversineGreatCircleDistance(
+        return Meter::fromValue($this->haversineGreatCircleDistance(
             $this->lat,
             $this->long,
             $coordinate->lat,
             $coordinate->long
-        );
+        ));
     }
 
     private function haversineGreatCircleDistance(

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Advice;
 use App\Models\Group;
 use App\ValueObjects\Coordinate;
+use App\ValueObjects\Meter;
 use Illuminate\Database\Eloquent\Collection;
 
 class GroupService
@@ -40,7 +41,7 @@ class GroupService
                 return PHP_FLOAT_MAX;
             }
 
-            return $coordinate->distanceTo($groupCenter);
+            return $coordinate->distanceTo($groupCenter)->getValue();
         });
 
         return $sortedgroups->first();
@@ -86,7 +87,7 @@ class GroupService
     /**
      * Calculate the distance between two groups (based on polygon centers)
      */
-    public function getDistanceBetweenGroups(Group $group1, Group $group2): ?float
+    public function getDistanceBetweenGroups(Group $group1, Group $group2): ?Meter
     {
         $center1 = $group1->consulting_area?->getCenter();
         $center2 = $group2->consulting_area?->getCenter();
