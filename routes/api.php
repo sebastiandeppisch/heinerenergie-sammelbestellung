@@ -1,15 +1,15 @@
 <?php
 
-use App\Http\Controllers\AdviceController;
-use App\Http\Controllers\AdviceTypeController;
+use App\Http\Controllers\Api\AdviceController;
 use App\Http\Controllers\Api\AdviceStatusController;
+use App\Http\Controllers\Api\AdviceTypeController;
+use App\Http\Controllers\Api\GeoSearchController;
+use App\Http\Controllers\Api\GroupAdviceStatusController;
 use App\Http\Controllers\Api\GroupUserController;
+use App\Http\Controllers\Api\SettingController;
+use App\Http\Controllers\Api\StoreAdviceController;
+use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\GeoSearchController;
-use App\Http\Controllers\GroupAdviceStatusController;
-use App\Http\Controllers\SettingController;
-use App\Http\Controllers\StoreAdviceController;
-use App\Http\Controllers\UploadController;
 use Illuminate\Support\Facades\Route;
 
 /*

@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
 use App\Events\Advice\AdviceSharedAdvisorAdded;
 use App\Events\Advice\AdviceSharedAdvisorRemoved;
 use App\Events\Advice\InitiativeTransferEvent;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAdviceRequest;
 use App\Http\Requests\TransferAdviceRequest;
 use App\Http\Requests\UpdateAdviceRequest;

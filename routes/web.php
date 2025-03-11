@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\AdviceController;
+use App\Http\Controllers\Api\AdviceController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\DevLoginController;
 use App\Http\Controllers\GroupController;
