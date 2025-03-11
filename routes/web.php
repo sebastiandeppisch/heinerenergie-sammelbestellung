@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Api\AdviceController;
+use App\Http\Controllers\AdviceController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\DevLoginController;
 use App\Http\Controllers\GroupController;
@@ -25,8 +25,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [PageController::class, 'profile'])->name('profile');
     Route::get('/users', [PageController::class, 'users'])->name('users');
     Route::get('/settings', [PageController::class, 'settings'])->name('settings');
-    Route::get('/advices', [PageController::class, 'advices'])->name('advices');
-    Route::get('/advices/{advice}', [PageController::class, 'showAdvice'])->name('advices.show');
+    Route::get('/advices', [AdviceController::class, 'index'])->name('advices');
+    Route::get('/advices/{advice}', [AdviceController::class, 'show'])->name('advices.show');
     Route::get('/advicesmap', [PageController::class, 'advicesMap'])->name('advices.map');
     Route::get('/backend', function () {
         return redirect()->route('dashboard');

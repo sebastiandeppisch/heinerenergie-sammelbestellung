@@ -4,16 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Events\Advice\AdviceSharedAdvisorAdded;
 use App\Events\Advice\AdviceSharedAdvisorRemoved;
-use App\Events\Advice\InitiativeTransferEvent;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAdviceRequest;
-use App\Http\Requests\TransferAdviceRequest;
 use App\Http\Requests\UpdateAdviceRequest;
 use App\Mail\SendOrderLink;
 use App\Models\Advice;
-use App\Models\Group;
 use App\Models\User;
-use App\Notifications\AdviceTransferred;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -116,16 +112,6 @@ class AdviceController extends Controller
         return $advice;
     }
 
-    public function unassign(Advice $advice)
-    {
-        $this->authorize('update', $advice);
-
-        $advice->advisor_id = null;
-        $advice->save();
-
-        return redirect()->route('advices.show', $advice);
-    }
-
     public function sortedAdvisors(Advice $advice)
     {
         return User::all()->map(function (User $user) use ($advice) {
@@ -184,33 +170,5 @@ class AdviceController extends Controller
         }
 
         return round($number, $sigdigs) * $multiplier;
-    }
-
-    public function transfer(Advice $advice, TransferAdviceRequest $request)
-    {
-        $this->authorize('update', $advice);
-
-        $targetGroup = Group::findOrFail($request->group_id);
-
-        if (! $targetGroup->accepts_transfers) {
-            abort(403, 'Diese Initiative akzeptiert keine Beratungsübertragungen');
-        }
-
-        $oldGroup = $advice->group;
-        $advice->group()->associate($targetGroup);
-        $advice->save();
-
-        event(new InitiativeTransferEvent(
-            $advice,
-            Auth::user(),
-            $oldGroup,
-            $targetGroup,
-            $request->reason
-        ));
-
-        $advice->notify(new AdviceTransferred($advice, $oldGroup, $targetGroup, $request->reason));
-
-        return redirect()->route('advices.show', $advice)
-            ->with('success', 'Beratung wurde erfolgreich übertragen. Eine Benachrichtigung wurde versendet.');
     }
 }
