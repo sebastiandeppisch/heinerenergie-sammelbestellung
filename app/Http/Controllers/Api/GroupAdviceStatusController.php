@@ -50,8 +50,10 @@ class GroupAdviceStatusController extends Controller
         // Only allow deleting group-specific statuses
         if ($group->is($advicestatus->ownerGroup)) {
             $advicestatus->delete();
+
+            return response()->noContent();
         }
 
-        return response()->noContent();
+        return response()->json(['message' => 'Cannot delete status from other groups'], 403);
     }
 }
