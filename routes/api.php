@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\AdviceController;
-use App\Http\Controllers\AdviceStatusController;
 use App\Http\Controllers\AdviceTypeController;
+use App\Http\Controllers\Api\AdviceStatusController;
 use App\Http\Controllers\Api\GroupUserController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\GeoSearchController;

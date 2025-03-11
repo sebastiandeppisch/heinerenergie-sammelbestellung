@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
 use App\Data\AdviceStatusNamesData;
+use App\Http\Controllers\Controller;
 use App\Models\AdviceStatus;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 
 class AdviceStatusController extends Controller
 {
