@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Group;
+use App\Models\User;
 use App\Services\SessionService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
@@ -12,6 +14,11 @@ class UserController extends Controller
     public function __construct(
         private readonly SessionService $sessionService
     ) {}
+
+    public function user(): User
+    {
+        return Auth::user();
+    }
 
     public function actAsGroup(Request $request, Group $group)
     {
