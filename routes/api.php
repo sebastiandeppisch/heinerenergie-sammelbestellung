@@ -4,12 +4,12 @@ use App\Http\Controllers\AdviceController;
 use App\Http\Controllers\AdviceStatusController;
 use App\Http\Controllers\AdviceTypeController;
 use App\Http\Controllers\Api\GroupUserController;
+use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\GeoSearchController;
 use App\Http\Controllers\GroupAdviceStatusController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StoreAdviceController;
 use App\Http\Controllers\UploadController;
-use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
