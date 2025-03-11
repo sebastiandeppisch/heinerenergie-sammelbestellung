@@ -43,7 +43,9 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        return $this->dxFilter($request, User::query())->get();
+        $users = $this->dxFilter($request, User::query())->get();
+
+        return $users->filter(fn (User $user) => $this->user()->can('view', $user))->values();
     }
 
     /**
