@@ -27,7 +27,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/settings', [PageController::class, 'settings'])->name('settings');
     Route::get('/advices', [AdviceController::class, 'index'])->name('advices');
     Route::get('/advices/{advice}', [AdviceController::class, 'show'])->name('advices.show');
-    Route::get('/advicesmap', [PageController::class, 'advicesMap'])->name('advices.map');
+    Route::get('/advicesmap', [AdviceController::class, 'map'])->name('advices.map');
     Route::get('/backend', function () {
         return redirect()->route('dashboard');
     })->middleware('auth')->name('backend');

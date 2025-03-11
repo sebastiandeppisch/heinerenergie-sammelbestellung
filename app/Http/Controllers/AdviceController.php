@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Data\AdviceEventData;
 use App\Data\DataProtectedAdviceData;
 use App\Data\GroupData;
+use App\Data\GroupMapData;
 use App\Events\Advice\InitiativeTransferEvent;
 use App\Http\Requests\TransferAdviceRequest;
 use App\Models\Advice;
 use App\Models\Group;
+use App\Models\User;
 use App\Notifications\AdviceTransferred;
 use App\Services\SessionService;
 use Illuminate\Support\Facades\Auth;
@@ -109,5 +111,18 @@ class AdviceController extends Controller
         $advice->save();
 
         return redirect()->route('advices.show', $advice);
+    }
+
+    public function map()
+    {
+        $advices = Advice::all()->filter(fn (Advice $advice) => Auth::user()->can('viewDataProtected', $advice))->values()->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice));
+
+        $groups = Group::where('accepts_transfers', true)->get()->map(fn (Group $group) => GroupMapData::fromModel($group))->filter(fn (GroupMapData $group) => $group->polygon !== null)->values();
+
+        return Inertia::render('AdvicesMap', [
+            'advices' => $advices,
+            'advisors' => User::all(),
+            'groups' => $groups,
+        ]);
     }
 }

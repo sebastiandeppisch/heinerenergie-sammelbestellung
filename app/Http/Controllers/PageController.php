@@ -2,11 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Data\DataProtectedAdviceData;
 use App\Data\GroupData;
-use App\Data\GroupMapData;
-use App\Models\Advice;
-use App\Models\Group;
 use App\Models\Setting;
 use App\Models\User;
 use App\Services\SessionService;
@@ -59,19 +55,6 @@ class PageController extends Controller
     public function settings()
     {
         return Inertia::render('Settings');
-    }
-
-    public function advicesMap()
-    {
-        $advices = Advice::all()->filter(fn (Advice $advice) => Auth::user()->can('viewDataProtected', $advice))->values()->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice));
-
-        $groups = Group::where('accepts_transfers', true)->get()->map(fn (Group $group) => GroupMapData::fromModel($group))->filter(fn (GroupMapData $group) => $group->polygon !== null)->values();
-
-        return Inertia::render('AdvicesMap', [
-            'advices' => $advices,
-            'advisors' => User::all(),
-            'groups' => $groups,
-        ]);
     }
 
     public function resetPassword()
