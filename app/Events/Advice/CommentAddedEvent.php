@@ -20,6 +20,6 @@ class CommentAddedEvent extends AdviceEvent
 
     public function getDescription(): string
     {
-        return "{$this->user->name} hat einen Kommentar hinzugefügt: {$this->comment}";
+        return $this->comment;
     }
 }

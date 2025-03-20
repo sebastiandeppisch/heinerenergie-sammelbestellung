@@ -59,7 +59,7 @@ const advisor = user.value;
       <div class="content-sidebar">
         <div class="content-card">
           <h3 class="card-title">Verlauf</h3>
-          <AdviceTimeline :events="events" />
+          <AdviceTimeline :events="events" :advice-id="advice.id" />
         </div>
         
         <div class="content-card">

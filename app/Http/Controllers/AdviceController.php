@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\Advice\AdviceSharedAdvisorAdded;
 use App\Events\Advice\AdviceSharedAdvisorRemoved;
+use App\Events\Advice\CommentAddedEvent;
 use App\Events\Advice\InitiativeTransferEvent;
 use App\Http\Requests\StoreAdviceRequest;
 use App\Http\Requests\TransferAdviceRequest;
@@ -16,7 +17,7 @@ use App\Notifications\AdviceTransferred;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
-
+use App\Http\Requests\StoreAdviceCommentRequest;
 class AdviceController extends Controller
 {
     public function __construct()
@@ -211,5 +212,16 @@ class AdviceController extends Controller
 
         return redirect()->route('advices.show', $advice)
             ->with('success', 'Beratung wurde erfolgreich übertragen. Eine Benachrichtigung wurde versendet.');
+    }
+
+    public function storeComment(Advice $advice, StoreAdviceCommentRequest $request)
+    {
+        event(new CommentAddedEvent(
+            comment: $request->comment,
+            author: Auth::user(),
+            advice: $advice
+        ));
+        
+        return redirect()->back();
     }
 }
