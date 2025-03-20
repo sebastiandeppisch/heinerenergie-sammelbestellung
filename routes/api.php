@@ -1,15 +1,15 @@
 <?php
 
-use App\Http\Controllers\AdviceController;
-use App\Http\Controllers\AdviceStatusController;
-use App\Http\Controllers\AdviceTypeController;
+use App\Http\Controllers\Api\AdviceController;
+use App\Http\Controllers\Api\AdviceStatusController;
+use App\Http\Controllers\Api\AdviceTypeController;
+use App\Http\Controllers\Api\GeoSearchController;
+use App\Http\Controllers\Api\GroupAdviceStatusController;
 use App\Http\Controllers\Api\GroupUserController;
-use App\Http\Controllers\GeoSearchController;
-use App\Http\Controllers\GroupAdviceStatusController;
-use App\Http\Controllers\SettingController;
-use App\Http\Controllers\StoreAdviceController;
-use App\Http\Controllers\UploadController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\Api\SettingController;
+use App\Http\Controllers\Api\StoreAdviceController;
+use App\Http\Controllers\Api\UploadController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -42,17 +42,12 @@ Route::middleware('auth')->group(function () {
     Route::post('advices/{advice}/assign', [AdviceController::class, 'assign']);
     Route::get('advices/{advice}/advisors', [AdviceController::class, 'sortedAdvisors']);
 
-    Route::get('html/advisorInfo', [SettingController::class, 'advisorInfo']);
-
     Route::get('map/search', GeoSearchController::class);
 
     Route::apiResource('groups.advicestatus', GroupAdviceStatusController::class);
 
     Route::apiResource('advicestatus', AdviceStatusController::class)->only(['index', 'show']);
 });
-
-Route::get('html/impress', [SettingController::class, 'impress']);
-Route::get('html/datapolicy', [SettingController::class, 'datapolicy']);
 
 Route::resource('advicetypes', AdviceTypeController::class)->only(['index', 'show']);
 

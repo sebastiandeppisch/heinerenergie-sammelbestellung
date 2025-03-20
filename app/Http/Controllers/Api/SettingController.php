@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\RequireOrderPasswordRequest;
 use App\Http\Requests\UpdateSettingRequest;
 use App\Models\Setting;
@@ -38,20 +39,6 @@ class SettingController extends Controller
     {
         $setting->fill($request->all());
         $setting->save();
-    }
-
-    public function impress()
-    {
-        return [
-            'html' => Setting::get('impress'),
-        ];
-    }
-
-    public function datapolicy()
-    {
-        return [
-            'html' => Setting::get('datapolicy'),
-        ];
     }
 
     public function orderFormText(RequireOrderPasswordRequest $request)

@@ -9,6 +9,10 @@ defineOptions({
 
 </script>
 <template>
-  <div v-html="props.content">
+  <div class="mt-8">
+    <div class="dx-card content p-4">
+      <div v-html="props.content">
+      </div>
+    </div>
   </div>
 </template>

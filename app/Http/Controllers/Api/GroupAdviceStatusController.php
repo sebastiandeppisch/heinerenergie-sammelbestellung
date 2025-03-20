@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
 use App\Data\AdviceStatusData;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreGroupAdviceStatusRequest;
 use App\Http\Requests\UpdateGroupAdviceStatusRequest;
 use App\Models\AdviceStatus;
@@ -49,8 +50,10 @@ class GroupAdviceStatusController extends Controller
         // Only allow deleting group-specific statuses
         if ($group->is($advicestatus->ownerGroup)) {
             $advicestatus->delete();
+
+            return response()->noContent();
         }
 
-        return response()->noContent();
+        return response()->json(['message' => 'Cannot delete status from other groups'], 403);
     }
 }

@@ -21,8 +21,8 @@ createInertiaApp({
 	title: (title) => `${title} - ${appName}`,
 	resolve: name => {
 		const pages = import.meta.glob<DefineComponent>('./Pages/**/*.vue', { eager: true })
-    	const page = pages[`./Pages/${name}.vue`]
-		if(!page) {
+		const page = pages[`./Pages/${name}.vue`]
+		if (!page) {
 			throw new Error(`Page ${name} not found`)
 		}
 		page.default.layout = page.default.layout || SideNavOuterToolbar
@@ -33,8 +33,6 @@ createInertiaApp({
 		app.use(plugin)
 		app.use(ZiggyVue)
 		app.mount(el)
-		//TODO add Ziggy
-
 		app.component('font-awesome-icon', FontAwesomeIcon)
 	},
 })

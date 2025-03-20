@@ -7,6 +7,8 @@ use Illuminate\Contracts\Database\Eloquent\Castable;
 
 class Coordinate implements Castable
 {
+    public const EARTH_RADIUS = 6371000;
+
     public function __construct(
         public float $lat,
         public float $long
@@ -25,30 +27,36 @@ class Coordinate implements Castable
         return CoordinateCast::class;
     }
 
-    public function distanceTo(self $coordinate): float
+    public function distanceTo(self $other): Meter
     {
-        return $this->haversineGreatCircleDistance(
-            $this->lat,
-            $this->long,
-            $coordinate->lat,
-            $coordinate->long
+        return Meter::fromValue($this->haversineGreatCircleDistance(
+            $this,
+            $other
+        ));
+    }
+
+    private function toRad(): self
+    {
+        return new self(
+            deg2rad($this->lat),
+            deg2rad($this->long)
         );
     }
 
-    private function haversineGreatCircleDistance(
-        $latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371000): float
-    {
-        $latFrom = deg2rad($latitudeFrom);
-        $lonFrom = deg2rad($longitudeFrom);
-        $latTo = deg2rad($latitudeTo);
-        $lonTo = deg2rad($longitudeTo);
+    private static function haversineGreatCircleDistance(
+        self $from,
+        self $to
+    ): float {
 
-        $latDelta = $latTo - $latFrom;
-        $lonDelta = $lonTo - $lonFrom;
+        $from = $from->toRad();
+        $to = $to->toRad();
+
+        $latDelta = $to->lat - $from->lat;
+        $lonDelta = $to->long - $from->long;
 
         $angle = 2 * asin(sqrt(sin($latDelta / 2) ** 2 +
-          cos($latFrom) * cos($latTo) * sin($lonDelta / 2) ** 2));
+          cos($from->lat) * cos($to->lat) * sin($lonDelta / 2) ** 2));
 
-        return $angle * $earthRadius;
+        return $angle * self::EARTH_RADIUS;
     }
 }

@@ -5,185 +5,79 @@ namespace App\Http\Controllers;
 use App\Events\Advice\AdviceSharedAdvisorAdded;
 use App\Events\Advice\AdviceSharedAdvisorRemoved;
 use App\Events\Advice\CommentAddedEvent;
+use App\Data\AdviceEventData;
+use App\Data\DataProtectedAdviceData;
+use App\Data\GroupData;
+use App\Data\GroupMapData;
 use App\Events\Advice\InitiativeTransferEvent;
-use App\Http\Requests\StoreAdviceRequest;
 use App\Http\Requests\TransferAdviceRequest;
-use App\Http\Requests\UpdateAdviceRequest;
-use App\Mail\SendOrderLink;
 use App\Models\Advice;
 use App\Models\Group;
 use App\Models\User;
 use App\Notifications\AdviceTransferred;
-use Illuminate\Http\Request;
+use App\Services\SessionService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Requests\StoreAdviceCommentRequest;
+use Inertia\Inertia;
+
 class AdviceController extends Controller
 {
-    public function __construct()
+    public function index(SessionService $sessionService)
     {
-        $this->authorizeResource(Advice::class);
-    }
+        $onlyOneGroup = $sessionService->getCurrentGroup() !== null && ! $sessionService->actsAsSystemAdmin() && ! $sessionService->actsAsGroupAdmin();
 
-    public function store(StoreAdviceRequest $request)
-    {
-        $advice = new Advice;
-        $advice->fill($request->validated());
-        $advice->save();
+        $advices = Advice::all()->filter(fn (Advice $advice) => Auth::user()->can('viewDataProtected', $advice))->values()->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice))->toArray();
 
-        return $advice;
+        $groups = Group::all()
+        // ->filter(fn (Group $group) => Auth::user()->can('view', $group))
+            ->map(fn (Group $group) => GroupData::fromModel($group))->values()->toArray();
+
+        return Inertia::render('AdvicesTable', [
+            'onlyOneGroup' => $onlyOneGroup,
+            'advices' => $advices,
+            'groups' => $groups,
+        ]);
     }
 
     public function show(Advice $advice)
     {
-        return $advice;
-    }
-
-    public function update(UpdateAdviceRequest $request, Advice $advice)
-    {
-        $advice->fill($request->validated());
-        $advice->save();
-
-        return $advice;
-    }
-
-    public function destroy(Advice $advice)
-    {
-        $advice->delete();
-
-        return response()->noContent();
-    }
-
-    public function setAdvisors(Advice $advice, Request $request)
-    {
-        $this->auth($advice, 'addAdvisors');
-
-        // Get current advisors before sync
-        $currentAdvisors = $advice->shares()->pluck('advisor_id')->toArray();
-
-        // Sync new advisors
-        $advice->shares()->sync($request->advisors);
-
-        // Get new advisors after sync
-        $newAdvisors = $advice->shares()->pluck('advisor_id')->toArray();
-
-        // Find added advisors
-        $addedAdvisors = array_diff($newAdvisors, $currentAdvisors);
-        foreach ($addedAdvisors as $advisorId) {
-            $advisor = User::find($advisorId);
-            event(new AdviceSharedAdvisorAdded(
-                $advice,
-                Auth::user(),
-                $advisor
-            ));
+        if (! Auth::user()->can('view', $advice)) {
+            return redirect('/advices')->withErrors('Du hast keine Berechtigung, diese Beratung zu sehen');
         }
 
-        // Find removed advisors
-        $removedAdvisors = array_diff($currentAdvisors, $newAdvisors);
-        foreach ($removedAdvisors as $advisorId) {
-            $advisor = User::find($advisorId);
-            event(new AdviceSharedAdvisorRemoved(
-                $advice,
-                Auth::user(),
-                $advisor
-            ));
-        }
-    }
+        $events = $advice->events()
+            ->get()
+            ->map(fn ($event) => AdviceEventData::fromModel($event));
 
-    private function auth(Advice $advice, string $ability)
-    {
-        if (! Auth::user()->can($ability, $advice)) {
-            abort(403, 'Du hast keine Berechtigung, diese Beratung zu sehen');
-        }
-    }
+        $mails = $advice->sends()
+            ->get()
+            ->map(fn ($mail) => AdviceEventData::fromMail($mail));
 
-    public function sendOrderLink(Advice $advice)
-    {
-        Mail::to($advice->email)->send(new SendOrderLink($advice));
+        $timeline = $events->concat($mails)
+            ->sortBy(fn ($item) => $item->created_at)
+            ->values();
 
-        return response()->noContent(202);
-    }
+        $coordinateOfAdvice = $advice->coordinate;
 
-    public function assign(Advice $advice)
-    {
-        if ($advice->advisor_id === null) {
-            $advice->advisor_id = Auth::user()->id;
-            $advice->save();
-        } else {
-            abort(403, 'Diese Beratung wurde bereits einem Berater zugewiesen');
-        }
+        $transferableGroups = Group::where('accepts_transfers', true)->get()
+            ->sortBy(function (Group $group) use ($coordinateOfAdvice) {
+                $center = $group->consulting_area?->getCenter();
 
-        return $advice;
-    }
+                if ($center === null || $coordinateOfAdvice === null) {
+                    return INF;
+                }
 
-    public function unassign(Advice $advice)
-    {
-        $this->authorize('update', $advice);
+                return $coordinateOfAdvice->distanceTo($center);
+            })
+            ->map(fn (Group $group) => GroupData::fromModel($group))
+            ->values();
 
-        $advice->advisor_id = null;
-        $advice->save();
-
-        return redirect()->route('advices.show', $advice);
-    }
-
-    public function sortedAdvisors(Advice $advice)
-    {
-        return User::all()->map(function (User $user) use ($advice) {
-            $name = $user->name;
-            $distance = $advice->getDistanceToUser($user);
-            if ($distance !== null) {
-                $name = $name.' ('.$this->formatValue($distance, 'm').')';
-            }
-            if ($distance === null) {
-                // max float value
-                $distance = 1e6;
-            }
-
-            return [
-                'id' => $user->id,
-                'name' => $name,
-                'distance' => $distance,
-            ];
-        })->sortBy('distance')->values();
-    }
-
-    private function formatValue(float $n, string $unit, int $significant = 3): string
-    {
-
-        $ranges = [
-            ['divider' => 1e18, 'suffix' => 'P'],
-            ['divider' => 1e15, 'suffix' => 'E'],
-            ['divider' => 1e12, 'suffix' => 'T'],
-            ['divider' => 1e9, 'suffix' => 'G'],
-            ['divider' => 1e6, 'suffix' => 'M'],
-            ['divider' => 1e3, 'suffix' => 'k'],
-        ];
-        foreach ($ranges as $range) {
-            if ($n >= $range['divider']) {
-                $number = $n / $range['divider'];
-                $number = $this->roundSigDigs($number, $significant);
-
-                return ((string) $number).' '.$range['suffix'].$unit;
-            }
-        }
-        $number = $this->roundSigDigs($n, $significant);
-
-        return ((string) $number).' '.$unit;
-    }
-
-    private function roundSigDigs(float $number, int $sigdigs): float
-    {
-        $multiplier = 1;
-        while ($number < 0.1) {
-            $number *= 10;
-            $multiplier /= 10;
-        }
-        while ($number >= 1) {
-            $number /= 10;
-            $multiplier *= 10;
-        }
-
-        return round($number, $sigdigs) * $multiplier;
+        return Inertia::render('Advice', [
+            'advice' => $advice,
+            'events' => $timeline,
+            'transferableGroups' => $transferableGroups,
+        ]);
     }
 
     public function transfer(Advice $advice, TransferAdviceRequest $request)
@@ -223,5 +117,28 @@ class AdviceController extends Controller
         ));
         
         return redirect()->back();
+    }
+
+    public function unassign(Advice $advice)
+    {
+        $this->authorize('update', $advice);
+
+        $advice->advisor_id = null;
+        $advice->save();
+
+        return redirect()->route('advices.show', $advice);
+    }
+
+    public function map()
+    {
+        $advices = Advice::all()->filter(fn (Advice $advice) => Auth::user()->can('viewDataProtected', $advice))->values()->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice));
+
+        $groups = Group::where('accepts_transfers', true)->get()->map(fn (Group $group) => GroupMapData::fromModel($group))->filter(fn (GroupMapData $group) => $group->polygon !== null)->values();
+
+        return Inertia::render('AdvicesMap', [
+            'advices' => $advices,
+            'advisors' => User::all(),
+            'groups' => $groups,
+        ]);
     }
 }

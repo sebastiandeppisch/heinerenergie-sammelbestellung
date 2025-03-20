@@ -145,9 +145,7 @@ it('can delete own group status', function () {
 
     $response->assertNoContent();
 
-    $this->assertDatabaseMissing('advice_status', [
-        'id' => $this->subGroupStatus->id,
-    ]);
+    $this->assertNull(AdviceStatus::find($this->subGroupStatus->id));
 });
 
 it('cannot delete parent group status', function () {
@@ -205,67 +203,67 @@ test('system admin can manage any group status', function () {
 it('can toggle visibility of parent status in child group', function () {
     // We're using the existing group hierarchy (mainGroup is parent of subGroup)
     // The status belongs to the mainGroup (parent)
-    
+
     // First, check the initial state via the API
     $initialResponse = $this->actingAs($this->groupAdmin)
         ->getJson("/api/groups/{$this->subGroup->id}/advicestatus");
-    
+
     $initialResponse->assertOk();
     $statusesData = collect($initialResponse->json());
     $mainGroupStatus = $statusesData->firstWhere('id', $this->mainGroupStatus->id);
     expect($mainGroupStatus['visible_in_group'])->toBeTrue();
-    
+
     // Now toggle the status to invisible
     $updateResponse = $this->actingAs($this->groupAdmin)
         ->putJson("/api/groups/{$this->subGroup->id}/advicestatus/{$this->mainGroupStatus->id}", [
             'visible_in_group' => false,
         ]);
-        
+
     $updateResponse->assertOk()
         ->assertJsonFragment([
             'id' => $this->mainGroupStatus->id,
             'visible_in_group' => false,
         ]);
-    
+
     // Verify that the data is correctly stored in the database
     $this->assertDatabaseHas('advice_status_group', [
         'group_id' => $this->subGroup->id,
         'advice_status_id' => $this->mainGroupStatus->id,
         'visible_in_group' => false,
     ]);
-    
+
     // Now check with a GET request if the API returns the updated data
     $getAfterUpdateResponse = $this->actingAs($this->groupAdmin)
         ->getJson("/api/groups/{$this->subGroup->id}/advicestatus");
-    
+
     $getAfterUpdateResponse->assertOk();
     $updatedStatusesData = collect($getAfterUpdateResponse->json());
     $updatedMainGroupStatus = $updatedStatusesData->firstWhere('id', $this->mainGroupStatus->id);
     expect($updatedMainGroupStatus['visible_in_group'])->toBeFalse();
-    
+
     // And toggle back to visible
     $revertResponse = $this->actingAs($this->groupAdmin)
         ->putJson("/api/groups/{$this->subGroup->id}/advicestatus/{$this->mainGroupStatus->id}", [
             'visible_in_group' => true,
         ]);
-        
+
     $revertResponse->assertOk()
         ->assertJsonFragment([
             'id' => $this->mainGroupStatus->id,
             'visible_in_group' => true,
         ]);
-    
+
     // Verify that the data is correctly stored in the database
     $this->assertDatabaseHas('advice_status_group', [
         'group_id' => $this->subGroup->id,
         'advice_status_id' => $this->mainGroupStatus->id,
         'visible_in_group' => true,
     ]);
-    
+
     // Finally, check with a GET request if the API returns the updated data again
     $finalResponse = $this->actingAs($this->groupAdmin)
         ->getJson("/api/groups/{$this->subGroup->id}/advicestatus");
-    
+
     $finalResponse->assertOk();
     $finalStatusesData = collect($finalResponse->json());
     $finalMainGroupStatus = $finalStatusesData->firstWhere('id', $this->mainGroupStatus->id);
@@ -275,67 +273,67 @@ it('can toggle visibility of parent status in child group', function () {
 it('can toggle visibility of own status in own group', function () {
     // We're using the existing group hierarchy
     // The status belongs to the own subgroup (subGroup)
-    
+
     // First, check the initial state via the API
     $initialResponse = $this->actingAs($this->groupAdmin)
         ->getJson("/api/groups/{$this->subGroup->id}/advicestatus");
-    
+
     $initialResponse->assertOk();
     $statusesData = collect($initialResponse->json());
     $subGroupStatus = $statusesData->firstWhere('id', $this->subGroupStatus->id);
     expect($subGroupStatus['visible_in_group'])->toBeTrue();
-    
+
     // Now toggle the status to invisible (own initiative)
     $updateResponse = $this->actingAs($this->groupAdmin)
         ->putJson("/api/groups/{$this->subGroup->id}/advicestatus/{$this->subGroupStatus->id}", [
             'visible_in_group' => false,
         ]);
-        
+
     $updateResponse->assertOk()
         ->assertJsonFragment([
             'id' => $this->subGroupStatus->id,
             'visible_in_group' => false,
         ]);
-    
+
     // Verify that the data is correctly stored in the database
     $this->assertDatabaseHas('advice_status_group', [
         'group_id' => $this->subGroup->id,
         'advice_status_id' => $this->subGroupStatus->id,
         'visible_in_group' => false,
     ]);
-    
+
     // Now check with a GET request if the API returns the updated data
     $getAfterUpdateResponse = $this->actingAs($this->groupAdmin)
         ->getJson("/api/groups/{$this->subGroup->id}/advicestatus");
-    
+
     $getAfterUpdateResponse->assertOk();
     $updatedStatusesData = collect($getAfterUpdateResponse->json());
     $updatedSubGroupStatus = $updatedStatusesData->firstWhere('id', $this->subGroupStatus->id);
     expect($updatedSubGroupStatus['visible_in_group'])->toBeFalse();
-    
+
     // And toggle back to visible
     $revertResponse = $this->actingAs($this->groupAdmin)
         ->putJson("/api/groups/{$this->subGroup->id}/advicestatus/{$this->subGroupStatus->id}", [
             'visible_in_group' => true,
         ]);
-        
+
     $revertResponse->assertOk()
         ->assertJsonFragment([
             'id' => $this->subGroupStatus->id,
             'visible_in_group' => true,
         ]);
-    
+
     // Verify that the data is correctly stored in the database
     $this->assertDatabaseHas('advice_status_group', [
         'group_id' => $this->subGroup->id,
         'advice_status_id' => $this->subGroupStatus->id,
         'visible_in_group' => true,
     ]);
-    
+
     // Finally, check with a GET request if the API returns the updated data again
     $finalResponse = $this->actingAs($this->groupAdmin)
         ->getJson("/api/groups/{$this->subGroup->id}/advicestatus");
-    
+
     $finalResponse->assertOk();
     $finalStatusesData = collect($finalResponse->json());
     $finalSubGroupStatus = $finalStatusesData->firstWhere('id', $this->subGroupStatus->id);
