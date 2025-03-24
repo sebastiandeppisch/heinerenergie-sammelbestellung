@@ -12,7 +12,7 @@ import {
 } from "@vue-leaflet/vue-leaflet";
 
 
-import L, { DrawEvents, LatLng, LatLngExpression, Point } from "leaflet";
+import L, { DrawEvents, LatLng, LatLngExpression, Point, PointExpression } from "leaflet";
 import "leaflet-draw";
 
 const CRS = L.CRS.Earth;
@@ -53,7 +53,20 @@ const centerOfPolygon = computed<Coordinate>(() => {
     if(!polygonModel.value || polygonModel.value.coordinates.length === 0) {
         return zeroCoordinate;
     }
-    return L.PolyUtil.polygonCenter(polygonModel.value?.coordinates, CRS);
+
+    const coordinates = polygonModel.value.coordinates;
+
+    const center = coordinates.reduce((acc: Coordinate, curr: Coordinate) => {
+        return {
+            lat: acc.lat + curr.lat,
+            lng: acc.lng + curr.lng
+        }
+    }, zeroCoordinate);
+
+    center.lat = center.lat / coordinates.length;
+    center.lng = center.lng / coordinates.length;
+
+    return center;
 });
 
 async function onLeafletReady() {
@@ -124,19 +137,14 @@ async function onFeatureGroupReady() {
     mapRef.value?.leafletObject.addControl(drawControl);
 }
 
-const coordinatedOfDarmstadtCityCenter = {
-    lat: 49.8728,
-    lng: 8.6512
-}
-
-const centerOfMap = CRS.project(coordinatedOfDarmstadtCityCenter);
+const coordinatedOfDarmstadtCityCenter: PointExpression = [ 49.8728, 8.6512 ];
 
 </script>
 <template>
     <LMap
       ref="mapRef"
       :zoom="15"
-      :center="centerOfMap"
+      :center="coordinatedOfDarmstadtCityCenter"
       use-global-leaflet
       :options="{attributionControl: false}"
       @ready="onLeafletReady"
