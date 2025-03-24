@@ -2,7 +2,6 @@
 
 namespace App\Context;
 
-use App\Models\Advice;
 use App\Models\Group;
 use App\Models\User;
 
@@ -10,19 +9,28 @@ interface GroupContextContract
 {
     public function getCurrentGroup(): ?Group;
 
-    public function actsAsSystemAdmin(User $user): bool;
+    public function isActingAsSystemAdmin(User $user): bool;
 
-    public function actsAsGroupAdmin(User $user, Group $group): bool;
+    // is acting as a group admin methods
+    public function isActingAsDirectAdmin(User $user, Group $group): bool;
 
-    public function actsAsTransitiveGroupAdmin(User $user, Group $group): bool;
+    public function isActingAsTransitiveAdmin(User $user, Group $group): bool;
 
-    //public function hasAccessToGroup(User $user, Group $group): bool;
+    public function isActingAsAncestorAdmin(User $user, Group $group): bool;
 
-    public function actsAsGroupMember(User $user, Group $group): bool;
+    // is acting as a group member methods
 
-    public function actsAsTransitiveGroupMember(User $user, Group $group): bool;
+    public function isActingAsDirectMember(User $user, Group $group): bool;
 
-    //public function hasAccessToAdvice(User $user, Advice $advice): bool;
+    public function isActingAsTransitiveMember(User $user, Group $group): bool;
 
-    //public function hasAccessToAdvisor(User $user, User $advisor): bool;
+    public function isActingAsAncestorMember(User $user, Group $group): bool;
+
+    //is acting as a group member or admin
+
+    public function isActingAsDirectMemberOrAdmin(User $user, Group $group): bool;
+
+    public function isActingAsTransitiveMemberOrAdmin(User $user, Group $group): bool;
+
+    public function isActingAsAncestorMemberOrAdmin(User $user, Group $group): bool;
 }

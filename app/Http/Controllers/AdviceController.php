@@ -82,14 +82,7 @@ class AdviceController extends Controller
 
     public function transfer(Advice $advice, TransferAdviceRequest $request)
     {
-        $this->authorize('update', $advice);
-
         $targetGroup = Group::findOrFail($request->group_id);
-
-        if (! $targetGroup->accepts_transfers) {
-            abort(403, 'Diese Initiative akzeptiert keine Beratungsübertragungen');
-        }
-
         $oldGroup = $advice->group;
         $advice->group()->associate($targetGroup);
         $advice->save();
@@ -110,18 +103,19 @@ class AdviceController extends Controller
 
     public function storeComment(Advice $advice, StoreAdviceCommentRequest $request)
     {
+        $this->authorize('storeComment', $advice);
         event(new CommentAddedEvent(
             comment: $request->comment,
             author: Auth::user(),
             advice: $advice
         ));
-        
+
         return redirect()->back();
     }
 
     public function unassign(Advice $advice)
     {
-        $this->authorize('update', $advice);
+        $this->authorize('unassign', $advice);
 
         $advice->advisor_id = null;
         $advice->save();

@@ -20,9 +20,9 @@ class SessionGroupContextFactory
 
         return new GroupContext(
             currentGroup: $this->sessionService->getCurrentGroup(),
-            actsAsSystemAdmin: $this->sessionService->actsAsSystemAdmin(),
+            isActingAsSystemAdmin: $this->sessionService->actsAsSystemAdmin(),
             user: $user,
-            actsAsGroupAdmin: $this->sessionService->actsAsGroupAdmin()
+            isActingAsGroupAdmin: $this->sessionService->actsAsGroupAdmin()
         );
     }
 }

@@ -121,7 +121,7 @@ test('events retain user who triggered them', function () {
         ->and($event->user_id)->toBe($this->user->id);
 });
 
-function transferAdvice(Advice $advice, Group $newGroup, string $reason = null)
+function transferAdvice(Advice $advice, Group $newGroup, ?string $reason = null)
 {
     $response = post(route('advices.transfer', $advice), [
         'group_id' => $newGroup->id,

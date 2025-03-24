@@ -23,6 +23,7 @@ class GroupAdviceStatusController extends Controller
 
     public function store(StoreGroupAdviceStatusRequest $request, Group $group)
     {
+        $this->authorize('create', [AdviceStatusGroup::class, $group]);
         $advicestatus = $group->ownStatuses()->create($request->validated());
 
         return AdviceStatusData::fromModel($advicestatus, $group);

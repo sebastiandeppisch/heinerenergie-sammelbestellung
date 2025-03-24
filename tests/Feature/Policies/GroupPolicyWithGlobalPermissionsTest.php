@@ -52,69 +52,72 @@ test('initiative admin can manage their group and subgroups', function () {
     // Make normal user admin of main group
     $this->mainGroup->users()->attach($this->normalUser->id, ['is_admin' => true]);
 
+    $mainGroupAdmin = $this->normalUser;
+
     // Can view groups in their hierarchy
-    expect($this->normalUser->can('viewAny', Group::class))->toBeTrue()
-        ->and($this->normalUser->can('view', $this->mainGroup))->toBeTrue()
-        ->and($this->normalUser->can('view', $this->subGroup))->toBeTrue();
+    expect($mainGroupAdmin->can('viewAny', Group::class))->toBeTrue()
+        ->and($mainGroupAdmin->can('view', $this->mainGroup))->toBeTrue()
+        ->and($mainGroupAdmin->can('view', $this->subGroup))->toBeTrue();
 
     // Cannot view groups outside their hierarchy
-    expect($this->normalUser->can('view', $this->otherMainGroup))->toBeFalse()
-        ->and($this->normalUser->can('view', $this->otherSubGroup))->toBeFalse();
+    expect($mainGroupAdmin->can('view', $this->otherMainGroup))->toBeFalse()
+        ->and($mainGroupAdmin->can('view', $this->otherSubGroup))->toBeFalse();
 
     // Can manage own group and subgroups
-    expect($this->normalUser->can('update', $this->mainGroup))->toBeTrue()
-        ->and($this->normalUser->can('update', $this->subGroup))->toBeTrue()
-        ->and($this->normalUser->can('create', [Group::class, $this->mainGroup]))->toBeTrue()
-        ->and($this->normalUser->can('create', [Group::class, $this->subGroup]))->toBeTrue()
-        ->and($this->normalUser->can('manageUsers', $this->mainGroup))->toBeTrue()
-        ->and($this->normalUser->can('manageUsers', $this->subGroup))->toBeTrue()
-        ->and($this->normalUser->can('manageArea', $this->mainGroup))->toBeTrue()
-        ->and($this->normalUser->can('manageArea', $this->subGroup))->toBeTrue();
+    expect($mainGroupAdmin->can('update', $this->mainGroup))->toBeTrue()
+        ->and($mainGroupAdmin->can('update', $this->subGroup))->toBeTrue()
+        ->and($mainGroupAdmin->can('create', [Group::class, $this->mainGroup]))->toBeTrue()
+        ->and($mainGroupAdmin->can('create', [Group::class, $this->subGroup]))->toBeTrue()
+        ->and($mainGroupAdmin->can('manageUsers', $this->mainGroup))->toBeTrue()
+        ->and($mainGroupAdmin->can('manageUsers', $this->subGroup))->toBeTrue()
+        ->and($mainGroupAdmin->can('manageArea', $this->mainGroup))->toBeTrue()
+        ->and($mainGroupAdmin->can('manageArea', $this->subGroup))->toBeTrue();
 
     // Cannot manage groups outside their hierarchy
-    expect($this->normalUser->can('update', $this->otherMainGroup))->toBeFalse()
-        ->and($this->normalUser->can('create', [Group::class, $this->otherMainGroup]))->toBeFalse()
-        ->and($this->normalUser->can('manageUsers', $this->otherMainGroup))->toBeFalse()
-        ->and($this->normalUser->can('manageArea', $this->otherMainGroup))->toBeFalse();
+    expect($mainGroupAdmin->can('update', $this->otherMainGroup))->toBeFalse()
+        ->and($mainGroupAdmin->can('create', [Group::class, $this->otherMainGroup]))->toBeFalse()
+        ->and($mainGroupAdmin->can('manageUsers', $this->otherMainGroup))->toBeFalse()
+        ->and($mainGroupAdmin->can('manageArea', $this->otherMainGroup))->toBeFalse();
 
     // Cannot create root groups
-    expect($this->normalUser->can('create', Group::class))->toBeFalse();
+    expect($mainGroupAdmin->can('create', Group::class))->toBeFalse();
 
     // Cannot delete groups to which they are not an admin
-    expect($this->normalUser->can('delete', $this->mainGroup))->toBeTrue()
-        ->and($this->normalUser->can('delete', $this->subGroup))->toBeTrue();
-    expect($this->normalUser->can('delete', $this->otherMainGroup))->toBeFalse();
-    expect($this->normalUser->can('delete', $this->otherSubGroup))->toBeFalse();
+    expect($mainGroupAdmin->can('delete', $this->mainGroup))->toBeTrue()
+        ->and($mainGroupAdmin->can('delete', $this->subGroup))->toBeTrue();
+    expect($mainGroupAdmin->can('delete', $this->otherMainGroup))->toBeFalse();
+    expect($mainGroupAdmin->can('delete', $this->otherSubGroup))->toBeFalse();
 });
 
 test('subgroup admin cannot manage parent groups', function () {
     // Make normal user admin of sub group
     $this->subGroup->users()->attach($this->normalUser->id, ['is_admin' => true]);
+    $subGroupAdmin = $this->normalUser;
 
     // Can view groups in their hierarchy
-    expect($this->normalUser->can('viewAny', Group::class))->toBeTrue()
-        ->and($this->normalUser->can('view', $this->mainGroup))->toBeTrue()
-        ->and($this->normalUser->can('view', $this->subGroup))->toBeTrue();
+    expect($subGroupAdmin->can('viewAny', Group::class))->toBeTrue()
+        ->and($subGroupAdmin->can('view', $this->mainGroup))->toBeTrue()
+        ->and($subGroupAdmin->can('view', $this->subGroup))->toBeTrue();
 
     // Cannot view groups outside their hierarchy
-    expect($this->normalUser->can('view', $this->otherMainGroup))->toBeFalse()
-        ->and($this->normalUser->can('view', $this->otherSubGroup))->toBeFalse();
+    expect($subGroupAdmin->can('view', $this->otherMainGroup))->toBeFalse()
+        ->and($subGroupAdmin->can('view', $this->otherSubGroup))->toBeFalse();
 
     // Can only manage own group
-    expect($this->normalUser->can('update', $this->mainGroup))->toBeFalse()
-        ->and($this->normalUser->can('update', $this->subGroup))->toBeTrue()
-        ->and($this->normalUser->can('manageUsers', $this->mainGroup))->toBeFalse()
-        ->and($this->normalUser->can('manageUsers', $this->subGroup))->toBeTrue()
-        ->and($this->normalUser->can('manageArea', $this->mainGroup))->toBeFalse()
-        ->and($this->normalUser->can('manageArea', $this->subGroup))->toBeTrue();
+    expect($subGroupAdmin->can('update', $this->mainGroup))->toBeFalse()
+        ->and($subGroupAdmin->can('update', $this->subGroup))->toBeTrue()
+        ->and($subGroupAdmin->can('manageUsers', $this->mainGroup))->toBeFalse()
+        ->and($subGroupAdmin->can('manageUsers', $this->subGroup))->toBeTrue()
+        ->and($subGroupAdmin->can('manageArea', $this->mainGroup))->toBeFalse()
+        ->and($subGroupAdmin->can('manageArea', $this->subGroup))->toBeTrue();
 
     // Can create subgroups under own group
-    expect($this->normalUser->can('create', [Group::class, $this->subGroup]))->toBeTrue();
+    expect($subGroupAdmin->can('create', [Group::class, $this->subGroup]))->toBeTrue();
 
     // Cannot create groups outside their hierarchy
-    expect($this->normalUser->can('create', Group::class))->toBeFalse()
-        ->and($this->normalUser->can('create', [Group::class, $this->mainGroup]))->toBeFalse()
-        ->and($this->normalUser->can('create', [Group::class, $this->otherMainGroup]))->toBeFalse();
+    expect($subGroupAdmin->can('create', Group::class))->toBeFalse()
+        ->and($subGroupAdmin->can('create', [Group::class, $this->mainGroup]))->toBeFalse()
+        ->and($subGroupAdmin->can('create', [Group::class, $this->otherMainGroup]))->toBeFalse();
 });
 
 test('normal user can only view groups they belong to', function () {
@@ -149,3 +152,4 @@ test('group admin is also a regular member of the group', function () {
         ->and($this->mainGroup->users()->pluck('users.id'))->toContain($this->normalUser->id)
         ->and($this->mainGroup->admins()->pluck('users.id'))->toContain($this->normalUser->id);
 });
+

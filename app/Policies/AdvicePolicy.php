@@ -4,14 +4,15 @@ namespace App\Policies;
 
 use App\Context\GroupContextContract;
 use App\Models\Advice;
+use App\Models\Group;
 use App\Models\User;
+use App\Policies\Concerns\GroupContextHelper;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class AdvicePolicy
 {
     use HandlesAuthorization;
-
-    public function __construct(private GroupContextContract $groupContext) {}
+    use GroupContextHelper;
 
     public function viewAny(User $user)
     {
@@ -20,10 +21,6 @@ class AdvicePolicy
 
     public function view(User $user, Advice $advice)
     {
-        if ($this->groupContext->actsAsSystemAdmin($user)) {
-            return true;
-        }
-
         if ($advice->advisor_id === $user->id) {
             return true;
         }
@@ -34,33 +31,44 @@ class AdvicePolicy
             return true;
         }
 
-        return $this->groupContext->hasAccessToGroup($user, $advice->group);
+        return $this->groupContext->isActingAsTransitiveMemberOrAdmin($user, $advice->group);
     }
 
     public function viewDataProtected(User $user, Advice $advice)
     {
-
-        if ($this->groupContext->hasAccessToGroup($user, $advice->group)) {
-            if ($advice->advisor_id === null) {
+        if ($advice->advisor_id === null) {
+            if ($this->groupContext->isActingAsTransitiveMemberOrAdmin($user, $advice->group)) {
                 return true;
             }
         }
+
 
         return $this->view($user, $advice);
     }
 
     public function create(User $user)
     {
+        //everyone, even guests can create advices
         return true;
     }
 
     public function update(User $user, Advice $advice)
     {
-        if ($this->groupContext->actsAsSystemAdmin($user)) {
+        if ($advice->advisor_id === $user->id) {
             return true;
         }
 
-        return $this->groupContext->actsAsTransitiveGroupMember($user, $advice->group);
+        $shared = $advice->shares()->where('advisor_id', $user->id)->first();
+
+        if ($shared) {
+            return true;
+        }
+
+        if($this->groupContext->isActingAsTransitiveAdmin($user, $advice->group)) {
+            return true;
+        }
+
+        return false;
     }
 
     public function delete(User $user, Advice $advice)
@@ -70,6 +78,21 @@ class AdvicePolicy
     }
 
     public function addAdvisors(User $user, Advice $advice)
+    {
+        return $this->update($user, $advice);
+    }
+
+    public function transfer(User $user, Advice $advice)
+    {
+        return $this->update($user, $advice);
+    }
+
+    public function storeComment(User $user, Advice $advice)
+    {
+        return $this->update($user, $advice);
+    }
+
+    public function unassign(User $user, Advice $advice)
     {
         return $this->update($user, $advice);
     }

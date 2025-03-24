@@ -47,28 +47,28 @@ beforeEach(function () {
     ]);
 });
 
-test('system admin has full access', function () {
+test('system admin is not group admin => being implicit group admin is concern of Policy, not GroupContext', function () {
     $context = new GroupContext(null, true, $this->systemAdmin);
 
-    expect($context->actsAsSystemAdmin($this->systemAdmin))->toBeTrue()
-        ->and($context->hasAccessToGroup($this->systemAdmin, $this->mainGroup))->toBeTrue()
-        ->and($context->hasAccessToGroup($this->systemAdmin, $this->subGroup))->toBeTrue()
-        ->and($context->hasAccessToGroup($this->systemAdmin, $this->subSubGroup))->toBeTrue()
-        ->and($context->actsAsGroupAdmin($this->systemAdmin, $this->mainGroup))->toBeTrue()
-        ->and($context->actsAsGroupAdmin($this->systemAdmin, $this->subGroup))->toBeTrue()
-        ->and($context->actsAsGroupAdmin($this->systemAdmin, $this->subSubGroup))->toBeTrue();
+    expect($context->isActingAsSystemAdmin($this->systemAdmin))->toBeTrue()
+        ->and($context->isActingAsTransitiveMemberOrAdmin($this->systemAdmin, $this->mainGroup))->toBeFalse()
+        ->and($context->isActingAsTransitiveMemberOrAdmin($this->systemAdmin, $this->subGroup))->toBeFalse()
+        ->and($context->isActingAsTransitiveMemberOrAdmin($this->systemAdmin, $this->subSubGroup))->toBeFalse()
+        ->and($context->isActingAsDirectAdmin($this->systemAdmin, $this->mainGroup))->toBeFalse()
+        ->and($context->isActingAsDirectAdmin($this->systemAdmin, $this->subGroup))->toBeFalse()
+        ->and($context->isActingAsDirectAdmin($this->systemAdmin, $this->subSubGroup))->toBeFalse();
 });
 
 test('normal user has no access without group membership', function () {
     $context = new GroupContext(null, false, $this->normalUser);
 
-    expect($context->actsAsSystemAdmin($this->normalUser))->toBeFalse()
-        ->and($context->hasAccessToGroup($this->normalUser, $this->mainGroup))->toBeFalse()
-        ->and($context->hasAccessToGroup($this->normalUser, $this->subGroup))->toBeFalse()
-        ->and($context->hasAccessToGroup($this->normalUser, $this->subSubGroup))->toBeFalse()
-        ->and($context->actsAsGroupAdmin($this->normalUser, $this->mainGroup))->toBeFalse()
-        ->and($context->actsAsGroupAdmin($this->normalUser, $this->subGroup))->toBeFalse()
-        ->and($context->actsAsGroupAdmin($this->normalUser, $this->subSubGroup))->toBeFalse();
+    expect($context->isActingAsSystemAdmin($this->normalUser))->toBeFalse()
+        ->and($context->isActingAsTransitiveMemberOrAdmin($this->normalUser, $this->mainGroup))->toBeFalse()
+        ->and($context->isActingAsTransitiveMemberOrAdmin($this->normalUser, $this->subGroup))->toBeFalse()
+        ->and($context->isActingAsTransitiveMemberOrAdmin($this->normalUser, $this->subSubGroup))->toBeFalse()
+        ->and($context->isActingAsDirectAdmin($this->normalUser, $this->mainGroup))->toBeFalse()
+        ->and($context->isActingAsDirectAdmin($this->normalUser, $this->subGroup))->toBeFalse()
+        ->and($context->isActingAsDirectAdmin($this->normalUser, $this->subSubGroup))->toBeFalse();
 });
 
 test('group admin has access to group and subgroups', function () {
@@ -77,13 +77,13 @@ test('group admin has access to group and subgroups', function () {
 
     $context = new GroupContext($this->mainGroup, false, $this->normalUser, true);
 
-    expect($context->actsAsSystemAdmin($this->normalUser))->toBeFalse()
-        ->and($context->hasAccessToGroup($this->normalUser, $this->mainGroup))->toBeTrue()
-        ->and($context->hasAccessToGroup($this->normalUser, $this->subGroup))->toBeTrue()
-        ->and($context->hasAccessToGroup($this->normalUser, $this->subSubGroup))->toBeTrue()
-        ->and($context->actsAsGroupAdmin($this->normalUser, $this->mainGroup))->toBeTrue()
-        ->and($context->actsAsGroupAdmin($this->normalUser, $this->subGroup))->toBeTrue()
-        ->and($context->actsAsGroupAdmin($this->normalUser, $this->subSubGroup))->toBeTrue();
+    expect($context->isActingAsSystemAdmin($this->normalUser))->toBeFalse()
+        ->and($context->isActingAsTransitiveMemberOrAdmin($this->normalUser, $this->mainGroup))->toBeTrue()
+        ->and($context->isActingAsTransitiveMemberOrAdmin($this->normalUser, $this->subGroup))->toBeTrue()
+        ->and($context->isActingAsTransitiveMemberOrAdmin($this->normalUser, $this->subSubGroup))->toBeTrue()
+        ->and($context->isActingAsDirectAdmin($this->normalUser, $this->mainGroup))->toBeTrue()
+        ->and($context->isActingAsDirectAdmin($this->normalUser, $this->subGroup))->toBeTrue()
+        ->and($context->isActingAsDirectAdmin($this->normalUser, $this->subSubGroup))->toBeTrue();
 });
 
 test('temporary group admin has scoped access', function () {
@@ -93,43 +93,15 @@ test('temporary group admin has scoped access', function () {
     $context = new GroupContext($this->mainGroup, false, $this->normalUser, true);
 
     expect($context->getCurrentGroup()->id)->toBe($this->mainGroup->id)
-        ->and($context->actsAsGroupAdmin($this->normalUser, $this->mainGroup))->toBeTrue()
-        ->and($context->hasAccessToGroup($this->normalUser, $this->mainGroup))->toBeTrue()
-        ->and($context->hasAccessToGroup($this->normalUser, $this->subGroup))->toBeTrue()
-        ->and($context->hasAccessToGroup($this->normalUser, $this->subSubGroup))->toBeTrue()
-        ->and($context->actsAsGroupAdmin($this->normalUser, $this->mainGroup))->toBeTrue()
-        ->and($context->actsAsGroupAdmin($this->normalUser, $this->subGroup))->toBeTrue()
-        ->and($context->actsAsGroupAdmin($this->normalUser, $this->subSubGroup))->toBeTrue();
+        ->and($context->isActingAsDirectAdmin($this->normalUser, $this->mainGroup))->toBeTrue()
+        ->and($context->isActingAsTransitiveMemberOrAdmin($this->normalUser, $this->mainGroup))->toBeTrue()
+        ->and($context->isActingAsTransitiveMemberOrAdmin($this->normalUser, $this->subGroup))->toBeTrue()
+        ->and($context->isActingAsTransitiveMemberOrAdmin($this->normalUser, $this->subSubGroup))->toBeTrue()
+        ->and($context->isActingAsDirectAdmin($this->normalUser, $this->mainGroup))->toBeTrue()
+        ->and($context->isActingAsDirectAdmin($this->normalUser, $this->subGroup))->toBeTrue()
+        ->and($context->isActingAsDirectAdmin($this->normalUser, $this->subSubGroup))->toBeTrue();
 });
 
-test('advice access is group scoped', function () {
-    $mainGroupAdvice = Advice::factory()->create(['group_id' => $this->mainGroup->id]);
-    $otherGroupAdvice = Advice::factory()->create(['group_id' => $this->otherGroup->id]);
-
-    // Make normal user member of main group
-    $this->mainGroup->users()->attach($this->normalUser->id, ['is_admin' => false]);
-
-    $context = new GroupContext($this->mainGroup, false, $this->normalUser);
-
-    expect($context->hasAccessToAdvice($this->normalUser, $mainGroupAdvice))->toBeTrue()
-        ->and($context->hasAccessToAdvice($this->normalUser, $otherGroupAdvice))->toBeFalse();
-});
-
-test('advisor access is group scoped', function () {
-    $mainGroupAdvisor = User::factory()->create();
-    $otherGroupAdvisor = User::factory()->create();
-
-    $this->mainGroup->users()->attach($mainGroupAdvisor->id);
-    $this->otherGroup->users()->attach($otherGroupAdvisor->id);
-
-    // Make normal user member of main group
-    $this->mainGroup->users()->attach($this->normalUser->id);
-
-    $context = new GroupContext($this->mainGroup, false, $this->normalUser);
-
-    expect($context->hasAccessToAdvisor($this->normalUser, $mainGroupAdvisor))->toBeTrue()
-        ->and($context->hasAccessToAdvisor($this->normalUser, $otherGroupAdvisor))->toBeFalse();
-});
 
 test('admin of sub group cannot access parent groups', function () {
     // Make normal user admin of sub group only
@@ -137,13 +109,13 @@ test('admin of sub group cannot access parent groups', function () {
 
     $context = new GroupContext($this->subGroup, false, $this->normalUser, true);
 
-    expect($context->actsAsSystemAdmin($this->normalUser))->toBeFalse()
-        ->and($context->hasAccessToGroup($this->normalUser, $this->mainGroup))->toBeFalse()
-        ->and($context->hasAccessToGroup($this->normalUser, $this->subGroup))->toBeTrue()
-        ->and($context->hasAccessToGroup($this->normalUser, $this->subSubGroup))->toBeTrue()
-        ->and($context->actsAsGroupAdmin($this->normalUser, $this->mainGroup))->toBeFalse()
-        ->and($context->actsAsGroupAdmin($this->normalUser, $this->subGroup))->toBeTrue()
-        ->and($context->actsAsGroupAdmin($this->normalUser, $this->subSubGroup))->toBeTrue();
+    expect($context->isActingAsSystemAdmin($this->normalUser))->toBeFalse()
+        ->and($context->isActingAsTransitiveMemberOrAdmin($this->normalUser, $this->mainGroup))->toBeFalse()
+        ->and($context->isActingAsTransitiveMemberOrAdmin($this->normalUser, $this->subGroup))->toBeTrue()
+        ->and($context->isActingAsTransitiveMemberOrAdmin($this->normalUser, $this->subSubGroup))->toBeTrue()
+        ->and($context->isActingAsDirectAdmin($this->normalUser, $this->mainGroup))->toBeFalse()
+        ->and($context->isActingAsDirectAdmin($this->normalUser, $this->subGroup))->toBeTrue()
+        ->and($context->isActingAsDirectAdmin($this->normalUser, $this->subSubGroup))->toBeTrue();
 });
 
 test('user with multiple group memberships has correct access', function () {
@@ -154,35 +126,35 @@ test('user with multiple group memberships has correct access', function () {
     $context = new GroupContext($this->mainGroup, false, $this->normalUser);
 
     // Should have normal access to main group hierarchy
-    expect($context->hasAccessToGroup($this->normalUser, $this->mainGroup))->toBeTrue()
-        ->and($context->hasAccessToGroup($this->normalUser, $this->subGroup))->toBeTrue()
-        ->and($context->hasAccessToGroup($this->normalUser, $this->subSubGroup))->toBeTrue()
-        ->and($context->actsAsGroupAdmin($this->normalUser, $this->mainGroup))->toBeFalse()
-        ->and($context->actsAsGroupAdmin($this->normalUser, $this->subGroup))->toBeFalse()
-        ->and($context->actsAsGroupAdmin($this->normalUser, $this->subSubGroup))->toBeFalse();
+    expect($context->isActingAsTransitiveMemberOrAdmin($this->normalUser, $this->mainGroup))->toBeTrue()
+        ->and($context->isActingAsTransitiveMemberOrAdmin($this->normalUser, $this->subGroup))->toBeTrue()
+        ->and($context->isActingAsTransitiveMemberOrAdmin($this->normalUser, $this->subSubGroup))->toBeTrue()
+        ->and($context->isActingAsDirectAdmin($this->normalUser, $this->mainGroup))->toBeFalse()
+        ->and($context->isActingAsDirectAdmin($this->normalUser, $this->subGroup))->toBeFalse()
+        ->and($context->isActingAsDirectAdmin($this->normalUser, $this->subSubGroup))->toBeFalse();
 
     // without swichting the context, the normal user should not have access to the other group
 
-    expect($context->hasAccessToGroup($this->normalUser, $this->otherGroup))->toBeFalse()
-        ->and($context->hasAccessToGroup($this->normalUser, $this->otherSubGroup))->toBeFalse()
-        ->and($context->actsAsGroupAdmin($this->normalUser, $this->otherGroup))->toBeFalse()
-        ->and($context->actsAsGroupAdmin($this->normalUser, $this->otherSubGroup))->toBeFalse();
+    expect($context->isActingAsTransitiveMemberOrAdmin($this->normalUser, $this->otherGroup))->toBeFalse()
+        ->and($context->isActingAsTransitiveMemberOrAdmin($this->normalUser, $this->otherSubGroup))->toBeFalse()
+        ->and($context->isActingAsDirectAdmin($this->normalUser, $this->otherGroup))->toBeFalse()
+        ->and($context->isActingAsDirectAdmin($this->normalUser, $this->otherSubGroup))->toBeFalse();
 
     $context = new GroupContext($this->otherGroup, false, $this->normalUser, true);
 
     // Should have admin access to other group hierarchy
-    expect($context->hasAccessToGroup($this->normalUser, $this->otherGroup))->toBeTrue()
-        ->and($context->hasAccessToGroup($this->normalUser, $this->otherSubGroup))->toBeTrue()
-        ->and($context->actsAsGroupAdmin($this->normalUser, $this->otherGroup))->toBeTrue()
-        ->and($context->actsAsGroupAdmin($this->normalUser, $this->otherSubGroup))->toBeTrue();
+    expect($context->isActingAsTransitiveMemberOrAdmin($this->normalUser, $this->otherGroup))->toBeTrue()
+        ->and($context->isActingAsTransitiveMemberOrAdmin($this->normalUser, $this->otherSubGroup))->toBeTrue()
+        ->and($context->isActingAsDirectAdmin($this->normalUser, $this->otherGroup))->toBeTrue()
+        ->and($context->isActingAsDirectAdmin($this->normalUser, $this->otherSubGroup))->toBeTrue();
 
     // again without swichting the context, the normal user should not have access to the main group
-    expect($context->hasAccessToGroup($this->normalUser, $this->mainGroup))->toBeFalse()
-        ->and($context->hasAccessToGroup($this->normalUser, $this->subGroup))->toBeFalse()
-        ->and($context->hasAccessToGroup($this->normalUser, $this->subSubGroup))->toBeFalse()
-        ->and($context->actsAsGroupAdmin($this->normalUser, $this->mainGroup))->toBeFalse()
-        ->and($context->actsAsGroupAdmin($this->normalUser, $this->subGroup))->toBeFalse()
-        ->and($context->actsAsGroupAdmin($this->normalUser, $this->subSubGroup))->toBeFalse();
+    expect($context->isActingAsTransitiveMemberOrAdmin($this->normalUser, $this->mainGroup))->toBeFalse()
+        ->and($context->isActingAsTransitiveMemberOrAdmin($this->normalUser, $this->subGroup))->toBeFalse()
+        ->and($context->isActingAsTransitiveMemberOrAdmin($this->normalUser, $this->subSubGroup))->toBeFalse()
+        ->and($context->isActingAsDirectAdmin($this->normalUser, $this->mainGroup))->toBeFalse()
+        ->and($context->isActingAsDirectAdmin($this->normalUser, $this->subGroup))->toBeFalse()
+        ->and($context->isActingAsDirectAdmin($this->normalUser, $this->subSubGroup))->toBeFalse();
 });
 
 test('temporary admin access works independently for different groups', function () {
@@ -193,63 +165,29 @@ test('temporary admin access works independently for different groups', function
     // Set up context with main group and admin rights
     $context1 = new GroupContext($this->mainGroup, false, $this->normalUser, true);
 
-    expect($context1->actsAsGroupAdmin($this->normalUser, $this->mainGroup))->toBeTrue()
-        ->and($context1->actsAsGroupAdmin($this->normalUser, $this->subGroup))->toBeTrue()
-        ->and($context1->actsAsGroupAdmin($this->normalUser, $this->subSubGroup))->toBeTrue();
+    expect($context1->isActingAsDirectAdmin($this->normalUser, $this->mainGroup))->toBeTrue()
+        ->and($context1->isActingAsDirectAdmin($this->normalUser, $this->subGroup))->toBeTrue()
+        ->and($context1->isActingAsDirectAdmin($this->normalUser, $this->subSubGroup))->toBeTrue();
 
     // Switch to other group context without admin rights
     $context2 = new GroupContext($this->otherGroup, false, $this->normalUser, false);
 
-    expect($context2->actsAsGroupAdmin($this->normalUser, $this->otherGroup))->toBeFalse()
-        ->and($context2->actsAsGroupAdmin($this->normalUser, $this->otherSubGroup))->toBeFalse();
+    expect($context2->isActingAsDirectAdmin($this->normalUser, $this->otherGroup))->toBeFalse()
+        ->and($context2->isActingAsDirectAdmin($this->normalUser, $this->otherSubGroup))->toBeFalse();
 });
 
 test('access is denied for null user', function () {
     $context = new GroupContext($this->mainGroup, false, null);
 
-    $context->hasAccessToGroup($this->normalUser, $this->mainGroup);
+    $context->isActingAsTransitiveMemberOrAdmin($this->normalUser, $this->mainGroup);
 })->throws(InvalidArgumentException::class);
 
-test('system admin without current group still has full access', function () {
-    $context = new GroupContext(null, true, $this->systemAdmin);
 
-    expect($context->getCurrentGroup())->toBeNull()
-        ->and($context->actsAsSystemAdmin($this->systemAdmin))->toBeTrue()
-        ->and($context->hasAccessToGroup($this->systemAdmin, $this->mainGroup))->toBeTrue()
-        ->and($context->hasAccessToGroup($this->systemAdmin, $this->subGroup))->toBeTrue()
-        ->and($context->hasAccessToGroup($this->systemAdmin, $this->subSubGroup))->toBeTrue()
-        ->and($context->actsAsGroupAdmin($this->systemAdmin, $this->mainGroup))->toBeTrue()
-        ->and($context->actsAsGroupAdmin($this->systemAdmin, $this->subSubGroup))->toBeTrue();
-});
-
-test('user can access shared advisors across groups', function () {
-    $sharedAdvisor = User::factory()->create();
-
-    // Advisor is member of both groups
-    $this->mainGroup->users()->attach($sharedAdvisor->id);
-    $this->otherGroup->users()->attach($sharedAdvisor->id);
-
-    // User is only member of main group
-    $this->mainGroup->users()->attach($this->normalUser->id);
-
-    $context = new GroupContext($this->mainGroup, false, $this->normalUser);
-
-    expect($context->hasAccessToAdvisor($this->normalUser, $sharedAdvisor))->toBeTrue();
-
-    // Even in global context (no specific group)
-    $globalContext = new GroupContext(null, false, $this->normalUser);
-    expect($globalContext->hasAccessToAdvisor($this->normalUser, $sharedAdvisor))->toBeTrue();
-});
-
-test('admin of parent group has access to child group advices', function () {
-    // Create advice in sub-sub-group
-    $deepAdvice = Advice::factory()->create(['group_id' => $this->subSubGroup->id]);
-
+test('admin of parent group has access to child group', function () {
     // Make user admin of main group
     $this->mainGroup->users()->attach($this->normalUser->id, ['is_admin' => true]);
 
     $context = new GroupContext($this->mainGroup, false, $this->normalUser, true);
 
-    expect($context->hasAccessToAdvice($this->normalUser, $deepAdvice))->toBeTrue()
-        ->and($context->actsAsGroupAdmin($this->normalUser, $this->subSubGroup))->toBeTrue();
+    expect($context->isActingAsTransitiveAdmin($this->normalUser, $this->subSubGroup))->toBeTrue();
 });

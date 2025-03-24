@@ -2,17 +2,17 @@
 
 namespace App\Policies;
 
-use App\Context\GroupContextContract;
 use App\Models\AdviceStatus;
 use App\Models\Group;
 use App\Models\User;
+use App\Policies\Concerns\GroupContextHelper;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class AdviceStatusPolicy
 {
     use HandlesAuthorization;
 
-    public function __construct(private GroupContextContract $groupContext) {}
+    use GroupContextHelper;
 
     public function create(User $user, Group $group)
     {
@@ -31,11 +31,11 @@ class AdviceStatusPolicy
 
     private function isGroupAdmin(User $user, Group $group)
     {
-        if ($this->groupContext->actsAsSystemAdmin($user)) {
+        if ($this->groupContext->isActingAsSystemAdmin($user)) {
             return true;
         }
 
-        if ($this->groupContext->actsAsGroupAdmin($user, $group)) {
+        if ($this->groupContext->isActingAsDirectAdmin($user, $group)) {
             return true;
         }
 
@@ -46,7 +46,7 @@ class AdviceStatusPolicy
     {
         $group = $status->ownerGroup;
 
-        if ($this->groupContext->hasAccessToGroup($user, $group)) {
+        if ($this->groupContext->isActingAsTransitiveMemberOrAdmin($user, $group)) {
             return true;
         }
 
@@ -55,7 +55,7 @@ class AdviceStatusPolicy
         }
 
         foreach ($group->parentGroups as $parentGroup) {
-            if ($this->groupContext->hasAccessToGroup($user, $parentGroup)) {
+            if ($this->groupContext->isActingAsTransitiveMemberOrAdmin($user, $parentGroup)) {
                 return true;
             }
         }

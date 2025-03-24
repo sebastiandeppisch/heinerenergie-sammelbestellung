@@ -43,7 +43,7 @@ test('middleware binds context to container', function () {
         expect($context)->toBeInstanceOf(GroupContextContract::class);
         expect($context->getCurrentGroup())->not->toBeNull();
         expect($context->getCurrentGroup()->id)->toEqual($this->group->id);
-        expect($context->actsAsGroupAdmin($this->user, $this->group))->toEqual(true);
+        expect($context->isActingAsDirectAdmin($this->user, $this->group))->toEqual(true);
 
         return 'next';
     });
@@ -57,7 +57,7 @@ test('middleware creates new context for each request', function () {
 
     $this->middleware->handle(Request::create('/'), function ($request) {
         $context1 = app()->make(GroupContextContract::class);
-        expect($context1->actsAsGroupAdmin($this->user, $this->group))->toEqual(true);
+        expect($context1->isActingAsDirectAdmin($this->user, $this->group))->toEqual(true);
 
         return 'next';
     });
@@ -68,7 +68,7 @@ test('middleware creates new context for each request', function () {
 
     $this->middleware->handle(Request::create('/'), function ($request) {
         $context2 = app()->make(GroupContextContract::class);
-        expect($context2->actsAsGroupAdmin($this->user, $this->group))->toEqual(false);
+        expect($context2->isActingAsDirectAdmin($this->user, $this->group))->toEqual(false);
 
         return 'next';
     });

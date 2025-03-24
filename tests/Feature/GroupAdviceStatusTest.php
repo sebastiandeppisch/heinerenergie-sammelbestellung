@@ -339,3 +339,28 @@ it('can toggle visibility of own status in own group', function () {
     $finalSubGroupStatus = $finalStatusesData->firstWhere('id', $this->subGroupStatus->id);
     expect($finalSubGroupStatus['visible_in_group'])->toBeTrue();
 });
+
+test('normal group member cannot use group advice status', function () {
+    $this->actingAs($this->user)
+        ->getJson("/api/groups/{$this->subGroup->id}/advicestatus")
+        ->assertForbidden();
+
+    $this->actingAs($this->user)
+        ->postJson("/api/groups/{$this->subGroup->id}/advicestatus", [
+            'name' => 'New Status',
+            'result' => AdviceStatusResult::New->value,
+        ])
+        ->assertForbidden();
+
+    $this->actingAs($this->user)
+        ->putJson("/api/groups/{$this->subGroup->id}/advicestatus/{$this->subGroupStatus->id}", [
+            'name' => 'Updated Status',
+            'result' => AdviceStatusResult::Unsuccessfully->value,
+        ])
+        ->assertForbidden();
+
+    $this->actingAs($this->user)
+        ->deleteJson("/api/groups/{$this->subGroup->id}/advicestatus/{$this->subGroupStatus->id}")
+        ->assertForbidden();
+
+});
