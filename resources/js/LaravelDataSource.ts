@@ -1,6 +1,7 @@
 import DataSource from "devextreme/data/data_source";
 import axios, { AxiosError } from 'axios'
 import CustomStore from 'devextreme/data/custom_store';
+import { LaravelValidationError } from "./helpers";
 
 export default class LaravelDataSource extends DataSource{
 	constructor(url: string){
@@ -38,7 +39,7 @@ export default class LaravelDataSource extends DataSource{
 		});
 	}
 
-	private formatError(error: AxiosError): void{
+	private formatError(error: AxiosError<LaravelValidationError>): void{
 		if(error.response && error.response.status === 422){
 			for(const prop  in error.response.data.errors){
 				const validationErrors  = error.response.data.errors[prop] as Array<String>;

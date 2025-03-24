@@ -12,7 +12,13 @@ function formatPrice(price: number): string{
 	return price.toFixed(2).replace(".", ",") + " €";
 }
 
-function notifyError(error: AxiosError): void{
+export interface LaravelValidationError{
+    errors: {
+        [key: string]: Array<string>
+    }
+}
+
+function notifyError(error: AxiosError<LaravelValidationError>): void{
 	if(error.response && error.response.status === 422){
 	  let validationErrors: Array<String> = [];
 	  for(const prop in error.response.data.errors){
@@ -58,5 +64,5 @@ class AdaptTableHeight{
 		return this.r;
 	}
 }
-  
+
 export {formatPrice, formatPriceCell, notifyError, formatDateCell, AdaptTableHeight}
