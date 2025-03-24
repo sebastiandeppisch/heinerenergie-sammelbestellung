@@ -80,7 +80,7 @@ class GroupContext implements GroupContextContract
         $this->user = $user;
     }
 
-    public function hasAccessToGroup(User $user, Group $group): bool
+    /*public function hasAccessToGroup(User $user, Group $group): bool
     {
         $this->assertUserMatches($user);
 
@@ -116,13 +116,17 @@ class GroupContext implements GroupContextContract
         }
 
         return false;
-    }
+    }*/
 
-    public function hasAccessToAdvice(User $user, Advice $advice): bool
+    /*public function hasAccessToAdvice(User $user, Advice $advice): bool
     {
         $this->assertUserMatches($user);
 
         if ($this->actsAsSystemAdmin($user)) {
+            return true;
+        }
+
+        if ($this->actsAsGroupAdmin($user, $advice->group)) {
             return true;
         }
 
@@ -143,9 +147,19 @@ class GroupContext implements GroupContextContract
             return false;
         }
 
-        return $this->hasAccessToGroup($user, $group);
-    }
+        if ($this->hasAccessToGroup($user, $group)) {
+            if ($advice->advisor_id === $user->id) {
+                return true;
+            }
 
+            if ($advice->shares()->where('advisor_id', $user->id)->exists()) {
+                return true;
+            }
+        }
+
+        return false;
+    }*/
+/*
     public function hasAccessToAdvisor(User $user, User $advisor): bool
     {
         $this->assertUserMatches($user);
@@ -164,5 +178,25 @@ class GroupContext implements GroupContextContract
         $advisorGroups = $advisor->groups()->get();
 
         return $userGroups->contains(fn ($group) => $advisorGroups->contains($group));
+    }*/
+
+    public function actsAsGroupMember(User $user, Group $group): bool
+    {
+        $this->assertUserMatches($user);
+
+        return $this->getCurrentGroup() !== null && $this->getCurrentGroup()->is($group);
+    }
+
+    public function actsAsTransitiveGroupMember(User $user, Group $group): bool
+    {
+        $this->assertUserMatches($user);
+
+        foreach($group->ancestors() as $ancestor) {
+            if ($this->actsAsGroupMember($user, $ancestor)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

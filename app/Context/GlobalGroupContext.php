@@ -59,18 +59,21 @@ class GlobalGroupContext implements GroupContextContract
         return false;
     }
 
-    public function hasAccessToAdvice(User $user, Advice $advice): bool
+    public function actsAsGroupMember(User $user, Group $group): bool
     {
-
-        if ($advice->user_id === $user->id) {
-            return true;
-        }
-
-        return $this->hasAccessToGroup($user, $advice->group);
+        return $group->users()->contains($user);
     }
 
-    public function hasAccessToAdvisor(User $user, User $advisor): bool
+    public function actsAsTransitiveGroupMember(User $user, Group $group): bool
     {
-        return $advisor->groups()->wherePivot('user_id', $user->id)->exists();
+        
+        foreach($group->ancestors() as $ancestor){
+            if($this->actsAsGroupMember($user, $ancestor)){
+                return true;
+            }
+        }
+
+        return false;
+
     }
 }

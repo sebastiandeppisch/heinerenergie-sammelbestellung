@@ -28,13 +28,14 @@ class NoGroupContext implements GroupContextContract
         return false;
     }
 
-    public function hasAccessToAdvice(User $user, Advice $advice): bool
+    public function actsAsGroupMember(User $user, Group $group): bool
     {
         return false;
     }
 
-    public function hasAccessToAdvisor(User $user, User $advisor): bool
+    public function actsAsTransitiveGroupMember(User $user, Group $group): bool
     {
         return false;
     }
+    
 }
