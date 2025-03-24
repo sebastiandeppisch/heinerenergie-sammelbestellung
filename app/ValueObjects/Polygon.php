@@ -5,11 +5,14 @@ namespace App\ValueObjects;
 use App\Casts\PolygonCast;
 use Illuminate\Contracts\Database\Eloquent\Castable;
 use JsonSerializable;
+use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
-class Polygon implements Castable, JsonSerializable
+#[TypeScript]
+readonly class Polygon implements Castable, JsonSerializable
 {
     public function __construct(
-        private array $coordinates = []
+        /** @var array<Coordinate> */
+        public array $coordinates = []
     ) {}
 
     public static function castUsing(array $attributes): string
@@ -54,7 +57,7 @@ class Polygon implements Castable, JsonSerializable
 
         return new Coordinate(
             lat: $center[0],
-            long: $center[1],
+            lng: $center[1],
         );
     }
 
@@ -73,7 +76,7 @@ class Polygon implements Castable, JsonSerializable
 
         // Ray casting algorithm
         $inside = false;
-        $x = $point->long;
+        $x = $point->lng;
         $y = $point->lat;
 
         // For each edge of the polygon

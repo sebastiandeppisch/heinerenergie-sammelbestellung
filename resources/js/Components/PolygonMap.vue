@@ -12,51 +12,48 @@ import {
 } from "@vue-leaflet/vue-leaflet";
 
 
-import L, { DrawEvents, LatLng, LatLngExpression } from "leaflet";
+import L, { DrawEvents, LatLng, LatLngExpression, Point } from "leaflet";
 import "leaflet-draw";
 
-type Point = [number, number];
-type Polygon = Point[];
+const CRS = L.CRS.Earth;
 
 const props = withDefaults(defineProps<{
-  logo: string | null,
-  logoAspect: number | null
+    logo: string | null,
+    logoAspect: number | null
 }>(), {
-  logo: null,
-  logoAspect: null
+    logo: null,
+    logoAspect: null
 });
 
-const logoSize = computed(() => {
+const logoSize = computed<Point>(() => {
   const height = 30;
 
 
   if(!props.logoAspect) {
-    return [height, height];
+    return new Point(height, height);
   }
 
   const width = height * props.logoAspect;
-  return [width, height];
+  return new Point(width, height);
 });
 
-const polygonModel = defineModel<Polygon>();
+type Coordinate = App.ValueObjects.Coordinate;
+
+const polygonModel = defineModel<App.ValueObjects.Polygon>();
 
 const mapRef = ref<typeof LMap | null>(null);
 
-const centerOfPolygon = computed<Point>(() => {
+const centerOfPolygon = computed<Coordinate>(() => {
 
-  if(!polygonModel.value || polygonModel.value.length === 0) {
-    return [0, 0];
-  }
-  const polygon = polygonModel.value;
+    const zeroCoordinate: Coordinate = {
+        lat: 0,
+        lng: 0
+    };
 
-  const center = polygon.reduce((acc: Point, curr: Point) => {
-    return  [acc[0] + curr[0], acc[1] + curr[1]];
-  }, [0, 0]);
-
-  center[0] = center[0] / polygon.length;
-  center[1] = center[1] / polygon.length;
-
-  return center;
+    if(!polygonModel.value || polygonModel.value.coordinates.length === 0) {
+        return zeroCoordinate;
+    }
+    return L.PolyUtil.polygonCenter(polygonModel.value?.coordinates, CRS);
 });
 
 async function onLeafletReady() {
@@ -67,12 +64,20 @@ async function onLeafletReady() {
             const layer = e.layer as L.Polygon;
             const polygon = layer.getLatLngs();
 
-            polygonModel.value = (polygon[0] as LatLng[]).map((item: LatLng) => {
-              if (typeof item === 'object') {
-                return [item.lat, item.lng];
-              }
-              return item;
-            });
+            polygonModel.value = {
+                coordinates: (polygon[0] as LatLng[]).map((item: LatLng) => {
+                    if (typeof item === 'object') {
+                        return {
+                            lat: item.lat,
+                            lng: item.lng
+                        }
+                    }
+                    return {
+                        lat: item[0],
+                        lng: item[1]
+                    };
+                })
+            };
         }else{
           console.log('other type');
           console.log(e.layerType);
@@ -83,7 +88,7 @@ async function onLeafletReady() {
 }
 
 function centerAndZoomToContent(){
-  const polygon = polygonModel.value;
+  const polygon = polygonModel.value?.coordinates;
 
   if(!polygon || polygon.length === 0) {
     return;
@@ -119,14 +124,19 @@ async function onFeatureGroupReady() {
     mapRef.value?.leafletObject.addControl(drawControl);
 }
 
-const coordinatedOfDarmstadtCityCenter = [49.8728, 8.6512];
+const coordinatedOfDarmstadtCityCenter = {
+    lat: 49.8728,
+    lng: 8.6512
+}
+
+const centerOfMap = CRS.project(coordinatedOfDarmstadtCityCenter);
 
 </script>
 <template>
     <LMap
       ref="mapRef"
       :zoom="15"
-      :center="coordinatedOfDarmstadtCityCenter"
+      :center="centerOfMap"
       use-global-leaflet
       :options="{attributionControl: false}"
       @ready="onLeafletReady"
@@ -138,9 +148,9 @@ const coordinatedOfDarmstadtCityCenter = [49.8728, 8.6512];
       />
       <LFeatureGroup @ready="onFeatureGroupReady" />
      <LMarker :lat-lng="centerOfPolygon">
-        <LIcon :icon-url="logo" :icon-size="logoSize" />
+        <LIcon v-if="logo !== null" :icon-url="logo" :icon-size="logoSize" />
       </LMarker>
-    
-      <LPolygon v-for="(item, index) in [polygonModel]" :key="index" :lat-lngs="item" v-if="polygonModel && polygonModel.length > 0" />
+
+      <LPolygon v-for="(item, index) in [polygonModel]" :key="index" :lat-lngs="item.coordinates" v-if="polygonModel && polygonModel.coordinates.length > 0" />
     </LMap>
-</template> 
+</template>

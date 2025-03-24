@@ -102,8 +102,6 @@ class User extends Authenticatable
             'is_admin' => 'bool',
             'address' => Address::class,
             'coordinate' => Coordinate::class,
-            'long' => 'float',
-            'lat' => 'float',
             'advice_radius' => 'int',
         ];
     }

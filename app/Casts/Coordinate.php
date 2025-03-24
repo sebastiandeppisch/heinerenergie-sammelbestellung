@@ -10,13 +10,13 @@ class Coordinate implements CastsAttributes
 {
     public function get($model, string $key, $value, array $attributes)
     {
-        if ($attributes['lat'] === null || $attributes['long'] === null) {
+        if ($attributes['lat'] === null || $attributes['lng'] === null) {
             return null;
         }
 
         return new ValueObjectsCoordinate(
             lat: $attributes['lat'],
-            long: $attributes['long']
+            lng: $attributes['lng']
         );
     }
 
@@ -25,7 +25,7 @@ class Coordinate implements CastsAttributes
         if ($value === null) {
             return [
                 'lat' => null,
-                'long' => null,
+                'lng' => null,
             ];
         }
 
@@ -35,7 +35,7 @@ class Coordinate implements CastsAttributes
 
         return [
             'lat' => $value->lat,
-            'long' => $value->long,
+            'lng' => $value->lng,
         ];
     }
 }

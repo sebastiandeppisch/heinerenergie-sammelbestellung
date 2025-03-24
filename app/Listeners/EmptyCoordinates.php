@@ -13,7 +13,7 @@ class EmptyCoordinates
         if ($advice->wasChanged(['street', 'city', 'zip', 'streetNumber'])) {
             $advice = $advice->fresh();
             $advice->lat = null;
-            $advice->long = null;
+            $advice->lng = null;
             $advice->save();
         }
     }

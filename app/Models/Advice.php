@@ -41,7 +41,7 @@ class Advice extends Model implements HasSends
         'commentary',
         'advisor_id',
         'advice_status_id',
-        'long',
+        'lng',
         'lat',
         'type',
         'helpType_place',
@@ -130,8 +130,6 @@ class Advice extends Model implements HasSends
             'phone' => 'string',
             'commentary' => 'string',
             'advisor_id' => 'integer',
-            'long' => 'float',
-            'lat' => 'float',
             'advice_status_id' => 'integer',
             'type' => AdviceType::class,
             'helpType_place' => 'boolean',
@@ -143,7 +141,7 @@ class Advice extends Model implements HasSends
             'placeNotes' => 'string',
             'address' => Address::class,
             'coordinate' => Coordinate::class,
-            'long' => 'float',
+            'lng' => 'float',
             'lat' => 'float',
         ];
     }

@@ -230,7 +230,7 @@ function runSearch(){
                 <img src="/images/markers/gray_red.svg" style="height:3em;display:inline;" />
               </div>
             </div>
-          
+
           </div>
         </div>
       </LControl>
@@ -327,8 +327,8 @@ function runSearch(){
         name="Initiativen"
         layer-type="overlay"
       >
-        <LPolygon v-for="(item, index) in props.groups" :key="index" :lat-lngs="item.polygon" v-if="props.groups && props.groups.length > 0" />
-        <LMarker v-for="(item, index) in props.groups" :key="index" :lat-lng="latLng(item.center.lat, item.center.long)" v-if="props.groups && props.groups.length > 0">
+        <LPolygon v-for="(item, index) in props.groups" :key="index" :lat-lngs="item.polygon.coordinates" v-if="props.groups && props.groups.length > 0" />
+        <LMarker v-for="(item, index) in props.groups" :key="index" :lat-lng="latLng(item.center.lat, item.center.lng)" v-if="props.groups && props.groups.length > 0">
           <LIcon :icon-url="item.logo_path" :icon-size="[50, 50]" v-if="item.logo_path !== null" />
         </LMarker>
       </LLayerGroup>

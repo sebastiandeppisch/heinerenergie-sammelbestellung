@@ -37,13 +37,13 @@ test('unauthorized users cannot update consulting area', function () {
 
 test('group admin can update consulting area', function () {
     $coordinates = [
-        [49.8807, 8.6572],
-        [49.8787, 8.6661],
-        [49.8746, 8.6630],
-        [49.8731, 8.6578],
-        [49.8754, 8.6525],
-        [49.8782, 8.6497],
-        [49.8803, 8.6509],
+        ["lat" => 49.8807, "lng" => 8.6572],
+        ["lat" => 49.8787, "lng" => 8.6661],
+        ["lat" => 49.8746, "lng" => 8.6630],
+        ["lat" => 49.8731, "lng" => 8.6578],
+        ["lat" => 49.8754, "lng" => 8.6525],
+        ["lat" => 49.8782, "lng" => 8.6497],
+        ["lat" => 49.8803, "lng" => 8.6509],
     ];
 
     actingAs($this->admin)
@@ -58,7 +58,7 @@ test('group admin can update consulting area', function () {
     expect($this->group->consulting_area)
         ->toBeInstanceOf(Polygon::class)
         ->and($this->group->consulting_area->getCoordinates())
-        ->toBe($coordinates);
+        ->toMatchArray($coordinates);
 });
 
 test('it validates polygon format', function () {

@@ -4,22 +4,24 @@ namespace App\ValueObjects;
 
 use App\Casts\Coordinate as CoordinateCast;
 use Illuminate\Contracts\Database\Eloquent\Castable;
+use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
-class Coordinate implements Castable
+#[TypeScript]
+readonly class Coordinate implements Castable
 {
     public const EARTH_RADIUS = 6371000;
 
     public function __construct(
         public float $lat,
-        public float $long
+        public float $lng
     ) {}
 
     public static function fromArray(array $data): self
     {
-        $lat = $data['lat'];
-        $long = $data['lon'] ?? $data['long'];
+        $lat = $data['lat'] ?? $data['latitude'];
+        $lng = $data['lon'] ?? $data['long'] ?? $data['lng'] ?? $data['longitude'];
 
-        return new self($lat, $long);
+        return new self($lat, $lng);
     }
 
     public static function castUsing(array $attributes): string
@@ -39,7 +41,7 @@ class Coordinate implements Castable
     {
         return new self(
             deg2rad($this->lat),
-            deg2rad($this->long)
+            deg2rad($this->lng)
         );
     }
 
@@ -52,10 +54,10 @@ class Coordinate implements Castable
         $to = $to->toRad();
 
         $latDelta = $to->lat - $from->lat;
-        $lonDelta = $to->long - $from->long;
+        $lngDelta = $to->lng - $from->lng;
 
         $angle = 2 * asin(sqrt(sin($latDelta / 2) ** 2 +
-          cos($from->lat) * cos($to->lat) * sin($lonDelta / 2) ** 2));
+          cos($from->lat) * cos($to->lat) * sin($lngDelta / 2) ** 2));
 
         return $angle * self::EARTH_RADIUS;
     }

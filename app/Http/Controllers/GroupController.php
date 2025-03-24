@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Data\GroupData;
+use App\Data\Pages\GroupsIndexData;
 use App\Http\Requests\Group\StoreGroupRequest;
 use App\Http\Requests\Group\UpdateGroupRequest;
 use App\Http\Requests\UpdateGroupConsultingAreaRequest;
@@ -25,20 +26,18 @@ class GroupController extends Controller
     {
         $polygon = $selectedGroup?->consulting_area;
 
-        $groups = $groups->toArray();
-
         $user = request()->user();
 
         $canEditGroup = $selectedGroup ? $user->can('update', $selectedGroup) : false;
 
-        return Inertia::render('Groups/Index', [
-            'groups' => array_values($groups),
-            'canCreateRootGroup' => $canCreateRootGroup,
-            'selectedGroup' => $selectedGroup ? GroupData::fromModel($selectedGroup) : null,
-            'polygon' => $polygon,
-            'canEditGroup' => $canEditGroup,
-            'canCreateGroups' => $user->can('createAny', Group::class),
-        ]);
+        return Inertia::render('Groups/Index', new GroupsIndexData(
+            groups: $groups->map(fn (GroupData $group) => $group)->values(),
+            canCreateRootGroup: $canCreateRootGroup,
+            selectedGroup: $selectedGroup ? GroupData::fromModel($selectedGroup) : null,
+            polygon: $polygon,
+            canEditGroup: $canEditGroup,
+            canCreateGroups: $user->can('createAny', Group::class),
+        ));
     }
 
     public function index(Request $request, #[CurrentUser] User $user)

@@ -29,13 +29,13 @@ test('find group containing coordinates', function () {
     ]);
 
     // Check if a coordinate inside the polygon finds the group
-    $coordinate = new Coordinate(lat: 48.5, long: 8.5);  // Inside the polygon
+    $coordinate = new Coordinate(lat: 48.5, lng: 8.5);  // Inside the polygon
     $foundGroup = $this->groupService->findGroupContainingCoordinates($coordinate);
     expect($foundGroup)->not->toBeNull();
     expect($foundGroup->id)->toBe($group->id);
 
     // Check if a coordinate outside the polygon returns no group
-    $outsideCoordinate = new Coordinate(lat: 47.0, long: 7.0);  // Outside the polygon
+    $outsideCoordinate = new Coordinate(lat: 47.0, lng: 7.0);  // Outside the polygon
     $notFoundGroup = $this->groupService->findGroupContainingCoordinates($outsideCoordinate);
     expect($notFoundGroup)->toBeNull();
 });
@@ -79,13 +79,13 @@ test('find nearest main group', function () {
     ]);
 
     // Check if a nearby coordinate finds the nearest group
-    $nearbyCoordinate = new Coordinate(lat: 8.5, long: 48.5);  // Near the first group
+    $nearbyCoordinate = new Coordinate(lat: 8.5, lng: 48.5);  // Near the first group
     $foundNearGroup = $this->groupService->findNearestMainGroup($nearbyCoordinate);
     expect($foundNearGroup)->not->toBeNull();
     expect($foundNearGroup->name)->toBe('Nearby Group');
 
     // Check if a distant coordinate finds the other group
-    $distantCoordinate = new Coordinate(lat: 20.5, long: 60.5);  // Near the second group
+    $distantCoordinate = new Coordinate(lat: 20.5, lng: 60.5);  // Near the second group
     $foundDistantGroup = $this->groupService->findNearestMainGroup($distantCoordinate);
     expect($foundDistantGroup)->not->toBeNull();
     expect($foundDistantGroup->name)->toBe('Distant Group');

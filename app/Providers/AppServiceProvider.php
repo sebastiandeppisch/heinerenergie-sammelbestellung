@@ -38,7 +38,7 @@ class AppServiceProvider extends ServiceProvider
 
                 $coordinatesOfDarmstadtCenter = new Coordinate(
                     lat: 49.8728475,
-                    long: 8.6510204
+                    lng: 8.6510204
                 );
 
                 return fn (Address $address) => $coordinatesOfDarmstadtCenter;
@@ -47,7 +47,7 @@ class AppServiceProvider extends ServiceProvider
             $this->app->bind(FetchCoordinateByFreeText::class, function () {
                 $coordinatesOfDarmstadtCenter = new Coordinate(
                     lat: 49.8728475,
-                    long: 8.6510204
+                    lng: 8.6510204
                 );
 
                 return fn (string $text) => $coordinatesOfDarmstadtCenter;

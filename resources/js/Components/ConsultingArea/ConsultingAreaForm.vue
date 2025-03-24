@@ -5,16 +5,10 @@ import { ref, watch } from 'vue'
 import { route } from 'ziggy-js'
 import DxButton from "devextreme-vue/button";
 
-interface Polygon {
-  coordinates: number[][]
-}
-
-
-type Group = App.Data.GroupData
 
 const props = defineProps<{
-  group: Group,
-  polygon: Polygon
+  group: App.Data.GroupData,
+  polygon: App.ValueObjects.Polygon
 }>()
 
 const form = useForm({
@@ -70,7 +64,7 @@ const handleDelete = () => {
         <DxButton
           v-if="props.polygon"
           text="Beratungsgebiet löschen"
-          :disabled="form.processing || form.polygon.length === 0"
+          :disabled="form.processing || form.polygon.coordinates.length === 0"
           stylingMode="outlined"
           icon="trash"
           type="danger"

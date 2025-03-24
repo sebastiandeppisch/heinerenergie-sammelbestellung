@@ -15,8 +15,8 @@ class UpdateGroupConsultingAreaRequest extends FormRequest
     {
         return [
             'polygon' => ['required', 'array'],
-            'polygon.*' => ['required', 'array', 'size:2'],
-            'polygon.*.*' => ['required', 'numeric', 'between:0,180'], // Covers both lat/long ranges
+            'polygon.*.lng' => ['required', 'numeric', 'between:-180,180'],
+            'polygon.*.lat' => ['required',  'numeric', 'between:-90,90'],
         ];
     }
 
@@ -25,11 +25,10 @@ class UpdateGroupConsultingAreaRequest extends FormRequest
         return [
             'polygon.required' => 'Das Polygon ist erforderlich.',
             'polygon.array' => 'Das Polygon muss ein Array sein.',
-            'polygon.*.array' => 'Jeder Punkt muss ein Array mit Koordinaten sein.',
-            'polygon.*.size' => 'Jeder Punkt muss genau zwei Koordinaten enthalten.',
-            'polygon.*.*.required' => 'Alle Koordinaten müssen angegeben werden.',
-            'polygon.*.*.numeric' => 'Koordinaten müssen numerisch sein.',
-            'polygon.*.*.between' => 'Koordinaten müssen zwischen 0 und 180 liegen.',
+            'polygon.*.lng.numeric' => 'Koordinaten müssen numerisch sein.',
+            'polygon.*.lat.numeric' => 'Koordinaten müssen numerisch sein.',
+            'polygon.*.lng.between' => 'Geographische Längenangaben müssen zwischen -180 und 180 liegen.',
+            'polygon.*.lat.between' => 'Geographische Breitenangaben müssen zwischen -90 und 90 liegen.',
         ];
     }
 }

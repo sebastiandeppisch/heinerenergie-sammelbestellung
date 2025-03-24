@@ -36,7 +36,7 @@ phone: string;
 commentary: string;
 advisor_id: number;
 advice_status_id: number;
-long: number;
+lng: number;
 lat: number;
 type: any;
 created_at: any;
@@ -66,8 +66,8 @@ accepts_transfers: boolean;
 userCanActAsAdmin: boolean;
 };
 export type GroupMapData = {
-polygon: any;
-center: any;
+polygon: App.ValueObjects.Polygon;
+center: App.ValueObjects.Coordinate;
 name: string;
 logo_path: string;
 };
@@ -76,5 +76,24 @@ id: number;
 name: string;
 email: string;
 is_admin: boolean;
+};
+}
+declare namespace App.Data.Pages {
+export type GroupsIndexData = {
+groups: Array<App.Data.GroupData>;
+canCreateRootGroup: boolean;
+selectedGroup: App.Data.GroupData;
+polygon: App.ValueObjects.Polygon;
+canEditGroup: boolean;
+canCreateGroups: boolean;
+};
+}
+declare namespace App.ValueObjects {
+export type Coordinate = {
+lat: number;
+lng: number;
+};
+export type Polygon = {
+coordinates: Array<App.ValueObjects.Coordinate>;
 };
 }

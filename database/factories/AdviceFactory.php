@@ -34,7 +34,7 @@ class AdviceFactory extends Factory
             'email' => fake()->email(),
             'phone' => fake()->phoneNumber(),
             'commentary' => fake()->optional()->text(),
-            'long' => fake()->optional()->longitude(),
+            'lng' => fake()->optional()->longitude(),
             'lat' => fake()->optional()->latitude(),
             'group_id' => $group,
         ];

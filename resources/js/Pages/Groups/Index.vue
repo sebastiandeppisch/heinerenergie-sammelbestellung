@@ -117,16 +117,8 @@ import ConsultingAreaForm from '@/components/ConsultingArea/ConsultingAreaForm.v
 import AdviceStatusGroup from '@/views/AdviceStatusGroup.vue'
 import { DxButton } from 'devextreme-vue'
 import CreateGroupForm from '@/components/Groups/CreateGroupForm.vue'
-type GroupData = App.Data.GroupData;
 
-const props = defineProps<{
-  groups: GroupData[],
-  selectedGroup: GroupData | null,
-  canCreateRootGroup: boolean,
-  polygon: number[][] | null,
-  canCreateGroups: boolean,
-  canEditGroup: boolean,
-}>();
+const props = defineProps<App.Data.Pages.GroupsIndexData>();
 
 const showCreateModal = ref(false)
 const selectedTabIndex = ref(0)
@@ -136,9 +128,11 @@ const onTabSelectionChanged = (e: any) => {
 }
 
 
-const polygon = computed(() => {
+const polygon = computed<App.ValueObjects.Polygon>(() => {
   if (props.polygon === null) {
-    return [];
+    return {
+        coordinates: []
+    }
   }
   return props.polygon
 })
