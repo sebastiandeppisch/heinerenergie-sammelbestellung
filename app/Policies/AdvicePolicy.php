@@ -60,24 +60,7 @@ class AdvicePolicy
             return true;
         }
 
-        // Global admins can update any advice
-        if ($user->isActingAsAdmin()) {
-            return true;
-        }
-
-        // Get the user's role in the advice's group
-        $userGroup = $user->groups()
-            ->select('groups.id', 'group_user.is_admin')
-            ->where('groups.id', $advice->group_id)
-            ->first();
-
-        // If user is an admin in this group, they can update
-        if ($userGroup && $userGroup->pivot->is_admin) {
-            return true;
-        }
-
-        // Advisors can only update their own advices
-        return $advice->advisor_id === $user->id;
+        return $this->groupContext->actsAsTransitiveGroupMember($user, $advice->group);
     }
 
     public function delete(User $user, Advice $advice)

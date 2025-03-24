@@ -14,9 +14,15 @@ interface GroupContextContract
 
     public function actsAsGroupAdmin(User $user, Group $group): bool;
 
-    public function hasAccessToGroup(User $user, Group $group): bool;
+    public function actsAsTransitiveGroupAdmin(User $user, Group $group): bool;
 
-    public function hasAccessToAdvice(User $user, Advice $advice): bool;
+    //public function hasAccessToGroup(User $user, Group $group): bool;
 
-    public function hasAccessToAdvisor(User $user, User $advisor): bool;
+    public function actsAsGroupMember(User $user, Group $group): bool;
+
+    public function actsAsTransitiveGroupMember(User $user, Group $group): bool;
+
+    //public function hasAccessToAdvice(User $user, Advice $advice): bool;
+
+    //public function hasAccessToAdvisor(User $user, User $advisor): bool;
 }
