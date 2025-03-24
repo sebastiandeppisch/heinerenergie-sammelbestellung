@@ -34,7 +34,7 @@
                 :selected-index="selectedTabIndex"
                 @selection-changed="onTabSelectionChanged"
               >
-                <DxItem 
+                <DxItem
                   title="Stammdaten"
                   icon="info"
                 >
@@ -45,7 +45,7 @@
                     />
                   </template>
                 </DxItem>
-                <DxItem 
+                <DxItem
                   title="Berater:innen"
                   icon="user"
                   v-if="canEditGroup"
@@ -56,7 +56,7 @@
                     />
                   </template>
                 </DxItem>
-                <DxItem 
+                <DxItem
                   title="Beratungsgebiet"
                   icon="map"
                 >
@@ -67,7 +67,7 @@
                     />
                   </template>
                 </DxItem>
-                <DxItem 
+                <DxItem
                   title="Beratungszustände"
                   icon="tableproperties"
                   v-if="canEditGroup"
@@ -110,13 +110,13 @@
 import { computed, ref } from 'vue'
 import { DxTabPanel, DxItem } from 'devextreme-vue/tab-panel'
 import { DxPopup } from 'devextreme-vue/popup'
-import GroupTree from '@/Components/Groups/GroupTree.vue'
-import GroupDetails from '@/Components/Groups/GroupDetails.vue'
-import GroupUsers from '@/Components/Groups/GroupUsers.vue'
-import ConsultingAreaForm from '@/Components/ConsultingArea/ConsultingAreaForm.vue'
+import GroupTree from '@/components/Groups/GroupTree.vue'
+import GroupDetails from '@/components/Groups/GroupDetails.vue'
+import GroupUsers from '@/components/Groups/GroupUsers.vue'
+import ConsultingAreaForm from '@/components/ConsultingArea/ConsultingAreaForm.vue'
 import AdviceStatusGroup from '@/views/AdviceStatusGroup.vue'
 import { DxButton } from 'devextreme-vue'
-import CreateGroupForm from '@/Components/Groups/CreateGroupForm.vue'
+import CreateGroupForm from '@/components/Groups/CreateGroupForm.vue'
 type GroupData = App.Data.GroupData;
 
 const props = defineProps<{

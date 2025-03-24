@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3'
-import PolygonMap from '@/Components/PolygonMap.vue'
+import PolygonMap from '@/components/PolygonMap.vue'
 import { ref, watch } from 'vue'
 import { route } from 'ziggy-js'
 import DxButton from "devextreme-vue/button";
@@ -52,7 +52,7 @@ const handleDelete = () => {
   <div class="space-y-4">
     <div class="mt-4">
       <p class="text-sm text-gray-600 text-right">
-        Klicke auf das Polygon-Symbol oben rechts in der Karte, um den Beratungsbereich zu bearbeiten. 
+        Klicke auf das Polygon-Symbol oben rechts in der Karte, um den Beratungsbereich zu bearbeiten.
       </p>
     </div>
 
@@ -88,4 +88,4 @@ const handleDelete = () => {
       </div>
     </div>
   </div>
-</template> 
+</template>
