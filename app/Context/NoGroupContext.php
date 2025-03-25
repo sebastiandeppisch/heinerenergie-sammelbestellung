@@ -28,5 +28,4 @@ class NoGroupContext implements GroupContextContract
     {
         return false;
     }
-
 }

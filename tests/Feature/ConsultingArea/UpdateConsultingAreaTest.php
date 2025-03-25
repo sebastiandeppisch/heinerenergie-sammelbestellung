@@ -37,13 +37,13 @@ test('unauthorized users cannot update consulting area', function () {
 
 test('group admin can update consulting area', function () {
     $coordinates = [
-        ["lat" => 49.8807, "lng" => 8.6572],
-        ["lat" => 49.8787, "lng" => 8.6661],
-        ["lat" => 49.8746, "lng" => 8.6630],
-        ["lat" => 49.8731, "lng" => 8.6578],
-        ["lat" => 49.8754, "lng" => 8.6525],
-        ["lat" => 49.8782, "lng" => 8.6497],
-        ["lat" => 49.8803, "lng" => 8.6509],
+        ['lat' => 49.8807, 'lng' => 8.6572],
+        ['lat' => 49.8787, 'lng' => 8.6661],
+        ['lat' => 49.8746, 'lng' => 8.6630],
+        ['lat' => 49.8731, 'lng' => 8.6578],
+        ['lat' => 49.8754, 'lng' => 8.6525],
+        ['lat' => 49.8782, 'lng' => 8.6497],
+        ['lat' => 49.8803, 'lng' => 8.6509],
     ];
 
     actingAs($this->admin)
@@ -74,10 +74,10 @@ test('it validates polygon format', function () {
     // Test invalid coordinate values
     actingAs($this->admin)
         ->post(route('groups.consulting-area.update', $this->group), [
-            'polygon' => ["coordinates" =>  [
-                "lat" => 181,
-                "long" => 200
-            ]
+            'polygon' => ['coordinates' => [
+                'lat' => 181,
+                'long' => 200,
+            ],
             ]], // Invalid lat/long values
         )
         ->assertSessionHasErrors('polygon.coordinates.*');

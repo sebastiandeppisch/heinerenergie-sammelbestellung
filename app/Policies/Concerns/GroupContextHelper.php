@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Policies\Concerns;
+
 use App\Context\GroupContextContract;
 use App\Models\User;
 
@@ -13,6 +14,7 @@ trait GroupContextHelper
         if ($this->groupContext->isActingAsSystemAdmin($user)) {
             return true;
         }
+
         return null;
     }
 }

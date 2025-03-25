@@ -2,7 +2,6 @@
 
 namespace App\Policies;
 
-use App\Context\GroupContextContract;
 use App\Models\AdviceStatusGroup;
 use App\Models\Group;
 use App\Models\User;

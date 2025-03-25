@@ -10,9 +10,8 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 
 class AdviceStatusPolicy
 {
-    use HandlesAuthorization;
-
     use GroupContextHelper;
+    use HandlesAuthorization;
 
     public function create(User $user, Group $group)
     {

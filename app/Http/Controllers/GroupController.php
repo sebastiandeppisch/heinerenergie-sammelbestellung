@@ -47,7 +47,7 @@ class GroupController extends Controller
         }
 
         $groups = $this->listGroups($user)
-        ->map(fn (Group $group) => GroupData::fromModel($group));
+            ->map(fn (Group $group) => GroupData::fromModel($group));
 
         return $this->showPage(
             $groups,

@@ -9,6 +9,7 @@ use App\Models\Group;
 use App\Models\User;
 use App\Services\SessionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+
 use function Pest\Laravel\post;
 
 uses(RefreshDatabase::class);

@@ -76,7 +76,6 @@ test('user can access shared advisors across groups', function () {
     expect($this->normalUser->can('view', $sharedAdvisor))->toBeTrue('The user should be able to view the shared advisor after sharing');
 })->todo('sharing between groups is not yet completely defined');
 
-
 test('user can see colleagues in same group', function () {
     $colleague = User::factory()->create();
 

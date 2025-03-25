@@ -152,4 +152,3 @@ test('group admin is also a regular member of the group', function () {
         ->and($this->mainGroup->users()->pluck('users.id'))->toContain($this->normalUser->id)
         ->and($this->mainGroup->admins()->pluck('users.id'))->toContain($this->normalUser->id);
 });
-

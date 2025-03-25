@@ -2,7 +2,6 @@
 
 namespace App\Context;
 
-use App\Models\Advice;
 use App\Models\Group;
 use App\Models\User;
 
@@ -25,6 +24,7 @@ class GlobalGroupContext implements GroupContextContract
         if ($group->users()->wherePivot('user_id', $user->id)->wherePivot('is_admin', true)->exists()) {
             return true;
         }
+
         return false;
     }
 

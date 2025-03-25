@@ -26,7 +26,7 @@ interface GroupContextContract
 
     public function isActingAsAncestorMember(User $user, Group $group): bool;
 
-    //is acting as a group member or admin
+    // is acting as a group member or admin
 
     public function isActingAsDirectMemberOrAdmin(User $user, Group $group): bool;
 

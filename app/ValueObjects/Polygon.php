@@ -4,7 +4,6 @@ namespace App\ValueObjects;
 
 use App\Casts\PolygonCast;
 use Illuminate\Contracts\Database\Eloquent\Castable;
-use JsonSerializable;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
 #[TypeScript]
@@ -27,12 +26,11 @@ readonly class Polygon implements Castable
         }
         $data = json_decode($json, true);
 
-        if(array_key_exists('coordinates', $data)) {
+        if (array_key_exists('coordinates', $data)) {
             $coordinates = $data['coordinates'];
         } else {
             $coordinates = $data;
         }
-
 
         return empty($coordinates) ? null : new self($coordinates);
     }

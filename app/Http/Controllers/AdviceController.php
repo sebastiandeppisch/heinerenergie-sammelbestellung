@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\Advice\AdviceSharedAdvisorAdded;
-use App\Events\Advice\AdviceSharedAdvisorRemoved;
-use App\Events\Advice\CommentAddedEvent;
 use App\Data\AdviceEventData;
 use App\Data\DataProtectedAdviceData;
 use App\Data\GroupData;
 use App\Data\GroupMapData;
+use App\Events\Advice\CommentAddedEvent;
 use App\Events\Advice\InitiativeTransferEvent;
+use App\Http\Requests\StoreAdviceCommentRequest;
 use App\Http\Requests\TransferAdviceRequest;
 use App\Models\Advice;
 use App\Models\Group;
@@ -17,8 +16,6 @@ use App\Models\User;
 use App\Notifications\AdviceTransferred;
 use App\Services\SessionService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
-use App\Http\Requests\StoreAdviceCommentRequest;
 use Inertia\Inertia;
 
 class AdviceController extends Controller

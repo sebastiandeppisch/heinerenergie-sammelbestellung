@@ -2,7 +2,6 @@
 
 namespace App\Policies;
 
-use App\Context\GroupContextContract;
 use App\Models\Group;
 use App\Models\User;
 use App\Policies\Concerns\GroupContextHelper;
@@ -10,9 +9,8 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 
 class GroupPolicy
 {
-    use HandlesAuthorization;
-
     use GroupContextHelper;
+    use HandlesAuthorization;
 
     public function viewAny(User $user): bool
     {
@@ -26,11 +24,12 @@ class GroupPolicy
             return true;
         }
 
-        foreach($group->descendants() as $descendant) {
+        foreach ($group->descendants() as $descendant) {
             if ($this->groupContext->isActingAsTransitiveMemberOrAdmin($user, $descendant)) {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -50,8 +49,8 @@ class GroupPolicy
             return true;
         }
 
-        //users that are admins of some group can create groups, even if they dont act as group admin
-        //TODO this should be handled via group context
+        // users that are admins of some group can create groups, even if they dont act as group admin
+        // TODO this should be handled via group context
         return $user->groups()
             ->wherePivot('is_admin', true)
             ->exists();
@@ -68,9 +67,10 @@ class GroupPolicy
 
     public function delete(User $user, Group $group): bool
     {
-        if($group->advices()->exists()) {
+        if ($group->advices()->exists()) {
             return false;
         }
+
         return $this->groupContext->isActingAsTransitiveAdmin($user, $group);
     }
 

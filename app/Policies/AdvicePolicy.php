@@ -2,17 +2,15 @@
 
 namespace App\Policies;
 
-use App\Context\GroupContextContract;
 use App\Models\Advice;
-use App\Models\Group;
 use App\Models\User;
 use App\Policies\Concerns\GroupContextHelper;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class AdvicePolicy
 {
-    use HandlesAuthorization;
     use GroupContextHelper;
+    use HandlesAuthorization;
 
     public function viewAny(User $user)
     {
@@ -42,13 +40,12 @@ class AdvicePolicy
             }
         }
 
-
         return $this->view($user, $advice);
     }
 
     public function create(User $user)
     {
-        //everyone, even guests can create advices
+        // everyone, even guests can create advices
         return true;
     }
 
@@ -64,7 +61,7 @@ class AdvicePolicy
             return true;
         }
 
-        if($this->groupContext->isActingAsTransitiveAdmin($user, $advice->group)) {
+        if ($this->groupContext->isActingAsTransitiveAdmin($user, $advice->group)) {
             return true;
         }
 

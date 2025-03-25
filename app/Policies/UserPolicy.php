@@ -8,30 +8,30 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 
 class UserPolicy
 {
-    use HandlesAuthorization;
-
     use GroupContextHelper;
+    use HandlesAuthorization;
 
     public function viewAny(User $user)
     {
-        //anyone can see their colleagues
+        // anyone can see their colleagues
         return true;
     }
 
     public function view(User $user, User $model)
     {
         $groupsOfUser = $model->groups()->get();
-        foreach($groupsOfUser as $group) {
+        foreach ($groupsOfUser as $group) {
             if ($this->groupContext->isActingAsTransitiveMemberOrAdmin($user, $group)) {
                 return true;
             }
         }
+
         return false;
     }
 
     public function create(User $user)
     {
-        //TODO this should be handled via group context
+        // TODO this should be handled via group context
         return $user->groups()
             ->wherePivot('is_admin', true)
             ->exists();
@@ -44,7 +44,7 @@ class UserPolicy
 
     public function delete(User $user, User $model)
     {
-        //TODO there is no defined behaviour for the foreign data advices & orders yet
+        // TODO there is no defined behaviour for the foreign data advices & orders yet
         return false;
     }
 

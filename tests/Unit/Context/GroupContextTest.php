@@ -3,7 +3,6 @@
 namespace Tests\Unit\Context;
 
 use App\Context\GroupContext;
-use App\Models\Advice;
 use App\Models\Group;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -102,7 +101,6 @@ test('temporary group admin has scoped access', function () {
         ->and($context->isActingAsDirectAdmin($this->normalUser, $this->subSubGroup))->toBeTrue();
 });
 
-
 test('admin of sub group cannot access parent groups', function () {
     // Make normal user admin of sub group only
     $this->subGroup->users()->attach($this->normalUser->id, ['is_admin' => true]);
@@ -181,7 +179,6 @@ test('access is denied for null user', function () {
 
     $context->isActingAsTransitiveMemberOrAdmin($this->normalUser, $this->mainGroup);
 })->throws(InvalidArgumentException::class);
-
 
 test('admin of parent group has access to child group', function () {
     // Make user admin of main group

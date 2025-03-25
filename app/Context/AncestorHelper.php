@@ -7,7 +7,8 @@ use App\Models\User;
 
 trait AncestorHelper
 {
-    public function isActingAsAncestorAdmin(User $user, Group $group): bool {
+    public function isActingAsAncestorAdmin(User $user, Group $group): bool
+    {
         foreach ($group->ancestors() as $ancestor) {
             if ($this->isActingAsDirectAdmin($user, $ancestor)) {
                 return true;
@@ -54,7 +55,8 @@ trait AncestorHelper
         return false;
     }
 
-    public function isActingAsDirectMemberOrAdmin(User $user, Group $group): bool{
+    public function isActingAsDirectMemberOrAdmin(User $user, Group $group): bool
+    {
 
         if ($this->isActingAsDirectAdmin($user, $group)) {
             return true;
@@ -67,7 +69,8 @@ trait AncestorHelper
         return false;
     }
 
-    public function isActingAsTransitiveMemberOrAdmin(User $user, Group $group): bool{
+    public function isActingAsTransitiveMemberOrAdmin(User $user, Group $group): bool
+    {
         if ($this->isActingAsTransitiveAdmin($user, $group)) {
             return true;
         }
@@ -79,7 +82,8 @@ trait AncestorHelper
         return false;
     }
 
-    public function isActingAsAncestorMemberOrAdmin(User $user, Group $group): bool{
+    public function isActingAsAncestorMemberOrAdmin(User $user, Group $group): bool
+    {
         if ($this->isActingAsAncestorAdmin($user, $group)) {
             return true;
         }

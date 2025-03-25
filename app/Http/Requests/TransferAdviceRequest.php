@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use App\Models\Group;
-use Auth;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -12,11 +11,12 @@ class TransferAdviceRequest extends FormRequest
     public function authorize(): bool
     {
         $targetGroup = Group::findOrFail($this->group_id);
-        if(! $targetGroup->accepts_transfers) {
+        if (! $targetGroup->accepts_transfers) {
             throw new AuthorizationException('This group does not accept transfers');
         }
 
         $advice = $this->route('advice');
+
         return $this->user()->can('transfer', $advice);
     }
 
