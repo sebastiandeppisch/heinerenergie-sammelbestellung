@@ -2,20 +2,21 @@
 import { router } from '@inertiajs/vue3'
 import SingleCard from "../layouts/SingleCard.vue";
 import MainPublic from "../layouts/MainPublic.vue";
+import { route } from 'ziggy-js';
 
 const props = defineProps<{
   initiatives: App.Data.GroupData[];
   canActAsSystemAdmin: boolean;
 }>();
 
-function selectInitiative(id: number, asAdmin: boolean = false) {
-  router.post(`/actAsGroup/${id}`, {
+function selectInitiative(id: string, asAdmin: boolean = false) {
+  router.post(route('actAsGroup', id), {
     asAdmin
   });
 }
 
 function selectSystemAdmin() {
-  router.post('/actAsSystemAdmin');
+  router.post(route('actAsSystemAdmin'));
 }
 
 defineOptions({

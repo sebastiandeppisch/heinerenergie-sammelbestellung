@@ -23,7 +23,7 @@ class TransferAdviceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'group_id' => 'required|integer|exists:groups,id',
+            'group_id' => 'required|uuid|exists:groups,id',
             'reason' => 'nullable|string|max:1000',
         ];
     }

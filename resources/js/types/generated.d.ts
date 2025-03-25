@@ -1,6 +1,6 @@
 declare namespace App.Data {
 export type AdviceEventData = {
-id: number;
+id: string;
 description: string;
 comment: string;
 created_at: string;
@@ -12,19 +12,19 @@ content: string;
 to: string;
 };
 export type AdviceStatusData = {
-id: number;
+id: string;
 name: string;
 result: any;
-group_id: number;
+group_id: string;
 visible_in_group: boolean;
 };
 export type AdviceStatusNamesData = {
-id: number;
+id: string;
 name: string;
 result: any;
 };
 export type DataProtectedAdviceData = {
-id: number;
+id: string;
 firstName: string;
 lastName: string;
 street: string;
@@ -57,11 +57,11 @@ group_id: number;
 export type GroupData = {
 users_count: number;
 advices_count: number;
-id: number;
+id: string;
 name: string;
 description: string;
 logo_path: string;
-parent_id: number;
+parent_id: string;
 accepts_transfers: boolean;
 userCanActAsAdmin: boolean;
 };
@@ -72,7 +72,7 @@ name: string;
 logo_path: string;
 };
 export type GroupUserData = {
-id: number;
+id: string;
 name: string;
 email: string;
 is_admin: boolean;

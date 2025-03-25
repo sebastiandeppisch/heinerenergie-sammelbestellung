@@ -15,7 +15,7 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 class DataProtectedAdviceData extends Data
 {
     public function __construct(
-        public int $id,
+        public string $id,
         public string $firstName,
         public string $lastName,
         public string $street,
@@ -26,7 +26,7 @@ class DataProtectedAdviceData extends Data
         public string $phone,
         public ?string $commentary,
         public ?int $advisor_id,
-        public ?int $advice_status_id,
+        public ?string $advice_status_id,
         public ?float $lng,
         public ?float $lat,
         public ?AdviceType $type,
@@ -43,7 +43,7 @@ class DataProtectedAdviceData extends Data
         public ?string $helpType_other,
         public ?AdviceStatusResult $result,
         public ?bool $can_edit,
-        public ?int $group_id,
+        public ?string $group_id,
     ) {}
 
     public static function fromModel(Advice $advice): self

@@ -12,10 +12,10 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 class AdviceStatusData extends Data
 {
     public function __construct(
-        public int $id,
+        public string $id,
         public string $name,
         public AdviceStatusResult $result,
-        public ?int $group_id,
+        public ?string $group_id,
         public bool $visible_in_group,
     ) {}
 

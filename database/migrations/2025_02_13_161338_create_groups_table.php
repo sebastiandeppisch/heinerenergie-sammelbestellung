@@ -14,7 +14,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('groups', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->timestamps();
 
             $table->string('name');
@@ -25,8 +25,6 @@ return new class extends Migration
         });
 
         Schema::create('group_user', function (Blueprint $table) {
-            $table->id();
-
             $table->foreignIdFor(Group::class)->constrained();
             $table->foreignIdFor(User::class)->constrained();
             $table->boolean('is_admin')->default(false);

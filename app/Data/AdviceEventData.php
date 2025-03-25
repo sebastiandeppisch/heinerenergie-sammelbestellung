@@ -12,7 +12,7 @@ use Wnx\Sends\Models\Send;
 class AdviceEventData extends Data
 {
     public function __construct(
-        public int $id,
+        public string $id,
         public string $description,
         public ?string $comment,
         public string $created_at,

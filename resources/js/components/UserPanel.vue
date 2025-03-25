@@ -4,6 +4,7 @@ import DxList from "devextreme-vue/list";
 import { Link, router } from "@inertiajs/vue3";
 import { computed } from 'vue';
 import notify from 'devextreme/ui/notify';
+import { route } from "ziggy-js";
 
 interface MenuItem {
   text: string;
@@ -26,8 +27,8 @@ interface Props {
 
 const props = defineProps<Props>();
 
-function switchGroup(groupId: number, asAdmin: boolean) {
-  router.post(`/actAsGroup/${groupId}`, {
+function switchGroup(groupId: string, asAdmin: boolean) {
+  router.post(route('actAsGroup', groupId), {
     asAdmin: asAdmin
   });
 }

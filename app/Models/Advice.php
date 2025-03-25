@@ -10,6 +10,7 @@ use App\Events\AdviceSaving;
 use App\Events\AdviceUpdated;
 use App\ValueObjects\Address;
 use App\ValueObjects\Coordinate;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,6 +27,7 @@ class Advice extends Model implements HasSends
 
     use HasFactory;
     use HasSendsTrait;
+    use HasUuids;
     use Notifiable;
     use SoftDeletes;
 
@@ -129,8 +131,8 @@ class Advice extends Model implements HasSends
             'email' => 'string',
             'phone' => 'string',
             'commentary' => 'string',
-            'advisor_id' => 'integer',
-            'advice_status_id' => 'integer',
+            'advisor_id' => 'string',
+            'advice_status_id' => 'string',
             'type' => AdviceType::class,
             'helpType_place' => 'boolean',
             'helpType_technical' => 'boolean',
