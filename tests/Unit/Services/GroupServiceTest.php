@@ -20,11 +20,11 @@ test('find group containing coordinates', function () {
     // Create a group with a polygonal consulting area
     $group = Group::factory()->create([
         'consulting_area' => new Polygon([
-            [8.0, 48.0],  // [long, lat]
-            [9.0, 48.0],
-            [9.0, 49.0],
-            [8.0, 49.0],
-            [8.0, 48.0],  // Close the polygon
+            ['lng' => 8.0, 'lat' => 48.0],
+            ['lng' => 9.0, 'lat' => 48.0],
+            ['lng' => 9.0, 'lat' => 49.0],
+            ['lng' => 8.0, 'lat' => 49.0],
+            ['lng' => 8.0, 'lat' => 48.0],
         ]),
     ]);
 
@@ -46,11 +46,11 @@ test('find nearest main group', function () {
         'name' => 'Nearby Group',
         'parent_id' => null,
         'consulting_area' => new Polygon([
-            [8.0, 48.0],  // [long, lat]
-            [9.0, 48.0],
-            [9.0, 49.0],
-            [8.0, 49.0],
-            [8.0, 48.0],  // Close the polygon
+            ['lng' => 8.0, 'lat' => 48.0],  // [long, lat]
+            ['lng' => 9.0, 'lat' => 48.0],
+            ['lng' => 9.0, 'lat' => 49.0],
+            ['lng' => 8.0, 'lat' => 49.0],
+            ['lng' => 8.0, 'lat' => 48.0],  // Close the polygon
         ]),
     ]);
 
@@ -59,11 +59,11 @@ test('find nearest main group', function () {
         'name' => 'Distant Group',
         'parent_id' => null,
         'consulting_area' => new Polygon([
-            [20.0, 60.0],  // Much further away
-            [21.0, 60.0],
-            [21.0, 61.0],
-            [20.0, 61.0],
-            [20.0, 60.0],  // Close the polygon
+            ['lng' => 20.0, 'lat' => 60.0],  // Much further away
+            ['lng' => 21.0, 'lat' => 60.0],
+            ['lng' => 21.0, 'lat' => 61.0],
+            ['lng' => 20.0, 'lat' => 61.0],
+            ['lng' => 20.0, 'lat' => 60.0],  // Close the polygon
         ]),
     ]);
 
@@ -72,9 +72,9 @@ test('find nearest main group', function () {
         'name' => 'Sub Group',
         'parent_id' => $mainGroup1->id,
         'consulting_area' => new Polygon([
-            [8.5, 48.0],  // [long, lat]
-            [8.0, 49.0],
-            [8.0, 48.0],
+            ['lng' => 8.5, 'lat' => 48.0],  // [long, lat]
+            ['lng' => 8.0, 'lat' => 49.0],
+            ['lng' => 8.0, 'lat' => 48.0],
         ]),
     ]);
 
@@ -151,21 +151,21 @@ test('calculate distance between groups', function () {
     // Create two groups with polygons
     $group1 = Group::factory()->create([
         'consulting_area' => new Polygon([
-            [8.0, 48.0],  // [long, lat]
-            [9.0, 48.0],
-            [9.0, 49.0],
-            [8.0, 49.0],
-            [8.0, 48.0],  // Close the polygon
+            ['lat' => 8.0, 'lng' => 48.0],  // [long, lat]
+            ['lat' => 9.0, 'lng' => 48.0],
+            ['lat' => 9.0, 'lng' => 49.0],
+            ['lat' => 8.0, 'lng' => 49.0],
+            ['lat' => 8.0, 'lng' => 48.0],  // Close the polygon
         ]),
     ]);
 
     $group2 = Group::factory()->create([
         'consulting_area' => new Polygon([
-            [20.0, 60.0],  // Much further away
-            [21.0, 60.0],
-            [21.0, 61.0],
-            [20.0, 61.0],
-            [20.0, 60.0],  // Close the polygon
+            ['lat' => 20.0, 'lng' => 60.0],  // Much further away
+            ['lat' => 21.0, 'lng' => 60.0],
+            ['lat' => 21.0, 'lng' => 61.0],
+            ['lat' => 20.0, 'lng' => 61.0],
+            ['lat' => 20.0, 'lng' => 60.0],  // Close the polygon
         ]),
     ]);
 

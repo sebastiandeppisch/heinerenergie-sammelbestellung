@@ -23,22 +23,22 @@ test('advice is assigned to correct group based on coordinates', function () {
     $correctGroup = Group::factory()->create([
         'name' => 'Correct Group',
         'consulting_area' => new Polygon([
-            [48.0, 8.0],
-            [48.0, 9.0],
-            [49.0, 9.0],
-            [49.0, 8.0],
-            [48.0, 8.0], // Close polygon
+            ['lat' => 48.0, 'lng' => 8.0],
+            ['lat' => 48.0, 'lng' => 9.0],
+            ['lat' => 49.0, 'lng' => 9.0],
+            ['lat' => 49.0, 'lng' => 8.0],
+            ['lat' => 48.0, 'lng' => 8.0], // Close polygon
         ]),
     ]);
 
     $otherGroup = Group::factory()->create([
         'name' => 'Other Group',
         'consulting_area' => new Polygon([
-            [49.1, 8.0],
-            [49.1, 9.0],
-            [50.0, 9.0],
-            [50.0, 8.0],
-            [49.1, 8.0], // Close polygon
+            ['lat' => 49.1, 'lng' => 8.0],
+            ['lat' => 49.1, 'lng' => 9.0],
+            ['lat' => 50.0, 'lng' => 9.0],
+            ['lat' => 50.0, 'lng' => 8.0],
+            ['lat' => 49.1, 'lng' => 8.0], // Close polygon
         ]),
     ]);
 
@@ -125,11 +125,11 @@ test('advice is assigned to main group even when subgroup is closer', function (
         'name' => 'Main Group',
         'parent_id' => null, // Main group
         'consulting_area' => new Polygon([
-            [10.0, 10.0],
-            [10.0, 11.0],
-            [11.0, 11.0],
-            [11.0, 10.0],
-            [10.0, 10.0], // Close polygon
+            ['lng' => 10.0, 'lat' => 10.0],
+            ['lng' => 10.0, 'lat' => 11.0],
+            ['lng' => 11.0, 'lat' => 11.0],
+            ['lng' => 11.0, 'lat' => 10.0],
+            ['lng' => 10.0, 'lat' => 10.0], // Close polygon
         ]),
     ]);
 
@@ -138,11 +138,11 @@ test('advice is assigned to main group even when subgroup is closer', function (
         'name' => 'Sub Group',
         'parent_id' => $mainGroup->id,
         'consulting_area' => new Polygon([
-            [1.0, 1.0],
-            [1.0, 2.0],
-            [2.0, 2.0],
-            [2.0, 1.0],
-            [1.0, 1.0], // Close polygon
+            ['lng' => 1.0, 'lat' => 1.0],
+            ['lng' => 1.0, 'lat' => 2.0],
+            ['lng' => 2.0, 'lat' => 2.0],
+            ['lng' => 2.0, 'lat' => 1.0],
+            ['lng' => 1.0, 'lat' => 1.0], // Close polygon
         ]),
     ]);
 

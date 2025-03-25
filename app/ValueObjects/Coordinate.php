@@ -4,6 +4,7 @@ namespace App\ValueObjects;
 
 use App\Casts\Coordinate as CoordinateCast;
 use Illuminate\Contracts\Database\Eloquent\Castable;
+use InvalidArgumentException;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
 #[TypeScript]
@@ -19,9 +20,8 @@ readonly class Coordinate implements Castable
     public static function fromArray(array $data): self
     {
 
-
-        $lat = $data['lat'] ?? $data['latitude'] ?? $data[0];
-        $lng = $data['lon'] ?? $data['long'] ?? $data['lng'] ?? $data['longitude'] ?? $data[1];
+        $lat = $data['lat'] ?? $data['latitude'] ?? throw new InvalidArgumentException('Latitude is required');
+        $lng = $data['lon'] ?? $data['long'] ?? $data['lng'] ?? $data['longitude'] ?? throw new InvalidArgumentException('Longitude is required');
 
         return new self($lat, $lng);
     }

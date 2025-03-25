@@ -7,11 +7,11 @@ use App\ValueObjects\Polygon;
 test('polygon can determine if point is inside', function () {
     // Create a square polygon
     $polygon = new Polygon([
-        [0, 0],
-        [0, 10],
-        [10, 10],
-        [10, 0],
-        [0, 0], // Close the polygon
+        ['lat' => 0, 'lng' => 0],
+        ['lat' => 0, 'lng' => 10],
+        ['lat' => 10, 'lng' => 10],
+        ['lat' => 10, 'lng' => 0],
+        ['lat' => 0, 'lng' => 0], // Close the polygon
     ]);
 
     // Test points inside
@@ -31,10 +31,10 @@ test('polygon can determine if point is inside', function () {
 test('polygon handles triangle correctly', function () {
     // Create a simple triangle
     $polygon = new Polygon([
-        [0, 0],   // Bottom left
-        [10, 0],  // Bottom right
-        [5, 10],  // Top middle
-        [0, 0],    // Close the polygon
+        ['lat' => 0,  'lng' => 0],   // Bottom left
+        ['lat' => 10, 'lng' => 0],  // Bottom right
+        ['lat' => 5,  'lng' => 10],  // Top middle
+        ['lat' => 0,  'lng' => 0],    // Close the polygon
     ]);
 
     // Inside point
@@ -50,8 +50,8 @@ test('polygon handles triangle correctly', function () {
 test('polygon returns false for invalid polygons', function () {
     // Invalid polygon (less than 3 points)
     $invalidPolygon = new Polygon([
-        [0, 0],
-        [10, 10],
+        ['lat' => 0,  'lng' => 0],
+        ['lat' => 10, 'lng' => 10],
     ]);
 
     $point = new Coordinate(5, 5);
@@ -62,15 +62,15 @@ test('polygon returns false for invalid polygons', function () {
 test('polygon handles concave shapes correctly', function () {
     // Concave polygon (U-shape)
     $polygon = new Polygon([
-        [0, 0],
-        [0, 10],
-        [3, 10],
-        [3, 3],
-        [7, 3],
-        [7, 10],
-        [10, 10],
-        [10, 0],
-        [0, 0], // Close the polygon
+        ['lat' => 0, 'lng' => 0],
+        ['lat' => 0, 'lng' => 10],
+        ['lat' => 3, 'lng' => 10],
+        ['lat' => 3, 'lng' => 3],
+        ['lat' => 7, 'lng' => 3],
+        ['lat' => 7, 'lng' => 10],
+        ['lat' => 10, 'lng' => 10],
+        ['lat' => 10, 'lng' => 0],
+        ['lat' => 0, 'lng' => 0], // Close the polygon
     ]);
 
     // Point in the concavity (should be outside)
@@ -80,4 +80,18 @@ test('polygon handles concave shapes correctly', function () {
     // Point in the solid part (should be inside)
     $solid = new Coordinate(2, 2);
     expect($polygon->containsPoint($solid))->toBeTrue();
+});
+
+test('test getCenter returns average of polygon coordinates', function () {
+    $polygon = new Polygon([
+        ['lat' => 0, 'lng' => 0],
+        ['lat' => 4, 'lng' => 0],
+        ['lat' => 4, 'lng' => 4],
+        ['lat' => 0, 'lng' => 4],
+    ]);
+
+    $center = $polygon->getCenter();
+
+    expect($center->lat)->toBe(2.0);
+    expect($center->lng)->toBe(2.0);
 });

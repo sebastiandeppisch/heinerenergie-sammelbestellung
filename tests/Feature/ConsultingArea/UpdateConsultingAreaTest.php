@@ -5,6 +5,7 @@ namespace Tests\Feature\ConsultingArea;
 use App\Models\Group;
 use App\Models\User;
 use App\Services\SessionService;
+use App\ValueObjects\Coordinate;
 use App\ValueObjects\Polygon;
 use Config;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -59,7 +60,10 @@ test('group admin can update consulting area', function () {
 
     expect($this->group->consulting_area)
         ->toBeInstanceOf(Polygon::class)
-        ->and($this->group->consulting_area->getCoordinates())
+        ->and(collect($this->group->consulting_area->getCoordinates())->map(fn (Coordinate $coordinate) => [
+            'lat' => $coordinate->lat,
+            'lng' => $coordinate->lng,
+        ]))
         ->toMatchArray($coordinates);
 });
 
@@ -85,7 +89,10 @@ test('it validates polygon format', function () {
 
 test('consulting area can be cleared', function () {
     // First set a polygon
-    $this->group->consulting_area = new Polygon([[49.8807, 8.6572], [49.8787, 8.6661]]);
+    $this->group->consulting_area = new Polygon([
+        ['lat' => 49.8807, 'lng' => 8.6572],
+        ['lat' => 49.8787, 'lng' => 8.6661],
+    ]);
     $this->group->save();
 
     actingAs($this->admin)

@@ -2,18 +2,23 @@
 
 namespace App\ValueObjects;
 
-use JsonSerializable;
 use App\Casts\PolygonCast;
 use Illuminate\Contracts\Database\Eloquent\Castable;
+use JsonSerializable;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
 #[TypeScript]
 class Polygon implements Castable, JsonSerializable
 {
+    /** @var array<Coordinate> */
+    public readonly array $coordinates;
+
     public function __construct(
-        /** @var array<Coordinate> */
-        readonly private array $coordinates = []
-    ) {}
+        /** @var array<Coordinate|array<int>> */
+        array $coordinates = []
+    ) {
+        $this->coordinates = array_map(fn ($coordinate) => $coordinate instanceof Coordinate ? $coordinate : Coordinate::fromArray($coordinate), $coordinates);
+    }
 
     public static function castUsing(array $attributes): string
     {
@@ -33,8 +38,6 @@ class Polygon implements Castable, JsonSerializable
             $coordinates = $data;
         }
 
-        $coordinates = array_map(fn ($coordinate) => Coordinate::fromArray($coordinate), $coordinates);
-
         return empty($coordinates) ? null : new self($coordinates);
     }
 
@@ -50,7 +53,7 @@ class Polygon implements Castable, JsonSerializable
 
     public function jsonSerialize(): ?array
     {
-        if(empty($this->coordinates) || count($this->coordinates) === 0 ) {
+        if (empty($this->coordinates) || count($this->coordinates) === 0) {
             return null;
         }
 
@@ -61,17 +64,22 @@ class Polygon implements Castable, JsonSerializable
 
     public function getCenter(): Coordinate
     {
+        $zeroCoordinate = new Coordinate(0, 0);
+
         // this is not the actual center, but its good enough for now
-        $center = collect(collect($this->coordinates)->reduce(function ($carry, $item) {
-            return [
-                $carry[0] + $item[0],
-                $carry[1] + $item[1],
-            ];
-        }, [0, 0]))->map(fn ($item) => $item / count($this->coordinates))->toArray();
+        $center = collect($this->coordinates)->reduce(function (Coordinate $carry, Coordinate $item): Coordinate {
+
+            return new Coordinate(
+                lat: $carry->lat + $item->lat,
+                lng: $carry->lng + $item->lng,
+            );
+        }, $zeroCoordinate);
+
+        $divider = count($this->coordinates);
 
         return new Coordinate(
-            lat: $center[0],
-            lng: $center[1],
+            lat: $center->lat / $divider,
+            lng: $center->lng / $divider,
         );
     }
 
@@ -95,10 +103,10 @@ class Polygon implements Castable, JsonSerializable
 
         // For each edge of the polygon
         for ($i = 0, $j = $vertexCount - 1; $i < $vertexCount; $j = $i++) {
-            $xi = $vertices[$i][0];
-            $yi = $vertices[$i][1];
-            $xj = $vertices[$j][0];
-            $yj = $vertices[$j][1];
+            $xi = $vertices[$i]->lng;
+            $yi = $vertices[$i]->lat;
+            $xj = $vertices[$j]->lng;
+            $yj = $vertices[$j]->lat;
 
             // Check if the ray intersects with the edge
             $intersect = (($yi > $y) != ($yj > $y)) &&
