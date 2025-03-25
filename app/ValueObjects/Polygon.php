@@ -2,16 +2,17 @@
 
 namespace App\ValueObjects;
 
+use JsonSerializable;
 use App\Casts\PolygonCast;
 use Illuminate\Contracts\Database\Eloquent\Castable;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
 #[TypeScript]
-readonly class Polygon implements Castable
+class Polygon implements Castable, JsonSerializable
 {
     public function __construct(
         /** @var array<Coordinate> */
-        private array $coordinates = []
+        readonly private array $coordinates = []
     ) {}
 
     public static function castUsing(array $attributes): string
@@ -32,6 +33,8 @@ readonly class Polygon implements Castable
             $coordinates = $data;
         }
 
+        $coordinates = array_map(fn ($coordinate) => Coordinate::fromArray($coordinate), $coordinates);
+
         return empty($coordinates) ? null : new self($coordinates);
     }
 
@@ -45,8 +48,12 @@ readonly class Polygon implements Castable
         return $this->coordinates;
     }
 
-    public function jsonSerialize(): array
+    public function jsonSerialize(): ?array
     {
+        if(empty($this->coordinates) || count($this->coordinates) === 0 ) {
+            return null;
+        }
+
         return [
             'coordinates' => $this->coordinates,
         ];

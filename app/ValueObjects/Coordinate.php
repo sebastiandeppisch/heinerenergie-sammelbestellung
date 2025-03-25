@@ -18,8 +18,10 @@ readonly class Coordinate implements Castable
 
     public static function fromArray(array $data): self
     {
-        $lat = $data['lat'] ?? $data['latitude'];
-        $lng = $data['lon'] ?? $data['long'] ?? $data['lng'] ?? $data['longitude'];
+
+
+        $lat = $data['lat'] ?? $data['latitude'] ?? $data[0];
+        $lng = $data['lon'] ?? $data['long'] ?? $data['lng'] ?? $data['longitude'] ?? $data[1];
 
         return new self($lat, $lng);
     }

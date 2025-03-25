@@ -1,5 +1,4 @@
 <template>
-  {{  polygon }}
     <div class="py-12">
       <div class="mx-auto sm:px-6 lg:px-8 space-y-6">
         <!-- Title section -->
