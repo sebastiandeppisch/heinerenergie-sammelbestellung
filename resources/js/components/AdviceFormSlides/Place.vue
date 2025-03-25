@@ -55,7 +55,7 @@ const adviceOrDirectOrder = [
 const phoneOrHome = [
   {
     id: 1,
-    text: "Telefon",
+    text: "Telefon / per E-Mail",
     icon: "fa fa-phone",
   },
   {
@@ -66,16 +66,8 @@ const phoneOrHome = [
 ];
 
 const buttonsValid = ref(false);
-const adviceOrDirectOrderIsSet = ref(false);
+const adviceOrDirectOrderIsSet = ref(true);
 
-function adviceOrDirectOrderChanged(e: any) {
-  if(e.addedItems[0].id === 2){
-    advice.value.type = 2;
-  } else {
-    advice.value.type = 0;
-  }
-  adviceOrDirectOrderIsSet.value = true;
-}
 
 function phoneOrHomeChanged(e: any) {
   advice.value.type = e.addedItems[0].id
@@ -101,15 +93,8 @@ function adviceTypeChanged(e: any) {
 
 <template>
 <div style="display: flex;flex-direction: column;height:100%;">
-  <span style="font-size:1.2em">Möchtest Du beraten werden, oder ohne Beratung an der Sammelbestellung teilnehmen?</span>
+  <span style="font-size:1.2em">Möchtest Du telefonisch oder vor Ort beraten werden?</span>
   <DxButtonGroup
-    :items="adviceOrDirectOrder"
-    key-expr="id"
-    width="100%"
-    @selection-changed="adviceOrDirectOrderChanged"
-  />
-  <DxButtonGroup
-    v-if="adviceOrDirectOrderIsSet && advice.type !== 2"
     :items="phoneOrHome"
     key-expr="id"
     width="100%"
