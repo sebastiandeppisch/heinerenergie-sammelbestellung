@@ -4,6 +4,7 @@ import { computed } from "vue";
 
 import DxCheckBox from "devextreme-vue/check-box";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import otherHelpTypeImage from '@/../img/heinerenergie-hochzeitsturm.svg';
 
 type HelpTypeAdvice = Pick<App.Models.Advice,
   | 'helpType_place' | 'helpType_technical'
@@ -89,7 +90,7 @@ const advice = computed<HelpTypeAdvice>({
       <div style="width: 45px">
         <!-- TODO fix path -->
         <img
-          src="https://balkon.heinerenergie.de/images/heinerenergie-hochzeitsturm.svg"
+          :src="otherHelpTypeImage"
           style="height: 2em"
         />
       </div>

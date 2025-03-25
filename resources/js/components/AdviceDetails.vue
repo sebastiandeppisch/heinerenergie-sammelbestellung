@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import otherHelpTypeImage from '@/../img/heinerenergie-hochzeitsturm.svg';
 
 const props = defineProps<{
   advice: App.Models.Advice
@@ -25,7 +26,7 @@ const props = defineProps<{
         </div>
         <div v-if="advice.helpType_other" class="help-type">
           <img
-            src="https://balkon.heinerenergie.de/images/heinerenergie-hochzeitsturm.svg"
+            :src="otherHelpTypeImage"
             class="custom-icon"
           />
           <span>Andere Themen</span>
