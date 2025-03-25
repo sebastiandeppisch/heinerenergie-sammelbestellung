@@ -107,7 +107,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { DxTabPanel, DxItem } from 'devextreme-vue/tab-panel'
 import { DxPopup } from 'devextreme-vue/popup'
 import GroupTree from '@/components/Groups/GroupTree.vue'
@@ -134,9 +134,25 @@ const showCreateModal = ref(false)
 const selectedTabIndex = ref(0)
 
 const onTabSelectionChanged = (e: any) => {
-  selectedTabIndex.value = e.component.option('selectedIndex')
+  const newIndex = e.component.option('selectedIndex')
+  selectedTabIndex.value = newIndex
+  window.location.hash = `tab=${newIndex}`
 }
 
+// Function to get tab index from URL hash
+const getTabIndexFromHash = (): number => {
+  const hash = window.location.hash
+  if (hash && hash.includes('tab=')) {
+    const tabIndex = parseInt(hash.split('tab=')[1], 10)
+    return !isNaN(tabIndex) ? tabIndex : 0
+  }
+  return 0
+}
+
+// Initialize tab index from URL on component mount
+onMounted(() => {
+  selectedTabIndex.value = getTabIndexFromHash()
+})
 
 const polygon = computed<App.ValueObjects.Polygon>(() => {
   if (props.polygon === null) {
