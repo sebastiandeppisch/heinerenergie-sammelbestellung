@@ -31,7 +31,7 @@ class GroupController extends Controller
         $canEditGroup = $selectedGroup ? $user->can('update', $selectedGroup) : false;
 
         return Inertia::render('Groups/Index', new GroupsIndexData(
-            groups: $groups->map(fn (GroupData $group) => $group)->values(),
+            groups: $groups,
             canCreateRootGroup: $canCreateRootGroup,
             selectedGroup: $selectedGroup ? GroupData::fromModel($selectedGroup) : null,
             polygon: $polygon,
@@ -46,9 +46,11 @@ class GroupController extends Controller
             return redirect()->route('groups.index');
         }
 
+        $groups = $this->listGroups($user)
+        ->map(fn (Group $group) => GroupData::fromModel($group));
+
         return $this->showPage(
-            $this->listGroups($user)
-                ->map(fn (Group $group) => GroupData::fromModel($group)),
+            $groups,
             $request->user()->can('create', Group::class),
             null
         );
@@ -145,7 +147,7 @@ class GroupController extends Controller
     public function updateConsultingArea(UpdateGroupConsultingAreaRequest $request, Group $group)
     {
 
-        $group->consulting_area = $request->validated('polygon');
+        $group->consulting_area = $request->validated('polygon.coordinates');
         $group->save();
 
         return redirect()->back()->with('success', 'Beratungsgebiet wurde erfolgreich gespeichert.');

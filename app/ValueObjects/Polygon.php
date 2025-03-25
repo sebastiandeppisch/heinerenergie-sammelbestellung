@@ -8,11 +8,11 @@ use JsonSerializable;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
 #[TypeScript]
-readonly class Polygon implements Castable, JsonSerializable
+readonly class Polygon implements Castable
 {
     public function __construct(
         /** @var array<Coordinate> */
-        public array $coordinates = []
+        private array $coordinates = []
     ) {}
 
     public static function castUsing(array $attributes): string
@@ -25,14 +25,21 @@ readonly class Polygon implements Castable, JsonSerializable
         if ($json === null) {
             return null;
         }
-        $coordinates = json_decode($json, true);
+        $data = json_decode($json, true);
+
+        if(array_key_exists('coordinates', $data)) {
+            $coordinates = $data['coordinates'];
+        } else {
+            $coordinates = $data;
+        }
+
 
         return empty($coordinates) ? null : new self($coordinates);
     }
 
     public function toJson(): ?string
     {
-        return empty($this->coordinates) ? null : json_encode($this->coordinates);
+        return empty($this->coordinates) ? null : json_encode($this->jsonSerialize());
     }
 
     public function getCoordinates(): array
@@ -42,7 +49,9 @@ readonly class Polygon implements Castable, JsonSerializable
 
     public function jsonSerialize(): array
     {
-        return $this->coordinates;
+        return [
+            'coordinates' => $this->coordinates,
+        ];
     }
 
     public function getCenter(): Coordinate

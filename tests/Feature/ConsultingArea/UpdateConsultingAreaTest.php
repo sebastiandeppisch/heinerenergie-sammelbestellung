@@ -48,7 +48,9 @@ test('group admin can update consulting area', function () {
 
     actingAs($this->admin)
         ->post(route('groups.consulting-area.update', $this->group), [
-            'polygon' => $coordinates,
+            'polygon' => [
+                'coordinates' => $coordinates,
+            ],
         ])
         ->assertRedirect()
         ->assertSessionHas('success', 'Beratungsgebiet wurde erfolgreich gespeichert.');
@@ -67,14 +69,18 @@ test('it validates polygon format', function () {
         ->post(route('groups.consulting-area.update', $this->group), [
             'polygon' => [[1]], // Invalid coordinate pair
         ])
-        ->assertSessionHasErrors('polygon.*');
+        ->assertSessionHasErrors('polygon.coordinates');
 
     // Test invalid coordinate values
     actingAs($this->admin)
         ->post(route('groups.consulting-area.update', $this->group), [
-            'polygon' => [[181, 200]], // Invalid lat/long values
-        ])
-        ->assertSessionHasErrors('polygon.*.*');
+            'polygon' => ["coordinates" =>  [
+                "lat" => 181,
+                "long" => 200
+            ]
+            ]], // Invalid lat/long values
+        )
+        ->assertSessionHasErrors('polygon.coordinates.*');
 });
 
 test('consulting area can be cleared', function () {

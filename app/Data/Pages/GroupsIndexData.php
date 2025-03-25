@@ -4,6 +4,7 @@ namespace App\Data\Pages;
 
 use App\Data\GroupData;
 use App\ValueObjects\Polygon;
+use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
@@ -11,11 +12,11 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 class GroupsIndexData extends Data
 {
     public function __construct(
-        /** @var  array<GroupData> */
-        public array $groups,
+        /** @var  Collection<GroupData> */
+        public Collection $groups,
         public bool $canCreateRootGroup,
         public ?GroupData $selectedGroup,
-        public Polygon $polygon,
+        public ?Polygon $polygon,
         public bool $canEditGroup,
         public bool $canCreateGroups,
     ) {}

@@ -118,7 +118,17 @@ import AdviceStatusGroup from '@/views/AdviceStatusGroup.vue'
 import { DxButton } from 'devextreme-vue'
 import CreateGroupForm from '@/components/Groups/CreateGroupForm.vue'
 
-const props = defineProps<App.Data.Pages.GroupsIndexData>();
+type GroupsIndexData = {
+    groups: Array<App.Data.GroupData>;
+    canCreateRootGroup: boolean;
+    selectedGroup: App.Data.GroupData;
+    polygon: App.ValueObjects.Polygon;
+    canEditGroup: boolean;
+    canCreateGroups: boolean;
+};
+
+
+const props = defineProps<GroupsIndexData>();
 
 const showCreateModal = ref(false)
 const selectedTabIndex = ref(0)

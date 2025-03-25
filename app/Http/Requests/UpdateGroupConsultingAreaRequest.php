@@ -14,9 +14,9 @@ class UpdateGroupConsultingAreaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'polygon' => ['required', 'array'],
-            'polygon.*.lng' => ['required', 'numeric', 'between:-180,180'],
-            'polygon.*.lat' => ['required',  'numeric', 'between:-90,90'],
+            'polygon.coordinates' => ['required', 'array'],
+            'polygon.coordinates.*.lng' => ['required', 'numeric', 'between:-180,180'],
+            'polygon.coordinates.*.lat' => ['required',  'numeric', 'between:-90,90'],
         ];
     }
 

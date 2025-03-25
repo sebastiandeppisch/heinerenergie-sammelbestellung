@@ -22,6 +22,9 @@ class PolygonCast implements CastsAttributes
         }
 
         if (is_array($value)) {
+            if(array_key_exists('coordinates', $value)) {
+                $value = $value['coordinates'];
+            }
             $value = new Polygon($value);
         }
 
