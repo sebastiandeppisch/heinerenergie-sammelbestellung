@@ -35,7 +35,7 @@ email: string;
 phone: string;
 commentary: string;
 advisor_id: number;
-advice_status_id: number;
+advice_status_id: string;
 lng: number;
 lat: number;
 type: any;
@@ -52,7 +52,7 @@ helpType_bureaucracy: string;
 helpType_other: string;
 result: any;
 can_edit: boolean;
-group_id: number;
+group_id: string;
 };
 export type GroupData = {
 users_count: number;

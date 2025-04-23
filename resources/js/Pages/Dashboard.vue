@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import KpiDashboard from '@/components/KpiDashboard.vue';
 const props = defineProps<{
   advisorInfo: string
 }>();
@@ -13,5 +14,8 @@ const props = defineProps<{
       <div v-html="props.advisorInfo">
       </div>
     </p>
+
+
+    <KpiDashboard />
   </div>
 </template>
