@@ -61,7 +61,7 @@ function onSubmit(){
         <DxItem data-field="street" :label="{ text: 'Straße'}"/>
         <DxItem data-field="streetNumber" :label="{ text: 'Hausnummer'}"/>
         <DxItem data-field="zip" :label="{ text: 'Postleitzahl'}"/>
-        <DxItem data-field="city" :label="{ text: 'Darmstadt'}"/>
+        <DxItem data-field="city" :label="{ text: 'Stadt'}"/>
       </DxGroupItem>
 
       <DxGroupItem caption="Beratung">
@@ -86,24 +86,24 @@ function onSubmit(){
             itemTemplate: radioBoxLayout
           }"
         />
-        <DxItem 
-          data-field="commentary" 
-          :label="{ text: 'Kommentar'}" 
-          editor-type="dxTextArea" 
+        <DxItem
+          data-field="commentary"
+          :label="{ text: 'Kommentar'}"
+          editor-type="dxTextArea"
           :editor-options="{ autoResizeEnabled: true}"
         />
       </DxGroupItem>
-      
+
       <DxButtonItem
-        :button-options="{ 
-          text: 'Speichern', 
-          type: 'default', 
-          useSubmitBehavior: true, 
-          width: '100%', 
-          onClick: onSubmit 
+        :button-options="{
+          text: 'Speichern',
+          type: 'default',
+          useSubmitBehavior: true,
+          width: '100%',
+          onClick: onSubmit
         }"
         :col-span="2"
       />
     </DxForm>
   </div>
-</template> 
+</template>
