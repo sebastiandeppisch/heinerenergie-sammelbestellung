@@ -142,8 +142,6 @@ function adviceTypeChanged(e: any) {
       @change="checkForm"
       @key-up="checkForm"
       value-change-event="keyup"
-      mask="00000"
-      mask-char=""
       mask-invalid-message="Gib bitte eine 5 stellige Postleitzahl an"
     >
       <DxValidator >
