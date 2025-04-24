@@ -15,7 +15,7 @@ const emit = defineEmits<{
   (e: 'update:sharedIds', value: number[]): void;
 }>();
 
-const advisors = new LaravelDataSource('/api/users');
+const advisors = new LaravelDataSource('/api/users?withoutself=true');
 
 function updateAdvisors(e: { value: number[] }) {
   axios.post('/api/advices/' + props.adviceId + '/advisors', {advisors: e.value})
@@ -36,7 +36,7 @@ function updateAdvisors(e: { value: number[] }) {
       label="Teilen mit"
       :value="sharedIds"
     />
-    
+
     <div class="sharing-info">
       <div class="info-icon">
         <font-awesome-icon icon="fa fa-info-circle" />

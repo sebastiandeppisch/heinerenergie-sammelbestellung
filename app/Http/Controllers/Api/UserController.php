@@ -43,7 +43,14 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $users = $this->dxFilter($request, User::query())->get();
+
+        if($request->has(('withoutself'))){
+            $query = User::query()->where('id', '!=', $this->user()->id);
+        } else {
+            $query = User::query();
+        }
+
+        $users = $this->dxFilter($request, $query)->get();
 
         return $users->filter(fn (User $user) => $this->user()->can('view', $user))->values();
     }
@@ -55,7 +62,7 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request)
     {
-        $user = new User($request->all());
+        $user = new User($request->validated());
         $user->password = '';
         $user->save();
 
