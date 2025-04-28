@@ -7,17 +7,17 @@ import { router } from '@inertiajs/vue3';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 const props = defineProps<{
-  adviceId: number
+  adviceId: string
   sharedIds: number[]
 }>();
 
 const emit = defineEmits<{
-  (e: 'update:sharedIds', value: number[]): void;
+  (e: 'update:sharedIds', value: string[]): void;
 }>();
 
 const advisors = new LaravelDataSource('/api/users?withoutself=true');
 
-function updateAdvisors(e: { value: number[] }) {
+function updateAdvisors(e: { value: string[] }) {
   axios.post('/api/advices/' + props.adviceId + '/advisors', {advisors: e.value})
     .then(() => {
       notify('Teilung aktualisiert', 'success', 2000);

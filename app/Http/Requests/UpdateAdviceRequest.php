@@ -37,7 +37,7 @@ class UpdateAdviceRequest extends FormRequest
             'advisor_id' => 'nullable|integer|exists:users,id',
             'commentary' => 'nullable|string|max:65535',
             'type' => [new Enum(AdviceType::class)],
-            'advice_status_id' => 'nullable|integer|exists:advice_status,id',
+            'advice_status_id' => 'nullable|string|exists:advice_status,id',
         ];
     }
 }

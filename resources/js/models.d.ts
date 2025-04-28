@@ -60,7 +60,7 @@ declare namespace App.Models {
     }
 
     export interface Advice {
-        id: number;
+        id: string;
         created_at: string | null;
         updated_at: string | null;
         firstName: string;

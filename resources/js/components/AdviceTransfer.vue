@@ -7,13 +7,13 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faWarning } from '@fortawesome/free-solid-svg-icons';
 
 const props = defineProps<{
-  adviceId: number
+  adviceId: string
   transferableGroups: Array<App.Data.GroupData>
 }>();
 
 const popupVisible = ref(false);
 const reason = ref('');
-const selectedGroup = ref<number | null>(null);
+const selectedGroup = ref<string | null>(null);
 
 function showTransferPopup() {
   popupVisible.value = true;

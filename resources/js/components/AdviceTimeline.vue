@@ -9,7 +9,7 @@ type AdviceEvent = App.Data.AdviceEventData;
 
 const props = defineProps<{
   events: AdviceEvent[];
-  adviceId: number;
+  adviceId: string;
 }>();
 
 const form = useForm({
@@ -18,7 +18,7 @@ const form = useForm({
 
 const submitComment = () => {
   if (!form.comment.trim()) return;
-  
+
   form.post(route('advices.comment.store', { advice: props.adviceId }), {
     onSuccess: () => {
       form.reset();
@@ -36,7 +36,7 @@ const submitComment = () => {
 			:event="event"
       />
     </div>
-    
+
     <div class="new-comment-container">
       <h4>Neuen Kommentar hinzufügen</h4>
       <form @submit.prevent="submitComment">
@@ -87,4 +87,4 @@ const submitComment = () => {
 .submit-comment-btn {
   margin-top: 10px;
 }
-</style> 
+</style>
