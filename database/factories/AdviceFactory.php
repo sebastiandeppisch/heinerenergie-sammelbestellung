@@ -31,7 +31,7 @@ class AdviceFactory extends Factory
             'streetNumber' => fake()->buildingNumber(),
             'zip' => fake()->numberBetween(10000, 99999),
             'city' => fake()->city(),
-            'email' => fake()->email(),
+            'email' => fake()->safeEmail(),
             'phone' => fake()->phoneNumber(),
             'commentary' => fake()->optional()->text(),
             'lng' => fake()->optional()->longitude(),
