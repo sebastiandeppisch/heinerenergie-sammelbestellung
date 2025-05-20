@@ -211,7 +211,9 @@ const filteredStatusData = computed(() => {
   const filtered = { statusCounts: {} };
   
   // Only include the selected status and 'Neu' for context
+  // @ts-ignore
   filtered.statusCounts['Neu'] = currentStatusData.value.statusCounts['Neu'];
+  // @ts-ignore
   filtered.statusCounts[filteredStatus] = currentStatusData.value.statusCounts[filteredStatus];
   
   return filtered;

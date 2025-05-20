@@ -114,7 +114,7 @@ advisors.load().then(() => {
 });
 
 function openAdvice(e: { row: any }){
-  router.get('/advices/' + e.row.data.id);
+  router.get('/adviaces/' + e.row.data.id);
 }
 
 onMounted(() => {
@@ -123,7 +123,8 @@ onMounted(() => {
 
 function assignAdvice(id: number){
   axios.post('api/advices/' + id + '/assign').then(response => response.data).then((advice) => {
-    advices.store().push([{ type: "update", data: advice, key: advice.id }]);
+    router.reload();
+    notify('Die Beratung wurde Dir zugewiesen', 'success', 3000);
   });
 }
 
@@ -173,7 +174,7 @@ function openNewAdvice(){
 function saveNewAdvice(){
   axios.post('api/advices', newadvice).then(response => response.data).then((advice) => {
     notify('Beratung erfolgreich angelegt', 'success', 3000);
-    advices.store().push([{ type: "insert", data: advice, key: advice.id }]);
+    router.reload();
     r.newAdvicePopupVisible = false;
     newadvice.firstName = '';
     newadvice.lastName = '';
