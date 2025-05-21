@@ -34,7 +34,7 @@ city: string;
 email: string;
 phone: string;
 commentary: string;
-advisor_id: number;
+advisor_id: string;
 advice_status_id: string;
 lng: number;
 lat: number;

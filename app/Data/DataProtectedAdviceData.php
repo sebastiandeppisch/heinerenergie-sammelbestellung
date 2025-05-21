@@ -25,7 +25,7 @@ class DataProtectedAdviceData extends Data
         public string $email,
         public string $phone,
         public ?string $commentary,
-        public ?int $advisor_id,
+        public ?string $advisor_id,
         public ?string $advice_status_id,
         public ?float $lng,
         public ?float $lat,
