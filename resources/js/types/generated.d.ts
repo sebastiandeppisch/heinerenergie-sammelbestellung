@@ -68,8 +68,8 @@ accepts_transfers: boolean;
 userCanActAsAdmin: boolean;
 };
 export type GroupMapData = {
-polygon: App.ValueObjects.Polygon | null;
-center: App.ValueObjects.Coordinate | null;
+polygon: App.ValueObjects.Polygon;
+center: App.ValueObjects.Coordinate;
 name: string;
 logo_path: string | null;
 };
@@ -78,6 +78,7 @@ id: string;
 name: string;
 selected: boolean;
 expanded: boolean;
+parent_id: string | null;
 };
 export type GroupUserData = {
 id: string;

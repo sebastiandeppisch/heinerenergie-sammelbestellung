@@ -50,7 +50,7 @@ function parseEmail(emailString: string[] | null): string {
 			</div>
 			<!-- E-Mail Content -->
 			<div v-if="isMail && isExpanded" class="timeline-mail-content">
-				<iframe :srcdoc="props.event.content" class="mail-iframe"></iframe>
+				<iframe v-if="props.event.content !== null" :srcdoc="props.event.content" class="mail-iframe"></iframe>
 			</div>
 		</div>
 	</div>
@@ -186,4 +186,4 @@ function parseEmail(emailString: string[] | null): string {
 	font-size: 12px;
 	margin-left: 8px;
 }
-</style> 
+</style>

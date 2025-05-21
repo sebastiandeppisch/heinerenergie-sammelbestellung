@@ -61,7 +61,18 @@ class GroupController extends Controller
         $groups = $this->listGroups($user)
             ->map(fn (Group $group) => GroupData::fromModel($group));
 
+        $groupTreeItems = $groups->map(function (GroupData $groupData): GroupTreeItem {
+            return new GroupTreeItem(
+                id: $groupData->id,
+                name: $groupData->name,
+                selected: false,
+                expanded: false,
+                parent_id: $groupData->parent_id,
+            );
+        });
+
         return $this->showPage(
+            $groupTreeItems,
             $groups,
             $request->user()->can('create', Group::class),
             null
