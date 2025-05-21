@@ -12,7 +12,9 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 class GroupsIndexData extends Data
 {
     public function __construct(
-        /** @var Collection<GroupData> */
+        /** @var Collection|array<GroupTreeItem> */
+        public Collection $groupTreeItems,
+        /** @var Collection|array<GroupData> */
         public Collection $groups,
         public bool $canCreateRootGroup,
         public ?GroupData $selectedGroup,

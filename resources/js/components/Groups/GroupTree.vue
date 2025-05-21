@@ -2,7 +2,6 @@
   <DxTreeView
     ref="treeViewRef"
     :items="props.groups"
-    :selected-item="selectedGroup?.id"
     :search-enabled="true"
     :search-mode="'contains'"
     :select-by-click="true"
@@ -14,8 +13,6 @@
     class="group-tree-container"
     :show-checkboxes-mode="true"
     @selection-changed="treeViewSelectionChanged"
-    expanded-expr="isExpanded"
-    selected-expr="isSelected"
   >
     <template #item="{ data: item }">
       <div class="flex items-center py-1.5 pl-1">
@@ -60,10 +57,11 @@ import { DxTreeView } from 'devextreme-vue/tree-view'
 import { route } from 'ziggy-js'
 import { router } from '@inertiajs/vue3'
 
+type GroupTreeItem = App.Data.GroupTreeItem;
 type GroupData = App.Data.GroupData;
 
 const props = defineProps<{
-  groups: GroupData[]
+  groups: GroupTreeItem[]
   selectedGroup: GroupData | null,
 }>()
 

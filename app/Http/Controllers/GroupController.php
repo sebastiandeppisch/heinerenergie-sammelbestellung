@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Data\GroupData;
+use App\Data\GroupTreeItem;
 use App\Data\Pages\GroupsIndexData;
 use App\Http\Requests\Group\StoreGroupRequest;
 use App\Http\Requests\Group\UpdateGroupRequest;
@@ -10,10 +11,12 @@ use App\Http\Requests\UpdateGroupConsultingAreaRequest;
 use App\Models\Group;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class GroupController extends Controller
 {
@@ -22,7 +25,10 @@ class GroupController extends Controller
         // there is no authorization here, as its done in the methods themself or in the Request classes
     }
 
-    private function showPage(iterable $groups, bool $canCreateRootGroup, ?Group $selectedGroup)
+    /**
+     * @param Collection<GroupData> $groups
+     */
+    private function showPage(Collection $groupTreeItems, Collection $groups, bool $canCreateRootGroup, ?Group $selectedGroup)
     {
         $polygon = $selectedGroup?->consulting_area;
 
@@ -30,14 +36,20 @@ class GroupController extends Controller
 
         $canEditGroup = $selectedGroup ? $user->can('update', $selectedGroup) : false;
 
-        return Inertia::render('Groups/Index', new GroupsIndexData(
-            groups: $groups,
+
+        $selectedGroup = $selectedGroup ? GroupData::fromModel($selectedGroup) : null;
+
+        $groupIndexData = new GroupsIndexData(
+            groupTreeItems: $groupTreeItems,
+            groups: GroupData::collect($groups),
             canCreateRootGroup: $canCreateRootGroup,
-            selectedGroup: $selectedGroup ? GroupData::fromModel($selectedGroup) : null,
+            selectedGroup: $selectedGroup,
             polygon: $polygon,
             canEditGroup: $canEditGroup,
             canCreateGroups: $user->can('createAny', Group::class),
-        ));
+        );
+
+        return Inertia::render('Groups/Index', $groupIndexData);
     }
 
     public function index(Request $request, #[CurrentUser] User $user)
@@ -81,6 +93,15 @@ class GroupController extends Controller
         $groups = $this->listGroups($request->user())
             ->map(fn (Group $group) => GroupData::fromModel($group));
 
+        $groupTreeItems = $groups->map(function (GroupData $groupData) use ($expandGroups, $group): GroupTreeItem {
+            return new GroupTreeItem(
+                id: $groupData->id,
+                name: $groupData->name,
+                selected: $groupData->id === $group->id,
+                expanded: $expandGroups->contains($groupData->id),
+                parent_id: $groupData->parent_id,
+            );
+        });
         $groups = $groups->map(function (GroupData $groupData) use ($expandGroups, $group) {
             $groupData = $groupData->toArray();
             $groupData['isExpanded'] = $expandGroups->contains($groupData['id']);
@@ -90,6 +111,7 @@ class GroupController extends Controller
         });
 
         return $this->showPage(
+            $groupTreeItems,
             $groups,
             $request->user()->can('create', Group::class),
             $group

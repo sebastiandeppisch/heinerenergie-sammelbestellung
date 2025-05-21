@@ -21,7 +21,7 @@
           <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg shrink-0 w-180">
             <div class="p-6">
               <GroupTree
-                :groups="groups"
+                :groups="props.groupTreeItems"
                 :selected-group="selectedGroup"
               />
             </div>
@@ -119,6 +119,7 @@ import { DxButton } from 'devextreme-vue'
 import CreateGroupForm from '@/components/Groups/CreateGroupForm.vue'
 
 type GroupsIndexData = {
+    groupTreeItems: Array<App.Data.GroupTreeItem>;
     groups: Array<App.Data.GroupData>;
     canCreateRootGroup: boolean;
     selectedGroup: App.Data.GroupData;

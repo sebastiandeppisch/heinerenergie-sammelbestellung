@@ -73,6 +73,12 @@ center: App.ValueObjects.Coordinate | null;
 name: string;
 logo_path: string | null;
 };
+export type GroupTreeItem = {
+id: string;
+name: string;
+selected: boolean;
+expanded: boolean;
+};
 export type GroupUserData = {
 id: string;
 name: string;
@@ -82,6 +88,7 @@ is_admin: boolean;
 }
 declare namespace App.Data.Pages {
 export type GroupsIndexData = {
+groupTreeItems: any | Array<any>;
 groups: Array<App.Data.GroupData>;
 canCreateRootGroup: boolean;
 selectedGroup: App.Data.GroupData | null;
