@@ -55,7 +55,7 @@ test('it creates an event when status changes', function () {
 test('it creates an event when group is transferred', function () {
     $this->actingAs($this->user);
 
-    $newGroup = Group::factory()->create(['name' => 'New Initiative']);
+    $newGroup = Group::factory()->create(['name' => 'New Initiative', 'accepts_transfers' => true]);
 
     transferAdvice($this->advice, $newGroup);
 
