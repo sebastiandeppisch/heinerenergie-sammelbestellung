@@ -4,8 +4,32 @@ on: [push]
 
 jobs:
   laravel-tests:
-
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        db: [sqlite, mysql, postgres]
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: laravel_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: laravel_test
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
     - uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
@@ -26,22 +50,32 @@ jobs:
       run: chmod -R 777 storage bootstrap/cache
     - name: Create Database
       run: |
-        mkdir -p database
-        touch database/database.sqlite
+        if [ "${{ matrix.db }}" == "sqlite" ]; then
+          mkdir -p database
+          touch database/database.sqlite
+        elif [ "${{ matrix.db }}" == "mysql" ]; then
+          mysql -h 127.0.0.1 -P 3306 -u root -ppassword -e "CREATE DATABASE IF NOT EXISTS laravel_test;"
+        elif [ "${{ matrix.db }}" == "postgres" ]; then
+          PGPASSWORD=password psql -h 127.0.0.1 -p 5432 -U postgres -c "SELECT 1 FROM pg_database WHERE datname = 'laravel_test'" | grep -q 1 || PGPASSWORD=password psql -h 127.0.0.1 -p 5432 -U postgres -c "CREATE DATABASE laravel_test;"
+        fi
     - name: Install NPM dependencies
       run: npm ci
     - name: Build frontend assets
       run: npm run build
     - name: Execute tests (Unit and Feature tests) via PHPUnit
       env:
-        DB_CONNECTION: sqlite
-        DB_DATABASE: database/database.sqlite
+        DB_CONNECTION: ${{ matrix.db }}
+        DB_DATABASE: ${{ matrix.db == 'sqlite' && 'database/database.sqlite' || 'laravel_test' }}
+        DB_USERNAME: ${{ matrix.db == 'postgres' && 'postgres' || 'root' }}
+        DB_PASSWORD: password
+        DB_PORT: ${{ matrix.db == 'postgres' && '5432' || '3306' }}
+        DB_HOST: 127.0.0.1
       run: php artisan test --log-junit test-results.xml
     - name: Upload test logs if tests fail
       if: failure()
       uses: actions/upload-artifact@v4
       with:
-        name: test-logs
+        name: test-logs-${{ matrix.db }}
         path: |
           test-results.xml
           storage/logs/
