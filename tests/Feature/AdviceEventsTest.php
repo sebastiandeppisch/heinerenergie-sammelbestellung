@@ -55,7 +55,7 @@ test('it creates an event when status changes', function () {
 test('it creates an event when group is transferred', function () {
     $this->actingAs($this->user);
 
-    $newGroup = Group::factory()->create(['name' => 'New Initiative']);
+    $newGroup = Group::factory()->create(['name' => 'New Initiative', 'accepts_transfers' => true]);
 
     transferAdvice($this->advice, $newGroup);
 
@@ -96,7 +96,7 @@ test('events can be retrieved in chronological order', function () {
     $this->advice->advice_status_id = $this->status2->id;
     $this->advice->save();
 
-    $newGroup = Group::factory()->create(['name' => 'New Initiative']);
+    $newGroup = Group::factory()->create(['name' => 'New Initiative', 'accepts_transfers' => true]);
     transferAdvice($this->advice, $newGroup);
 
     $events = $this->advice->events()->orderBy('created_at')->get();
