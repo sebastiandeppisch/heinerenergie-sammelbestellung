@@ -28,4 +28,13 @@ jobs:
       env:
         DB_CONNECTION: sqlite
         DB_DATABASE: database/database.sqlite
-      run: php artisan test
+      run: php artisan test --log-junit test-results.xml
+    - name: Upload test logs if tests fail
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-logs
+        path: |
+          test-results.xml
+          storage/logs/
+          ./laravel.log
