@@ -12,6 +12,8 @@
         "@inertiajs/vue3": "^1.2.0",
         "@types/leaflet-draw": "^1.0.11",
         "@types/ziggy-js": "^1.8.0",
+        "@vee-validate/zod": "^4.15.0",
+        "@vueuse/core": "^13.2.0",
         "apexcharts": "^4.5.0",
         "axios": "^1.7.9",
         "class-variance-authority": "^0.7.1",
@@ -38,7 +40,8 @@
         "vue-sonner": "^2.0.0",
         "vue3-apexcharts": "^1.8.0",
         "vuex": "^4.0.2",
-        "ziggy-js": "^2.5.1"
+        "ziggy-js": "^2.5.1",
+        "zod": "^3.25.23"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.6",

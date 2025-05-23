@@ -21,7 +21,9 @@ class PageController extends Controller
             return redirect()->route('dashboard');
         }
 
-        $users = [];
+        if (User::empty()) {
+            return redirect()->route('register');
+        }
 
         // Nur in lokaler Umgebung Benutzer laden
         if (app()->environment('local')) {

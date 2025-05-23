@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdviceController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\DevLoginController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\PageController;
@@ -60,6 +61,8 @@ Route::get('/change-password', [PageController::class, 'changePassword'])->name(
 Route::get('/', fn () => redirect()->route('dashboard'))->name('home');
 
 Route::get('/login-form', [PageController::class, 'login'])->name('login');
+Route::get('/register', [RegisterController::class, 'show'])->name('register');
+Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
 Route::get('/reset-password', [PageController::class, 'resetPassword'])->name('reset-password');
 Route::get('newadvice', [PageController::class, 'newAdvice'])->name('newadvice');
 Route::get('impress', [PageController::class, 'impress'])->name('impress');
