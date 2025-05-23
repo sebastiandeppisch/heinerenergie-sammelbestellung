@@ -79,6 +79,7 @@ name: string;
 selected: boolean;
 expanded: boolean;
 parent_id: string | null;
+logo_path: string | null;
 };
 export type GroupUserData = {
 id: string;

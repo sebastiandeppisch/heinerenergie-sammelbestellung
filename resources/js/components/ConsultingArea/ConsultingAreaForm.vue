@@ -54,7 +54,7 @@ const handleDelete = () => {
       <PolygonMap
         v-model="form.polygon"
         class="rounded-lg"
-        logo="http://[::1]:5173/resources/img/logo.png"
+        :logo="group.logo_path"
         :logo-aspect="2.84"
       />
     </div>

@@ -15,6 +15,7 @@ class GroupTreeItem extends Data
         public bool $selected,
         public bool $expanded,
         public ?string $parent_id,
+        public ?string $logo_path
     ) {
     }
 }
