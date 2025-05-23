@@ -16,14 +16,6 @@ class SettingsSeeder extends Seeder
     {
         $settings = [
             [
-                'key' => 'orderFormPassword',
-                'value' => '',
-            ],
-            [
-                'key' => 'orderFormText',
-                'value' => 'Bestellungformular Text',
-            ],
-            [
                 'key' => 'impress',
                 'value' => 'Impressum',
             ],
