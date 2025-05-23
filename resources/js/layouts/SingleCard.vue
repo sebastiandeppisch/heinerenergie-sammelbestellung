@@ -25,7 +25,6 @@ const props = withDefaults(defineProps<{
       </div>
       <slot />
     </div>
-    <Link v-if="showBackLink" class="back-link" href="/"><i class="dx-icon-back"></i> Zurück</Link>
   </div>
 </div>
 </template>
