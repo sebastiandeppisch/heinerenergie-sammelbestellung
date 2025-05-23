@@ -64,12 +64,7 @@ jobs:
       run: npm run build
     - name: Execute tests (Unit and Feature tests) via PHPUnit
       env:
-        DB_CONNECTION: ${{ matrix.db }}
-        DB_DATABASE: ${{ matrix.db == 'sqlite' && 'database/database.sqlite' || 'laravel_test' }}
-        DB_USERNAME: ${{ matrix.db == 'postgres' && 'postgres' || 'root' }}
-        DB_PASSWORD: password
-        DB_PORT: ${{ matrix.db == 'postgres' && '5432' || '3306' }}
-        DB_HOST: 127.0.0.1
+        DB_URL: ${{ matrix.db == 'sqlite' && 'sqlite:///database/database.sqlite' || matrix.db == 'mysql' && 'mysql://root:password@127.0.0.1:3306/laravel_test' || 'pgsql://postgres:password@127.0.0.1:5432/laravel_test' }}
       run: php artisan test --log-junit test-results.xml
     - name: Upload test logs if tests fail
       if: failure()
