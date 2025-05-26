@@ -16,14 +16,14 @@ to: string | null;
 export type AdviceStatusData = {
 id: string;
 name: string;
-result: any;
+result: App.Enums.AdviceStatusResult;
 group_id: string | null;
 visible_in_group: boolean;
 };
 export type AdviceStatusNamesData = {
 id: string;
 name: string;
-result: any;
+result: App.Enums.AdviceStatusResult;
 };
 export type DataProtectedAdviceData = {
 id: string;
@@ -52,7 +52,7 @@ helpType_place: string | null;
 helpType_technical: string | null;
 helpType_bureaucracy: string | null;
 helpType_other: string | null;
-result: any | null;
+result: App.Enums.AdviceStatusResult | null;
 can_edit: boolean | null;
 group_id: string | null;
 };
@@ -97,6 +97,12 @@ selectedGroup: App.Data.GroupData | null;
 polygon: App.ValueObjects.Polygon | null;
 canEditGroup: boolean;
 canCreateGroups: boolean;
+};
+}
+declare namespace App.Enums {
+export type AdviceStatusResult = {
+name: string;
+value: number;
 };
 }
 declare namespace App.ValueObjects {
