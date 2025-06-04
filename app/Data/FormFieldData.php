@@ -1,0 +1,57 @@
+<?php
+
+namespace App\Data;
+
+use App\Enums\FieldType;
+use Illuminate\Support\Collection;
+use Spatie\LaravelData\Attributes\DataCollectionOf;
+use Spatie\LaravelData\Data;
+use Spatie\TypeScriptTransformer\Attributes\TypeScript;
+
+#[TypeScript]
+class FormFieldData extends Data
+{
+    public function __construct(
+        public string $id,
+        public string $form_definition_id,
+        public FieldType $type,
+        public string $name,
+        public string $label,
+        public ?string $placeholder = null,
+        public ?string $help_text = null,
+        public bool $required = false,
+        public ?string $default_value = null,
+        public int $sort_order = 0,
+        public ?int $min_length = null,
+        public ?int $max_length = null,
+        public ?float $min_value = null,
+        public ?float $max_value = null,
+        public ?array $accepted_file_types = null,
+        #[DataCollectionOf(FormFieldOptionData::class)]
+        public Collection $options,
+    ) {
+    }
+
+    public static function fromModel(\App\Models\FormField $model): self
+    {
+        $model->loadMissing('options');
+        return new self(
+            id: $model->id,
+            form_definition_id: $model->form_definition_id,
+            type: $model->type,
+            name: $model->name,
+            label: $model->label,
+            placeholder: $model->placeholder,
+            help_text: $model->help_text,
+            required: $model->required,
+            default_value: $model->default_value,
+            sort_order: $model->sort_order,
+            min_length: $model->min_length,
+            max_length: $model->max_length,
+            min_value: $model->min_value,
+            max_value: $model->max_value,
+            accepted_file_types: $model->accepted_file_types,
+            options: $model->options->map(fn($option) => FormFieldOptionData::fromModel($option)),
+        );
+    }
+}
