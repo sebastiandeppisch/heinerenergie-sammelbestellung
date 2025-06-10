@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use App\Casts\FieldConfigurationCast;
 use App\Enums\FieldType;
-use App\ValueObjects\FieldConfiguration;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -24,7 +22,6 @@ class FormField extends Model
     protected $fillable = [
         'form_definition_id',
         'type',
-        'name',
         'label',
         'placeholder',
         'help_text',
@@ -54,12 +51,61 @@ class FormField extends Model
         'accepted_file_types' => 'array',
     ];
 
+    public function formDefinition(): BelongsTo
+    {
+        return $this->belongsTo(FormDefinition::class);
+    }
 
-    /**
-     * Get the options for this field (for select, radio, etc.).
-     */
     public function options(): HasMany
     {
         return $this->hasMany(FormFieldOption::class)->orderBy('sort_order');
     }
+
+    public function submissionFields(): HasMany
+    {
+        return $this->hasMany(SubmissionField::class);
+    }
+
+    public function getValidationRules(): array
+    {
+        $rules = match ($this->type) {
+            FieldType::TEXT => ['string'],
+            FieldType::TEXTAREA => ['string'],
+            FieldType::NUMBER => ['numeric'],
+            FieldType::EMAIL => ['email'],
+            FieldType::PHONE => ['string', 'regex:/^[\+]?[0-9\s\-\(\)]+$/'],
+            FieldType::SELECT => ['string'],
+            FieldType::RADIO => ['string'],
+            FieldType::CHECKBOX => ['array'],
+            FieldType::FILE => [''], //TODO
+            FieldType::DATE => ['date'],
+            FieldType::GEO_COORDINATE => ['array', 'size:2'],
+            default => ['string'],
+        };
+
+        if ($this->type->supportsLengthValidation()) {
+            if (isset($this->min_length)) {
+                $rules[] = 'min:' . $this->min_length;
+            }
+            if (isset($this->max_length)) {
+                $rules[] = 'max:' . $this->max_length;
+            }
+        }
+
+        if ($this->type->supportsNumericValidation()) {
+            if (isset($this->min_value )) {
+                $rules[] = 'min:' . $this->min_value;
+            }
+            if (isset($this->max_value)) {
+                $rules[] = 'max:' . $this->max_value;
+            }
+        }
+
+        if ($this->type->requiresGeoCoordinate()) {
+            //TODO
+        }
+
+        return $rules;
+    }
+
 }

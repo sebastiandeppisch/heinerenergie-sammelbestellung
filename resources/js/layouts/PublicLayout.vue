@@ -18,7 +18,10 @@ import AppFooter from './AppFooter.vue';
   <div class="outer">
     <div class="public-layout">
       <SmallToolbar/>
+      <div class="m-8">
         <slot />
+
+      </div>
     </div>
   </div>
 </MainPublic>
@@ -64,7 +67,7 @@ import AppFooter from './AppFooter.vue';
   margin-left: auto;
   margin-right: auto;
 }
-.outer{ 
+.outer{
   background-color: #f2f2f2;
   width: 100%;
   height: max-content;

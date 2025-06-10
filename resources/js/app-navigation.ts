@@ -36,5 +36,11 @@ export default [
     path: "/settings",
     icon: "preferences",
     admin: true
+  },
+  {
+    text: "Formulare",
+    path: "/form-definitions",
+    icon: "fields",
+    admin: true
   }
 ];

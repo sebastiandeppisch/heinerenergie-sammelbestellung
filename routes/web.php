@@ -4,11 +4,13 @@ use App\Http\Controllers\AdviceController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\DevLoginController;
+use App\Http\Controllers\FormController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use \App\Http\Controllers\FormDefinitionController;
+use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 
 /*
 |--------------------------------------------------------------------------
@@ -73,3 +75,8 @@ Route::get('datapolicy', [PageController::class, 'datapolicy'])->name('datapolic
 if (app()->environment('local')) {
     Route::get('/dev-login/{user}', [DevLoginController::class, 'login'])->name('dev.login');
 }
+
+Route::get('/forms/{formDefinition}', [FormController::class, 'show'])
+    ->name('form.show');
+Route::post('/forms/{formDefinition}', [FormController::class, 'submit'])
+    ->name('form.submit')->middleware([HandlePrecognitiveRequests::class]);

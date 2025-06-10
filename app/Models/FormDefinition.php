@@ -57,4 +57,18 @@ class FormDefinition extends Model
         return parent::delete();
     }
 
+    public function getValidationRules(): array
+    {
+        return $this->fields->mapWithKeys(function (FormField $field) {
+            return [$field->id => $field->getValidationRules()];
+        })->toArray();
+    }
+
+    public function getValidationAttributes(): array
+    {
+        return $this->fields->mapWithKeys(function (FormField $field) {
+            return [$field->id => $field->label];
+        })->toArray();
+    }
+
 }
