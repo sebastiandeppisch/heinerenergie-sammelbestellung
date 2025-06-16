@@ -8,7 +8,7 @@ type FormFieldData = App.Data.FormFieldData;
 const props = withDefaults(defineProps<{
   field: FormFieldData;
   isPreview?: boolean;
-  errors: Array<string>|string;
+  errors?: Array<string>|string;
   fieldName?: string;
   disabled?: boolean;
 }>(), {
