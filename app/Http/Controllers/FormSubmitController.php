@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Data\FormDefinitionData;
 use App\Enums\FieldType;
-use App\Http\Requests\StoreFormSubmission;
+use App\Http\Requests\StoreFormSubmissionRequest;
 use App\Models\FormDefinition;
 use App\Models\FormField;
 use Illuminate\Http\Request;
@@ -19,7 +19,7 @@ class FormSubmitController extends Controller
         ]);
     }
 
-    public function submit(StoreFormSubmission $request, FormDefinition $formDefinition){
+    public function submit(StoreFormSubmissionRequest $request, FormDefinition $formDefinition){
 
         $submission = $formDefinition->createSubmission();
 
