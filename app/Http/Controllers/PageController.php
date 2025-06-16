@@ -32,6 +32,8 @@ class PageController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
             ]);
+        }else{
+            $users = [];
         }
 
         return Inertia::render('LoginForm', [
