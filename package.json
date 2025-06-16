@@ -9,7 +9,7 @@
         "@fortawesome/free-regular-svg-icons": "^6.2.0",
         "@fortawesome/free-solid-svg-icons": "^6.2.0",
         "@fortawesome/vue-fontawesome": "^3.0.1",
-        "@inertiajs/vue3": "^1.2.0",
+        "@inertiajs/vue3": "^2.0.0",
         "@types/leaflet-draw": "^1.0.11",
         "@types/ziggy-js": "^1.8.0",
         "@vee-validate/zod": "^4.15.0",
