@@ -2,18 +2,19 @@
   <div class="area-chart-container">
     <div v-if="loading" class="loading-indicator">Laden...</div>
     <div v-else>
-      <apexchart
+      <VueApexCharts
         type="area"
         height="350"
         :options="chartOptions"
         :series="series"
-      ></apexchart>
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import VueApexCharts from 'vue3-apexcharts';
 
 // Typdefinitionen
 interface StatusData {
@@ -32,10 +33,10 @@ const loading = ref(false);
 // Berechnete Eigenschaften
 const series = computed(() => {
   // Alle Status-Typen aus allen Datenpunkten extrahieren
-  const statusTypes = [...new Set(props.data.flatMap(item => 
+  const statusTypes = [...new Set(props.data.flatMap(item =>
     Object.keys(item.statusCounts)
   ))];
-  
+
   // Für jeden Status-Typ eine Datenreihe erstellen
   return statusTypes.map(status => ({
     name: status,
@@ -53,8 +54,8 @@ const chartOptions = computed(() => {
       background: 'transparent'
     },
     colors: ['#FBBC05', '#4285F4', '#34A853', '#EA4335'],
-    dataLabels: { 
-      enabled: false 
+    dataLabels: {
+      enabled: false
     },
     fill: {
       type: 'gradient',
@@ -86,7 +87,7 @@ const chartOptions = computed(() => {
       }
     },
     yaxis: {
-      title: { 
+      title: {
         text: 'Anzahl Beratungen',
         style: {
           fontSize: '14px',
@@ -114,7 +115,7 @@ const chartOptions = computed(() => {
         }
       }
     },
-    legend: { 
+    legend: {
       position: 'top',
       horizontalAlign: 'right',
       fontSize: '13px',
@@ -151,4 +152,4 @@ const chartOptions = computed(() => {
   font-size: 16px;
   color: #666;
 }
-</style> 
+</style>

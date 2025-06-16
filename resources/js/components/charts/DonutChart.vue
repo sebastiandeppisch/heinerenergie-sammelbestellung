@@ -2,19 +2,19 @@
   <div class="donut-chart-container">
     <div v-if="loading" class="loading-indicator">Laden...</div>
     <div v-else>
-      <apexchart
+      <VueApexCharts
         type="donut"
         height="350"
         :options="chartOptions"
         :series="series"
-      ></apexchart>
+     />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-
+import VueApexCharts from 'vue3-apexcharts';
 // Typdefinitionen
 interface CurrentStatusData {
   statusCounts: Record<string, number>;
@@ -154,4 +154,4 @@ const getTotal = (): number => {
   font-size: 16px;
   color: #666;
 }
-</style> 
+</style>
