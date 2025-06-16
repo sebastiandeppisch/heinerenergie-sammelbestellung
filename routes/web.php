@@ -4,7 +4,7 @@ use App\Http\Controllers\AdviceController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\DevLoginController;
-use App\Http\Controllers\FormController;
+use App\Http\Controllers\FormSubmitController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\UserController;
@@ -76,7 +76,7 @@ if (app()->environment('local')) {
     Route::get('/dev-login/{user}', [DevLoginController::class, 'login'])->name('dev.login');
 }
 
-Route::get('/forms/{formDefinition}', [FormController::class, 'show'])
+Route::get('/forms/{formDefinition}', [FormSubmitController::class, 'show'])
     ->name('form.show');
-Route::post('/forms/{formDefinition}', [FormController::class, 'submit'])
+Route::post('/forms/{formDefinition}', [FormSubmitController::class, 'submit'])
     ->name('form.submit')->middleware([HandlePrecognitiveRequests::class]);

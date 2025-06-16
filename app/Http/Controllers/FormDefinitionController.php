@@ -30,8 +30,18 @@ class FormDefinitionController extends Controller
     {
         return Inertia::render('FormBuilder/Edit', [
             'formDefinition' => null,
-            'fieldTypes' => FieldType::cases()
+            'fieldTypes' => $this->activeFieldTypes()
         ]);
+    }
+
+    private function activeFieldTypes(): array
+    {
+        //TODO implement geo coordinate & file
+        $inactive = collect([
+            FieldType::FILE,
+            FieldType::GEO_COORDINATE
+        ]);
+        return collect(FieldType::cases())->filter(fn ($case) => !$inactive->contains($case))->toArray();
     }
 
     /**
@@ -44,7 +54,7 @@ class FormDefinitionController extends Controller
 
         return Inertia::render('FormBuilder/Edit', [
             'formDefinition' => $formDefinitionData,
-            'fieldTypes' => FieldType::cases()
+            'fieldTypes' =>  $this->activeFieldTypes()
         ]);
     }
 

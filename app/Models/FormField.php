@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Validation\Rule;
 
 class FormField extends Model
 {
@@ -68,44 +69,56 @@ class FormField extends Model
 
     public function getValidationRules(): array
     {
+        $inRule = Rule::in($this->options->pluck('id')->toArray());
+
         $rules = match ($this->type) {
             FieldType::TEXT => ['string'],
             FieldType::TEXTAREA => ['string'],
             FieldType::NUMBER => ['numeric'],
             FieldType::EMAIL => ['email'],
             FieldType::PHONE => ['string', 'regex:/^[\+]?[0-9\s\-\(\)]+$/'],
-            FieldType::SELECT => ['string'],
-            FieldType::RADIO => ['string'],
-            FieldType::CHECKBOX => ['array'],
-            FieldType::FILE => [''], //TODO
+            // TODO fix array validation FieldType::SELECT => [$inRule],
+            FieldType::RADIO => [$inRule],
+            // TODO fix array validation FieldType::CHECKBOX => [$inRule],
+            FieldType::FILE => [''], // TODO
             FieldType::DATE => ['date'],
             FieldType::GEO_COORDINATE => ['array', 'size:2'],
-            default => ['string'],
+            default => [],
         };
 
         if ($this->type->supportsLengthValidation()) {
             if (isset($this->min_length)) {
-                $rules[] = 'min:' . $this->min_length;
+                $rules[] = 'min:'.$this->min_length;
             }
             if (isset($this->max_length)) {
-                $rules[] = 'max:' . $this->max_length;
+                $rules[] = 'max:'.$this->max_length;
             }
         }
 
         if ($this->type->supportsNumericValidation()) {
-            if (isset($this->min_value )) {
-                $rules[] = 'min:' . $this->min_value;
+            if (isset($this->min_value)) {
+                $rules[] = 'min:'.$this->min_value;
             }
             if (isset($this->max_value)) {
-                $rules[] = 'max:' . $this->max_value;
+                $rules[] = 'max:'.$this->max_value;
             }
         }
 
         if ($this->type->requiresGeoCoordinate()) {
-            //TODO
+            // TODO
         }
 
         return $rules;
     }
 
+    public function createSubmissionField(FormSubmission $submission, mixed $value): SubmissionField
+    {
+        return $submission->submissionFields()->create([
+            'form_field_id' => $this->id,
+            'field_label' => $this->label,
+            'sort_order' => $this->sort_order,
+            'field_type' => $this->type,
+            'value' => $value,
+        ]);
+    }
 }

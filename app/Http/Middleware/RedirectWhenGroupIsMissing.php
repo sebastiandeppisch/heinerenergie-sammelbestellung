@@ -30,6 +30,8 @@ class RedirectWhenGroupIsMissing
                 'newadvice',
                 'register',
                 'register.store',
+                'form.submit',
+                'form.show',
             ];
 
             if ($groups->count() === 1) {

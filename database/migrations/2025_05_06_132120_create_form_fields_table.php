@@ -14,7 +14,6 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignIdFor(FormDefinition::class)->constrained();
             $table->string('type'); // Enum/FieldType
-            $table->string('name');
             $table->string('label');
             $table->string('placeholder')->nullable();
             $table->text('help_text')->nullable();

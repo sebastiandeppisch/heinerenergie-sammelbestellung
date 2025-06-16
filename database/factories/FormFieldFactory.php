@@ -28,12 +28,10 @@ class FormFieldFactory extends Factory
         ];
 
         $type = $this->faker->randomElement($fieldTypes);
-        $name = strtolower($this->faker->unique()->word) . '_' . $this->faker->numberBetween(1, 100);
 
         return [
             'type' => $type,
-            'name' => $name,
-            'label' => ucfirst(str_replace('_', ' ', $name)),
+            'label' => ucfirst($this->faker->unique()->word),
             'placeholder' => $this->faker->optional(0.7)->sentence(2),
             'help_text' => $this->faker->optional(0.4)->sentence(),
             'required' => $this->faker->boolean(30),

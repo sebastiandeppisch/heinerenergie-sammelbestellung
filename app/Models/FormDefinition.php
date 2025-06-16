@@ -34,7 +34,7 @@ class FormDefinition extends Model
     ];
 
     /**
-     * Get the fields for this form definition.
+     * @return HasMany<FormField>
      */
     public function fields(): HasMany
     {
@@ -69,6 +69,15 @@ class FormDefinition extends Model
         return $this->fields->mapWithKeys(function (FormField $field) {
             return [$field->id => $field->label];
         })->toArray();
+    }
+
+    public function createSubmission(): FormSubmission
+    {
+        return $this->submissions()->create([
+            'form_name' => $this->name,
+            'form_description' => $this->description,
+            'submitted_at' => now(),
+        ]);
     }
 
 }

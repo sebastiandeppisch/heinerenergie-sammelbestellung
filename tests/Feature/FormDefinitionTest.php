@@ -147,7 +147,6 @@ test('form definition can be created', function () {
     $this->assertDatabaseHas('form_fields', [
         'form_definition_id' => $formDefinition->id,
         'type' => FieldType::TEXT->value,
-        'name' => 'text_field',
         'label' => 'Text Field',
         'placeholder' => 'Enter text',
         'required' => true
@@ -156,13 +155,12 @@ test('form definition can be created', function () {
     $this->assertDatabaseHas('form_fields', [
         'form_definition_id' => $formDefinition->id,
         'type' => FieldType::SELECT->value,
-        'name' => 'select_field',
         'label' => 'Select Field',
         'required' => false
     ]);
 
     // Überprüfe, ob die Optionen für das Select-Feld erstellt wurden
-    $selectField = FormField::where('name', 'select_field')->first();
+    $selectField = FormField::where('label', 'Select Field')->first();
 
     $this->assertDatabaseHas('form_field_options', [
         'form_field_id' => $selectField->id,
@@ -189,7 +187,6 @@ test('form definition can be updated', function () {
     $field = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
         'type' => FieldType::TEXT->value,
-        'name' => 'original_field',
         'label' => 'Original Field'
     ]);
 
@@ -231,7 +228,6 @@ test('form definition can be updated', function () {
     $this->assertDatabaseHas('form_fields', [
         'form_definition_id' => $formDefinition->id,
         'type' => FieldType::TEXTAREA->value,
-        'name' => 'new_field',
         'label' => 'New Field',
         'placeholder' => 'Enter text here',
         'required' => true
