@@ -10,6 +10,7 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use \App\Http\Controllers\FormDefinitionController;
+use App\Http\Controllers\FormSubmissionController;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 
 /*
@@ -58,6 +59,8 @@ Route::middleware('auth')->group(function () {
         ->name('logout');
 
     Route::resource('form-definitions', FormDefinitionController::class);
+
+    Route::resource('form-submissions', FormSubmissionController::class)->only(['index']);
 });
 
 Route::get('/change-password', [PageController::class, 'changePassword'])->name('password.reset');

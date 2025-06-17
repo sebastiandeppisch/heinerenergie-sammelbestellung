@@ -42,5 +42,11 @@ export default [
     path: "/form-definitions",
     icon: "fields",
     admin: true
+  },
+  {
+    text: "Formulareinträge",
+    path: "/form-submissions",
+    icon: "message",
+    admin: true
   }
 ];
