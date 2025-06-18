@@ -51,7 +51,6 @@ class SubmissionField extends Model
 
     public function asCoordinate(): Coordinate{
         if($this->field_type != FieldType::GEO_COORDINATE){
-            dd($this->field_type);
             throw new RuntimeException('This method can only be called for an geo coordinate field');
         }
         return Coordinate::fromArray($this->value);
