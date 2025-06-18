@@ -26,6 +26,12 @@ class FormSubmission extends Model
         'submitted_at',
     ];
 
+    public function casts(){
+        return [
+            'submitted_at' => 'datetime',
+        ];
+    }
+
     public function formDefinition(): BelongsTo
     {
         return $this->belongsTo(FormDefinition::class);

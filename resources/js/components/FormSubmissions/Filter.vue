@@ -22,7 +22,7 @@
           <div class="flex items-center gap-2">
             TODO Datepicker
           </div>
-        
+
         </div>
       </div>
 
@@ -41,9 +41,9 @@
 
         <div>
           <label class="block text-sm font-medium mb-2">Darstellung</label>
-          <Button 
+          <Button
             @click="toggleGrouping"
-            :variant="groupByForm ? 'outline' : 'secondary'"
+            :variant="groupByForm ? 'secondary' : 'outline'"
             class="w-full justify-between flex items-center"
           >
             <span>Nach Formularen gruppieren</span>

@@ -68,6 +68,7 @@ id: string;
 form_definition_id: string;
 type: App.Enums.FieldType;
 label: string;
+options: Array<App.Data.FormFieldOptionData>;
 placeholder: string | null;
 help_text: string | null;
 required: boolean;
@@ -78,7 +79,6 @@ max_length: number | null;
 min_value: number | null;
 max_value: number | null;
 accepted_file_types: Array<any> | null;
-options: Array<App.Data.FormFieldOptionData>;
 };
 export type FormFieldOptionData = {
 id: string;
@@ -87,6 +87,14 @@ label: string;
 value: string;
 sort_order: number;
 is_default: boolean;
+};
+export type FormSubmissionData = {
+id: string;
+form_name: string;
+form_subscription: string | null;
+fields: Array<App.Data.SubmissionFieldData>;
+submitted_at: any;
+seen: boolean;
 };
 export type GroupData = {
 users_count: number;
@@ -118,6 +126,16 @@ id: string;
 name: string;
 email: string;
 is_admin: boolean;
+};
+export type PaginationData = {
+total: number;
+perPage: number;
+currentPage: number;
+lastPage: number;
+};
+export type SubmissionFieldData = {
+value: number | string | Array<string> | null;
+field: App.Data.FormFieldData;
 };
 }
 declare namespace App.Data.Pages {

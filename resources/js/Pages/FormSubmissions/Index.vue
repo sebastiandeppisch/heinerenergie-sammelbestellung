@@ -13,20 +13,29 @@
             v-model:group-by-form="groupByForm"
         />
 
-        {{  selectedFormDefinitions  }}
+        <Grid
+            :form-submissions="formSubmissions"
+            :pagination="props.pagination"
+            :group-by-form="groupByForm"
+        />
+
     </div>
 </template>
 <script lang="ts" setup>
 import Filter from '@/components/FormSubmissions/Filter.vue';
 import { computed, ComputedRef } from 'vue';
 import { router } from '@inertiajs/vue3';
+import Grid from '@/components/FormSubmissions/Grid.vue';
+
 const props = defineProps<{
     formDefinitions: Array<App.Data.FormDefinitionData>
     dateFrom: Date | null
     dateTo: Date | null
     selectedFormDefinitions: string[]
     sortOrder: 'asc' | 'desc'
-    groupByForm: boolean
+    groupByForm: boolean,
+    formSubmissions: App.Data.FormSubmissionData[] | any,
+    pagination: App.Data.PaginationData
 }>();
 
 const filter = computed(() => {
@@ -41,7 +50,7 @@ const filter = computed(() => {
         result['selectedFormDefinitions'] = props.selectedFormDefinitions;
     }
     if( props.sortOrder === 'asc') {
-        result['sortOrder'] = props.sortOrder;  
+        result['sortOrder'] = props.sortOrder;
     }else{
         result['sortOrder'] = undefined;
     }

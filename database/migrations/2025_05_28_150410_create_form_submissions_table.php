@@ -14,12 +14,12 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->timestamps();
 
-            $table->foreignIdFor(FormDefinition::class)->constrained();
+            $table->foreignIdFor(FormDefinition::class)->nullable();
             $table->foreignIdFor(Advice::class)->nullable();
-            $table->timestamp('submitted_at')->nullable();
+            $table->timestamp('submitted_at');
             $table->string('form_name');
             $table->string('form_description')->nullable();
-
+            $table->boolean('seen')->default(false);
         });
     }
 

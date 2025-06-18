@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignIdFor(FormField::class)->constrained();
             $table->string('field_label');
             $table->string('field_type');
-            $table->json('value');
+            $table->json('value')->nullable();
             $table->integer('sort_order');
         });
     }

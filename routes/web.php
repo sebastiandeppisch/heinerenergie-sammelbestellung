@@ -61,6 +61,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('form-definitions', FormDefinitionController::class);
 
     Route::resource('form-submissions', FormSubmissionController::class)->only(['index']);
+    Route::post('form-submissions/{formSubmission}/mark-seen', [FormSubmissionController::class, 'markSeen'])
+        ->name('form-submissions.mark-seen');
+    Route::post('form-submissions/{formSubmission}/mark-unseen', [FormSubmissionController::class, 'markUnseen'])
+        ->name('form-submissions.mark-unseen');
 });
 
 Route::get('/change-password', [PageController::class, 'changePassword'])->name('password.reset');

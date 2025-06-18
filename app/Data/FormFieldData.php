@@ -3,6 +3,7 @@
 namespace App\Data;
 
 use App\Enums\FieldType;
+use App\Models\SubmissionField;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Data;
@@ -16,6 +17,8 @@ class FormFieldData extends Data
         public string $form_definition_id,
         public FieldType $type,
         public string $label,
+        #[DataCollectionOf(FormFieldOptionData::class)]
+        public Collection $options,
         public ?string $placeholder = null,
         public ?string $help_text = null,
         public bool $required = false,
@@ -26,8 +29,6 @@ class FormFieldData extends Data
         public ?float $min_value = null,
         public ?float $max_value = null,
         public ?array $accepted_file_types = null,
-        #[DataCollectionOf(FormFieldOptionData::class)]
-        public Collection $options,
     ) {
     }
 
@@ -50,6 +51,19 @@ class FormFieldData extends Data
             max_value: $model->max_value,
             accepted_file_types: $model->accepted_file_types,
             options: $model->options->map(fn($option) => FormFieldOptionData::fromModel($option)),
+        );
+    }
+
+    public static function fromSubmissionField(SubmissionField $model): self{
+        return new self(
+            id: $model->id,
+            form_definition_id: $model->formSubmission->form_definition_id,
+            type: $model->field_type,
+            label: $model->field_label,
+            required: false,
+            options: $model->formField->options->map(fn($option) => FormFieldOptionData::fromModel($option)), //TODO add archive options
+            placeholder: null
+
         );
     }
 }
