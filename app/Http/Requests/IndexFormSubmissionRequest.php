@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class IndexFormSubmission extends FormRequest
+class IndexFormSubmissionRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -37,7 +37,7 @@ class IndexFormSubmission extends FormRequest
         return $this->input('selectedFormDefinitions', []);
     }
 
-    public function sorting(): string 
+    public function sorting(): string
     {
         return $this->input('sortOrder', 'desc');
     }

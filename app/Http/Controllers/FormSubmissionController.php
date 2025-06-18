@@ -8,13 +8,13 @@ use App\Models\FormDefinition;
 use App\Models\FormSubmission;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Http\Requests\IndexFormSubmission;
+use App\Http\Requests\IndexFormSubmissionRequest;
 use App\Data\PaginationData;
 use Illuminate\Support\Collection;
 
 class FormSubmissionController extends Controller
 {
-    public function index(IndexFormSubmission $request){
+    public function index(IndexFormSubmissionRequest $request){
         $formsubmissions = FormSubmission::query()
             ->with(['submissionFields']);
 
