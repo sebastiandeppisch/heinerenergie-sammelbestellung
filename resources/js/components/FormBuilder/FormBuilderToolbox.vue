@@ -13,7 +13,8 @@ const FIELD_TYPES = {
   RADIO: 'radio' as FieldType,
   CHECKBOX: 'checkbox' as FieldType,
   FILE: 'file' as FieldType,
-  DATE: 'date' as FieldType
+  DATE: 'date' as FieldType,
+  GEO_COORDINATE: 'geo_coordinate' as FieldType
 };
 
 
@@ -38,6 +39,7 @@ const getLabelForFieldType = (type: FieldType): string => {
     case FIELD_TYPES.CHECKBOX: return 'Checkbox';
     case FIELD_TYPES.FILE: return 'Datei-Upload';
     case FIELD_TYPES.DATE: return 'Datum';
+    case FIELD_TYPES.GEO_COORDINATE: return 'Kartenpunkt';
     default: return type.toString();
   }
 };

@@ -8,6 +8,7 @@ use App\Models\Group;
 use App\Models\SubmissionField;
 use App\Models\User;
 use App\Services\SessionService;
+use App\ValueObjects\Coordinate;
 use Inertia\Testing\AssertableInertia as Assert;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -236,4 +237,30 @@ test('form with radiobutton is validated', function () {
     ]);
 
     $response->assertSessionHasErrors($formField->id);
+});
+
+
+test('geoposition can be submitted', function(){
+    $formDefinition = FormDefinition::factory()->create();
+    $formField = FormField::factory()->create([
+        'form_definition_id' => $formDefinition->id,
+        'type' => FieldType::GEO_COORDINATE,
+        'label' => 'Your example location'
+    ]);
+
+    $this->withoutExceptionHandling();
+
+    $response = $this->post(route('form.submit', ['formDefinition' => $formField->formDefinition->id]), [
+        $formField->id => [
+            'lat' => 49,
+            'lng' => 10
+        ],
+    ]);
+
+    $response->assertSessionHasNoErrors();
+
+    $field = SubmissionField::firstOrFail();
+    $this->assertEquals(FieldType::GEO_COORDINATE, $field->field_type);
+
+    $this->assertEquals(new Coordinate(49, 10), $field->asCoordinate());
 });
