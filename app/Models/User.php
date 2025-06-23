@@ -106,4 +106,9 @@ class User extends Authenticatable
             'advice_radius' => 'int',
         ];
     }
+
+    public static function empty(): bool
+    {
+        return self::count() === 0;
+    }
 }

@@ -1,7 +1,7 @@
 import { AxiosError } from 'axios';
 import notify from 'devextreme/ui/notify';
 import moment from 'moment';
-import { Ref } from 'vue';
+import { onMounted, onUnmounted, Ref } from 'vue';
 import { reactive } from '@vue/reactivity';
 
 function formatPriceCell(cell: { value: number| string }): string{
@@ -32,6 +32,18 @@ function notifyError(error: AxiosError<LaravelValidationError>): void{
 
 function formatDateCell(row: { value: Date }): string{
 	return moment(row.value).format("DD.MM.YY");
+}
+
+function useOnResize(callback: () => void){
+    return {
+        onOnMounted: onMounted(() => {
+            callback();
+            window.addEventListener('resize', callback);
+        }),
+        onOnUnmounted: onUnmounted(() => {
+            window.removeEventListener('resize', callback);
+        })
+    };
 }
 
 class AdaptTableHeight{
@@ -65,4 +77,4 @@ class AdaptTableHeight{
 	}
 }
 
-export {formatPrice, formatPriceCell, notifyError, formatDateCell, AdaptTableHeight}
+export {formatPrice, formatPriceCell, notifyError, formatDateCell, AdaptTableHeight, useOnResize}

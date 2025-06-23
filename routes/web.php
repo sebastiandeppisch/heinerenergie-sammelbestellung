@@ -2,11 +2,16 @@
 
 use App\Http\Controllers\AdviceController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\DevLoginController;
+use App\Http\Controllers\FormSubmitController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use \App\Http\Controllers\FormDefinitionController;
+use App\Http\Controllers\FormSubmissionController;
+use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,6 +58,13 @@ Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 
+    Route::resource('form-definitions', FormDefinitionController::class);
+
+    Route::resource('form-submissions', FormSubmissionController::class)->only(['index']);
+    Route::post('form-submissions/{formSubmission}/mark-seen', [FormSubmissionController::class, 'markSeen'])
+        ->name('form-submissions.mark-seen');
+    Route::post('form-submissions/{formSubmission}/mark-unseen', [FormSubmissionController::class, 'markUnseen'])
+        ->name('form-submissions.mark-unseen');
 });
 
 Route::get('/change-password', [PageController::class, 'changePassword'])->name('password.reset');
@@ -60,6 +72,8 @@ Route::get('/change-password', [PageController::class, 'changePassword'])->name(
 Route::get('/', fn () => redirect()->route('dashboard'))->name('home');
 
 Route::get('/login-form', [PageController::class, 'login'])->name('login');
+Route::get('/register', [RegisterController::class, 'show'])->name('register');
+Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
 Route::get('/reset-password', [PageController::class, 'resetPassword'])->name('reset-password');
 Route::get('newadvice', [PageController::class, 'newAdvice'])->name('newadvice');
 Route::get('impress', [PageController::class, 'impress'])->name('impress');
@@ -68,3 +82,8 @@ Route::get('datapolicy', [PageController::class, 'datapolicy'])->name('datapolic
 if (app()->environment('local')) {
     Route::get('/dev-login/{user}', [DevLoginController::class, 'login'])->name('dev.login');
 }
+
+Route::get('/forms/{formDefinition}', [FormSubmitController::class, 'show'])
+    ->name('form.show');
+Route::post('/forms/{formDefinition}', [FormSubmitController::class, 'submit'])
+    ->name('form.submit')->middleware([HandlePrecognitiveRequests::class]);

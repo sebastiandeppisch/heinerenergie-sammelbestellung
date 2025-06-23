@@ -21,7 +21,9 @@ class PageController extends Controller
             return redirect()->route('dashboard');
         }
 
-        $users = [];
+        if (User::empty()) {
+            return redirect()->route('register');
+        }
 
         // Nur in lokaler Umgebung Benutzer laden
         if (app()->environment('local')) {
@@ -30,6 +32,8 @@ class PageController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
             ]);
+        }else{
+            $users = [];
         }
 
         return Inertia::render('LoginForm', [

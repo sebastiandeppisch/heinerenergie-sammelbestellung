@@ -16,14 +16,14 @@ to: string | null;
 export type AdviceStatusData = {
 id: string;
 name: string;
-result: any;
+result: App.Enums.AdviceStatusResult;
 group_id: string | null;
 visible_in_group: boolean;
 };
 export type AdviceStatusNamesData = {
 id: string;
 name: string;
-result: any;
+result: App.Enums.AdviceStatusResult;
 };
 export type DataProtectedAdviceData = {
 id: string;
@@ -40,21 +40,61 @@ advisor_id: string | null;
 advice_status_id: string | null;
 lng: number | null;
 lat: number | null;
-type: any | null;
+type: App.Enums.AdviceType | null;
 created_at: any;
 updated_at: any;
 distance: number | null;
 shares_ids: Array<any>;
 placeNotes: string | null;
-houseType: any | null;
+houseType: App.Enums.HouseType | null;
 landlordExists: boolean | null;
 helpType_place: string | null;
 helpType_technical: string | null;
 helpType_bureaucracy: string | null;
 helpType_other: string | null;
-result: any | null;
+result: App.Enums.AdviceStatusResult | null;
 can_edit: boolean | null;
 group_id: string | null;
+};
+export type FormDefinitionData = {
+id: string;
+name: string;
+description: string | null;
+is_active: boolean;
+fields: Array<App.Data.FormFieldData>;
+};
+export type FormFieldData = {
+id: string;
+form_definition_id: string;
+type: App.Enums.FieldType;
+label: string;
+options: Array<App.Data.FormFieldOptionData>;
+placeholder: string | null;
+help_text: string | null;
+required: boolean;
+default_value: string | null;
+sort_order: number;
+min_length: number | null;
+max_length: number | null;
+min_value: number | null;
+max_value: number | null;
+accepted_file_types: Array<any> | null;
+};
+export type FormFieldOptionData = {
+id: string;
+form_field_id: string;
+label: string;
+value: string;
+sort_order: number;
+is_default: boolean;
+};
+export type FormSubmissionData = {
+id: string;
+form_name: string;
+form_subscription: string | null;
+fields: Array<App.Data.SubmissionFieldData>;
+submitted_at: any;
+seen: boolean;
 };
 export type GroupData = {
 users_count: number;
@@ -79,12 +119,23 @@ name: string;
 selected: boolean;
 expanded: boolean;
 parent_id: string | null;
+logo_path: string | null;
 };
 export type GroupUserData = {
 id: string;
 name: string;
 email: string;
 is_admin: boolean;
+};
+export type PaginationData = {
+total: number;
+perPage: number;
+currentPage: number;
+lastPage: number;
+};
+export type SubmissionFieldData = {
+value: number | string | Array<string> | null;
+field: App.Data.FormFieldData;
 };
 }
 declare namespace App.Data.Pages {
@@ -97,6 +148,12 @@ polygon: App.ValueObjects.Polygon | null;
 canEditGroup: boolean;
 canCreateGroups: boolean;
 };
+}
+declare namespace App.Enums {
+export type AdviceStatusResult = 0 | 1 | 2 | 3;
+export type AdviceType = 0 | 1 | 2;
+export type FieldType = 'text' | 'textarea' | 'number' | 'email' | 'phone' | 'select' | 'radio' | 'checkbox' | 'file' | 'date' | 'geo_coordinate';
+export type HouseType = 0 | 1 | 2;
 }
 declare namespace App.ValueObjects {
 export type Coordinate = {

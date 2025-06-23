@@ -18,11 +18,6 @@ class Setting extends Model
     {
 
         return [
-            'orderFormPassword' => 'Bestellformular Passwort',
-            'orderFormText' => [
-                'name' => 'Bestellformular Text',
-                'type' => 'text',
-            ],
             'impress' => [
                 'name' => 'Impressum',
                 'type' => 'text',

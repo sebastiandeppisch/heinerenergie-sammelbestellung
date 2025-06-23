@@ -2,18 +2,19 @@
   <div class="line-chart-container">
     <div v-if="loading" class="loading-indicator">Laden...</div>
     <div v-else>
-      <apexchart
+      <VueApexCharts
         type="line"
         height="350"
         :options="chartOptions"
         :series="series"
-      ></apexchart>
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import VueApexCharts from 'vue3-apexcharts';
 
 // Typdefinitionen
 interface DataPoint {
@@ -44,14 +45,14 @@ const series = computed(() => {
       data: props.currentData.map(item => item.value)
     }
   ];
-  
+
   if (props.comparisonData) {
     result.push({
       name: props.comparisonLabel,
       data: props.comparisonData.map(item => item.value)
     });
   }
-  
+
   return result;
 });
 
@@ -64,11 +65,11 @@ const chartOptions = computed(() => {
       fontFamily: 'Arial, sans-serif',
       background: 'transparent'
     },
-    dataLabels: { 
-      enabled: false 
+    dataLabels: {
+      enabled: false
     },
-    stroke: { 
-      curve: 'smooth', 
+    stroke: {
+      curve: 'smooth',
       width: 3,
       lineCap: 'round'
     },
@@ -93,7 +94,7 @@ const chartOptions = computed(() => {
           fontSize: '12px'
         }
       },
-      title: { 
+      title: {
         text: 'Datum',
         style: {
           fontSize: '14px',
@@ -103,7 +104,7 @@ const chartOptions = computed(() => {
       }
     },
     yaxis: {
-      title: { 
+      title: {
         text: 'Anzahl Beratungen',
         style: {
           fontSize: '14px',
@@ -128,7 +129,7 @@ const chartOptions = computed(() => {
         }
       }
     },
-    legend: { 
+    legend: {
       position: 'top',
       horizontalAlign: 'right',
       floating: false,
@@ -155,12 +156,12 @@ const calculateGrowth = (): number | null => {
   if (!props.comparisonData || props.currentData.length === 0 || props.comparisonData.length === 0) {
     return null;
   }
-  
+
   // Summe aller Werte im aktuellen Zeitraum
   const currentSum = props.currentData.reduce((sum, item) => sum + item.value, 0);
   // Summe aller Werte im Vergleichszeitraum
   const comparisonSum = props.comparisonData.reduce((sum, item) => sum + item.value, 0);
-  
+
   // Prozentuales Wachstum berechnen
   return comparisonSum === 0 ? 100 : ((currentSum - comparisonSum) / comparisonSum) * 100;
 };
@@ -180,4 +181,4 @@ const calculateGrowth = (): number | null => {
   font-size: 16px;
   color: #666;
 }
-</style> 
+</style>

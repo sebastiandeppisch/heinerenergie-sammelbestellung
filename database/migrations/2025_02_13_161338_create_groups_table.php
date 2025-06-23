@@ -20,8 +20,11 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('logo_path')->nullable();
-            $table->foreignIdFor(Group::class, 'parent_id')->nullable()->constrained('groups');
             $table->boolean('accepts_transfers')->default(true);
+        });
+
+        Schema::table('groups', function (Blueprint $table) {
+            $table->foreignIdFor(Group::class, 'parent_id')->nullable()->constrained('groups');
         });
 
         Schema::create('group_user', function (Blueprint $table) {

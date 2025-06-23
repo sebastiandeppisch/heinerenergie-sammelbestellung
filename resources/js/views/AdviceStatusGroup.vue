@@ -56,6 +56,11 @@ function onVisibilityChanged(e: any) {
     notify(`Status Sichtbarkeit wurde ${e.value ? 'aktiviert' : 'deaktiviert'}.`, 'success', 3000);
   }
 }
+
+function reload() {
+    ownAdviceStatusSource.value.reload();
+    otherAdviceStatusSource.value.reload();
+}
 </script>
 
 <template>
@@ -68,6 +73,7 @@ function onVisibilityChanged(e: any) {
     <DxDataGrid
       :data-source="ownAdviceStatusSource"
       :cell-hint-enabled="true"
+      @saved="reload"
     >
       <DxEditing
         :allow-updating="true"
@@ -78,6 +84,7 @@ function onVisibilityChanged(e: any) {
       <DxColumn
         data-field="name"
         caption="Name"
+        sort-order="asc"
       />
       <DxColumn
         data-field="result"
@@ -101,12 +108,12 @@ function onVisibilityChanged(e: any) {
     <div>
     <h3 class="mt-4">Verwendete Beratungszustände</h3>
     <p class="text-sm text-gray-500">
-        Hier kannst Du für diese Gruppe festlegen, welche Beratungszustände von den Berater:innen verwendet werden sollen. 
+        Hier kannst Du für diese Gruppe festlegen, welche Beratungszustände von den Berater:innen verwendet werden sollen.
     </p>
     <DxDataGrid
       :data-source="otherAdviceStatusSource"
       :cell-hint-enabled="true"
-      
+      @saved="reload"
     >
       <DxEditing
         :allow-updating="true"
@@ -118,6 +125,7 @@ function onVisibilityChanged(e: any) {
         data-field="name"
         caption="Name"
         :allow-editing="false"
+        sort-order="asc"
       />
       <DxColumn
         data-field="group_id"
@@ -139,4 +147,4 @@ function onVisibilityChanged(e: any) {
     </DxDataGrid>
     </div>
   </div>
-</template> 
+</template>

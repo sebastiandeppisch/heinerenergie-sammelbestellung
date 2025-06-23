@@ -28,6 +28,10 @@ class RedirectWhenGroupIsMissing
                 'actAsSystemAdmin',
                 'dev.login',
                 'newadvice',
+                'register',
+                'register.store',
+                'form.submit',
+                'form.show',
             ];
 
             if ($groups->count() === 1) {

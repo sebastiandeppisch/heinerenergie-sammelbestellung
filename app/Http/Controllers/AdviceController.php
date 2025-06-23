@@ -124,7 +124,7 @@ class AdviceController extends Controller
     {
         $advices = Advice::all()->filter(fn (Advice $advice) => Auth::user()->can('viewDataProtected', $advice))->values()->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice));
 
-        $groups = Group::where('accepts_transfers', true)->get()->filter(fn (Group $group) => $group->polygon !== null)->map(fn (Group $group) => GroupMapData::fromModel($group))->values();
+        $groups = Group::where('accepts_transfers', true)->get()->filter(fn (Group $group) => $group->consulting_area !== null)->map(fn (Group $group) => GroupMapData::fromModel($group))->values();
 
         return Inertia::render('AdvicesMap', [
             'advices' => $advices,

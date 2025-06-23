@@ -1,5 +1,5 @@
 {
-    "name": "sebastiandeppisch/heinerenergie-sammelbestellung",
+    "name": "sebastiandeppisch/heinerenergie-crm",
     "type": "project",
     "description": "Software for the collection of bulk orders for balcony solar panels",
     "keywords": ["framework", "laravel"],

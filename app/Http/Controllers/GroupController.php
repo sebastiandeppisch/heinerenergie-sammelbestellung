@@ -68,6 +68,7 @@ class GroupController extends Controller
                 selected: false,
                 expanded: false,
                 parent_id: $groupData->parent_id,
+                logo_path: $groupData->logo_path,
             );
         });
 
@@ -111,6 +112,7 @@ class GroupController extends Controller
                 selected: $groupData->id === $group->id,
                 expanded: $expandGroups->contains($groupData->id),
                 parent_id: $groupData->parent_id,
+                logo_path: $groupData->logo_path,
             );
         });
         $groups = $groups->map(function (GroupData $groupData) use ($expandGroups, $group) {
