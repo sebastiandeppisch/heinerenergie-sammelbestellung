@@ -107,7 +107,6 @@ function addOption() {
     sort_order: model.value.options.length,
     is_default: false,
     id: uuidv4(),
-    form_field_id: model.value.id
   };
 
   model.value.options.push(newOption as FormFieldOptionData);
@@ -157,7 +156,6 @@ function onValueChanged(e: any) {
               id="field_label"
               v-model="model.label"
               placeholder="Feldbezeichnung"
-              @input="onValueChanged"
             />
           </div>
 
@@ -165,8 +163,7 @@ function onValueChanged(e: any) {
             <div class="flex items-center space-x-2">
               <Checkbox
                 id="field_required"
-                v-model:checked="model.required"
-                @update:checked="onValueChanged"
+                v-model="model.required"
               />
               <Label for="field_required">Pflichtfeld</Label>
             </div>

@@ -7,7 +7,7 @@ import {
   LControl,
 } from "@vue-leaflet/vue-leaflet";
 
-import L, { LatLngExpression } from "leaflet";
+import L, { LatLngExpression, PointExpression } from "leaflet";
 import { Loader2, Locate } from "lucide-vue-next";
 import Button from "@/shadcn/components/ui/button/Button.vue";
 import { useOnResize } from "@/helpers";
@@ -103,7 +103,7 @@ function locateUser() {
   );
 }
 
-const coordinatesOfDarmstadtCityCenter: LatLngExpression = [49.8728, 8.6512];
+const coordinatesOfDarmstadtCityCenter: PointExpression = [49.8728, 8.6512];
 </script>
 
 <template>
@@ -125,7 +125,7 @@ const coordinatesOfDarmstadtCityCenter: LatLngExpression = [49.8728, 8.6512];
         />
 
         <!-- Standard Leaflet Marker ohne benutzerdefiniertes Icon -->
-        <LMarker :lat-lng="locationModel" />
+        <LMarker :lat-lng="locationModel" v-if="locationModel !==null" />
 
         <!-- Benutzerdefiniertes Kontrollelement für GPS-Lokalisierung -->
         <LControl position="topright">

@@ -10,6 +10,7 @@ import { usePage } from "@inertiajs/vue3";
 import {getScreenSizeInfo} from '../utils/media-query';
 
 import { onMounted } from 'vue';
+import { Toaster } from "@/shadcn/components/ui/sonner";
 
 const screen = reactive({ getScreenSizeInfo: {} as { isXSmall: boolean; isLarge: boolean; cssClasses: string[] } });
 screen.getScreenSizeInfo = getScreenSizeInfo();
@@ -128,6 +129,7 @@ onMounted(() => {
         </dx-drawer>
       </div>
     </div>
+    <Toaster/>
   </div>
 </template>
 

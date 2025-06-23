@@ -22,7 +22,7 @@ function submitForm() {
   );
 
   if (missingRequiredFields.length > 0) {
-    notify('Bitte füllen Sie alle Pflichtfelder aus', 'error', 3000);
+    notify('Bitte füllen alle Pflichtfelder aus', 'error', 3000);
     return;
   }
 
