@@ -26,6 +26,16 @@ readonly class Coordinate implements Castable
         return new self($lat, $lng);
     }
 
+    public static function isValidLatitude(mixed $value): bool
+    {
+        return is_numeric($value) && $value >= -90 && $value <= 90;
+    }
+
+    public static function isValidLongitude(mixed $value): bool
+    {
+        return is_numeric($value) && $value >= -180 && $value <= 180;
+    }
+
     public static function castUsing(array $attributes): string
     {
         return CoordinateCast::class;

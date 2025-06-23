@@ -36,10 +36,9 @@ class FormDefinitionController extends Controller
 
     private function activeFieldTypes(): array
     {
-        //TODO implement geo coordinate & file
+        //TODO implement file
         $inactive = collect([
             FieldType::FILE,
-            FieldType::GEO_COORDINATE
         ]);
         return collect(FieldType::cases())->filter(fn ($case) => !$inactive->contains($case))->toArray();
     }

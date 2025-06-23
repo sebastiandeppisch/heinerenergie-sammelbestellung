@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\FieldType;
+use App\Rules\GeographicCoordinate;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -82,7 +83,7 @@ class FormField extends Model
             // TODO fix array validation FieldType::CHECKBOX => [$inRule],
             FieldType::FILE => [''], // TODO
             FieldType::DATE => ['date'],
-            FieldType::GEO_COORDINATE => ['array', 'size:2'],
+            FieldType::GEO_COORDINATE => [new GeographicCoordinate()],
             default => [],
         };
 

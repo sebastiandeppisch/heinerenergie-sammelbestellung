@@ -264,3 +264,22 @@ test('geoposition can be submitted', function(){
 
     $this->assertEquals(new Coordinate(49, 10), $field->asCoordinate());
 });
+
+
+it('validates geographic coordinates', function () {
+    $formDefinition = FormDefinition::factory()->create();
+    $formField = FormField::factory()->create([
+        'form_definition_id' => $formDefinition->id,
+        'type' => FieldType::GEO_COORDINATE,
+        'label' => 'Your example location'
+    ]);
+
+    $response = $this->post(route('form.submit', ['formDefinition' => $formField->formDefinition->id]), [
+        $formField->id => [
+            'lat' => 120,
+            'lng' => 190
+        ],
+    ]);
+
+    $response->assertSessionHasErrors();
+});
