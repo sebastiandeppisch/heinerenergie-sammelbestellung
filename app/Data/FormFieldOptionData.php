@@ -11,7 +11,6 @@ class FormFieldOptionData extends Data
 {
     public function __construct(
         public string $id,
-        public string $form_field_id,
         public string $label,
         public string $value,
         public int $sort_order = 0,
@@ -23,7 +22,6 @@ class FormFieldOptionData extends Data
     {
         return new self(
             id: $model->id,
-            form_field_id: $model->form_field_id,
             label: $model->label,
             value: $model->value,
             sort_order: $model->sort_order,

@@ -22,9 +22,9 @@ class FormDefinitionFactory extends Factory
     public function withFields(int $count = 3)
     {
         return $this->afterCreating(function (FormDefinition $formDefinition) use ($count) {
-            $formDefinition->fields()->saveMany(
-                FormField::factory()->count($count)->make()
-            );
+            FormField::factory()->count($count)->create([
+                'form_definition_id' => $formDefinition->id,
+            ]);
         });
     }
 }

@@ -8,13 +8,13 @@ use Illuminate\Support\Collection;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
+use App\Models\FormField;
 
 #[TypeScript]
 class FormFieldData extends Data
 {
     public function __construct(
         public string $id,
-        public string $form_definition_id,
         public FieldType $type,
         public string $label,
         #[DataCollectionOf(FormFieldOptionData::class)]
@@ -32,12 +32,11 @@ class FormFieldData extends Data
     ) {
     }
 
-    public static function fromModel(\App\Models\FormField $model): self
+    public static function fromModel(FormField $model): self
     {
         $model->loadMissing('options');
         return new self(
             id: $model->id,
-            form_definition_id: $model->form_definition_id,
             type: $model->type,
             label: $model->label,
             placeholder: $model->placeholder,

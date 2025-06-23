@@ -31,7 +31,6 @@ class UpsertFormDefinitionRequest extends FormRequest
             // Felder-Array-Validierung
             'fields' => 'array',
             'fields.*.type' => 'required|string|in:text,textarea,number,email,phone,select,radio,checkbox,file,date',
-            'fields.*.name' => 'required|string|max:255',
             'fields.*.label' => 'required|string|max:255',
             'fields.*.placeholder' => 'nullable|string|max:255',
             'fields.*.help_text' => 'nullable|string',
@@ -64,7 +63,6 @@ class UpsertFormDefinitionRequest extends FormRequest
             'is_active' => 'Aktiv',
             'fields' => 'Formularfelder',
             'fields.*.type' => 'Feldtyp',
-            'fields.*.name' => 'Feldname',
             'fields.*.label' => 'Feldbezeichnung',
             'fields.*.placeholder' => 'Platzhaltertext',
             'fields.*.help_text' => 'Hilfetext',

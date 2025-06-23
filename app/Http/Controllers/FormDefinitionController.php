@@ -6,8 +6,10 @@ use App\Data\FormDefinitionData;
 use App\Enums\FieldType;
 use App\Http\Requests\UpsertFormDefinitionRequest;
 use App\Models\FormDefinition;
+use App\Services\FormDefinitionService;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Throwable;
 
 class FormDefinitionController extends Controller
 {
@@ -16,7 +18,7 @@ class FormDefinitionController extends Controller
      */
     public function index()
     {
-        $formDefinitions = FormDefinition::all()->map(fn ($formDefinition) => FormDefinitionData::fromModel($formDefinition));
+        $formDefinitions = FormDefinition::with(['fields', 'fields.options'])->get()->map(fn ($formDefinition) => FormDefinitionData::fromModel($formDefinition));
 
         return Inertia::render('FormBuilder/Index', [
             'formDefinitions' => $formDefinitions
@@ -30,7 +32,8 @@ class FormDefinitionController extends Controller
     {
         return Inertia::render('FormBuilder/Edit', [
             'formDefinition' => null,
-            'fieldTypes' => $this->activeFieldTypes()
+            'fieldTypes' => $this->activeFieldTypes(),
+            'isEdit' => false
         ]);
     }
 
@@ -40,7 +43,7 @@ class FormDefinitionController extends Controller
         $inactive = collect([
             FieldType::FILE,
         ]);
-        return collect(FieldType::cases())->filter(fn ($case) => !$inactive->contains($case))->toArray();
+        return collect(FieldType::cases())->filter(fn ($case) => !$inactive->contains($case))->values()->toArray();
     }
 
     /**
@@ -53,71 +56,30 @@ class FormDefinitionController extends Controller
 
         return Inertia::render('FormBuilder/Edit', [
             'formDefinition' => $formDefinitionData,
-            'fieldTypes' =>  $this->activeFieldTypes()
+            'fieldTypes' =>  $this->activeFieldTypes(),
+            'isEdit' => true
         ]);
     }
 
     /**
      * Store a newly created form definition.
      */
-    public function store(UpsertFormDefinitionRequest $request)
+    public function store(UpsertFormDefinitionRequest $request, FormDefinitionData $formDefinitionData)
     {
-        DB::beginTransaction();
+        $formDefinition = app(FormDefinitionService::class)->storeFormDefinitionData($formDefinitionData);
 
-        try {
-            // Formular erstellen
-            $formDefinition = FormDefinition::create([
-                'name' => $request->name,
-                'description' => $request->description,
-                'is_active' => $request->input('is_active', true),
-            ]);
-
-            // Felder und Optionen erstellen (wenn vorhanden)
-            if ($request->has('fields')) {
-                $this->saveFormFields($formDefinition, $request->fields);
-            }
-
-            DB::commit();
-
-            return redirect()->route('form-definitions.edit', $formDefinition)
-                ->with('success', 'Formular wurde erfolgreich erstellt.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return back()->withErrors(['error' => 'Fehler beim Erstellen des Formulars: ' . $e->getMessage()]);
-        }
+        return redirect()->route('form-definitions.edit', $formDefinition)
+            ->with('success', 'Formular wurde erfolgreich erstellt.');
     }
 
     /**
      * Update the specified form definition.
      */
-    public function update(UpsertFormDefinitionRequest $request, FormDefinition $formDefinition)
+    public function update(UpsertFormDefinitionRequest $request, FormDefinition $formDefinition, FormDefinitionData $formDefinitionData)
     {
+        app(FormDefinitionService::class)->updateFormDefinitionData($formDefinitionData);
 
-        DB::beginTransaction();
-
-        try {
-            $formDefinition->update([
-                'name' => $request->name,
-                'description' => $request->description,
-                'is_active' => $request->input('is_active', true),
-            ]);
-
-            //TODO don't delete all fields, but only those that are not in the request
-            $formDefinition->fields()->delete();
-
-            if ($request->has('fields')) {
-                $this->saveFormFields($formDefinition, $request->fields);
-            }
-
-            DB::commit();
-
-            return back()->with('success', 'Formular wurde erfolgreich aktualisiert.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return back()->withErrors(['error' => 'Fehler beim Aktualisieren des Formulars: ' . $e->getMessage()]);
-        }
+        return back()->with('success', 'Formular wurde erfolgreich aktualisiert.');
     }
 
     /**
@@ -129,38 +91,6 @@ class FormDefinitionController extends Controller
 
         return redirect()->route('form-definitions.index')
             ->with('success', 'Formular wurde erfolgreich gelöscht.');
-    }
-
-    private function saveFormFields(FormDefinition $formDefinition, array $fields): void
-    {
-        foreach ($fields as $index => $fieldData) {
-            $field = $formDefinition->fields()->create([
-                'type' => $fieldData['type'],
-                'name' => $fieldData['name'],
-                'label' => $fieldData['label'],
-                'placeholder' => $fieldData['placeholder'] ?? null,
-                'help_text' => $fieldData['help_text'] ?? null,
-                'required' => $fieldData['required'] ?? false,
-                'default_value' => $fieldData['default_value'] ?? null,
-                'sort_order' => $index,
-                'min_length' => $fieldData['min_length'] ?? null,
-                'max_length' => $fieldData['max_length'] ?? null,
-                'min_value' => $fieldData['min_value'] ?? null,
-                'max_value' => $fieldData['max_value'] ?? null,
-                'accepted_file_types' => $fieldData['accepted_file_types'] ?? null,
-            ]);
-
-            if (isset($fieldData['options']) && is_array($fieldData['options'])) {
-                foreach ($fieldData['options'] as $optIndex => $option) {
-                    $field->options()->create([
-                        'label' => $option['label'],
-                        'value' => $option['value'],
-                        'sort_order' => $optIndex,
-                        'is_default' => $option['is_default'] ?? false,
-                    ]);
-                }
-            }
-        }
     }
 
 }

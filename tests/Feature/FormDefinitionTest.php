@@ -1,5 +1,6 @@
 <?php
 
+use App\Data\FormDefinitionData;
 use App\Enums\FieldType;
 use App\Models\FormDefinition;
 use App\Models\FormField;
@@ -95,33 +96,42 @@ test('formbuilder edit page can be rendered', function () {
 });
 
 test('form definition can be created', function () {
+
+    $this->withoutExceptionHandling();
+
     $formData = [
         'name' => 'Test Form',
         'description' => 'This is a test form',
         'is_active' => true,
+        'id' => 'temp',
         'fields' => [
             [
                 'type' => FieldType::TEXT->value,
                 'name' => 'text_field',
                 'label' => 'Text Field',
                 'placeholder' => 'Enter text',
-                'required' => true
+                'required' => true,
+                'id' => 'temp',
+                'options' => []
             ],
             [
                 'type' => FieldType::SELECT->value,
                 'name' => 'select_field',
                 'label' => 'Select Field',
                 'required' => false,
+                'id' => 'temp',
                 'options' => [
                     [
                         'label' => 'Option 1',
                         'value' => 'option1',
-                        'is_default' => true
+                        'is_default' => true,
+                        'id' => 'temp'
                     ],
                     [
                         'label' => 'Option 2',
                         'value' => 'option2',
-                        'is_default' => false
+                        'is_default' => false,
+                        'id' => 'temp'
                     ]
                 ]
             ]
@@ -195,13 +205,16 @@ test('form definition can be updated', function () {
         'name' => 'Updated Form',
         'description' => 'Updated description',
         'is_active' => true,
+        'id' => $formDefinition->id,
         'fields' => [
             [
                 'type' => FieldType::TEXTAREA->value,
                 'name' => 'new_field',
                 'label' => 'New Field',
                 'placeholder' => 'Enter text here',
-                'required' => true
+                'required' => true,
+                'id' => $field->id,
+                'options' => [],
             ]
         ]
     ];
@@ -251,3 +264,110 @@ test('form definition can be deleted', function () {
 });
 
 todo('Should only admins create forms or can regular users view forms?');
+
+
+test('form fields can be saved with required field', function(){
+
+    $this->withoutExceptionHandling();
+
+    $response = $this->post(route('form-definitions.store'), [
+        'name' => 'Test Form',
+        'id' => (string) Str::uuid7(),
+        'is_active' => true,
+        'fields' => [
+            [
+                'type' => FieldType::TEXTAREA->value,
+                'label' => 'Text Field',
+                'required' => true,
+                'form_definition_id' => 'some id',
+                'id' => (string) Str::uuid7(),
+                'options' => []
+            ]
+    ]]);
+
+    $response->assertSessionHasNoErrors();
+
+    $this->assertTrue(FormField::firstOrFail()->required);
+
+});
+
+
+test('form fields can be updated to be required', function(){
+    $this->withoutExceptionHandling();
+    FormDefinition::factory()->withFields(1)->create();
+
+    FormField::firstOrFail()->update([
+        'required' => false
+    ]);
+    $this->assertFalse(FormField::first()->required);
+
+    $data = FormDefinitionData::fromModel(FormDefinition::firstOrFail());
+
+    $data->fields[0]->required = true;
+    $response = $this->put(route('form-definitions.update', [FormDefinition::firstOrFail()]), $data->toArray());
+
+    $response->assertSessionHasNoErrors();
+
+    $this->assertTrue(FormField::first()->required);
+});
+
+
+test('form fields are updated in-place', function(){
+    $this->withoutExceptionHandling();
+
+    $id = FormDefinition::factory()->withFields()->create()->id;
+
+    $ids = FormDefinition::firstOrFail()->fields()->pluck('id');
+
+    $data = FormDefinitionData::fromModel(FormDefinition::firstOrFail());
+
+    $this->put(route('form-definitions.update', [FormDefinition::find($id)]), $data->toArray())->assertSessionHasNoErrors();
+
+    $this->assertEquals(1, FormDefinition::count());
+    $this->assertEquals(count($ids), FormField::count());
+    $this->assertEquals($id, FormDefinition::firstOrFail()->id);
+    $this->assertEquals($ids, FormDefinition::firstOrFail()->fields()->pluck('id'));
+});
+
+test('form fields can be deleted', function(){
+    $this->withoutExceptionHandling();
+
+    $id = FormDefinition::factory()->withFields(3)->create()->id;
+
+    $ids = FormDefinition::firstOrFail()->fields()->pluck('id');
+    $ids->forget(1);
+    $ids = $ids->values();
+
+    $data = FormDefinitionData::fromModel(FormDefinition::firstOrFail());
+
+    unset($data->fields[1]);
+
+    $this->put(route('form-definitions.update', [FormDefinition::find($id)]), $data->toArray())->assertSessionHasNoErrors();
+
+    $this->assertEquals(1, FormDefinition::count());
+    $this->assertEquals(2, FormField::count());
+    $this->assertEquals($id, FormDefinition::firstOrFail()->id);
+    $this->assertEquals($ids, FormDefinition::firstOrFail()->fields()->pluck('id'));
+});
+
+
+test('form field options can be deleted', function(){
+    $this->withoutExceptionHandling();
+
+    $formDefinition = FormDefinition::factory()->withFields(1)->create();
+    $field = $formDefinition->fields->first();
+    $field->options()->createMany([
+        ['label' => 'Option 1', 'value' => 'option1', 'is_default' => false, 'sort_order' => 1],
+        ['label' => 'Option 2', 'value' => 'option2', 'is_default' => false, 'sort_order' => 2],
+    ]);
+
+    $data = FormDefinitionData::fromModel($formDefinition);
+    unset($data->fields[0]->options[1]);
+    $optionsId = $data->fields[0]->options[0]->id;
+
+    $this->put(route('form-definitions.update', [$formDefinition]), $data->toArray())->assertSessionHasNoErrors();
+
+    $this->assertEquals(1, FormField::count());
+    $this->assertEquals(1, FormField::first()->options()->count());
+    $this->assertEquals($optionsId, FormField::first()->options->first()->id);
+});

@@ -13,6 +13,9 @@ use Illuminate\Support\Collection;
 #[TypeScript]
 class FormDefinitionData extends Data
 {
+    /**
+     * @param Collection<FormFieldData> $fields
+     */
     public function __construct(
         public string $id,
         public string $name,

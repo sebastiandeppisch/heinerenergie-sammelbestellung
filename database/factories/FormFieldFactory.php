@@ -45,25 +45,28 @@ class FormFieldFactory extends Factory
                 $this->faker->optional(0.3)->numberBetween(100, 1000) : null,
             'accepted_file_types' => $type === FieldType::FILE->value ?
                 $this->faker->randomElements(['.jpg', '.png', '.pdf', '.docx'], 2) : null,
+            'form_definition_id' => FormDefinition::factory(),
         ];
     }
 
-    public function afterCreating(Closure $callback)
+    public function configure()
     {
-        //when thy type is select, radio or checkbox, create options
-        return $this->afterCreating(function (FormField $formField) use ($callback) {
-            if (in_array($formField->type, [FieldType::SELECT->value, FieldType::RADIO->value, FieldType::CHECKBOX->value])) {
-                $options = [];
-                for ($i = 0; $i < rand(2, 5); $i++) {
-                    $options[] = [
+        return $this->afterCreating(function (FormField $formField) {
+            if (in_array($formField->type, [FieldType::SELECT, FieldType::RADIO, FieldType::CHECKBOX])) {
+
+                $count = rand(2, 5);
+                $defaultOptionIndex = rand(0, $count - 1);
+
+                for ($i = 0; $i < $count; $i++) {
+                    $formField->options()->create([
                         'label' => ucfirst($this->faker->word),
                         'value' => strtolower($this->faker->unique()->word) . '_' . $this->faker->numberBetween(1, 100),
-                    ];
+                        'sort_order' => $i,
+                        'is_default' => $i === $defaultOptionIndex && $this->faker->boolean(70),
+                    ]);
                 }
-                $formField->options()->createMany($options);
             }
 
-            $callback($formField);
         });
     }
 }
