@@ -297,7 +297,8 @@ test('form fields can be updated to be required', function(){
     FormDefinition::factory()->withFields(1)->create();
 
     FormField::firstOrFail()->update([
-        'required' => false
+        'required' => false,
+        'type' => FieldType::TEXTAREA->value,   
     ]);
     $this->assertFalse(FormField::first()->required);
 
@@ -356,6 +357,7 @@ test('form field options can be deleted', function(){
 
     $formDefinition = FormDefinition::factory()->withFields(1)->create();
     $field = $formDefinition->fields->first();
+    $field->options()->delete();
     $field->options()->createMany([
         ['label' => 'Option 1', 'value' => 'option1', 'is_default' => false, 'sort_order' => 1],
         ['label' => 'Option 2', 'value' => 'option2', 'is_default' => false, 'sort_order' => 2],
