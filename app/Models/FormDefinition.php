@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 class FormDefinition extends Model
 {
@@ -51,10 +52,17 @@ class FormDefinition extends Model
 
     public function delete(): bool
     {
-        $this->fields()->delete();
+        return DB::transaction(function () {
+            foreach($this->fields as $field) {
+                $field->options()->delete();
+                $field->delete();
+            }
 
-        //TODO handle submissions
-        return parent::delete();
+            $this->fields()->delete();
+
+            //TODO handle submissions
+            return parent::delete();
+        });
     }
 
     public function getValidationRules(): array
