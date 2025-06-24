@@ -167,8 +167,8 @@ function addField(type: FieldType) {
 
 
 function openFormular() {
-    if (formDefinition.id) {
-        window.open(route('form.show', formDefinition.id), '_blank');
+    if (props.formDefinition?.id) {
+        window.open(route('form.show', props.formDefinition?.id), '_blank');
     }
 }
 
@@ -188,7 +188,7 @@ const nullsafeDescription = computed<string>({
             <Button @click="goBack" variant="outline">Zurück zur Übersicht</Button>
 
             <div class="form-builder__toolbar">
-                <Button @click="openFormular" variant="outline">
+                <Button @click="openFormular" variant="outline" v-if="props.isEdit">
                     Formular öffnen
                     <ArrowUpRightFromSquare />
                 </Button>
