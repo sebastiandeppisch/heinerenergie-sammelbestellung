@@ -25,7 +25,9 @@ type FormFieldOptionData = App.Data.FormFieldOptionData;
 const props = defineProps<{
     formDefinition: FormDefinitionData | null;
     fieldTypes: FieldType[];
+    isEdit: boolean;
 }>();
+
 
 const formDefinition = reactive<FormDefinitionData>(props.formDefinition || {
     id: uuidv4(),
@@ -56,7 +58,7 @@ function handleFieldChange(field: FormFieldData) {
 }
 
 function saveForm() {
-    if (formDefinition.id) {
+    if (props.isEdit) {
         router.put(route('form-definitions.update', formDefinition.id), formDefinition, {
             onSuccess: () => {
                 toast({
@@ -66,6 +68,7 @@ function saveForm() {
                 });
             },
             onError: (errors) => {
+                console.log('errors', errors);
                 toast({
                     title: 'Fehler',
                     description: `Fehler beim Speichern des Formulars: ${Object.values(errors).join(', ')}`,
@@ -83,6 +86,7 @@ function saveForm() {
                 });
             },
             onError: (errors) => {
+                console.log('errors', errors);
                 toast({
                     title: 'Fehler',
                     description: `Fehler beim Erstellen des Formulars: ${Object.values(errors).join(', ')}`,
@@ -113,7 +117,6 @@ function createField(type: FieldType): FormFieldData {
         required: false,
         sort_order: formDefinition.fields.length,
         options: [],
-        form_definition_id: formDefinition.id,
     };
 
     switch (type) {
@@ -126,7 +129,6 @@ function createField(type: FieldType): FormFieldData {
                     value: 'option1',
                     sort_order: 0,
                     is_default: false,
-                    form_field_id: field.id,
                 },
                 {
                     id: uuidv4(),
@@ -134,7 +136,6 @@ function createField(type: FieldType): FormFieldData {
                     value: 'option2',
                     sort_order: 1,
                     is_default: false,
-                    form_field_id: field.id,
                 }
             ];
             break;
@@ -146,7 +147,6 @@ function createField(type: FieldType): FormFieldData {
                     value: 'option',
                     sort_order: 0,
                     is_default: false,
-                    form_field_id: field.id,
                 }
             ];
             break;
