@@ -38,6 +38,8 @@ class SettingController extends Controller
     {
         $setting->fill($request->all());
         $setting->save();
+
+        return $setting->fresh();
     }
 
     public function advisorInfo()

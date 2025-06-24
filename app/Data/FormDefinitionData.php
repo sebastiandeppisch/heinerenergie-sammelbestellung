@@ -19,8 +19,8 @@ class FormDefinitionData extends Data
     public function __construct(
         public string $id,
         public string $name,
-        public ?string $description = null,
-        public bool $is_active = true,
+        public ?string $description,
+        public bool $is_active,
         #[DataCollectionOf(FormFieldData::class)]
         public Collection $fields,
     ) {

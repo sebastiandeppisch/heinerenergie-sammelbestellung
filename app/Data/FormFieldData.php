@@ -56,7 +56,6 @@ class FormFieldData extends Data
     public static function fromSubmissionField(SubmissionField $model): self{
         return new self(
             id: $model->id,
-            form_definition_id: $model->formSubmission->form_definition_id,
             type: $model->field_type,
             label: $model->field_label,
             required: false,

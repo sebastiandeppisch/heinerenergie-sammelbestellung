@@ -7,7 +7,6 @@ use App\Events\Advice\AdviceSharedAdvisorRemoved;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAdviceRequest;
 use App\Http\Requests\UpdateAdviceRequest;
-use App\Mail\SendOrderLink;
 use App\Models\Advice;
 use App\Models\User;
 use App\Services\AdviceService;
@@ -92,13 +91,6 @@ class AdviceController extends Controller
         if (! Auth::user()->can($ability, $advice)) {
             abort(403, 'Du hast keine Berechtigung, diese Beratung zu sehen');
         }
-    }
-
-    public function sendOrderLink(Advice $advice)
-    {
-        Mail::to($advice->email)->send(new SendOrderLink($advice));
-
-        return response()->noContent(202);
     }
 
     public function assign(Advice $advice)
