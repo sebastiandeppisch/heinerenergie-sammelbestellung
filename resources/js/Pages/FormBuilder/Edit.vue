@@ -113,7 +113,6 @@ function createField(type: FieldType): FormFieldData {
         required: false,
         sort_order: formDefinition.fields.length,
         options: [],
-        form_definition_id: formDefinition.id,
     };
 
     switch (type) {
@@ -126,7 +125,6 @@ function createField(type: FieldType): FormFieldData {
                     value: 'option1',
                     sort_order: 0,
                     is_default: false,
-                    form_field_id: field.id,
                 },
                 {
                     id: uuidv4(),
@@ -134,7 +132,6 @@ function createField(type: FieldType): FormFieldData {
                     value: 'option2',
                     sort_order: 1,
                     is_default: false,
-                    form_field_id: field.id,
                 }
             ];
             break;
@@ -146,7 +143,6 @@ function createField(type: FieldType): FormFieldData {
                     value: 'option',
                     sort_order: 0,
                     is_default: false,
-                    form_field_id: field.id,
                 }
             ];
             break;

@@ -65,7 +65,6 @@ fields: Array<App.Data.FormFieldData>;
 };
 export type FormFieldData = {
 id: string;
-form_definition_id: string;
 type: App.Enums.FieldType;
 label: string;
 options: Array<App.Data.FormFieldOptionData>;
@@ -82,7 +81,6 @@ accepted_file_types: Array<any> | null;
 };
 export type FormFieldOptionData = {
 id: string;
-form_field_id: string;
 label: string;
 value: string;
 sort_order: number;
@@ -91,7 +89,6 @@ is_default: boolean;
 export type FormSubmissionData = {
 id: string;
 form_name: string;
-form_subscription: string | null;
 fields: Array<App.Data.SubmissionFieldData>;
 submitted_at: any;
 seen: boolean;
