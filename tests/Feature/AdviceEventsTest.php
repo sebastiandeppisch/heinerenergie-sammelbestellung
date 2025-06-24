@@ -23,9 +23,9 @@ beforeEach(function () {
 
     $this->group->users()->attach($this->user, ['is_admin' => true]);
 
-    $this->status1 = $this->group->ownStatuses()->create(['id' => 1, 'name' => 'Initial']);
-    $this->status2 = $this->group->ownStatuses()->create(['id' => 2, 'name' => 'In Progress']);
-    $this->status3 = $this->group->ownStatuses()->create(['id' => 3, 'name' => 'Completed']);
+    $this->status1 = $this->group->ownStatuses()->create(['name' => 'Initial']);
+    $this->status2 = $this->group->ownStatuses()->create(['name' => 'In Progress']);
+    $this->status3 = $this->group->ownStatuses()->create(['name' => 'Completed']);
 
     $this->advice = Advice::factory()->create([
         'advice_status_id' => $this->status1->id,
