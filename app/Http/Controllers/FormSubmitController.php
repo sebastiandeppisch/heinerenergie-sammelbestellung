@@ -8,6 +8,7 @@ use App\Http\Requests\StoreFormSubmissionRequest;
 use App\Models\FormDefinition;
 use App\Models\FormField;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class FormSubmitController extends Controller
@@ -21,11 +22,12 @@ class FormSubmitController extends Controller
 
     public function submit(StoreFormSubmissionRequest $request, FormDefinition $formDefinition){
 
-        $submission = $formDefinition->createSubmission();
-
-        foreach($formDefinition->fields as $field){
-            $field->createSubmissionField($submission, $this->getValueFromField($field, $request));
-        }
+        DB::transaction(function () use ($formDefinition, $request) {
+            $submission = $formDefinition->createSubmission();
+            foreach($formDefinition->fields as $field){
+                $field->createSubmissionField($submission, $this->getValueFromField($field, $request));
+            }
+        });
 
         return Inertia::render('Forms/Submitted', [
             "formDefinition" => FormDefinitionData::fromModel($formDefinition)
