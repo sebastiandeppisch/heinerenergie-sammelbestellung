@@ -11,7 +11,7 @@ class CalculateCoordinates
     public function handle(AdviceUpdated|AdviceCreated $event)
     {
         $advice = $event->advice;
-        if ($advice->lat === null || $advice->long === null) {
+        if ($advice->lng === null || $advice->lat === null) {
             CalculateCoordinatesForAdvice::dispatch($advice);
         }
     }
