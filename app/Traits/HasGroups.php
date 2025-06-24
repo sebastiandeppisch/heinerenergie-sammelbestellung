@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use App\Models\Group;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Collection;
 
@@ -33,7 +34,8 @@ trait HasGroups
      */
     public function isGlobalAdmin(): bool
     {
-        return $this->is_admin === true;
+        $user = User::findOrFail($this->id);
+        return $user->is_admin === true;
     }
 
     /**

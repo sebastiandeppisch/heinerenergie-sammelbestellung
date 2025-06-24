@@ -142,7 +142,7 @@ class GroupController extends Controller
 
     public function update(UpdateGroupRequest $request, Group $group)
     {
-        $validated = $request->validated();
+        $validated = $request->safe()->except(['logo']);
 
         if ($request->hasFile('logo')) {
             if ($group->logo_path) {

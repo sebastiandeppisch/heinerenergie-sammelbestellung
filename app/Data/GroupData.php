@@ -42,8 +42,8 @@ class GroupData extends Data
             parent_id: $group->parent_id,
             accepts_transfers: $group->accepts_transfers,
             userCanActAsAdmin: $canActAsAdmin,
-            users_count: $group->users_count,
-            advices_count: $group->advices_count,
+            users_count: $group->users()->count(),
+            advices_count: $group->advices()->count(),
         );
     }
 }

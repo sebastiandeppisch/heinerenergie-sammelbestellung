@@ -77,7 +77,8 @@ class FormDefinitionService
                 $data = collect($field->toArray())->forget(['id', 'options', 'form_definition_id'])->toArray();
                 $formField = $formDefinition->fields()->create($data);
                 foreach ($field->options as $option) {
-                    $formField->options()->create($option->toArray());
+                    $data = collect($option)->forget(['id'])->toArray();
+                    $formField->options()->create($data);
                 }
             }
             return $formDefinition->fresh();

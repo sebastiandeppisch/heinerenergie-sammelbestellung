@@ -48,7 +48,7 @@ class AssignAdviceToGroupByAddress implements ShouldQueue
         $adviceService = app(AdviceService::class);
 
         // Check if we already have coordinates
-        if ($advice->lat === null || $advice->long === null) {
+        if ($advice->lat === null || $advice->lng === null) {
             // Use the existing geocoding action
             $advice->coordinate = app(FetchCoordinateByAddress::class)($advice->address);
             $advice->save();

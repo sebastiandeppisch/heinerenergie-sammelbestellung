@@ -15,7 +15,6 @@ class FormSubmissionData extends Data
     public function __construct(
         public string $id,
         public string $form_name,
-        public ?string $form_subscription,
         #[DataCollectionOf(SubmissionFieldData::class)]
         public Collection $fields,
 		public Carbon $submitted_at,
@@ -28,7 +27,6 @@ class FormSubmissionData extends Data
         return new self(
             id: $model->id,
             form_name: $model->form_name,
-            form_subscription: $model->form_subscription,
 			submitted_at: $model->submitted_at,
             seen: $model->seen,
             fields: $model->submissionFields->map(fn($field) => SubmissionFieldData::fromModel($field)),

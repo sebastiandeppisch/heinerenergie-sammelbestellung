@@ -63,6 +63,6 @@ class AppServiceProvider extends ServiceProvider
             });
         }
 
-        Model::shouldBeStrict($this->app->isProduction());
+        Model::shouldBeStrict(! $this->app->isProduction());
     }
 }

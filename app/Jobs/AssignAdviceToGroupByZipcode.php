@@ -74,6 +74,7 @@ class AssignAdviceToGroupByZipcode implements ShouldQueue
      */
     private function notifyGroupAdmin(Group $group, Advice $advice)
     {
+        $group->load('admins');
         foreach ($group->admins as $admin) {
             // Create new admin notification
             $admin->notify(new NewAdviceAssignedToGroup($advice, $group));
