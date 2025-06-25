@@ -1,0 +1,31 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('map_points', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->timestamps();
+
+            $table->decimal('lng', 10, 7)->nullable()->default(null);
+            $table->decimal('lat', 10, 7)->nullable()->default(null);
+
+            $table->string('title');
+            $table->text('description')->nullable();
+
+            $table->nullableUuidMorphs('pointable');
+
+            $table->boolean('published');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('map_points');
+    }
+};

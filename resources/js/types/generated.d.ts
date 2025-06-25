@@ -124,6 +124,14 @@ name: string;
 email: string;
 is_admin: boolean;
 };
+export type MapPointData = {
+id: string;
+coordinate: App.ValueObjects.Coordinate;
+title: string;
+description: string;
+published: boolean;
+userReadablePointableType: string;
+};
 export type PaginationData = {
 total: number;
 perPage: number;

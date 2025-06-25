@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Contracts\Pointable;
 use App\Enums\AdviceStatusResult;
 use App\Enums\AdviceType;
 use App\Enums\HouseType;
 use App\Events\AdviceCreated;
 use App\Events\AdviceSaving;
 use App\Events\AdviceUpdated;
+use App\Traits\HasPoints;
 use App\ValueObjects\Address;
 use App\ValueObjects\Coordinate;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -21,7 +23,7 @@ use Illuminate\Notifications\Notifiable;
 use Wnx\Sends\Contracts\HasSends;
 use Wnx\Sends\Support\HasSendsTrait;
 
-class Advice extends Model implements HasSends
+class Advice extends Model implements HasSends, Pointable
 {
     protected $table = 'advices';
 
@@ -30,6 +32,7 @@ class Advice extends Model implements HasSends
     use HasUuids;
     use Notifiable;
     use SoftDeletes;
+    use HasPoints;
 
     protected $fillable = [
         'firstName',

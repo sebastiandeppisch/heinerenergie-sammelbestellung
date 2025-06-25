@@ -11,6 +11,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use \App\Http\Controllers\FormDefinitionController;
 use App\Http\Controllers\FormSubmissionController;
+use App\Http\Controllers\MapPointController;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 
 /*
@@ -65,6 +66,9 @@ Route::middleware('auth')->group(function () {
         ->name('form-submissions.mark-seen');
     Route::post('form-submissions/{formSubmission}/mark-unseen', [FormSubmissionController::class, 'markUnseen'])
         ->name('form-submissions.mark-unseen');
+
+
+    Route::get('map-points-map', [MapPointController::class, 'map'])->name('map-points-map');
 });
 
 Route::get('/change-password', [PageController::class, 'changePassword'])->name('password.reset');
