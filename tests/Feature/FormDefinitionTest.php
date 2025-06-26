@@ -8,8 +8,8 @@ use App\Models\FormFieldOption;
 use App\Models\Group;
 use App\Models\User;
 use App\Services\SessionService;
-use Inertia\Testing\AssertableInertia as Assert;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
 
@@ -79,7 +79,7 @@ test('formbuilder edit page can be rendered', function () {
     foreach ($formFields as $field) {
         if (in_array($field->type, [FieldType::SELECT->value, FieldType::RADIO->value, FieldType::CHECKBOX->value])) {
             FormFieldOption::factory()->count(2)->create([
-                'form_field_id' => $field->id
+                'form_field_id' => $field->id,
             ]);
         }
     }
@@ -104,6 +104,7 @@ test('form definition can be created', function () {
         'description' => 'This is a test form',
         'is_active' => true,
         'id' => 'temp',
+        'group_id' => $this->group->id,
         'fields' => [
             [
                 'type' => FieldType::TEXT->value,
@@ -112,7 +113,7 @@ test('form definition can be created', function () {
                 'placeholder' => 'Enter text',
                 'required' => true,
                 'id' => 'temp',
-                'options' => []
+                'options' => [],
             ],
             [
                 'type' => FieldType::SELECT->value,
@@ -125,21 +126,20 @@ test('form definition can be created', function () {
                         'label' => 'Option 1',
                         'value' => 'option1',
                         'is_default' => true,
-                        'id' => 'temp'
+                        'id' => 'temp',
                     ],
                     [
                         'label' => 'Option 2',
                         'value' => 'option2',
                         'is_default' => false,
-                        'id' => 'temp'
-                    ]
-                ]
-            ]
-        ]
+                        'id' => 'temp',
+                    ],
+                ],
+            ],
+        ],
     ];
 
     $response = $this->post(route('form-definitions.store'), $formData);
-
 
     $formDefinition = FormDefinition::firstOrFail();
 
@@ -150,7 +150,7 @@ test('form definition can be created', function () {
     $this->assertDatabaseHas('form_definitions', [
         'name' => 'Test Form',
         'description' => 'This is a test form',
-        'is_active' => true
+        'is_active' => true,
     ]);
 
     // Überprüfe, ob die Formular-Felder erstellt wurden
@@ -159,14 +159,14 @@ test('form definition can be created', function () {
         'type' => FieldType::TEXT->value,
         'label' => 'Text Field',
         'placeholder' => 'Enter text',
-        'required' => true
+        'required' => true,
     ]);
 
     $this->assertDatabaseHas('form_fields', [
         'form_definition_id' => $formDefinition->id,
         'type' => FieldType::SELECT->value,
         'label' => 'Select Field',
-        'required' => false
+        'required' => false,
     ]);
 
     // Überprüfe, ob die Optionen für das Select-Feld erstellt wurden
@@ -176,14 +176,14 @@ test('form definition can be created', function () {
         'form_field_id' => $selectField->id,
         'label' => 'Option 1',
         'value' => 'option1',
-        'is_default' => true
+        'is_default' => true,
     ]);
 
     $this->assertDatabaseHas('form_field_options', [
         'form_field_id' => $selectField->id,
         'label' => 'Option 2',
         'value' => 'option2',
-        'is_default' => false
+        'is_default' => false,
     ]);
 });
 
@@ -191,13 +191,13 @@ test('form definition can be updated', function () {
     // Erstelle ein Formular mit Feldern
     $formDefinition = FormDefinition::factory()->create([
         'name' => 'Original Form',
-        'description' => 'Original description'
+        'description' => 'Original description',
     ]);
 
     $field = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
         'type' => FieldType::TEXT->value,
-        'label' => 'Original Field'
+        'label' => 'Original Field',
     ]);
 
     // Aktualisierte Formulardaten
@@ -205,6 +205,7 @@ test('form definition can be updated', function () {
         'name' => 'Updated Form',
         'description' => 'Updated description',
         'is_active' => true,
+        'group_id' => $this->group->id,
         'id' => $formDefinition->id,
         'fields' => [
             [
@@ -215,8 +216,8 @@ test('form definition can be updated', function () {
                 'required' => true,
                 'id' => $field->id,
                 'options' => [],
-            ]
-        ]
+            ],
+        ],
     ];
 
     $response = $this->put(route('form-definitions.update', $formDefinition), $updatedData);
@@ -228,13 +229,13 @@ test('form definition can be updated', function () {
     $this->assertDatabaseHas('form_definitions', [
         'id' => $formDefinition->id,
         'name' => 'Updated Form',
-        'description' => 'Updated description'
+        'description' => 'Updated description',
     ]);
 
     // Überprüfe, ob das alte Feld gelöscht wurde
     $this->assertDatabaseMissing('form_fields', [
         'id' => $field->id,
-        'name' => 'original_field'
+        'name' => 'original_field',
     ]);
 
     // Überprüfe, ob das neue Feld erstellt wurde
@@ -243,7 +244,7 @@ test('form definition can be updated', function () {
         'type' => FieldType::TEXTAREA->value,
         'label' => 'New Field',
         'placeholder' => 'Enter text here',
-        'required' => true
+        'required' => true,
     ]);
 });
 
@@ -258,15 +259,14 @@ test('form definition can be deleted', function () {
 
     // Überprüfe, ob die Formular-Definition gelöscht wurde
     $this->assertDatabaseMissing('form_definitions', [
-        'id' => $formDefinition->id
+        'id' => $formDefinition->id,
     ]);
 
 });
 
 todo('Should only admins create forms or can regular users view forms?');
 
-
-test('form fields can be saved with required field', function(){
+test('form fields can be saved with required field', function () {
 
     $this->withoutExceptionHandling();
 
@@ -274,6 +274,7 @@ test('form fields can be saved with required field', function(){
         'name' => 'Test Form',
         'id' => (string) Str::uuid7(),
         'is_active' => true,
+        'group_id' => $this->group->id,
         'fields' => [
             [
                 'type' => FieldType::TEXTAREA->value,
@@ -281,9 +282,9 @@ test('form fields can be saved with required field', function(){
                 'required' => true,
                 'form_definition_id' => 'some id',
                 'id' => (string) Str::uuid7(),
-                'options' => []
-            ]
-    ]]);
+                'options' => [],
+            ],
+        ]]);
 
     $response->assertSessionHasNoErrors();
 
@@ -291,14 +292,13 @@ test('form fields can be saved with required field', function(){
 
 });
 
-
-test('form fields can be updated to be required', function(){
+test('form fields can be updated to be required', function () {
     $this->withoutExceptionHandling();
     FormDefinition::factory()->withFields(1)->create();
 
     FormField::firstOrFail()->update([
         'required' => false,
-        'type' => FieldType::TEXTAREA->value,   
+        'type' => FieldType::TEXTAREA->value,
     ]);
     $this->assertFalse(FormField::first()->required);
 
@@ -312,8 +312,7 @@ test('form fields can be updated to be required', function(){
     $this->assertTrue(FormField::first()->required);
 });
 
-
-test('form fields are updated in-place', function(){
+test('form fields are updated in-place', function () {
     $this->withoutExceptionHandling();
 
     $id = FormDefinition::factory()->withFields()->create()->id;
@@ -330,7 +329,7 @@ test('form fields are updated in-place', function(){
     $this->assertEquals($ids, FormDefinition::firstOrFail()->fields()->pluck('id'));
 });
 
-test('form fields can be deleted', function(){
+test('form fields can be deleted', function () {
     $this->withoutExceptionHandling();
 
     $id = FormDefinition::factory()->withFields(3)->create()->id;
@@ -351,8 +350,7 @@ test('form fields can be deleted', function(){
     $this->assertEquals($ids, FormDefinition::firstOrFail()->fields()->pluck('id'));
 });
 
-
-test('form field options can be deleted', function(){
+test('form field options can be deleted', function () {
     $this->withoutExceptionHandling();
 
     $formDefinition = FormDefinition::factory()->withFields(1)->create();

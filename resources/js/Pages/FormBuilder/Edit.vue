@@ -18,6 +18,11 @@ import { Textarea } from '@/shadcn/components/ui/textarea';
 import { Checkbox } from '@/shadcn/components/ui/checkbox';
 import { v4 as uuidv4 } from 'uuid';
 import { ArrowUpRightFromSquare } from 'lucide-vue-next';
+import { Select } from '@/shadcn/components/ui/select';
+import SelectTrigger from '@/shadcn/components/ui/select/SelectTrigger.vue';
+import SelectValue from '@/shadcn/components/ui/select/SelectValue.vue';
+import SelectContent from '@/shadcn/components/ui/select/SelectContent.vue';
+import SelectItem from '@/shadcn/components/ui/select/SelectItem.vue';
 type FormDefinitionData = App.Data.FormDefinitionData;
 type FormFieldData = App.Data.FormFieldData;
 type FieldType = App.Enums.FieldType;
@@ -27,6 +32,7 @@ const props = defineProps<{
     formDefinition: FormDefinitionData | null;
     fieldTypes: FieldType[];
     isEdit: boolean;
+    groups: App.Data.GroupData[];
 }>();
 
 
@@ -35,7 +41,8 @@ const formDefinition = reactive<FormDefinitionData>(props.formDefinition || {
     name: 'Neues Formular',
     description: null,
     is_active: true,
-    fields: []
+    fields: [],
+    group_id: "-1"
 });
 
 const selectedField = ref<FormFieldData | null>(null);
@@ -223,6 +230,23 @@ const nullsafeDescription = computed<string>({
                                 <Checkbox v-model="formDefinition.is_active" />
                             </FormControl>
                             <FormLabel>Aktiv</FormLabel>
+                        </FormItem>
+                    </FormField>
+                    <FormField v-slot="{ componentField }" name="group_id">
+                        <FormItem class="flex flex-row items-center space-x-2 space-y-0">
+                            <FormLabel>Initiative</FormLabel>
+                            <FormControl>
+                                <Select v-bind="componentField" v-model="formDefinition.group_id">
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Wähle ein Initiative aus" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem v-for="group in props.groups" :value="group.id" :key="group.id">
+                                            {{ group.name }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </FormControl>
                         </FormItem>
                     </FormField>
                 </Form>

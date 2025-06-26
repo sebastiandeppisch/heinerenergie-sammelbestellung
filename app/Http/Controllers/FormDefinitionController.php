@@ -6,10 +6,9 @@ use App\Data\FormDefinitionData;
 use App\Enums\FieldType;
 use App\Http\Requests\UpsertFormDefinitionRequest;
 use App\Models\FormDefinition;
+use App\Models\Group;
 use App\Services\FormDefinitionService;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
-use Throwable;
 
 class FormDefinitionController extends Controller
 {
@@ -20,8 +19,14 @@ class FormDefinitionController extends Controller
     {
         $formDefinitions = FormDefinition::with(['fields', 'fields.options'])->get()->map(fn ($formDefinition) => FormDefinitionData::fromModel($formDefinition));
 
+        $groups = Group::all()->map(fn (Group $group) => [
+            'id' => $group->id,
+            'name' => $group->name,
+        ]);
+
         return Inertia::render('FormBuilder/Index', [
-            'formDefinitions' => $formDefinitions
+            'formDefinitions' => $formDefinitions,
+            'groups' => $groups,
         ]);
     }
 
@@ -30,20 +35,27 @@ class FormDefinitionController extends Controller
      */
     public function create()
     {
+        $groups = Group::all()->map(fn (Group $group) => [
+            'id' => $group->id,
+            'name' => $group->name,
+        ]);
+
         return Inertia::render('FormBuilder/Edit', [
             'formDefinition' => null,
             'fieldTypes' => $this->activeFieldTypes(),
-            'isEdit' => false
+            'isEdit' => false,
+            'groups' => $groups,
         ]);
     }
 
     private function activeFieldTypes(): array
     {
-        //TODO implement file
+        // TODO implement file
         $inactive = collect([
             FieldType::FILE,
         ]);
-        return collect(FieldType::cases())->filter(fn ($case) => !$inactive->contains($case))->values()->toArray();
+
+        return collect(FieldType::cases())->filter(fn ($case) => ! $inactive->contains($case))->values()->toArray();
     }
 
     /**
@@ -52,12 +64,18 @@ class FormDefinitionController extends Controller
     public function edit(FormDefinition $formDefinition)
     {
         $formDefinition->load('fields.options');
-        $formDefinitionData = FormDefinitionData::from($formDefinition);
+        $formDefinitionData = FormDefinitionData::fromModel($formDefinition);
+
+        $groups = Group::all()->map(fn (Group $group) => [
+            'id' => $group->id,
+            'name' => $group->name,
+        ]);
 
         return Inertia::render('FormBuilder/Edit', [
             'formDefinition' => $formDefinitionData,
-            'fieldTypes' =>  $this->activeFieldTypes(),
-            'isEdit' => true
+            'fieldTypes' => $this->activeFieldTypes(),
+            'isEdit' => true,
+            'groups' => $groups,
         ]);
     }
 
@@ -92,5 +110,4 @@ class FormDefinitionController extends Controller
         return redirect()->route('form-definitions.index')
             ->with('success', 'Formular wurde erfolgreich gelöscht.');
     }
-
 }

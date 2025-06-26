@@ -1,10 +1,11 @@
 <?php
 
+use App\Models\Advice;
 use App\Models\FormDefinition;
+use App\Models\Group;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Models\Advice;
 
 return new class extends Migration
 {
@@ -20,6 +21,8 @@ return new class extends Migration
             $table->string('form_name');
             $table->string('form_description')->nullable();
             $table->boolean('seen')->default(false);
+
+            $table->foreignIdFor(Group::class);
         });
     }
 

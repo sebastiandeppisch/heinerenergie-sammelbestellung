@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Group;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\FormDefinition;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\FormSubmission>
@@ -22,6 +22,7 @@ class FormSubmissionFactory extends Factory
             'form_name' => $this->faker->sentence(3),
             'form_description' => $this->faker->optional()->sentence(6),
             'submitted_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
+            'group_id' => Group::factory(),
         ];
     }
 }

@@ -23,6 +23,7 @@ class FormDefinition extends Model
         'name',
         'description',
         'is_active',
+        'group_id',
     ];
 
     /**
@@ -85,6 +86,7 @@ class FormDefinition extends Model
             'form_name' => $this->name,
             'form_description' => $this->description,
             'submitted_at' => now(),
+            'group_id' => $this->group_id,
         ]);
     }
 

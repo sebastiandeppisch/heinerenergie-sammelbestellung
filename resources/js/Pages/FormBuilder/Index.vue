@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
-import { DxDataGrid, DxColumn, DxPaging, DxPager, DxSearchPanel } from 'devextreme-vue/data-grid';
+import { DxDataGrid, DxColumn, DxPaging, DxPager, DxSearchPanel, DxLookup } from 'devextreme-vue/data-grid';
 import { DxButton } from 'devextreme-vue/button';
 import notify from 'devextreme/ui/notify';
 import { route } from 'ziggy-js';
@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 const props = defineProps<{
   formDefinitions: App.Data.FormDefinitionData[];
+  groups: App.Data.GroupData[];
 }>();
 
 function confirmDeleteForm(formId: number) {
@@ -54,6 +55,13 @@ function editForm(formId: number) {
           :column-auto-width="true"
         >
           <DxColumn data-field="name" caption="Name" />
+          <DxColumn data-field="group_id" caption="Initiative">
+            <DxLookup
+              :data-source="props.groups"
+              value-expr="id"
+              display-expr="name"
+            />
+          </DxColumn>
           <DxColumn data-field="description" caption="Beschreibung" />
           <DxColumn data-field="is_active" caption="Aktiv" data-type="boolean" />
           <DxColumn

@@ -27,6 +27,7 @@ class FormSubmission extends Model implements Pointable
         'form_name',
         'form_description',
         'submitted_at',
+        'group_id',
     ];
 
     public function casts(){
