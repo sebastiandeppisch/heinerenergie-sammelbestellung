@@ -86,6 +86,7 @@ label: string;
 value: string;
 sort_order: number;
 is_default: boolean;
+is_required: boolean;
 };
 export type FormSubmissionData = {
 id: string;

@@ -159,8 +159,8 @@ const inputClasses = computed(() => ({
     <SelectContent>
       <SelectItem
         v-for="option in fieldOptions"
-        :key="option.value"
-        :value="option.value"
+        :key="option.id"
+        :value="option.id"
       >
         {{ option.label }}
       </SelectItem>

@@ -13,8 +13,9 @@ class FormFieldOptionData extends Data
         public string $id,
         public string $label,
         public string $value,
-        public int $sort_order = 0,
-        public bool $is_default = false,
+        public int $sort_order,
+        public bool $is_default,
+        public bool $is_required
     ) {
     }
 
@@ -26,6 +27,7 @@ class FormFieldOptionData extends Data
             value: $model->value,
             sort_order: $model->sort_order,
             is_default: $model->is_default,
+            is_required: $model->is_required
         );
     }
 }
