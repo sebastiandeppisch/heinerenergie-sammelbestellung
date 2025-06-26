@@ -68,7 +68,9 @@ Route::middleware('auth')->group(function () {
         ->name('form-submissions.mark-unseen');
 
 
-    Route::get('map-points-map', [MapPointController::class, 'map'])->name('map-points-map');
+    Route::get('mappoints-map', [MapPointController::class, 'map'])->name('map-points-map');
+
+    Route::resource('mappoints', MapPointController::class);
 });
 
 Route::get('/change-password', [PageController::class, 'changePassword'])->name('password.reset');
