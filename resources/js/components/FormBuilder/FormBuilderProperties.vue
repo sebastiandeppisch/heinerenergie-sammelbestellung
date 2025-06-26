@@ -100,6 +100,14 @@ const maxValue = computed({
   }
 });
 
+const supportsPlaceholder = computed( () => {
+  return ! supportsOptions.value;
+});
+
+const supportsDefaultValue = computed(() => {
+  return ! supportsOptions.value;
+})
+
 function addOption() {
   const newOption: FormFieldOptionData = {
     label: 'Neue Option',
@@ -107,6 +115,7 @@ function addOption() {
     sort_order: model.value.options.length,
     is_default: false,
     id: uuidv4(),
+    is_required: true
   };
 
   model.value.options.push(newOption as FormFieldOptionData);
@@ -159,7 +168,7 @@ function onValueChanged(e: any) {
             />
           </div>
 
-          <div class="grid gap-2 mt-4">
+          <div class="grid gap-2 mt-4" v-if="model.type !== FIELD_TYPES.CHECKBOX">
             <div class="flex items-center space-x-2">
               <Checkbox
                 id="field_required"
@@ -173,7 +182,7 @@ function onValueChanged(e: any) {
         <div class="form-section">
           <h4 class="section-title">Anzeige</h4>
 
-          <div class="grid gap-2">
+          <div class="grid gap-2" v-if="supportsPlaceholder">
             <Label for="field_placeholder">Platzhaltertext</Label>
             <Input
               id="field_placeholder"
@@ -194,7 +203,7 @@ function onValueChanged(e: any) {
             />
           </div>
 
-          <div class="grid gap-2 mt-4">
+          <div class="grid gap-2 mt-4" v-if="supportsDefaultValue">
             <Label for="field_default_value">Standardwert</Label>
             <Input
               id="field_default_value"
@@ -289,7 +298,7 @@ function onValueChanged(e: any) {
                 class="option-label"
                 @change="updateOptions"
               />
-              <label class="option-default">
+              <label class="option-default" v-if="model.type !== FIELD_TYPES.CHECKBOX">
                 <input
                   type="radio"
                   name="default-option"
@@ -302,6 +311,16 @@ function onValueChanged(e: any) {
                 >
                 Standard
               </label>
+              <div class="flex gap-1">
+                <Checkbox
+                  :id="option.id + '-required'"
+                  v-if="model.type === FIELD_TYPES.CHECKBOX"
+                  v-model="option.is_required"
+                />
+                <Label
+                  :for="option.id + '-required'"
+                >Pflichtfeld</Label>
+              </div>
             </div>
             <Button
               variant="ghost"

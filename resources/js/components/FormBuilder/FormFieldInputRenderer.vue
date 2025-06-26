@@ -45,8 +45,9 @@ const fieldOptions = computed(() => {
   if (props.field.options && props.field.options.length > 0) {
     return props.field.options.map(option => ({
       label: option.label,
-      value: option.value,
-      disabled: false
+      id: option.id,
+      disabled: false,
+      is_required: option.is_required
     }));
   }
   return [];
@@ -175,11 +176,11 @@ const inputClasses = computed(() => ({
   >
     <div
       v-for="option in fieldOptions"
-      :key="option.value"
+      :key="option.id"
       class="flex items-center space-x-2"
     >
-      <RadioGroupItem :value="option.value" :id="`${fieldId}_${option.value}`" />
-      <Label :for="`${fieldId}_${option.value}`" class="text-sm font-normal">
+      <RadioGroupItem :value="option.id" :id="`${fieldId}_${option.id}`" />
+      <Label :for="`${fieldId}_${option.id }`" class="text-sm font-normal">
         {{ option.label }}
       </Label>
     </div>
@@ -188,17 +189,19 @@ const inputClasses = computed(() => ({
   <div v-else-if="field.type === FIELD_TYPES.CHECKBOX" class="space-y-2">
     <div
       v-for="option in fieldOptions"
-      :key="option.value"
+      :key="option.id"
       class="flex items-center space-x-2"
     >
       <Checkbox
-        :id="`${fieldId}_${option.value}`"
-        :checked="Array.isArray(modelValue) ? modelValue.includes(option.value) : modelValue === option.value"
+        :id="`${fieldId}_${option.id}`"
+        :model-value="Array.isArray(modelValue) &&  modelValue.includes(option.id) "
+        @update:model-value="(checked) => handleCheckboxChange(option.id, checked)"
         :disabled="disabled"
-        @update:checked="(checked: boolean) => handleCheckboxChange(option.value, checked)"
+        :required="option.is_required"
       />
-      <Label :for="`${fieldId}_${option.value}`" class="text-sm font-normal">
+      <Label :for="`${fieldId}_${option.id}`" class="text-sm font-normal">
         {{ option.label }}
+        <span v-if="option.is_required" class="text-destructive">*</span>
       </Label>
     </div>
   </div>
