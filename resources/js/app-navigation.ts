@@ -48,5 +48,15 @@ export default [
     path: "/form-submissions",
     icon: "message",
     admin: true
+  },
+  {
+    text: 'Kartenpunkte - Tabelle',
+    icon: "tableproperties",
+    path: '/mappoints',
+  },
+  {
+    text: 'Kartenpunkte - Karte',
+    icon: "map",
+    path: '/mappoints-map'
   }
 ];
