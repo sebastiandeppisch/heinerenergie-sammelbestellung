@@ -5,6 +5,7 @@ import FormBuilderCanvas from '@/components/FormBuilder/FormBuilderCanvas.vue';
 import FormBuilderToolbox from '@/components/FormBuilder/FormBuilderToolbox.vue';
 import FormBuilderProperties from '@/components/FormBuilder/FormBuilderProperties.vue';
 import FormBuilderPreview from '@/components/FormBuilder/FormBuilderPreview.vue';
+import FormEmbedDialog from '@/components/FormBuilder/FormEmbedDialog.vue';
 import { nanoid } from 'nanoid';
 import { route } from 'ziggy-js';
 import { toast } from 'vue-sonner'
@@ -167,8 +168,8 @@ function addField(type: FieldType) {
 
 
 function openFormular() {
-    if (formDefinition.id) {
-        window.open(route('form.show', formDefinition.id), '_blank');
+    if (props.formDefinition?.id) {
+        window.open(route('form.show', props.formDefinition?.id), '_blank');
     }
 }
 
@@ -188,7 +189,8 @@ const nullsafeDescription = computed<string>({
             <Button @click="goBack" variant="outline">Zurück zur Übersicht</Button>
 
             <div class="form-builder__toolbar">
-                <Button @click="openFormular" variant="outline">
+                <FormEmbedDialog :form-definition="props.formDefinition" v-if="props.isEdit && props.formDefinition !== null" />
+                <Button @click="openFormular" variant="outline" v-if="props.isEdit">
                     Formular öffnen
                     <ArrowUpRightFromSquare />
                 </Button>
