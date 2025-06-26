@@ -13,8 +13,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class FormSubmission extends Model implements Pointable
 {
     use HasFactory;
-    use HasUuids;
     use HasPoints;
+    use HasUuids;
 
     /**
      * The attributes that are mass assignable.
@@ -30,7 +30,8 @@ class FormSubmission extends Model implements Pointable
         'group_id',
     ];
 
-    public function casts(){
+    public function casts()
+    {
         return [
             'submitted_at' => 'datetime',
         ];
@@ -46,4 +47,10 @@ class FormSubmission extends Model implements Pointable
         return $this->hasMany(SubmissionField::class)->orderBy('sort_order');
     }
 
+    public function handleCreators(): void
+    {
+        if ($this->formDefinition->adviceCreator) {
+            $this->formDefinition->adviceCreator->createAdvice($this);
+        }
+    }
 }

@@ -25,7 +25,11 @@ class Address implements CastsAttributes
     public function set($model, string $key, $value, array $attributes)
     {
         if (! $value instanceof AddressValueObject) {
-            throw new InvalidArgumentException('The given value is not an Address instance.');
+            $value = $this->get($model, $key, $value, $value);
+
+            if (! $value instanceof AddressValueObject) {
+                throw new InvalidArgumentException('The given value is not an Address instance and can not be cast to an AddressValueObject');
+            }
         }
 
         return [

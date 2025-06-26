@@ -6,12 +6,12 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\DB;
 
 class FormDefinition extends Model
 {
     use HasFactory;
-
     use HasUuids;
 
     /**
@@ -54,20 +54,22 @@ class FormDefinition extends Model
     public function delete(): bool
     {
         return DB::transaction(function () {
-            foreach($this->fields as $field) {
+            foreach ($this->fields as $field) {
                 $field->options()->delete();
                 $field->delete();
             }
 
             $this->fields()->delete();
 
-            //TODO handle submissions
+            // TODO handle submissions
             return parent::delete();
         });
     }
 
     public function getValidationRules(): array
     {
+        $this->loadMissing(['fields', 'fields.options']);
+
         return $this->fields->mapWithKeys(function (FormField $field) {
             return [$field->id => $field->getValidationRules()];
         })->toArray();
@@ -90,4 +92,11 @@ class FormDefinition extends Model
         ]);
     }
 
+    /**
+     * @return HasOne<FormDefinitionToAdvice>
+     */
+    public function adviceCreator(): HasOne
+    {
+        return $this->hasOne(FormDefinitionToAdvice::class);
+    }
 }

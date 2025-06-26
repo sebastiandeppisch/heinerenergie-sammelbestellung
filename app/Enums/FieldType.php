@@ -18,6 +18,7 @@ enum FieldType: string
     case FILE = 'file';
     case DATE = 'date';
     case GEO_COORDINATE = 'geo_coordinate';
+    case ADDRESS = 'address';
 
     public const typesWithOptions = [
         self::SELECT,

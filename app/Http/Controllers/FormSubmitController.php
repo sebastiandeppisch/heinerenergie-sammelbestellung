@@ -13,29 +13,33 @@ use Inertia\Inertia;
 
 class FormSubmitController extends Controller
 {
-    public function show(FormDefinition $formDefinition){
+    public function show(FormDefinition $formDefinition)
+    {
 
         return Inertia::render('Forms/Show', [
-            "formDefinition" => FormDefinitionData::fromModel($formDefinition)
+            'formDefinition' => FormDefinitionData::fromModel($formDefinition),
         ]);
     }
 
-    public function submit(StoreFormSubmissionRequest $request, FormDefinition $formDefinition){
+    public function submit(StoreFormSubmissionRequest $request, FormDefinition $formDefinition)
+    {
 
         DB::transaction(function () use ($formDefinition, $request) {
             $submission = $formDefinition->createSubmission();
-            foreach($formDefinition->fields as $field){
+            foreach ($formDefinition->fields as $field) {
                 $field->createSubmissionField($submission, $this->getValueFromField($field, $request));
             }
+            $submission->handleCreators();
         });
 
         return Inertia::render('Forms/Submitted', [
-            "formDefinition" => FormDefinitionData::fromModel($formDefinition)
+            'formDefinition' => FormDefinitionData::fromModel($formDefinition),
         ]);
     }
 
-    private function getValueFromField(FormField $field, Request $request){
-        switch($field->type){
+    private function getValueFromField(FormField $field, Request $request)
+    {
+        switch ($field->type) {
             case FieldType::TEXT:
                 return $request->string($field->id);
             case FieldType::NUMBER:
@@ -44,5 +48,4 @@ class FormSubmitController extends Controller
                 return $request->input($field->id);
         }
     }
-
 }
