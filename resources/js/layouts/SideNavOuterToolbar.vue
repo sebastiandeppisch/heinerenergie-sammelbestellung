@@ -11,7 +11,7 @@ import {getScreenSizeInfo} from '../utils/media-query';
 
 import { onMounted } from 'vue';
 import { Toaster } from "@/shadcn/components/ui/sonner";
-
+import 'vue-sonner/style.css' 
 const screen = reactive({ getScreenSizeInfo: {} as { isXSmall: boolean; isLarge: boolean; cssClasses: string[] } });
 screen.getScreenSizeInfo = getScreenSizeInfo();
 
@@ -127,9 +127,9 @@ onMounted(() => {
             />
           </template>
         </dx-drawer>
+        <Toaster class="pointer-events-auto" style="z-index: 9999;" />
       </div>
     </div>
-    <Toaster/>
   </div>
 </template>
 
