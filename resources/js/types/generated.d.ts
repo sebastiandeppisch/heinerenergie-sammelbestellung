@@ -131,6 +131,7 @@ title: string;
 description: string;
 published: boolean;
 userReadablePointableType: string;
+created_at: any;
 };
 export type PaginationData = {
 total: number;

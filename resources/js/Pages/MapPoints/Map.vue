@@ -12,7 +12,10 @@ import {
 } from "@vue-leaflet/vue-leaflet";
 import L from "leaflet";
 import { latLng } from "leaflet";
-
+import Button from "@/shadcn/components/ui/button/Button.vue";
+import { route } from "ziggy-js";
+import { Link } from "lucide-vue-next";
+import { router } from "@inertiajs/vue3";
 // Define props
 const props = defineProps<{
   pointsByType: Record<string, Array<App.Data.MapPointData>>;
@@ -102,6 +105,12 @@ watch(map, () => {
               <div class="p-2">
                 <h3 class="text-lg font-bold">{{ point.title }}</h3>
                 <p class="text-sm">{{ point.description }}</p>
+                <Button
+                    variant="outline"
+                    @click="router.visit(route('mappoints.edit', point.id))"
+                >
+                    <Link /> Punkt öffnen
+                </Button>
               </div>
             </LPopup>
           </LMarker>

@@ -23,8 +23,8 @@ class MapPointFactory extends Factory
         //some random coordinates around Darmstadt
         $lng = 8.6510204;
         $lat = 49.8728475;
-        $lng += fake()->randomFloat(null, -1, 1) * 0.1;
-        $lat += fake()->randomFloat(null, -1, 1) * 0.1;
+        $lng += fake()->randomFloat(null, -1, 1) * 0.04;
+        $lat += fake()->randomFloat(null, -1, 1) * 0.04;
 
         return [
             'lng' => $lng,

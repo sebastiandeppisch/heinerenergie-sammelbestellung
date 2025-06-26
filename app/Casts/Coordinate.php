@@ -5,11 +5,16 @@ namespace App\Casts;
 use App\ValueObjects\Coordinate as ValueObjectsCoordinate;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use InvalidArgumentException;
+use Throwable;
 
 class Coordinate implements CastsAttributes
 {
     public function get($model, string $key, $value, array $attributes)
     {
+        if(! array_key_exists('lat', $attributes) || ! array_key_exists('lng', $attributes)){
+            return null;
+        }
+
         if ($attributes['lat'] === null || $attributes['lng'] === null) {
             return null;
         }
@@ -30,7 +35,11 @@ class Coordinate implements CastsAttributes
         }
 
         if (! $value instanceof ValueObjectsCoordinate) {
-            throw new InvalidArgumentException('The given value is not an Coordinate instance.');
+            try{
+                $value = ValueObjectsCoordinate::fromArray($value);
+            }catch(Throwable $e){
+                throw new InvalidArgumentException('The given value is not an Coordinate instance and cannot be casted to a valueobject', 0, $e);
+            }
         }
 
         return [

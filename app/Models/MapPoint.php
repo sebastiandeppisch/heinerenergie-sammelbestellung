@@ -20,7 +20,9 @@ class MapPoint extends Model
         'title',
         'description',
         'lng',
-        'lat'
+        'lat',
+        'coordinate',
+        'published'
     ];
 
     protected $casts = [
