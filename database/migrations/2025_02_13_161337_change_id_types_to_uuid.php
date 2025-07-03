@@ -46,6 +46,10 @@ return new class extends Migration
         Schema::table('orders', function (Blueprint $table) {
             $table->uuid('advisor_id')->change();
         });
+
+        Schema::table('sendables', function(Blueprint $table){
+            $table->uuid('sendabled_id')->change();
+        });
     }
 
     private function createUuids()

@@ -16,7 +16,7 @@ return new class extends Migration
     {
         Schema::create('sharings', function (Blueprint $table) {
             $table->timestamps();
-            $table->morphs('sharing');
+            $table->uuidMorphs('sharing');
             $table->foreignIdFor(User::class, 'advisor_id')->constrained();
         });
     }
