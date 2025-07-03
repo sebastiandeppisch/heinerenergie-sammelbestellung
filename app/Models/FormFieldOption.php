@@ -22,6 +22,7 @@ class FormFieldOption extends Model
         'value',
         'sort_order',
         'is_default',
+        'is_required',
     ];
 
     /**
@@ -30,6 +31,7 @@ class FormFieldOption extends Model
     protected $casts = [
         'sort_order' => 'integer',
         'is_default' => 'boolean',
+        'is_required' => 'boolean',
     ];
 
     public function field(): BelongsTo

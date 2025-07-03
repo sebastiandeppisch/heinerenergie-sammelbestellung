@@ -283,3 +283,70 @@ it('validates geographic coordinates', function () {
 
     $response->assertSessionHasErrors();
 });
+
+
+test('submitting a required checkbox options produces a validation error', function () {
+    $formDefinition = FormDefinition::factory()->create();
+    $formField = FormField::factory()->create([
+        'form_definition_id' => $formDefinition->id,
+        'type' => FieldType::CHECKBOX,
+        'label' => 'Test Checkbox Field',
+    ]);
+
+    $option1 = FormFieldOption::factory()->create([
+        'form_field_id' => $formField->id,
+        'label' => 'Option 1',
+        'is_required' => true,
+    ]);
+    $option2 = FormFieldOption::factory()->create([
+        'form_field_id' => $formField->id,
+        'label' => 'Option 2',
+        'is_required' => true,
+    ]);
+    $option3 = FormFieldOption::factory()->create([
+        'form_field_id' => $formField->id,
+        'label' => 'Option 3',
+        'is_required' => false,
+    ]);
+
+
+    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition->id]), [
+        $formField->id => [],
+    ]);
+
+    $response->assertSessionHasErrors($formField->id);
+    $response->assertSessionHasErrors([
+        $formField->id => 'Es müssen die folgenden Optionen ausgewählt werden: Option 1, Option 2',
+    ]);
+});
+
+test('submitting a checkbox with required options passes validation when all required options are selected', function () {
+    $formDefinition = FormDefinition::factory()->create();
+    $formField = FormField::factory()->create([
+        'form_definition_id' => $formDefinition->id,
+        'type' => FieldType::CHECKBOX,
+        'label' => 'Test Checkbox Field',
+    ]);
+
+    $option1 = FormFieldOption::factory()->create([
+        'form_field_id' => $formField->id,
+        'label' => 'Option 1',
+        'is_required' => true,
+    ]);
+    $option2 = FormFieldOption::factory()->create([
+        'form_field_id' => $formField->id,
+        'label' => 'Option 2',
+        'is_required' => true,
+    ]);
+    $option3 = FormFieldOption::factory()->create([
+        'form_field_id' => $formField->id,
+        'label' => 'Option 3',
+        'is_required' => false,
+    ]);
+
+    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition->id]), [
+        $formField->id => [$option1->id, $option2->id],
+    ]);
+
+    $response->assertSessionHasNoErrors();
+});

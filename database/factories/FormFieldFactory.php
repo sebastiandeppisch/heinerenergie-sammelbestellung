@@ -34,7 +34,7 @@ class FormFieldFactory extends Factory
             'label' => ucfirst($this->faker->unique()->word),
             'placeholder' => $this->faker->optional(0.7)->sentence(2),
             'help_text' => $this->faker->optional(0.4)->sentence(),
-            'required' => $this->faker->boolean(30),
+            'required' => $this->faker->boolean(30) && $type !== FieldType::CHECKBOX->value,
             'default_value' => $this->faker->optional(0.2)->word(),
             'sort_order' => $this->faker->numberBetween(0, 100),
             'min_length' => $this->faker->optional(0.3)->numberBetween(1, 5),

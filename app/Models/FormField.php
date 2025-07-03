@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\FieldType;
+use App\Rules\CheckboxRequiredValidator;
 use App\Rules\GeographicCoordinate;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -107,6 +108,20 @@ class FormField extends Model
 
         if ($this->type->requiresGeoCoordinate()) {
             // TODO
+        }
+
+
+        $requiredOptions = $this->options->filter(fn($option) => $option->is_required)->pluck('label', 'id');
+
+        
+        if($requiredOptions->isNotEmpty()) {
+            $rules[] = new CheckboxRequiredValidator(
+                requiredOptions: $requiredOptions->toArray()
+            );
+        }
+
+        if($this->required) {
+            $rules[] = 'required';
         }
 
         return $rules;
