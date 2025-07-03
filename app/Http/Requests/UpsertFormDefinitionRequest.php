@@ -48,7 +48,8 @@ class UpsertFormDefinitionRequest extends FormRequest
             'fields.*.options' => 'array|required_if:fields.*.type,select,radio,checkbox',
             'fields.*.options.*.label' => 'required|string|max:255',
             'fields.*.options.*.value' => 'required|string|max:255',
-            'fields.*.options.*.is_default' => 'boolean',
+            'fields.*.options.*.is_default' => 'required|boolean',
+            'fields.*.options.*.is_required' => 'required|boolean'
         ];
     }
 

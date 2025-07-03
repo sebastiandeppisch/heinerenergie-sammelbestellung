@@ -22,6 +22,9 @@ beforeEach(function () {
 });
 
 test('index page can be rendered without data', function () {
+
+    $this->withoutExceptionHandling();
+
     $response = $this->get(route('form-definitions.index'));
 
     $response->assertStatus(200);
@@ -126,13 +129,17 @@ test('form definition can be created', function () {
                         'label' => 'Option 1',
                         'value' => 'option1',
                         'is_default' => true,
+                        'sort_order' => 1,
                         'id' => 'temp',
+                        'is_required' => false
                     ],
                     [
                         'label' => 'Option 2',
                         'value' => 'option2',
                         'is_default' => false,
+                        'sort_order' => 2,
                         'id' => 'temp',
+                        'is_required' => false
                     ],
                 ],
             ],
