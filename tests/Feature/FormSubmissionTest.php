@@ -297,16 +297,19 @@ test('submitting a required checkbox options produces a validation error', funct
         'form_field_id' => $formField->id,
         'label' => 'Option 1',
         'is_required' => true,
+        'sort_order' => 1
     ]);
     $option2 = FormFieldOption::factory()->create([
         'form_field_id' => $formField->id,
         'label' => 'Option 2',
         'is_required' => true,
+        'sort_order' => 2
     ]);
     $option3 = FormFieldOption::factory()->create([
         'form_field_id' => $formField->id,
         'label' => 'Option 3',
         'is_required' => false,
+        'sort_order'  => 3
     ]);
 
 
