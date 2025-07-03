@@ -20,13 +20,13 @@ const props = defineProps<{
 const navigationTypes = [
   { id: 'google', name: 'Google Maps' },
   { id: 'apple', name: 'Apple Maps' },
-  { id: 'osm', name: 'Open Streep Maps' },
+  { id: 'osm', name: 'Open Street Maps' },
 ];
 
 function openNavigation(e: { itemData: { id: string } }){
   const type = e.itemData.id;
   const address = props.advice.street + ' ' + props.advice.streetNumber + ', ' + props.advice.zip + ' ' + props.advice.city;
-  
+
   switch(type){
     case 'google':
       window.open('https://www.google.com/maps/dir/?api=1&destination=' + address + '&travelmode=bicycling', '_blank');
@@ -45,7 +45,7 @@ function openNavigation(e: { itemData: { id: string } }){
 const mailLink = computed(() => {
   const body = 'Hallo ' + props.advice.firstName + ',%0D%0A%0D%0A' + 'TEXT' + '%0D%0A%0D%0A' + 'Gruß,%0D%0A' + props.advisor?.first_name;
   const subject = 'heiner*energie%20Beratung';
-   
+
   return 'mailto:' + props.advice.email + '?subject=' + subject + '&body=' + body;
 });
 
@@ -76,12 +76,12 @@ const showUnassignButton = computed(() => {
     />
     <a :href="phoneLink"><DxButton text="Anrufen" icon="tel" /></a>
     <a :href="mailLink"><DxButton text="E-Mail verfassen" icon="email" /></a>
-    <DxButton 
+    <DxButton
       v-if="showUnassignButton"
-      text="Beratung freigeben" 
+      text="Beratung freigeben"
       @click="unassignAdvice"
       hint="Beratung freigeben"
     />
     <AdviceTransfer :advice-id="advice.id" :transferable-groups="transferableGroups" />
   </div>
-</template> 
+</template>

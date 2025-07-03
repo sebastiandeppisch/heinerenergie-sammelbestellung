@@ -48,7 +48,6 @@ class User extends Authenticatable
 
     protected $appends = [
         'name',
-        'isActingAsAdmin',
     ];
 
     public function orders(): HasMany
@@ -69,17 +68,6 @@ class User extends Authenticatable
     public function sharedOrders(): MorphMany
     {
         return $this->morphMany(Order::class, 'sharings');
-    }
-
-    public function getIsActingAsAdminAttribute(): bool
-    {
-        return $this->isActingAsAdmin();
-    }
-
-    public function isActingAsAdmin(): bool
-    {
-        // TODO this dont belong to the model
-        return app(SessionService::class)->actsAsSystemAdmin() || app(SessionService::class)->actsAsGroupAdmin();
     }
 
     public function shouldBeNotifiedForNearbyAdvice(Advice $advice): bool

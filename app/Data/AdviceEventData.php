@@ -49,7 +49,6 @@ class AdviceEventData extends Data
         return new self(
             id: $mail->id,
             description: 'E-Mail versendet: '.$mail->subject,
-            comment: null,
             created_at: $mail->sent_at?->format('Y-m-d H:i:s') ?? $mail->created_at->format('Y-m-d H:i:s'),
             user_name: null,
             initials: null,

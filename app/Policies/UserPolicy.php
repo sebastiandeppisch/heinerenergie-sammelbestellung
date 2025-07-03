@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Policies\Concerns\GroupContextHelper;
+use App\Services\SessionService;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class UserPolicy
@@ -39,7 +40,7 @@ class UserPolicy
 
     public function update(User $user, User $model)
     {
-        return $user->isActingAsAdmin();
+        return app(SessionService::class)->actsAsSystemAdmin() || app(SessionService::class)->actsAsGroupAdmin();
     }
 
     public function delete(User $user, User $model)

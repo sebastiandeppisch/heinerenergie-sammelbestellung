@@ -3,7 +3,10 @@
 namespace App\Http\Middleware;
 
 use App\Data\GroupData;
+use App\Data\UserData;
 use App\Models\Group;
+use App\Models\User;
+use App\Services\SessionService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -56,16 +59,12 @@ class HandleInertiaRequests extends Middleware
             }
         }
 
+        $userIsActingAsAdmin = app(SessionService::class)->actsAsSystemAdmin() || app(SessionService::class)->actsAsGroupAdmin();
+
+        $userData = $request->user() ? UserData::fromModel($request->user()->fresh(), $userIsActingAsAdmin): null;
+
         return array_merge(parent::share($request), [
-            'auth.user' => fn () => $request->user()?->only([
-                'id',
-                'first_name',
-                'last_name',
-                'name',
-                'email',
-        //        'is_admin',
-                'is_acting_as_admin',
-            ]),
+            'auth.user' => $userData,
             'auth.availableGroups' => fn () => $request->user()?->groups->map(fn (Group $group) => GroupData::fromModel($group)),
             'auth.currentGroup' => fn () => $currentGroup,
             'flashMessages' => $flashMessages,

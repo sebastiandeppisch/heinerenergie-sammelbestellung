@@ -105,5 +105,6 @@ class OrdersExport implements FromCollection, ShouldAutoSize, WithHeadings, With
                 return $i;
             }
         }
+        return 0;
     }
 }

@@ -7,8 +7,15 @@ use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use InvalidArgumentException;
 use Throwable;
 
+
+/**
+ * @implements CastsAttributs<ValueObjectsCoordinate>
+ */
 class Coordinate implements CastsAttributes
 {
+    /**
+     * @return ValueObject|null
+     */
     public function get($model, string $key, $value, array $attributes)
     {
         if(! array_key_exists('lat', $attributes) || ! array_key_exists('lng', $attributes)){

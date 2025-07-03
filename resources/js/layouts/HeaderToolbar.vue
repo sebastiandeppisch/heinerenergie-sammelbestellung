@@ -10,7 +10,7 @@ import notify from "devextreme/ui/notify";
 
 interface CustomPageProps extends PageProps {
   auth: {
-    user: App.Models.User;
+    user: App.Data.UserData;
     currentGroup?: App.Data.GroupData;
     availableGroups?: App.Data.GroupData[];
   }
@@ -88,7 +88,7 @@ watch(() => page.props.flashMessages, (newVal) => {
               height="100%"
               styling-mode="text"
             >
-              <UserPanel 
+              <UserPanel
                 :email="user.email"
                 :user="user"
                 :current-group="currentGroup"
@@ -99,7 +99,7 @@ watch(() => page.props.flashMessages, (newVal) => {
           </div>
         </template>
       </DxItem>
-      
+
       <template #menuUserItem>
         <UserPanel
           :email="user.email"

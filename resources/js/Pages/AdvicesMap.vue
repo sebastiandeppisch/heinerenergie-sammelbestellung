@@ -35,7 +35,7 @@ const emit = defineEmits(["selectAdviceId"])
 
 const props = defineProps<{
   advices: App.Models.Advice[];
-  advisors: App.Models.User[];
+  advisors: App.Data.UserData[];
   groups: App.Data.GroupMapData[];
 }>();
 const advisors = props.advisors;
@@ -64,7 +64,7 @@ if (hash !== '') {
 
 
 
-function advisorName(advisorId: number){
+function advisorName(advisorId: string){
   const advisor = advisors.find((advisor) => advisor.id === advisorId);
   if(advisor === undefined){
     return '';

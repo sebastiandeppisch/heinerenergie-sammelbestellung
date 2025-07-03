@@ -20,7 +20,7 @@ interface MenuItem {
 interface Props {
   menuMode: string;
   email?: string;
-  user: App.Models.User;
+  user: App.Data.UserData;
   currentGroup?: App.Data.GroupData;
   availableGroups: App.Data.GroupData[];
 }
@@ -49,12 +49,12 @@ const menuItems = computed<MenuItem[]>(() => {
   const items: MenuItem[] = [];
 
   // Add standard menu items first
-  items.push({ 
+  items.push({
     text: "Profil",
     icon: "user",
     onClick: onProfileClick
   });
-  
+
   items.push({
     text: "Logout",
     icon: "runner",
@@ -238,7 +238,7 @@ const menuItems = computed<MenuItem[]>(() => {
   display: flex;
   align-items: center;
   padding: 8px 12px;
-  
+
   &.current {
     background-color: rgba($base-color, 0.1);
   }

@@ -144,6 +144,23 @@ export type SubmissionFieldData = {
 value: number | string | Array<string> | null;
 field: App.Data.FormFieldData;
 };
+export type UserData = {
+id: string;
+first_name: string;
+last_name: string;
+name: string;
+email: string;
+is_acting_as_admin: boolean;
+lat: number | null;
+long: number | null;
+profile_picture: string | null;
+advice_radius: number | null;
+street: string | null;
+streetNumber: string | null;
+city: string | null;
+zip: string | null;
+is_admin: boolean;
+};
 }
 declare namespace App.Data.Pages {
 export type GroupsIndexData = {

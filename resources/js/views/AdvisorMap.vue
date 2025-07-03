@@ -16,7 +16,7 @@ import L from "leaflet";
 import { latLng } from "leaflet";
 
 interface Props {
-  advisor: App.Models.User
+  advisor: App.Data.UserData;
 }
 const {advisor} = defineProps<Props>();
 const zoom = ref(15);

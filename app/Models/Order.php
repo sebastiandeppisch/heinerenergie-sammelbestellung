@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use InvalidArgumentException;
 use NumberFormatter;
 
 class Order extends Model
@@ -72,9 +73,9 @@ class Order extends Model
     public function save(array $options = [])
     {
         if ($this->archived) {
-            throw new InvalidArgument('An archived order can not be changed');
+            throw new InvalidArgumentException('An archived order can not be changed');
         }
-        parent::save($options);
+        return parent::save($options);
     }
 
     public function shares(): MorphToMany
