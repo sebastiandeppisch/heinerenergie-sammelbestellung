@@ -7,13 +7,11 @@ use App\Events\AdviceCreated;
 use App\Events\AdviceSaved;
 use App\Events\AdviceSaving;
 use App\Events\AdviceUpdated;
-use App\Events\OrderCreated;
 use App\Listeners\CalculateCoordinates;
 use App\Listeners\EmptyCoordinates;
 use App\Listeners\HandleAdviceEvents;
 use App\Listeners\InitiateAdviceAssignment;
 use App\Listeners\SaveAdviceEvents;
-use App\Listeners\SendOrderCreatedNotification;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -31,9 +29,6 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
-        ],
-        OrderCreated::class => [
-            SendOrderCreatedNotification::class,
         ],
         AdviceCreated::class => [
             CalculateCoordinates::class,

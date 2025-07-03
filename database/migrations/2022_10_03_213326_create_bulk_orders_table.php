@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\BulkOrder;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -21,13 +21,13 @@ return new class extends Migration
             $table->boolean('archived')->default(false);
         });
 
-        $bulkOrder = new BulkOrder;
-        $bulkOrder->name = 'Standard Sammelbestellung';
-        $bulkOrder->save();
+        $bulkOrderId = DB::table('bulk_orders')->insertGetId([
+            'name' => 'Standard Sammelbestellung',
+        ]);
 
-        Schema::table('orders', function (Blueprint $table) use ($bulkOrder) {
+        Schema::table('orders', function (Blueprint $table) use ($bulkOrderId) {
             $table->foreignId('bulk_order_id')
-                ->default($bulkOrder->id)
+                ->default($bulkOrderId)
                 ->constrained()
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
@@ -40,9 +40,9 @@ return new class extends Migration
                 ->change();
         });
 
-        Schema::table('products', function (Blueprint $table) use ($bulkOrder) {
+        Schema::table('products', function (Blueprint $table) use ($bulkOrderId) {
             $table->foreignId('bulk_order_id')
-                ->default($bulkOrder->id)
+                ->default($bulkOrderId)
                 ->constrained()
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
@@ -55,9 +55,9 @@ return new class extends Migration
                 ->change();
         });
 
-        Schema::table('product_categories', function (Blueprint $table) use ($bulkOrder) {
+        Schema::table('product_categories', function (Blueprint $table) use ($bulkOrderId) {
             $table->foreignId('bulk_order_id')
-                ->default($bulkOrder->id)
+                ->default($bulkOrderId)
                 ->constrained()
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();

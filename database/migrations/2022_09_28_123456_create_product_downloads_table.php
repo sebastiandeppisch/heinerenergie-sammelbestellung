@@ -3,6 +3,7 @@
 use App\Models\Product;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -23,9 +24,9 @@ return new class extends Migration
             $table->foreign('product_id')->references('id')->on('products');
         });
 
-        foreach (Product::all() as $product) {
+        foreach (DB::table('products')->get() as $product) {
             if ($product->url !== null) {
-                $product->downloads()->create([
+                DB::table('product_downloads')->insert([
                     'name' => 'url',
                     'url' => $product->url,
                 ]);

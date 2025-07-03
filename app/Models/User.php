@@ -2,14 +2,12 @@
 
 namespace App\Models;
 
-use App\Services\SessionService;
 use App\Traits\HasGroups;
 use App\ValueObjects\Address;
 use App\ValueObjects\Coordinate;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -53,11 +51,6 @@ class User extends Authenticatable
         'name',
     ];
 
-    public function orders(): HasMany
-    {
-        return $this->hasMany(Order::class, 'advisor_id');
-    }
-
     public function advices(): HasMany
     {
         return $this->hasMany(Advice::class);
@@ -66,11 +59,6 @@ class User extends Authenticatable
     public function getNameAttribute()
     {
         return sprintf('%s %s', $this->first_name, $this->last_name);
-    }
-
-    public function sharedOrders(): MorphMany
-    {
-        return $this->morphMany(Order::class, 'sharings');
     }
 
     public function shouldBeNotifiedForNearbyAdvice(Advice $advice): bool
