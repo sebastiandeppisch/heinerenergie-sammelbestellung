@@ -32,6 +32,8 @@ class StoreFormSubmissionRequest extends FormRequest
 
     private function formDefinition(): FormDefinition
     {
-        return $this->route('formDefinition');
+        $formDefinition = $this->route('formDefinition');
+        $formDefinition->loadMissing('fields', 'fields.options');
+        return $formDefinition;
     }
 }
