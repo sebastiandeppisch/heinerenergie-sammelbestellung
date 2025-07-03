@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\FormDefinition;
 use App\Models\FormField;
+use App\Models\Group;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class FormDefinitionFactory extends Factory
@@ -13,9 +14,10 @@ class FormDefinitionFactory extends Factory
     public function definition()
     {
         return [
-            'name' => $this->faker->words(3, true) . ' Form',
+            'name' => $this->faker->words(3, true).' Form',
             'description' => $this->faker->optional(0.8)->sentence(),
             'is_active' => $this->faker->boolean(80),
+            'group_id' => Group::factory(),
         ];
     }
 

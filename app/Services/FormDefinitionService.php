@@ -13,12 +13,13 @@ class FormDefinitionService
 {
     public function updateFormDefinitionData(FormDefinitionData $formDefinitionData): FormDefinition
     {
-        return DB::transaction(function () use ($formDefinitionData){
+        return DB::transaction(function () use ($formDefinitionData) {
             $data = collect($formDefinitionData->toArray())->forget(['id', 'fields'])->toArray();
             $formDefinition = FormDefinition::findOrFail($formDefinitionData->id);
             $formDefinition->update($data);
 
             $this->updateFields($formDefinitionData->fields, $formDefinition);
+
             return $formDefinition->fresh();
         });
     }
@@ -26,16 +27,17 @@ class FormDefinitionService
     /**
      * @param Collection<FormFieldData>
      */
-    private function updateFields(Collection $fields, FormDefinition $formDefinition){
+    private function updateFields(Collection $fields, FormDefinition $formDefinition)
+    {
         $formFieldIds = [];
         foreach ($fields as $field) {
             $data = collect($field->toArray())->forget(['id', 'options', 'form_definition_id'])->toArray();
 
             $formField = FormField::find($field->id);
 
-            if($formField === null){
+            if ($formField === null) {
                 $formField = $formDefinition->fields()->insert($data);
-            }else{
+            } else {
                 $formField->update($data);
             }
 
@@ -47,7 +49,7 @@ class FormDefinitionService
     }
 
     /**
-     * @param Collection<FormFieldOptionData> $options
+     * @param  Collection<FormFieldOptionData>  $options
      */
     private function updateFieldOptions(Collection $options, FormField $formField): void
     {
@@ -70,7 +72,7 @@ class FormDefinitionService
 
     public function storeFormDefinitionData(FormDefinitionData $formDefinitionData): FormDefinition
     {
-        return DB::transaction(function () use ($formDefinitionData){
+        return DB::transaction(function () use ($formDefinitionData) {
             $data = collect($formDefinitionData->toArray())->forget(['id', 'fields'])->toArray();
             $formDefinition = FormDefinition::create($data);
             foreach ($formDefinitionData->fields as $field) {
@@ -81,6 +83,7 @@ class FormDefinitionService
                     $formField->options()->create($data);
                 }
             }
+
             return $formDefinition->fresh();
         });
     }

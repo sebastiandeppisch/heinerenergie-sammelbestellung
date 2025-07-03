@@ -54,16 +54,25 @@ class FormField extends Model
         'accepted_file_types' => 'array',
     ];
 
+    /**
+     * @return BelongsTo<FormDefinition>
+     */
     public function formDefinition(): BelongsTo
     {
         return $this->belongsTo(FormDefinition::class);
     }
 
+    /**
+     * @return HasMany<FormFieldOption>
+     */
     public function options(): HasMany
     {
         return $this->hasMany(FormFieldOption::class)->orderBy('sort_order');
     }
 
+    /**
+     * @return HasMany<SubmissionField>
+     */
     public function submissionFields(): HasMany
     {
         return $this->hasMany(SubmissionField::class);
@@ -84,7 +93,7 @@ class FormField extends Model
             // TODO fix array validation FieldType::CHECKBOX => [$inRule],
             FieldType::FILE => [''], // TODO
             FieldType::DATE => ['date'],
-            FieldType::GEO_COORDINATE => [new GeographicCoordinate()],
+            FieldType::GEO_COORDINATE => [new GeographicCoordinate],
             default => [],
         };
 
@@ -113,14 +122,14 @@ class FormField extends Model
 
         $requiredOptions = $this->options->filter(fn($option) => $option->is_required)->pluck('label', 'id');
 
-        
+
         if($requiredOptions->isNotEmpty()) {
             $rules[] = new CheckboxRequiredValidator(
                 requiredOptions: $requiredOptions->toArray()
             );
         }
 
-        if($this->required) {
+        if ($this->required) {
             $rules[] = 'required';
         }
 

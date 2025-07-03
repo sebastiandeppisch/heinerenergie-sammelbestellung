@@ -62,6 +62,7 @@ name: string;
 description: string | null;
 is_active: boolean;
 fields: Array<App.Data.FormFieldData>;
+group_id: string;
 };
 export type FormFieldData = {
 id: string;
@@ -159,7 +160,7 @@ canCreateGroups: boolean;
 declare namespace App.Enums {
 export type AdviceStatusResult = 0 | 1 | 2 | 3;
 export type AdviceType = 0 | 1 | 2;
-export type FieldType = 'text' | 'textarea' | 'number' | 'email' | 'phone' | 'select' | 'radio' | 'checkbox' | 'file' | 'date' | 'geo_coordinate';
+export type FieldType = 'text' | 'textarea' | 'number' | 'email' | 'phone' | 'select' | 'radio' | 'checkbox' | 'file' | 'date' | 'geo_coordinate' | 'address';
 export type HouseType = 0 | 1 | 2;
 }
 declare namespace App.ValueObjects {

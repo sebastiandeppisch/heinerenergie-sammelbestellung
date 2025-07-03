@@ -6,12 +6,12 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\DB;
 
 class FormDefinition extends Model
 {
     use HasFactory;
-
     use HasUuids;
 
     /**
@@ -23,6 +23,7 @@ class FormDefinition extends Model
         'name',
         'description',
         'is_active',
+        'group_id',
     ];
 
     /**
@@ -53,20 +54,22 @@ class FormDefinition extends Model
     public function delete(): bool
     {
         return DB::transaction(function () {
-            foreach($this->fields as $field) {
+            foreach ($this->fields as $field) {
                 $field->options()->delete();
                 $field->delete();
             }
 
             $this->fields()->delete();
 
-            //TODO handle submissions
+            // TODO handle submissions
             return parent::delete();
         });
     }
 
     public function getValidationRules(): array
     {
+        $this->loadMissing(['fields', 'fields.options']);
+
         return $this->fields->mapWithKeys(function (FormField $field) {
             return [$field->id => $field->getValidationRules()];
         })->toArray();
@@ -85,7 +88,15 @@ class FormDefinition extends Model
             'form_name' => $this->name,
             'form_description' => $this->description,
             'submitted_at' => now(),
+            'group_id' => $this->group_id,
         ]);
     }
 
+    /**
+     * @return HasOne<FormDefinitionToAdvice>
+     */
+    public function adviceCreator(): HasOne
+    {
+        return $this->hasOne(FormDefinitionToAdvice::class);
+    }
 }

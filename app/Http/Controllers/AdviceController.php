@@ -24,7 +24,9 @@ class AdviceController extends Controller
     {
         $onlyOneGroup = $sessionService->getCurrentGroup() !== null && ! $sessionService->actsAsSystemAdmin() && ! $sessionService->actsAsGroupAdmin();
 
-        $advices = Advice::all()->filter(fn (Advice $advice) => Auth::user()->can('viewDataProtected', $advice))->values()->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice))->toArray();
+        $advices = Advice::query()
+            ->with('shares', 'status')->get()
+            ->filter(fn (Advice $advice) => Auth::user()->can('viewDataProtected', $advice))->values()->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice))->toArray();
 
         $groups = Group::all()
         // ->filter(fn (Group $group) => Auth::user()->can('view', $group))
@@ -43,7 +45,10 @@ class AdviceController extends Controller
             return redirect('/advices')->withErrors('Du hast keine Berechtigung, diese Beratung zu sehen');
         }
 
+        $advice->loadMissing('events', 'events.user');
+
         $events = $advice->events()
+            ->with('user')
             ->get()
             ->map(fn ($event) => AdviceEventData::fromModel($event));
 
@@ -122,7 +127,10 @@ class AdviceController extends Controller
 
     public function map()
     {
-        $advices = Advice::all()->filter(fn (Advice $advice) => Auth::user()->can('viewDataProtected', $advice))->values()->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice));
+        $advices = Advice::query()
+            ->with('shares', 'status')->get()
+            ->filter(fn (Advice $advice) => Auth::user()->can('viewDataProtected', $advice))
+            ->values()->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice));
 
         $groups = Group::where('accepts_transfers', true)->get()->filter(fn (Group $group) => $group->consulting_area !== null)->map(fn (Group $group) => GroupMapData::fromModel($group))->values();
 

@@ -1,0 +1,38 @@
+<?php
+
+use App\Models\Advice;
+use App\Models\FormDefinitionToAdvice;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
+
+test('can be created by factory', function () {
+    FormDefinitionToAdvice::factory()->create();
+    $this->assertTrue(true);
+});
+
+test('submitting the form produces an advice', function () {
+
+    $this->withoutExceptionHandling();
+
+    $config = FormDefinitionToAdvice::factory()->create();
+
+    $form = $config->formDefinition;
+
+    $response = $this->post(route('form.submit', $form), [
+        $config->firstNameField->id => fake()->firstName(),
+        $config->lastNameField->id => fake()->lastName(),
+        $config->emailField->id => fake()->safeEmail(),
+        $config->addressField->id => [
+            'street' => fake()->streetAddress(),
+            'streetNumber' => fake()->buildingNumber(),
+            'city' => fake()->city(),
+            'zip' => fake()->postcode(),
+        ],
+        $config->phoneField->id => fake()->phoneNumber(),
+    ]);
+
+    $response->assertSessionHasNoErrors();
+
+    $this->assertEquals(1, Advice::count());
+});

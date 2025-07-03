@@ -4,21 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Data\FormDefinitionData;
 use App\Data\FormSubmissionData;
+use App\Data\PaginationData;
+use App\Http\Requests\IndexFormSubmissionRequest;
 use App\Models\FormDefinition;
 use App\Models\FormSubmission;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use App\Http\Requests\IndexFormSubmissionRequest;
-use App\Data\PaginationData;
 use Illuminate\Support\Collection;
+use Inertia\Inertia;
 
 class FormSubmissionController extends Controller
 {
-    public function index(IndexFormSubmissionRequest $request){
+    public function index(IndexFormSubmissionRequest $request)
+    {
         $formsubmissions = FormSubmission::query()
-            ->with(['submissionFields']);
+            ->with(['submissionFields', 'submissionFields.formField', 'submissionFields.formField.options']);
 
-        if($request->groupByForm()){
+        if ($request->groupByForm()) {
             $formsubmissions = $formsubmissions->orderBy('form_definition_id');
         }
         $formsubmissions = $formsubmissions->orderBy('submitted_at', $request->sorting())
@@ -35,18 +36,19 @@ class FormSubmissionController extends Controller
             })->paginate(10);
 
         return Inertia::render('FormSubmissions/Index', [
-            'formDefinitions' => FormDefinition::all()->map(fn(FormDefinition $formDefinition) => FormDefinitionData::fromModel($formDefinition)),
+            'formDefinitions' => FormDefinition::with(['fields'])->get()->map(fn (FormDefinition $formDefinition) => FormDefinitionData::fromModel($formDefinition)),
             'selectedFormDefinitions' => $request->selectedFormDefinitions(),
             'sortOrder' => $request->sorting(),
             'groupByForm' => $request->groupByForm(),
-            'dateTo' =>  $request->dateTo(),
+            'dateTo' => $request->dateTo(),
             'dateFrom' => $request->dateFrom(),
-            'formSubmissions' => Inertia::deepMerge( $this->addPagedIndex($formsubmissions->items(), $formsubmissions->currentPage())),
+            'formSubmissions' => Inertia::deepMerge($this->addPagedIndex($formsubmissions->items(), $formsubmissions->currentPage())),
             'pagination' => PaginationData::fromPagination($formsubmissions),
         ]);
     }
 
-    private function addPagedIndex(array $items, int $page): Collection{
+    private function addPagedIndex(array $items, int $page): Collection
+    {
         return collect($items)->mapWithKeys(function ($item, $key) use ($page) {
             $index = ($key + ($page - 1) * 10);
 
@@ -56,12 +58,14 @@ class FormSubmissionController extends Controller
         });
     }
 
-    private function singleSubmission(FormSubmission $formSubmission, Request $request){
+    private function singleSubmission(FormSubmission $formSubmission, Request $request)
+    {
         $index = $request->input('index');
         $data = [];
         $data[$index] = FormSubmissionData::fromModel($formSubmission);
+
         return Inertia::render('FormSubmissions/Index', [
-            'formSubmissions' => Inertia::deepMerge($data)
+            'formSubmissions' => Inertia::deepMerge($data),
         ]);
 
     }
@@ -81,5 +85,4 @@ class FormSubmissionController extends Controller
 
         return $this->singleSubmission($formSubmission, $request)->with('success', 'Der Formulareintrag wurde als ungelesen markiert');
     }
-
 }

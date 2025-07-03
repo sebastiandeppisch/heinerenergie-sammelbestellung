@@ -28,11 +28,11 @@ class Advice extends Model implements HasSends, Pointable
     protected $table = 'advices';
 
     use HasFactory;
+    use HasPoints;
     use HasSendsTrait;
     use HasUuids;
     use Notifiable;
     use SoftDeletes;
-    use HasPoints;
 
     protected $fillable = [
         'firstName',
@@ -57,6 +57,7 @@ class Advice extends Model implements HasSends, Pointable
         'landlordExists',
         'group_id',
         'placeNotes',
+        'address',
     ];
 
     protected $appends = ['shares_ids'];
