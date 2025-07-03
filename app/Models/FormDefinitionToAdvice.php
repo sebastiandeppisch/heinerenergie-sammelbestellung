@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Events\Advice\AdviceCreatedByFormSubmission;
+use App\Mail\AdviceCreated;
 use Database\Factories\FormDefinitionToAdviceFactory;
+use DB;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Mail;
 
 class FormDefinitionToAdvice extends Model
 {
@@ -66,23 +70,33 @@ class FormDefinitionToAdvice extends Model
 
     public function createAdvice(FormSubmission $submission): Advice
     {
-        $addressField = $this->addressField->getSubmissionField($submission);
-        $emailField = $this->emailField->getSubmissionField($submission);
-        $phoneField = $this->phoneField->getSubmissionField($submission);
-        $firstNameField = $this->firstNameField->getSubmissionField($submission);
-        $lastNameField = $this->lastNameField->getSubmissionField($submission);
+        $advice = DB::transaction(function ()  use ($submission){
+            $addressField = $this->addressField->getSubmissionField($submission);
+            $emailField = $this->emailField->getSubmissionField($submission);
+            $phoneField = $this->phoneField->getSubmissionField($submission);
+            $firstNameField = $this->firstNameField->getSubmissionField($submission);
+            $lastNameField = $this->lastNameField->getSubmissionField($submission);
 
-        $advice = Advice::create([
-            'address' => $addressField->value,
-            'email' => $emailField->value,
-            'phone' => $phoneField->value,
-            'firstName' => $firstNameField->value,
-            'lastName' => $lastNameField->value,
-            'group_id' => $submission->group_id,
-        ]);
 
-        // TODO add Advice Submission Event
+            $advice = Advice::create([
+                'address' => $addressField->value,
+                'email' => $emailField->value,
+                'phone' => $phoneField->value,
+                'firstName' => $firstNameField->value,
+                'lastName' => $lastNameField->value,
+                'group_id' => $submission->group_id,
+            ]);
 
+            $advice->save();
+
+            event(new AdviceCreatedByFormSubmission($advice, $submission));
+
+
+            $advice = $advice->fresh();
+            return $advice;
+        });
+
+        Mail::to($advice->email)->send(new AdviceCreated($advice));
         return $advice;
     }
 }

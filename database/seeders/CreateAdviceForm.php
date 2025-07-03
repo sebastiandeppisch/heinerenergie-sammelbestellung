@@ -15,9 +15,10 @@ class CreateAdviceForm extends Seeder
      */
     public function run(): void
     {
+        $group = Group::firstOrFail();
         $formDefinition = new FormDefinition();
-        $formDefinition->name = 'Beratungsformular';
-        $formDefinition->group()->associate(Group::firstOrFail());
+        $formDefinition->name = 'Beratungsformular für '.$group->name;
+        $formDefinition->group()->associate($group);
         $formDefinition->save();
 
 
