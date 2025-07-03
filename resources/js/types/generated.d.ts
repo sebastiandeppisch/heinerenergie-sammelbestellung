@@ -4,7 +4,6 @@ declare namespace App.Data {
 export type AdviceEventData = {
 id: string;
 description: string;
-comment: string | null;
 created_at: string;
 user_name: string | null;
 initials: string | null;

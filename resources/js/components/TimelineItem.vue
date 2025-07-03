@@ -45,9 +45,6 @@ function parseEmail(emailString: string[] | null): string {
 				<div v-else>{{ props.event.description }}</div>
 				<i v-if="isMail" :class="isExpanded ? 'dx-icon-chevronup' : 'dx-icon-chevrondown'" class="expand-icon"></i>
 			</div>
-			<div v-if="props.event.comment" class="timeline-comment">
-				{{ props.event.comment }}
-			</div>
 			<!-- E-Mail Content -->
 			<div v-if="isMail && isExpanded" class="timeline-mail-content">
 				<iframe v-if="props.event.content !== null" :srcdoc="props.event.content" class="mail-iframe"></iframe>

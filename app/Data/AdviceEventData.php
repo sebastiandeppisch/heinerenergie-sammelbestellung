@@ -14,7 +14,6 @@ class AdviceEventData extends Data
     public function __construct(
         public string $id,
         public string $description,
-        public ?string $comment,
         public string $created_at,
         public ?string $user_name,
         public ?string $initials,
@@ -38,7 +37,6 @@ class AdviceEventData extends Data
         return new self(
             id: $event->id,
             description: $event->description,
-            comment: $event->comment,
             created_at: $event->created_at->format('Y-m-d H:i:s'),
             user_name: $user?->name,
             initials: $initials,
