@@ -85,7 +85,7 @@ class Setting extends Model
         return static::defaultConfig()[$this->key];
     }
 
-    private function type()
+    private function getType()
     {
         if ($this->hasConfig()) {
             if (array_key_exists('type', $this->config())) {
@@ -100,7 +100,7 @@ class Setting extends Model
 
     private function nativeType()
     {
-        return str_replace('text', 'string', $this->type());
+        return str_replace('text', 'string', $this->getType());
     }
 
     private function nullable()
@@ -137,6 +137,6 @@ class Setting extends Model
 
     public function getTypeAttribute(): string
     {
-        return $this->type();
+        return $this->getType();
     }
 }
