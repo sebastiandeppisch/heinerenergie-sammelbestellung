@@ -6,6 +6,8 @@ use App\Enums\AdviceStatusResult;
 use App\Enums\AdviceType;
 use App\Enums\HouseType;
 use App\Models\Advice;
+use App\Models\User;
+use App\Services\AdviceService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Spatie\LaravelData\Data;
@@ -46,7 +48,7 @@ class DataProtectedAdviceData extends Data
         public ?string $group_id,
     ) {}
 
-    public static function fromModel(Advice $advice): self
+    public static function fromModel(Advice $advice, ?User $user = null): self
     {
         $email = $advice->email;
         $phone = $advice->phone;
@@ -54,6 +56,8 @@ class DataProtectedAdviceData extends Data
             $email = null;
             $phone = null;
         }
+
+        $adviceService = app(AdviceService::class);
 
         return new self(
             id: $advice->id,
@@ -73,8 +77,7 @@ class DataProtectedAdviceData extends Data
             type: $advice->type,
             created_at: $advice->created_at,
             updated_at: $advice->updated_at,
-            distance: $advice->distance,
-            shares_ids: $advice->shares_ids,
+            distance: $user ? $adviceService->getDistance($advice, $user) : null,
             placeNotes: $advice->placeNotes,
             houseType: $advice->houseType,
             landlordExists: $advice->landlordExists,
@@ -83,8 +86,9 @@ class DataProtectedAdviceData extends Data
             helpType_bureaucracy: $advice->helpType_bureaucracy,
             helpType_other: $advice->helpType_other,
             result: $advice->result,
-            can_edit: $advice->can_edit,
+            can_edit: $user ? $adviceService->canEdit($advice, $user) : false,
             group_id: $advice->group_id,
+            shares_ids: $advice->shares_ids
         );
     }
 }

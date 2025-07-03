@@ -24,9 +24,11 @@ class AdviceController extends Controller
     {
         $onlyOneGroup = $sessionService->getCurrentGroup() !== null && ! $sessionService->actsAsSystemAdmin() && ! $sessionService->actsAsGroupAdmin();
 
+        $user = Auth::user();
+
         $advices = Advice::query()
-            ->with('shares', 'status')->get()
-            ->filter(fn (Advice $advice) => Auth::user()->can('viewDataProtected', $advice))->values()->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice))->toArray();
+            ->with('status', 'group', 'group.parent', 'group.users', 'shares')->get()
+            ->filter(fn (Advice $advice) => Auth::user()->can('viewDataProtected', $advice))->values()->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice, $user))->toArray();
 
         $groups = Group::all()
         // ->filter(fn (Group $group) => Auth::user()->can('view', $group))
@@ -128,7 +130,7 @@ class AdviceController extends Controller
     public function map()
     {
         $advices = Advice::query()
-            ->with('shares', 'status')->get()
+            ->with('shares', 'status', 'group', 'group.parent', 'group.users')->get()
             ->filter(fn (Advice $advice) => Auth::user()->can('viewDataProtected', $advice))
             ->values()->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice));
 

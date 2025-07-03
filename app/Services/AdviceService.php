@@ -2,9 +2,12 @@
 
 namespace App\Services;
 
+use App\Events\Advice\AdviceSharedAdvisorAdded;
+use App\Events\Advice\AdviceSharedAdvisorRemoved;
 use App\Models\Advice;
 use App\Models\User;
 use App\ValueObjects\Meter;
+use Illuminate\Support\Collection;
 
 class AdviceService
 {
@@ -29,5 +32,53 @@ class AdviceService
     public function canEdit(Advice $advice, User $user): bool
     {
         return $user->can('view', $advice);
+    }
+
+
+    /**
+     *
+     * @param Advice $advice
+     * @param Collection<UserId|User> $newAdvisors
+     * @return void
+     */
+    public function syncShares(Advice $advice, Collection $newAdvisors, ?User $user): void{
+
+        $newAdvisors = $newAdvisors->map(function (mixed $user): User{
+            if(! $user instanceof User){
+                return User::findOrFail($user);
+            }
+            return $user;
+        });
+
+        // Get current advisors before sync
+        $currentAdvisors = $advice->shares()->pluck('advisor_id')->toArray();
+
+        // Sync new advisors
+        $advice->shares()->sync($newAdvisors);
+
+        // Get new advisors after sync
+        $newAdvisors = $advice->shares()->pluck('advisor_id')->toArray();
+
+        // Find added advisors
+        $addedAdvisors = array_diff($newAdvisors, $currentAdvisors);
+        foreach ($addedAdvisors as $advisorId) {
+            $advisor = User::find($advisorId);
+            event(new AdviceSharedAdvisorAdded(
+                $advice,
+                $user,
+                $advisor
+            ));
+        }
+
+        // Find removed advisors
+        $removedAdvisors = array_diff($currentAdvisors, $newAdvisors);
+        foreach ($removedAdvisors as $advisorId) {
+            $advisor = User::find($advisorId);
+            event(new AdviceSharedAdvisorRemoved(
+                $advice,
+                $user,
+                $advisor
+            ));
+        }
     }
 }

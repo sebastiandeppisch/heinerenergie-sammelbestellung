@@ -2,8 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Advice;
 use App\Models\Group;
+use App\Models\User;
+use App\Services\AdviceService;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Wnx\Sends\Models\Send;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Advice>
@@ -39,4 +43,23 @@ class AdviceFactory extends Factory
             'group_id' => $group,
         ];
     }
+
+    public function withSharing(): self
+    {
+        return $this->afterCreating(function (Advice $advice){
+            $user = User::factory()->create();
+            $advisor = User::factory()->create();
+            app(AdviceService::class)->syncShares($advice, collect([$advisor]), $user);
+        });
+    }
+
+    public function withSendable(): self
+    {
+        return $this->afterCreating(function (Advice $advice){
+            $sendable = Send::factory()->create();
+            $advice->sends()->attach($sendable);
+        });
+    }
+
+
 }
