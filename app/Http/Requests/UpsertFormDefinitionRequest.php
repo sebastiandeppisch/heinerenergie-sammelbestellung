@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\FieldType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class UpsertFormDefinitionRequest extends FormRequest
 {
@@ -30,7 +32,7 @@ class UpsertFormDefinitionRequest extends FormRequest
 
             // Felder-Array-Validierung
             'fields' => 'array',
-            'fields.*.type' => 'required|string|in:text,textarea,number,email,phone,select,radio,checkbox,file,date',
+            'fields.*.type' => ['required', Rule::enum(FieldType::class)],
             'fields.*.label' => 'required|string|max:255',
             'fields.*.placeholder' => 'nullable|string|max:255',
             'fields.*.help_text' => 'nullable|string',
