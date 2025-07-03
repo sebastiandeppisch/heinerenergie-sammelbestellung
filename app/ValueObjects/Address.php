@@ -4,8 +4,10 @@ namespace App\ValueObjects;
 
 use App\Casts\Address as AddressCast;
 use Illuminate\Contracts\Database\Eloquent\Castable;
+use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 use Stringable;
 
+#[TypeScript]
 class Address implements Castable, Stringable
 {
     public function __construct(

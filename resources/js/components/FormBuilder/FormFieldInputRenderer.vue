@@ -7,6 +7,7 @@ import { RadioGroup, RadioGroupItem } from '@/shadcn/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { Label } from '@/shadcn/components/ui/label';
 import PinLocationMap from '../PinLocationMap.vue';
+import AddressInput from './AddressInput.vue';
 
 type FormFieldData = App.Data.FormFieldData;
 type FieldType = App.Enums.FieldType;
@@ -22,7 +23,8 @@ const FIELD_TYPES = {
     CHECKBOX: 'checkbox' as FieldType,
     FILE: 'file' as FieldType,
     DATE: 'date' as FieldType,
-    GEO_COORDINATE: 'geo_coordinate' as FieldType
+    GEO_COORDINATE: 'geo_coordinate' as FieldType,
+    ADDRESS: 'address' as FieldType
 };
 
 const props = withDefaults(defineProps<{
@@ -235,6 +237,12 @@ const inputClasses = computed(() => ({
     :id="fieldId"
     v-model="modelValue"
     />
+
+  <AddressInput
+    v-else-if="field.type == FIELD_TYPES.ADDRESS"
+    :id="fieldId"
+    v-model="modelValue"
+  />
 
   <div v-else class="p-2 border border-destructive rounded-md text-destructive text-sm">
     Feldtyp "{{ field.type }}" wird nicht unterstützt

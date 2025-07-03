@@ -164,6 +164,12 @@ export type FieldType = 'text' | 'textarea' | 'number' | 'email' | 'phone' | 'se
 export type HouseType = 0 | 1 | 2;
 }
 declare namespace App.ValueObjects {
+export type Address = {
+street: string;
+streetNumber: string;
+zip: number;
+city: string;
+};
 export type Coordinate = {
 lat: number;
 lng: number;
