@@ -4,8 +4,10 @@ namespace Database\Factories;
 
 use App\Enums\FieldType;
 use App\Models\FormDefinition;
+use App\Models\FormDefinitionToAdvice;
 use App\Models\FormField;
 use App\Models\Group;
+use App\ValueObjects\Address;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -69,5 +71,30 @@ class FormDefinitionToAdviceFactory extends Factory
             'last_name_field_id' => $lastNameField->id,
             'default_group_id' => Group::factory(),
         ];
+    }
+
+    public function withAdvice() {
+        return $this->afterCreating(function (FormDefinitionToAdvice $creator){
+            $submission = $creator->formDefinition->createSubmission();
+
+            $creator->addressField->createSubmissionField($submission, new Address(
+                street: fake()->streetAddress(),
+                city: fake()->city(),
+                zip: fake()->postcode,
+                streetNumber: fake()->buildingNumber()
+            ));
+
+            $creator->emailField->createSubmissionField($submission, fake()->safeEmail());
+
+            $creator->phoneField->createSubmissionField($submission, fake()->phoneNumber());
+
+            $creator->firstNameField->createSubmissionField($submission, fake()->name());
+
+            $creator->lastNameField->createSubmissionField($submission, fake()->name());
+
+            $creator->createAdvice($submission);
+
+            return [];
+        });
     }
 }
