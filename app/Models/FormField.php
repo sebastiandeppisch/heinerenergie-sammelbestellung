@@ -146,4 +146,9 @@ class FormField extends Model
             'value' => $value,
         ]);
     }
+
+    public function getSubmissionField(FormSubmission $submission): SubmissionField
+    {
+        return $this->submissionFields()->where('form_submission_id', $submission->id)->firstOrFail();
+    }
 }

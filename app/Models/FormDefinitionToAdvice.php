@@ -66,11 +66,11 @@ class FormDefinitionToAdvice extends Model
 
     public function createAdvice(FormSubmission $submission): Advice
     {
-        $addressField = $this->addressField->submissionFields()->where('form_submission_id', $submission->id)->firstOrFail();
-        $emailField = $this->emailField->submissionFields()->where('form_submission_id', $submission->id)->firstOrFail();
-        $phoneField = $this->phoneField->submissionFields()->where('form_submission_id', $submission->id)->firstOrFail();
-        $firstNameField = $this->firstNameField->submissionFields()->where('form_submission_id', $submission->id)->firstOrFail();
-        $lastNameField = $this->lastNameField->submissionFields()->where('form_submission_id', $submission->id)->firstOrFail();
+        $addressField = $this->addressField->getSubmissionField($submission);
+        $emailField = $this->emailField->getSubmissionField($submission);
+        $phoneField = $this->phoneField->getSubmissionField($submission);
+        $firstNameField = $this->firstNameField->getSubmissionField($submission);
+        $lastNameField = $this->lastNameField->getSubmissionField($submission);
 
         $advice = Advice::create([
             'address' => $addressField->value,
