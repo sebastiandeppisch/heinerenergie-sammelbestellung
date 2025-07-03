@@ -30,7 +30,7 @@
 		{
 			"label": "Export-IDE-Helper",
 			"type": "shell",
-			"command": "php artisan ide-helper:generate && php artisan ide-helper:models --nowrite && php artisan typescript:transform",
+			"command": "php artisan ide-helper:generate && php artisan ide-helper:models --nowrite && php artisan typescript:transform && php artisan ziggy:generate --types",
 			"group": "build",
 			"presentation": {
 				"revealProblems": "onProblem",
@@ -47,6 +47,26 @@
                 "kind": "build",
                 "isDefault": true
             }
-        }
+        },
+        {
+            "label": "Lint PHP",
+            "type": "shell",
+            "command": "vendor/bin/phpstan analyze",
+        },
+        {
+            "label": "PHP Tests",
+            "type": "shell",
+            "command": "php artisan test",
+        },
+        {
+            "label": "Create test coverage report",
+            "type": "shell",
+            "command": "XDEBUG_MODE=coverage php artisan test --coverage-html coverage-report"
+        },
+        {
+            "label": "Lint JS",
+            "type": "shell",
+            "command": "npx vue-tsc",
+        },
 	]
 }
