@@ -2,7 +2,10 @@
     "name": "sebastiandeppisch/heinerenergie-crm",
     "type": "project",
     "description": "Software for the collection of bulk orders for balcony solar panels",
-    "keywords": ["framework", "laravel"],
+    "keywords": [
+        "framework",
+        "laravel"
+    ],
     "license": "TODO",
     "require": {
         "php": "^8.4",
@@ -26,7 +29,7 @@
         "driftingly/rector-laravel": "^2.0.2",
         "fakerphp/faker": "^1.9.1",
         "larastan/larastan": "^3.0",
-        "laravel/pint": "^1.21.0",
+        "laravel/pint": "^1.22.1",
         "laravel/sail": "^1.0.1",
         "mockery/mockery": "^1.4.4",
         "nunomaduro/collision": "^8.1",
