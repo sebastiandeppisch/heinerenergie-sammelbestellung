@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, nextTick } from "vue";
+import { ref, nextTick, onMounted, computed } from "vue";
 import {
   LMap,
   LTileLayer,
@@ -104,6 +104,21 @@ function locateUser() {
 }
 
 const coordinatesOfDarmstadtCityCenter: PointExpression = [49.8728, 8.6512];
+
+onMounted(() => {
+    if (locationModel.value as any === '') {
+        locationModel.value = null;
+    }
+    updateMapHeight();
+});
+
+const centerOfMap = computed<PointExpression>(() => {
+  if (locationModel.value) {
+    return [locationModel.value.lat, locationModel.value.lng];
+  }
+  return coordinatesOfDarmstadtCityCenter;
+});
+
 </script>
 
 <template>
@@ -112,7 +127,7 @@ const coordinatesOfDarmstadtCityCenter: PointExpression = [49.8728, 8.6512];
       <LMap
         ref="mapRef"
         :zoom="15"
-        :center="coordinatesOfDarmstadtCityCenter"
+        :center="centerOfMap"
         use-global-leaflet
         :options="{attributionControl: false}"
         @ready="onLeafletReady"
@@ -125,7 +140,7 @@ const coordinatesOfDarmstadtCityCenter: PointExpression = [49.8728, 8.6512];
         />
 
         <!-- Standard Leaflet Marker ohne benutzerdefiniertes Icon -->
-        <LMarker :lat-lng="locationModel" v-if="locationModel !==null" />
+        <LMarker :lat-lng="locationModel" v-if="locationModel !==null && locationModel.lat !== undefined && locationModel.lng !== undefined" />
 
         <!-- Benutzerdefiniertes Kontrollelement für GPS-Lokalisierung -->
         <LControl position="topright">
