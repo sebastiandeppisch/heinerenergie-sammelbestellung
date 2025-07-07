@@ -77,4 +77,6 @@ class AdaptTableHeight{
 	}
 }
 
-export {formatPrice, formatPriceCell, notifyError, formatDateCell, AdaptTableHeight, useOnResize}
+const isIframe = window.self !== window.top;
+
+export {formatPrice, formatPriceCell, notifyError, formatDateCell, AdaptTableHeight, useOnResize, isIframe}

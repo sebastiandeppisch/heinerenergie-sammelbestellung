@@ -4,10 +4,11 @@ import PublicLayout from '@/layouts/PublicLayout.vue';
 import Card from '@/shadcn/components/ui/card/Card.vue';
 import CardContent from '@/shadcn/components/ui/card/CardContent.vue';
 import { route } from 'ziggy-js';
-
+import NoLayout from '@/layouts/NoLayout.vue';
+import { isIframe } from '@/helpers';
 
 defineOptions({
-    layout: PublicLayout
+    layout: isIframe ? NoLayout : PublicLayout
 });
 
 
