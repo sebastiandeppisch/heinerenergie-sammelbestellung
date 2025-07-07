@@ -35,7 +35,7 @@
 	--sidebar-border: oklch(0.92 0.004 286.32);
 	--sidebar-ring: oklch(0.705 0.213 47.604);
   }
-  
+
 .dark {
 	--background: oklch(0.141 0.005 285.823);
 	--foreground: oklch(0.985 0 0);
@@ -69,8 +69,6 @@
 	--sidebar-border: oklch(1 0 0 / 10%);
 	--sidebar-ring: oklch(0.646 0.222 41.116);
   }
- 
-  
 
 @theme inline {
   --color-background: var(--background);
