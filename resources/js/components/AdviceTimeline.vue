@@ -38,18 +38,18 @@ const submitComment = () => {
     </div>
 
     <div class="new-comment-container">
-      <h4>Neuen Kommentar hinzufügen</h4>
+      <h4>Neue Notiz hinzufügen</h4>
       <form @submit.prevent="submitComment">
         <DxTextArea
           v-model="form.comment"
           :height="100"
-          placeholder="Hier kannst Du einen neuen Kommentar... hinzufügen"
+          placeholder="Neue Notiz..."
           class="comment-textarea"
           :disabled="form.processing"
           value-change-event="keyup"
         />
         <DxButton
-          text="Kommentar hinzufügen"
+          text="Notiz hinzufügen"
           type="default"
           class="submit-comment-btn"
           :disabled="form.processing || !form.comment.trim()"
