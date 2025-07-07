@@ -18,6 +18,13 @@ const locationModel = defineModel<Coordinate | null>({
   default: null
 });
 
+const props = withDefaults(defineProps<{
+    readonly?: boolean;
+}>(), {
+    readonly: false
+});
+
+
 const mapRef = ref<typeof LMap | null>(null);
 const mapContainerRef = ref<HTMLDivElement | null>(null);
 const isLocating = ref(false);
@@ -40,12 +47,16 @@ useOnResize(updateMapHeight);
 async function onLeafletReady() {
   await nextTick();
 
-  mapRef.value?.leafletObject.on('click', (event: L.LeafletMouseEvent) => {
-    locationModel.value = {
-      lat: event.latlng.lat,
-      lng: event.latlng.lng
-    };
-  });
+  if(! props.readonly) {
+    mapRef.value?.leafletObject.on('click', (event: L.LeafletMouseEvent) => {
+        locationModel.value = {
+            lat: event.latlng.lat,
+            lng: event.latlng.lng
+        };
+    });
+
+  }
+
 
   updateMapHeight();
 }
@@ -119,6 +130,7 @@ const centerOfMap = computed<PointExpression>(() => {
   return coordinatesOfDarmstadtCityCenter;
 });
 
+
 </script>
 
 <template>
@@ -143,7 +155,7 @@ const centerOfMap = computed<PointExpression>(() => {
         <LMarker :lat-lng="locationModel" v-if="locationModel !==null && locationModel.lat !== undefined && locationModel.lng !== undefined" />
 
         <!-- Benutzerdefiniertes Kontrollelement für GPS-Lokalisierung -->
-        <LControl position="topright">
+        <LControl position="topright" v-if="!props.readonly">
           <div>
             <Button
                 @click.prevent="locateUser"

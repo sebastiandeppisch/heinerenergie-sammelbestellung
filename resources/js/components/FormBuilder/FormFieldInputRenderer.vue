@@ -236,12 +236,14 @@ const inputClasses = computed(() => ({
     v-else-if="field.type == FIELD_TYPES.GEO_COORDINATE"
     :id="fieldId"
     v-model="modelValue"
+    :readonly="disabled"
     />
 
   <AddressInput
     v-else-if="field.type == FIELD_TYPES.ADDRESS"
     :id="fieldId"
     v-model="modelValue"
+    :readonly="disabled"
   />
 
   <div v-else class="p-2 border border-destructive rounded-md text-destructive text-sm">

@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-4">
+  <div class="space-y-4" v-if="props.readonly === false">
     <div class="grid grid-cols-4 gap-4">
       <div class="col-span-3">
         <Label for="street">Straße</Label>
@@ -43,6 +43,9 @@
       </div>
     </div>
   </div>
+  <div v-else>
+    {{ model.street }} {{ model.streetNumber }}<br> {{ intZip }} {{ model.city }}
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -50,6 +53,13 @@ import Input from '@/shadcn/components/ui/input/Input.vue'
 import Label from '@/shadcn/components/ui/label/Label.vue'
 import { computed, onMounted } from 'vue';
 type Address = App.ValueObjects.Address;
+
+
+const props = withDefaults(defineProps<{
+    readonly?: boolean;
+}>(), {
+    readonly: false
+});
 
 const model = defineModel<Address>({
     default: () =>({
