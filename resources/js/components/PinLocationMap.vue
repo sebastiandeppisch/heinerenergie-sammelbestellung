@@ -11,6 +11,7 @@ import L, { LatLngExpression, PointExpression } from "leaflet";
 import { Loader2, Locate } from "lucide-vue-next";
 import Button from "@/shadcn/components/ui/button/Button.vue";
 import { useOnResize } from "@/helpers";
+import "leaflet/dist/leaflet.css";
 
 type Coordinate = App.ValueObjects.Coordinate;
 
