@@ -102,6 +102,14 @@ class FormDefinition extends Model
     }
 
     /**
+     * @return HasOne<FormDefinitionToMapPoint>
+     */
+    public function mapPointCreator(): HasOne
+    {
+        return $this->hasOne(FormDefinitionToMapPoint::class);
+    }
+
+    /**
      * @return BelongsTo<Group>
      */
     public function group(): BelongsTo

@@ -52,5 +52,9 @@ class FormSubmission extends Model implements Pointable
         if ($this->formDefinition->adviceCreator) {
             $this->formDefinition->adviceCreator->createAdvice($this);
         }
+
+        if ($this->formDefinition->mapPointCreator) {
+            $this->formDefinition->mapPointCreator->createMapPoint($this);
+        }
     }
 }

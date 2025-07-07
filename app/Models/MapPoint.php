@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use App\Contracts\Pointable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-
+/**
+ * @property Coordinate $coordinate
+ */
 class MapPoint extends Model
 {
     /** @use HasFactory<\Database\Factories\MapPointFactory> */
