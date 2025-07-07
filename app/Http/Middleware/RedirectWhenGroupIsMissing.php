@@ -32,6 +32,7 @@ class RedirectWhenGroupIsMissing
                 'register.store',
                 'form.submit',
                 'form.show',
+                'map.public',
             ];
 
             if ($groups->count() === 1) {

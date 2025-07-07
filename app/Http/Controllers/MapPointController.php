@@ -31,6 +31,19 @@ class MapPointController extends Controller
         ]);
     }
 
+    public function publicMap()
+    {
+        $mapPoints = MapPoint::where('published', true)
+            ->get()
+            ->map(fn (MapPoint $mapPoint): MapPointData => MapPointData::fromModel($mapPoint));
+
+        $pointsByType = $mapPoints->groupBy('userReadablePointableType');
+
+        return Inertia::render('MapPoints/PublicMap', [
+            'pointsByType' => $pointsByType
+        ]);
+    }
+
     public function edit(MapPoint $mappoint)
     {
         return Inertia::render('MapPoints/Edit', [
