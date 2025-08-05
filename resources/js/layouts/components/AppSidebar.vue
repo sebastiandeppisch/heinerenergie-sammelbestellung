@@ -68,6 +68,16 @@ const footerNavItems: NavItem[] = [
         href: 'https://github.com/sebastiandeppisch/heinerenergie-sammelbestellung',
         icon: Github,
     },
+    {
+        title: 'Impressum',
+        href: '/impress',
+        icon: FileText,
+    },
+    {
+        title: 'Datenschutzerklärung',
+        href: '/datapolicy',
+        icon: FileText,
+    }
 ];
 </script>
 
