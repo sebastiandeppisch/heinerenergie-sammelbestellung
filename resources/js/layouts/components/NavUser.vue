@@ -2,13 +2,11 @@
 import UserInfo from '@/layouts/components/UserInfo.vue';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/shadcn/components/ui/dropdown-menu';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/shadcn/components/ui/sidebar';
-import { type User } from '@/layouts/helper';
-import { usePage } from '@inertiajs/vue3';
 import { ChevronsUpDown } from 'lucide-vue-next';
 import UserMenuContent from './UserMenuContent.vue';
+import { user } from '@/authHelper';
 
-const page = usePage();
-const user = page.props.auth.user as User;
+
 const { isMobile, state } = useSidebar();
 </script>
 

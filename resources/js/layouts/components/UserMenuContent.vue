@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import UserInfo from '@/layouts/components/UserInfo.vue';
 import { DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/shadcn/components/ui/dropdown-menu';
-import type { User } from '@/layouts/helper';
 import { Link, router } from '@inertiajs/vue3';
 import { LogOut, Settings } from 'lucide-vue-next';
+import { route } from 'ziggy-js';
 
 interface Props {
-    user: User;
+    user: App.Data.UserData;
 }
 
 const handleLogout = () => {
