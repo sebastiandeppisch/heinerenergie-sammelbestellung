@@ -1,12 +1,28 @@
 <script setup lang="ts">
-import AppLogoIcon from '@/layouts/components/AppLogoIcon.vue';
+import { PageProps } from "@inertiajs/core";
+import { usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import genericLogo from '../../../img/logo.png';
+
+
+interface CustomPageProps extends PageProps {
+  auth: {
+    user: App.Data.UserData;
+    currentGroup?: App.Data.GroupData;
+    availableGroups?: App.Data.GroupData[];
+  }
+}
+
+const page = usePage<CustomPageProps>();
+const currentGroup = computed(() => page.props.auth.currentGroup);
+const logo = computed(() => {
+  if (currentGroup.value) {
+    return currentGroup.value.logo_path || genericLogo;
+  }
+  return genericLogo;
+});
 </script>
 
 <template>
-    <div class="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-        <AppLogoIcon class="size-5 fill-current text-white dark:text-black" />
-    </div>
-    <div class="ml-1 grid flex-1 text-left text-sm">
-        <span class="mb-0.5 truncate leading-tight font-semibold">Laravel Starter Kit</span>
-    </div>
+    <img :src="logo" >
 </template>

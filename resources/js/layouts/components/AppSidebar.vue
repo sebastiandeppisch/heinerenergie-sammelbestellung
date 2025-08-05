@@ -8,6 +8,7 @@ import { Link } from '@inertiajs/vue3';
 import { BookOpen, Folder, LayoutGrid, Table, Map, Users, Settings, FileText, MessageSquare, User, Info } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 import { route } from 'ziggy-js';
+import Card from '@/shadcn/components/ui/card/Card.vue';
 
 const mainNavItems: NavItem[] = [
     {
@@ -81,10 +82,12 @@ const footerNavItems: NavItem[] = [
         <SidebarHeader>
             <SidebarMenu>
                 <SidebarMenuItem>
-                    <SidebarMenuButton size="lg" as-child>
-                        <Link :href="route('dashboard')">
-                            <AppLogo />
-                        </Link>
+                    <SidebarMenuButton size="lg" as-child class="bg-white hover:bg-white hover:shadow-md">
+                        <Card>
+                            <Link :href="route('dashboard')" class="w-full h-full flex justify-center">
+                                <AppLogo />
+                            </Link>
+                        </Card>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
             </SidebarMenu>
