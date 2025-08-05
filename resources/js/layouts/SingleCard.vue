@@ -2,91 +2,25 @@
 import DxScrollView from "devextreme-vue/scroll-view";
 import MainPublic from "./MainPublic.vue";
 import { Link } from "@inertiajs/vue3";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shadcn/components/ui/card";
 
-const props = withDefaults(defineProps<{
+const props = defineProps<{
   title: string
   description?: string
-  showBackLink?: boolean
-  fixedWidth?: boolean
-}>(), {
-  showBackLink: true,
-  fixedWidth: true
-});
+}>();
 
 </script>
 
 <template>
-<div class="single-card">
-  <div class="inner">
-    <div class="dx-card" :class="{ 'auto-width': !fixedWidth }">
-      <div class="header">
-        <div class="title">{{title}}</div>
-        <div class="description">{{description}}</div>
-      </div>
-      <slot />
-    </div>
+  <div class="flex justify-center items-center h-full">
+    <Card>
+      <CardHeader>
+        <CardTitle>{{ title }}</CardTitle>
+        <CardDescription>{{ description }}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <slot />
+      </CardContent>
+    </Card>
   </div>
-</div>
 </template>
-
-<style lang="scss">
-@import "../themes/generated/variables.base.scss";
-
-.inner{
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  flex-direction: column;
-}
-
-.back-link{
-  margin-top: 20px;
-  font-size: 14px;
-  display: inline-block;
-  cursor: pointer;
-  text-decoration: none;
-}
-
-.single-card {
-  width: 100%;
-  height: 100%;
-
-  .dx-card {
-    width: 330px;
-    padding: 40px;
-    flex-grow: 0;
-
-    &.auto-width {
-      width: auto;
-      min-width: 330px;
-    }
-
-    .screen-x-small & {
-      width: 100%;
-      height: 100%;
-      border-radius: 0;
-      box-shadow: none;
-      margin: 0;
-      border: 0;
-      flex-grow: 1;
-    }
-
-    .header {
-      margin-bottom: 30px;
-
-      .title {
-        color: $base-text-color;
-        line-height: 28px;
-        font-weight: 500;
-        font-size: 24px;
-      }
-
-      .description {
-        color: rgba($base-text-color, alpha($base-text-color) * 0.7);
-        line-height: 18px;
-      }
-    }
-  }
-}
-</style>
