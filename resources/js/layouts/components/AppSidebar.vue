@@ -5,11 +5,10 @@ import NavUser from '@/layouts/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/shadcn/components/ui/sidebar';
 import { type NavItem } from '@/layouts/helper';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, Table, Map, Users, Settings, FileText, MessageSquare, User, Info } from 'lucide-vue-next';
+import { LayoutGrid, Table, Map, Users, Settings, FileText, MessageSquare, User, Github } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 import { route } from 'ziggy-js';
 import Card from '@/shadcn/components/ui/card/Card.vue';
-
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
@@ -65,14 +64,9 @@ const mainNavItems: NavItem[] = [
 
 const footerNavItems: NavItem[] = [
     {
-        title: 'Github Repo',
-        href: 'https://github.com/laravel/vue-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
+        title: 'Github',
+        href: 'https://github.com/sebastiandeppisch/heinerenergie-sammelbestellung',
+        icon: Github,
     },
 ];
 </script>
