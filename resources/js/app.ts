@@ -13,6 +13,7 @@ library.add()
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import SideNavOuterToolbar from './layouts/SideNavOuterToolbar.vue';
+import AppLayout from './layouts/AppLayout.vue';
 
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
@@ -25,7 +26,7 @@ createInertiaApp({
 		if (!page) {
 			throw new Error(`Page ${name} not found`)
 		}
-		page.default.layout = page.default.layout || SideNavOuterToolbar
+		page.default.layout = page.default.layout || AppLayout
 		return page
 	},
 	setup({ el, App, props, plugin }) {
