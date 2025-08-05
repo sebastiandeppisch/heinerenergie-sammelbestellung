@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import DxScrollView from "devextreme-vue/scroll-view";
-import MainPublic from "./MainPublic.vue";
-import { Link } from "@inertiajs/vue3";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shadcn/components/ui/card";
 
 const props = defineProps<{
