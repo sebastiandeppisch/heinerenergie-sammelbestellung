@@ -21,6 +21,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('logo_path')->nullable();
             $table->boolean('accepts_transfers')->default(true);
+            $table->json('consulting_area')->nullable();
         });
 
         Schema::table('groups', function (Blueprint $table) {
