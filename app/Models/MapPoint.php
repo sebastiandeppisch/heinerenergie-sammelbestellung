@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Contracts\Pointable;
+use App\Models\Traits\HasUuid;
 use App\ValueObjects\Coordinate;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use App\Contracts\Pointable;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+
 /**
  * @property Coordinate $coordinate
  */
@@ -15,7 +16,8 @@ class MapPoint extends Model
 {
     /** @use HasFactory<\Database\Factories\MapPointFactory> */
     use HasFactory;
-    use HasUuids;
+
+    use HasUuid;
 
     protected $fillable = [
         'name',
@@ -24,19 +26,19 @@ class MapPoint extends Model
         'lng',
         'lat',
         'coordinate',
-        'published'
+        'published',
     ];
 
     protected $casts = [
         'coordinate' => Coordinate::class,
-        'published' => 'boolean'
+        'published' => 'boolean',
     ];
 
     /**
      * @return MorphTo<Pointable>
      */
-    public function pointable(): MorphTo{
+    public function pointable(): MorphTo
+    {
         return $this->morphTo();
     }
-
 }

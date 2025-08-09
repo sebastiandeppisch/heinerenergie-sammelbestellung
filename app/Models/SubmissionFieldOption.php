@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Models\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class SubmissionFieldOption extends Model
 {
     use HasFactory;
-    use HasUuids;
+    use HasUuid;
 
     /**
      * @var array<string, mixed>
@@ -32,7 +32,6 @@ class SubmissionFieldOption extends Model
 
     /**
      * @return BelongsTo<FormFieldOption>
-     *
      */
     public function formFieldOption(): BelongsTo
     {

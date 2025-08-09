@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Models\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 class FormDefinition extends Model
 {
     use HasFactory;
-    use HasUuids;
+    use HasUuid;
 
     /**
      * The attributes that are mass assignable.
@@ -72,7 +72,7 @@ class FormDefinition extends Model
         $this->loadMissing(['fields', 'fields.options']);
 
         return $this->fields->mapWithKeys(function (FormField $field) {
-            return [$field->id => $field->getValidationRules()];
+            return [$field->uuid => $field->getValidationRules()];
         })->toArray();
     }
 

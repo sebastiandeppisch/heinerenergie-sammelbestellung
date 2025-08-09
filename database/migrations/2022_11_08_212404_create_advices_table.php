@@ -16,14 +16,14 @@ return new class extends Migration
     public function up()
     {
         Schema::create('advice_status', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
             $table->timestamps();
 
             $table->string('name');
         });
 
         Schema::create('advices', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
             $table->timestamps();
 
             $table->string('firstName');

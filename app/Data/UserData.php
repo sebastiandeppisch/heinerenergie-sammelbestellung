@@ -27,9 +27,10 @@ class UserData extends Data
         public bool $is_admin,
     ) {}
 
-    static public function fromModel(User $user, bool $isActingAsAdmin){
+    public static function fromModel(User $user, bool $isActingAsAdmin)
+    {
         return new self(
-            $user->id,
+            $user->uuid,
             $user->first_name,
             $user->last_name,
             $user->name,
@@ -37,7 +38,7 @@ class UserData extends Data
             $isActingAsAdmin,
             $user->coordinate?->lat,
             $user->coordinate?->lng,
-            null, //TODO add missing profile_picture
+            null, // TODO add missing profile_picture
             $user->advice_radius,
             $user->street,
             $user->streetNumber,

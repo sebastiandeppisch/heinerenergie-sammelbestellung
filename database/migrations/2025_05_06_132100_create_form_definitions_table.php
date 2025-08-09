@@ -17,7 +17,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('form_definitions', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
+            $table->uuid('uuid')->unique();
+
             $table->string('name');
             $table->text('description')->nullable();
             $table->boolean('is_active')->default(true);
@@ -27,7 +29,9 @@ return new class extends Migration
         });
 
         Schema::create('form_fields', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
+            $table->uuid('uuid')->unique();
+
             $table->foreignIdFor(FormDefinition::class)->constrained();
             $table->string('type'); // Enum/FieldType
             $table->string('label');
@@ -48,7 +52,9 @@ return new class extends Migration
         });
 
         Schema::create('form_field_options', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
+            $table->uuid('uuid')->unique();
+
             $table->foreignIdFor(FormField::class)->constrained();
             $table->string('label');
             $table->string('value');
@@ -61,7 +67,8 @@ return new class extends Migration
         });
 
         Schema::create('form_submissions', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
+            $table->uuid('uuid')->unique();
             $table->timestamps();
 
             $table->foreignIdFor(FormDefinition::class)->nullable();
@@ -75,7 +82,9 @@ return new class extends Migration
         });
 
         Schema::create('submission_fields', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
+            $table->uuid('uuid')->unique();
+
             $table->timestamps();
             $table->foreignIdFor(FormSubmission::class)->constrained();
             $table->foreignIdFor(FormField::class)->constrained();

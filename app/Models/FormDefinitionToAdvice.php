@@ -4,9 +4,9 @@ namespace App\Models;
 
 use App\Events\Advice\AdviceCreatedByFormSubmission;
 use App\Mail\AdviceCreated;
+use App\Models\Traits\HasUuid;
 use Database\Factories\FormDefinitionToAdviceFactory;
 use DB;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,7 +17,7 @@ class FormDefinitionToAdvice extends Model
     /** @use HasFactory<FormDefinitionToAdviceFactory> */
     use HasFactory;
 
-    use HasUuids;
+    use HasUuid;
 
     /**
      * @return BelongsTo<FormDefinition>
@@ -70,13 +70,12 @@ class FormDefinitionToAdvice extends Model
 
     public function createAdvice(FormSubmission $submission): Advice
     {
-        $advice = DB::transaction(function ()  use ($submission){
+        $advice = DB::transaction(function () use ($submission) {
             $addressField = $this->addressField->getSubmissionField($submission);
             $emailField = $this->emailField->getSubmissionField($submission);
             $phoneField = $this->phoneField->getSubmissionField($submission);
             $firstNameField = $this->firstNameField->getSubmissionField($submission);
             $lastNameField = $this->lastNameField->getSubmissionField($submission);
-
 
             $advice = Advice::create([
                 'address' => $addressField->value,
@@ -91,12 +90,13 @@ class FormDefinitionToAdvice extends Model
 
             event(new AdviceCreatedByFormSubmission($advice, $submission));
 
-
             $advice = $advice->fresh();
+
             return $advice;
         });
 
         Mail::to($advice->email)->send(new AdviceCreated($advice));
+
         return $advice;
     }
 }

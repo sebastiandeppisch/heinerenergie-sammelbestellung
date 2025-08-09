@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use App\Contracts\Pointable;
+use App\Models\Traits\HasUuid;
 use App\Traits\HasPoints;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,7 +14,7 @@ class FormSubmission extends Model implements Pointable
 {
     use HasFactory;
     use HasPoints;
-    use HasUuids;
+    use HasUuid;
 
     /**
      * The attributes that are mass assignable.

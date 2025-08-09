@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Traits\HasUuid;
 use App\ValueObjects\Polygon;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Storage;
 class Group extends Model
 {
     use HasFactory;
-    use HasUuids;
+    use HasUuid;
 
     protected $fillable = [
         'name',

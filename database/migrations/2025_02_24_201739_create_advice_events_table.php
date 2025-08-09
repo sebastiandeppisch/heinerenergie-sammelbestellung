@@ -14,7 +14,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('advice_events', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            
             $table->foreignIdFor(Advice::class)->constrained();
             $table->foreignIdFor(User::class)->nullable()->constrained();
             $table->longText('event');

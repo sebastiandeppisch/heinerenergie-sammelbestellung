@@ -27,10 +27,10 @@ class AdviceController extends Controller
         $user = Auth::user();
 
         $advices = Advice::query()
-            ->with('status', 'group', 'group.parent', 'group.users', 'shares')->get()
+            ->with('status', 'group', 'group.parent', 'group.users', 'shares', 'advisor')->get()
             ->filter(fn (Advice $advice) => Auth::user()->can('viewDataProtected', $advice))->values()->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice, $user))->toArray();
 
-        $groups = Group::all()
+        $groups = Group::with('parent')->get()
         // ->filter(fn (Group $group) => Auth::user()->can('view', $group))
             ->map(fn (Group $group) => GroupData::fromModel($group))->values()->toArray();
 
@@ -64,7 +64,7 @@ class AdviceController extends Controller
 
         $coordinateOfAdvice = $advice->coordinate;
 
-        $transferableGroups = Group::where('accepts_transfers', true)->get()
+        $transferableGroups = Group::where('accepts_transfers', true)->with('parent')->get()
             ->sortBy(function (Group $group) use ($coordinateOfAdvice) {
                 $center = $group->consulting_area?->getCenter();
 
@@ -86,7 +86,7 @@ class AdviceController extends Controller
 
     public function transfer(Advice $advice, TransferAdviceRequest $request)
     {
-        $targetGroup = Group::findOrFail($request->group_id);
+        $targetGroup = Group::where('uuid', $request->group_id)->firstOrFail();
         $oldGroup = $advice->group;
         $advice->group()->associate($targetGroup);
         $advice->save();
@@ -130,7 +130,7 @@ class AdviceController extends Controller
     public function map()
     {
         $advices = Advice::query()
-            ->with('shares', 'status', 'group', 'group.parent', 'group.users')->get()
+            ->with('shares', 'status', 'group', 'group.parent', 'group.users', 'advisor')->get()
             ->filter(fn (Advice $advice) => Auth::user()->can('viewDataProtected', $advice))
             ->values()->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice));
 

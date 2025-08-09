@@ -9,10 +9,10 @@ use App\Enums\HouseType;
 use App\Events\AdviceCreated;
 use App\Events\AdviceSaving;
 use App\Events\AdviceUpdated;
+use App\Models\Traits\HasUuid;
 use App\Traits\HasPoints;
 use App\ValueObjects\Address;
 use App\ValueObjects\Coordinate;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -30,7 +30,7 @@ class Advice extends Model implements HasSends, Pointable
     use HasFactory;
     use HasPoints;
     use HasSendsTrait;
-    use HasUuids;
+    use HasUuid;
     use Notifiable;
     use SoftDeletes;
 
@@ -149,6 +149,7 @@ class Advice extends Model implements HasSends, Pointable
             'coordinate' => Coordinate::class,
             'lng' => 'float',
             'lat' => 'float',
+            'advisor_id' => 'int',
         ];
     }
 }

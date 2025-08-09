@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use App\Enums\FieldType;
+use App\Models\Traits\HasUuid;
 use App\Rules\CheckboxRequiredValidator;
 use App\Rules\GeographicCoordinate;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,7 +15,7 @@ use Illuminate\Validation\Rule;
 class FormField extends Model
 {
     use HasFactory;
-    use HasUuids;
+    use HasUuid;
 
     /**
      * The attributes that are mass assignable.
@@ -80,7 +80,7 @@ class FormField extends Model
 
     public function getValidationRules(): array
     {
-        $inRule = Rule::in($this->options->pluck('id')->toArray());
+        $inRule = Rule::in($this->options->pluck('uuid')->toArray());
 
         $rules = match ($this->type) {
             FieldType::TEXT => ['string'],
@@ -119,11 +119,9 @@ class FormField extends Model
             // TODO
         }
 
+        $requiredOptions = $this->options->filter(fn ($option) => $option->is_required)->pluck('label', 'uuid');
 
-        $requiredOptions = $this->options->filter(fn($option) => $option->is_required)->pluck('label', 'id');
-
-
-        if($requiredOptions->isNotEmpty()) {
+        if ($requiredOptions->isNotEmpty()) {
             $rules[] = new CheckboxRequiredValidator(
                 requiredOptions: $requiredOptions->toArray()
             );

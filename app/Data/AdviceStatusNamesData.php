@@ -19,7 +19,7 @@ class AdviceStatusNamesData extends Data
     public static function fromModel(AdviceStatus $status): self
     {
         return new self(
-            id: $status->id,
+            id: $status->uuid,
             name: $status->name,
             result: $status->result,
         );

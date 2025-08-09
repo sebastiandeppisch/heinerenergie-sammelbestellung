@@ -60,7 +60,7 @@ class DataProtectedAdviceData extends Data
         $adviceService = app(AdviceService::class);
 
         return new self(
-            id: $advice->id,
+            id: $advice->uuid,
             firstName: $advice->firstName,
             lastName: $advice->lastName,
             street: $advice->street,
@@ -70,14 +70,14 @@ class DataProtectedAdviceData extends Data
             email: $email,
             phone: $phone,
             commentary: $advice->commentary,
-            advisor_id: $advice->advisor_id,
-            advice_status_id: $advice->advice_status_id,
+            advisor_id: $advice->advisor?->uuid,
+            advice_status_id: $advice->status?->uuid,
             lng: $advice->lng,
             lat: $advice->lat,
             type: $advice->type,
             created_at: $advice->created_at,
             updated_at: $advice->updated_at,
-            distance: $user ? $adviceService->getDistance($advice, $user) : null,
+            distance: $user ? $adviceService->getDistance($advice, $user)?->getValue() : null,
             placeNotes: $advice->placeNotes,
             houseType: $advice->houseType,
             landlordExists: $advice->landlordExists,
@@ -87,7 +87,7 @@ class DataProtectedAdviceData extends Data
             helpType_other: $advice->helpType_other,
             result: $advice->result,
             can_edit: $user ? $adviceService->canEdit($advice, $user) : false,
-            group_id: $advice->group_id,
+            group_id: $advice->group->uuid,
             shares_ids: $advice->shares_ids
         );
     }

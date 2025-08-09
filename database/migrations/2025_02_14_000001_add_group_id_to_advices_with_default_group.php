@@ -11,22 +11,23 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (DB::getDriverName() === 'mysql') {
-            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        }
-
-        Schema::table('advices', function (Blueprint $table) {
-            $table->foreignIdFor(Group::class)->constrained();
-        });
-
         $defaultGroupId = DB::table('groups')->insertGetId([
-            'id' => (string) Str::uuid(),
+            'uuid' => (string) Str::uuid(),
             'name' => 'Standard Initiative',
             'description' => 'Automatisch erstellte Standard-Initiative für bestehende Beratungen',
             'accepts_transfers' => true,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
+
+        Schema::table('advices', function (Blueprint $table) use ($defaultGroupId) {
+            $table->foreignIdFor(Group::class)->default($defaultGroupId)->constrained();
+        });
+
+        Schema::table('advices', function (Blueprint $table) {
+            $table->foreignIdFor(Group::class)->default(null)->change();
+        });
 
         DB::table('advices')
             ->whereNull('group_id')
@@ -46,16 +47,13 @@ return new class extends Migration
         DB::table('group_user')->insert($groupUserRecords);
 
         DB::table('users')->update(['is_admin' => false]);
-
-        if (DB::getDriverName() === 'mysql') {
-            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-        }
     }
 
     public function down(): void
     {
         Schema::table('advices', function (Blueprint $table) {
             $table->dropForeign(['group_id']);
+            $table->dropColumn(['group_id']);
         });
     }
 };

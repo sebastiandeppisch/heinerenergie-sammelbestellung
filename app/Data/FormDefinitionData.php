@@ -27,12 +27,12 @@ class FormDefinitionData extends Data
     public static function fromModel(FormDefinition $model): self
     {
         return new self(
-            id: $model->id,
+            id: $model->uuid,
             name: $model->name,
             description: $model->description,
             is_active: $model->is_active,
             fields: $model->fields->map(fn ($field) => FormFieldData::fromModel($field)),
-            group_id: $model->group_id,
+            group_id: $model->group->uuid,
         );
     }
 }

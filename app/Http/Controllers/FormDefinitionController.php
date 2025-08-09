@@ -17,7 +17,7 @@ class FormDefinitionController extends Controller
      */
     public function index()
     {
-        $formDefinitions = FormDefinition::with(['fields', 'fields.options'])->get()->map(fn ($formDefinition) => FormDefinitionData::fromModel($formDefinition));
+        $formDefinitions = FormDefinition::with(['fields', 'fields.options', 'group'])->get()->map(fn ($formDefinition) => FormDefinitionData::fromModel($formDefinition));
 
         $groups = Group::all()->map(fn (Group $group) => [
             'id' => $group->id,

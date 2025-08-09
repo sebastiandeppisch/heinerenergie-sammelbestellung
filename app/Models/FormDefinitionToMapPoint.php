@@ -3,19 +3,19 @@
 namespace App\Models;
 
 use App\Events\MapPointCreatedByFormSubmission;
+use App\Models\Traits\HasUuid;
 use Database\Factories\FormDefinitionToMapPointFactory;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 
 class FormDefinitionToMapPoint extends Model
 {
     /** @use HasFactory<FormDefinitionToMapPointFactory> */
     use HasFactory;
 
-    use HasUuids;
+    use HasUuid;
 
     protected $table = 'form_definition_to_map_points';
 

@@ -29,8 +29,8 @@ test('form with text field can be submitted', function () {
 
     $this->withoutExceptionHandling();
 
-    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition->id]), [
-        $formField->id => 'Sample text input',
+    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition]), [
+        $formField->uuid => 'Sample text input',
     ]);
 
     $response->assertSessionHasNoErrors();
@@ -57,8 +57,8 @@ test('form with number field can be submitted', function () {
 
     $this->withoutExceptionHandling();
 
-    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition->id]), [
-        $formField->id => 123,
+    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition]), [
+        $formField->uuid => 123,
     ]);
 
     $response->assertSessionHasNoErrors();
@@ -93,8 +93,8 @@ test('form with single select can be submitted', function () {
 
     $this->withoutExceptionHandling();
 
-    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition->id]), [
-        $formField->id => $option1->id,
+    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition]), [
+        $formField->uuid => $option1->uuid,
     ]);
 
     $response->assertSessionHasNoErrors();
@@ -104,11 +104,11 @@ test('form with single select can be submitted', function () {
     ]);
     $this->assertDatabaseHas('submission_fields', [
         'form_field_id' => $formField->id,
-        'value' => json_encode($option1->id),
+        'value' => json_encode($option1->uuid),
     ]);
 
     $field = SubmissionField::firstOrFail();
-    $this->assertSame($option1->id, $field->value);
+    $this->assertSame($option1->uuid, $field->value);
 });
 test('form with multiple select can be submitted', function () {
     $formDefinition = FormDefinition::factory()->create();
@@ -130,7 +130,7 @@ test('form with multiple select can be submitted', function () {
 
     $this->withoutExceptionHandling();
 
-    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition->id]), [
+    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition]), [
         $formField->id => [$option1->id, $option2->id],
     ]);
 
@@ -167,8 +167,8 @@ test('Selectboxes with multiple values can be submitted', function () {
 
     $this->withoutExceptionHandling();
 
-    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition->id]), [
-        $formField->id => [$option1->id, $option2->id],
+    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition]), [
+        $formField->uuid => [$option1->uuid, $option2->uuid],
     ]);
 
     $response->assertSessionHasNoErrors();
@@ -178,11 +178,11 @@ test('Selectboxes with multiple values can be submitted', function () {
     ]);
     $this->assertDatabaseHas('submission_fields', [
         'form_field_id' => $formField->id,
-        'value' => json_encode([$option1->id, $option2->id]),
+        'value' => json_encode([$option1->uuid, $option2->uuid]),
     ]);
 
     $field = SubmissionField::firstOrFail();
-    $this->assertSame([$option1->id, $option2->id], $field->value);
+    $this->assertSame([$option1->uuid, $option2->uuid], $field->value);
 });
 
 test('form with radio button can be submitted', function(){
@@ -204,8 +204,8 @@ test('form with radio button can be submitted', function(){
 
     $this->withoutExceptionHandling();
 
-    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition->id]), [
-        $formField->id => $option1->id,
+    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition]), [
+        $formField->uuid => $option1->uuid,
     ]);
 
     $response->assertSessionHasNoErrors();
@@ -215,11 +215,11 @@ test('form with radio button can be submitted', function(){
     ]);
     $this->assertDatabaseHas('submission_fields', [
         'form_field_id' => $formField->id,
-        'value' => json_encode($option1->id),
+        'value' => json_encode($option1->uuid),
     ]);
 
     $field = SubmissionField::firstOrFail();
-    $this->assertSame($option1->id, $field->value);
+    $this->assertSame($option1->uuid, $field->value);
 });
 
 
@@ -232,11 +232,11 @@ test('form with radiobutton is validated', function () {
     ]);
 
 
-    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition->id]), [
-        $formField->id => 'random_value', // Invalid value
+    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition]), [
+        $formField->uuid => 'random_value', // Invalid value
     ]);
 
-    $response->assertSessionHasErrors($formField->id);
+    $response->assertSessionHasErrors($formField->uuid);
 });
 
 
@@ -250,8 +250,8 @@ test('geoposition can be submitted', function(){
 
     $this->withoutExceptionHandling();
 
-    $response = $this->post(route('form.submit', ['formDefinition' => $formField->formDefinition->id]), [
-        $formField->id => [
+    $response = $this->post(route('form.submit', ['formDefinition' => $formField->formDefinition]), [
+        $formField->uuid => [
             'lat' => 49,
             'lng' => 10
         ],
@@ -274,8 +274,8 @@ it('validates geographic coordinates', function () {
         'label' => 'Your example location'
     ]);
 
-    $response = $this->post(route('form.submit', ['formDefinition' => $formField->formDefinition->id]), [
-        $formField->id => [
+    $response = $this->post(route('form.submit', ['formDefinition' => $formField->formDefinition]), [
+        $formField->uuid => [
             'lat' => 120,
             'lng' => 190
         ],
@@ -313,13 +313,13 @@ test('submitting a required checkbox options produces a validation error', funct
     ]);
 
 
-    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition->id]), [
-        $formField->id => [],
+    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition]), [
+        $formField->uuid => [],
     ]);
 
-    $response->assertSessionHasErrors($formField->id);
+    $response->assertSessionHasErrors($formField->uuid);
     $response->assertSessionHasErrors([
-        $formField->id => 'Es müssen die folgenden Optionen ausgewählt werden: Option 1, Option 2',
+        $formField->uuid => 'Es müssen die folgenden Optionen ausgewählt werden: Option 1, Option 2',
     ]);
 });
 

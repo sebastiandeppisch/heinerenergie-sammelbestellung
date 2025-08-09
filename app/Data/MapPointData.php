@@ -26,7 +26,7 @@ class MapPointData extends Data
     public static function fromModel(MapPoint $model)
     {
         return new self(
-            id: $model->id,
+            id: $model->uuid,
             coordinate: $model->coordinate,
             title: $model->title,
             description: $model->description,

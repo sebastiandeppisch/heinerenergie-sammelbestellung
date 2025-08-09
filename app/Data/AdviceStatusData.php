@@ -21,11 +21,12 @@ class AdviceStatusData extends Data
 
     public static function fromModel(AdviceStatus $status, Group $context): self
     {
+        $status->loadMissing('ownerGroup', 'usingGroups');
         return new self(
-            id: $status->id,
+            id: $status->uuid,
             name: $status->name,
             result: $status->result,
-            group_id: $status->group_id,
+            group_id: $status->ownerGroup->uuid,
             visible_in_group: $status->isVisibleInGroup($context),
         );
     }

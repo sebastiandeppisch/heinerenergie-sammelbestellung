@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Traits\HasUuid;
 use App\Traits\HasGroups;
 use App\ValueObjects\Address;
 use App\ValueObjects\Coordinate;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
@@ -17,7 +18,7 @@ use Laravel\Sanctum\HasApiTokens;
  */
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, HasGroups, HasUuids, Notifiable;
+    use HasApiTokens, HasFactory, HasGroups, Notifiable, HasUuid;
 
     /**
      * The attributes that are mass assignable.

@@ -47,8 +47,8 @@ test('form submissions can be sorted by submitted_at ascending', function(){
     $response->assertInertia(fn (Assert $page) => $page
        ->component('FormSubmissions/Index')
        ->has('formSubmissions', 2)
-       ->where('formSubmissions.0.id', $submissionA->id)
-       ->where('formSubmissions.1.id', $submissionB->id)
+       ->where('formSubmissions.0.id', $submissionA->uuid)
+       ->where('formSubmissions.1.id', $submissionB->uuid)
     );
 });
 
@@ -70,8 +70,8 @@ test('form submissions are sorted by submitted_at descending by default', functi
     $response->assertInertia(fn (Assert $page) => $page
        ->component('FormSubmissions/Index')
        ->has('formSubmissions', 2)
-       ->where('formSubmissions.0.id', $submissionB->id)
-       ->where('formSubmissions.1.id', $submissionA->id)
+       ->where('formSubmissions.0.id', $submissionB->uuid)
+       ->where('formSubmissions.1.id', $submissionA->uuid)
     );
 });
 

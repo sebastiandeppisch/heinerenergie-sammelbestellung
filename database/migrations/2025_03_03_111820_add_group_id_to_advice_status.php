@@ -10,9 +10,16 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('advice_status', function (Blueprint $table) {
-            $table->foreignIdFor(Group::class)->constrained();
+
+        $defaultGroupId = Group::firstOrFail()->id;
+
+        Schema::table('advice_status', function (Blueprint $table) use ($defaultGroupId) {
+            $table->foreignIdFor(Group::class)->default($defaultGroupId)->constrained();
             $table->softDeletes();
+        });
+
+        Schema::table('advice_status', function (Blueprint $table) {
+            $table->foreignIdFor(Group::class)->default(null)->change();
         });
 
         Schema::create('advice_status_group', function (Blueprint $table) {

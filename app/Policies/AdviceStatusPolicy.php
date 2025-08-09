@@ -42,7 +42,9 @@ class AdviceStatusPolicy
     }
 
     public function view(User $user, AdviceStatus $status)
-    {
+{
+        $status->loadMissing('ownerGroup');
+
         $group = $status->ownerGroup;
 
         if ($this->groupContext->isActingAsTransitiveMemberOrAdmin($user, $group)) {

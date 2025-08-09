@@ -2,9 +2,9 @@
 
 namespace App\Data;
 
+use App\Models\FormFieldOption;
 use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
-use App\Models\FormFieldOption;
 
 #[TypeScript]
 class FormFieldOptionData extends Data
@@ -16,13 +16,12 @@ class FormFieldOptionData extends Data
         public int $sort_order,
         public bool $is_default,
         public bool $is_required
-    ) {
-    }
+    ) {}
 
     public static function fromModel(FormFieldOption $model): self
     {
         return new self(
-            id: $model->id,
+            id: $model->uuid,
             label: $model->label,
             value: $model->value,
             sort_order: $model->sort_order,

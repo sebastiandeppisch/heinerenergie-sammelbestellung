@@ -20,16 +20,16 @@ test('submitting the form produces an advice', function () {
     $form = $config->formDefinition;
 
     $response = $this->post(route('form.submit', $form), [
-        $config->firstNameField->id => fake()->firstName(),
-        $config->lastNameField->id => fake()->lastName(),
-        $config->emailField->id => fake()->safeEmail(),
-        $config->addressField->id => [
+        $config->firstNameField->uuid => fake()->firstName(),
+        $config->lastNameField->uuid => fake()->lastName(),
+        $config->emailField->uuid => fake()->safeEmail(),
+        $config->addressField->uuid => [
             'street' => fake()->streetAddress(),
             'streetNumber' => fake()->buildingNumber(),
             'city' => fake()->city(),
             'zip' => fake()->postcode(),
         ],
-        $config->phoneField->id => fake()->phoneNumber(),
+        $config->phoneField->uuid => fake()->phoneNumber(),
     ]);
 
     $response->assertSessionHasNoErrors();

@@ -41,11 +41,11 @@ class FormSubmitController extends Controller
     {
         switch ($field->type) {
             case FieldType::TEXT:
-                return $request->string($field->id);
+                return $request->string($field->uuid);
             case FieldType::NUMBER:
-                return $request->integer($field->id);
+                return $request->integer($field->uuid);
             default:
-                return $request->input($field->id);
+                return $request->input($field->uuid);
         }
     }
 }

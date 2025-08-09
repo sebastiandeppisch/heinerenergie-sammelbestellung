@@ -3,20 +3,17 @@
 namespace App\Models;
 
 use App\Enums\FieldType;
+use App\Models\Traits\HasUuid;
 use App\ValueObjects\Coordinate;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 class SubmissionField extends Model
 {
     use HasFactory;
-    use HasUuids;
+    use HasUuid;
 
     /**
      * @var array<string, mixed>
@@ -36,7 +33,7 @@ class SubmissionField extends Model
     protected $casts = [
         'sort_order' => 'integer',
         'field_type' => FieldType::class,
-        'value' => 'json'
+        'value' => 'json',
     ];
 
     public function formSubmission(): BelongsTo
@@ -49,10 +46,12 @@ class SubmissionField extends Model
         return $this->belongsTo(FormField::class);
     }
 
-    public function asCoordinate(): Coordinate{
-        if($this->field_type != FieldType::GEO_COORDINATE){
+    public function asCoordinate(): Coordinate
+    {
+        if ($this->field_type != FieldType::GEO_COORDINATE) {
             throw new RuntimeException('This method can only be called for an geo coordinate field');
         }
+
         return Coordinate::fromArray($this->value);
     }
 }

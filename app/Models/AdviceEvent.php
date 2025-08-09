@@ -3,13 +3,13 @@
 namespace App\Models;
 
 use App\Casts\AdviceEventCast;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Models\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AdviceEvent extends Model
 {
-    use HasUuids;
+    use HasUuid;
 
     protected $fillable = [
         'advice_id',
