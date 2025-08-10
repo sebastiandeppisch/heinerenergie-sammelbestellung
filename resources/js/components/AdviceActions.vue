@@ -7,7 +7,7 @@ import AdviceTransfer from './AdviceTransfer.vue';
 import { route } from 'ziggy-js';
 import { router } from '@inertiajs/vue3';
 const props = defineProps<{
-  advice: App.Models.Advice;
+  advice: App.Data.DataProtectedAdviceData;
   advisor?: {
     first_name: string;
     email: string;
@@ -35,8 +35,8 @@ function openNavigation(e: { itemData: { id: string } }){
       window.open('https://maps.apple.com/?daddr=' + address + '&dirflg=w', '_blank');
       break;
     case 'osm':
-      if (props.advisor?.lat && props.advisor?.long && props.advice.lat && props.advice.long) {
-        window.open('https://www.openstreetmap.org/directions?engine=graphhopper_bicycle&route=' + props.advisor.lat + '%2C' + props.advisor.long + '%3B' + props.advice.lat + '%2C' + props.advice.long, '_blank');
+      if (props.advisor?.lat && props.advisor?.long && props.advice.lat && props.advice.lng) {
+        window.open('https://www.openstreetmap.org/directions?engine=graphhopper_bicycle&route=' + props.advisor.lat + '%2C' + props.advisor.long + '%3B' + props.advice.lat + '%2C' + props.advice.lng, '_blank');
       }
       break;
   }

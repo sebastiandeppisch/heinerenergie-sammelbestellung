@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import otherHelpTypeImage from '@/../img/heinerenergie-hochzeitsturm.svg';
 
 const props = defineProps<{
-  advice: App.Models.Advice
+  advice: App.Data.DataProtectedAdviceData
 }>();
 </script>
 

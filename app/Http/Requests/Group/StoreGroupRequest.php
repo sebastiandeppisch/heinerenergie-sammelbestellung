@@ -10,7 +10,7 @@ class StoreGroupRequest extends FormRequest
     public function authorize(): bool
     {
         if ($this->input('parent_id')) {
-            $parent = Group::findOrFail($this->input('parent_id'));
+            $parent = Group::where('uuid', $this->input('parent_id'))->firstOrFail();
 
             return $this->user()->can('create', $parent);
         }
@@ -26,7 +26,7 @@ class StoreGroupRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'parent_id' => 'nullable|exists:groups,id',
+            'parent_id' => 'nullable|exists:groups,uuid',
         ];
     }
 }

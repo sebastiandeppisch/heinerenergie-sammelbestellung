@@ -7,7 +7,7 @@ import { router } from '@inertiajs/vue3';
 import notify from 'devextreme/ui/notify';
 
 const props = defineProps<{
-  advice: App.Models.Advice
+  advice: App.Data.DataProtectedAdviceData
 }>();
 
 const adviceStatus = new LaravelDataSource('/api/advicestatus');

@@ -135,6 +135,8 @@ class GroupController extends Controller
     {
         $validated = $request->validated();
 
+        $validated['parent_id'] = $validated['parent_id'] === null ? null : Group::where('uuid', $validated['parent_id'])->firstOrFail()->id;
+
         $group = Group::create($validated);
 
         return redirect()->route('groups.show', $group)->with('success', 'Initiative erfolgreich erstellt.');
@@ -142,7 +144,7 @@ class GroupController extends Controller
 
     public function update(UpdateGroupRequest $request, Group $group)
     {
-        $validated = $request->safe()->except(['logo']);
+        $validated = $request->safe()->except(['logo', 'remove_logo']);
 
         if ($request->hasFile('logo')) {
             if ($group->logo_path) {

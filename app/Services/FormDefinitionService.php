@@ -38,7 +38,7 @@ class FormDefinitionService
             $formField = FormField::where('uuid', $field->id)->first();
 
             if ($formField === null) {
-                $formField = $formDefinition->fields()->insert($data);
+                $formField = $formDefinition->fields()->create($data);
             } else {
                 $formField->update($data);
             }

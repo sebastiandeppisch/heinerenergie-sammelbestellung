@@ -15,7 +15,22 @@ class GroupContext implements GroupContextContract
         private bool $isActingAsSystemAdmin,
         private ?User $user,
         private bool $isActingAsGroupAdmin = false
-    ) {}
+    ) {
+
+        if($this->currentGroup !== null){
+            $this->currentGroup->loadMissing('parent');
+            $this->currentGroup->loadMissing('children');
+            foreach ($this->currentGroup->children as $child) {
+                $child->loadMissing('parent');
+            }
+            $group = $this->currentGroup;
+            while($group->parent_id) {
+                $group = $group->parent;
+                $group->loadMissing('parent');
+            }
+        }
+
+    }
 
     private function assertUserMatches(User $user)
     {

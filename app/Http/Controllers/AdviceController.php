@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Data\AdviceData;
 use App\Data\AdviceEventData;
 use App\Data\DataProtectedAdviceData;
 use App\Data\GroupData;
@@ -76,6 +77,8 @@ class AdviceController extends Controller
             })
             ->map(fn (Group $group) => GroupData::fromModel($group))
             ->values();
+
+        $advice = DataProtectedAdviceData::fromModel($advice, Auth::user());
 
         return Inertia::render('Advice', [
             'advice' => $advice,

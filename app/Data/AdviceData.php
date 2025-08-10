@@ -30,8 +30,8 @@ class AdviceData extends Data
         public bool $helpType_technical,
         public bool $helpType_bureaucracy,
         public bool $helpType_other,
-        public HouseType $houseType,
-        public bool $landlordExists,
+        public ?HouseType $houseType,
+        public ?bool $landlordExists,
         public ?string $placeNotes,
         public array $shares_ids,
         public ?float $distance = null,
@@ -65,7 +65,7 @@ class AdviceData extends Data
             landlordExists: $advice->landlordExists,
             placeNotes: $advice->placeNotes,
             shares_ids: $advice->shares_ids,
-            distance: $user ? $adviceService->getDistance($advice, $user) : null,
+            distance: $user ? $adviceService->getDistance($advice, $user)?->getValue() : null,
             can_edit: $user ? $adviceService->canEdit($advice, $user) : false,
         );
     }
