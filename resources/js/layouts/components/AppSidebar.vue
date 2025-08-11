@@ -16,14 +16,20 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Beratungen - Tabelle',
-        href: '/advices',
-        icon: Table,
-    },
-    {
-        title: 'Beratungen - Karte',
-        href: '/advicesmap',
-        icon: Map,
+        title: 'Beratungen',
+        icon: User,
+        children: [
+            {
+                title: 'Tabelle',
+                href: '/advices',
+                icon: Table,
+            },
+            {
+                title: 'Karte',
+                href: '/advicesmap',
+                icon: Map,
+            }
+        ]
     },
     {
         title: 'Initiativen',
@@ -51,14 +57,20 @@ const mainNavItems: NavItem[] = [
         icon: MessageSquare,
     },
     {
-        title: 'Kartenpunkte - Tabelle',
-        href: '/mappoints',
-        icon: Table,
-    },
-    {
-        title: 'Kartenpunkte - Karte',
-        href: '/mappoints-map',
+        title: 'Kartenpunkte',
         icon: Map,
+        children: [
+            {
+                title: 'Tabelle',
+                href: '/mappoints',
+                icon: Table,
+            },
+            {
+                title: 'Karte',
+                href: '/mappoints-map',
+                icon: Map,
+            }
+        ]
     },
 ];
 
