@@ -51,7 +51,7 @@ helpType_place: string | null;
 helpType_technical: string | null;
 helpType_bureaucracy: string | null;
 helpType_other: string | null;
-result: App.Enums.AdviceStatusResult | null;
+result: App.Enums.AdviceStatusResult;
 can_edit: boolean | null;
 group_id: string | null;
 };

@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Data\AdviceData;
 use App\Data\AdviceEventData;
 use App\Data\DataProtectedAdviceData;
 use App\Data\GroupData;
 use App\Data\GroupMapData;
+use App\Data\UserData;
 use App\Events\Advice\CommentAddedEvent;
 use App\Events\Advice\InitiativeTransferEvent;
 use App\Http\Requests\StoreAdviceCommentRequest;
@@ -141,7 +141,7 @@ class AdviceController extends Controller
 
         return Inertia::render('AdvicesMap', [
             'advices' => $advices,
-            'advisors' => User::all(),
+            'advisors' => User::all()->map(fn ($user) => UserData::fromModel($user, false)), // TODO filter
             'groups' => $groups,
         ]);
     }

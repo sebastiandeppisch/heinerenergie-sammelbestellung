@@ -34,7 +34,7 @@ const userId = user.id;
 const emit = defineEmits(["selectAdviceId"])
 
 const props = defineProps<{
-  advices: App.Models.Advice[];
+  advices: App.Data.DataProtectedAdviceData[];
   advisors: App.Data.UserData[];
   groups: App.Data.GroupMapData[];
 }>();
@@ -64,7 +64,7 @@ if (hash !== '') {
 
 
 
-function advisorName(advisorId: string){
+function advisorName(advisorId: string | null){
   const advisor = advisors.find((advisor) => advisor.id === advisorId);
   if(advisor === undefined){
     return '';
@@ -72,7 +72,7 @@ function advisorName(advisorId: string){
   return advisor.name;
 }
 
-function openAdvice(advice: App.Models.Advice){
+function openAdvice(advice: App.Data.DataProtectedAdviceData){
   router.get('/advices/' + advice.id);
 }
 
@@ -81,13 +81,13 @@ function ownId(){
   return user.id;
 }
 
-function addAdvice(advice: App.Models.Advice) {
+function addAdvice(advice: App.Data.DataProtectedAdviceData) {
   axios.post('api/advices/' + advice.id + '/assign').then(response => response.data).then((advice) => {
     router.visit('/advicesmap' + '#' + map.zoom + '/' + map.center.lat + '/' + map.center.lng);
   });
 }
 
-function userCanOpen(advice: App.Models.Advice){
+function userCanOpen(advice: App.Data.DataProtectedAdviceData){
   if(isAdmin){
     return true;
   }
@@ -148,7 +148,6 @@ function runSearch(){
   <div ref="outer">
   <div :style="{height: reactiveHeight.height+170 + 'px', width: '100%'}">
     <LMap
-      ref="map"
       :zoom="map.zoom"
       @update:zoom="zoomChanged"
       :center="[map.center.lat, map.center.lng]"
@@ -238,11 +237,11 @@ function runSearch(){
       <LLayerGroup
         name="Beratungen"
         layer-type="overlay"
-      >
+        >
         <LMarker
-          v-for="advice in advices.filter(advice => advice.result < 2).filter(advice => advice.lat !== null && advice.long !== null)"
+          v-for="advice in advices.filter(advice => advice.result < 2).filter(advice => advice.lat !== null && advice.lng !== null)"
           :key="advice.id"
-          :lat-lng="latLng(advice.lat ?? 0, advice.long ?? 0)"
+          :lat-lng="latLng(advice.lat ?? 0, advice.lng ?? 0)"
         >
           <LIcon v-if="     advice.advisor_id === null &&    advice.type === AdviceTypes.Home"    icon-url="/images/markers/house_magenta.svg" :icon-size="[50, 50]" />
           <LIcon v-else-if="advice.advisor_id === null &&    advice.type === AdviceTypes.Virtual" icon-url="/images/markers/phone_magenta.svg" :icon-size="[50, 50]" />
@@ -255,7 +254,7 @@ function runSearch(){
               <b>{{ advice.firstName }} {{ advice.lastName }}<br />
               {{ advice.street }} {{ advice.streetNumber}}<br />
               </b>
-              <div v-if="advice.advisor_id !== null">Berater*in: {{ advisorName(advice.advisor_id )}}</div>
+              <div v-if="advice.advisor_id !== null">Berater*in: {{ advisorName(advice.advisor_id)}}</div>
               <div v-if="advice.shares_ids.length > 0">Geteilt mit: {{ advice.shares_ids.map(advisorName).join(', ') }}</div>
               <DxButton
                 v-if="advice.advisor_id === null"
@@ -282,9 +281,9 @@ function runSearch(){
           :visible="false"
         >
         <LMarker
-          v-for="advice in advices.filter(advice => advice.result >= 2).filter(advice => advice.lat !== null && advice.long !== null)"
+          v-for="advice in advices.filter(advice => advice.result >= 2).filter(advice => advice.lat !== null && advice.lng !== null)"
           :key="advice.id"
-          :lat-lng="latLng(advice.lat?? 0, advice.long ?? 0)"
+          :lat-lng="latLng(advice.lat?? 0, advice.lng ?? 0)"
         >
           <LIcon v-if="     advice.result === 2" icon-url="/images/markers/gray_green.svg" :icon-size="[50, 50]" />
           <LIcon v-else-if="advice.result === 3" icon-url="/images/markers/gray_red.svg" :icon-size="[50, 50]" />
@@ -308,7 +307,8 @@ function runSearch(){
       </LLayerGroup>
       <LLayerGroup
         name="Berater*innen"
-        layer-type="overlay">
+        layer-type="overlay"
+        >
         <LMarker
           v-for="advisor in advisors.filter(advice => advice.lat !== null && advice.long !== null)"
           :key="advisor.id"

@@ -8,11 +8,10 @@ import AdviceOrderActions from '../components/AdviceOrderActions.vue';
 import AdviceTimeline from '../components/AdviceTimeline.vue';
 import AdviceDetails from '../components/AdviceDetails.vue';
 
-type Advice = App.Models.Advice;
 type AdviceEvent = App.Data.AdviceEventData;
 
 const props = defineProps<{
-  advice: Advice;
+  advice: App.Data.DataProtectedAdviceData;
   events: AdviceEvent[];
   transferableGroups: App.Data.GroupData[];
 }>();
