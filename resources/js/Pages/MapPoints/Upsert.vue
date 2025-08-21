@@ -19,13 +19,29 @@ import PinLocationMap from '@/components/PinLocationMap.vue';
 import { ArrowLeft } from 'lucide-vue-next';
 
 const props = defineProps<{
-  mapPoint: App.Data.MapPointData;
+  mapPoint?: App.Data.MapPointData;
 }>();
 
-const form = useForm<App.Data.MapPointData>(props.mapPoint);
+const isEditing = !!props.mapPoint;
+
+const defaultMapPoint: App.Data.MapPointData = {
+  id: '',
+  title: '',
+  description: '',
+  coordinate: { lat: 0, lng: 0 },
+  published: false,
+  userReadablePointableType: '',
+  created_at: null
+};
+
+const form = useForm<App.Data.MapPointData>(props.mapPoint || defaultMapPoint);
 
 function submit() {
-  form.put(route('mappoints.update', props.mapPoint.id));
+  if (isEditing) {
+    form.put(route('mappoints.update', props.mapPoint!.id));
+  } else {
+    form.post(route('mappoints.store'));
+  }
 }
 
 
@@ -49,7 +65,7 @@ function submit() {
 
     <Card class="max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>Kartenpunkt bearbeiten</CardTitle>
+        <CardTitle>{{ isEditing ? 'Kartenpunkt bearbeiten' : 'Neuen Kartenpunkt erstellen' }}</CardTitle>
       </CardHeader>
       <form @submit.prevent="submit">
         <CardContent class="space-y-4">
@@ -66,9 +82,9 @@ function submit() {
           </div>
 
            <div class="space-y-2">
-            <Label for="description">Ort</Label>
+            <Label for="coordinate">Ort</Label>
             <PinLocationMap v-model="form.coordinate"/>
-            <p v-if="form.errors.description" class="text-red-500 text-sm">{{ form.errors.coordinate }}</p>
+            <p v-if="form.errors.coordinate" class="text-red-500 text-sm">{{ form.errors.coordinate }}</p>
           </div>
 
           <div class="flex items-center space-x-2">
@@ -77,9 +93,9 @@ function submit() {
             <p v-if="form.errors.published" class="text-red-500 text-sm">{{ form.errors.published }}</p>
           </div>
 
-          <div>
+          <div v-if="isEditing">
             <p class="text-sm text-gray-500">
-              Typ: {{ props.mapPoint.userReadablePointableType }}
+              Typ: {{ props.mapPoint!.userReadablePointableType }}
             </p>
           </div>
         </CardContent>
@@ -90,7 +106,7 @@ function submit() {
             type="submit"
             :disabled="form.processing"
           >
-            Update Map Point
+            {{ isEditing ? 'Kartenpunkt aktualisieren' : 'Kartenpunkt erstellen' }}
           </Button>
         </CardFooter>
       </form>

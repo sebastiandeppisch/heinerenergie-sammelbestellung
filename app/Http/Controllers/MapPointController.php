@@ -46,7 +46,7 @@ class MapPointController extends Controller
 
     public function edit(MapPoint $mappoint)
     {
-        return Inertia::render('MapPoints/Edit', [
+        return Inertia::render('MapPoints/Upsert', [
             'mapPoint' => MapPointData::fromModel($mappoint)
         ]);
     }
@@ -62,6 +62,18 @@ class MapPointController extends Controller
 
         $mappoint->delete();
         return redirect()->back()->with('info', 'Der Kartenpunkt '.e($name).' wurde gelöscht');
+    }
+
+    public function create()
+    {
+        return Inertia::render('MapPoints/Upsert');
+    }
+
+    public function store(UpsertMapPointRequest $request)
+    {
+        $mapPoint = MapPoint::create($request->validated());
+
+        return redirect()->route('mappoints.edit', $mapPoint)->with('success', 'Der Kartenpunkt wurde erstellt');
     }
 
 
