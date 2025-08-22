@@ -34,19 +34,17 @@ class AdviceService
         return $user->can('view', $advice);
     }
 
-
     /**
-     *
-     * @param Advice $advice
-     * @param Collection<UserId|User> $newAdvisors
-     * @return void
+     * @param  Collection<UserId|User>  $newAdvisors
      */
-    public function syncShares(Advice $advice, Collection $newAdvisors, ?User $user): void{
+    public function syncShares(Advice $advice, Collection $newAdvisors, ?User $user): void
+    {
 
-        $newAdvisors = $newAdvisors->map(function (mixed $user): User{
-            if(! $user instanceof User){
+        $newAdvisors = $newAdvisors->map(function (mixed $user): User {
+            if (! $user instanceof User) {
                 return User::findOrFail($user);
             }
+
             return $user;
         });
 

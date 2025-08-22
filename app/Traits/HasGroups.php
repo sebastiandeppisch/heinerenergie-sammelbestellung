@@ -35,6 +35,7 @@ trait HasGroups
     public function isGlobalAdmin(): bool
     {
         $user = User::findOrFail($this->id);
+
         return $user->is_admin === true;
     }
 

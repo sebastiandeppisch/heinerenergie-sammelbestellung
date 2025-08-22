@@ -10,7 +10,8 @@ trait HasPoints
     /**
      * @return MorphMany<MapPoint>
      */
-    public function points(): MorphMany{
+    public function points(): MorphMany
+    {
         return $this->morphMany(MapPoint::class, 'pointable');
     }
 }

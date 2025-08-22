@@ -3,9 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\FormDefinition;
-use App\Models\FormDefinitionToAdvice;
 use App\Models\Group;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class CreateAdviceForm extends Seeder
@@ -16,11 +14,10 @@ class CreateAdviceForm extends Seeder
     public function run(): void
     {
         $group = Group::firstOrFail();
-        $formDefinition = new FormDefinition();
+        $formDefinition = new FormDefinition;
         $formDefinition->name = 'Beratungsformular für '.$group->name;
         $formDefinition->group()->associate($group);
         $formDefinition->save();
-
 
         $formToAdvice = $formDefinition->adviceCreator()->make();
 
@@ -45,7 +42,7 @@ class CreateAdviceForm extends Seeder
         $formToAdvice->addressField()->associate($formDefinition->fields()->create([
             'type' => 'address',
             'label' => 'Adresse',
-            'required' => true
+            'required' => true,
         ]));
 
         $formToAdvice->emailField()->associate($formDefinition->fields()->create([
@@ -65,8 +62,6 @@ class CreateAdviceForm extends Seeder
         ]));
 
         $formToAdvice->default_group_id = $formDefinition->group_id;
-
-
 
         $formToAdvice->save();
     }

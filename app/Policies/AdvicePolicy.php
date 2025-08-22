@@ -27,7 +27,7 @@ class AdvicePolicy
                 return true;
             }
 
-            $shared = Cache::remember("advice.sharings.{$advice->id}.{$user->id}", $this->cacheSeconds, fn() => $advice->shares()->where('advisor_id', $user->id)->exists());
+            $shared = Cache::remember("advice.sharings.{$advice->id}.{$user->id}", $this->cacheSeconds, fn () => $advice->shares()->where('advisor_id', $user->id)->exists());
             if ($shared) {
                 return true;
             }

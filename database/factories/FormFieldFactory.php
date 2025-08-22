@@ -5,7 +5,6 @@ namespace Database\Factories;
 use App\Enums\FieldType;
 use App\Models\FormDefinition;
 use App\Models\FormField;
-use Closure;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class FormFieldFactory extends Factory
@@ -24,7 +23,7 @@ class FormFieldFactory extends Factory
             FieldType::RADIO->value,
             FieldType::CHECKBOX->value,
             FieldType::DATE->value,
-            FieldType::FILE->value
+            FieldType::FILE->value,
         ];
 
         $type = $this->faker->randomElement($fieldTypes);
@@ -61,7 +60,7 @@ class FormFieldFactory extends Factory
                 for ($i = 0; $i < $count; $i++) {
                     $formField->options()->create([
                         'label' => ucfirst($this->faker->word),
-                        'value' => strtolower($this->faker->unique()->word) . '_' . $this->faker->numberBetween(1, 100),
+                        'value' => strtolower($this->faker->unique()->word).'_'.$this->faker->numberBetween(1, 100),
                         'sort_order' => $i,
                         'is_default' => $i === $defaultOptionIndex && $this->faker->boolean(70),
                     ]);

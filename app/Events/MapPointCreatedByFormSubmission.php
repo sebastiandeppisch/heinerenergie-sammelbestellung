@@ -2,8 +2,8 @@
 
 namespace App\Events;
 
-use App\Models\MapPoint;
 use App\Models\FormSubmission;
+use App\Models\MapPoint;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 

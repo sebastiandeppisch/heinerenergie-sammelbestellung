@@ -7,7 +7,6 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 class CheckboxRequiredValidator implements ValidationRule
 {
-
     public function __construct(
         /**
          * The field options that are required.
@@ -15,8 +14,7 @@ class CheckboxRequiredValidator implements ValidationRule
          * @var array<string, string>
          */
         protected array $requiredOptions = []
-    ) {
-    }
+    ) {}
 
     private function values(): array
     {
@@ -34,12 +32,12 @@ class CheckboxRequiredValidator implements ValidationRule
             $missing = array_diff($this->values(), $value);
 
             $missingNames = collect($this->requiredOptions)
-                ->filter(fn($option, $key) => in_array($key, $missing))
+                ->filter(fn ($option, $key) => in_array($key, $missing))
                 ->values()
                 ->toArray();
 
-            if (!empty($missing)) {
-                $fail('Es müssen die folgenden Optionen ausgewählt werden: ' . implode(', ', $missingNames));
+            if (! empty($missing)) {
+                $fail('Es müssen die folgenden Optionen ausgewählt werden: '.implode(', ', $missingNames));
             }
         } else {
             $fail('Der Wert muss ein Array sein.');

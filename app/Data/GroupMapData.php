@@ -22,7 +22,7 @@ class GroupMapData extends Data
     public static function fromModel(Group $group): self
     {
 
-        if($group->consulting_area === null){
+        if ($group->consulting_area === null) {
             throw new InvalidArgumentException('Can only create map data from group with consulting area');
         }
 

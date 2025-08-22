@@ -2,17 +2,17 @@
 
 use App\Http\Controllers\AdviceController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\DevLoginController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\FormDefinitionController;
+use App\Http\Controllers\FormSubmissionController;
 use App\Http\Controllers\FormSubmitController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\MapPointController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\UserController;
-use Illuminate\Support\Facades\Route;
-use \App\Http\Controllers\FormDefinitionController;
-use App\Http\Controllers\FormSubmissionController;
-use App\Http\Controllers\MapPointController;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,7 +38,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/advices', [AdviceController::class, 'index'])->name('advices');
     Route::get('/advices/{advice}', [AdviceController::class, 'show'])->name('advices.show');
     Route::get('/advicesmap', [AdviceController::class, 'map'])->name('advices.map');
-    Route::get('/backend', fn() => redirect()->route('dashboard'))->middleware('auth')->name('backend');
+    Route::get('/backend', fn () => redirect()->route('dashboard'))->middleware('auth')->name('backend');
 
     Route::resource('groups', GroupController::class);
 
@@ -65,7 +65,6 @@ Route::middleware('auth')->group(function () {
     Route::post('form-submissions/{formSubmission}/mark-unseen', [FormSubmissionController::class, 'markUnseen'])
         ->name('form-submissions.mark-unseen');
 
-
     Route::get('mappoints-map', [MapPointController::class, 'map'])->name('map-points-map');
 
     Route::resource('mappoints', MapPointController::class);
@@ -91,7 +90,6 @@ Route::get('/forms/{formDefinition}', [FormSubmitController::class, 'show'])
     ->name('form.show');
 Route::post('/forms/{formDefinition}', [FormSubmitController::class, 'submit'])
     ->name('form.submit')->middleware([HandlePrecognitiveRequests::class]);
-
 
 Route::get('/map', [MapPointController::class, 'publicMap'])
     ->name('map.public');

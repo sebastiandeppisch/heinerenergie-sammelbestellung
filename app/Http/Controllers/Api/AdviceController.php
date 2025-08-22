@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Events\Advice\AdviceSharedAdvisorAdded;
-use App\Events\Advice\AdviceSharedAdvisorRemoved;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAdviceRequest;
 use App\Http\Requests\UpdateAdviceRequest;
@@ -12,7 +10,6 @@ use App\Models\User;
 use App\Services\AdviceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
 
 class AdviceController extends Controller
 {
@@ -56,7 +53,7 @@ class AdviceController extends Controller
 
         $validated = $request->validate([
             'advisor' => 'array',
-            'advisor.*' => 'exists:users,id'
+            'advisor.*' => 'exists:users,id',
         ]);
 
         app(AdviceService::class)->syncShares($advice, $validated->advisors, $request->user());

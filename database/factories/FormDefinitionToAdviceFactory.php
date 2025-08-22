@@ -73,8 +73,9 @@ class FormDefinitionToAdviceFactory extends Factory
         ];
     }
 
-    public function withAdvice() {
-        return $this->afterCreating(function (FormDefinitionToAdvice $creator){
+    public function withAdvice()
+    {
+        return $this->afterCreating(function (FormDefinitionToAdvice $creator) {
             $submission = $creator->formDefinition->createSubmission();
 
             $creator->addressField->createSubmissionField($submission, new Address(

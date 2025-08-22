@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('advice_events', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
-            
+
             $table->foreignIdFor(Advice::class)->constrained();
             $table->foreignIdFor(User::class)->nullable()->constrained();
             $table->longText('event');

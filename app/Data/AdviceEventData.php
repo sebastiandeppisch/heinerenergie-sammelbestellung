@@ -47,7 +47,7 @@ class AdviceEventData extends Data
     public static function fromMail(Send $mail): self
     {
         return new self(
-            id: $mail->uuid ?? Str::uuid()->toString(), //TODO the uuid from a mail is missing sometimes
+            id: $mail->uuid ?? Str::uuid()->toString(), // TODO the uuid from a mail is missing sometimes
             description: 'E-Mail versendet: '.$mail->subject,
             created_at: $mail->sent_at?->format('Y-m-d H:i:s') ?? $mail->created_at->format('Y-m-d H:i:s'),
             user_name: null,

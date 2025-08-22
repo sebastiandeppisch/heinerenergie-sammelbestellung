@@ -11,5 +11,4 @@ interface Pointable
      * @return MorphMany<MapPoint>
      */
     public function points(): MorphMany;
-
 }

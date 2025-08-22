@@ -52,7 +52,6 @@ test('submitting the form fires map point created event', function () {
             'lng' => 8.6510,
         ],
     ]);
-    
 
     Event::assertDispatched(\App\Events\MapPointCreatedByFormSubmission::class);
 });

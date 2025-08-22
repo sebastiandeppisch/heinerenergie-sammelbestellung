@@ -12,7 +12,7 @@ class UpsertMapPointRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        //TODO
+        // TODO
         return true;
     }
 
@@ -27,7 +27,7 @@ class UpsertMapPointRequest extends FormRequest
             'title' => 'required',
             'description' => 'nullable',
             'coordinate' => new GeographicCoordinate,
-            'published' => 'boolean'
+            'published' => 'boolean',
         ];
     }
 }

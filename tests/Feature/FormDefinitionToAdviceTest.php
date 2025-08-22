@@ -37,8 +37,7 @@ test('submitting the form produces an advice', function () {
     $this->assertEquals(1, Advice::count());
 });
 
-
-test('form can be created with seeder', function(){
+test('form can be created with seeder', function () {
     $this->artisan('db:seed --class=CreateAdviceForm');
     $this->assertTrue(true);
 });

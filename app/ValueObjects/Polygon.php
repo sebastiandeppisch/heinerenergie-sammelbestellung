@@ -67,7 +67,7 @@ class Polygon implements Castable, JsonSerializable
         $zeroCoordinate = new Coordinate(0, 0);
 
         // this is not the actual center, but its good enough for now
-        $center = collect($this->coordinates)->reduce(fn(Coordinate $carry, Coordinate $item): Coordinate => new Coordinate(
+        $center = collect($this->coordinates)->reduce(fn (Coordinate $carry, Coordinate $item): Coordinate => new Coordinate(
             lat: $carry->lat + $item->lat,
             lng: $carry->lng + $item->lng,
         ), $zeroCoordinate);

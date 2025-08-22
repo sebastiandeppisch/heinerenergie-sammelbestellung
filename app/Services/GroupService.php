@@ -17,7 +17,7 @@ class GroupService
     {
         return Group::whereNotNull('consulting_area')
             ->get()
-            ->filter(fn($group) => $group->consulting_area->containsPoint($coordinate))
+            ->filter(fn ($group) => $group->consulting_area->containsPoint($coordinate))
             ->first();
     }
 

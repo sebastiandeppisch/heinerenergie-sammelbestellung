@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\FormDefinition;
 use App\Models\Group;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class CreateMapPointForm extends Seeder
@@ -15,7 +14,7 @@ class CreateMapPointForm extends Seeder
     public function run(): void
     {
         $group = Group::firstOrFail();
-        $formDefinition = new FormDefinition();
+        $formDefinition = new FormDefinition;
         $formDefinition->name = 'Kartenpunktformular für '.$group->name;
         $formDefinition->group()->associate($group);
         $formDefinition->save();
@@ -43,7 +42,7 @@ class CreateMapPointForm extends Seeder
         $formToMapPoint->coordinateField()->associate($formDefinition->fields()->create([
             'type' => 'geo_coordinate',
             'label' => 'Koordinaten',
-            'required' => true
+            'required' => true,
         ]));
 
         $formToMapPoint->save();

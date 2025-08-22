@@ -10,12 +10,12 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->renameColumn('long', 'lng');
-            //$table->renameColumn('lat', 'lat');
+            // $table->renameColumn('lat', 'lat');
         });
 
         Schema::table('advices', function (Blueprint $table) {
             $table->renameColumn('long', 'lng');
-            //$table->renameColumn('lat', 'lat');
+            // $table->renameColumn('lat', 'lat');
         });
     }
 
@@ -23,12 +23,12 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->renameColumn('lng', 'long');
-            //$table->renameColumn('lat', 'lat');
+            // $table->renameColumn('lat', 'lat');
         });
 
         Schema::table('advices', function (Blueprint $table) {
             $table->renameColumn('lng', 'long');
-            //$table->renameColumn('lat', 'lat');
+            // $table->renameColumn('lat', 'lat');
         });
     }
 };

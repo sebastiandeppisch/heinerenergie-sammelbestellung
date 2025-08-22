@@ -12,6 +12,7 @@ class IndexFormSubmissionRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
+
         return false;
     }
 
@@ -56,6 +57,4 @@ class IndexFormSubmissionRequest extends FormRequest
     {
         return $this->input('dateTo', null);
     }
-
-
 }

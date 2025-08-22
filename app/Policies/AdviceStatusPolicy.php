@@ -42,7 +42,7 @@ class AdviceStatusPolicy
     }
 
     public function view(User $user, AdviceStatus $status)
-{
+    {
         $status->loadMissing('ownerGroup');
 
         $group = $status->ownerGroup;

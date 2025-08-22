@@ -16,7 +16,7 @@ class SubmissionFieldData extends Data
         public null|int|float|string|array $value,
         public FormFieldData $field,
 
-    ){}
+    ) {}
 
     public static function fromModel(SubmissionField $model): self
     {

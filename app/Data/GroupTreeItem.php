@@ -2,7 +2,6 @@
 
 namespace App\Data;
 
-use App\Models\Group;
 use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
@@ -16,6 +15,5 @@ class GroupTreeItem extends Data
         public bool $expanded,
         public ?string $parent_id,
         public ?string $logo_path
-    ) {
-    }
+    ) {}
 }

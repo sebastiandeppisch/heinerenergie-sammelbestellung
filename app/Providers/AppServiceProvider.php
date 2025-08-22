@@ -64,7 +64,7 @@ class AppServiceProvider extends ServiceProvider
             });
         }
 
-        $this->app->singleton(fn(): \App\Services\CurrentGroupService => new CurrentGroupService);
+        $this->app->singleton(fn (): \App\Services\CurrentGroupService => new CurrentGroupService);
 
         Model::shouldBeStrict(! $this->app->isProduction());
     }

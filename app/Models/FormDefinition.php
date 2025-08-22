@@ -72,12 +72,12 @@ class FormDefinition extends Model
     {
         $this->loadMissing(['fields', 'fields.options']);
 
-        return $this->fields->mapWithKeys(fn(FormField $field) => [$field->uuid => $field->getValidationRules()])->toArray();
+        return $this->fields->mapWithKeys(fn (FormField $field) => [$field->uuid => $field->getValidationRules()])->toArray();
     }
 
     public function getValidationAttributes(): array
     {
-        return $this->fields->mapWithKeys(fn(FormField $field) => [$field->id => $field->label])->toArray();
+        return $this->fields->mapWithKeys(fn (FormField $field) => [$field->id => $field->label])->toArray();
     }
 
     public function createSubmission(): FormSubmission

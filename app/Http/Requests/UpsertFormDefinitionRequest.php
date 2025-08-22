@@ -4,7 +4,6 @@ namespace App\Http\Requests;
 
 use App\Enums\FieldType;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class UpsertFormDefinitionRequest extends FormRequest
@@ -14,7 +13,7 @@ class UpsertFormDefinitionRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        //TODO
+        // TODO
         return true;
     }
 
@@ -49,7 +48,7 @@ class UpsertFormDefinitionRequest extends FormRequest
             'fields.*.options.*.label' => 'required|string|max:255',
             'fields.*.options.*.value' => 'required|string|max:255',
             'fields.*.options.*.is_default' => 'required|boolean',
-            'fields.*.options.*.is_required' => 'required|boolean'
+            'fields.*.options.*.is_required' => 'required|boolean',
         ];
     }
 
@@ -90,5 +89,4 @@ class UpsertFormDefinitionRequest extends FormRequest
             'fields.*.options.required_if' => 'Für Auswahlfelder müssen Optionen angegeben werden.',
         ];
     }
-
 }

@@ -17,14 +17,14 @@ class GroupContext implements GroupContextContract
         private bool $isActingAsGroupAdmin = false
     ) {
 
-        if($this->currentGroup !== null){
+        if ($this->currentGroup !== null) {
             $this->currentGroup->loadMissing('parent');
             $this->currentGroup->loadMissing('children');
             foreach ($this->currentGroup->children as $child) {
                 $child->loadMissing('parent');
             }
             $group = $this->currentGroup;
-            while($group->parent_id) {
+            while ($group->parent_id) {
                 $group = $group->parent;
                 $group->loadMissing('parent');
             }

@@ -44,7 +44,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
 
-        if($request->has(('withoutself'))){
+        if ($request->has(('withoutself'))) {
             $query = User::query()->where('id', '!=', $this->user()->id);
         } else {
             $query = User::query();

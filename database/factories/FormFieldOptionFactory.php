@@ -17,10 +17,10 @@ class FormFieldOptionFactory extends Factory
 
         return [
             'form_field_id' => FormField::factory(),
-            'label' => 'Option ' . $optionCount,
-            'value' => 'option_' . $optionCount,
+            'label' => 'Option '.$optionCount,
+            'value' => 'option_'.$optionCount,
             'sort_order' => $this->faker->numberBetween(0, 10),
-            'is_default' => $this->faker->boolean(20)
+            'is_default' => $this->faker->boolean(20),
         ];
     }
 }
