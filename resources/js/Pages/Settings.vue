@@ -5,7 +5,7 @@ import LaravelDataSource from '../LaravelDataSource';
 
 import Setting from './../components/Setting.vue';
 
-let dataSource = new LaravelDataSource('api/settings');
+const dataSource = new LaravelDataSource('api/settings');
 </script>
 
 <template>

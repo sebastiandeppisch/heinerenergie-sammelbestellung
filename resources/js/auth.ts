@@ -48,7 +48,7 @@ export default {
                 if (error.response && error.response.status === 422) {
                     for (const prop in error.response.data.errors) {
                         if (prop === 'email') {
-                            const validationErrors = error.response.data.errors[prop] as Array<String>;
+                            const validationErrors = error.response.data.errors[prop] as Array<string>;
                             message = validationErrors.join(',');
                         }
                     }
@@ -78,7 +78,7 @@ export default {
                 let message = '';
                 if (error.response && error.response.status === 422) {
                     for (const prop in error.response.data.errors) {
-                        const validationErrors = error.response.data.errors[prop] as Array<String>;
+                        const validationErrors = error.response.data.errors[prop] as Array<string>;
                         message += validationErrors.join(',');
                     }
                 } else {

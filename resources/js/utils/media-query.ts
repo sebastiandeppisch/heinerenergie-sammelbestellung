@@ -5,7 +5,7 @@ const Breakpoints = {
     Large: '(min-width: 1280px)',
 };
 
-let handlers: any[] = [];
+const handlers: any[] = [];
 const xSmallMedia = window.matchMedia(Breakpoints.XSmall);
 const smallMedia = window.matchMedia(Breakpoints.Small);
 const mediumMedia = window.matchMedia(Breakpoints.Medium);

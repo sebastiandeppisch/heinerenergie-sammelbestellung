@@ -20,4 +20,4 @@ export const user = computed(() => {
     return user as App.Data.UserData;
 });
 export const email = computed(() => user.value?.email);
-export const isAdmin = computed(() => user !== null && user.value?.is_acting_as_admin);
+export const isAdmin = computed(() => user.value !== null && user.value?.is_acting_as_admin);

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive } from '@vue/reactivity';
+import { reactive } from 'vue';
 import { DxButton } from 'devextreme-vue/button';
 import { DxHtmlEditor, DxMediaResizing, DxToolbar } from 'devextreme-vue/html-editor';
 import DxNumberBox from 'devextreme-vue/number-box';

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AdvisorMap from '@/views/AdvisorMap.vue';
 import ProfilePictureUpload from '@/views/ProfilePictureUpload.vue';
-import { ref } from '@vue/reactivity';
+import { ref } from 'vue';
 import axios from 'axios';
 import { DxButton, DxNumberBox } from 'devextreme-vue';
 import DxTextBox from 'devextreme-vue/text-box';

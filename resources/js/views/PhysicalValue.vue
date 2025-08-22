@@ -10,11 +10,11 @@ const formattedValue = computed(() => {
     if (p.value === null) {
         return '';
     }
-    let n = p.value ?? 0;
+    const n = p.value ?? 0;
 
     //n = n * Math.pow(10, this.exp);
 
-    var ranges = [
+    const ranges = [
         { divider: 1e18, suffix: 'P' },
         { divider: 1e15, suffix: 'E' },
         { divider: 1e12, suffix: 'T' },
@@ -22,7 +22,7 @@ const formattedValue = computed(() => {
         { divider: 1e6, suffix: 'M' },
         { divider: 1e3, suffix: 'k' },
     ];
-    for (var i = 0; i < ranges.length; i++) {
+    for (let i = 0; i < ranges.length; i++) {
         if (n >= ranges[i].divider) {
             return (n / ranges[i].divider).toPrecision(3).toString() + ' ' + ranges[i].suffix + p.unit;
         }

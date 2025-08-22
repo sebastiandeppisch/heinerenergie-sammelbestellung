@@ -9,7 +9,7 @@ export default class LaravelDataSource extends DataSource {
             store: new CustomStore({
                 key: 'id',
                 load: (options) => {
-                    var params = options;
+                    const params = options;
                     return axios
                         .get(url, {
                             params,
@@ -44,7 +44,7 @@ export default class LaravelDataSource extends DataSource {
     private formatError(error: AxiosError<LaravelValidationError>): void {
         if (error.response && error.response.status === 422) {
             for (const prop in error.response.data.errors) {
-                const validationErrors = error.response.data.errors[prop] as Array<String>;
+                const validationErrors = error.response.data.errors[prop] as Array<string>;
                 throw validationErrors.join(',');
             }
         }

@@ -1,4 +1,4 @@
-import { reactive } from '@vue/reactivity';
+import { reactive } from 'vue';
 import { AxiosError } from 'axios';
 import notify from 'devextreme/ui/notify';
 import moment from 'moment';
@@ -20,9 +20,9 @@ export interface LaravelValidationError {
 
 function notifyError(error: AxiosError<LaravelValidationError>): void {
     if (error.response && error.response.status === 422) {
-        let validationErrors: Array<String> = [];
+        let validationErrors: Array<string> = [];
         for (const prop in error.response.data.errors) {
-            validationErrors = validationErrors.concat(error.response.data.errors[prop] as Array<String>);
+            validationErrors = validationErrors.concat(error.response.data.errors[prop] as Array<string>);
         }
         notify(validationErrors.join(','), 'error');
     } else {
