@@ -103,7 +103,7 @@ class GroupController extends Controller
         $groupTreeItems = $groups->map(fn (GroupData $groupData): GroupTreeItem => new GroupTreeItem(
             id: $groupData->id,
             name: $groupData->name,
-            selected: $groupData->id === $group->id,
+            selected: $groupData->id === $group->uuid,
             expanded: $expandGroups->contains($groupData->id),
             parent_id: $groupData->parent_id,
             logo_path: $groupData->logo_path,
@@ -111,7 +111,7 @@ class GroupController extends Controller
         $groups = $groups->map(function (GroupData $groupData) use ($expandGroups, $group) {
             $groupData = $groupData->toArray();
             $groupData['isExpanded'] = $expandGroups->contains($groupData['id']);
-            $groupData['isSelected'] = $groupData['id'] === $group->id;
+            $groupData['isSelected'] = $groupData['id'] === $group->uuid;
 
             return $groupData;
         });

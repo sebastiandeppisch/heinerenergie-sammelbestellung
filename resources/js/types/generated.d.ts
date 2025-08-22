@@ -47,10 +47,10 @@ shares_ids: Array<any>;
 placeNotes: string | null;
 houseType: App.Enums.HouseType | null;
 landlordExists: boolean | null;
-helpType_place: string | null;
-helpType_technical: string | null;
-helpType_bureaucracy: string | null;
-helpType_other: string | null;
+helpType_place: boolean | null;
+helpType_technical: boolean | null;
+helpType_bureaucracy: boolean | null;
+helpType_other: boolean | null;
 result: App.Enums.AdviceStatusResult;
 can_edit: boolean | null;
 group_id: string | null;
@@ -170,7 +170,7 @@ is_admin: boolean;
 }
 declare namespace App.Data.Pages {
 export type GroupsIndexData = {
-groupTreeItems: any | Array<any>;
+groupTreeItems: Array<App.Data.GroupTreeItem>;
 groups: Array<App.Data.GroupData>;
 canCreateRootGroup: boolean;
 selectedGroup: App.Data.GroupData | null;
