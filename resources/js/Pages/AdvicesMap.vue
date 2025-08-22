@@ -313,11 +313,12 @@ function runSearch() {
                 </LLayerGroup>
 
                 <LLayerGroup name="Initiativen" layer-type="overlay">
+                    <!-- eslint-disable vue/no-use-v-if-with-v-for -->
                     <LPolygon
+                        v-if="props.groups && props.groups.length > 0"
                         v-for="(item, index) in props.groups"
                         :key="index"
                         :lat-lngs="item.polygon.coordinates"
-                        v-if="props.groups && props.groups.length > 0"
                     />
                     <LMarker
                         v-for="(item, index) in props.groups"
@@ -327,6 +328,7 @@ function runSearch() {
                     >
                         <LIcon :icon-url="item.logo_path" :icon-size="[50, 50]" v-if="item.logo_path !== null" />
                     </LMarker>
+                    <!-- eslint-enable -->
                 </LLayerGroup>
             </LMap>
         </div>

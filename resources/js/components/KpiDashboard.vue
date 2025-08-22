@@ -211,9 +211,9 @@ const filteredStatusData = computed(() => {
     const filtered = { statusCounts: {} };
 
     // Only include the selected status and 'Neu' for context
-    // @ts-ignore
+    // @ts-expect-error Element implicitly has an 'any' type because
     filtered.statusCounts['Neu'] = currentStatusData.value.statusCounts['Neu'];
-    // @ts-ignore
+    // @ts-expect-error Element implicitly has an 'any' type because
     filtered.statusCounts[filteredStatus] = currentStatusData.value.statusCounts[filteredStatus];
 
     return filtered;

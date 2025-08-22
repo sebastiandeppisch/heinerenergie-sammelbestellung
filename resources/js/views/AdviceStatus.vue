@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import DxDataGrid, { DxColumn, DxEditing, DxLookup } from 'devextreme-vue/data-grid';
 import LaravelDataSource from '../LaravelDataSource';
 

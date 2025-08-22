@@ -19,6 +19,9 @@ const form = useForm<App.Data.MapPointData>(props.mapPoint);
 function submit() {
     form.put(route('mappoints.update', props.mapPoint.id));
 }
+
+// @ts-expect-error Type instantiation is excessively deep and possibly infinite.
+const errors: Record<string, string> = form.errors as any;
 </script>
 
 <template>

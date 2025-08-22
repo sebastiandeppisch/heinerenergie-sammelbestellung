@@ -75,6 +75,7 @@ const addressText = computed(() => {
     } else if (advice.value.type === 2) {
         return 'Gib bitte Deine Adresse an, die wir an den Lieferanten weitergeben dürfen';
     }
+    return 'invalid type';
 });
 
 function adviceTypeChanged(e: any) {

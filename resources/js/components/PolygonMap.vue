@@ -147,11 +147,13 @@ const coordinatedOfDarmstadtCityCenter: PointExpression = [49.8728, 8.6512];
             <LIcon v-if="logo !== null" :icon-url="logo" :icon-size="logoSize" />
         </LMarker>
 
+        <!-- eslint-disable vue/no-use-v-if-with-v-for -->
         <LPolygon
             v-for="(item, index) in [polygonModel]"
             :key="index"
             :lat-lngs="item.coordinates"
             v-if="polygonModel && polygonModel.coordinates.length > 0"
         />
+        <!-- eslint-disable -->
     </LMap>
 </template>

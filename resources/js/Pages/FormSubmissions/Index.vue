@@ -4,14 +4,14 @@
 
         <Filter
             :form-definitions="formDefinitions"
-            v-model:selected-form-types="selectedFormDefinitions"
-            v-model:date-from="dateFrom"
-            v-model:date-to="dateTo"
-            v-model:sort-order="sortOrder"
-            v-model:group-by-form="groupByForm"
+            v-model:selected-form-types="selectedFormDefinitionsModel"
+            v-model:date-from="dateFromModel"
+            v-model:date-to="dateToModel"
+            v-model:sort-order="sortOrderModel"
+            v-model:group-by-form="groupByFormModel"
         />
 
-        <Grid :form-submissions="formSubmissions" :pagination="props.pagination" :group-by-form="groupByForm" />
+        <Grid :form-submissions="formSubmissions" :pagination="props.pagination" :group-by-form="groupByFormModel" />
     </div>
 </template>
 <script lang="ts" setup>
@@ -85,7 +85,6 @@ function filterQuery(query: any) {
 }
 
 function computedTriggerReload<T>(key: keyof typeof props): ComputedRef<T> {
-    // @ts-ignore
     return computed({
         get: () => props[key],
         set: (value: T) => {
@@ -101,10 +100,10 @@ function computedTriggerReload<T>(key: keyof typeof props): ComputedRef<T> {
     });
 }
 
-const dateFrom = computedTriggerReload<Date | null>('dateFrom');
+const dateFromModel = computedTriggerReload<Date | null>('dateFrom');
 
-const dateTo = computedTriggerReload<Date | null>('dateTo');
-const selectedFormDefinitions = computedTriggerReload<string[]>('selectedFormDefinitions');
-const sortOrder = computedTriggerReload<'asc' | 'desc'>('sortOrder');
-const groupByForm = computedTriggerReload<boolean>('groupByForm');
+const dateToModel = computedTriggerReload<Date | null>('dateTo');
+const selectedFormDefinitionsModel = computedTriggerReload<string[]>('selectedFormDefinitions');
+const sortOrderModel = computedTriggerReload<'asc' | 'desc'>('sortOrder');
+const groupByFormModel = computedTriggerReload<boolean>('groupByForm');
 </script>
