@@ -51,11 +51,11 @@ class AdviceStatusPolicy
             return true;
         }
 
-        if ($group->parentGroups === null) {
+        if ($group->parent_id === null) {
             return false;
         }
 
-        foreach ($group->parentGroups as $parentGroup) {
+        foreach ($group->ancestors() as $parentGroup) {
             if ($this->groupContext->isActingAsTransitiveMemberOrAdmin($user, $parentGroup)) {
                 return true;
             }

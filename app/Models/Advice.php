@@ -24,6 +24,10 @@ use Illuminate\Notifications\Notifiable;
 use Wnx\Sends\Contracts\HasSends;
 use Wnx\Sends\Support\HasSendsTrait;
 
+/**
+ * @property Coordinate $coordinate
+ * @property Address $address
+ */
 class Advice extends Model implements HasSends, Pointable
 {
     protected $table = 'advices';

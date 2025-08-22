@@ -38,7 +38,7 @@ class AdviceStatus extends Model
     }
 
     /**
-     * @return BelongsToMany<Group, $this, Pivot>
+     * @return BelongsToMany<Group, $this, AdviceStatusGroup>
      */
     public function usingGroups(): BelongsToMany
     {

@@ -35,7 +35,7 @@ class AdviceService
     }
 
     /**
-     * @param  Collection<UserId|User>  $newAdvisors
+     * @param  Collection<User>  $newAdvisors
      */
     public function syncShares(Advice $advice, Collection $newAdvisors, ?User $user): void
     {

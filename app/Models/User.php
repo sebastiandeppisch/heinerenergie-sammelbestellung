@@ -14,6 +14,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 /**
  * @property Coordinate|null $coordinate
+ * @property Address|null $address
  */
 class User extends Authenticatable
 {
@@ -70,7 +71,7 @@ class User extends Authenticatable
             return false;
         }
 
-        return $this->coordinate->distanceTo($advice->coordinate) <= $this->advice_radius;
+        return $this->coordinate->distanceTo($advice->coordinate)->getValue() <= $this->advice_radius;
     }
 
     /**

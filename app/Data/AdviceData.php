@@ -53,7 +53,7 @@ class AdviceData extends Data
             phone: $advice->phone,
             commentary: $advice->commentary,
             advisor_id: $advice->advisor?->uuid,
-            advice_status_id: $advice->advice_status?->uuid,
+            advice_status_id: $advice->status?->uuid,
             lng: $advice->lng,
             lat: $advice->lat,
             type: $advice->type,

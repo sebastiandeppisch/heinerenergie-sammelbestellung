@@ -21,9 +21,6 @@ class SettingController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  Setting  $setting
-     * @return Response
      */
     public function show(string $key)
     {

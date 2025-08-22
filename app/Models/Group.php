@@ -96,6 +96,8 @@ class Group extends Model
 
     /**
      * Get all ancestor groups
+     *
+     * @return Collection<Group>
      */
     public function ancestors(): Collection
     {
@@ -114,6 +116,8 @@ class Group extends Model
 
     /**
      * Get all descendant groups
+     *
+     * @return Collection<Group>
      */
     public function descendants(): Collection
     {
@@ -139,12 +143,13 @@ class Group extends Model
     }
 
     #[Override]
-    public function delete()
+    public function delete(): ?bool
     {
         if ($this->logo_path) {
             Storage::disk('public')->delete($this->logo_path);
         }
-        parent::delete();
+
+        return parent::delete();
     }
 
     protected function casts(): array

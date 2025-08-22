@@ -8,12 +8,12 @@ use InvalidArgumentException;
 use Throwable;
 
 /**
- * @implements CastsAttributs<ValueObjectsCoordinate>
+ * @implements CastsAttributes<ValueObjectsCoordinate, array<string, float>>
  */
 class Coordinate implements CastsAttributes
 {
     /**
-     * @return ValueObject|null
+     * @return ValueObjectsCoordinate|null
      */
     public function get($model, string $key, $value, array $attributes)
     {
