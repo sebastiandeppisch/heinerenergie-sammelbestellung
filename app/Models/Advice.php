@@ -17,9 +17,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
-use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Wnx\Sends\Contracts\HasSends;
@@ -160,7 +159,7 @@ class Advice extends Model implements HasSends, Pointable
             'email' => 'string',
             'phone' => 'string',
             'commentary' => 'string',
-            'advice_status_id' => 'id',
+            'advice_status_id' => 'int',
             'type' => AdviceType::class,
             'helpType_place' => 'boolean',
             'helpType_technical' => 'boolean',
