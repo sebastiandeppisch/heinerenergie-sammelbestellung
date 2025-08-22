@@ -26,7 +26,7 @@ class IndexFormSubmissionRequest extends FormRequest
     {
         return [
             'selectedFormDefinitions' => 'array',
-            'selectedFormDefinitinos.*' => 'string|exists:form_definitions,id',
+            'selectedFormDefinitions.*' => 'string|exists:form_definitions,id',
             'sortOrder' => 'string|in:asc,desc',
             'groupByForm' => 'string|in:true,false',
             'dateFrom' => 'nullable|date',

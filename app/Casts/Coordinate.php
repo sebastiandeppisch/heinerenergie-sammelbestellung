@@ -8,7 +8,7 @@ use InvalidArgumentException;
 use Throwable;
 
 /**
- * @implements CastsAttributes<ValueObjectsCoordinate, array<string, float>>
+ * @implements CastsAttributes<ValueObjectsCoordinate, array<string, float>|ValueObjectsCoordinate>
  */
 class Coordinate implements CastsAttributes
 {

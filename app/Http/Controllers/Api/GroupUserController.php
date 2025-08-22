@@ -24,7 +24,7 @@ class GroupUserController extends Controller
         }
 
         return new GroupUserData(
-            id: $user->id,
+            id: $user->uuid,
             name: $user->name,
             email: $user->email,
             // @phpstan-ignore-next-line

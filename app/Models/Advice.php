@@ -155,7 +155,7 @@ class Advice extends Model implements HasSends, Pointable
             'email' => 'string',
             'phone' => 'string',
             'commentary' => 'string',
-            'advice_status_id' => 'string',
+            'advice_status_id' => 'id',
             'type' => AdviceType::class,
             'helpType_place' => 'boolean',
             'helpType_technical' => 'boolean',

@@ -34,7 +34,7 @@ class FormFieldOptionData extends Data
     public static function fromSubmissionFieldOption(SubmissionFieldOption $model): self
     {
         return new self(
-            id: $model->form_field_option_id,
+            id: $model->uuid,
             label: $model->label,
             value: $model->value,
             sort_order: $model->sort_order,
