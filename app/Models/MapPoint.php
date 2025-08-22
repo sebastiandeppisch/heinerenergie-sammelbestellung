@@ -9,9 +9,11 @@ use Database\Factories\MapPointFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 
 /**
  * @property Coordinate $coordinate
+ * @property Carbon $created_at
  */
 class MapPoint extends Model
 {
@@ -36,7 +38,7 @@ class MapPoint extends Model
     ];
 
     /**
-     * @return MorphTo<Model&Pointable, $this>
+     * @return MorphTo<Pointable&Model, $this>
      */
     public function pointable(): MorphTo
     {

@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\Relations\MorphPivot;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
@@ -27,6 +28,10 @@ use Wnx\Sends\Support\HasSendsTrait;
 /**
  * @property ?Coordinate $coordinate
  * @property ?Address $address
+ * @property AdviceType $type
+ * @property HouseType|null $houseType
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon $updated_at
  */
 class Advice extends Model implements HasSends, Pointable
 {
@@ -90,7 +95,7 @@ class Advice extends Model implements HasSends, Pointable
     }
 
     /**
-     * @return MorphToMany<User, $this, Pivot>
+     * @return MorphToMany<User, $this, MorphPivot>
      */
     public function shares(): MorphToMany
     {
@@ -119,7 +124,7 @@ class Advice extends Model implements HasSends, Pointable
 
     public function getResultAttribute(): AdviceStatusResult
     {
-        return $this->status?->result ?? AdviceStatusResult::New;
+        return $this->status->result ?? AdviceStatusResult::New;
     }
 
     public function getNameAttribute(): string

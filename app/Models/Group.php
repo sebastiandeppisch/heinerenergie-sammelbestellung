@@ -173,7 +173,7 @@ class Group extends Model
     }
 
     /**
-     * @return BelongsToMany<AdviceStatus, $this, Pivot>
+     * @return BelongsToMany<AdviceStatus, $this, AdviceStatusGroup>
      */
     public function usableStatuses(): BelongsToMany
     {
