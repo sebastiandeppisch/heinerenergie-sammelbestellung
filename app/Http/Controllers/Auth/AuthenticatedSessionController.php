@@ -12,11 +12,6 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthenticatedSessionController extends Controller
 {
-    /**
-     * Handle an incoming authentication request.
-     *
-     * @return RedirectResponse
-     */
     public function store(LoginRequest $request)
     {
         $request->authenticate();

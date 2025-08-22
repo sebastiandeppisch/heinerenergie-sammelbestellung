@@ -11,7 +11,6 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
@@ -37,11 +36,6 @@ class UserController extends Controller
         return $builder;
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return Response
-     */
     public function index(Request $request)
     {
 
@@ -53,14 +47,10 @@ class UserController extends Controller
 
         $users = $this->dxFilter($request, $query)->get();
 
+        // @phpstan-ignore-next-line
         return $users->filter(fn (User $user) => $this->user()->can('view', $user))->values();
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @return Response
-     */
     public function store(StoreUserRequest $request)
     {
         $user = new User($request->validated());
@@ -70,11 +60,6 @@ class UserController extends Controller
         return $user;
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @return Response
-     */
     public function update(UpdateUserRequest $request, User $user)
     {
         $user->fill($request->all());
@@ -83,11 +68,6 @@ class UserController extends Controller
         return $user;
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @return Response
-     */
     public function destroy(User $user)
     {
         $user->delete();

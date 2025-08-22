@@ -93,7 +93,7 @@ class GroupController extends Controller
         $currentGroup = $group;
 
         while ($currentGroup->parent_id) {
-            $expandGroups->push($currentGroup->parent_id);
+            $expandGroups->push($currentGroup->parent->uuid);
             $currentGroup = $currentGroup->parent;
         }
 
@@ -108,13 +108,6 @@ class GroupController extends Controller
             parent_id: $groupData->parent_id,
             logo_path: $groupData->logo_path,
         ));
-        $groups = $groups->map(function (GroupData $groupData) use ($expandGroups, $group) {
-            $groupData = $groupData->toArray();
-            $groupData['isExpanded'] = $expandGroups->contains($groupData['id']);
-            $groupData['isSelected'] = $groupData['id'] === $group->uuid;
-
-            return $groupData;
-        });
 
         return $this->showPage(
             $groupTreeItems,

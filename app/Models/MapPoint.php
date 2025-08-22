@@ -42,6 +42,7 @@ class MapPoint extends Model
      */
     public function pointable(): MorphTo
     {
+        // @phpstan-ignore-next-line
         return $this->morphTo();
     }
 }

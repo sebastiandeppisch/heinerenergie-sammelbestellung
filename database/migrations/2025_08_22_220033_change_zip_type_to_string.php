@@ -16,7 +16,7 @@ return new class extends Migration
         });
 
         Schema::table('users', function (Blueprint $table) {
-            $table->string('zip')->change();
+            $table->string('zip')->default('')->change();
         });
     }
 
@@ -26,11 +26,11 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('advices', function (Blueprint $table) {
-            $table->unsignedInteger('zip');
+            $table->unsignedInteger('zip')->change();
         });
 
         Schema::table('users', function (Blueprint $table) {
-            $table->unsignedInteger('zip');
+            $table->unsignedInteger('zip')->change();
         });
     }
 };

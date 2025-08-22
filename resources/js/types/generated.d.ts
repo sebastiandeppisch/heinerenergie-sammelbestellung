@@ -189,7 +189,7 @@ declare namespace App.ValueObjects {
 export type Address = {
 street: string;
 streetNumber: string;
-zip: number;
+zip: string;
 city: string;
 };
 export type Coordinate = {
