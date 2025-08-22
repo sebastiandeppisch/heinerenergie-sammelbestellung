@@ -25,6 +25,7 @@ class StoreFormSubmissionRequest extends FormRequest
         return $this->formDefinition()->getValidationRules();
     }
 
+    #[\Override]
     public function attributes()
     {
         return $this->formDefinition()->getValidationAttributes();

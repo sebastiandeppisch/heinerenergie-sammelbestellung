@@ -51,7 +51,7 @@ class AdviceEventCast implements CastsAttributes
 
         try {
             return serialize($value);
-        } catch (Throwable $e) {
+        } catch (Throwable) {
             return '';
         }
     }

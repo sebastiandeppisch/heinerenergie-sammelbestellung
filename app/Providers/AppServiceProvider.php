@@ -54,7 +54,7 @@ class AppServiceProvider extends ServiceProvider
                 return fn (string $text) => $coordinatesOfDarmstadtCenter;
             });
         } else {
-            $this->app->bind(Nominatim::class, function () {
+            $this->app->bind(function (): \maxh\Nominatim\Nominatim {
                 $url = 'http://nominatim.openstreetmap.org/';
                 $defaultHeader = [
                     'User-Agent' => 'heiner*energie CMS',
@@ -64,9 +64,7 @@ class AppServiceProvider extends ServiceProvider
             });
         }
 
-        $this->app->singleton(CurrentGroupService::class, function () {
-            return new CurrentGroupService;
-        });
+        $this->app->singleton(fn(): \App\Services\CurrentGroupService => new CurrentGroupService);
 
         Model::shouldBeStrict(! $this->app->isProduction());
     }

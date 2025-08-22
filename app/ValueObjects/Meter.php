@@ -2,10 +2,10 @@
 
 namespace App\ValueObjects;
 
-class Meter
+class Meter implements \Stringable
 {
     public function __construct(
-        private float $value
+        private readonly float $value
     ) {}
 
     public function getValue(): float

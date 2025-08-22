@@ -49,13 +49,14 @@ class FormFieldFactory extends Factory
         ];
     }
 
+    #[\Override]
     public function configure()
     {
         return $this->afterCreating(function (FormField $formField) {
             if (in_array($formField->type, [FieldType::SELECT, FieldType::RADIO, FieldType::CHECKBOX])) {
 
-                $count = rand(2, 5);
-                $defaultOptionIndex = rand(0, $count - 1);
+                $count = random_int(2, 5);
+                $defaultOptionIndex = random_int(0, $count - 1);
 
                 for ($i = 0; $i < $count; $i++) {
                     $formField->options()->create([

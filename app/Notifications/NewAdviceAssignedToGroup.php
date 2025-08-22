@@ -23,6 +23,7 @@ class NewAdviceAssignedToGroup extends BaseNotification implements ShouldQueue
     /**
      * Get the mail representation of the notification.
      */
+    #[\Override]
     public function toMail($notifiable): MailMessage
     {
         $mail = parent::toMail($notifiable);

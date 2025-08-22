@@ -34,15 +34,13 @@ return new class extends Migration
             ->update(['group_id' => $defaultGroupId]);
 
         $users = DB::table('users')->select('id', 'is_admin')->get();
-        $groupUserRecords = $users->map(function ($user) use ($defaultGroupId) {
-            return [
-                'group_id' => $defaultGroupId,
-                'user_id' => $user->id,
-                'is_admin' => $user->is_admin,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        })->toArray();
+        $groupUserRecords = $users->map(fn($user) => [
+            'group_id' => $defaultGroupId,
+            'user_id' => $user->id,
+            'is_admin' => $user->is_admin,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ])->toArray();
 
         DB::table('group_user')->insert($groupUserRecords);
 

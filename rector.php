@@ -19,5 +19,5 @@ return RectorConfig::configure()
     ->withPhpSets(php84: true)
     ->withRules([
     ])->withSets([
-        LaravelSetList::LARAVEL_110,
+        LaravelSetList::LARAVEL_120,
     ]);

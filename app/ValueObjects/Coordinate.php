@@ -43,10 +43,7 @@ readonly class Coordinate implements Castable
 
     public function distanceTo(self $other): Meter
     {
-        return Meter::fromValue($this->haversineGreatCircleDistance(
-            $this,
-            $other
-        ));
+        return Meter::fromValue(self::haversineGreatCircleDistance($this, $other));
     }
 
     private function toRad(): self

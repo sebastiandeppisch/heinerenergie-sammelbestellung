@@ -7,11 +7,9 @@ use Illuminate\Contracts\Auth\Access\Gate as GateContract;
 
 class AuthServiceProvider extends BaseAuthServiceProvider
 {
+    #[\Override]
     protected function registerAccessGate()
     {
-        $this->app->singleton(GateContract::class, function ($app) {
-
-            return new Gate($app, fn () => call_user_func($app['auth']->userResolver()));
-        });
+        $this->app->singleton(fn($app): \Illuminate\Contracts\Auth\Access\Gate => new Gate($app, fn () => call_user_func($app['auth']->userResolver())));
     }
 }

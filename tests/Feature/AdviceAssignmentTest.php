@@ -43,18 +43,12 @@ test('advice is assigned to correct group based on coordinates', function () {
     ]);
 
     // Register the FetchCoordinateByAddress action in the container
-    App::bind(FetchCoordinateByAddress::class, function () {
-        return function (Address $address) {
-            return new Coordinate(48.5, 8.5); // Inside the correct group's area
-        };
+    App::bind(FetchCoordinateByAddress::class, fn() => function (Address $address) {
+        return new Coordinate(48.5, 8.5); // Inside the correct group's area
     });
 
     // Also bind FetchCoordinateByFreeText to avoid issues if it's called
-    App::bind(FetchCoordinateByFreeText::class, function () {
-        return function (string $text) {
-            return new Coordinate(48.5, 8.5);
-        };
-    });
+    App::bind(FetchCoordinateByFreeText::class, fn() => fn(string $text) => new Coordinate(48.5, 8.5));
 
     // Create a new advice
     $advice = Advice::factory()->create([
@@ -65,7 +59,7 @@ test('advice is assigned to correct group based on coordinates', function () {
     ]);
 
     // Run the job
-    (new AssignAdviceToGroupByAddress($advice))->handle();
+    new AssignAdviceToGroupByAddress($advice)->handle();
 
     // Refresh advice from database
     $advice->refresh();
@@ -81,18 +75,10 @@ test('system administrators are notified on geocoding failure', function () {
     $admin = User::factory()->create(['is_admin' => true]);
 
     // Register FetchCoordinateByAddress to return null (geocoding failure)
-    App::bind(FetchCoordinateByAddress::class, function () {
-        return function (Address $address) {
-            return null;
-        };
-    });
+    App::bind(FetchCoordinateByAddress::class, fn() => fn(Address $address) => null);
 
     // Register FetchCoordinateByFreeText to return null (zipcode geocoding failure)
-    App::bind(FetchCoordinateByFreeText::class, function () {
-        return function (string $text) {
-            return null;
-        };
-    });
+    App::bind(FetchCoordinateByFreeText::class, fn() => fn(string $text) => null);
 
     // Create advice
     $advice = Advice::factory()->create([
@@ -103,15 +89,13 @@ test('system administrators are notified on geocoding failure', function () {
     Notification::fake();
 
     // Run jobs
-    (new AssignAdviceToGroupByAddress($advice))->handle();
+    new AssignAdviceToGroupByAddress($advice)->handle();
 
     // Verify that system administrators were notified
     Notification::assertSentTo(
         $admin,
         SystemErrorNotification::class,
-        function ($notification) use ($advice) {
-            return $notification->advice->id === $advice->id;
-        }
+        fn($notification) => $notification->advice->id === $advice->id
     );
 
     // This line verifies the job completes without exceptions
@@ -147,19 +131,14 @@ test('advice is assigned to main group even when subgroup is closer', function (
     ]);
 
     // Register FetchCoordinateByAddress to return null to force zipcode-based assignment
-    App::bind(FetchCoordinateByAddress::class, function () {
-        return function (Address $address) {
-            return null; // Force zipcode-based assignment
-        };
+    App::bind(FetchCoordinateByAddress::class, fn() => function (Address $address) {
+        return null; // Force zipcode-based assignment
     });
 
     // Register FetchCoordinateByFreeText to return coordinates
-    App::bind(FetchCoordinateByFreeText::class, function () {
-        return function (string $text) {
-            // Return a coordinate that would be closer to the subgroup's polygon
-            return new Coordinate(1.5, 1.5);
-        };
-    });
+    App::bind(FetchCoordinateByFreeText::class, fn() => fn(string $text) =>
+        // Return a coordinate that would be closer to the subgroup's polygon
+        new Coordinate(1.5, 1.5));
 
     // Create a system admin to receive notifications
     $admin = User::factory()->create(['is_admin' => true]);
@@ -173,10 +152,10 @@ test('advice is assigned to main group even when subgroup is closer', function (
     Notification::fake();
 
     // Run jobs - first the address job will fail with null coordinates
-    (new AssignAdviceToGroupByAddress($advice))->handle();
+    new AssignAdviceToGroupByAddress($advice)->handle();
 
     // Then we'll run the zipcode job directly (as it would be triggered in the real flow)
-    (new AssignAdviceToGroupByZipcode($advice))->handle();
+    new AssignAdviceToGroupByZipcode($advice)->handle();
 
     // Refresh advice from database
     $advice->refresh();

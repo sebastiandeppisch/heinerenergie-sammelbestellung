@@ -42,13 +42,10 @@ class FormSubmitController extends Controller
 
     private function getValueFromField(FormField $field, Request $request)
     {
-        switch ($field->type) {
-            case FieldType::TEXT:
-                return $request->string($field->uuid);
-            case FieldType::NUMBER:
-                return $request->integer($field->uuid);
-            default:
-                return $request->input($field->uuid);
-        }
+        return match ($field->type) {
+            FieldType::TEXT => $request->string($field->uuid),
+            FieldType::NUMBER => $request->integer($field->uuid),
+            default => $request->input($field->uuid),
+        };
     }
 }

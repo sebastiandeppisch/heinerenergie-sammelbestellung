@@ -58,16 +58,14 @@ class GroupController extends Controller
         $groups = $this->listGroups($user)
             ->map(fn (Group $group) => GroupData::fromModel($group));
 
-        $groupTreeItems = $groups->map(function (GroupData $groupData): GroupTreeItem {
-            return new GroupTreeItem(
-                id: $groupData->id,
-                name: $groupData->name,
-                selected: false,
-                expanded: false,
-                parent_id: $groupData->parent_id,
-                logo_path: $groupData->logo_path,
-            );
-        });
+        $groupTreeItems = $groups->map(fn(GroupData $groupData): GroupTreeItem => new GroupTreeItem(
+            id: $groupData->id,
+            name: $groupData->name,
+            selected: false,
+            expanded: false,
+            parent_id: $groupData->parent_id,
+            logo_path: $groupData->logo_path,
+        ));
 
         return $this->showPage(
             $groupTreeItems,
@@ -102,16 +100,14 @@ class GroupController extends Controller
         $groups = $this->listGroups($request->user())
             ->map(fn (Group $group) => GroupData::fromModel($group));
 
-        $groupTreeItems = $groups->map(function (GroupData $groupData) use ($expandGroups, $group): GroupTreeItem {
-            return new GroupTreeItem(
-                id: $groupData->id,
-                name: $groupData->name,
-                selected: $groupData->id === $group->id,
-                expanded: $expandGroups->contains($groupData->id),
-                parent_id: $groupData->parent_id,
-                logo_path: $groupData->logo_path,
-            );
-        });
+        $groupTreeItems = $groups->map(fn(GroupData $groupData): GroupTreeItem => new GroupTreeItem(
+            id: $groupData->id,
+            name: $groupData->name,
+            selected: $groupData->id === $group->id,
+            expanded: $expandGroups->contains($groupData->id),
+            parent_id: $groupData->parent_id,
+            logo_path: $groupData->logo_path,
+        ));
         $groups = $groups->map(function (GroupData $groupData) use ($expandGroups, $group) {
             $groupData = $groupData->toArray();
             $groupData['isExpanded'] = $expandGroups->contains($groupData['id']);
