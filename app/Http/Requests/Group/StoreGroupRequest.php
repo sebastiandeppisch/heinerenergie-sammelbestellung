@@ -29,4 +29,9 @@ class StoreGroupRequest extends FormRequest
             'parent_id' => 'nullable|exists:groups,uuid',
         ];
     }
+
+    public function parentId(): ?int
+    {
+        return $this->input('parent_id') ? Group::where('uuid', $this->input('parent_id'))->first()->id : null;
+    }
 }

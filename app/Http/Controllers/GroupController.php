@@ -11,12 +11,10 @@ use App\Http\Requests\UpdateGroupConsultingAreaRequest;
 use App\Models\Group;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
-use Inertia\Response;
 
 class GroupController extends Controller
 {
@@ -26,7 +24,7 @@ class GroupController extends Controller
     }
 
     /**
-     * @param Collection<GroupData> $groups
+     * @param  Collection<GroupData>  $groups
      */
     private function showPage(Collection $groupTreeItems, Collection $groups, bool $canCreateRootGroup, ?Group $selectedGroup)
     {
@@ -35,7 +33,6 @@ class GroupController extends Controller
         $user = request()->user();
 
         $canEditGroup = $selectedGroup ? $user->can('update', $selectedGroup) : false;
-
 
         $selectedGroup = $selectedGroup ? GroupData::fromModel($selectedGroup) : null;
 
@@ -135,7 +132,7 @@ class GroupController extends Controller
     {
         $validated = $request->validated();
 
-        $validated['parent_id'] = $validated['parent_id'] === null ? null : Group::where('uuid', $validated['parent_id'])->firstOrFail()->id;
+        $validated['parent_id'] = $request->parentId();
 
         $group = Group::create($validated);
 
