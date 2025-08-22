@@ -26,6 +26,8 @@ class FormDefinitionData extends Data
 
     public static function fromModel(FormDefinition $model): self
     {
+        $model->loadMissing('group');
+
         return new self(
             id: $model->uuid,
             name: $model->name,
