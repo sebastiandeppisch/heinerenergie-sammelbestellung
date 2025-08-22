@@ -150,7 +150,7 @@ class Advice extends Model implements HasSends, Pointable
             'lastName' => 'string',
             'street' => 'string',
             'streetNumber' => 'string',
-            'zip' => 'integer',
+            'zip' => 'string',
             'city' => 'string',
             'email' => 'string',
             'phone' => 'string',

@@ -13,7 +13,7 @@ class Address implements Castable, Stringable
     public function __construct(
         public string $street,
         public string $streetNumber,
-        public int $zip,
+        public string $zip,
         public string $city
     ) {}
 

@@ -16,7 +16,7 @@ class AdviceData extends Data
         public string $lastName,
         public string $street,
         public string $streetNumber,
-        public int $zip,
+        public string $zip,
         public string $city,
         public string $email,
         public string $phone,
