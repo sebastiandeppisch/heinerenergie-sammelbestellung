@@ -20,16 +20,25 @@ class AdviceStatus extends Model
 
     protected $fillable = ['name', 'result', 'group_id'];
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Advice, $this>
+     */
     public function advices(): BelongsTo
     {
         return $this->belongsTo(Advice::class);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Group, $this>
+     */
     public function ownerGroup(): BelongsTo
     {
         return $this->belongsTo(Group::class, 'group_id');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\Group, $this, \Illuminate\Database\Eloquent\Relations\Pivot>
+     */
     public function usingGroups(): BelongsToMany
     {
         return $this->belongsToMany(Group::class)

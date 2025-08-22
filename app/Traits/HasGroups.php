@@ -11,6 +11,7 @@ trait HasGroups
 {
     /**
      * Get all groups this user belongs to
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\Group, $this, \Illuminate\Database\Eloquent\Relations\Pivot>
      */
     public function groups(): BelongsToMany
     {
@@ -21,6 +22,7 @@ trait HasGroups
 
     /**
      * Get all groups where this user is an admin
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\Group, $this, \Illuminate\Database\Eloquent\Relations\Pivot>
      */
     public function administeredGroups(): BelongsToMany
     {

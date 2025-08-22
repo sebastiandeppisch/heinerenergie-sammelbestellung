@@ -11,11 +11,17 @@ class AdviceStatusGroup extends Pivot
         'visible' => 'boolean',
     ];
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Group, $this>
+     */
     public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\AdviceStatus, $this>
+     */
     public function adviceStatus(): BelongsTo
     {
         return $this->belongsTo(AdviceStatus::class);

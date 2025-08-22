@@ -33,6 +33,9 @@ class FormFieldOption extends Model
         'is_required' => 'boolean',
     ];
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FormField, $this>
+     */
     public function field(): BelongsTo
     {
         return $this->belongsTo(FormField::class, 'form_field_id');

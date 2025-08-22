@@ -68,16 +68,25 @@ class Advice extends Model implements HasSends, Pointable
         'saving' => AdviceSaving::class,
     ];
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this>
+     */
     public function advisor(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\AdviceStatus, $this>
+     */
     public function status(): BelongsTo
     {
         return $this->belongsTo(AdviceStatus::class, 'advice_status_id');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany<\App\Models\User, $this, \Illuminate\Database\Eloquent\Relations\Pivot>
+     */
     public function shares(): MorphToMany
     {
         return $this->morphToMany(User::class, 'sharing', 'sharings', 'sharing_id', 'advisor_id');
@@ -113,11 +122,17 @@ class Advice extends Model implements HasSends, Pointable
         return sprintf('%s %s', $this->firstName, $this->lastName);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Group, $this>
+     */
     public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\AdviceEvent, $this>
+     */
     public function events(): HasMany
     {
         return $this->hasMany(AdviceEvent::class);

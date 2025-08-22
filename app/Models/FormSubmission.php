@@ -37,11 +37,17 @@ class FormSubmission extends Model implements Pointable
         ];
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FormDefinition, $this>
+     */
     public function formDefinition(): BelongsTo
     {
         return $this->belongsTo(FormDefinition::class);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\SubmissionField, $this>
+     */
     public function submissionFields(): HasMany
     {
         return $this->hasMany(SubmissionField::class)->orderBy('sort_order');

@@ -37,7 +37,7 @@ class FormDefinition extends Model
     ];
 
     /**
-     * @return HasMany<FormField>
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\FormField, $this>
      */
     public function fields(): HasMany
     {
@@ -46,6 +46,7 @@ class FormDefinition extends Model
 
     /**
      * Get the submissions for this form definition.
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\FormSubmission, $this>
      */
     public function submissions(): HasMany
     {
@@ -91,7 +92,7 @@ class FormDefinition extends Model
     }
 
     /**
-     * @return HasOne<FormDefinitionToAdvice>
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne<\App\Models\FormDefinitionToAdvice, $this>
      */
     public function adviceCreator(): HasOne
     {
@@ -99,7 +100,7 @@ class FormDefinition extends Model
     }
 
     /**
-     * @return HasOne<FormDefinitionToMapPoint>
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne<\App\Models\FormDefinitionToMapPoint, $this>
      */
     public function mapPointCreator(): HasOne
     {
@@ -107,7 +108,7 @@ class FormDefinition extends Model
     }
 
     /**
-     * @return BelongsTo<Group>
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Group, $this>
      */
     public function group(): BelongsTo
     {

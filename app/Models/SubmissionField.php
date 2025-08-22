@@ -39,11 +39,17 @@ class SubmissionField extends Model
         'value' => 'json',
     ];
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FormSubmission, $this>
+     */
     public function formSubmission(): BelongsTo
     {
         return $this->belongsTo(FormSubmission::class);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FormField, $this>
+     */
     public function formField(): BelongsTo
     {
         return $this->belongsTo(FormField::class);
@@ -58,6 +64,9 @@ class SubmissionField extends Model
         return Coordinate::fromArray($this->value);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\SubmissionFieldOption, $this>
+     */
     public function options(): HasMany
     {
         return $this->hasMany(SubmissionFieldOption::class);

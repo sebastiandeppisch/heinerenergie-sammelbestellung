@@ -25,11 +25,17 @@ class AdviceEvent extends Model
         'event' => AdviceEventCast::class,
     ];
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Advice, $this>
+     */
     public function advice(): BelongsTo
     {
         return $this->belongsTo(Advice::class);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

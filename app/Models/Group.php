@@ -32,6 +32,7 @@ class Group extends Model
 
     /**
      * Get the users that belong to this group
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\User, $this, \Illuminate\Database\Eloquent\Relations\Pivot>
      */
     public function users(): BelongsToMany
     {
@@ -42,6 +43,7 @@ class Group extends Model
 
     /**
      * Get the admins of this group
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\User, $this, \Illuminate\Database\Eloquent\Relations\Pivot>
      */
     public function admins(): BelongsToMany
     {
@@ -52,6 +54,7 @@ class Group extends Model
 
     /**
      * Get the parent group
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Group, $this>
      */
     public function parent(): BelongsTo
     {
@@ -60,6 +63,7 @@ class Group extends Model
 
     /**
      * Get the child groups
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Group, $this>
      */
     public function children(): HasMany
     {
@@ -68,6 +72,7 @@ class Group extends Model
 
     /**
      * Get all advices belonging to this group
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Advice, $this>
      */
     public function advices(): HasMany
     {
@@ -155,11 +160,17 @@ class Group extends Model
         return $ids;
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\AdviceStatus, $this, \Illuminate\Database\Eloquent\Relations\Pivot>
+     */
     public function usableStatuses(): BelongsToMany
     {
         return $this->belongsToMany(AdviceStatus::class)->withPivot('visible_in_group')->using(AdviceStatusGroup::class);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\AdviceStatus, $this>
+     */
     public function ownStatuses(): HasMany
     {
         return $this->hasMany(AdviceStatus::class);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
 use RectorLaravel\Rector\Class_\AddExtendsAnnotationToModelFactoriesRector;
+use RectorLaravel\Rector\ClassMethod\AddGenericReturnTypeToRelationsRector;
 use RectorLaravel\Set\LaravelSetList;
 
 return RectorConfig::configure()
@@ -20,6 +21,7 @@ return RectorConfig::configure()
     ->withPhpSets(php84: true)
     ->withRules([
         AddExtendsAnnotationToModelFactoriesRector::class,
+        AddGenericReturnTypeToRelationsRector::class,
     ])->withSets([
         LaravelSetList::LARAVEL_120,
     ])->withPreparedSets(

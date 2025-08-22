@@ -51,6 +51,9 @@ class User extends Authenticatable
         'name',
     ];
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Advice, $this>
+     */
     public function advices(): HasMany
     {
         return $this->hasMany(Advice::class);
