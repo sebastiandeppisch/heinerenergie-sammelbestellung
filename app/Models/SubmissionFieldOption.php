@@ -19,7 +19,10 @@ class SubmissionFieldOption extends Model
         'submission_field_id',
         'form_field_option_id',
         'option_label_snapshot',
-        'option_value_snapshot',
+        'value',
+        'label',
+        'sort_order',
+        'is_default',
     ];
 
     /**
@@ -36,18 +39,5 @@ class SubmissionFieldOption extends Model
     public function formFieldOption(): BelongsTo
     {
         return $this->belongsTo(FormFieldOption::class);
-    }
-
-    /**
-     * Create a snapshot of the given form field option.
-     */
-    public static function createFromFormFieldOption(SubmissionField $submissionField, FormFieldOption $formFieldOption): self
-    {
-        return self::create([
-            'submission_field_id' => $submissionField->id,
-            'form_field_option_id' => $formFieldOption->id,
-            'option_label_snapshot' => $formFieldOption->label,
-            'option_value_snapshot' => $formFieldOption->value,
-        ]);
     }
 }

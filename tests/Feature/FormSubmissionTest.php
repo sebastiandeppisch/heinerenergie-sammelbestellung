@@ -4,20 +4,13 @@ use App\Enums\FieldType;
 use App\Models\FormDefinition;
 use App\Models\FormField;
 use App\Models\FormFieldOption;
-use App\Models\Group;
 use App\Models\SubmissionField;
-use App\Models\User;
-use App\Services\SessionService;
 use App\ValueObjects\Coordinate;
-use Inertia\Testing\AssertableInertia as Assert;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
-
-});
-
+beforeEach(function () {});
 
 test('form with text field can be submitted', function () {
     $formDefinition = FormDefinition::factory()->create();
@@ -36,7 +29,7 @@ test('form with text field can be submitted', function () {
     $response->assertSessionHasNoErrors();
 
     $this->assertDatabaseHas('form_submissions', [
-        'form_definition_id' => $formDefinition->id
+        'form_definition_id' => $formDefinition->id,
     ]);
     $this->assertDatabaseHas('submission_fields', [
         'form_field_id' => $formField->id,
@@ -45,7 +38,6 @@ test('form with text field can be submitted', function () {
     $field = SubmissionField::firstOrFail();
     $this->assertSame('Sample text input', $field->value);
 });
-
 
 test('form with number field can be submitted', function () {
     $formDefinition = FormDefinition::factory()->create();
@@ -64,7 +56,7 @@ test('form with number field can be submitted', function () {
     $response->assertSessionHasNoErrors();
 
     $this->assertDatabaseHas('form_submissions', [
-        'form_definition_id' => $formDefinition->id
+        'form_definition_id' => $formDefinition->id,
     ]);
     $this->assertDatabaseHas('submission_fields', [
         'form_field_id' => $formField->id,
@@ -100,7 +92,7 @@ test('form with single select can be submitted', function () {
     $response->assertSessionHasNoErrors();
 
     $this->assertDatabaseHas('form_submissions', [
-        'form_definition_id' => $formDefinition->id
+        'form_definition_id' => $formDefinition->id,
     ]);
     $this->assertDatabaseHas('submission_fields', [
         'form_field_id' => $formField->id,
@@ -137,7 +129,7 @@ test('form with multiple select can be submitted', function () {
     $response->assertSessionHasNoErrors();
 
     $this->assertDatabaseHas('form_submissions', [
-        'form_definition_id' => $formDefinition->id
+        'form_definition_id' => $formDefinition->id,
     ]);
     $this->assertDatabaseHas('submission_fields', [
         'form_field_id' => $formField->id,
@@ -174,7 +166,7 @@ test('Selectboxes with multiple values can be submitted', function () {
     $response->assertSessionHasNoErrors();
 
     $this->assertDatabaseHas('form_submissions', [
-        'form_definition_id' => $formDefinition->id
+        'form_definition_id' => $formDefinition->id,
     ]);
     $this->assertDatabaseHas('submission_fields', [
         'form_field_id' => $formField->id,
@@ -185,7 +177,7 @@ test('Selectboxes with multiple values can be submitted', function () {
     $this->assertSame([$option1->uuid, $option2->uuid], $field->value);
 });
 
-test('form with radio button can be submitted', function(){
+test('form with radio button can be submitted', function () {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
@@ -211,7 +203,7 @@ test('form with radio button can be submitted', function(){
     $response->assertSessionHasNoErrors();
 
     $this->assertDatabaseHas('form_submissions', [
-        'form_definition_id' => $formDefinition->id
+        'form_definition_id' => $formDefinition->id,
     ]);
     $this->assertDatabaseHas('submission_fields', [
         'form_field_id' => $formField->id,
@@ -222,7 +214,6 @@ test('form with radio button can be submitted', function(){
     $this->assertSame($option1->uuid, $field->value);
 });
 
-
 test('form with radiobutton is validated', function () {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
@@ -231,7 +222,6 @@ test('form with radiobutton is validated', function () {
         'label' => 'Test Radio Field',
     ]);
 
-
     $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition]), [
         $formField->uuid => 'random_value', // Invalid value
     ]);
@@ -239,13 +229,12 @@ test('form with radiobutton is validated', function () {
     $response->assertSessionHasErrors($formField->uuid);
 });
 
-
-test('geoposition can be submitted', function(){
+test('geoposition can be submitted', function () {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
         'type' => FieldType::GEO_COORDINATE,
-        'label' => 'Your example location'
+        'label' => 'Your example location',
     ]);
 
     $this->withoutExceptionHandling();
@@ -253,37 +242,35 @@ test('geoposition can be submitted', function(){
     $response = $this->post(route('form.submit', ['formDefinition' => $formField->formDefinition]), [
         $formField->uuid => [
             'lat' => 49,
-            'lng' => 10
+            'lng' => 10,
         ],
     ]);
 
     $response->assertSessionHasNoErrors();
 
     $field = SubmissionField::firstOrFail();
-    $this->assertEquals(FieldType::GEO_COORDINATE, $field->field_type);
+    $this->assertEquals(FieldType::GEO_COORDINATE, $field->type);
 
     $this->assertEquals(new Coordinate(49, 10), $field->asCoordinate());
 });
-
 
 it('validates geographic coordinates', function () {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
         'type' => FieldType::GEO_COORDINATE,
-        'label' => 'Your example location'
+        'label' => 'Your example location',
     ]);
 
     $response = $this->post(route('form.submit', ['formDefinition' => $formField->formDefinition]), [
         $formField->uuid => [
             'lat' => 120,
-            'lng' => 190
+            'lng' => 190,
         ],
     ]);
 
     $response->assertSessionHasErrors();
 });
-
 
 test('submitting a required checkbox options produces a validation error', function () {
     $formDefinition = FormDefinition::factory()->create();
@@ -297,21 +284,20 @@ test('submitting a required checkbox options produces a validation error', funct
         'form_field_id' => $formField->id,
         'label' => 'Option 1',
         'is_required' => true,
-        'sort_order' => 1
+        'sort_order' => 1,
     ]);
     $option2 = FormFieldOption::factory()->create([
         'form_field_id' => $formField->id,
         'label' => 'Option 2',
         'is_required' => true,
-        'sort_order' => 2
+        'sort_order' => 2,
     ]);
     $option3 = FormFieldOption::factory()->create([
         'form_field_id' => $formField->id,
         'label' => 'Option 3',
         'is_required' => false,
-        'sort_order'  => 3
+        'sort_order' => 3,
     ]);
-
 
     $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition]), [
         $formField->uuid => [],

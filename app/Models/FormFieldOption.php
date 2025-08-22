@@ -37,4 +37,15 @@ class FormFieldOption extends Model
     {
         return $this->belongsTo(FormField::class, 'form_field_id');
     }
+
+    public function createSubmissionFieldOption(SubmissionField $submissionField): SubmissionFieldOption
+    {
+        return $submissionField->options()->create([
+            'form_field_option_id' => $this->id,
+            'value' => $this->value,
+            'label' => $this->label,
+            'sort_order' => $this->sort_order,
+            'is_default' => $this->is_default,
+        ]);
+    }
 }

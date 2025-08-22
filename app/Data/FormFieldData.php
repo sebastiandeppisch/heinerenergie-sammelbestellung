@@ -57,12 +57,11 @@ class FormFieldData extends Data
     {
         return new self(
             id: $model->uuid,
-            type: $model->field_type,
-            label: $model->field_label,
+            type: $model->type,
+            label: $model->label,
             required: false,
-            options: $model->formField->options->map(fn ($option) => FormFieldOptionData::fromModel($option)), // TODO add archive options
+            options: $model->options->map(fn ($option) => FormFieldOptionData::fromSubmissionFieldOption($option)),
             placeholder: null
-
         );
     }
 }

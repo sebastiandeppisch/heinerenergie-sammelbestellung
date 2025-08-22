@@ -3,8 +3,10 @@
 use App\Models\Advice;
 use App\Models\FormDefinition;
 use App\Models\FormField;
+use App\Models\FormFieldOption;
 use App\Models\FormSubmission;
 use App\Models\Group;
+use App\Models\SubmissionField;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -24,7 +26,6 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
-            $table->softDeletes();
             $table->foreignIdFor(Group::class)->constrained();
         });
 
@@ -45,10 +46,7 @@ return new class extends Migration
             $table->float('min_value')->nullable();
             $table->float('max_value')->nullable();
             $table->json('accepted_file_types')->nullable();
-            $table->boolean('enable_processing')->default(false); // for geo_coordinate
-            $table->boolean('enable_email_confirmation')->default(false); // for email fields
             $table->timestamps();
-            $table->softDeletes();
         });
 
         Schema::create('form_field_options', function (Blueprint $table) {
@@ -61,7 +59,6 @@ return new class extends Migration
             $table->integer('sort_order');
             $table->boolean('is_default');
             $table->timestamps();
-            $table->softDeletes();
             $table->boolean('is_required')->default(false);
 
         });
@@ -88,10 +85,26 @@ return new class extends Migration
             $table->timestamps();
             $table->foreignIdFor(FormSubmission::class)->constrained();
             $table->foreignIdFor(FormField::class)->constrained();
-            $table->string('field_label');
-            $table->string('field_type');
             $table->json('value')->nullable();
+            $table->string('type');
+            $table->string('label');
+            $table->text('help_text')->nullable();
+            $table->boolean('required');
             $table->integer('sort_order');
+        });
+
+        Schema::create('submission_field_options', function (Blueprint $table) {
+            $table->id();
+            $table->uuid('uuid')->unique();
+
+            $table->foreignIdFor(SubmissionField::class)->constrained();
+            $table->foreignIdFor(FormFieldOption::class)->constrained();
+            $table->string('label');
+            $table->string('value');
+            $table->integer('sort_order');
+            $table->boolean('is_default');
+            $table->timestamps();
+            $table->boolean('is_required')->default(false);
         });
     }
 

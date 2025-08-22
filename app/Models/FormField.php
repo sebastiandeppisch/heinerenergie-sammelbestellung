@@ -136,13 +136,21 @@ class FormField extends Model
 
     public function createSubmissionField(FormSubmission $submission, mixed $value): SubmissionField
     {
-        return $submission->submissionFields()->create([
+        $submissionField = $submission->submissionFields()->create([
             'form_field_id' => $this->id,
-            'field_label' => $this->label,
-            'sort_order' => $this->sort_order,
-            'field_type' => $this->type,
             'value' => $value,
+            'sort_order' => $this->sort_order,
+            'type' => $this->type,
+            'label' => $this->label,
+            'help_text' => $this->help_text,
+            'required' => $this->required,
         ]);
+
+        foreach ($this->options as $option) {
+            $option->createSubmissionFieldOption($submissionField);
+        }
+
+        return $submissionField;
     }
 
     public function getSubmissionField(FormSubmission $submission): SubmissionField
