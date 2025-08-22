@@ -32,8 +32,8 @@ street: string;
 streetNumber: string;
 zip: string;
 city: string;
-email: string;
-phone: string;
+email: string | null;
+phone: string | null;
 commentary: string | null;
 advisor_id: string | null;
 advice_status_id: string | null;
@@ -93,6 +93,12 @@ form_name: string;
 fields: Array<App.Data.SubmissionFieldData>;
 submitted_at: any;
 seen: boolean;
+};
+export type GroupBaseData = {
+id: string;
+name: string;
+description: string | null;
+logo_path: string | null;
 };
 export type GroupData = {
 users_count: number;
