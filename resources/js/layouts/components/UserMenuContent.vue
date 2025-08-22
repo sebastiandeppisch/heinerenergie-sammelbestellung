@@ -1,17 +1,12 @@
 <script setup lang="ts">
-import UserInfo from "@/layouts/components/UserInfo.vue";
-import {
-    DropdownMenuGroup,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-} from "@/shadcn/components/ui/dropdown-menu";
-import { Badge } from "@/shadcn/components/ui/badge";
-import { Link, router, usePage } from "@inertiajs/vue3";
-import { LogOut, Settings, Users, Key, User } from "lucide-vue-next";
-import { route } from "ziggy-js";
-import { computed } from "vue";
-import { PageProps } from "@inertiajs/core";
+import UserInfo from '@/layouts/components/UserInfo.vue';
+import { Badge } from '@/shadcn/components/ui/badge';
+import { DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/shadcn/components/ui/dropdown-menu';
+import { PageProps } from '@inertiajs/core';
+import { Link, router, usePage } from '@inertiajs/vue3';
+import { Key, LogOut, User, Users } from 'lucide-vue-next';
+import { computed } from 'vue';
+import { route } from 'ziggy-js';
 
 interface CustomPageProps extends PageProps {
     auth: {
@@ -27,13 +22,13 @@ const currentGroup = computed(() => page.props.auth.currentGroup);
 const availableGroups = computed(() => page.props.auth.availableGroups || []);
 
 function switchGroup(groupId: string, asAdmin: boolean) {
-    router.post(route("actAsGroup", groupId), {
+    router.post(route('actAsGroup', groupId), {
         asAdmin: asAdmin,
     });
 }
 
 function switchToSystemAdmin() {
-    router.post("/actAsSystemAdmin");
+    router.post('/actAsSystemAdmin');
 }
 
 const handleLogout = () => {
@@ -52,12 +47,7 @@ const handleLogout = () => {
     <!-- Standard Menu Items -->
     <DropdownMenuGroup>
         <DropdownMenuItem :as-child="true">
-            <Link
-                class="block w-full"
-                :href="route('profile')"
-                prefetch
-                as="button"
-            >
+            <Link class="block w-full" :href="route('profile')" prefetch as="button">
                 <User class="mr-2 h-4 w-4" />
                 Profil
             </Link>
@@ -67,32 +57,15 @@ const handleLogout = () => {
     <!-- Current Group Section -->
     <template v-if="currentGroup">
         <DropdownMenuSeparator />
-        <DropdownMenuLabel class="text-xs text-muted-foreground">
-            Aktuelle Ansicht:
-        </DropdownMenuLabel>
+        <DropdownMenuLabel class="text-xs text-muted-foreground"> Aktuelle Ansicht: </DropdownMenuLabel>
         <DropdownMenuGroup>
-            <DropdownMenuItem
-                class="flex items-start justify-between cursor-default min-h-[2.5rem]"
-                disabled
-            >
+            <DropdownMenuItem class="flex min-h-[2.5rem] cursor-default items-start justify-between" disabled>
                 <div class="flex items-start">
-                    <img
-                        v-if="currentGroup.logo_path"
-                        :src="currentGroup.logo_path"
-                        class="w-4 h-4 mr-2 mt-0.5 object-contain flex-shrink-0"
-                    />
-                    <Users v-else class="mr-2 h-4 w-4 mt-0.5 flex-shrink-0" />
-                    <span class="text-left leading-tight">{{
-                        currentGroup.name
-                    }}</span>
+                    <img v-if="currentGroup.logo_path" :src="currentGroup.logo_path" class="mt-0.5 mr-2 h-4 w-4 flex-shrink-0 object-contain" />
+                    <Users v-else class="mt-0.5 mr-2 h-4 w-4 flex-shrink-0" />
+                    <span class="text-left leading-tight">{{ currentGroup.name }}</span>
                 </div>
-                <Badge
-                    v-if="user.is_acting_as_admin"
-                    variant="default"
-                    class="ml-2 flex-shrink-0"
-                >
-                    Admin
-                </Badge>
+                <Badge v-if="user.is_acting_as_admin" variant="default" class="ml-2 flex-shrink-0"> Admin </Badge>
             </DropdownMenuItem>
         </DropdownMenuGroup>
     </template>
@@ -100,56 +73,29 @@ const handleLogout = () => {
     <!-- Available Groups Section -->
     <template v-if="availableGroups.length > 0">
         <DropdownMenuSeparator />
-        <DropdownMenuLabel class="text-xs text-muted-foreground">
-            Wechseln zu:
-        </DropdownMenuLabel>
+        <DropdownMenuLabel class="text-xs text-muted-foreground"> Wechseln zu: </DropdownMenuLabel>
         <DropdownMenuGroup>
             <template v-for="group in availableGroups" :key="group.id">
                 <!-- Regular view -->
                 <DropdownMenuItem :as-child="true">
-                    <button
-                        @click="switchGroup(group.id, false)"
-                        class="w-full flex items-start justify-between min-h-[2.5rem] text-left"
-                    >
+                    <button @click="switchGroup(group.id, false)" class="flex min-h-[2.5rem] w-full items-start justify-between text-left">
                         <div class="flex items-start">
-                            <img
-                                v-if="group.logo_path"
-                                :src="group.logo_path"
-                                class="w-4 h-4 mr-2 mt-0.5 object-contain flex-shrink-0"
-                            />
-                            <Users
-                                v-else
-                                class="mr-2 h-4 w-4 mt-0.5 flex-shrink-0"
-                            />
+                            <img v-if="group.logo_path" :src="group.logo_path" class="mt-0.5 mr-2 h-4 w-4 flex-shrink-0 object-contain" />
+                            <Users v-else class="mt-0.5 mr-2 h-4 w-4 flex-shrink-0" />
                             <span class="leading-tight">{{ group.name }}</span>
                         </div>
                     </button>
                 </DropdownMenuItem>
 
                 <!-- Admin view (if user can act as admin) -->
-                <DropdownMenuItem
-                    v-if="group.userCanActAsAdmin"
-                    :as-child="true"
-                >
-                    <button
-                        @click="switchGroup(group.id, true)"
-                        class="w-full flex items-start justify-between min-h-[2.5rem] text-left"
-                    >
+                <DropdownMenuItem v-if="group.userCanActAsAdmin" :as-child="true">
+                    <button @click="switchGroup(group.id, true)" class="flex min-h-[2.5rem] w-full items-start justify-between text-left">
                         <div class="flex items-start">
-                            <img
-                                v-if="group.logo_path"
-                                :src="group.logo_path"
-                                class="w-4 h-4 mr-2 mt-0.5 object-contain flex-shrink-0"
-                            />
-                            <Users
-                                v-else
-                                class="mr-2 h-4 w-4 mt-0.5 flex-shrink-0"
-                            />
+                            <img v-if="group.logo_path" :src="group.logo_path" class="mt-0.5 mr-2 h-4 w-4 flex-shrink-0 object-contain" />
+                            <Users v-else class="mt-0.5 mr-2 h-4 w-4 flex-shrink-0" />
                             <span class="leading-tight">{{ group.name }}</span>
                         </div>
-                        <Badge variant="default" class="ml-2 flex-shrink-0">
-                            Admin
-                        </Badge>
+                        <Badge variant="default" class="ml-2 flex-shrink-0"> Admin </Badge>
                     </button>
                 </DropdownMenuItem>
             </template>
@@ -161,10 +107,7 @@ const handleLogout = () => {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
             <DropdownMenuItem :as-child="true">
-                <button
-                    @click="switchToSystemAdmin"
-                    class="w-full flex items-center"
-                >
+                <button @click="switchToSystemAdmin" class="flex w-full items-center">
                     <Key class="mr-2 h-4 w-4" />
                     System Admin
                 </button>
@@ -174,13 +117,7 @@ const handleLogout = () => {
 
     <DropdownMenuSeparator />
     <DropdownMenuItem :as-child="true">
-        <Link
-            class="block w-full"
-            method="post"
-            :href="route('logout')"
-            @click="handleLogout"
-            as="button"
-        >
+        <Link class="block w-full" method="post" :href="route('logout')" @click="handleLogout" as="button">
             <LogOut class="mr-2 h-4 w-4" />
             Log out
         </Link>

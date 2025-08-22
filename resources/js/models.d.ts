@@ -5,7 +5,6 @@
  */
 
 declare namespace App.Models {
-
     /**
      * @deprecated
      */

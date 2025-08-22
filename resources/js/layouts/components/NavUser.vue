@@ -1,11 +1,10 @@
 <script setup lang="ts">
+import { user } from '@/authHelper';
 import UserInfo from '@/layouts/components/UserInfo.vue';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/shadcn/components/ui/dropdown-menu';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/shadcn/components/ui/sidebar';
 import { ChevronsUpDown } from 'lucide-vue-next';
 import UserMenuContent from './UserMenuContent.vue';
-import { user } from '@/authHelper';
-
 
 const { isMobile, state } = useSidebar();
 </script>
@@ -21,7 +20,7 @@ const { isMobile, state } = useSidebar();
                     </SidebarMenuButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
-                    class="min-w-56 rounded-lg ml-4"
+                    class="ml-4 min-w-56 rounded-lg"
                     :side="isMobile ? 'bottom' : state === 'collapsed' ? 'left' : 'bottom'"
                     align="end"
                     :side-offset="4"

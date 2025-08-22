@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { PageProps } from "@inertiajs/core";
-import { usePage } from "@inertiajs/vue3";
-import { computed } from "vue";
-import genericLogo from "../../../img/logo.png";
+import { PageProps } from '@inertiajs/core';
+import { usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import genericLogo from '../../../img/logo.png';
 
 interface CustomPageProps extends PageProps {
     auth: {

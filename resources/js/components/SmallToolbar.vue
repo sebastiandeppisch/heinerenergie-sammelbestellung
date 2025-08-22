@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { router, usePage } from "@inertiajs/vue3";
-import { User } from "lucide-vue-next";
-import AppLogo from "@/layouts/components/AppLogo.vue";
-import { PageProps } from "@inertiajs/core";
-import { computed } from "vue";
-import { Head } from "@inertiajs/vue3";
+import AppLogo from '@/layouts/components/AppLogo.vue';
+import { PageProps } from '@inertiajs/core';
+import { router, usePage } from '@inertiajs/vue3';
+import { User } from 'lucide-vue-next';
+import { computed } from 'vue';
 const openBackend = () => {
-    router.visit("/backend");
+    router.visit('/backend');
 };
 
 interface CustomPageProps extends PageProps {
@@ -20,14 +19,12 @@ interface CustomPageProps extends PageProps {
 const page = usePage<CustomPageProps>();
 const currentGroup = computed(() => page.props.auth.currentGroup);
 const header = computed(() => {
-    return currentGroup.value?.name || "CRM";
+    return currentGroup.value?.name || 'CRM';
 });
 </script>
 
 <template>
-    <header
-        class="flex items-center justify-between px-4 py-2 bg-white border-b shadow-sm rounded-b-lg"
-    >
+    <header class="flex items-center justify-between rounded-b-lg border-b bg-white px-4 py-2 shadow-sm">
         <!-- Left spacer -->
         <div class="w-[70px]"></div>
 
@@ -45,7 +42,7 @@ const header = computed(() => {
         <div class="flex items-center">
             <button
                 @click="openBackend"
-                class="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+                class="flex items-center gap-2 rounded-md px-4 py-2 text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900"
             >
                 <User class="h-4 w-4" />
                 <span class="hidden sm:inline">Berater:innen Zugang</span>

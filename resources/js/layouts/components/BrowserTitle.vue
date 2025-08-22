@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { router, usePage } from "@inertiajs/vue3";
-import { PageProps } from "@inertiajs/core";
-import { computed } from "vue";
-import { Head } from "@inertiajs/vue3";
+import { PageProps } from '@inertiajs/core';
+import { Head, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 interface CustomPageProps extends PageProps {
     auth: {
@@ -13,7 +12,7 @@ interface CustomPageProps extends PageProps {
 const page = usePage<CustomPageProps>();
 const currentGroup = computed(() => page.props.auth.currentGroup);
 const header = computed(() => {
-    return currentGroup.value?.name || "CRM";
+    return currentGroup.value?.name || 'CRM';
 });
 </script>
 

@@ -4,7 +4,6 @@ import FormFieldRenderer from './FormFieldRenderer.vue';
 defineProps<{
     formSubmission: App.Data.FormSubmissionData;
 }>();
-
 </script>
 
 <template>

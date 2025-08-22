@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { Avatar, AvatarFallback, AvatarImage } from '@/shadcn/components/ui/avatar';
 import { useInitials } from '@/composables/useInitials';
-import { computed } from 'vue';
+import { Avatar, AvatarFallback } from '@/shadcn/components/ui/avatar';
 
 interface Props {
     user: App.Data.UserData;

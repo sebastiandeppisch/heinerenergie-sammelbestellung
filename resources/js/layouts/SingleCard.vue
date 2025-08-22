@@ -1,23 +1,22 @@
 <script setup lang="ts">
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shadcn/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shadcn/components/ui/card';
 
 const props = defineProps<{
-  title: string
-  description?: string
+    title: string;
+    description?: string;
 }>();
-
 </script>
 
 <template>
-  <div class="flex justify-center items-center h-full">
-    <Card>
-      <CardHeader>
-        <CardTitle>{{ title }}</CardTitle>
-        <CardDescription>{{ description }}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <slot />
-      </CardContent>
-    </Card>
-  </div>
+    <div class="flex h-full items-center justify-center">
+        <Card>
+            <CardHeader>
+                <CardTitle>{{ title }}</CardTitle>
+                <CardDescription>{{ description }}</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <slot />
+            </CardContent>
+        </Card>
+    </div>
 </template>

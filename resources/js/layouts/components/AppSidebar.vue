@@ -2,13 +2,21 @@
 import NavFooter from '@/layouts/components/NavFooter.vue';
 import NavMain from '@/layouts/components/NavMain.vue';
 import NavUser from '@/layouts/components/NavUser.vue';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/shadcn/components/ui/sidebar';
 import { type NavItem } from '@/layouts/helper';
-import { Link } from '@inertiajs/vue3';
-import { LayoutGrid, Table, Map, Users, Settings, FileText, MessageSquare, User, Github } from 'lucide-vue-next';
-import AppLogo from './AppLogo.vue';
-import { route } from 'ziggy-js';
 import Card from '@/shadcn/components/ui/card/Card.vue';
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+} from '@/shadcn/components/ui/sidebar';
+import { Link } from '@inertiajs/vue3';
+import { FileText, Github, LayoutGrid, Map, MessageSquare, Settings, Table, User, Users } from 'lucide-vue-next';
+import { route } from 'ziggy-js';
+import AppLogo from './AppLogo.vue';
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
@@ -28,8 +36,8 @@ const mainNavItems: NavItem[] = [
                 title: 'Karte',
                 href: '/advicesmap',
                 icon: Map,
-            }
-        ]
+            },
+        ],
     },
     {
         title: 'Initiativen',
@@ -69,8 +77,8 @@ const mainNavItems: NavItem[] = [
                 title: 'Karte',
                 href: '/mappoints-map',
                 icon: Map,
-            }
-        ]
+            },
+        ],
     },
 ];
 
@@ -89,7 +97,7 @@ const footerNavItems: NavItem[] = [
         title: 'Datenschutzerklärung',
         href: '/datapolicy',
         icon: FileText,
-    }
+    },
 ];
 </script>
 
@@ -100,7 +108,7 @@ const footerNavItems: NavItem[] = [
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child class="bg-white hover:bg-white hover:shadow-md">
                         <Card>
-                            <Link :href="route('dashboard')" class="w-full h-full flex justify-center">
+                            <Link :href="route('dashboard')" class="flex h-full w-full justify-center">
                                 <AppLogo />
                             </Link>
                         </Card>

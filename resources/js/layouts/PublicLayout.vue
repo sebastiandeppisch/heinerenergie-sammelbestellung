@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import SmallToolbar from "../components/SmallToolbar.vue";
-import BrowserTitle from "./components/BrowserTitle.vue";
-import MainPublic from "./MainPublic.vue";
+import SmallToolbar from '../components/SmallToolbar.vue';
+import BrowserTitle from './components/BrowserTitle.vue';
+import MainPublic from './MainPublic.vue';
 </script>
 
 <template>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import AppLayout from "@/layouts/app/AppSidebarLayout.vue";
-import type { BreadcrumbItemType } from "@/layouts/helper";
-import BrowserTitle from "./components/BrowserTitle.vue";
+import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
+import type { BreadcrumbItemType } from '@/layouts/helper';
+import BrowserTitle from './components/BrowserTitle.vue';
 
 interface Props {
     breadcrumbs?: BreadcrumbItemType[];
