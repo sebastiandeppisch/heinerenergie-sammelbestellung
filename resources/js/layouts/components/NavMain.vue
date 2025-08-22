@@ -12,6 +12,7 @@ import {
 } from '@/shadcn/components/ui/sidebar';
 import { PageProps } from '@inertiajs/core';
 import { Link, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 defineProps<{
     items: NavItem[];
@@ -25,15 +26,29 @@ interface CustomPageProps extends PageProps {
 }
 
 const page = usePage<CustomPageProps>();
+
+const groupName = computed<string>(() => {
+    const name = page.props.auth.currentGroup?.name || '';
+
+    if (page.props.auth.currentGroup === null && page.props.auth.user.is_acting_as_admin) {
+        return 'Systemadministrator';
+    }
+
+    if (page.props.auth.user.is_acting_as_admin) {
+        return name + ' (Admin)';
+    }
+
+    return name;
+});
 </script>
 
 <template>
     <SidebarGroup class="px-2 py-0">
-        <SidebarGroupLabel>{{ page.props.auth.currentGroup?.name }}</SidebarGroupLabel>
+        <SidebarGroupLabel>{{ groupName }}</SidebarGroupLabel>
         <SidebarMenu>
             <template v-for="item in items" :key="item.title">
                 <!-- without children -->
-                <SidebarMenuItem v-if="!item.children && item.href">
+                <SidebarMenuItem v-if="!item.children && item.href && (!item.admin || page.props.auth.user.is_acting_as_admin)">
                     <SidebarMenuButton as-child :is-active="item.href === page.url" :tooltip="item.title" class="text-sidebar-accent-foreground">
                         <Link :href="item.href">
                             <component :is="item.icon" class="text-sidebar-accent-foreground" />
@@ -43,7 +58,7 @@ const page = usePage<CustomPageProps>();
                 </SidebarMenuItem>
 
                 <!-- with children -->
-                <SidebarMenuItem v-else-if="item.children">
+                <SidebarMenuItem v-else-if="item.children && (!item.admin || page.props.auth.user.is_acting_as_admin)">
                     <SidebarMenuButton class="text-sidebar-accent-foreground">
                         <component :is="item.icon" />
                         <span>{{ item.title }}</span>
@@ -51,7 +66,7 @@ const page = usePage<CustomPageProps>();
                     <SidebarMenuSub>
                         <SidebarMenuSubItem v-for="child in item.children" :key="child.title">
                             <SidebarMenuSubButton
-                                v-if="child.href"
+                                v-if="child.href && (!child.admin || page.props.auth.user.is_acting_as_admin)"
                                 as-child
                                 :is-active="child.href === page.url"
                                 class="text-sidebar-accent-foreground"

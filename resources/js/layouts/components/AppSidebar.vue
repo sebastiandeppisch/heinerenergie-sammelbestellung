@@ -42,6 +42,7 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Initiativen',
         icon: UserCog,
+        admin: true,
         children: [
             {
                 title: 'Initiativen-Verwaltung',
@@ -59,6 +60,7 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Formulare',
         icon: FileText,
+        admin: true,
         children: [
             {
                 title: 'Formular-Verwaltung',
@@ -79,6 +81,7 @@ const mainNavItems: NavItem[] = [
             {
                 title: 'Tabelle',
                 href: '/mappoints',
+                admin: true,
                 icon: Table,
             },
             {
@@ -92,6 +95,7 @@ const mainNavItems: NavItem[] = [
         title: 'Einstellungen',
         href: '/settings',
         icon: Settings,
+        admin: true,
     },
 ];
 

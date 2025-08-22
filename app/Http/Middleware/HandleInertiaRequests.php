@@ -55,15 +55,18 @@ class HandleInertiaRequests extends Middleware
             }
         }
 
-        $userIsActingAsAdmin = app(SessionService::class)->actsAsSystemAdmin() || app(SessionService::class)->actsAsGroupAdmin();
-
-        $userData = $request->user() ? UserData::fromModel($request->user()->fresh(), $userIsActingAsAdmin) : null;
-
         return array_merge(parent::share($request), [
-            'auth.user' => $userData,
+            'auth.user' => fn () => $this->getUserData($request),
             'auth.availableGroups' => fn () => $request->user()?->groups->map(fn (Group $group) => GroupData::fromModel($group)),
             'auth.currentGroup' => fn () => app(CurrentGroupService::class)->getGroup() ? GroupBaseData::fromModel(app(CurrentGroupService::class)->getGroup()) : null,
             'flashMessages' => $flashMessages,
         ]);
+    }
+
+    private function getUserData(Request $request): ?UserData
+    {
+        $userIsActingAsAdmin = app(SessionService::class)->actsAsSystemAdmin() || app(SessionService::class)->actsAsGroupAdmin();
+
+        return $request->user() ? UserData::fromModel($request->user()->fresh(), $userIsActingAsAdmin) : null;
     }
 }
