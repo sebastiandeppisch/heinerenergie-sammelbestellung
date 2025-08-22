@@ -6,6 +6,9 @@ use App\Models\FormField;
 use App\Models\FormFieldOption;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\FormFieldOption>
+ */
 class FormFieldOptionFactory extends Factory
 {
     protected $model = FormFieldOption::class;

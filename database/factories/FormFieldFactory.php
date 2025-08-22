@@ -7,6 +7,9 @@ use App\Models\FormDefinition;
 use App\Models\FormField;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\FormField>
+ */
 class FormFieldFactory extends Factory
 {
     protected $model = FormField::class;
