@@ -16,9 +16,6 @@ class SubmissionField extends Model
     use HasFactory;
     use HasUuid;
 
-    /**
-     * @var array<string, mixed>
-     */
     protected $fillable = [
         'form_submission_id',
         'form_field_id',

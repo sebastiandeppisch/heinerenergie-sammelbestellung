@@ -12,9 +12,6 @@ class FormFieldOption extends Model
     use HasFactory;
     use HasUuid;
 
-    /**
-     * @var array<string>
-     */
     protected $fillable = [
         'form_field_id',
         'label',

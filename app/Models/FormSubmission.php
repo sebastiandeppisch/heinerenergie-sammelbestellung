@@ -16,11 +16,6 @@ class FormSubmission extends Model implements Pointable
     use HasPoints;
     use HasUuid;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<string, mixed>
-     */
     protected $fillable = [
         'form_definition_id',
         'advice_id',

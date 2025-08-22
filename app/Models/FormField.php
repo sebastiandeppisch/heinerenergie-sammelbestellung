@@ -17,11 +17,6 @@ class FormField extends Model
     use HasFactory;
     use HasUuid;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<string, mixed>
-     */
     protected $fillable = [
         'form_definition_id',
         'type',
