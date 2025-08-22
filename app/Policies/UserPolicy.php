@@ -40,7 +40,10 @@ class UserPolicy
 
     public function update(User $user, User $model)
     {
-        return app(SessionService::class)->actsAsSystemAdmin() || app(SessionService::class)->actsAsGroupAdmin();
+        if (app(SessionService::class)->actsAsSystemAdmin()) {
+            return true;
+        }
+        return app(SessionService::class)->actsAsGroupAdmin();
     }
 
     public function delete(User $user, User $model)

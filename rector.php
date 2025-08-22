@@ -20,4 +20,6 @@ return RectorConfig::configure()
     ->withRules([
     ])->withSets([
         LaravelSetList::LARAVEL_120,
-    ]);
+    ])->withPreparedSets(
+        earlyReturn: true
+    );

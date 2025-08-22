@@ -57,7 +57,8 @@ class MapPointFactory extends Factory
         $rand = random_int(1, 3);
         if ($rand == 1) {
             return $this->withFormSubmission();
-        } elseif ($rand == 2) {
+        }
+        if ($rand == 2) {
             return $this->withAdvice();
         }
 

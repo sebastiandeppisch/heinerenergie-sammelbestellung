@@ -40,10 +40,11 @@ class AdvicePolicy
     {
         return Cache::remember("advice.viewDataProtected.{$advice->id}.{$user->id}", $this->cacheSeconds, function () use ($advice, $user) {
 
-            if ($advice->advisor_id === null) {
-                if ($this->groupContext->isActingAsTransitiveMemberOrAdmin($user, $advice->group)) {
-                    return true;
-                }
+            if ($advice->advisor_id !== null) {
+                return $this->view($user, $advice);
+            }
+            if ($this->groupContext->isActingAsTransitiveMemberOrAdmin($user, $advice->group)) {
+                return true;
             }
 
             return $this->view($user, $advice);

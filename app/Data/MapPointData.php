@@ -41,7 +41,8 @@ class MapPointData extends Data
         // TODO load from model itself
         if ($type === FormSubmission::class) {
             return 'Formular';
-        } elseif ($type === Advice::class) {
+        }
+        if ($type === Advice::class) {
             return 'Beratung';
         }
 
