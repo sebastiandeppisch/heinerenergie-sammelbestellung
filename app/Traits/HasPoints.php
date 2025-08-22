@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 trait HasPoints
 {
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany<\App\Models\MapPoint, $this>
+     * @return MorphMany<MapPoint, $this>
      */
     public function points(): MorphMany
     {

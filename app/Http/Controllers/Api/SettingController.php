@@ -5,13 +5,14 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateSettingRequest;
 use App\Models\Setting;
+use Illuminate\Http\Response;
 
 class SettingController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function index()
     {
@@ -21,8 +22,8 @@ class SettingController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Setting  $setting
-     * @return \Illuminate\Http\Response
+     * @param  Setting  $setting
+     * @return Response
      */
     public function show(string $key)
     {
@@ -32,7 +33,7 @@ class SettingController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function update(UpdateSettingRequest $request, Setting $setting)
     {

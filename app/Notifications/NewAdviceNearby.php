@@ -3,12 +3,13 @@
 namespace App\Notifications;
 
 use App\Models\Advice;
+use Override;
 
 class NewAdviceNearby extends BaseNotification
 {
     public function __construct(public Advice $advice, public float $distance) {}
 
-    #[\Override]
+    #[Override]
     public function toMail($notifiable)
     {
 

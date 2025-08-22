@@ -3,7 +3,9 @@
 namespace App\Http\Requests;
 
 use App\Models\FormDefinition;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Override;
 
 class StoreFormSubmissionRequest extends FormRequest
 {
@@ -18,14 +20,14 @@ class StoreFormSubmissionRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return $this->formDefinition()->getValidationRules();
     }
 
-    #[\Override]
+    #[Override]
     public function attributes()
     {
         return $this->formDefinition()->getValidationAttributes();

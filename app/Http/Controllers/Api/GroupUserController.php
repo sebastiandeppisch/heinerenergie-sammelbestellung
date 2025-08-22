@@ -8,18 +8,19 @@ use App\Http\Requests\StoreGroupUserRequest;
 use App\Http\Requests\UpdateGroupUserRequest;
 use App\Models\Group;
 use App\Models\User;
+use RuntimeException;
 
 class GroupUserController extends Controller
 {
     private function userToDTO(User $user): GroupUserData
     {
         if (! $user->relationLoaded('groups')) {
-            throw new \RuntimeException('User groups relation must be loaded before converting to DTO');
+            throw new RuntimeException('User groups relation must be loaded before converting to DTO');
         }
 
         $group = $user->groups->first();
         if (! $group) {
-            throw new \RuntimeException('User must be in the group before converting to DTO');
+            throw new RuntimeException('User must be in the group before converting to DTO');
         }
 
         return new GroupUserData(

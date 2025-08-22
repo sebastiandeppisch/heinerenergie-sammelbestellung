@@ -43,6 +43,7 @@ class UserPolicy
         if (app(SessionService::class)->actsAsSystemAdmin()) {
             return true;
         }
+
         return app(SessionService::class)->actsAsGroupAdmin();
     }
 

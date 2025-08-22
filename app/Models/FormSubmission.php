@@ -38,7 +38,7 @@ class FormSubmission extends Model implements Pointable
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FormDefinition, $this>
+     * @return BelongsTo<FormDefinition, $this>
      */
     public function formDefinition(): BelongsTo
     {
@@ -46,7 +46,7 @@ class FormSubmission extends Model implements Pointable
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\SubmissionField, $this>
+     * @return HasMany<SubmissionField, $this>
      */
     public function submissionFields(): HasMany
     {

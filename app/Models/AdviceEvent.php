@@ -26,7 +26,7 @@ class AdviceEvent extends Model
     ];
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Advice, $this>
+     * @return BelongsTo<Advice, $this>
      */
     public function advice(): BelongsTo
     {
@@ -34,7 +34,7 @@ class AdviceEvent extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {

@@ -6,9 +6,10 @@ use App\Enums\FieldType;
 use App\Models\FormDefinition;
 use App\Models\FormField;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Override;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\FormField>
+ * @extends Factory<FormField>
  */
 class FormFieldFactory extends Factory
 {
@@ -51,7 +52,7 @@ class FormFieldFactory extends Factory
         ];
     }
 
-    #[\Override]
+    #[Override]
     public function configure()
     {
         return $this->afterCreating(function (FormField $formField) {

@@ -7,6 +7,7 @@ use App\Models\Group;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Override;
 
 class NewAdviceAssignedToGroup extends BaseNotification implements ShouldQueue
 {
@@ -23,7 +24,7 @@ class NewAdviceAssignedToGroup extends BaseNotification implements ShouldQueue
     /**
      * Get the mail representation of the notification.
      */
-    #[\Override]
+    #[Override]
     public function toMail($notifiable): MailMessage
     {
         $mail = parent::toMail($notifiable);

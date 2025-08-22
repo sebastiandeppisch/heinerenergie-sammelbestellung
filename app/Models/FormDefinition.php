@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\DB;
+use Override;
 
 class FormDefinition extends Model
 {
@@ -37,7 +38,7 @@ class FormDefinition extends Model
     ];
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\FormField, $this>
+     * @return HasMany<FormField, $this>
      */
     public function fields(): HasMany
     {
@@ -46,14 +47,15 @@ class FormDefinition extends Model
 
     /**
      * Get the submissions for this form definition.
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\FormSubmission, $this>
+     *
+     * @return HasMany<FormSubmission, $this>
      */
     public function submissions(): HasMany
     {
         return $this->hasMany(FormSubmission::class);
     }
 
-    #[\Override]
+    #[Override]
     public function delete(): bool
     {
         return DB::transaction(function () {
@@ -92,7 +94,7 @@ class FormDefinition extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne<\App\Models\FormDefinitionToAdvice, $this>
+     * @return HasOne<FormDefinitionToAdvice, $this>
      */
     public function adviceCreator(): HasOne
     {
@@ -100,7 +102,7 @@ class FormDefinition extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne<\App\Models\FormDefinitionToMapPoint, $this>
+     * @return HasOne<FormDefinitionToMapPoint, $this>
      */
     public function mapPointCreator(): HasOne
     {
@@ -108,7 +110,7 @@ class FormDefinition extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Group, $this>
+     * @return BelongsTo<Group, $this>
      */
     public function group(): BelongsTo
     {

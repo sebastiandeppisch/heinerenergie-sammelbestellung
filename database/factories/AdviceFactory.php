@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Wnx\Sends\Models\Send;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Advice>
+ * @extends Factory<Advice>
  */
 class AdviceFactory extends Factory
 {

@@ -40,7 +40,7 @@ class SubmissionField extends Model
     ];
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FormSubmission, $this>
+     * @return BelongsTo<FormSubmission, $this>
      */
     public function formSubmission(): BelongsTo
     {
@@ -48,7 +48,7 @@ class SubmissionField extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FormField, $this>
+     * @return BelongsTo<FormField, $this>
      */
     public function formField(): BelongsTo
     {
@@ -65,7 +65,7 @@ class SubmissionField extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\SubmissionFieldOption, $this>
+     * @return HasMany<SubmissionFieldOption, $this>
      */
     public function options(): HasMany
     {

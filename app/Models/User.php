@@ -52,7 +52,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Advice, $this>
+     * @return HasMany<Advice, $this>
      */
     public function advices(): HasMany
     {

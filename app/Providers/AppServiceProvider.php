@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 use maxh\Nominatim\Nominatim;
 use Opcodes\LogViewer\Facades\LogViewer;
+use Override;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    #[\Override]
+    #[Override]
     public function register()
     {
         //
@@ -54,7 +55,7 @@ class AppServiceProvider extends ServiceProvider
                 return fn (string $text) => $coordinatesOfDarmstadtCenter;
             });
         } else {
-            $this->app->bind(function (): \maxh\Nominatim\Nominatim {
+            $this->app->bind(function (): Nominatim {
                 $url = 'http://nominatim.openstreetmap.org/';
                 $defaultHeader = [
                     'User-Agent' => 'heiner*energie CMS',
@@ -64,7 +65,7 @@ class AppServiceProvider extends ServiceProvider
             });
         }
 
-        $this->app->singleton(fn (): \App\Services\CurrentGroupService => new CurrentGroupService);
+        $this->app->singleton(fn (): CurrentGroupService => new CurrentGroupService);
 
         Model::shouldBeStrict(! $this->app->isProduction());
     }

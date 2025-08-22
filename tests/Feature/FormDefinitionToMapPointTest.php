@@ -1,5 +1,6 @@
 <?php
 
+use App\Events\MapPointCreatedByFormSubmission;
 use App\Models\FormDefinitionToMapPoint;
 use App\Models\MapPoint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -53,7 +54,7 @@ test('submitting the form fires map point created event', function () {
         ],
     ]);
 
-    Event::assertDispatched(\App\Events\MapPointCreatedByFormSubmission::class);
+    Event::assertDispatched(MapPointCreatedByFormSubmission::class);
 });
 
 test('form can be created with seeder', function () {

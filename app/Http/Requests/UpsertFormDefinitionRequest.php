@@ -3,8 +3,10 @@
 namespace App\Http\Requests;
 
 use App\Enums\FieldType;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Override;
 
 class UpsertFormDefinitionRequest extends FormRequest
 {
@@ -20,7 +22,7 @@ class UpsertFormDefinitionRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {
@@ -57,7 +59,7 @@ class UpsertFormDefinitionRequest extends FormRequest
      *
      * @return array<string, string>
      */
-    #[\Override]
+    #[Override]
     public function attributes(): array
     {
         return [
@@ -82,7 +84,7 @@ class UpsertFormDefinitionRequest extends FormRequest
      *
      * @return array<string, string>
      */
-    #[\Override]
+    #[Override]
     public function messages(): array
     {
         return [

@@ -10,9 +10,7 @@ use RectorLaravel\Set\LaravelSetList;
 return RectorConfig::configure()
     ->withPaths([
         __DIR__.'/app',
-        __DIR__.'/config',
         __DIR__.'/database',
-        __DIR__.'/node_modules',
         __DIR__.'/public',
         __DIR__.'/resources',
         __DIR__.'/routes',
@@ -26,4 +24,4 @@ return RectorConfig::configure()
         LaravelSetList::LARAVEL_120,
     ])->withPreparedSets(
         earlyReturn: true
-    );
+    )->withImportNames();

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Contracts\Pointable;
 use App\Models\Traits\HasUuid;
 use App\ValueObjects\Coordinate;
+use Database\Factories\MapPointFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -14,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  */
 class MapPoint extends Model
 {
-    /** @use HasFactory<\Database\Factories\MapPointFactory> */
+    /** @use HasFactory<MapPointFactory> */
     use HasFactory;
 
     use HasUuid;

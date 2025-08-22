@@ -11,7 +11,7 @@ use App\ValueObjects\Address;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\FormDefinitionToAdvice>
+ * @extends Factory<FormDefinitionToAdvice>
  */
 class FormDefinitionToAdviceFactory extends Factory
 {

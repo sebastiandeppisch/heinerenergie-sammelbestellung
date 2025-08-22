@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Override;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -33,7 +34,7 @@ class Handler extends ExceptionHandler
      *
      * @return void
      */
-    #[\Override]
+    #[Override]
     public function register()
     {
         $this->reportable(function (Throwable $e) {
@@ -41,7 +42,7 @@ class Handler extends ExceptionHandler
         });
     }
 
-    #[\Override]
+    #[Override]
     protected function unauthenticated($request, AuthenticationException $exception)
     {
         if ($request->expectsJson()) {

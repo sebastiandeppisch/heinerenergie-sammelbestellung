@@ -20,7 +20,7 @@ class FormDefinitionToAdvice extends Model
     use HasUuid;
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FormDefinition, $this>
+     * @return BelongsTo<FormDefinition, $this>
      */
     public function formDefinition(): BelongsTo
     {
@@ -28,7 +28,7 @@ class FormDefinitionToAdvice extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FormField, $this>
+     * @return BelongsTo<FormField, $this>
      */
     public function addressField(): BelongsTo
     {
@@ -36,7 +36,7 @@ class FormDefinitionToAdvice extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FormField, $this>
+     * @return BelongsTo<FormField, $this>
      */
     public function emailField(): BelongsTo
     {
@@ -44,7 +44,7 @@ class FormDefinitionToAdvice extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FormField, $this>
+     * @return BelongsTo<FormField, $this>
      */
     public function phoneField(): BelongsTo
     {
@@ -52,7 +52,7 @@ class FormDefinitionToAdvice extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FormField, $this>
+     * @return BelongsTo<FormField, $this>
      */
     public function firstNameField(): BelongsTo
     {
@@ -61,7 +61,7 @@ class FormDefinitionToAdvice extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FormField, $this>
+     * @return BelongsTo<FormField, $this>
      */
     public function lastNameField(): BelongsTo
     {

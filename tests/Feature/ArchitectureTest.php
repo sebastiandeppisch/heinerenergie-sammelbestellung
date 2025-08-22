@@ -1,5 +1,16 @@
 <?php
 
+use App\Exceptions\Handler;
+use App\LaravelExtensions\StrictGates\AuthServiceProvider;
+use App\LaravelExtensions\StrictGates\MissingGateException;
+use Illuminate\Console\Command;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Mail\Mailable;
+use Illuminate\Notifications\Notification;
+use Illuminate\Support\ServiceProvider;
+
 arch()->preset()->php();
 
 // copied from https://github.com/pestphp/pest/blob/3.x/src/ArchPresets/Laravel.php
@@ -33,12 +44,12 @@ arch()->expect('App\Features')
 arch()->expect('App\Exceptions')
     ->classes()
     ->toImplement('Throwable')
-    ->ignoring(\App\Exceptions\Handler::class);
+    ->ignoring(Handler::class);
 
 arch()->expect('App')
     ->not->toImplement(Throwable::class)
     ->ignoring('App\Exceptions')
-    ->ignoring(\App\LaravelExtensions\StrictGates\MissingGateException::class);
+    ->ignoring(MissingGateException::class);
 
 arch()->expect('App\Http\Middleware')
     ->classes()
@@ -46,7 +57,7 @@ arch()->expect('App\Http\Middleware')
 
 arch()->expect('App\Models')
     ->classes()
-    ->toExtend(\Illuminate\Database\Eloquent\Model::class)
+    ->toExtend(Model::class)
     ->ignoring('App\Models\Scopes');
 
 arch()->expect('App\Models')
@@ -54,7 +65,7 @@ arch()->expect('App\Models')
     ->not->toHaveSuffix('Model');
 
 arch()->expect('App')
-    ->not->toExtend(\Illuminate\Database\Eloquent\Model::class)
+    ->not->toExtend(Model::class)
     ->ignoring('App\Models');
 
 arch()->expect('App\Http\Requests')
@@ -62,13 +73,13 @@ arch()->expect('App\Http\Requests')
     ->toHaveSuffix('Request');
 
 arch()->expect('App\Http\Requests')
-    ->toExtend(\Illuminate\Foundation\Http\FormRequest::class);
+    ->toExtend(FormRequest::class);
 
 arch()->expect('App\Http\Requests')
     ->toHaveMethod('rules');
 
 arch()->expect('App')
-    ->not->toExtend(\Illuminate\Foundation\Http\FormRequest::class)
+    ->not->toExtend(FormRequest::class)
     ->ignoring('App\Http\Requests');
 
 arch()->expect('App\Console\Commands')
@@ -77,31 +88,31 @@ arch()->expect('App\Console\Commands')
 
 arch()->expect('App\Console\Commands')
     ->classes()
-    ->toExtend(\Illuminate\Console\Command::class);
+    ->toExtend(Command::class);
 
 arch()->expect('App\Console\Commands')
     ->classes()
     ->toHaveMethod('handle');
 
 arch()->expect('App')
-    ->not->toExtend(\Illuminate\Console\Command::class)
+    ->not->toExtend(Command::class)
     ->ignoring('App\Console\Commands');
 
 arch()->expect('App\Mail')
     ->classes()
-    ->toExtend(\Illuminate\Mail\Mailable::class);
+    ->toExtend(Mailable::class);
 
 arch()->expect('App\Mail')
     ->classes()
-    ->toImplement(\Illuminate\Contracts\Queue\ShouldQueue::class);
+    ->toImplement(ShouldQueue::class);
 
 arch()->expect('App')
-    ->not->toExtend(\Illuminate\Mail\Mailable::class)
+    ->not->toExtend(Mailable::class)
     ->ignoring('App\Mail');
 
 arch()->expect('App\Jobs')
     ->classes()
-    ->toImplement(\Illuminate\Contracts\Queue\ShouldQueue::class);
+    ->toImplement(ShouldQueue::class);
 
 arch()->expect('App\Jobs')
     ->classes()
@@ -111,31 +122,31 @@ arch()->expect('App\Listeners')
     ->toHaveMethod('handle');
 
 arch()->expect('App\Notifications')
-    ->toExtend(\Illuminate\Notifications\Notification::class);
+    ->toExtend(Notification::class);
 
 arch()->expect('App')
-    ->not->toExtend(\Illuminate\Notifications\Notification::class)
+    ->not->toExtend(Notification::class)
     ->ignoring('App\Notifications');
 
 arch()->expect('App\Providers')
     ->toHaveSuffix('ServiceProvider');
 
 arch()->expect('App\Providers')
-    ->toExtend(\Illuminate\Support\ServiceProvider::class);
+    ->toExtend(ServiceProvider::class);
 
 arch()->expect('App\Providers')
     ->not->toBeUsed()
-    ->ignoring(\App\LaravelExtensions\StrictGates\AuthServiceProvider::class);
+    ->ignoring(AuthServiceProvider::class);
 
 arch()->expect('App')
-    ->not->toExtend(\Illuminate\Support\ServiceProvider::class)
+    ->not->toExtend(ServiceProvider::class)
     ->ignoring('App\Providers')
-    ->ignoring(\App\LaravelExtensions\StrictGates\AuthServiceProvider::class);
+    ->ignoring(AuthServiceProvider::class);
 
 arch()->expect('App')
     ->not->toHaveSuffix('ServiceProvider')
     ->ignoring('App\Providers')
-    ->ignoring(\App\LaravelExtensions\StrictGates\AuthServiceProvider::class);
+    ->ignoring(AuthServiceProvider::class);
 
 arch()->expect('App')
     ->not->toHaveSuffix('Controller')

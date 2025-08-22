@@ -20,7 +20,7 @@ class FormDefinitionToMapPoint extends Model
     protected $table = 'form_definition_to_map_points';
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FormDefinition, $this>
+     * @return BelongsTo<FormDefinition, $this>
      */
     public function formDefinition(): BelongsTo
     {
@@ -28,7 +28,7 @@ class FormDefinitionToMapPoint extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FormField, $this>
+     * @return BelongsTo<FormField, $this>
      */
     public function titleField(): BelongsTo
     {
@@ -36,7 +36,7 @@ class FormDefinitionToMapPoint extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FormField, $this>
+     * @return BelongsTo<FormField, $this>
      */
     public function descriptionField(): BelongsTo
     {
@@ -44,7 +44,7 @@ class FormDefinitionToMapPoint extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FormField, $this>
+     * @return BelongsTo<FormField, $this>
      */
     public function coordinateField(): BelongsTo
     {

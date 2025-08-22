@@ -12,7 +12,7 @@ class AdviceStatusGroup extends Pivot
     ];
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Group, $this>
+     * @return BelongsTo<Group, $this>
      */
     public function group(): BelongsTo
     {
@@ -20,7 +20,7 @@ class AdviceStatusGroup extends Pivot
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\AdviceStatus, $this>
+     * @return BelongsTo<AdviceStatus, $this>
      */
     public function adviceStatus(): BelongsTo
     {

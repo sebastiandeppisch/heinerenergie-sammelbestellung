@@ -5,13 +5,15 @@ namespace App\Traits;
 use App\Models\Group;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Collection;
 
 trait HasGroups
 {
     /**
      * Get all groups this user belongs to
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\Group, $this, \Illuminate\Database\Eloquent\Relations\Pivot>
+     *
+     * @return BelongsToMany<Group, $this, Pivot>
      */
     public function groups(): BelongsToMany
     {
@@ -22,7 +24,8 @@ trait HasGroups
 
     /**
      * Get all groups where this user is an admin
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\Group, $this, \Illuminate\Database\Eloquent\Relations\Pivot>
+     *
+     * @return BelongsToMany<Group, $this, Pivot>
      */
     public function administeredGroups(): BelongsToMany
     {

@@ -3,11 +3,12 @@
 namespace Database\Factories;
 
 use App\Enums\AdviceStatusResult;
+use App\Models\AdviceStatus;
 use App\Models\Group;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\AdviceStatus>
+ * @extends Factory<AdviceStatus>
  */
 class AdviceStatusFactory extends Factory
 {

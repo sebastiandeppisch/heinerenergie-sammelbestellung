@@ -34,7 +34,7 @@ class FormFieldOption extends Model
     ];
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FormField, $this>
+     * @return BelongsTo<FormField, $this>
      */
     public function field(): BelongsTo
     {

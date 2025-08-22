@@ -10,7 +10,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Facades\Storage;
+use Override;
 
 class Group extends Model
 {
@@ -32,7 +34,8 @@ class Group extends Model
 
     /**
      * Get the users that belong to this group
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\User, $this, \Illuminate\Database\Eloquent\Relations\Pivot>
+     *
+     * @return BelongsToMany<User, $this, Pivot>
      */
     public function users(): BelongsToMany
     {
@@ -43,7 +46,8 @@ class Group extends Model
 
     /**
      * Get the admins of this group
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\User, $this, \Illuminate\Database\Eloquent\Relations\Pivot>
+     *
+     * @return BelongsToMany<User, $this, Pivot>
      */
     public function admins(): BelongsToMany
     {
@@ -54,7 +58,8 @@ class Group extends Model
 
     /**
      * Get the parent group
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Group, $this>
+     *
+     * @return BelongsTo<\App\Models\Group, $this>
      */
     public function parent(): BelongsTo
     {
@@ -63,7 +68,8 @@ class Group extends Model
 
     /**
      * Get the child groups
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Group, $this>
+     *
+     * @return HasMany<\App\Models\Group, $this>
      */
     public function children(): HasMany
     {
@@ -72,7 +78,8 @@ class Group extends Model
 
     /**
      * Get all advices belonging to this group
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Advice, $this>
+     *
+     * @return HasMany<Advice, $this>
      */
     public function advices(): HasMany
     {
@@ -131,7 +138,7 @@ class Group extends Model
         return $this->logo_path ? Storage::url($this->logo_path) : null;
     }
 
-    #[\Override]
+    #[Override]
     public function delete()
     {
         if ($this->logo_path) {
@@ -161,7 +168,7 @@ class Group extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\AdviceStatus, $this, \Illuminate\Database\Eloquent\Relations\Pivot>
+     * @return BelongsToMany<AdviceStatus, $this, Pivot>
      */
     public function usableStatuses(): BelongsToMany
     {
@@ -169,7 +176,7 @@ class Group extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\AdviceStatus, $this>
+     * @return HasMany<AdviceStatus, $this>
      */
     public function ownStatuses(): HasMany
     {

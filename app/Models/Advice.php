@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Wnx\Sends\Contracts\HasSends;
@@ -69,7 +70,7 @@ class Advice extends Model implements HasSends, Pointable
     ];
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this>
+     * @return BelongsTo<User, $this>
      */
     public function advisor(): BelongsTo
     {
@@ -77,7 +78,7 @@ class Advice extends Model implements HasSends, Pointable
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\AdviceStatus, $this>
+     * @return BelongsTo<AdviceStatus, $this>
      */
     public function status(): BelongsTo
     {
@@ -85,7 +86,7 @@ class Advice extends Model implements HasSends, Pointable
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany<\App\Models\User, $this, \Illuminate\Database\Eloquent\Relations\Pivot>
+     * @return MorphToMany<User, $this, Pivot>
      */
     public function shares(): MorphToMany
     {
@@ -123,7 +124,7 @@ class Advice extends Model implements HasSends, Pointable
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Group, $this>
+     * @return BelongsTo<Group, $this>
      */
     public function group(): BelongsTo
     {
@@ -131,7 +132,7 @@ class Advice extends Model implements HasSends, Pointable
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\AdviceEvent, $this>
+     * @return HasMany<AdviceEvent, $this>
      */
     public function events(): HasMany
     {

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AdviceStatus extends Model
@@ -21,7 +22,7 @@ class AdviceStatus extends Model
     protected $fillable = ['name', 'result', 'group_id'];
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Advice, $this>
+     * @return BelongsTo<Advice, $this>
      */
     public function advices(): BelongsTo
     {
@@ -29,7 +30,7 @@ class AdviceStatus extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Group, $this>
+     * @return BelongsTo<Group, $this>
      */
     public function ownerGroup(): BelongsTo
     {
@@ -37,7 +38,7 @@ class AdviceStatus extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\Group, $this, \Illuminate\Database\Eloquent\Relations\Pivot>
+     * @return BelongsToMany<Group, $this, Pivot>
      */
     public function usingGroups(): BelongsToMany
     {

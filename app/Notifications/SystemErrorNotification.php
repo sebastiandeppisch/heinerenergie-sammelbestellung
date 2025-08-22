@@ -6,6 +6,7 @@ use App\Models\Advice;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Override;
 
 class SystemErrorNotification extends BaseNotification implements ShouldQueue
 {
@@ -23,7 +24,7 @@ class SystemErrorNotification extends BaseNotification implements ShouldQueue
     /**
      * Get the mail representation of the notification.
      */
-    #[\Override]
+    #[Override]
     public function toMail($notifiable): MailMessage
     {
         $mail = parent::toMail($notifiable);

@@ -2,7 +2,9 @@
 
 namespace App\ValueObjects;
 
-class Meter implements \Stringable
+use Stringable;
+
+class Meter implements Stringable
 {
     public function __construct(
         private readonly float $value
