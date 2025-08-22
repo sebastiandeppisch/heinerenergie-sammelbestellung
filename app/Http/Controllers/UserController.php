@@ -62,8 +62,6 @@ class UserController extends Controller
     {
         $user = $this->user();
 
-        CacheUsersAdvicePolicies::dispatchAfterResponse($user);
-
         if (! $user->isGlobalAdmin()) {
             Log::error('User is not a system admin', ['user' => $user->id]);
             $this->sessionService->clear();
@@ -72,6 +70,9 @@ class UserController extends Controller
         }
 
         $this->sessionService->actAsSystemAdmin();
+
+        $groupContext = app(SessionGroupContextFactory::class)->createFromSession();
+        CacheUsersAdvicePolicies::dispatchAfterResponse($user, $groupContext);
 
         if ($redirectTo = $this->sessionService->getRedirectAfterSelectionAndForget()) {
             return redirect()->to($redirectTo);
