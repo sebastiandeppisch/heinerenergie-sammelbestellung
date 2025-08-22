@@ -7,6 +7,7 @@ use App\Enums\FieldType;
 use App\Http\Requests\StoreFormSubmissionRequest;
 use App\Models\FormDefinition;
 use App\Models\FormField;
+use App\Services\CurrentGroupService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -15,6 +16,7 @@ class FormSubmitController extends Controller
 {
     public function show(FormDefinition $formDefinition)
     {
+        app(CurrentGroupService::class)->setGroup($formDefinition->group);
 
         return Inertia::render('Forms/Show', [
             'formDefinition' => FormDefinitionData::fromModel($formDefinition),
@@ -23,6 +25,7 @@ class FormSubmitController extends Controller
 
     public function submit(StoreFormSubmissionRequest $request, FormDefinition $formDefinition)
     {
+        app(CurrentGroupService::class)->setGroup($formDefinition->group);
 
         DB::transaction(function () use ($formDefinition, $request) {
             $submission = $formDefinition->createSubmission();

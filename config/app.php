@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'Ehrenamt CRM'),
 
     'admin_email' => env('ADMIN_EMAIL', null),
 

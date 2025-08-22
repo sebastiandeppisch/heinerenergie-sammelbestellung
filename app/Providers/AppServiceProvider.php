@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Actions\FetchCoordinateByAddress;
 use App\Actions\FetchCoordinateByFreeText;
+use App\Services\CurrentGroupService;
 use App\ValueObjects\Address;
 use App\ValueObjects\Coordinate;
 use Illuminate\Database\Eloquent\Model;
@@ -62,6 +63,10 @@ class AppServiceProvider extends ServiceProvider
                 return new Nominatim($url, $defaultHeader);
             });
         }
+
+        $this->app->singleton(CurrentGroupService::class, function () {
+            return new CurrentGroupService;
+        });
 
         Model::shouldBeStrict(! $this->app->isProduction());
     }

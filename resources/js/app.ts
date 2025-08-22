@@ -12,11 +12,10 @@ import library from './fontawesome'
 library.add()
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import SideNavOuterToolbar from './layouts/SideNavOuterToolbar.vue';
 import AppLayout from './layouts/AppLayout.vue';
 
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'Ehrenamt CRM';
 
 createInertiaApp({
 	title: (title) => `${title} - ${appName}`,
