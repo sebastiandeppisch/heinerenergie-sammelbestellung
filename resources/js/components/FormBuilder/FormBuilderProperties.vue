@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { Button } from '@/shadcn/components/ui/button';
+import Card from '@/shadcn/components/ui/card/Card.vue';
+import CardContent from '@/shadcn/components/ui/card/CardContent.vue';
+import CardHeader from '@/shadcn/components/ui/card/CardHeader.vue';
 import { Checkbox } from '@/shadcn/components/ui/checkbox';
 import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
@@ -146,10 +149,9 @@ function onValueChanged(e: any) {
 </script>
 
 <template>
-    <div class="properties-panel">
-        <h3 class="panel-title">Feldeigenschaften</h3>
-
-        <div class="panel-content p-1">
+    <Card>
+        <CardHeader>Feldeigenschaften</CardHeader>
+        <CardContent>
             <form @submit.prevent="updateField">
                 <div class="form-section">
                     <h4 class="section-title">Allgemein</h4>
@@ -265,8 +267,8 @@ function onValueChanged(e: any) {
                     <Button variant="outline" class="add-option-btn" @click="addOption"> <PlusIcon /> Option hinzufügen </Button>
                 </div>
             </div>
-        </div>
-    </div>
+        </CardContent>
+    </Card>
 </template>
 
 <style scoped>

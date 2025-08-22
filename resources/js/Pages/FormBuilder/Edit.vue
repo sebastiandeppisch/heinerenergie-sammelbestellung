@@ -300,7 +300,6 @@ const nullsafeDescription = computed<string>({
 }
 
 .form-builder__header {
-    background: #f8f8f8;
     padding: 15px;
     border-radius: 4px;
 }
@@ -321,7 +320,6 @@ const nullsafeDescription = computed<string>({
 .form-builder__canvas,
 .form-builder__properties,
 .form-builder__preview {
-    background: #f8f8f8;
     padding: 15px;
     border-radius: 4px;
     overflow: auto;
