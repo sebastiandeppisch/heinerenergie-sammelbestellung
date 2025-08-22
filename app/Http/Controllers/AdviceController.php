@@ -44,6 +44,7 @@ class AdviceController extends Controller
 
     public function show(Advice $advice)
     {
+        $advice->loadMissing('shares', 'group', 'group.parent', 'advisor');
         if (! Auth::user()->can('view', $advice)) {
             return redirect('/advices')->withErrors('Du hast keine Berechtigung, diese Beratung zu sehen');
         }

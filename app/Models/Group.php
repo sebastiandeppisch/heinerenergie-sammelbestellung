@@ -88,9 +88,11 @@ class Group extends Model
     public function ancestors(): Collection
     {
         $ancestors = new Collection;
+        $this->loadMissing('parent');
         $current = $this->parent;
 
         while ($current !== null) {
+            $current->loadMissing('parent');
             $ancestors->push($current);
             $current = $current->parent;
         }

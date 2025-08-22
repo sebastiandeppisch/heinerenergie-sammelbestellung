@@ -21,7 +21,7 @@ class CacheUsersAdvicePolicies implements ShouldQueue
     {
         app()->instance(GroupContextContract::class, $this->groupContext);
 
-        foreach (Advice::all() as $advice) {
+        foreach (Advice::with('shares', 'group', 'advisor')->get() as $advice) {
             $this->user->can('view', $advice);
             $this->user->can('viewDataProtected', $advice);
         }
