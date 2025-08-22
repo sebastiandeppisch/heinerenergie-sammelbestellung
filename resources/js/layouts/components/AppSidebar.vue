@@ -14,7 +14,7 @@ import {
     SidebarMenuItem,
 } from '@/shadcn/components/ui/sidebar';
 import { Link } from '@inertiajs/vue3';
-import { FileText, Github, LayoutGrid, Map, MessageSquare, Settings, Table, User, Users } from 'lucide-vue-next';
+import { FileText, Github, LayoutGrid, Map, MessageSquare, Settings, Table, User, UserCog, Users } from 'lucide-vue-next';
 import { route } from 'ziggy-js';
 import AppLogo from './AppLogo.vue';
 const mainNavItems: NavItem[] = [
@@ -41,28 +41,36 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Initiativen',
-        href: '/groups',
-        icon: Users,
+        icon: UserCog,
+        children: [
+            {
+                title: 'Initiativen-Verwaltung',
+                href: '/groups',
+                icon: Users,
+            },
+            {
+                title: 'Berater*innen',
+                href: '/users',
+                icon: User,
+            },
+        ],
     },
-    {
-        title: 'Berater*innen',
-        href: '/users',
-        icon: User,
-    },
-    {
-        title: 'Einstellungen',
-        href: '/settings',
-        icon: Settings,
-    },
+
     {
         title: 'Formulare',
-        href: '/form-definitions',
         icon: FileText,
-    },
-    {
-        title: 'Formulareinträge',
-        href: '/form-submissions',
-        icon: MessageSquare,
+        children: [
+            {
+                title: 'Formular-Verwaltung',
+                href: '/form-definitions',
+                icon: FileText,
+            },
+            {
+                title: 'Formulareinträge',
+                href: '/form-submissions',
+                icon: MessageSquare,
+            },
+        ],
     },
     {
         title: 'Kartenpunkte',
@@ -79,6 +87,11 @@ const mainNavItems: NavItem[] = [
                 icon: Map,
             },
         ],
+    },
+    {
+        title: 'Einstellungen',
+        href: '/settings',
+        icon: Settings,
     },
 ];
 
