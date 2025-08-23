@@ -48,7 +48,7 @@ class AdviceController extends Controller
     {
         $advice->loadMissing('shares', 'group', 'group.parent', 'advisor');
         if (! Auth::user()->can('view', $advice)) {
-            return redirect('/advices')->withErrors('Du hast keine Berechtigung, diese Beratung zu sehen');
+            return redirect('/advices')->with('error', 'Du hast keine Berechtigung, diese Beratung zu sehen');
         }
 
         $advice->loadMissing('events', 'events.user');

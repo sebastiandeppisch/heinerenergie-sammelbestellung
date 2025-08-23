@@ -5,6 +5,7 @@ import { DxLoadIndicator } from 'devextreme-vue/load-indicator';
 import DxTextArea from 'devextreme-vue/text-area';
 import notify from 'devextreme/ui/notify';
 import { computed, ref } from 'vue';
+import { route } from 'ziggy-js';
 
 type BaseAdvice = Pick<
     App.Models.Advice,
@@ -48,7 +49,7 @@ function submit() {
     loading.value = true;
     const startTime = new Date().getTime();
     axios
-        .post('https://balkon.heinerenergie.de/api/newadvice', advice.value)
+        .post(route('api.newadvice'), advice.value)
         .then((response) => {
             const endTime = new Date().getTime();
             const timeDiff = endTime - startTime;

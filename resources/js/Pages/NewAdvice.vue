@@ -41,6 +41,10 @@ defineOptions({
     layout: PublicLayout,
 });
 
+const props = defineProps<{
+    groupId: string;
+}>();
+
 const r = reactive({
     advice: {
         commentary: null,
@@ -60,6 +64,7 @@ const r = reactive({
         place_notes: '',
         landlord_exists: null,
         type: null,
+        group_id: props.groupId,
     } as NewAdvice,
     selectedSlide: 0,
 });

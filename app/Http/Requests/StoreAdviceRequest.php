@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Group;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreAdviceRequest extends FormRequest
@@ -42,6 +43,15 @@ class StoreAdviceRequest extends FormRequest
             'landlord_exists' => 'nullable|boolean',
             'place_notes' => 'nullable|string|max:65535',
             'type' => 'integer|between:0,2',
+            'group_id' => 'uuid|exists:groups,uuid',
         ];
+    }
+
+    public function getData(): array
+    {
+        $validated = $this->validated();
+        $validated['group_id'] = Group::where('uuid', $validated['group_id'])->first()->id;
+
+        return $validated;
     }
 }

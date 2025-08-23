@@ -13,7 +13,7 @@ class StoreAdviceController extends Controller
     public function __invoke(StoreAdviceRequest $request)
     {
         $advice = new Advice;
-        $advice->fill($request->validated());
+        $advice->fill($request->getData());
         $advice->save();
 
         Mail::to($advice->email)->send(new AdviceCreated($advice));

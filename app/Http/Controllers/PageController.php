@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Data\GroupData;
+use App\Models\Group;
 use App\Models\Setting;
 use App\Models\User;
 use App\Services\SessionService;
@@ -82,7 +83,9 @@ class PageController extends Controller
 
     public function newAdvice()
     {
-        return Inertia::render('NewAdvice');
+        return Inertia::render('NewAdvice', [
+            'groupId' => Group::latest()->first()?->uuid,
+        ]);
     }
 
     public function impress()

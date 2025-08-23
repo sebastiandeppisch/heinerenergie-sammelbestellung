@@ -84,7 +84,7 @@ return new class extends Migration
 
             $table->timestamps();
             $table->foreignIdFor(FormSubmission::class)->constrained();
-            $table->foreignIdFor(FormField::class)->constrained();
+            $table->foreignIdFor(FormField::class)->nullable()->constrained();
             $table->json('value')->nullable();
             $table->string('type');
             $table->string('label');
@@ -98,7 +98,7 @@ return new class extends Migration
             $table->uuid('uuid')->unique();
 
             $table->foreignIdFor(SubmissionField::class)->constrained();
-            $table->foreignIdFor(FormFieldOption::class)->constrained();
+            $table->foreignIdFor(FormFieldOption::class)->nullable()->constrained();
             $table->string('label');
             $table->string('value');
             $table->integer('sort_order');

@@ -2,6 +2,7 @@
 import { LFeatureGroup, LIcon, LMap, LMarker, LPolygon, LTileLayer } from '@vue-leaflet/vue-leaflet';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet-toolbar/dist/leaflet.toolbar.css';
+import 'leaflet/dist/leaflet.css';
 import { computed, nextTick, ref } from 'vue';
 
 import L, { DrawEvents, LatLng, LatLngExpression, Point, PointExpression } from 'leaflet';

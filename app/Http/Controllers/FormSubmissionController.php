@@ -17,7 +17,7 @@ class FormSubmissionController extends Controller
     public function index(IndexFormSubmissionRequest $request)
     {
         $formsubmissions = FormSubmission::query()
-            ->with(['submissionFields', 'submissionFields.formField', 'submissionFields.formField.options']);
+            ->with(['submissionFields', 'submissionFields.formField', 'submissionFields.formField.options', 'submissionFields.options']);
 
         if ($request->groupByForm()) {
             $formsubmissions = $formsubmissions->orderBy('form_definition_id');

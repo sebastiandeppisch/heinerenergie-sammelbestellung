@@ -49,7 +49,7 @@ class FormDefinitionService
 
             $this->updateFieldOptions($field->options, $formField);
         }
-        FormField::whereNotIn('id', $formFieldIds)->delete();
+        FormField::whereNotIn('id', $formFieldIds)->get()->each->delete();
     }
 
     /**
@@ -71,7 +71,7 @@ class FormDefinitionService
 
             $formOptionIds[] = $option->id;
         }
-        FormFieldOption::whereNotIn('id', $formOptionIds)->delete();
+        FormFieldOption::whereNotIn('id', $formOptionIds)->get()->each->delete();
     }
 
     public function storeFormDefinitionData(FormDefinitionData $formDefinitionData): FormDefinition

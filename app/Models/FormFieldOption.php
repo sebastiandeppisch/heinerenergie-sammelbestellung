@@ -48,4 +48,11 @@ class FormFieldOption extends Model
             'is_default' => $this->is_default,
         ]);
     }
+
+    public function delete(): ?bool
+    {
+        SubmissionFieldOption::where('form_field_option_id', $this->id)->update(['form_field_option_id' => null]);
+
+        return parent::delete();
+    }
 }

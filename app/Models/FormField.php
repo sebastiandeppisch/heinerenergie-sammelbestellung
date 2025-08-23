@@ -152,4 +152,11 @@ class FormField extends Model
     {
         return $this->submissionFields()->where('form_submission_id', $submission->id)->firstOrFail();
     }
+
+    public function delete(): ?bool
+    {
+        SubmissionField::where('form_field_id', $this->id)->update(['form_field_id' => null]);
+
+        return parent::delete();
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Actions\FetchCoordinateByAddress;
+use App\Data\UserData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SetAddressRequest;
 use App\Http\Requests\SetPictureRequest;
@@ -48,7 +49,7 @@ class UserController extends Controller
         $users = $this->dxFilter($request, $query)->get();
 
         // @phpstan-ignore-next-line
-        return $users->filter(fn (User $user) => $this->user()->can('view', $user))->values();
+        return $users->filter(fn (User $user) => $this->user()->can('view', $user))->values()->map(fn ($user) => UserData::fromModel($user, false));
     }
 
     public function store(StoreUserRequest $request)
