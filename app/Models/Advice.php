@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Carbon;
 use App\Contracts\Pointable;
 use App\Enums\AdviceStatusResult;
 use App\Enums\AdviceType;
@@ -22,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\MorphPivot;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Wnx\Sends\Contracts\HasSends;
 use Wnx\Sends\Support\HasSendsTrait;
 

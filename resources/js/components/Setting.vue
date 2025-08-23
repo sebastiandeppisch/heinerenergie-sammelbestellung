@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { reactive } from 'vue';
 import { DxButton } from 'devextreme-vue/button';
 import { DxHtmlEditor, DxMediaResizing, DxToolbar } from 'devextreme-vue/html-editor';
 import DxNumberBox from 'devextreme-vue/number-box';
 import DxSwitch from 'devextreme-vue/switch';
+import { reactive } from 'vue';
 
 import axios from 'axios';
 import DxTextBox from 'devextreme-vue/text-box';

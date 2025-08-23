@@ -1,8 +1,7 @@
-import { reactive } from 'vue';
 import { AxiosError } from 'axios';
 import notify from 'devextreme/ui/notify';
 import moment from 'moment';
-import { onMounted, onUnmounted, Ref } from 'vue';
+import { onMounted, onUnmounted, reactive, Ref } from 'vue';
 
 function formatPriceCell(cell: { value: number | string }): string {
     return formatPrice(parseFloat(cell.value.toString()));
