@@ -3,12 +3,12 @@
 use App\Http\Controllers\AdviceController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\DevLoginController;
-use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\FormDefinitionController;
 use App\Http\Controllers\FormSubmissionController;
 use App\Http\Controllers\FormSubmitController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\MapPointCategoryController;
 use App\Http\Controllers\MapPointController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\UserController;
@@ -69,7 +69,7 @@ Route::middleware('auth')->group(function () {
     Route::get('mappoints-map', [MapPointController::class, 'map'])->name('map-points-map');
 
     Route::resource('mappoints', MapPointController::class);
-    Route::resource('categories', CategoryController::class);
+    Route::resource('mappoint-categories', MapPointCategoryController::class);
 });
 
 Route::get('/change-password', [PageController::class, 'changePassword'])->name('password.reset');

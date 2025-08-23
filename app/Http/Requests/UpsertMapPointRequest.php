@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\MapPointCategory;
 use App\Rules\GeographicCoordinate;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -29,7 +30,16 @@ class UpsertMapPointRequest extends FormRequest
             'description' => 'nullable',
             'coordinate' => new GeographicCoordinate,
             'published' => 'boolean',
-            'category_id' => 'nullable|exists:categories,uuid'
+            'category_id' => 'nullable|exists:map_point_categories,uuid',
         ];
+    }
+
+    public function getData(): array
+    {
+        $validated = $this->validated();
+
+        $validated['category_id'] = MapPointCategory::where('uuid', $validated['category_id'])->first()?->id;
+
+        return $validated;
     }
 }

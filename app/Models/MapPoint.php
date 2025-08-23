@@ -30,7 +30,7 @@ class MapPoint extends Model
         'lat',
         'coordinate',
         'published',
-        'category_id'
+        'category_id',
     ];
 
     protected $casts = [
@@ -49,7 +49,6 @@ class MapPoint extends Model
 
     public function category()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(MapPointCategory::class, 'category_id');
     }
-
 }

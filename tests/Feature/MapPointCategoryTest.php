@@ -1,12 +1,14 @@
 <?php
 
-use App\Models\User;
 use App\Models\Group;
-use App\Models\Category;
+use App\Models\MapPoint;
+use App\Models\MapPointCategory;
+use App\Models\User;
 use App\Services\SessionService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
@@ -24,10 +26,10 @@ beforeEach(function () {
 });
 
 test('admin can view categories index', function () {
-    $categories = Category::factory()->count(3)->create();
+    $categories = MapPointCategory::factory()->count(3)->create();
 
     $response = $this->actingAs($this->admin)
-        ->get(route('categories.index'));
+        ->get(route('mappoint-categories.index'));
 
     $response->assertStatus(200);
     $response->assertInertia(fn ($page) => $page
@@ -40,14 +42,14 @@ test('admin can view categories index', function () {
 test('regular user cannot access categories', function () {
 
     $response = $this->actingAs($this->regularUser)
-        ->get(route('categories.index'));
+        ->get(route('mappoint-categories.index'));
 
     $response->assertStatus(403);
 });
 
 test('admin can view create category form', function () {
     $response = $this->actingAs($this->admin)
-        ->get(route('categories.create'));
+        ->get(route('mappoint-categories.create'));
 
     $response->assertStatus(200);
     $response->assertInertia(fn ($page) => $page
@@ -62,12 +64,12 @@ test('admin can create category without image', function () {
     ];
 
     $response = $this->actingAs($this->admin)
-        ->post(route('categories.store'), $categoryData);
+        ->post(route('mappoint-categories.store'), $categoryData);
 
     $response->assertRedirect();
     $response->assertSessionHas('success');
 
-    $this->assertDatabaseHas('categories', [
+    $this->assertDatabaseHas('map_point_categories', [
         'name' => 'Test Category',
         'image_path' => null,
     ]);
@@ -77,30 +79,30 @@ test('admin can create category with image', function () {
     Storage::fake('public');
 
     $image = UploadedFile::fake()->image('category-icon.jpg', 100, 100);
-    
+
     $categoryData = [
         'name' => 'Test Category with Image',
         'image' => $image,
     ];
 
     $response = $this->actingAs($this->admin)
-        ->post(route('categories.store'), $categoryData);
+        ->post(route('mappoint-categories.store'), $categoryData);
 
     $response->assertRedirect();
     $response->assertSessionHas('success');
 
-    $category = Category::where('name', 'Test Category with Image')->first();
+    $category = MapPointCategory::where('name', 'Test Category with Image')->first();
     $this->assertNotNull($category);
     $this->assertNotNull($category->image_path);
-    
+
     Storage::disk('public')->assertExists($category->image_path);
 });
 
 test('admin can view edit category form', function () {
-    $category = Category::factory()->create();
+    $category = MapPointCategory::factory()->create();
 
     $response = $this->actingAs($this->admin)
-        ->get(route('categories.edit', $category));
+        ->get(route('mappoint-categories.edit', $category));
 
     $response->assertStatus(200);
     $response->assertInertia(fn ($page) => $page
@@ -111,39 +113,37 @@ test('admin can view edit category form', function () {
 });
 
 test('admin can update category', function () {
-    $category = Category::factory()->create(['name' => 'Old Name']);
+    $this->actingAs($this->admin);
+    $category = MapPointCategory::factory()->create(['name' => 'Old Name']);
 
-    $updateData = [
+    $response = $this->put(route('mappoint-categories.update', $category), [
         'name' => 'Updated Category Name',
-    ];
-
-    $response = $this->actingAs($this->admin)
-        ->put(route('categories.update', $category), $updateData);
+    ]);
 
     $response->assertRedirect();
     $response->assertSessionHas('success');
 
-    $category->refresh();
+    $category = $category->refresh();
     $this->assertEquals('Updated Category Name', $category->name);
 });
 
 test('admin can update category with new image', function () {
     Storage::fake('public');
-    
+
     $oldImage = UploadedFile::fake()->image('old-icon.jpg');
-    $category = Category::factory()->create([
+    $category = MapPointCategory::factory()->create([
         'image_path' => $oldImage->store('categories', 'public'),
     ]);
 
     $newImage = UploadedFile::fake()->image('new-icon.jpg', 100, 100);
-    
+
     $updateData = [
         'name' => $category->name,
         'image' => $newImage,
     ];
 
     $response = $this->actingAs($this->admin)
-        ->put(route('categories.update', $category), $updateData);
+        ->put(route('mappoint-categories.update', $category), $updateData);
 
     $response->assertRedirect();
     $response->assertSessionHas('success');
@@ -154,47 +154,47 @@ test('admin can update category with new image', function () {
 });
 
 test('admin can delete category', function () {
-    $category = Category::factory()->create();
+    $category = MapPointCategory::factory()->create();
 
     $response = $this->actingAs($this->admin)
-        ->delete(route('categories.destroy', $category));
+        ->delete(route('mappoint-categories.destroy', $category));
 
     $response->assertRedirect();
     $response->assertSessionHas('info');
 
-    $this->assertDatabaseMissing('categories', ['id' => $category->id]);
+    $this->assertDatabaseMissing('map_point_categories', ['id' => $category->id]);
 });
 
 test('admin can delete category with image', function () {
     Storage::fake('public');
-    
+
     $image = UploadedFile::fake()->image('category-icon.jpg');
-    $imagePath = $image->store('categories', 'public');
-    
-    $category = Category::factory()->create([
+    $imagePath = $image->store('map_point_categories', 'public');
+
+    $category = MapPointCategory::factory()->create([
         'image_path' => $imagePath,
     ]);
 
     $response = $this->actingAs($this->admin)
-        ->delete(route('categories.destroy', $category));
+        ->delete(route('mappoint-categories.destroy', $category));
 
     $response->assertRedirect();
     $response->assertSessionHas('info');
 
-    $this->assertDatabaseMissing('categories', ['id' => $category->id]);
+    $this->assertDatabaseMissing('map_point_categories', ['id' => $category->id]);
     Storage::disk('public')->assertMissing($imagePath);
 });
 
 test('category validation works correctly', function () {
     $response = $this->actingAs($this->admin)
-        ->post(route('categories.store'), []);
+        ->post(route('mappoint-categories.store'), []);
 
     $response->assertSessionHasErrors(['name']);
 });
 
 test('image validation works correctly', function () {
     $response = $this->actingAs($this->admin)
-        ->post(route('categories.store'), [
+        ->post(route('mappoint-categories.store'), [
             'name' => 'Test Category',
             'image' => 'not-an-image',
         ]);
@@ -203,7 +203,7 @@ test('image validation works correctly', function () {
 });
 
 test('categories are included in mappoints create form', function () {
-    $categories = Category::factory()->count(2)->create();
+    $categories = MapPointCategory::factory()->count(2)->create();
 
     $response = $this->actingAs($this->admin)
         ->get(route('mappoints.create'));
@@ -216,8 +216,8 @@ test('categories are included in mappoints create form', function () {
 });
 
 test('categories are included in mappoints edit form', function () {
-    $categories = Category::factory()->count(2)->create();
-    $mapPoint = \App\Models\MapPoint::factory()->create();
+    $categories = MapPointCategory::factory()->count(2)->create();
+    $mapPoint = MapPoint::factory()->create();
 
     $response = $this->actingAs($this->admin)
         ->get(route('mappoints.edit', $mapPoint));
@@ -231,20 +231,21 @@ test('categories are included in mappoints edit form', function () {
 });
 
 test('mappoint can be created with category', function () {
-    $category = Category::factory()->create();
+    $category = MapPointCategory::factory()->create();
 
     $mapPointData = [
         'title' => 'Test MapPoint',
         'description' => 'Test description',
         'coordinate' => ['lat' => 52.5, 'lng' => 13.4],
         'published' => true,
-        'category_id' => $category->id,
+        'category_id' => $category->uuid,
     ];
 
     $response = $this->actingAs($this->admin)
         ->post(route('mappoints.store'), $mapPointData);
 
     $response->assertRedirect();
+    $response->assertSessionHasNoErrors();
 
     $this->assertDatabaseHas('map_points', [
         'title' => 'Test MapPoint',
@@ -253,10 +254,10 @@ test('mappoint can be created with category', function () {
 });
 
 test('mappoint can be updated with different category', function () {
-    $category1 = Category::factory()->create();
-    $category2 = Category::factory()->create();
-    
-    $mapPoint = \App\Models\MapPoint::factory()->create([
+    $category1 = MapPointCategory::factory()->create();
+    $category2 = MapPointCategory::factory()->create();
+
+    $mapPoint = MapPoint::factory()->create([
         'category_id' => $category1->id,
     ]);
 
@@ -265,7 +266,7 @@ test('mappoint can be updated with different category', function () {
         'description' => $mapPoint->description,
         'coordinate' => ['lat' => 52.5, 'lng' => 13.4],
         'published' => $mapPoint->published,
-        'category_id' => $category2->id,
+        'category_id' => $category2->uuid,
     ];
 
     $response = $this->actingAs($this->admin)
@@ -278,13 +279,14 @@ test('mappoint can be updated with different category', function () {
 });
 
 test('deleting category sets mappoint category_id to null', function () {
-    $category = Category::factory()->create();
-    $mapPoint = \App\Models\MapPoint::factory()->create([
+    $category = MapPointCategory::factory()->create();
+    $mapPoint = MapPoint::factory()->create([
         'category_id' => $category->id,
     ]);
 
     $this->actingAs($this->admin)
-        ->delete(route('categories.destroy', $category));
+        ->delete(route('mappoint-categories.destroy', $category))
+        ->assertRedirect(route('mappoint-categories.index'));
 
     $mapPoint->refresh();
     $this->assertNull($mapPoint->category_id);

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Button from '@/shadcn/components/ui/button/Button.vue';
 import { router } from '@inertiajs/vue3';
-import { LControlLayers, LLayerGroup, LMap, LMarker, LPopup, LTileLayer } from '@vue-leaflet/vue-leaflet';
+import { LControlLayers, LIcon, LLayerGroup, LMap, LMarker, LPopup, LTileLayer } from '@vue-leaflet/vue-leaflet';
 import { latLng } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Link } from 'lucide-vue-next';
@@ -9,7 +9,8 @@ import { reactive, watch } from 'vue';
 import { route } from 'ziggy-js';
 // Define props
 const props = defineProps<{
-    pointsByType: Record<string, Array<App.Data.MapPointData>>;
+    pointsByCategory: Record<string, Array<App.Data.MapPointData>>;
+    categories: Array<App.Data.MapPointCategoryData>;
 }>();
 
 // Map configuration
@@ -57,6 +58,16 @@ function formatPointableType(type: string): string {
 watch(map, () => {
     window.location.hash = '#' + map.zoom + '/' + map.center.lat + '/' + map.center.lng;
 });
+
+function categoryIdToName(category_id: string): string {
+    const category = props.categories.find((cat) => cat.id === category_id);
+    return category ? category.name : 'Unbekannte Kategorie';
+}
+
+function categoryIdToImagePath(category_id: string): string | undefined {
+    const category = props.categories.find((cat) => cat.id === category_id);
+    return category && category.image_path ? category.image_path : undefined;
+}
 </script>
 
 <template>
@@ -74,8 +85,18 @@ watch(map, () => {
                 <LControlLayers :collapsed="false" :hide-single-base="true" />
                 <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" layer-type="base" name="OpenStreetMap" />
 
-                <LLayerGroup v-for="(points, type) in pointsByType" :key="type" :name="type" layer-type="overlay">
+                <LLayerGroup
+                    v-for="(points, category_id) in pointsByCategory"
+                    :key="category_id"
+                    :name="categoryIdToName(category_id)"
+                    layer-type="overlay"
+                >
                     <LMarker v-for="point in points" :key="point.id" :lat-lng="latLng(point.coordinate.lat, point.coordinate.lng)">
+                        <LIcon
+                            v-if="categoryIdToImagePath(category_id) !== null"
+                            :icon-url="categoryIdToImagePath(category_id)"
+                            :icon-size="[50, 50]"
+                        />
                         <LPopup>
                             <div class="p-2">
                                 <h3 class="text-lg font-bold">{{ point.title }}</h3>

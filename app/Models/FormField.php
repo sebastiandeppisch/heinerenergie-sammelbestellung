@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Validation\Rule;
+use Override;
 
 class FormField extends Model
 {
@@ -153,6 +154,7 @@ class FormField extends Model
         return $this->submissionFields()->where('form_submission_id', $submission->id)->firstOrFail();
     }
 
+    #[Override]
     public function delete(): ?bool
     {
         SubmissionField::where('form_field_id', $this->id)->update(['form_field_id' => null]);

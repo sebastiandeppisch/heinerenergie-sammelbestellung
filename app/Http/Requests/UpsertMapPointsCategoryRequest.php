@@ -2,23 +2,24 @@
 
 namespace App\Http\Requests;
 
-use App\Services\SessionService;
+use App\Models\MapPointCategory;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpsertCategoryRequest extends FormRequest
+class UpsertMapPointsCategoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return app(SessionService::class)->actsAsSystemAdmin();
+        return $this->user()->can('create', MapPointCategory::class);
     }
 
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -26,5 +27,10 @@ class UpsertCategoryRequest extends FormRequest
             'name' => 'required|string|max:255',
             'image' => 'nullable|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ];
+    }
+
+    public function getData(): array
+    {
+        return $this->safe()->only(['name']);
     }
 }

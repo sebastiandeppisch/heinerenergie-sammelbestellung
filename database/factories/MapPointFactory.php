@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\Advice;
 use App\Models\FormSubmission;
 use App\Models\MapPoint;
+use App\Models\MapPointCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -66,11 +67,10 @@ class MapPointFactory extends Factory
         return $this;
     }
 
-    public function withCategory($category = null): Factory{
-        return $this->state(function (array $attributes) use ($category) {
-            return [
-                'category_id' => $category?->id ?? \App\Models\Category::factory()->create()->id,
-            ];
-        });
+    public function withCategory($category = null): Factory
+    {
+        return $this->state(fn (array $attributes) => [
+            'category_id' => $category?->id ?? MapPointCategory::factory()->create()->id,
+        ]);
     }
 }

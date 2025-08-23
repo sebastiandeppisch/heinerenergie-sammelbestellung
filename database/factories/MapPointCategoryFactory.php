@@ -2,12 +2,13 @@
 
 namespace Database\Factories;
 
+use App\Models\MapPointCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Category>
+ * @extends Factory<MapPointCategory>
  */
-class CategoryFactory extends Factory
+class MapPointCategoryFactory extends Factory
 {
     /**
      * Define the model's default state.

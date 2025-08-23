@@ -6,6 +6,7 @@ use App\Models\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 class FormFieldOption extends Model
 {
@@ -49,6 +50,7 @@ class FormFieldOption extends Model
         ]);
     }
 
+    #[Override]
     public function delete(): ?bool
     {
         SubmissionFieldOption::where('form_field_option_id', $this->id)->update(['form_field_option_id' => null]);

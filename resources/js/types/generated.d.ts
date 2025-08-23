@@ -24,13 +24,6 @@ id: string;
 name: string;
 result: App.Enums.AdviceStatusResult;
 };
-export type CategoryData = {
-id: string;
-name: string;
-image_path: string | null;
-map_points_count: number;
-created_at: string | null;
-};
 export type DataProtectedAdviceData = {
 id: string;
 first_name: string;
@@ -138,6 +131,13 @@ name: string;
 email: string;
 is_admin: boolean;
 };
+export type MapPointCategoryData = {
+id: string;
+name: string;
+image_path: string | null;
+map_points_count: number;
+created_at: string | null;
+};
 export type MapPointData = {
 id: string;
 coordinate: App.ValueObjects.Coordinate;
@@ -146,7 +146,6 @@ description: string;
 published: boolean;
 userReadablePointableType: string;
 created_at: any;
-category: App.Data.CategoryData | null;
 category_id: string | null;
 };
 export type PaginationData = {
