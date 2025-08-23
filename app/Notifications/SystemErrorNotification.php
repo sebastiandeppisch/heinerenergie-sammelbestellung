@@ -18,8 +18,10 @@ class SystemErrorNotification extends BaseNotification implements ShouldQueue
     public function __construct(
         public string $title,
         public string $errorMessage,
-        public ?Advice $advice = null
-    ) {}
+        ?Advice $advice = null
+    ) {
+        $this->advice = $advice;
+    }
 
     /**
      * Get the mail representation of the notification.

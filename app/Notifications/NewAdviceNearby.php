@@ -4,11 +4,17 @@ namespace App\Notifications;
 
 use App\Models\Advice;
 use App\ValueObjects\Meter;
+use InvalidArgumentException;
 use Override;
 
 class NewAdviceNearby extends BaseNotification
 {
-    public function __construct(public Advice $advice, public Meter $distance) {}
+    public function __construct(public ?Advice $advice, public Meter $distance)
+    {
+        if ($this->advice === null) {
+            throw new InvalidArgumentException('Advice must not be null');
+        }
+    }
 
     #[Override]
     public function toMail($notifiable)
