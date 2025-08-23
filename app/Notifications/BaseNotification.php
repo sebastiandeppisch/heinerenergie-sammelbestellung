@@ -11,7 +11,7 @@ class BaseNotification extends Notification
 {
     use Queueable;
 
-    public ?Advice $advice;
+    public ?Advice $advice = null;
 
     public function via($notifiable)
     {

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Carbon;
 use App\Contracts\Pointable;
 use App\Enums\AdviceStatusResult;
 use App\Enums\AdviceType;
@@ -29,8 +30,8 @@ use Wnx\Sends\Support\HasSendsTrait;
  * @property ?Address $address
  * @property AdviceType $type
  * @property HouseType|null $house_type
- * @property \Illuminate\Support\Carbon $created_at
- * @property \Illuminate\Support\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class Advice extends Model implements HasSends, Pointable
 {
