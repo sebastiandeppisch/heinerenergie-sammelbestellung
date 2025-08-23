@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import KpiDashboard from '@/components/KpiDashboard.vue';
 import Card from '@/shadcn/components/ui/card/Card.vue';
 import CardContent from '@/shadcn/components/ui/card/CardContent.vue';
 import CardHeader from '@/shadcn/components/ui/card/CardHeader.vue';
@@ -20,6 +19,6 @@ const props = defineProps<{
             </CardContent>
         </Card>
 
-        <KpiDashboard />
+        <!-- <KpiDashboard /> -->
     </div>
 </template>
