@@ -16,6 +16,7 @@ use App\Models\Group;
 use App\Models\User;
 use App\Notifications\AdviceTransferred;
 use App\Services\SessionService;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Wnx\Sends\Models\Send;
@@ -57,9 +58,9 @@ class AdviceController extends Controller
             ->get()
             ->map(fn ($event) => AdviceEventData::fromModel($event));
 
-        $mails = $advice->sends()
-            ->get()
-            ->map(fn (Send $mail) => AdviceEventData::fromMail($mail));
+        /** @var Collection<int, Send> $mails */
+        $mails = $advice->sends()->get();
+        $mails = $mails->map(fn ($mail) => AdviceEventData::fromMail($mail));
 
         $timeline = $events->concat($mails)
             ->sortBy(fn ($item) => $item->created_at)
