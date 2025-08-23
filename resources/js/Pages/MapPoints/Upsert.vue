@@ -38,6 +38,9 @@ function submit() {
         form.post(route('mappoints.store'));
     }
 }
+
+// @ts-expect-error Type instantiation is excessively deep and possibly infinite.
+const errors: Record<string, string> = form.errors;
 </script>
 
 <template>
@@ -58,19 +61,19 @@ function submit() {
                     <div class="space-y-2">
                         <Label for="title">Titel</Label>
                         <Input id="title" v-model="form.title" required />
-                        <p v-if="form.errors.title" class="text-sm text-red-500">{{ form.errors.title }}</p>
+                        <p v-if="errors.title" class="text-sm text-red-500">{{ errors.title }}</p>
                     </div>
 
                     <div class="space-y-2">
                         <Label for="description">Beschreibung</Label>
                         <Textarea id="description" v-model="form.description" rows="4" />
-                        <p v-if="form.errors.description" class="text-sm text-red-500">{{ form.errors.description }}</p>
+                        <p v-if="errors.description" class="text-sm text-red-500">{{ errors.description }}</p>
                     </div>
 
                     <div class="space-y-2">
                         <Label for="coordinate">Ort</Label>
                         <PinLocationMap v-model="form.coordinate" />
-                        <p v-if="form.errors.coordinate" class="text-sm text-red-500">{{ form.errors.coordinate }}</p>
+                        <p v-if="errors.coordinate" class="text-sm text-red-500">{{ errors.coordinate }}</p>
                     </div>
 
                     <div class="space-y-2">
@@ -95,7 +98,7 @@ function submit() {
                     <div class="flex items-center space-x-2">
                         <Switch id="published" v-model="form.published" />
                         <Label for="published">Veröffentlicht</Label>
-                        <p v-if="form.errors.published" class="text-sm text-red-500">{{ form.errors.published }}</p>
+                        <p v-if="errors.published" class="text-sm text-red-500">{{ errors.published }}</p>
                     </div>
 
                     <div v-if="isEditing">

@@ -9,7 +9,7 @@ import { computed, ref } from 'vue';
 import { route } from 'ziggy-js';
 
 const props = defineProps<{
-    category?: App.Data.CategoryData;
+    category?: App.Data.MapPointCategoryData;
 }>();
 
 const isEditing = !!props.category;

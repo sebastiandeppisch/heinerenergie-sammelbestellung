@@ -8,7 +8,7 @@ import { ArrowLeft, Edit, Plus, Trash2 } from 'lucide-vue-next';
 import { route } from 'ziggy-js';
 
 const props = defineProps<{
-    categories: Array<App.Data.CategoryData>;
+    categories: Array<App.Data.MapPointCategoryData>;
 }>();
 
 function deleteCategory(categoryId: string) {
