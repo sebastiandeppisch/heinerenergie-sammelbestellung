@@ -75,7 +75,7 @@ class FormDefinition extends Model
 
     public function getValidationAttributes(): array
     {
-        return $this->fields->mapWithKeys(fn (FormField $field) => [$field->id => $field->label])->toArray();
+        return $this->fields->mapWithKeys(fn (FormField $field) => [$field->uuid => $field->label])->toArray();
     }
 
     public function createSubmission(): FormSubmission

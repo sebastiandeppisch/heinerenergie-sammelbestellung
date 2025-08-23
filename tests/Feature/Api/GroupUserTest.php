@@ -61,7 +61,7 @@ test('admin can add user to group', function () {
             'is_admin',
         ])
         ->assertJson([
-            'id' => $this->user->id,
+            'id' => $this->user->uuid,
             'is_admin' => false,
         ]);
 
@@ -80,7 +80,7 @@ test('admin can add user as admin to group', function () {
         ])
         ->assertOk()
         ->assertJson([
-            'id' => $this->user->id,
+            'id' => $this->user->uuid,
             'is_admin' => true,
         ]);
 });
@@ -104,7 +104,7 @@ test('admin can update user role in group', function () {
         ])
         ->assertOk()
         ->assertJson([
-            'id' => $this->user->id,
+            'id' => $this->user->uuid,
             'is_admin' => true,
         ]);
 
