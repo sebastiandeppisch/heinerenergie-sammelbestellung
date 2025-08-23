@@ -66,12 +66,12 @@ const groups = computed(() => {
 });
 
 const newadvice = reactive({
-    firstName: '',
-    lastName: '',
+    first_name: '',
+    last_name: '',
     phone: '',
     email: '',
     street: '',
-    streetNumber: '',
+    street_number: '',
     zip: '',
     city: '',
     advice_status_id: 1,
@@ -177,12 +177,12 @@ function saveNewAdvice() {
             notify('Beratung erfolgreich angelegt', 'success', 3000);
             router.reload();
             r.newAdvicePopupVisible = false;
-            newadvice.firstName = '';
-            newadvice.lastName = '';
+            newadvice.first_name = '';
+            newadvice.last_name = '';
             newadvice.phone = '';
             newadvice.email = '';
             newadvice.street = '';
-            newadvice.streetNumber = '';
+            newadvice.street_number = '';
             newadvice.zip = '';
             newadvice.city = '';
             newadvice.advice_status_id = 1;
@@ -260,8 +260,8 @@ const adviceStatusResult = new ArrayDataSource([
                 <DxColumn data-field="type" caption="Typ" cell-template="typeIcon">
                     <DxLookup :data-source="adviceTypes" display-expr="name" value-expr="id" />
                 </DxColumn>
-                <DxColumn data-field="firstName" caption="Vorname" :allow-editing="false" />
-                <DxColumn data-field="lastName" caption="Nachname" :allow-editing="false" />
+                <DxColumn data-field="first_name" caption="Vorname" :allow-editing="false" />
+                <DxColumn data-field="last_name" caption="Nachname" :allow-editing="false" />
                 <DxColumn data-field="email" caption="E-Mail Adresse" :allow-editing="false" />
                 <DxColumn data-field="phone" caption="Telefonnummer" :allow-editing="false" />
                 <DxColumn data-field="street" caption="Straße & Nr." :allow-editing="false" cell-template="street" />
@@ -276,7 +276,7 @@ const adviceStatusResult = new ArrayDataSource([
                     <PhysicalValue :value="data.data.distance" unit="m" />
                 </template>
                 <template #street="{ data }">
-                    <div>{{ data.data.street }} {{ data.data.streetNumber }}</div>
+                    <div>{{ data.data.street }} {{ data.data.street_number }}</div>
                 </template>
                 <template #simpleadvisorassignment="{ data }">
                     <div v-if="data.data.advisor_id !== null">{{ r.advisorNames.get(data.data.advisor_id) }}</div>
@@ -302,8 +302,8 @@ const adviceStatusResult = new ArrayDataSource([
                 <DxScrollView width="100%" height="100%">
                     <DxForm label-mode="floating" :col-count="2" :form-data="newadvice">
                         <DxFormGroupItem caption="Name">
-                            <DxFormItem data-field="firstName" :label="{ text: 'Vorname' }" />
-                            <DxFormItem data-field="lastName" :label="{ text: 'Nachname' }" />
+                            <DxFormItem data-field="first_name" :label="{ text: 'Vorname' }" />
+                            <DxFormItem data-field="last_name" :label="{ text: 'Nachname' }" />
                         </DxFormGroupItem>
 
                         <DxFormGroupItem caption="Kontakt">
@@ -313,7 +313,7 @@ const adviceStatusResult = new ArrayDataSource([
 
                         <DxFormGroupItem caption="Adresse">
                             <DxFormItem data-field="street" :label="{ text: 'Straße' }" />
-                            <DxFormItem data-field="streetNumber" :label="{ text: 'Hausnummer' }" />
+                            <DxFormItem data-field="street_number" :label="{ text: 'Hausnummer' }" />
                             <DxFormItem data-field="zip" :label="{ text: 'Postleitzahl' }" />
                             <DxFormItem data-field="city" :label="{ text: 'Stadt' }" />
                         </DxFormGroupItem>

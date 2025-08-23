@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import AdvisorMap from '@/views/AdvisorMap.vue';
 import ProfilePictureUpload from '@/views/ProfilePictureUpload.vue';
-import { ref } from 'vue';
 import axios from 'axios';
 import { DxButton, DxNumberBox } from 'devextreme-vue';
 import DxTextBox from 'devextreme-vue/text-box';
 import notify from 'devextreme/ui/notify';
+import { ref } from 'vue';
 import { user as userData } from '../authHelper';
 
 const user = ref(userData.value);
@@ -36,7 +36,7 @@ function saveAddress() {
                                     <DxTextBox label="Straße" style="margin: 10px" v-model="user.street" />
                                 </div>
                                 <div>
-                                    <DxTextBox label="Nr." width="100px" style="margin: 10px" v-model="user.streetNumber" />
+                                    <DxTextBox label="Nr." width="100px" style="margin: 10px" v-model="user.street_number" />
                                 </div>
                             </div>
 

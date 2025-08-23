@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-type SentAdvice = Pick<App.Models.Advice, 'firstName'>;
+type SentAdvice = Pick<App.Models.Advice, 'first_name'>;
 
 interface Props {
     modelValue: SentAdvice;
@@ -20,7 +20,7 @@ const advice = computed<Props['modelValue']>({
 <template>
     <div style="display: flex; align-items: center; height: 90%; flex-direction: column">
         <div style="font-size: 1.5em; width: 80%; margin-top: 32px">
-            Vielen Dank für Deine Beratungsanfrage, {{ advice.firstName }}. Wir werden uns in Kürze bei Dir melden
+            Vielen Dank für Deine Beratungsanfrage, {{ advice.first_name }}. Wir werden uns in Kürze bei Dir melden
             <font-awesome-icon icon="sun" style="color:" /> <br />
         </div>
         <div style="font-size: 1em; width: 80%; margin-top: 16px">

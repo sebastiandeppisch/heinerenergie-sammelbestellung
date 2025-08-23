@@ -27,7 +27,7 @@ class User extends Authenticatable
         'password',
         'is_admin',
         'street',
-        'streetNumber',
+        'street_number',
         'zip',
         'city',
         'advice_radius',

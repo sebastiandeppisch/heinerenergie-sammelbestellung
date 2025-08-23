@@ -46,8 +46,8 @@ function onSubmit() {
     <div class="" style="padding: 20px">
         <DxForm label-mode="floating" :col-count="2" :form-data="advice">
             <DxGroupItem caption="Name">
-                <DxItem data-field="firstName" :label="{ text: 'Vorname' }" />
-                <DxItem data-field="lastName" :label="{ text: 'Nachname' }" />
+                <DxItem data-field="first_name" :label="{ text: 'Vorname' }" />
+                <DxItem data-field="last_name" :label="{ text: 'Nachname' }" />
             </DxGroupItem>
 
             <DxGroupItem caption="Kontakt">
@@ -57,7 +57,7 @@ function onSubmit() {
 
             <DxGroupItem caption="Adresse">
                 <DxItem data-field="street" :label="{ text: 'Straße' }" />
-                <DxItem data-field="streetNumber" :label="{ text: 'Hausnummer' }" />
+                <DxItem data-field="street_number" :label="{ text: 'Hausnummer' }" />
                 <DxItem data-field="zip" :label="{ text: 'Postleitzahl' }" />
                 <DxItem data-field="city" :label="{ text: 'Stadt' }" />
             </DxGroupItem>

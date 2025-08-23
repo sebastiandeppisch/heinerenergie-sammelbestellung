@@ -25,7 +25,7 @@ test('submitting the form produces an advice', function () {
         $config->emailField->uuid => fake()->safeEmail(),
         $config->addressField->uuid => [
             'street' => fake()->streetAddress(),
-            'streetNumber' => fake()->buildingNumber(),
+            'street_number' => fake()->buildingNumber(),
             'city' => fake()->city(),
             'zip' => fake()->postcode(),
         ],

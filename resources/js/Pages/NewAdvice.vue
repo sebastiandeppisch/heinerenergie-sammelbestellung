@@ -14,21 +14,21 @@ import PublicLayout from '../layouts/PublicLayout.vue';
 type BaseAdvice = Pick<
     App.Models.Advice,
     | 'commentary'
-    | 'helpType_place'
-    | 'helpType_technical'
-    | 'helpType_bureaucracy'
-    | 'helpType_other'
-    | 'houseType'
-    | 'firstName'
-    | 'lastName'
+    | 'help_type_place'
+    | 'help_type_technical'
+    | 'help_type_bureaucracy'
+    | 'help_type_other'
+    | 'house_type'
+    | 'first_name'
+    | 'last_name'
     | 'email'
     | 'phone'
     | 'zip'
     | 'city'
     | 'street'
-    | 'streetNumber'
-    | 'placeNotes'
-    | 'landlordExists'
+    | 'street_number'
+    | 'place_notes'
+    | 'landlord_exists'
     | 'type'
 >;
 
@@ -44,21 +44,21 @@ defineOptions({
 const r = reactive({
     advice: {
         commentary: null,
-        helpType_place: false,
-        helpType_technical: false,
-        helpType_bureaucracy: false,
-        helpType_other: false,
-        houseType: null,
-        firstName: '',
-        lastName: '',
+        help_type_place: false,
+        help_type_technical: false,
+        help_type_bureaucracy: false,
+        help_type_other: false,
+        house_type: null,
+        first_name: '',
+        last_name: '',
         email: '',
         phone: '',
         zip: null,
         city: '',
         street: '',
-        streetNumber: '',
-        placeNotes: '',
-        landlordExists: null,
+        street_number: '',
+        place_notes: '',
+        landlord_exists: null,
         type: null,
     } as NewAdvice,
     selectedSlide: 0,

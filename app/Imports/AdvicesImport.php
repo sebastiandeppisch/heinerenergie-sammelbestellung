@@ -26,7 +26,7 @@ class AdvicesImport implements ToModel, WithHeadingRow
         }
 
         $street = explode(' ', (string) $row['strasse']);
-        $streetNumber = array_pop($street);
+        $street_number = array_pop($street);
         $street = implode(' ', $street);
 
         $type = $row['beratungswunsch'];
@@ -41,10 +41,10 @@ class AdvicesImport implements ToModel, WithHeadingRow
         }
 
         $advice = new Advice([
-            'firstName' => $row['vorname'],
-            'lastName' => $row['nachname'],
+            'first_name' => $row['vorname'],
+            'last_name' => $row['nachname'],
             'street' => $street,
-            'streetNumber' => $streetNumber,
+            'street_number' => $street_number,
             'zip' => $row['plz'],
             'city' => $row['wohnort'],
             'email' => $row['email'],

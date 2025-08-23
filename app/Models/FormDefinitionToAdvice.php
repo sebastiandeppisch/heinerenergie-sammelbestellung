@@ -81,8 +81,8 @@ class FormDefinitionToAdvice extends Model
                 'address' => $addressField->value,
                 'email' => $emailField->value,
                 'phone' => $phoneField->value,
-                'firstName' => $firstNameField->value,
-                'lastName' => $lastNameField->value,
+                'first_name' => $firstNameField->value,
+                'last_name' => $lastNameField->value,
                 'group_id' => $submission->group_id,
             ]);
 

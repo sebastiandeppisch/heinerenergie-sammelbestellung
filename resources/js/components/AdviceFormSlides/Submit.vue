@@ -8,22 +8,22 @@ import { computed, ref } from 'vue';
 
 type BaseAdvice = Pick<
     App.Models.Advice,
-    | 'firstName'
-    | 'lastName'
+    | 'first_name'
+    | 'last_name'
     | 'email'
     | 'phone'
     | 'street'
-    | 'streetNumber'
+    | 'street_number'
     | 'zip'
     | 'city'
     | 'type'
-    | 'helpType_place'
-    | 'helpType_technical'
-    | 'helpType_bureaucracy'
-    | 'helpType_other'
-    | 'houseType'
-    | 'landlordExists'
-    | 'placeNotes'
+    | 'help_type_place'
+    | 'help_type_technical'
+    | 'help_type_bureaucracy'
+    | 'help_type_other'
+    | 'house_type'
+    | 'landlord_exists'
+    | 'place_notes'
     | 'commentary'
 >;
 

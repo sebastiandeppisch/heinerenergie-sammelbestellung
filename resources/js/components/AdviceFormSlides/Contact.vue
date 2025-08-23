@@ -6,7 +6,7 @@ import { computed, reactive, ref } from 'vue';
 import { DxEmailRule, DxRequiredRule, DxValidator } from 'devextreme-vue/validator';
 
 interface Props {
-    modelValue: Pick<App.Models.Advice, 'firstName' | 'lastName' | 'email' | 'phone'>;
+    modelValue: Pick<App.Models.Advice, 'first_name' | 'last_name' | 'email' | 'phone'>;
 }
 
 const props = defineProps<Props>();
@@ -30,11 +30,11 @@ function contactValidated(e: { name: string; isValid: boolean }) {
         r.phoneValid = e.isValid;
     }
 
-    if (e.name === 'firstName') {
+    if (e.name === 'first_name') {
         r.firstNameValid = e.isValid;
     }
 
-    if (e.name === 'lastName') {
+    if (e.name === 'last_name') {
         r.lastNameValid = e.isValid;
     }
 }
@@ -48,8 +48,8 @@ function checkForm() {
         props.modelValue.phone === '' ||
         r.firstNameValid === false ||
         r.lastNameValid === false ||
-        props.modelValue.firstName === '' ||
-        props.modelValue.lastName === ''
+        props.modelValue.first_name === '' ||
+        props.modelValue.last_name === ''
     ) {
         emit('allowForward', false);
     } else {
@@ -76,7 +76,7 @@ const advice = computed<Props['modelValue']>({
 
         <div style="display: flex; flex-direction: row; gap: 16px">
             <DxTextBox
-                v-model="advice.firstName"
+                v-model="advice.first_name"
                 placeholder="Erika"
                 label="Vorname"
                 @change="checkForm"
@@ -85,12 +85,12 @@ const advice = computed<Props['modelValue']>({
                 validation-message-mode="always"
                 width="100%"
             >
-                <DxValidator @validated="contactValidated" name="firstName">
+                <DxValidator @validated="contactValidated" name="first_name">
                     <DxRequiredRule message="Wir benötigen Deinen Vornamen" />
                 </DxValidator>
             </DxTextBox>
             <DxTextBox
-                v-model="advice.lastName"
+                v-model="advice.last_name"
                 placeholder="Musterfrau"
                 validation-message-mode="always"
                 label="Nachname"
@@ -99,7 +99,7 @@ const advice = computed<Props['modelValue']>({
                 value-change-event="keyup"
                 width="100%"
             >
-                <DxValidator @validated="contactValidated" name="lastName">
+                <DxValidator @validated="contactValidated" name="last_name">
                     <DxRequiredRule message="Wir benötigen Deinen Nachnamen" />
                 </DxValidator>
             </DxTextBox>

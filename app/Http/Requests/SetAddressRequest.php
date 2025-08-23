@@ -25,7 +25,7 @@ class SetAddressRequest extends FormRequest
     {
         return [
             'street' => 'nullable|string',
-            'streetNumber' => 'nullable|string',
+            'street_number' => 'nullable|string',
             'zip' => 'nullable|integer',
             'city' => 'nullable|string',
             'advice_radius' => 'nullable|integer',

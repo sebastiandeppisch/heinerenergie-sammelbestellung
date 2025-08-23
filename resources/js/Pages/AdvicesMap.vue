@@ -244,8 +244,8 @@ function runSearch() {
                         <LPopup>
                             <div>
                                 <b
-                                    >{{ advice.firstName }} {{ advice.lastName }}<br />
-                                    {{ advice.street }} {{ advice.streetNumber }}<br />
+                                    >{{ advice.first_name }} {{ advice.last_name }}<br />
+                                    {{ advice.street }} {{ advice.street_number }}<br />
                                 </b>
                                 <div v-if="advice.advisor_id !== null">Berater*in: {{ advisorName(advice.advisor_id) }}</div>
                                 <div v-if="advice.shares_ids.length > 0">Geteilt mit: {{ advice.shares_ids.map(advisorName).join(', ') }}</div>
@@ -281,8 +281,8 @@ function runSearch() {
                         <LPopup>
                             <div>
                                 <b
-                                    >{{ advice.firstName }} {{ advice.lastName }}<br />
-                                    {{ advice.street }} {{ advice.streetNumber }}<br />
+                                    >{{ advice.first_name }} {{ advice.last_name }}<br />
+                                    {{ advice.street }} {{ advice.street_number }}<br />
                                 </b>
                                 <div v-if="advice.advisor_id !== null">Berater*in: {{ advisorName(advice.advisor_id) }}</div>
                                 <div v-if="advice.shares_ids.length > 0">Geteilt mit: {{ advice.shares_ids.map(advisorName).join(', ') }}</div>

@@ -29,10 +29,10 @@ class AdviceFactory extends Factory
         }
 
         return [
-            'firstName' => fake()->firstName(),
-            'lastName' => fake()->lastName(),
+            'first_name' => fake()->firstName(),
+            'last_name' => fake()->lastName(),
             'street' => fake()->streetName(),
-            'streetNumber' => fake()->buildingNumber(),
+            'street_number' => fake()->buildingNumber(),
             'zip' => fake()->numberBetween(10000, 99999),
             'city' => fake()->city(),
             'email' => fake()->safeEmail(),

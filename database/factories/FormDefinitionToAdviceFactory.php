@@ -82,7 +82,7 @@ class FormDefinitionToAdviceFactory extends Factory
                 street: fake()->streetAddress(),
                 city: fake()->city(),
                 zip: fake()->postcode,
-                streetNumber: fake()->buildingNumber()
+                street_number: fake()->buildingNumber()
             ));
 
             $creator->emailField->createSubmissionField($submission, fake()->safeEmail());

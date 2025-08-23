@@ -53,7 +53,7 @@ test('advice is assigned to correct group based on coordinates', function () {
     // Create a new advice
     $advice = Advice::factory()->create([
         'street' => 'Teststraße',
-        'streetNumber' => '123',
+        'street_number' => '123',
         'zip' => '12345',
         'city' => 'Teststadt',
     ]);

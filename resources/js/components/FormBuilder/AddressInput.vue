@@ -7,7 +7,7 @@
             </div>
             <div class="col-span-1">
                 <Label for="number">Nr.</Label>
-                <Input id="number" v-model="model.streetNumber" type="text" placeholder="123" />
+                <Input id="number" v-model="model.street_number" type="text" placeholder="123" />
             </div>
         </div>
 
@@ -23,7 +23,7 @@
         </div>
     </div>
     <div v-else>
-        {{ model.street }} {{ model.streetNumber }}<br />
+        {{ model.street }} {{ model.street_number }}<br />
         {{ intZip }} {{ model.city }}
     </div>
 </template>
@@ -47,7 +47,7 @@ const model = defineModel<Address>({
     default: () =>
         ({
             street: 'Standard Straße',
-            streetNumber: '',
+            street_number: '',
             zip: 0,
             city: '',
         }) as Address,
@@ -71,7 +71,7 @@ onMounted(() => {
     if (model.value !== undefined && model.value.zip === undefined) {
         model.value = {
             street: '',
-            streetNumber: '',
+            street_number: '',
             zip: 0,
             city: '',
         } as Address;

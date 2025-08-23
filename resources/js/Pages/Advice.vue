@@ -27,7 +27,7 @@ const advisor = user.value;
                 <div class="header-title-section">
                     <h2 class="advice-title">
                         Beratung für<br class="mobile-break" />
-                        {{ advice.firstName }} {{ advice.lastName }}
+                        {{ advice.first_name }} {{ advice.last_name }}
                     </h2>
                 </div>
                 <div class="header-actions">

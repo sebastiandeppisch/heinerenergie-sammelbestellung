@@ -28,7 +28,7 @@ use Wnx\Sends\Support\HasSendsTrait;
  * @property ?Coordinate $coordinate
  * @property ?Address $address
  * @property AdviceType $type
- * @property HouseType|null $houseType
+ * @property HouseType|null $house_type
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
  */
@@ -44,10 +44,10 @@ class Advice extends Model implements HasSends, Pointable
     use SoftDeletes;
 
     protected $fillable = [
-        'firstName',
-        'lastName',
+        'first_name',
+        'last_name',
         'street',
-        'streetNumber',
+        'street_number',
         'zip',
         'city',
         'email',
@@ -58,14 +58,14 @@ class Advice extends Model implements HasSends, Pointable
         'lng',
         'lat',
         'type',
-        'helpType_place',
-        'helpType_technical',
-        'helpType_bureaucracy',
+        'help_type_place',
+        'help_type_technical',
+        'help_type_bureaucracy',
         'helpType_other',
-        'houseType',
-        'landlordExists',
+        'house_type',
+        'landlord_exists',
         'group_id',
-        'placeNotes',
+        'place_notes',
         'address',
     ];
 
@@ -128,7 +128,7 @@ class Advice extends Model implements HasSends, Pointable
 
     public function getNameAttribute(): string
     {
-        return sprintf('%s %s', $this->firstName, $this->lastName);
+        return sprintf('%s %s', $this->first_name, $this->last_name);
     }
 
     /**
@@ -150,10 +150,10 @@ class Advice extends Model implements HasSends, Pointable
     protected function casts(): array
     {
         return [
-            'firstName' => 'string',
-            'lastName' => 'string',
+            'first_name' => 'string',
+            'last_name' => 'string',
             'street' => 'string',
-            'streetNumber' => 'string',
+            'street_number' => 'string',
             'zip' => 'string',
             'city' => 'string',
             'email' => 'string',
@@ -161,13 +161,13 @@ class Advice extends Model implements HasSends, Pointable
             'commentary' => 'string',
             'advice_status_id' => 'int',
             'type' => AdviceType::class,
-            'helpType_place' => 'boolean',
-            'helpType_technical' => 'boolean',
-            'helpType_bureaucracy' => 'boolean',
+            'help_type_place' => 'boolean',
+            'help_type_technical' => 'boolean',
+            'help_type_bureaucracy' => 'boolean',
             'helpType_other' => 'boolean',
-            'houseType' => HouseType::class,
-            'landlordExists' => 'boolean',
-            'placeNotes' => 'string',
+            'house_type' => HouseType::class,
+            'landlord_exists' => 'boolean',
+            'place_notes' => 'string',
             'address' => Address::class,
             'coordinate' => Coordinate::class,
             'lng' => 'float',

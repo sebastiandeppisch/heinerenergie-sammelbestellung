@@ -25,7 +25,7 @@ const navigationTypes = [
 
 function openNavigation(e: { itemData: { id: string } }) {
     const type = e.itemData.id;
-    const address = props.advice.street + ' ' + props.advice.streetNumber + ', ' + props.advice.zip + ' ' + props.advice.city;
+    const address = props.advice.street + ' ' + props.advice.street_number + ', ' + props.advice.zip + ' ' + props.advice.city;
 
     switch (type) {
         case 'google':
@@ -53,7 +53,7 @@ function openNavigation(e: { itemData: { id: string } }) {
 }
 
 const mailLink = computed(() => {
-    const body = 'Hallo ' + props.advice.firstName + ',%0D%0A%0D%0A' + 'TEXT' + '%0D%0A%0D%0A' + 'Gruß,%0D%0A' + props.advisor?.first_name;
+    const body = 'Hallo ' + props.advice.first_name + ',%0D%0A%0D%0A' + 'TEXT' + '%0D%0A%0D%0A' + 'Gruß,%0D%0A' + props.advisor?.first_name;
     const subject = 'heiner*energie%20Beratung';
 
     return 'mailto:' + props.advice.email + '?subject=' + subject + '&body=' + body;

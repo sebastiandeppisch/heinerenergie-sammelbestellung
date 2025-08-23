@@ -6,7 +6,7 @@ import { computed, ref } from 'vue';
 
 import { DxRequiredRule, DxStringLengthRule, DxValidator } from 'devextreme-vue/validator';
 
-type PlaceAdvice = Omit<Pick<App.Models.Advice, 'street' | 'streetNumber' | 'zip' | 'city' | 'type'>, 'type' | 'zip'> & {
+type PlaceAdvice = Omit<Pick<App.Models.Advice, 'street' | 'street_number' | 'zip' | 'city' | 'type'>, 'type' | 'zip'> & {
     type: number | null;
     zip: number | null;
 };
@@ -21,7 +21,7 @@ const emit = defineEmits(['allowForward']);
 function checkForm() {
     if (
         advice.value.street === '' ||
-        advice.value.streetNumber === '' ||
+        advice.value.street_number === '' ||
         advice.value.zip === null ||
         advice.value.zip.toString() === '' ||
         advice.value.city === ''
@@ -110,7 +110,7 @@ function adviceTypeChanged(e: any) {
                     placeholder="42a"
                     width="100px"
                     label="Nr."
-                    v-model="advice.streetNumber"
+                    v-model="advice.street_number"
                     @change="checkForm"
                     @key-up="checkForm"
                     value-change-event="keyup"

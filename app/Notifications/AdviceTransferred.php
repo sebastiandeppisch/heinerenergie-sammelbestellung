@@ -26,7 +26,7 @@ class AdviceTransferred extends BaseNotification implements ShouldQueue
         $mail = parent::toMail($notifiable);
 
         $mail->subject('Deine Beratung wurde übertragen')
-            ->greeting('Hallo '.$this->advice->firstName)
+            ->greeting('Hallo '.$this->advice->first_name)
             ->line('Deine Beratung wurde an eine andere Initiative übertragen:')
             ->line('Von: '.$this->oldGroup->name)
             ->line('An: '.$this->newGroup->name);

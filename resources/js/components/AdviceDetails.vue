@@ -12,24 +12,24 @@ const props = defineProps<{
         <div class="detail-section">
             <h3 class="section-title">Benötigt Hilfe bei:</h3>
             <div class="help-types">
-                <div v-if="advice.helpType_place" class="help-type">
+                <div v-if="advice.help_type_place" class="help-type">
                     <font-awesome-icon icon="fa fa-house" class="icon" />
                     <span>Ort (Balkon, Garten, Terrasse, etc.)</span>
                 </div>
-                <div v-if="advice.helpType_bureaucracy" class="help-type">
+                <div v-if="advice.help_type_bureaucracy" class="help-type">
                     <font-awesome-icon icon="fa fa-file-signature" class="icon" />
                     <span>Bürokratie (Anmeldung, Förderung, etc.)</span>
                 </div>
-                <div v-if="advice.helpType_technical" class="help-type">
+                <div v-if="advice.help_type_technical" class="help-type">
                     <font-awesome-icon icon="fa fa-wrench" class="icon" />
                     <span>Technisches (Anschluss, Befestigung, etc.)</span>
                 </div>
-                <div v-if="advice.helpType_other" class="help-type">
+                <div v-if="advice.help_type_other" class="help-type">
                     <img :src="otherHelpTypeImage" class="custom-icon" />
                     <span>Andere Themen</span>
                 </div>
                 <div
-                    v-if="!advice.helpType_place && !advice.helpType_bureaucracy && !advice.helpType_technical && !advice.helpType_other"
+                    v-if="!advice.help_type_place && !advice.help_type_bureaucracy && !advice.help_type_technical && !advice.help_type_other"
                     class="no-data"
                 >
                     <span>Keine Angabe</span>
@@ -40,11 +40,11 @@ const props = defineProps<{
         <div class="detail-section">
             <h3 class="section-title">Gebäudeart:</h3>
             <div class="building-info">
-                <div v-if="advice.houseType === 0" class="info-item">
+                <div v-if="advice.house_type === 0" class="info-item">
                     <font-awesome-icon icon="fa fa-home" class="icon" />
                     <span>Einfamilienhaus</span>
                 </div>
-                <div v-if="advice.houseType === 1" class="info-item">
+                <div v-if="advice.house_type === 1" class="info-item">
                     <font-awesome-icon icon="fa fa-building" class="icon" />
                     <span>Mehrfamilienhaus</span>
                 </div>
@@ -55,8 +55,8 @@ const props = defineProps<{
 
             <h3 class="section-title">Vermieter*in / WEG vorhanden?</h3>
             <div class="landlord-info">
-                <div :class="['status-badge', advice.landlordExists ? 'yes' : 'no']">
-                    {{ advice.landlordExists ? 'Ja' : 'Nein' }}
+                <div :class="['status-badge', advice.landlord_exists ? 'yes' : 'no']">
+                    {{ advice.landlord_exists ? 'Ja' : 'Nein' }}
                 </div>
             </div>
         </div>
@@ -64,7 +64,7 @@ const props = defineProps<{
         <div class="detail-section">
             <h3 class="section-title">Wo soll das Steckersolargerät installiert werden?</h3>
             <div class="installation-info">
-                <p v-if="advice.placeNotes" class="notes">{{ advice.placeNotes }}</p>
+                <p v-if="advice.place_notes" class="notes">{{ advice.place_notes }}</p>
                 <p v-else class="no-data">Keine Angabe</p>
             </div>
         </div>

@@ -18,7 +18,7 @@ class BaseNotification extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-            ->greeting('Hallo '.$notifiable->firstName.',')
+            ->greeting('Hallo '.$notifiable->first_name.',')
             ->salutation('Viele Grüße, das heiner*energie Team');
     }
 

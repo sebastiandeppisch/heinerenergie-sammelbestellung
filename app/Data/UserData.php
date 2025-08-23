@@ -21,7 +21,7 @@ class UserData extends Data
         public ?string $profile_picture,
         public ?int $advice_radius,
         public ?string $street,
-        public ?string $streetNumber,
+        public ?string $street_number,
         public ?string $city,
         public ?string $zip,
         public bool $is_admin,
@@ -41,7 +41,7 @@ class UserData extends Data
             null, // TODO add missing profile_picture
             $user->advice_radius,
             $user->street,
-            $user->streetNumber,
+            $user->street_number,
             $user->city,
             $user->zip,
             $user->is_admin
