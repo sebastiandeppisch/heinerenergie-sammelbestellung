@@ -14,7 +14,7 @@
         <div class="grid grid-cols-4 gap-4">
             <div class="col-span-1">
                 <Label for="zipCode">PLZ</Label>
-                <Input id="zipCode" v-model="intZip" type="text" placeholder="12345" pattern="[0-9]{5}" />
+                <Input id="zipCode" v-model="model.zip" type="text" placeholder="12345" pattern="[0-9]{5}" />
             </div>
             <div class="col-span-3">
                 <Label for="city">Ort</Label>
@@ -24,14 +24,14 @@
     </div>
     <div v-else>
         {{ model.street }} {{ model.street_number }}<br />
-        {{ intZip }} {{ model.city }}
+        {{ model.zip }} {{ model.city }}
     </div>
 </template>
 
 <script lang="ts" setup>
 import Input from '@/shadcn/components/ui/input/Input.vue';
 import Label from '@/shadcn/components/ui/label/Label.vue';
-import { computed, onMounted } from 'vue';
+import { onMounted } from 'vue';
 type Address = App.ValueObjects.Address;
 
 const props = withDefaults(
@@ -48,23 +48,10 @@ const model = defineModel<Address>({
         ({
             street: 'Standard Straße',
             street_number: '',
-            zip: 0,
+            zip: '',
             city: '',
         }) as Address,
     required: true,
-});
-
-const intZip = computed<string>({
-    get() {
-        if (model.value === undefined || model.value.zip === undefined) {
-            return '';
-        }
-
-        return model.value.zip.toString();
-    },
-    set(value) {
-        model.value.zip = parseInt(value);
-    },
 });
 
 onMounted(() => {
@@ -72,7 +59,7 @@ onMounted(() => {
         model.value = {
             street: '',
             street_number: '',
-            zip: 0,
+            zip: '',
             city: '',
         } as Address;
     }

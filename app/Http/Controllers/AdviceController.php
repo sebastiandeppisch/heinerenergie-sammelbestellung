@@ -75,7 +75,7 @@ class AdviceController extends Controller
                     return INF;
                 }
 
-                return $coordinateOfAdvice->distanceTo($center);
+                return $coordinateOfAdvice->distanceTo($center)->getValue();
             })
             ->map(fn (Group $group) => GroupData::fromModel($group))
             ->values();
