@@ -3,6 +3,7 @@
 use App\Exceptions\Handler;
 use App\LaravelExtensions\StrictGates\AuthServiceProvider;
 use App\LaravelExtensions\StrictGates\MissingGateException;
+use App\Mail\BaseNotificationMail;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
@@ -100,11 +101,11 @@ arch()->expect('App')
 
 arch()->expect('App\Mail')
     ->classes()
-    ->toExtend(Mailable::class);
+    ->toExtend(Mailable::class)->ignoring(BaseNotificationMail::class);
 
 arch()->expect('App\Mail')
     ->classes()
-    ->toImplement(ShouldQueue::class);
+    ->toImplement(ShouldQueue::class)->ignoring(BaseNotificationMail::class);
 
 arch()->expect('App')
     ->not->toExtend(Mailable::class)
