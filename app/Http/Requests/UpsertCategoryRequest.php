@@ -2,18 +2,17 @@
 
 namespace App\Http\Requests;
 
-use App\Rules\GeographicCoordinate;
+use App\Services\SessionService;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpsertMapPointRequest extends FormRequest
+class UpsertCategoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        //TODO
-        return true;
+        return app(SessionService::class)->actsAsSystemAdmin();
     }
 
     /**
@@ -24,11 +23,8 @@ class UpsertMapPointRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'required',
-            'description' => 'nullable',
-            'coordinate' => new GeographicCoordinate,
-            'published' => 'boolean',
-            'category_id' => 'nullable|exists:categories,uuid'
+            'name' => 'required|string|max:255',
+            'image' => 'nullable|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ];
     }
 }

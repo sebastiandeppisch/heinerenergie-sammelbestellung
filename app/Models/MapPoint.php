@@ -24,7 +24,8 @@ class MapPoint extends Model
         'lng',
         'lat',
         'coordinate',
-        'published'
+        'published',
+        'category_id'
     ];
 
     protected $casts = [
@@ -37,6 +38,11 @@ class MapPoint extends Model
      */
     public function pointable(): MorphTo{
         return $this->morphTo();
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
 
 }

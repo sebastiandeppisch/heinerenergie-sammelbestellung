@@ -24,6 +24,13 @@ id: string;
 name: string;
 result: App.Enums.AdviceStatusResult;
 };
+export type CategoryData = {
+id: string;
+name: string;
+image_path: string | null;
+map_points_count: number;
+created_at: string | null;
+};
 export type DataProtectedAdviceData = {
 id: string;
 firstName: string;
@@ -133,6 +140,8 @@ description: string;
 published: boolean;
 userReadablePointableType: string;
 created_at: any;
+category: App.Data.CategoryData | null;
+category_id: string | null;
 };
 export type PaginationData = {
 total: number;

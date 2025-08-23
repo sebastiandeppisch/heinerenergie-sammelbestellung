@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Data\MapPointData;
+use App\Data\CategoryData;
 use App\Http\Requests\UpsertMapPointRequest;
 use App\Models\FormSubmission;
 use App\Models\MapPoint;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
@@ -13,7 +15,7 @@ use Inertia\Inertia;
 class MapPointController extends Controller
 {
     public function map(){
-        $mapPoints = MapPoint::all()->map(fn (MapPoint $mapPoint): MapPointData => MapPointData::fromModel($mapPoint));
+        $mapPoints = MapPoint::with('category')->get()->map(fn (MapPoint $mapPoint): MapPointData => MapPointData::fromModel($mapPoint));
 
         $pointsByType = $mapPoints->groupBy('userReadablePointableType');
 
@@ -24,7 +26,7 @@ class MapPointController extends Controller
 
     public function index()
     {
-        $mapPoints = MapPoint::all()->map(fn (MapPoint $mapPoint): MapPointData => MapPointData::fromModel($mapPoint));
+        $mapPoints = MapPoint::with('category')->get()->map(fn (MapPoint $mapPoint): MapPointData => MapPointData::fromModel($mapPoint));
 
         return Inertia::render('MapPoints/Index', [
             'mapPoints' => $mapPoints
@@ -34,6 +36,7 @@ class MapPointController extends Controller
     public function publicMap()
     {
         $mapPoints = MapPoint::where('published', true)
+            ->with('category')
             ->get()
             ->map(fn (MapPoint $mapPoint): MapPointData => MapPointData::fromModel($mapPoint));
 
@@ -46,8 +49,11 @@ class MapPointController extends Controller
 
     public function edit(MapPoint $mappoint)
     {
+        $categories = Category::all()->map(fn (Category $category): CategoryData => CategoryData::fromModel($category));
+        
         return Inertia::render('MapPoints/Upsert', [
-            'mapPoint' => MapPointData::fromModel($mappoint)
+            'mapPoint' => MapPointData::fromModel($mappoint->load('category')),
+            'categories' => $categories
         ]);
     }
 
@@ -66,7 +72,11 @@ class MapPointController extends Controller
 
     public function create()
     {
-        return Inertia::render('MapPoints/Upsert');
+        $categories = Category::all()->map(fn (Category $category): CategoryData => CategoryData::fromModel($category));
+        
+        return Inertia::render('MapPoints/Upsert', [
+            'categories' => $categories
+        ]);
     }
 
     public function store(UpsertMapPointRequest $request)

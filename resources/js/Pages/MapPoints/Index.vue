@@ -78,6 +78,9 @@ function deleteMapPoint() {
           placeholder="Suche..."
           class="max-w-sm bg-white"
         />
+        <Link :href="route('categories.index')">
+          <Button variant="outline">Kategorien verwalten</Button>
+        </Link>
         <Link :href="route('mappoints.create')">
           <Button><Plus />Neuen Punkt hinzufügen</Button>
         </Link>
