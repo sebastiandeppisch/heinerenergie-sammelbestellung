@@ -45,7 +45,7 @@ test('user can access own group resources', function () {
 
     $response->assertSessionHasErrors();
     $response->assertRedirect('/advices');
-});
+})->todo('this needs to be better defined: The user should only see the advice data protected and when is it not assigned to another advisor');
 
 test('group admin has elevated privileges', function () {
     actingAs($this->user);
