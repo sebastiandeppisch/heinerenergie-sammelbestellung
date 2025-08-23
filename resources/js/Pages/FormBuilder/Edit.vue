@@ -1,28 +1,27 @@
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue';
-import { router } from '@inertiajs/vue3';
 import FormBuilderCanvas from '@/components/FormBuilder/FormBuilderCanvas.vue';
-import FormBuilderToolbox from '@/components/FormBuilder/FormBuilderToolbox.vue';
-import FormBuilderProperties from '@/components/FormBuilder/FormBuilderProperties.vue';
 import FormBuilderPreview from '@/components/FormBuilder/FormBuilderPreview.vue';
+import FormBuilderProperties from '@/components/FormBuilder/FormBuilderProperties.vue';
+import FormBuilderToolbox from '@/components/FormBuilder/FormBuilderToolbox.vue';
 import FormEmbedDialog from '@/components/FormBuilder/FormEmbedDialog.vue';
-import { nanoid } from 'nanoid';
-import { route } from 'ziggy-js';
-import { toast } from 'vue-sonner'
 import Button from '@/shadcn/components/ui/button/Button.vue';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/shadcn/components/ui/tabs';
 import { Card, CardContent } from '@/shadcn/components/ui/card';
-import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription } from '@/shadcn/components/ui/form';
-import { Input } from '@/shadcn/components/ui/input';
-import { Textarea } from '@/shadcn/components/ui/textarea';
 import { Checkbox } from '@/shadcn/components/ui/checkbox';
-import { v4 as uuidv4 } from 'uuid';
-import { ArrowUpRightFromSquare } from 'lucide-vue-next';
+import { Form, FormControl, FormField, FormItem, FormLabel } from '@/shadcn/components/ui/form';
+import { Input } from '@/shadcn/components/ui/input';
 import { Select } from '@/shadcn/components/ui/select';
-import SelectTrigger from '@/shadcn/components/ui/select/SelectTrigger.vue';
-import SelectValue from '@/shadcn/components/ui/select/SelectValue.vue';
 import SelectContent from '@/shadcn/components/ui/select/SelectContent.vue';
 import SelectItem from '@/shadcn/components/ui/select/SelectItem.vue';
+import SelectTrigger from '@/shadcn/components/ui/select/SelectTrigger.vue';
+import SelectValue from '@/shadcn/components/ui/select/SelectValue.vue';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';
+import { Textarea } from '@/shadcn/components/ui/textarea';
+import { router } from '@inertiajs/vue3';
+import { ArrowUpRightFromSquare } from 'lucide-vue-next';
+import { v4 as uuidv4 } from 'uuid';
+import { computed, reactive, ref } from 'vue';
+import { toast } from 'vue-sonner';
+import { route } from 'ziggy-js';
 type FormDefinitionData = App.Data.FormDefinitionData;
 type FormFieldData = App.Data.FormFieldData;
 type FieldType = App.Enums.FieldType;
@@ -35,15 +34,16 @@ const props = defineProps<{
     groups: App.Data.GroupData[];
 }>();
 
-
-const formDefinition = reactive<FormDefinitionData>(props.formDefinition || {
-    id: uuidv4(),
-    name: 'Neues Formular',
-    description: null,
-    is_active: true,
-    fields: [],
-    group_id: "-1"
-});
+const formDefinition = reactive<FormDefinitionData>(
+    props.formDefinition || {
+        id: uuidv4(),
+        name: 'Neues Formular',
+        description: null,
+        is_active: true,
+        fields: [],
+        group_id: '-1',
+    },
+);
 
 const selectedField = ref<FormFieldData | null>(null);
 
@@ -59,7 +59,7 @@ function handleFieldsUpdate(fields: FormFieldData[]) {
 }
 
 function handleFieldChange(field: FormFieldData) {
-    const index = formDefinition.fields.findIndex(f => f.id === field.id);
+    const index = formDefinition.fields.findIndex((f) => f.id === field.id);
     if (index !== -1) {
         formDefinition.fields[index] = field;
     }
@@ -72,7 +72,7 @@ function saveForm() {
                 toast({
                     title: 'Gespeichert',
                     description: 'Formular wurde erfolgreich gespeichert',
-                    variant: 'success'
+                    variant: 'success',
                 });
             },
             onError: (errors) => {
@@ -80,9 +80,9 @@ function saveForm() {
                 toast({
                     title: 'Fehler',
                     description: `Fehler beim Speichern des Formulars: ${Object.values(errors).join(', ')}`,
-                    variant: 'destructive'
+                    variant: 'destructive',
                 });
-            }
+            },
         });
     } else {
         router.post(route('form-definitions.store'), formDefinition, {
@@ -90,7 +90,7 @@ function saveForm() {
                 toast({
                     title: 'Erstellt',
                     description: 'Formular wurde erfolgreich erstellt',
-                    variant: 'success'
+                    variant: 'success',
                 });
             },
             onError: (errors) => {
@@ -98,9 +98,9 @@ function saveForm() {
                 toast({
                     title: 'Fehler',
                     description: `Fehler beim Erstellen des Formulars: ${Object.values(errors).join(', ')}`,
-                    variant: 'destructive'
+                    variant: 'destructive',
                 });
-            }
+            },
         });
     }
 }
@@ -137,7 +137,7 @@ function createField(type: FieldType): FormFieldData {
                     value: 'option1',
                     sort_order: 0,
                     is_default: false,
-                    is_required: false
+                    is_required: false,
                 },
                 {
                     id: uuidv4(),
@@ -145,8 +145,8 @@ function createField(type: FieldType): FormFieldData {
                     value: 'option2',
                     sort_order: 1,
                     is_default: false,
-                    is_required: false
-                }
+                    is_required: false,
+                },
             ];
             break;
         case 'checkbox':
@@ -157,8 +157,8 @@ function createField(type: FieldType): FormFieldData {
                     value: 'option',
                     sort_order: 0,
                     is_default: false,
-                    is_required: false
-                }
+                    is_required: false,
+                },
             ];
             break;
         case 'file':
@@ -176,7 +176,6 @@ function addField(type: FieldType) {
     selectedTab.value = 'canvas';
 }
 
-
 function openFormular() {
     if (props.formDefinition?.id) {
         window.open(route('form.show', props.formDefinition?.id), '_blank');
@@ -184,12 +183,12 @@ function openFormular() {
 }
 
 const nullsafeDescription = computed<string>({
-    get(){
+    get() {
         return formDefinition.description || '';
     },
-    set(value: string){
+    set(value: string) {
         formDefinition.description = value;
-    }
+    },
 });
 </script>
 
@@ -210,7 +209,7 @@ const nullsafeDescription = computed<string>({
 
         <Card class="form-builder__header">
             <CardContent>
-                <Form class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Form class="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <FormField v-slot="{ componentField }" name="name">
                         <FormItem>
                             <FormLabel>Name</FormLabel>
@@ -228,7 +227,7 @@ const nullsafeDescription = computed<string>({
                         </FormItem>
                     </FormField>
                     <FormField v-slot="{ componentField }" name="is_active">
-                        <FormItem class="flex flex-row items-center space-x-2 space-y-0">
+                        <FormItem class="flex flex-row items-center space-y-0 space-x-2">
                             <FormControl>
                                 <Checkbox v-model="formDefinition.is_active" />
                             </FormControl>
@@ -236,7 +235,7 @@ const nullsafeDescription = computed<string>({
                         </FormItem>
                     </FormField>
                     <FormField v-slot="{ componentField }" name="group_id">
-                        <FormItem class="flex flex-row items-center space-x-2 space-y-0">
+                        <FormItem class="flex flex-row items-center space-y-0 space-x-2">
                             <FormLabel>Initiative</FormLabel>
                             <FormControl>
                                 <Select v-bind="componentField" v-model="formDefinition.group_id">
@@ -266,25 +265,20 @@ const nullsafeDescription = computed<string>({
                 <div class="flex flex-col items-center">
                     <div class="form-builder__canvas-container">
                         <FormBuilderToolbox :field-types="fieldTypes" @add-field="addField" class="form-builder__toolbox" />
-                    <FormBuilderCanvas :modelValue="formDefinition.fields" @update:model-value="handleFieldsUpdate"
-                            @field-selected="handleFieldSelect" class="form-builder__canvas" />
-
-
-                        <FormBuilderProperties
-                            v-model="selectedField"
-                            v-if="selectedField"
-                            class="form-builder__properties"
+                        <FormBuilderCanvas
+                            :modelValue="formDefinition.fields"
+                            @update:model-value="handleFieldsUpdate"
+                            @field-selected="handleFieldSelect"
+                            class="form-builder__canvas"
                         />
 
+                        <FormBuilderProperties v-model="selectedField" v-if="selectedField" class="form-builder__properties" />
                     </div>
                 </div>
             </TabsContent>
 
             <TabsContent value="preview">
-                <FormBuilderPreview
-                    v-if="props.formDefinition !== null" :form-definition="props.formDefinition"
-                    class="form-builder__preview"
-                />
+                <FormBuilderPreview v-if="props.formDefinition !== null" :form-definition="props.formDefinition" class="form-builder__preview" />
             </TabsContent>
         </Tabs>
     </div>
@@ -306,7 +300,6 @@ const nullsafeDescription = computed<string>({
 }
 
 .form-builder__header {
-    background: #f8f8f8;
     padding: 15px;
     border-radius: 4px;
 }
@@ -327,7 +320,6 @@ const nullsafeDescription = computed<string>({
 .form-builder__canvas,
 .form-builder__properties,
 .form-builder__preview {
-    background: #f8f8f8;
     padding: 15px;
     border-radius: 4px;
     overflow: auto;

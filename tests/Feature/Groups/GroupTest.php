@@ -27,6 +27,12 @@ beforeEach(function () {
     Config::set('app.group_context', 'global');
 });
 
+it('can create group via factory', function () {
+    $group = Group::factory()->create();
+    expect($group)->toBeInstanceOf(Group::class);
+    expect($group->name)->not->toBeEmpty();
+});
+
 test('can create group', function () {
     actingAs($this->admin);
 

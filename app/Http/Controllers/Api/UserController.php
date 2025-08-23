@@ -36,15 +36,10 @@ class UserController extends Controller
         return $builder;
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index(Request $request)
     {
 
-        if($request->has(('withoutself'))){
+        if ($request->has(('withoutself'))) {
             $query = User::query()->where('id', '!=', $this->user()->id);
         } else {
             $query = User::query();
@@ -52,14 +47,10 @@ class UserController extends Controller
 
         $users = $this->dxFilter($request, $query)->get();
 
+        // @phpstan-ignore-next-line
         return $users->filter(fn (User $user) => $this->user()->can('view', $user))->values();
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function store(StoreUserRequest $request)
     {
         $user = new User($request->validated());
@@ -69,11 +60,6 @@ class UserController extends Controller
         return $user;
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function update(UpdateUserRequest $request, User $user)
     {
         $user->fill($request->all());
@@ -82,11 +68,6 @@ class UserController extends Controller
         return $user;
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function destroy(User $user)
     {
         $user->delete();

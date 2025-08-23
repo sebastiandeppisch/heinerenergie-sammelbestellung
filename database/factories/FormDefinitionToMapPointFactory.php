@@ -6,11 +6,10 @@ use App\Enums\FieldType;
 use App\Models\FormDefinition;
 use App\Models\FormDefinitionToMapPoint;
 use App\Models\FormField;
-use App\ValueObjects\Coordinate;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\FormDefinitionToMapPoint>
+ * @extends Factory<FormDefinitionToMapPoint>
  */
 class FormDefinitionToMapPointFactory extends Factory
 {
@@ -55,8 +54,9 @@ class FormDefinitionToMapPointFactory extends Factory
         ];
     }
 
-    public function withMapPoint() {
-        return $this->afterCreating(function (FormDefinitionToMapPoint $creator){
+    public function withMapPoint()
+    {
+        return $this->afterCreating(function (FormDefinitionToMapPoint $creator) {
             $submission = $creator->formDefinition->createSubmission();
 
             $creator->titleField->createSubmissionField($submission, fake()->sentence(3));

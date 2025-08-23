@@ -5,9 +5,12 @@ namespace Database\Factories;
 use App\Enums\FieldType;
 use App\Models\FormDefinition;
 use App\Models\FormField;
-use Closure;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Override;
 
+/**
+ * @extends Factory<FormField>
+ */
 class FormFieldFactory extends Factory
 {
     protected $model = FormField::class;
@@ -24,7 +27,7 @@ class FormFieldFactory extends Factory
             FieldType::RADIO->value,
             FieldType::CHECKBOX->value,
             FieldType::DATE->value,
-            FieldType::FILE->value
+            FieldType::FILE->value,
         ];
 
         $type = $this->faker->randomElement($fieldTypes);
@@ -49,18 +52,19 @@ class FormFieldFactory extends Factory
         ];
     }
 
+    #[Override]
     public function configure()
     {
         return $this->afterCreating(function (FormField $formField) {
             if (in_array($formField->type, [FieldType::SELECT, FieldType::RADIO, FieldType::CHECKBOX])) {
 
-                $count = rand(2, 5);
-                $defaultOptionIndex = rand(0, $count - 1);
+                $count = random_int(2, 5);
+                $defaultOptionIndex = random_int(0, $count - 1);
 
                 for ($i = 0; $i < $count; $i++) {
                     $formField->options()->create([
                         'label' => ucfirst($this->faker->word),
-                        'value' => strtolower($this->faker->unique()->word) . '_' . $this->faker->numberBetween(1, 100),
+                        'value' => strtolower($this->faker->unique()->word).'_'.$this->faker->numberBetween(1, 100),
                         'sort_order' => $i,
                         'is_default' => $i === $defaultOptionIndex && $this->faker->boolean(70),
                     ]);

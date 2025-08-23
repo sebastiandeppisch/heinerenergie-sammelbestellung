@@ -28,7 +28,7 @@ class MapPointData extends Data
     public static function fromModel(MapPoint $model)
     {
         return new self(
-            id: $model->id,
+            id: $model->uuid,
             coordinate: $model->coordinate,
             title: $model->title,
             description: $model->description,
@@ -45,7 +45,8 @@ class MapPointData extends Data
         // TODO load from model itself
         if ($type === FormSubmission::class) {
             return 'Formular';
-        } elseif ($type === Advice::class) {
+        }
+        if ($type === Advice::class) {
             return 'Beratung';
         }
 

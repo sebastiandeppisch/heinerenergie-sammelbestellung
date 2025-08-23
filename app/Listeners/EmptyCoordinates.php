@@ -10,7 +10,7 @@ class EmptyCoordinates
     public function handle(AdviceUpdated|AdviceCreated $event)
     {
         $advice = $event->advice;
-        if ($advice->wasChanged(['street', 'city', 'zip', 'streetNumber'])) {
+        if ($advice->wasChanged(['street', 'city', 'zip', 'street_number'])) {
             $advice = $advice->fresh();
             $advice->lat = null;
             $advice->lng = null;

@@ -26,7 +26,7 @@ class UpdateGroupAdviceStatusRequest extends FormRequest
         $pivot = $adviceStatus->usingGroups()->wherePivot('group_id', $group->id)->first()?->pivot;
 
         if ($pivot === null) {
-            $pivot = new AdviceStatusGroup([
+            return new AdviceStatusGroup([
                 'group_id' => $group->id,
                 'advice_status_id' => $adviceStatus->id,
                 'visible_in_group' => $this->visible_in_group,

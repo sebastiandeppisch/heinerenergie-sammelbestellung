@@ -11,21 +11,21 @@ uses(RefreshDatabase::class);
 test('advice can be saved', function () {
     Mail::fake();
     $data = [
-        'helpType_place' => fake()->boolean(),
-        'helpType_technical' => fake()->boolean(),
-        'helpType_bureaucracy' => fake()->boolean(),
+        'help_type_place' => fake()->boolean(),
+        'help_type_technical' => fake()->boolean(),
+        'help_type_bureaucracy' => fake()->boolean(),
         'helpType_other' => fake()->boolean(),
-        'houseType' => fake()->numberBetween(0, 2),
-        'firstName' => fake()->firstName(),
-        'lastName' => fake()->lastName(),
+        'house_type' => fake()->numberBetween(0, 2),
+        'first_name' => fake()->first_name(),
+        'last_name' => fake()->last_name(),
         'email' => fake()->email(),
         'phone' => fake()->phoneNumber(),
         'zip' => (int) fake()->postcode(),
         'city' => fake()->city(),
         'street' => fake()->streetName(),
-        'streetNumber' => fake()->buildingNumber(),
-        'placeNotes' => fake()->text(),
-        'landlordExists' => fake()->boolean(),
+        'street_number' => fake()->buildingNumber(),
+        'place_notes' => fake()->text(),
+        'landlord_exists' => fake()->boolean(),
     ];
     $response = $this->post('api/newadvice', $data);
     $response->assertStatus(200);
@@ -33,7 +33,7 @@ test('advice can be saved', function () {
     $advice = Advice::firstOrFail();
 
     foreach ($data as $key => $value) {
-        if ($key === 'houseType') {
+        if ($key === 'house_type') {
             expect($advice->$key)->toBe(HouseType::cases()[$value]);
 
             continue;
@@ -47,14 +47,14 @@ test('advice can be saved', function () {
 test('direct order advice can be saved', function () {
     Mail::fake();
     $data = [
-        'firstName' => fake()->firstName(),
-        'lastName' => fake()->lastName(),
+        'first_name' => fake()->first_name(),
+        'last_name' => fake()->last_name(),
         'email' => fake()->email(),
         'phone' => fake()->phoneNumber(),
         'zip' => (int) fake()->postcode(),
         'city' => fake()->city(),
         'street' => fake()->streetName(),
-        'streetNumber' => fake()->buildingNumber(),
+        'street_number' => fake()->buildingNumber(),
         'type' => AdviceType::DirectOrder->value,
     ];
     $response = $this->post('api/newadvice', $data);

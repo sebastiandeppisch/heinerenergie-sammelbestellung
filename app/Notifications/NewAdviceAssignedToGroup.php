@@ -7,6 +7,8 @@ use App\Models\Group;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use InvalidArgumentException;
+use Override;
 
 class NewAdviceAssignedToGroup extends BaseNotification implements ShouldQueue
 {
@@ -16,13 +18,18 @@ class NewAdviceAssignedToGroup extends BaseNotification implements ShouldQueue
      * Create a new notification instance.
      */
     public function __construct(
-        public Advice $advice,
+        public ?Advice $advice,
         public Group $group
-    ) {}
+    ) {
+        if ($this->advice === null) {
+            throw new InvalidArgumentException('Advice must not be null');
+        }
+    }
 
     /**
      * Get the mail representation of the notification.
      */
+    #[Override]
     public function toMail($notifiable): MailMessage
     {
         $mail = parent::toMail($notifiable);

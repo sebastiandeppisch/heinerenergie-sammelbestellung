@@ -2,24 +2,20 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Models\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\DB;
+use Override;
 
 class FormDefinition extends Model
 {
     use HasFactory;
-    use HasUuids;
+    use HasUuid;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<string, mixed>
-     */
     protected $fillable = [
         'name',
         'description',
@@ -37,7 +33,7 @@ class FormDefinition extends Model
     ];
 
     /**
-     * @return HasMany<FormField>
+     * @return HasMany<FormField, $this>
      */
     public function fields(): HasMany
     {
@@ -46,12 +42,15 @@ class FormDefinition extends Model
 
     /**
      * Get the submissions for this form definition.
+     *
+     * @return HasMany<FormSubmission, $this>
      */
     public function submissions(): HasMany
     {
         return $this->hasMany(FormSubmission::class);
     }
 
+    #[Override]
     public function delete(): bool
     {
         return DB::transaction(function () {
@@ -71,16 +70,12 @@ class FormDefinition extends Model
     {
         $this->loadMissing(['fields', 'fields.options']);
 
-        return $this->fields->mapWithKeys(function (FormField $field) {
-            return [$field->id => $field->getValidationRules()];
-        })->toArray();
+        return $this->fields->mapWithKeys(fn (FormField $field) => [$field->uuid => $field->getValidationRules()])->toArray();
     }
 
     public function getValidationAttributes(): array
     {
-        return $this->fields->mapWithKeys(function (FormField $field) {
-            return [$field->id => $field->label];
-        })->toArray();
+        return $this->fields->mapWithKeys(fn (FormField $field) => [$field->uuid => $field->label])->toArray();
     }
 
     public function createSubmission(): FormSubmission
@@ -94,7 +89,7 @@ class FormDefinition extends Model
     }
 
     /**
-     * @return HasOne<FormDefinitionToAdvice>
+     * @return HasOne<FormDefinitionToAdvice, $this>
      */
     public function adviceCreator(): HasOne
     {
@@ -102,7 +97,7 @@ class FormDefinition extends Model
     }
 
     /**
-     * @return HasOne<FormDefinitionToMapPoint>
+     * @return HasOne<FormDefinitionToMapPoint, $this>
      */
     public function mapPointCreator(): HasOne
     {
@@ -110,7 +105,7 @@ class FormDefinition extends Model
     }
 
     /**
-     * @return BelongsTo<Group>
+     * @return BelongsTo<Group, $this>
      */
     public function group(): BelongsTo
     {

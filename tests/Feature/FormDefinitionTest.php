@@ -55,9 +55,9 @@ test('index page can be rendered with form definitions', function () {
     $response->assertInertia(fn (Assert $page) => $page
         ->component('FormBuilder/Index')
         ->has('formDefinitions', 3)
-        ->where('formDefinitions.0.id', $formDefinitions[0]->id)
-        ->where('formDefinitions.1.id', $formDefinitions[1]->id)
-        ->where('formDefinitions.2.id', $formDefinitions[2]->id)
+        ->where('formDefinitions.0.id', $formDefinitions[0]->uuid)
+        ->where('formDefinitions.1.id', $formDefinitions[1]->uuid)
+        ->where('formDefinitions.2.id', $formDefinitions[2]->uuid)
     );
 });
 
@@ -107,7 +107,7 @@ test('form definition can be created', function () {
         'description' => 'This is a test form',
         'is_active' => true,
         'id' => 'temp',
-        'group_id' => $this->group->id,
+        'group_id' => $this->group->uuid,
         'fields' => [
             [
                 'type' => FieldType::TEXT->value,
@@ -131,7 +131,7 @@ test('form definition can be created', function () {
                         'is_default' => true,
                         'sort_order' => 1,
                         'id' => 'temp',
-                        'is_required' => false
+                        'is_required' => false,
                     ],
                     [
                         'label' => 'Option 2',
@@ -139,7 +139,7 @@ test('form definition can be created', function () {
                         'is_default' => false,
                         'sort_order' => 2,
                         'id' => 'temp',
-                        'is_required' => false
+                        'is_required' => false,
                     ],
                 ],
             ],
@@ -147,6 +147,8 @@ test('form definition can be created', function () {
     ];
 
     $response = $this->post(route('form-definitions.store'), $formData);
+    $response->assertSessionHasNoErrors();
+    $response->assertStatus(302);
 
     $formDefinition = FormDefinition::firstOrFail();
 
@@ -212,8 +214,8 @@ test('form definition can be updated', function () {
         'name' => 'Updated Form',
         'description' => 'Updated description',
         'is_active' => true,
-        'group_id' => $this->group->id,
-        'id' => $formDefinition->id,
+        'group_id' => $this->group->uuid,
+        'id' => $formDefinition->uuid,
         'fields' => [
             [
                 'type' => FieldType::TEXTAREA->value,
@@ -221,7 +223,7 @@ test('form definition can be updated', function () {
                 'label' => 'New Field',
                 'placeholder' => 'Enter text here',
                 'required' => true,
-                'id' => $field->id,
+                'id' => $field->uuid,
                 'options' => [],
             ],
         ],
@@ -281,7 +283,7 @@ test('form fields can be saved with required field', function () {
         'name' => 'Test Form',
         'id' => (string) Str::uuid7(),
         'is_active' => true,
-        'group_id' => $this->group->id,
+        'group_id' => $this->group->uuid,
         'fields' => [
             [
                 'type' => FieldType::TEXTAREA->value,
@@ -376,5 +378,6 @@ test('form field options can be deleted', function () {
 
     $this->assertEquals(1, FormField::count());
     $this->assertEquals(1, FormField::first()->options()->count());
-    $this->assertEquals($optionsId, FormField::first()->options->first()->id);
+
+    $this->assertEquals($optionsId, FormField::first()->options->first()->uuid);
 });

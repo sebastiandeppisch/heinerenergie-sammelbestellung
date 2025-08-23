@@ -1,90 +1,83 @@
-
 <template>
     <div class="m-6">
         <h2>Formulareinträge</h2>
 
         <Filter
             :form-definitions="formDefinitions"
-
-            v-model:selected-form-types="selectedFormDefinitions"
-            v-model:date-from="dateFrom"
-            v-model:date-to="dateTo"
-            v-model:sort-order="sortOrder"
-            v-model:group-by-form="groupByForm"
+            v-model:selected-form-types="selectedFormDefinitionsModel"
+            v-model:date-from="dateFromModel"
+            v-model:date-to="dateToModel"
+            v-model:sort-order="sortOrderModel"
+            v-model:group-by-form="groupByFormModel"
         />
 
-        <Grid
-            :form-submissions="formSubmissions"
-            :pagination="props.pagination"
-            :group-by-form="groupByForm"
-        />
-
+        <Grid :form-submissions="formSubmissions" :pagination="props.pagination" :group-by-form="groupByFormModel" />
     </div>
 </template>
 <script lang="ts" setup>
 import Filter from '@/components/FormSubmissions/Filter.vue';
-import { computed, ComputedRef } from 'vue';
-import { router } from '@inertiajs/vue3';
 import Grid from '@/components/FormSubmissions/Grid.vue';
+import { router } from '@inertiajs/vue3';
+import { computed, ComputedRef } from 'vue';
 
 const props = defineProps<{
-    formDefinitions: Array<App.Data.FormDefinitionData>
-    dateFrom: Date | null
-    dateTo: Date | null
-    selectedFormDefinitions: string[]
-    sortOrder: 'asc' | 'desc'
-    groupByForm: boolean,
-    formSubmissions: App.Data.FormSubmissionData[] | any,
-    pagination: App.Data.PaginationData
+    formDefinitions: Array<App.Data.FormDefinitionData>;
+    dateFrom: Date | null;
+    dateTo: Date | null;
+    selectedFormDefinitions: string[];
+    sortOrder: 'asc' | 'desc';
+    groupByForm: boolean;
+    formSubmissions: App.Data.FormSubmissionData[] | any;
+    pagination: App.Data.PaginationData;
 }>();
 
 const filter = computed(() => {
     const result = {} as any;
-    if( props.dateFrom !== null) {
+    if (props.dateFrom !== null) {
         result['dateFrom'] = props.dateFrom;
     }
-    if( props.dateTo !== null) {
+    if (props.dateTo !== null) {
         result['dateTo'] = props.dateTo;
     }
-    if( props.selectedFormDefinitions.length > 0) {
+    if (props.selectedFormDefinitions.length > 0) {
         result['selectedFormDefinitions'] = props.selectedFormDefinitions;
     }
-    if( props.sortOrder === 'asc') {
+    if (props.sortOrder === 'asc') {
         result['sortOrder'] = props.sortOrder;
-    }else{
+    } else {
         result['sortOrder'] = undefined;
     }
-    if( props.groupByForm) {
+    if (props.groupByForm) {
         result['groupByForm'] = props.groupByForm;
     }
     return result;
 });
 
-function filterQuery(query: any){
+function filterQuery(query: any) {
     const result = {} as any;
-    if( query.dateFrom !== null) {
+    if (query.dateFrom !== null) {
         result['dateFrom'] = query.dateFrom;
-    }else{
+    } else {
         result['dateFrom'] = undefined;
     }
-    if( query.dateTo !== null) {
+    if (query.dateTo !== null) {
         result['dateTo'] = query.dateTo;
-    }else{
+    } else {
         result['dateTo'] = undefined;
     }
-    if( query.selectedFormDefinitions && query.selectedFormDefinitions.length > 0) {
+    if (query.selectedFormDefinitions && query.selectedFormDefinitions.length > 0) {
         result['selectedFormDefinitions'] = query.selectedFormDefinitions;
-    }else{
+    } else {
         result['selectedFormDefinitions'] = undefined;
     }
-    if( query.sortOrder === 'asc') {
+    if (query.sortOrder === 'asc') {
         result['sortOrder'] = query.sortOrder;
-    }else{
+    } else {
         result['sortOrder'] = undefined;
     }
-    if( query.groupByForm) {
+    if (query.groupByForm) {
         result['groupByForm'] = query.groupByForm;
-    }else{
+    } else {
         result['groupByForm'] = undefined;
     }
     console.log(result);
@@ -92,28 +85,25 @@ function filterQuery(query: any){
 }
 
 function computedTriggerReload<T>(key: keyof typeof props): ComputedRef<T> {
-    // @ts-ignore
     return computed({
         get: () => props[key],
         set: (value: T) => {
             console.log(value);
             const data = filterQuery({
                 ...filter.value,
-                [key]: value
+                [key]: value,
             });
             router.reload({
-                data
+                data,
             });
-        }
+        },
     });
 }
 
-const dateFrom = computedTriggerReload<Date | null>('dateFrom');
+const dateFromModel = computedTriggerReload<Date | null>('dateFrom');
 
-const dateTo = computedTriggerReload<Date | null>('dateTo');
-const selectedFormDefinitions = computedTriggerReload<string[]>('selectedFormDefinitions');
-const sortOrder = computedTriggerReload<'asc' | 'desc'>('sortOrder');
-const groupByForm = computedTriggerReload<boolean>('groupByForm');
-
-
+const dateToModel = computedTriggerReload<Date | null>('dateTo');
+const selectedFormDefinitionsModel = computedTriggerReload<string[]>('selectedFormDefinitions');
+const sortOrderModel = computedTriggerReload<'asc' | 'desc'>('sortOrder');
+const groupByFormModel = computedTriggerReload<boolean>('groupByForm');
 </script>

@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use App\Enums\FieldType;
+use App\Models\Traits\HasUuid;
 use App\Rules\CheckboxRequiredValidator;
 use App\Rules\GeographicCoordinate;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,13 +15,8 @@ use Illuminate\Validation\Rule;
 class FormField extends Model
 {
     use HasFactory;
-    use HasUuids;
+    use HasUuid;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<string, mixed>
-     */
     protected $fillable = [
         'form_definition_id',
         'type',
@@ -55,7 +50,7 @@ class FormField extends Model
     ];
 
     /**
-     * @return BelongsTo<FormDefinition>
+     * @return BelongsTo<FormDefinition, $this>
      */
     public function formDefinition(): BelongsTo
     {
@@ -63,7 +58,7 @@ class FormField extends Model
     }
 
     /**
-     * @return HasMany<FormFieldOption>
+     * @return HasMany<FormFieldOption, $this>
      */
     public function options(): HasMany
     {
@@ -71,7 +66,7 @@ class FormField extends Model
     }
 
     /**
-     * @return HasMany<SubmissionField>
+     * @return HasMany<SubmissionField, $this>
      */
     public function submissionFields(): HasMany
     {
@@ -80,7 +75,7 @@ class FormField extends Model
 
     public function getValidationRules(): array
     {
-        $inRule = Rule::in($this->options->pluck('id')->toArray());
+        $inRule = Rule::in($this->options->pluck('uuid')->toArray());
 
         $rules = match ($this->type) {
             FieldType::TEXT => ['string'],
@@ -119,11 +114,9 @@ class FormField extends Model
             // TODO
         }
 
+        $requiredOptions = $this->options->filter(fn ($option) => $option->is_required)->pluck('label', 'uuid');
 
-        $requiredOptions = $this->options->filter(fn($option) => $option->is_required)->pluck('label', 'id');
-
-
-        if($requiredOptions->isNotEmpty()) {
+        if ($requiredOptions->isNotEmpty()) {
             $rules[] = new CheckboxRequiredValidator(
                 requiredOptions: $requiredOptions->toArray()
             );
@@ -138,13 +131,21 @@ class FormField extends Model
 
     public function createSubmissionField(FormSubmission $submission, mixed $value): SubmissionField
     {
-        return $submission->submissionFields()->create([
+        $submissionField = $submission->submissionFields()->create([
             'form_field_id' => $this->id,
-            'field_label' => $this->label,
-            'sort_order' => $this->sort_order,
-            'field_type' => $this->type,
             'value' => $value,
+            'sort_order' => $this->sort_order,
+            'type' => $this->type,
+            'label' => $this->label,
+            'help_text' => $this->help_text,
+            'required' => $this->required,
         ]);
+
+        foreach ($this->options as $option) {
+            $option->createSubmissionFieldOption($submissionField);
+        }
+
+        return $submissionField;
     }
 
     public function getSubmissionField(FormSubmission $submission): SubmissionField

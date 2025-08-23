@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class MapPointFactory extends Factory
 {
-
     protected $model = MapPoint::class;
 
     /**
@@ -20,7 +19,7 @@ class MapPointFactory extends Factory
      */
     public function definition(): array
     {
-        //some random coordinates around Darmstadt
+        // some random coordinates around Darmstadt
         $lng = 8.6510204;
         $lat = 49.8728475;
         $lng += fake()->randomFloat(null, -1, 1) * 0.04;
@@ -36,27 +35,34 @@ class MapPointFactory extends Factory
         ];
     }
 
-    public function withFormSubmission(): Factory{
-        return $this->afterMaking(function (MapPoint $mapPoint){
+    public function withFormSubmission(): Factory
+    {
+        return $this->afterMaking(function (MapPoint $mapPoint) {
             $mapPoint->pointable()->associate(FormSubmission::factory()->create());
+
             return $mapPoint;
         });
     }
 
-    public function withAdvice(): Factory{
-        return $this->afterMaking(function (MapPoint $mapPoint){
+    public function withAdvice(): Factory
+    {
+        return $this->afterMaking(function (MapPoint $mapPoint) {
             $mapPoint->pointable()->associate(Advice::factory()->create());
+
             return $mapPoint;
         });
     }
 
-    public function withRandomOrNullPointable(): Factory{
+    public function withRandomOrNullPointable(): Factory
+    {
         $rand = random_int(1, 3);
-        if($rand == 1) {
+        if ($rand == 1) {
             return $this->withFormSubmission();
-        } else if ($rand == 2){
+        }
+        if ($rand == 2) {
             return $this->withAdvice();
         }
+
         return $this;
     }
 

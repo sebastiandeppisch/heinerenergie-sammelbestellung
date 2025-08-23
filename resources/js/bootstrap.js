@@ -11,19 +11,19 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 let token = document.head.querySelector('meta[name="csrf-token"]');
 
 if (token) {
-	window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
+    window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
 } else {
-	console.error('CSRF token not found: https://laravel.com/docs/csrf#csrf-x-csrf-token');
+    console.error('CSRF token not found: https://laravel.com/docs/csrf#csrf-x-csrf-token');
 }
 
-import {loadMessages, locale } from 'devextreme/localization'
-import german from 'devextreme/localization/messages/de.json'
+import { loadMessages, locale } from 'devextreme/localization';
+import german from 'devextreme/localization/messages/de.json';
 
 loadMessages(german);
 locale('de');
 
-import config from "devextreme/core/config";
- 
+import config from 'devextreme/core/config';
+
 config({
-    defaultCurrency: 'EUR'
+    defaultCurrency: 'EUR',
 });

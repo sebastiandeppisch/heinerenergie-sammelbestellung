@@ -1,0 +1,6 @@
+resources/js/components/ui/*
+resources/js/shadcn/*
+resources/js/ziggy.js
+resources/views/mail/*
+resources/js/types/generated.d.ts
+resources/js/themes/generated/*.css

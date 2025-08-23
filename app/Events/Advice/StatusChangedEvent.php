@@ -8,15 +8,19 @@ use App\Models\User;
 
 class StatusChangedEvent extends AdviceEvent
 {
+    public ?string $fromStatus;
+
+    public ?string $toStatus;
+
     public function __construct(
         Advice $advice,
         ?User $user,
-        public ?string $fromStatus,
-        public ?string $toStatus
+        ?int $fromStatusId,
+        ?int $toStatusId
     ) {
         parent::__construct($advice, $user);
-        $this->fromStatus = AdviceStatus::find($fromStatus)?->name;
-        $this->toStatus = AdviceStatus::find($toStatus)?->name;
+        $this->fromStatus = AdviceStatus::find($fromStatusId)?->name;
+        $this->toStatus = AdviceStatus::find($toStatusId)?->name;
     }
 
     public function getDescription(): string

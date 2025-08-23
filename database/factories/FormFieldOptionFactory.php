@@ -6,6 +6,9 @@ use App\Models\FormField;
 use App\Models\FormFieldOption;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<FormFieldOption>
+ */
 class FormFieldOptionFactory extends Factory
 {
     protected $model = FormFieldOption::class;
@@ -17,10 +20,10 @@ class FormFieldOptionFactory extends Factory
 
         return [
             'form_field_id' => FormField::factory(),
-            'label' => 'Option ' . $optionCount,
-            'value' => 'option_' . $optionCount,
+            'label' => 'Option '.$optionCount,
+            'value' => 'option_'.$optionCount,
             'sort_order' => $this->faker->numberBetween(0, 10),
-            'is_default' => $this->faker->boolean(20)
+            'is_default' => $this->faker->boolean(20),
         ];
     }
 }

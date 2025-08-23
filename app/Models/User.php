@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use App\Models\Traits\HasUuid;
 use App\Traits\HasGroups;
 use App\ValueObjects\Address;
 use App\ValueObjects\Coordinate;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -14,16 +14,12 @@ use Laravel\Sanctum\HasApiTokens;
 
 /**
  * @property Coordinate|null $coordinate
+ * @property Address|null $address
  */
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, HasGroups, HasUuids, Notifiable;
+    use HasApiTokens, HasFactory, HasGroups, HasUuid, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'first_name',
         'last_name',
@@ -31,17 +27,12 @@ class User extends Authenticatable
         'password',
         'is_admin',
         'street',
-        'streetNumber',
+        'street_number',
         'zip',
         'city',
         'advice_radius',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
@@ -51,6 +42,9 @@ class User extends Authenticatable
         'name',
     ];
 
+    /**
+     * @return HasMany<Advice, $this>
+     */
     public function advices(): HasMany
     {
         return $this->hasMany(Advice::class);
@@ -67,7 +61,7 @@ class User extends Authenticatable
             return false;
         }
 
-        return $this->coordinate->distanceTo($advice->coordinate) <= $this->advice_radius;
+        return $this->coordinate->distanceTo($advice->coordinate)->getValue() <= $this->advice_radius;
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Override;
 
 class UpdateGroupConsultingAreaRequest extends FormRequest
 {
@@ -20,6 +21,7 @@ class UpdateGroupConsultingAreaRequest extends FormRequest
         ];
     }
 
+    #[Override]
     public function messages(): array
     {
         return [

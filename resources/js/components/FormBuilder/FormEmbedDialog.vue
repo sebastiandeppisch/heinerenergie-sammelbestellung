@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import { route } from 'ziggy-js';
 import Button from '@/shadcn/components/ui/button/Button.vue';
-import { Textarea } from '@/shadcn/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/shadcn/components/ui/dialog';
+import { Textarea } from '@/shadcn/components/ui/textarea';
 import { Code2, Copy } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 import { toast } from 'vue-sonner';
+import { route } from 'ziggy-js';
 
 type FormDefinitionData = App.Data.FormDefinitionData;
 
@@ -21,22 +21,24 @@ function openEmbedDialog() {
 
 function copyIframeCode() {
     if (props.formDefinition?.id) {
-        navigator.clipboard.writeText(iframeCode.value).then(() => {
-            toast.success('Kopiert', {
-                description: 'Iframe-Code wurde in die Zwischenablage kopiert',
+        navigator.clipboard
+            .writeText(iframeCode.value)
+            .then(() => {
+                toast.success('Kopiert', {
+                    description: 'Iframe-Code wurde in die Zwischenablage kopiert',
+                });
+            })
+            .catch(() => {
+                toast.error('Fehler', {
+                    description: 'Iframe-Code konnte nicht kopiert werden',
+                });
             });
-        }).catch(() => {
-            toast.error('Fehler', {
-                description: 'Iframe-Code konnte nicht kopiert werden',
-            });
-        });
     }
 }
 
 const iframeCode = computed(() => {
-	return `<iframe src="${route('form.show', props.formDefinition.id)}" width="100%" height="600" frameborder="0"></iframe>`;
+    return `<iframe src="${route('form.show', props.formDefinition.id)}" width="100%" height="600" frameborder="0"></iframe>`;
 });
-
 </script>
 
 <template>
@@ -51,17 +53,11 @@ const iframeCode = computed(() => {
         <DialogContent class="sm:max-w-md">
             <DialogHeader>
                 <DialogTitle>Formular einbetten</DialogTitle>
-                <DialogDescription>
-                    Kopiere den folgenden iframe-Code, um das Formular in Deine Webseite einzubetten.
-                </DialogDescription>
+                <DialogDescription> Kopiere den folgenden iframe-Code, um das Formular in Deine Webseite einzubetten. </DialogDescription>
             </DialogHeader>
             <div class="flex items-center space-x-2">
                 <div class="grid flex-1 gap-2">
-                    <Textarea
-                        :model-value="iframeCode"
-                        readonly
-                        class="min-h-[120px] font-mono text-sm"
-                    />
+                    <Textarea :model-value="iframeCode" readonly class="min-h-[120px] font-mono text-sm" />
                 </div>
             </div>
             <DialogFooter class="sm:justify-start">

@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Wnx\Sends\Models\Send;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Advice>
+ * @extends Factory<Advice>
  */
 class AdviceFactory extends Factory
 {
@@ -29,10 +29,10 @@ class AdviceFactory extends Factory
         }
 
         return [
-            'firstName' => fake()->firstName(),
-            'lastName' => fake()->lastName(),
+            'first_name' => fake()->firstName(),
+            'last_name' => fake()->lastName(),
             'street' => fake()->streetName(),
-            'streetNumber' => fake()->buildingNumber(),
+            'street_number' => fake()->buildingNumber(),
             'zip' => fake()->numberBetween(10000, 99999),
             'city' => fake()->city(),
             'email' => fake()->safeEmail(),
@@ -46,7 +46,7 @@ class AdviceFactory extends Factory
 
     public function withSharing(): self
     {
-        return $this->afterCreating(function (Advice $advice){
+        return $this->afterCreating(function (Advice $advice) {
             $user = User::factory()->create();
             $advisor = User::factory()->create();
             app(AdviceService::class)->syncShares($advice, collect([$advisor]), $user);
@@ -55,11 +55,9 @@ class AdviceFactory extends Factory
 
     public function withSendable(): self
     {
-        return $this->afterCreating(function (Advice $advice){
+        return $this->afterCreating(function (Advice $advice) {
             $sendable = Send::factory()->create();
             $advice->sends()->attach($sendable);
         });
     }
-
-
 }

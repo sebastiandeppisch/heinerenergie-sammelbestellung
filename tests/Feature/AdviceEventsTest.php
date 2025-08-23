@@ -125,7 +125,7 @@ test('events retain user who triggered them', function () {
 function transferAdvice(Advice $advice, Group $newGroup, ?string $reason = null)
 {
     $response = post(route('advices.transfer', $advice), [
-        'group_id' => $newGroup->id,
+        'group_id' => $newGroup->uuid,
         'reason' => $reason,
     ]);
 

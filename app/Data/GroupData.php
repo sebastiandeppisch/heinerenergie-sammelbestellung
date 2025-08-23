@@ -30,16 +30,18 @@ class GroupData extends Data
 
     public static function fromModel(Group $group): self
     {
+
+        $group->loadMissing('parent');
         $currentUser = auth()->user();
 
         $canActAsAdmin = $group->admins()->where('user_id', $currentUser->id)->exists();
 
         return new self(
-            id: $group->id,
+            id: $group->uuid,
             name: $group->name,
             description: $group->description,
             logo_path: $group->full_logo_path ? url($group->full_logo_path) : null,
-            parent_id: $group->parent_id,
+            parent_id: $group->parent ? $group->parent->uuid : null,
             accepts_transfers: $group->accepts_transfers,
             userCanActAsAdmin: $canActAsAdmin,
             users_count: $group->users()->count(),

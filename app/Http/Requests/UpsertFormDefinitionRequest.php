@@ -3,9 +3,10 @@
 namespace App\Http\Requests;
 
 use App\Enums\FieldType;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Override;
 
 class UpsertFormDefinitionRequest extends FormRequest
 {
@@ -14,14 +15,14 @@ class UpsertFormDefinitionRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        //TODO
+        // TODO
         return true;
     }
 
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {
@@ -49,7 +50,7 @@ class UpsertFormDefinitionRequest extends FormRequest
             'fields.*.options.*.label' => 'required|string|max:255',
             'fields.*.options.*.value' => 'required|string|max:255',
             'fields.*.options.*.is_default' => 'required|boolean',
-            'fields.*.options.*.is_required' => 'required|boolean'
+            'fields.*.options.*.is_required' => 'required|boolean',
         ];
     }
 
@@ -58,6 +59,7 @@ class UpsertFormDefinitionRequest extends FormRequest
      *
      * @return array<string, string>
      */
+    #[Override]
     public function attributes(): array
     {
         return [
@@ -82,11 +84,11 @@ class UpsertFormDefinitionRequest extends FormRequest
      *
      * @return array<string, string>
      */
+    #[Override]
     public function messages(): array
     {
         return [
             'fields.*.options.required_if' => 'Für Auswahlfelder müssen Optionen angegeben werden.',
         ];
     }
-
 }

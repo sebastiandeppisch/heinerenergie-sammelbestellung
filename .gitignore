@@ -23,3 +23,5 @@ _ide_helper.php
 _ide_helper_models.php
 .phpunit.cache
 coverage-report/**
+database/seeders/GroupAdvicesAdvisorsSeeder.php
+TODO.md

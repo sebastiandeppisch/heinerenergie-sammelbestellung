@@ -9,6 +9,7 @@ trait AncestorHelper
 {
     public function isActingAsAncestorAdmin(User $user, Group $group): bool
     {
+        $group->loadMissing('parent');
         foreach ($group->ancestors() as $ancestor) {
             if ($this->isActingAsDirectAdmin($user, $ancestor)) {
                 return true;

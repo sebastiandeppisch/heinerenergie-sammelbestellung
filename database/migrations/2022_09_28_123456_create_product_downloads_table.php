@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Product;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -47,13 +46,6 @@ return new class extends Migration
         Schema::table('products', function (Blueprint $table) {
             $table->string('url')->nullable();
         });
-
-        foreach (Product::all() as $product) {
-            if ($product->downloads()->count() > 0) {
-                $product->url = $product->downloads()->first()->url;
-                $product->save();
-            }
-        }
         Schema::dropIfExists('product_downloads');
     }
 };

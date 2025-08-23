@@ -6,6 +6,7 @@ use App\Data\AdviceEventData;
 use App\Data\DataProtectedAdviceData;
 use App\Data\GroupData;
 use App\Data\GroupMapData;
+use App\Data\UserData;
 use App\Events\Advice\CommentAddedEvent;
 use App\Events\Advice\InitiativeTransferEvent;
 use App\Http\Requests\StoreAdviceCommentRequest;
@@ -15,8 +16,10 @@ use App\Models\Group;
 use App\Models\User;
 use App\Notifications\AdviceTransferred;
 use App\Services\SessionService;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Wnx\Sends\Models\Send;
 
 class AdviceController extends Controller
 {
@@ -27,10 +30,10 @@ class AdviceController extends Controller
         $user = Auth::user();
 
         $advices = Advice::query()
-            ->with('status', 'group', 'group.parent', 'group.users', 'shares')->get()
+            ->with('status', 'group', 'group.parent', 'group.users', 'shares', 'advisor')->get()
             ->filter(fn (Advice $advice) => Auth::user()->can('viewDataProtected', $advice))->values()->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice, $user))->toArray();
 
-        $groups = Group::all()
+        $groups = Group::with('parent')->get()
         // ->filter(fn (Group $group) => Auth::user()->can('view', $group))
             ->map(fn (Group $group) => GroupData::fromModel($group))->values()->toArray();
 
@@ -43,6 +46,7 @@ class AdviceController extends Controller
 
     public function show(Advice $advice)
     {
+        $advice->loadMissing('shares', 'group', 'group.parent', 'advisor');
         if (! Auth::user()->can('view', $advice)) {
             return redirect('/advices')->withErrors('Du hast keine Berechtigung, diese Beratung zu sehen');
         }
@@ -54,9 +58,9 @@ class AdviceController extends Controller
             ->get()
             ->map(fn ($event) => AdviceEventData::fromModel($event));
 
-        $mails = $advice->sends()
-            ->get()
-            ->map(fn ($mail) => AdviceEventData::fromMail($mail));
+        /** @var Collection<int, Send> $mails */
+        $mails = $advice->sends()->get();
+        $mails = $mails->map(fn ($mail) => AdviceEventData::fromMail($mail));
 
         $timeline = $events->concat($mails)
             ->sortBy(fn ($item) => $item->created_at)
@@ -64,7 +68,7 @@ class AdviceController extends Controller
 
         $coordinateOfAdvice = $advice->coordinate;
 
-        $transferableGroups = Group::where('accepts_transfers', true)->get()
+        $transferableGroups = Group::where('accepts_transfers', true)->with('parent')->get()
             ->sortBy(function (Group $group) use ($coordinateOfAdvice) {
                 $center = $group->consulting_area?->getCenter();
 
@@ -72,10 +76,12 @@ class AdviceController extends Controller
                     return INF;
                 }
 
-                return $coordinateOfAdvice->distanceTo($center);
+                return $coordinateOfAdvice->distanceTo($center)->getValue();
             })
             ->map(fn (Group $group) => GroupData::fromModel($group))
             ->values();
+
+        $advice = DataProtectedAdviceData::fromModel($advice, Auth::user());
 
         return Inertia::render('Advice', [
             'advice' => $advice,
@@ -86,7 +92,7 @@ class AdviceController extends Controller
 
     public function transfer(Advice $advice, TransferAdviceRequest $request)
     {
-        $targetGroup = Group::findOrFail($request->group_id);
+        $targetGroup = Group::where('uuid', $request->group_id)->firstOrFail();
         $oldGroup = $advice->group;
         $advice->group()->associate($targetGroup);
         $advice->save();
@@ -130,7 +136,7 @@ class AdviceController extends Controller
     public function map()
     {
         $advices = Advice::query()
-            ->with('shares', 'status', 'group', 'group.parent', 'group.users')->get()
+            ->with('shares', 'status', 'group', 'group.parent', 'group.users', 'advisor')->get()
             ->filter(fn (Advice $advice) => Auth::user()->can('viewDataProtected', $advice))
             ->values()->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice));
 
@@ -138,7 +144,7 @@ class AdviceController extends Controller
 
         return Inertia::render('AdvicesMap', [
             'advices' => $advices,
-            'advisors' => User::all(),
+            'advisors' => User::all()->map(fn ($user) => UserData::fromModel($user, false)), // TODO filter
             'groups' => $groups,
         ]);
     }

@@ -33,14 +33,14 @@ created_at: string | null;
 };
 export type DataProtectedAdviceData = {
 id: string;
-firstName: string;
-lastName: string;
+first_name: string;
+last_name: string;
 street: string;
-streetNumber: string;
+street_number: string;
 zip: string;
 city: string;
-email: string;
-phone: string;
+email: string | null;
+phone: string | null;
 commentary: string | null;
 advisor_id: string | null;
 advice_status_id: string | null;
@@ -51,14 +51,14 @@ created_at: any;
 updated_at: any;
 distance: number | null;
 shares_ids: Array<any>;
-placeNotes: string | null;
-houseType: App.Enums.HouseType | null;
-landlordExists: boolean | null;
-helpType_place: string | null;
-helpType_technical: string | null;
-helpType_bureaucracy: string | null;
-helpType_other: string | null;
-result: App.Enums.AdviceStatusResult | null;
+place_notes: string | null;
+house_type: App.Enums.HouseType | null;
+landlord_exists: boolean | null;
+help_type_place: boolean | null;
+help_type_technical: boolean | null;
+help_type_bureaucracy: boolean | null;
+help_type_other: boolean | null;
+result: App.Enums.AdviceStatusResult;
 can_edit: boolean | null;
 group_id: string | null;
 };
@@ -100,6 +100,12 @@ form_name: string;
 fields: Array<App.Data.SubmissionFieldData>;
 submitted_at: any;
 seen: boolean;
+};
+export type GroupBaseData = {
+id: string;
+name: string;
+description: string | null;
+logo_path: string | null;
 };
 export type GroupData = {
 users_count: number;
@@ -165,7 +171,7 @@ long: number | null;
 profile_picture: string | null;
 advice_radius: number | null;
 street: string | null;
-streetNumber: string | null;
+street_number: string | null;
 city: string | null;
 zip: string | null;
 is_admin: boolean;
@@ -173,7 +179,7 @@ is_admin: boolean;
 }
 declare namespace App.Data.Pages {
 export type GroupsIndexData = {
-groupTreeItems: any | Array<any>;
+groupTreeItems: Array<App.Data.GroupTreeItem>;
 groups: Array<App.Data.GroupData>;
 canCreateRootGroup: boolean;
 selectedGroup: App.Data.GroupData | null;
@@ -191,8 +197,8 @@ export type HouseType = 0 | 1 | 2;
 declare namespace App.ValueObjects {
 export type Address = {
 street: string;
-streetNumber: string;
-zip: number;
+street_number: string;
+zip: string;
 city: string;
 };
 export type Coordinate = {

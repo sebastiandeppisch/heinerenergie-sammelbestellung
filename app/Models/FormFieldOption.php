@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Models\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,12 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class FormFieldOption extends Model
 {
     use HasFactory;
+    use HasUuid;
 
-    use HasUuids;
-
-    /**
-     * @var array<string>
-     */
     protected $fillable = [
         'form_field_id',
         'label',
@@ -34,8 +30,22 @@ class FormFieldOption extends Model
         'is_required' => 'boolean',
     ];
 
+    /**
+     * @return BelongsTo<FormField, $this>
+     */
     public function field(): BelongsTo
     {
         return $this->belongsTo(FormField::class, 'form_field_id');
+    }
+
+    public function createSubmissionFieldOption(SubmissionField $submissionField): SubmissionFieldOption
+    {
+        return $submissionField->options()->create([
+            'form_field_option_id' => $this->id,
+            'value' => $this->value,
+            'label' => $this->label,
+            'sort_order' => $this->sort_order,
+            'is_default' => $this->is_default,
+        ]);
     }
 }

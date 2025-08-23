@@ -43,17 +43,19 @@ class AdviceStatusPolicy
 
     public function view(User $user, AdviceStatus $status)
     {
+        $status->loadMissing('ownerGroup');
+
         $group = $status->ownerGroup;
 
         if ($this->groupContext->isActingAsTransitiveMemberOrAdmin($user, $group)) {
             return true;
         }
 
-        if ($group->parentGroups === null) {
+        if ($group->parent_id === null) {
             return false;
         }
 
-        foreach ($group->parentGroups as $parentGroup) {
+        foreach ($group->ancestors() as $parentGroup) {
             if ($this->groupContext->isActingAsTransitiveMemberOrAdmin($user, $parentGroup)) {
                 return true;
             }

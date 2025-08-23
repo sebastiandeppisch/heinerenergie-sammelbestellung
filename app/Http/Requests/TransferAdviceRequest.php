@@ -10,7 +10,7 @@ class TransferAdviceRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        $targetGroup = Group::findOrFail($this->group_id);
+        $targetGroup = Group::where('uuid', $this->group_id)->firstOrFail();
         if (! $targetGroup->accepts_transfers) {
             throw new AuthorizationException('This group does not accept transfers');
         }
@@ -23,7 +23,7 @@ class TransferAdviceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'group_id' => 'required|uuid|exists:groups,id',
+            'group_id' => 'required|uuid|exists:groups,uuid',
             'reason' => 'nullable|string|max:1000',
         ];
     }

@@ -1,89 +1,52 @@
 <script setup lang="ts">
-import DxButton from "devextreme-vue/button";
-import DxToolbar, { DxItem } from "devextreme-vue/toolbar";
-
-import UserPanel from "./UserPanel.vue";
-import { Link, router } from "@inertiajs/vue3";
-
-import logo from '../../img/logo.png';
-
-
+import AppLogo from '@/layouts/components/AppLogo.vue';
+import { PageProps } from '@inertiajs/core';
+import { router, usePage } from '@inertiajs/vue3';
+import { User } from 'lucide-vue-next';
+import { computed } from 'vue';
 const openBackend = () => {
-  router.visit('/backend');
+    router.visit('/backend');
+};
+
+interface CustomPageProps extends PageProps {
+    auth: {
+        user: App.Data.UserData;
+        currentGroup?: App.Data.GroupBaseData;
+        availableGroups?: App.Data.GroupData[];
+    };
 }
+
+const page = usePage<CustomPageProps>();
+const currentGroup = computed(() => page.props.auth.currentGroup);
+const header = computed(() => {
+    return currentGroup.value?.name || 'CRM';
+});
 </script>
 
 <template>
-  <header class="header-component">
-    <dx-toolbar class="header-toolbar">
-      <dx-item
-        location="before"
-      >
-        <div style="display:block;width:70px"></div>
-      </dx-item>
-      <dx-item
-        location="before"
-        css-class="header-title dx-toolbar-label"
-      >
-      <div><Link href="/"><img :src="logo" style="height:2em;width: 6em;"></Link></div>
-      </dx-item>
+    <header class="flex items-center justify-between rounded-b-lg border-b bg-white px-4 py-2 shadow-sm">
+        <!-- Left spacer -->
+        <div class="w-[70px]"></div>
 
-      <dx-item
-        location="center"
-      >
-        <div style="font-size:1.5em;">Balkonsolar</div>
-      </dx-item>
+        <!-- Logo -->
+        <div class="flex items-center">
+            <AppLogo class="h-12 w-24 object-contain" />
+        </div>
 
-      <dx-item
-        location="after"
-        locate-in-menu="auto"
-      >
-      <template #default>
-          <div>
-            <dx-button
-              class="user-button authorization"
-              :width="250"
-              height="100%"
-              text="Berater:innen Zugang"
-              styling-mode="text"
-              icon="user"
-              type="default"
-              @click="openBackend"
+        <!-- Center title -->
+        <div class="flex-1 text-center">
+            <h1 class="text-2xl font-semibold text-gray-800">{{ header }}</h1>
+        </div>
+
+        <!-- Right button -->
+        <div class="flex items-center">
+            <button
+                @click="openBackend"
+                class="flex items-center gap-2 rounded-md px-4 py-2 text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900"
             >
-            </dx-button>
-          </div>
-        </template>
-      </dx-item>
-    </dx-toolbar>
-  </header>
+                <User class="h-4 w-4" />
+                <span class="hidden sm:inline">Berater:innen Zugang</span>
+            </button>
+        </div>
+    </header>
 </template>
-
-<style lang="scss">
-@import "../themes/generated/variables.base.scss";
-@import "../dx-styles.scss";
-
-.header-component {
-  flex: 0 0 auto;
-  z-index: 1;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-
-  .dx-toolbar .dx-toolbar-item.menu-button > .dx-toolbar-item-content .dx-icon {
-    color: $base-accent;
-  }
-}
-
-.dx-toolbar.header-toolbar .dx-toolbar-items-container .dx-toolbar-after {
-  padding: 0 40px;
-
-  .screen-x-small & {
-    padding: 0 20px;
-  }
-}
-
-.dx-toolbar .dx-toolbar-item.dx-toolbar-button.menu-button {
-  width: $side-panel-min-width;
-  text-align: center;
-}
-
-
-</style>

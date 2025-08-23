@@ -2,20 +2,22 @@
 
 namespace App\Models;
 
+use App\Models\Traits\HasUuid;
 use App\ValueObjects\Polygon;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Facades\Storage;
+use Override;
 
 class Group extends Model
 {
     use HasFactory;
-    use HasUuids;
+    use HasUuid;
 
     protected $fillable = [
         'name',
@@ -32,6 +34,8 @@ class Group extends Model
 
     /**
      * Get the users that belong to this group
+     *
+     * @return BelongsToMany<User, $this, Pivot>
      */
     public function users(): BelongsToMany
     {
@@ -42,6 +46,8 @@ class Group extends Model
 
     /**
      * Get the admins of this group
+     *
+     * @return BelongsToMany<User, $this, Pivot>
      */
     public function admins(): BelongsToMany
     {
@@ -52,6 +58,8 @@ class Group extends Model
 
     /**
      * Get the parent group
+     *
+     * @return BelongsTo<\App\Models\Group, $this>
      */
     public function parent(): BelongsTo
     {
@@ -60,6 +68,8 @@ class Group extends Model
 
     /**
      * Get the child groups
+     *
+     * @return HasMany<\App\Models\Group, $this>
      */
     public function children(): HasMany
     {
@@ -68,6 +78,8 @@ class Group extends Model
 
     /**
      * Get all advices belonging to this group
+     *
+     * @return HasMany<Advice, $this>
      */
     public function advices(): HasMany
     {
@@ -84,13 +96,17 @@ class Group extends Model
 
     /**
      * Get all ancestor groups
+     *
+     * @return Collection<Group>
      */
     public function ancestors(): Collection
     {
         $ancestors = new Collection;
+        $this->loadMissing('parent');
         $current = $this->parent;
 
         while ($current !== null) {
+            $current->loadMissing('parent');
             $ancestors->push($current);
             $current = $current->parent;
         }
@@ -100,6 +116,8 @@ class Group extends Model
 
     /**
      * Get all descendant groups
+     *
+     * @return Collection<Group>
      */
     public function descendants(): Collection
     {
@@ -124,13 +142,14 @@ class Group extends Model
         return $this->logo_path ? Storage::url($this->logo_path) : null;
     }
 
-    #[\Override]
-    public function delete()
+    #[Override]
+    public function delete(): ?bool
     {
         if ($this->logo_path) {
             Storage::disk('public')->delete($this->logo_path);
         }
-        parent::delete();
+
+        return parent::delete();
     }
 
     protected function casts(): array
@@ -153,11 +172,17 @@ class Group extends Model
         return $ids;
     }
 
+    /**
+     * @return BelongsToMany<AdviceStatus, $this, AdviceStatusGroup>
+     */
     public function usableStatuses(): BelongsToMany
     {
         return $this->belongsToMany(AdviceStatus::class)->withPivot('visible_in_group')->using(AdviceStatusGroup::class);
     }
 
+    /**
+     * @return HasMany<AdviceStatus, $this>
+     */
     public function ownStatuses(): HasMany
     {
         return $this->hasMany(AdviceStatus::class);

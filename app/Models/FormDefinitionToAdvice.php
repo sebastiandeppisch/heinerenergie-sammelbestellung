@@ -4,9 +4,9 @@ namespace App\Models;
 
 use App\Events\Advice\AdviceCreatedByFormSubmission;
 use App\Mail\AdviceCreated;
+use App\Models\Traits\HasUuid;
 use Database\Factories\FormDefinitionToAdviceFactory;
 use DB;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,10 +17,10 @@ class FormDefinitionToAdvice extends Model
     /** @use HasFactory<FormDefinitionToAdviceFactory> */
     use HasFactory;
 
-    use HasUuids;
+    use HasUuid;
 
     /**
-     * @return BelongsTo<FormDefinition>
+     * @return BelongsTo<FormDefinition, $this>
      */
     public function formDefinition(): BelongsTo
     {
@@ -28,7 +28,7 @@ class FormDefinitionToAdvice extends Model
     }
 
     /**
-     * @return BelongsTo<FormField>
+     * @return BelongsTo<FormField, $this>
      */
     public function addressField(): BelongsTo
     {
@@ -36,7 +36,7 @@ class FormDefinitionToAdvice extends Model
     }
 
     /**
-     * @return BelongsTo<FormField>
+     * @return BelongsTo<FormField, $this>
      */
     public function emailField(): BelongsTo
     {
@@ -44,7 +44,7 @@ class FormDefinitionToAdvice extends Model
     }
 
     /**
-     * @return BelongsTo<FormField>
+     * @return BelongsTo<FormField, $this>
      */
     public function phoneField(): BelongsTo
     {
@@ -52,7 +52,7 @@ class FormDefinitionToAdvice extends Model
     }
 
     /**
-     * @return BelongsTo<FormField>
+     * @return BelongsTo<FormField, $this>
      */
     public function firstNameField(): BelongsTo
     {
@@ -61,7 +61,7 @@ class FormDefinitionToAdvice extends Model
     }
 
     /**
-     * @return BelongsTo<FormField>
+     * @return BelongsTo<FormField, $this>
      */
     public function lastNameField(): BelongsTo
     {
@@ -70,20 +70,19 @@ class FormDefinitionToAdvice extends Model
 
     public function createAdvice(FormSubmission $submission): Advice
     {
-        $advice = DB::transaction(function ()  use ($submission){
+        $advice = DB::transaction(function () use ($submission) {
             $addressField = $this->addressField->getSubmissionField($submission);
             $emailField = $this->emailField->getSubmissionField($submission);
             $phoneField = $this->phoneField->getSubmissionField($submission);
             $firstNameField = $this->firstNameField->getSubmissionField($submission);
             $lastNameField = $this->lastNameField->getSubmissionField($submission);
 
-
             $advice = Advice::create([
                 'address' => $addressField->value,
                 'email' => $emailField->value,
                 'phone' => $phoneField->value,
-                'firstName' => $firstNameField->value,
-                'lastName' => $lastNameField->value,
+                'first_name' => $firstNameField->value,
+                'last_name' => $lastNameField->value,
                 'group_id' => $submission->group_id,
             ]);
 
@@ -91,12 +90,13 @@ class FormDefinitionToAdvice extends Model
 
             event(new AdviceCreatedByFormSubmission($advice, $submission));
 
-
             $advice = $advice->fresh();
+
             return $advice;
         });
 
         Mail::to($advice->email)->send(new AdviceCreated($advice));
+
         return $advice;
     }
 }

@@ -9,7 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('map_points', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
+            $table->uuid('uuid')->unique();
             $table->timestamps();
 
             $table->decimal('lng', 10, 7)->nullable()->default(null);

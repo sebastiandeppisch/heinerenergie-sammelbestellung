@@ -3,9 +3,12 @@
 namespace App\Services;
 
 use App\Data\FormDefinitionData;
+use App\Data\FormFieldData;
+use App\Data\FormFieldOptionData;
 use App\Models\FormDefinition;
 use App\Models\FormField;
 use App\Models\FormFieldOption;
+use App\Models\Group;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -14,8 +17,9 @@ class FormDefinitionService
     public function updateFormDefinitionData(FormDefinitionData $formDefinitionData): FormDefinition
     {
         return DB::transaction(function () use ($formDefinitionData) {
-            $data = collect($formDefinitionData->toArray())->forget(['id', 'fields'])->toArray();
-            $formDefinition = FormDefinition::findOrFail($formDefinitionData->id);
+            $data = collect($formDefinitionData->toArray())->forget(['id', 'fields', 'group_id'])->toArray();
+            $formDefinition = FormDefinition::where('uuid', $formDefinitionData->id)->firstOrFail();
+            $formDefinition->group_id = Group::where('uuid', $formDefinitionData->group_id)->firstOrFail()->id;
             $formDefinition->update($data);
 
             $this->updateFields($formDefinitionData->fields, $formDefinition);
@@ -25,7 +29,7 @@ class FormDefinitionService
     }
 
     /**
-     * @param Collection<FormFieldData>
+     * @param  Collection<FormFieldData>  $fields
      */
     private function updateFields(Collection $fields, FormDefinition $formDefinition)
     {
@@ -33,10 +37,10 @@ class FormDefinitionService
         foreach ($fields as $field) {
             $data = collect($field->toArray())->forget(['id', 'options', 'form_definition_id'])->toArray();
 
-            $formField = FormField::find($field->id);
+            $formField = FormField::where('uuid', $field->id)->first();
 
             if ($formField === null) {
-                $formField = $formDefinition->fields()->insert($data);
+                $formField = $formDefinition->fields()->create($data);
             } else {
                 $formField->update($data);
             }
@@ -58,7 +62,7 @@ class FormDefinitionService
 
             $data = collect($option)->forget(['id'])->toArray();
 
-            $option = FormFieldOption::find($option->id);
+            $option = FormFieldOption::where('uuid', $option->id)->first();
             if ($option === null) {
                 $option = $formField->options()->create($data);
             } else {
@@ -73,7 +77,8 @@ class FormDefinitionService
     public function storeFormDefinitionData(FormDefinitionData $formDefinitionData): FormDefinition
     {
         return DB::transaction(function () use ($formDefinitionData) {
-            $data = collect($formDefinitionData->toArray())->forget(['id', 'fields'])->toArray();
+            $data = collect($formDefinitionData->toArray())->forget(['id', 'fields', 'group_id'])->toArray();
+            $data['group_id'] = Group::where('uuid', $formDefinitionData->group_id)->firstOrFail()->id;
             $formDefinition = FormDefinition::create($data);
             foreach ($formDefinitionData->fields as $field) {
                 $data = collect($field->toArray())->forget(['id', 'options', 'form_definition_id'])->toArray();

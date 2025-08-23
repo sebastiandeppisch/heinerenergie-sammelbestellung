@@ -26,7 +26,7 @@ test('admin can list users in a group', function () {
 
     // Act & Assert
     actingAs($this->admin)
-        ->get("/api/groups/{$this->group->id}/users")
+        ->get("/api/groups/{$this->group->uuid}/users")
         ->assertOk()
         ->assertJsonCount(2, 'data') // admin + regular user
         ->assertJsonStructure([
@@ -43,13 +43,13 @@ test('admin can list users in a group', function () {
 
 test('non-admin cannot list users in a group', function () {
     actingAs($this->user)
-        ->get("/api/groups/{$this->group->id}/users")
+        ->get("/api/groups/{$this->group->uuid}/users")
         ->assertForbidden();
 });
 
 test('admin can add user to group', function () {
     actingAs($this->admin)
-        ->post("/api/groups/{$this->group->id}/users", [
+        ->post("/api/groups/{$this->group->uuid}/users", [
             'id' => $this->user->id,
             'is_admin' => false,
         ])
@@ -61,7 +61,7 @@ test('admin can add user to group', function () {
             'is_admin',
         ])
         ->assertJson([
-            'id' => $this->user->id,
+            'id' => $this->user->uuid,
             'is_admin' => false,
         ]);
 
@@ -74,20 +74,20 @@ test('admin can add user to group', function () {
 
 test('admin can add user as admin to group', function () {
     actingAs($this->admin)
-        ->post("/api/groups/{$this->group->id}/users", [
+        ->post("/api/groups/{$this->group->uuid}/users", [
             'id' => $this->user->id,
             'is_admin' => true,
         ])
         ->assertOk()
         ->assertJson([
-            'id' => $this->user->id,
+            'id' => $this->user->uuid,
             'is_admin' => true,
         ]);
 });
 
 test('non-admin cannot add users to group', function () {
     actingAs($this->user)
-        ->post("/api/groups/{$this->group->id}/users", [
+        ->post("/api/groups/{$this->group->uuid}/users", [
             'user_id' => User::factory()->create()->id,
         ])
         ->assertForbidden();
@@ -99,12 +99,12 @@ test('admin can update user role in group', function () {
 
     // Act & Assert
     actingAs($this->admin)
-        ->put("/api/groups/{$this->group->id}/users/{$this->user->id}", [
+        ->put("/api/groups/{$this->group->uuid}/users/{$this->user->uuid}", [
             'is_admin' => true,
         ])
         ->assertOk()
         ->assertJson([
-            'id' => $this->user->id,
+            'id' => $this->user->uuid,
             'is_admin' => true,
         ]);
 
@@ -119,7 +119,7 @@ test('non-admin cannot update user role in group', function () {
     $this->group->users()->attach($this->user->id, ['is_admin' => false]);
 
     actingAs($this->user)
-        ->put("/api/groups/{$this->group->id}/users/{$this->admin->id}", [
+        ->put("/api/groups/{$this->group->uuid}/users/{$this->admin->uuid}", [
             'is_admin' => false,
         ])
         ->assertForbidden();
@@ -131,7 +131,7 @@ test('admin can remove user from group', function () {
 
     // Act & Assert
     actingAs($this->admin)
-        ->delete("/api/groups/{$this->group->id}/users/{$this->user->id}")
+        ->delete("/api/groups/{$this->group->uuid}/users/{$this->user->uuid}")
         ->assertNoContent();
 
     $this->assertDatabaseMissing('group_user', [
@@ -144,14 +144,14 @@ test('non-admin cannot remove user from group', function () {
     $this->group->users()->attach($this->user->id, ['is_admin' => false]);
 
     actingAs($this->user)
-        ->delete("/api/groups/{$this->group->id}/users/{$this->admin->id}")
+        ->delete("/api/groups/{$this->group->uuid}/users/{$this->admin->uuid}")
         ->assertForbidden();
 });
 
 test('cannot add same user twice to group', function () {
     // First add
     actingAs($this->admin)
-        ->post("/api/groups/{$this->group->id}/users", [
+        ->post("/api/groups/{$this->group->uuid}/users", [
             'user_id' => $this->user->id,
             'is_admin' => false,
         ]);
@@ -159,7 +159,7 @@ test('cannot add same user twice to group', function () {
     // Try to add again
     actingAs($this->admin)
         ->withHeaders(['Accept' => 'application/json'])
-        ->post("/api/groups/{$this->group->id}/users", [
+        ->post("/api/groups/{$this->group->uuid}/users", [
             'user_id' => $this->user->id,
             'is_admin' => false,
         ])

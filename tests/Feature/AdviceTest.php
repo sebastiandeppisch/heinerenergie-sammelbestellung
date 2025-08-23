@@ -5,11 +5,9 @@ use App\Models\FormDefinitionToAdvice;
 use App\Models\Group;
 use App\Models\User;
 use App\Services\SessionService;
-use Database\Factories\FormDefinitionToAdviceFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
-
 
 beforeEach(function () {
     $this->advisor = User::factory()->create();
@@ -23,12 +21,12 @@ beforeEach(function () {
     Config::set('app.group_context', 'global');
 });
 
-test('can be created with sharing', function(){
+test('can be created with sharing', function () {
     Advice::factory()->withSharing()->create();
     $this->assertTrue(true);
 });
 
-test('can be created with sendable', function(){
+test('can be created with sendable', function () {
     Advice::factory()->withSendable()->create();
     $this->assertTrue(true);
 });
@@ -63,9 +61,8 @@ test('advices map can be indexed by admin', function () {
     $this->actingAs($this->admin)->get('advicesmap')->assertOk();
 });
 
-
-
-function createAdviceWithAndWithoutAdvisor(User $advisor){
+function createAdviceWithAndWithoutAdvisor(User $advisor)
+{
 
     FormDefinitionToAdvice::factory()->withAdvice()->create();
 
@@ -80,6 +77,6 @@ function createAdviceWithAndWithoutAdvisor(User $advisor){
 
     $advisor = User::factory()->create();
 
-    $advice[0]->update(['advisor_id' =>  $advisor->id]);
-    $adviceWithSendAble[0]->update(['advisor_id' =>  $advisor->id]);
+    $advice[0]->update(['advisor_id' => $advisor->id]);
+    $adviceWithSendAble[0]->update(['advisor_id' => $advisor->id]);
 }

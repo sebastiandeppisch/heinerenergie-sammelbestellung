@@ -2,13 +2,15 @@
 
 namespace App\Http\Middleware;
 
+use App\Data\GroupBaseData;
 use App\Data\GroupData;
 use App\Data\UserData;
 use App\Models\Group;
-use App\Models\User;
+use App\Services\CurrentGroupService;
 use App\Services\SessionService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Override;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -26,7 +28,7 @@ class HandleInertiaRequests extends Middleware
      *
      * @see https://inertiajs.com/asset-versioning
      */
-    #[\Override]
+    #[Override]
     public function version(Request $request): ?string
     {
         return parent::version($request);
@@ -39,15 +41,9 @@ class HandleInertiaRequests extends Middleware
      *
      * @return array<string, mixed>
      */
-    #[\Override]
+    #[Override]
     public function share(Request $request): array
     {
-        $currentGroup = session()->get('actAsGroupId');
-        $currentGroup = Group::find($currentGroup);
-
-        if ($currentGroup) {
-            $currentGroup = GroupData::fromModel($currentGroup);
-        }
 
         $flashKeys = ['error', 'success', 'warning', 'info'];
 
@@ -59,15 +55,18 @@ class HandleInertiaRequests extends Middleware
             }
         }
 
-        $userIsActingAsAdmin = app(SessionService::class)->actsAsSystemAdmin() || app(SessionService::class)->actsAsGroupAdmin();
-
-        $userData = $request->user() ? UserData::fromModel($request->user()->fresh(), $userIsActingAsAdmin): null;
-
         return array_merge(parent::share($request), [
-            'auth.user' => $userData,
+            'auth.user' => fn () => $this->getUserData($request),
             'auth.availableGroups' => fn () => $request->user()?->groups->map(fn (Group $group) => GroupData::fromModel($group)),
-            'auth.currentGroup' => fn () => $currentGroup,
+            'auth.currentGroup' => fn () => app(CurrentGroupService::class)->getGroup() ? GroupBaseData::fromModel(app(CurrentGroupService::class)->getGroup()) : null,
             'flashMessages' => $flashMessages,
         ]);
+    }
+
+    private function getUserData(Request $request): ?UserData
+    {
+        $userIsActingAsAdmin = app(SessionService::class)->actsAsSystemAdmin() || app(SessionService::class)->actsAsGroupAdmin();
+
+        return $request->user() ? UserData::fromModel($request->user()->fresh(), $userIsActingAsAdmin) : null;
     }
 }

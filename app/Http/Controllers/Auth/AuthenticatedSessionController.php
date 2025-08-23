@@ -2,23 +2,24 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Context\SessionGroupContextFactory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Jobs\CacheUsersAdvicePolicies;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AuthenticatedSessionController extends Controller
 {
-    /**
-     * Handle an incoming authentication request.
-     *
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function store(LoginRequest $request)
     {
         $request->authenticate();
 
         $request->session()->regenerate();
+
+        $groupContext = app(SessionGroupContextFactory::class)->createFromSession();
+        CacheUsersAdvicePolicies::dispatchAfterResponse(Auth::user(), $groupContext);
 
         return Auth::user();
     }
@@ -26,7 +27,7 @@ class AuthenticatedSessionController extends Controller
     /**
      * Destroy an authenticated session.
      *
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function destroy(Request $request)
     {

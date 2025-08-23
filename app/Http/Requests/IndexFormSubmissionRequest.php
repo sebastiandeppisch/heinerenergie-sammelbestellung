@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class IndexFormSubmissionRequest extends FormRequest
@@ -12,19 +13,18 @@ class IndexFormSubmissionRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
-        return false;
     }
 
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
             'selectedFormDefinitions' => 'array',
-            'selectedFormDefinitinos.*' => 'string|exists:form_definitions,id',
+            'selectedFormDefinitions.*' => 'string|exists:form_definitions,id',
             'sortOrder' => 'string|in:asc,desc',
             'groupByForm' => 'string|in:true,false',
             'dateFrom' => 'nullable|date',
@@ -56,6 +56,4 @@ class IndexFormSubmissionRequest extends FormRequest
     {
         return $this->input('dateTo', null);
     }
-
-
 }

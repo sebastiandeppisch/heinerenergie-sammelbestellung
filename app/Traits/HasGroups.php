@@ -5,12 +5,15 @@ namespace App\Traits;
 use App\Models\Group;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Collection;
 
 trait HasGroups
 {
     /**
      * Get all groups this user belongs to
+     *
+     * @return BelongsToMany<Group, $this, Pivot>
      */
     public function groups(): BelongsToMany
     {
@@ -21,6 +24,8 @@ trait HasGroups
 
     /**
      * Get all groups where this user is an admin
+     *
+     * @return BelongsToMany<Group, $this, Pivot>
      */
     public function administeredGroups(): BelongsToMany
     {
@@ -35,6 +40,7 @@ trait HasGroups
     public function isGlobalAdmin(): bool
     {
         $user = User::findOrFail($this->id);
+
         return $user->is_admin === true;
     }
 

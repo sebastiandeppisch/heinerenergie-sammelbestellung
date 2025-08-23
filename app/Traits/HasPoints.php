@@ -8,9 +8,10 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 trait HasPoints
 {
     /**
-     * @return MorphMany<MapPoint>
+     * @return MorphMany<MapPoint, $this>
      */
-    public function points(): MorphMany{
+    public function points(): MorphMany
+    {
         return $this->morphMany(MapPoint::class, 'pointable');
     }
 }

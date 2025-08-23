@@ -11,7 +11,7 @@ use App\ValueObjects\Address;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\FormDefinitionToAdvice>
+ * @extends Factory<FormDefinitionToAdvice>
  */
 class FormDefinitionToAdviceFactory extends Factory
 {
@@ -73,15 +73,16 @@ class FormDefinitionToAdviceFactory extends Factory
         ];
     }
 
-    public function withAdvice() {
-        return $this->afterCreating(function (FormDefinitionToAdvice $creator){
+    public function withAdvice()
+    {
+        return $this->afterCreating(function (FormDefinitionToAdvice $creator) {
             $submission = $creator->formDefinition->createSubmission();
 
             $creator->addressField->createSubmissionField($submission, new Address(
                 street: fake()->streetAddress(),
                 city: fake()->city(),
                 zip: fake()->postcode,
-                streetNumber: fake()->buildingNumber()
+                street_number: fake()->buildingNumber()
             ));
 
             $creator->emailField->createSubmissionField($submission, fake()->safeEmail());

@@ -10,13 +10,12 @@ class AdviceCreatedByFormSubmission extends AdviceEvent
     public function __construct(
         public Advice $advice,
         public FormSubmission $submission
-    )
-    {
+    ) {
         parent::__construct($advice);
     }
 
     public function getDescription(): string
     {
-        return "Beratung ist via Kontaktformular eingegangen ".$this->submission->form_name;
+        return 'Beratung ist via Kontaktformular eingegangen '.$this->submission->form_name;
     }
 }

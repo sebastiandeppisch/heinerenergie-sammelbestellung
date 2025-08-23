@@ -29,6 +29,7 @@ beforeEach(function () {
         'group_id' => $this->mainGroup->id,
     ]);
 
+    /** @var AdviceStatus */
     $this->subGroupStatus = AdviceStatus::create([
         'name' => 'Sub Group Status',
         'result' => AdviceStatusResult::Completed,
@@ -45,7 +46,7 @@ afterEach(function () {
 
 it('lists all available statuses for a group', function () {
     $response = $this->actingAs($this->groupAdmin)
-        ->getJson("/api/groups/{$this->subGroup->id}/advicestatus");
+        ->getJson("/api/groups/{$this->subGroup->uuid}/advicestatus");
 
     $response->assertOk()
         ->assertJsonCount(2)
@@ -61,7 +62,7 @@ it('lists all available statuses for a group', function () {
 
 it('can create a new status for a group', function () {
     $response = $this->actingAs($this->groupAdmin)
-        ->postJson("/api/groups/{$this->subGroup->id}/advicestatus", [
+        ->postJson("/api/groups/{$this->subGroup->uuid}/advicestatus", [
             'name' => 'New Status',
             'result' => AdviceStatusResult::New->value,
         ]);
@@ -69,7 +70,7 @@ it('can create a new status for a group', function () {
     $response->assertCreated()
         ->assertJsonFragment([
             'name' => 'New Status',
-            'group_id' => $this->subGroup->id,
+            'group_id' => $this->subGroup->uuid,
             'visible_in_group' => true,
         ]);
 
@@ -81,13 +82,13 @@ it('can create a new status for a group', function () {
 
 it('can update visibility of parent status in own group', function () {
     $response = $this->actingAs($this->groupAdmin)
-        ->putJson("/api/groups/{$this->subGroup->id}/advicestatus/{$this->mainGroupStatus->id}", [
+        ->putJson("/api/groups/{$this->subGroup->uuid}/advicestatus/{$this->mainGroupStatus->uuid}", [
             'visible_in_group' => false,
         ]);
 
     $response->assertOk()
         ->assertJsonFragment([
-            'id' => $this->mainGroupStatus->id,
+            'id' => $this->mainGroupStatus->uuid,
             'visible_in_group' => false,
         ]);
 
@@ -100,7 +101,7 @@ it('can update visibility of parent status in own group', function () {
 
 it('cannot update visibility of parent status in parent group', function () {
     $response = $this->actingAs($this->groupAdmin)
-        ->putJson("/api/groups/{$this->mainGroup->id}/advicestatus/{$this->mainGroupStatus->id}", [
+        ->putJson("/api/groups/{$this->mainGroup->uuid}/advicestatus/{$this->mainGroupStatus->uuid}", [
             'visible_in_group' => false,
         ]);
 
@@ -109,7 +110,7 @@ it('cannot update visibility of parent status in parent group', function () {
 
 it('can update own group status', function () {
     $response = $this->actingAs($this->groupAdmin)
-        ->putJson("/api/groups/{$this->subGroup->id}/advicestatus/{$this->subGroupStatus->id}", [
+        ->putJson("/api/groups/{$this->subGroup->uuid}/advicestatus/{$this->subGroupStatus->uuid}", [
             'name' => 'Updated Status',
             'result' => AdviceStatusResult::Unsuccessfully->value,
         ]);
@@ -131,7 +132,7 @@ it('cannot update parent group status fields', function () {
     $originalName = $this->mainGroupStatus->name;
 
     $response = $this->actingAs($this->groupAdmin)
-        ->putJson("/api/groups/{$this->subGroup->id}/advicestatus/{$this->mainGroupStatus->id}", [
+        ->putJson("/api/groups/{$this->subGroup->uuid}/advicestatus/{$this->mainGroupStatus->uuid}", [
             'name' => 'Try to update parent',
             'result' => AdviceStatusResult::Unsuccessfully->value,
         ]);
@@ -141,7 +142,7 @@ it('cannot update parent group status fields', function () {
 
 it('can delete own group status', function () {
     $response = $this->actingAs($this->groupAdmin)
-        ->deleteJson("/api/groups/{$this->subGroup->id}/advicestatus/{$this->subGroupStatus->id}");
+        ->deleteJson("/api/groups/{$this->subGroup->uuid}/advicestatus/{$this->subGroupStatus->uuid}");
 
     $response->assertNoContent();
 
@@ -150,18 +151,18 @@ it('can delete own group status', function () {
 
 it('cannot delete parent group status', function () {
     $response = $this->actingAs($this->groupAdmin)
-        ->deleteJson("/api/groups/{$this->subGroup->id}/advicestatus/{$this->mainGroupStatus->id}");
+        ->deleteJson("/api/groups/{$this->subGroup->uuid}/advicestatus/{$this->mainGroupStatus->uuid}");
 
     $response->assertForbidden();
 });
 
 test('regular users cannot access status management', function () {
     $this->actingAs($this->user)
-        ->getJson("/api/groups/{$this->subGroup->id}/advicestatus")
+        ->getJson("/api/groups/{$this->subGroup->uuid}/advicestatus")
         ->assertForbidden();
 
     $this->actingAs($this->user)
-        ->postJson("/api/groups/{$this->subGroup->id}/advicestatus", [
+        ->postJson("/api/groups/{$this->subGroup->uuid}/advicestatus", [
             'name' => 'New Status',
             'result' => AdviceStatusResult::New->value,
         ])
@@ -172,11 +173,11 @@ test('group admin cannot manage other groups statuses', function () {
     $otherGroup = Group::factory()->create();
 
     $this->actingAs($this->groupAdmin)
-        ->getJson("/api/groups/{$otherGroup->id}/advicestatus")
+        ->getJson("/api/groups/{$otherGroup->uuid}/advicestatus")
         ->assertForbidden();
 
     $this->actingAs($this->groupAdmin)
-        ->postJson("/api/groups/{$otherGroup->id}/advicestatus", [
+        ->postJson("/api/groups/{$otherGroup->uuid}/advicestatus", [
             'name' => 'New Status',
             'result' => AdviceStatusResult::New->value,
         ])
@@ -185,11 +186,11 @@ test('group admin cannot manage other groups statuses', function () {
 
 test('system admin can manage any group status', function () {
     $this->actingAs($this->admin)
-        ->getJson("/api/groups/{$this->subGroup->id}/advicestatus")
+        ->getJson("/api/groups/{$this->subGroup->uuid}/advicestatus")
         ->assertOk();
 
     $response = $this->actingAs($this->admin)
-        ->postJson("/api/groups/{$this->subGroup->id}/advicestatus", [
+        ->postJson("/api/groups/{$this->subGroup->uuid}/advicestatus", [
             'name' => 'Admin Created Status',
             'result' => AdviceStatusResult::New->value,
         ]);
@@ -206,22 +207,22 @@ it('can toggle visibility of parent status in child group', function () {
 
     // First, check the initial state via the API
     $initialResponse = $this->actingAs($this->groupAdmin)
-        ->getJson("/api/groups/{$this->subGroup->id}/advicestatus");
+        ->getJson("/api/groups/{$this->subGroup->uuid}/advicestatus");
 
     $initialResponse->assertOk();
     $statusesData = collect($initialResponse->json());
-    $mainGroupStatus = $statusesData->firstWhere('id', $this->mainGroupStatus->id);
+    $mainGroupStatus = $statusesData->firstWhere('id', $this->mainGroupStatus->uuid);
     expect($mainGroupStatus['visible_in_group'])->toBeTrue();
 
     // Now toggle the status to invisible
     $updateResponse = $this->actingAs($this->groupAdmin)
-        ->putJson("/api/groups/{$this->subGroup->id}/advicestatus/{$this->mainGroupStatus->id}", [
+        ->putJson("/api/groups/{$this->subGroup->uuid}/advicestatus/{$this->mainGroupStatus->uuid}", [
             'visible_in_group' => false,
         ]);
 
     $updateResponse->assertOk()
         ->assertJsonFragment([
-            'id' => $this->mainGroupStatus->id,
+            'id' => $this->mainGroupStatus->uuid,
             'visible_in_group' => false,
         ]);
 
@@ -234,22 +235,22 @@ it('can toggle visibility of parent status in child group', function () {
 
     // Now check with a GET request if the API returns the updated data
     $getAfterUpdateResponse = $this->actingAs($this->groupAdmin)
-        ->getJson("/api/groups/{$this->subGroup->id}/advicestatus");
+        ->getJson("/api/groups/{$this->subGroup->uuid}/advicestatus");
 
     $getAfterUpdateResponse->assertOk();
     $updatedStatusesData = collect($getAfterUpdateResponse->json());
-    $updatedMainGroupStatus = $updatedStatusesData->firstWhere('id', $this->mainGroupStatus->id);
+    $updatedMainGroupStatus = $updatedStatusesData->firstWhere('id', $this->mainGroupStatus->uuid);
     expect($updatedMainGroupStatus['visible_in_group'])->toBeFalse();
 
     // And toggle back to visible
     $revertResponse = $this->actingAs($this->groupAdmin)
-        ->putJson("/api/groups/{$this->subGroup->id}/advicestatus/{$this->mainGroupStatus->id}", [
+        ->putJson("/api/groups/{$this->subGroup->uuid}/advicestatus/{$this->mainGroupStatus->uuid}", [
             'visible_in_group' => true,
         ]);
 
     $revertResponse->assertOk()
         ->assertJsonFragment([
-            'id' => $this->mainGroupStatus->id,
+            'id' => $this->mainGroupStatus->uuid,
             'visible_in_group' => true,
         ]);
 
@@ -262,11 +263,11 @@ it('can toggle visibility of parent status in child group', function () {
 
     // Finally, check with a GET request if the API returns the updated data again
     $finalResponse = $this->actingAs($this->groupAdmin)
-        ->getJson("/api/groups/{$this->subGroup->id}/advicestatus");
+        ->getJson("/api/groups/{$this->subGroup->uuid}/advicestatus");
 
     $finalResponse->assertOk();
     $finalStatusesData = collect($finalResponse->json());
-    $finalMainGroupStatus = $finalStatusesData->firstWhere('id', $this->mainGroupStatus->id);
+    $finalMainGroupStatus = $finalStatusesData->firstWhere('id', $this->mainGroupStatus->uuid);
     expect($finalMainGroupStatus['visible_in_group'])->toBeTrue();
 });
 
@@ -276,22 +277,22 @@ it('can toggle visibility of own status in own group', function () {
 
     // First, check the initial state via the API
     $initialResponse = $this->actingAs($this->groupAdmin)
-        ->getJson("/api/groups/{$this->subGroup->id}/advicestatus");
+        ->getJson("/api/groups/{$this->subGroup->uuid}/advicestatus");
 
     $initialResponse->assertOk();
     $statusesData = collect($initialResponse->json());
-    $subGroupStatus = $statusesData->firstWhere('id', $this->subGroupStatus->id);
+    $subGroupStatus = $statusesData->firstWhere('id', $this->subGroupStatus->uuid);
     expect($subGroupStatus['visible_in_group'])->toBeTrue();
 
     // Now toggle the status to invisible (own initiative)
     $updateResponse = $this->actingAs($this->groupAdmin)
-        ->putJson("/api/groups/{$this->subGroup->id}/advicestatus/{$this->subGroupStatus->id}", [
+        ->putJson("/api/groups/{$this->subGroup->uuid}/advicestatus/{$this->subGroupStatus->uuid}", [
             'visible_in_group' => false,
         ]);
 
     $updateResponse->assertOk()
         ->assertJsonFragment([
-            'id' => $this->subGroupStatus->id,
+            'id' => $this->subGroupStatus->uuid,
             'visible_in_group' => false,
         ]);
 
@@ -304,22 +305,22 @@ it('can toggle visibility of own status in own group', function () {
 
     // Now check with a GET request if the API returns the updated data
     $getAfterUpdateResponse = $this->actingAs($this->groupAdmin)
-        ->getJson("/api/groups/{$this->subGroup->id}/advicestatus");
+        ->getJson("/api/groups/{$this->subGroup->uuid}/advicestatus");
 
     $getAfterUpdateResponse->assertOk();
     $updatedStatusesData = collect($getAfterUpdateResponse->json());
-    $updatedSubGroupStatus = $updatedStatusesData->firstWhere('id', $this->subGroupStatus->id);
+    $updatedSubGroupStatus = $updatedStatusesData->firstWhere('id', $this->subGroupStatus->uuid);
     expect($updatedSubGroupStatus['visible_in_group'])->toBeFalse();
 
     // And toggle back to visible
     $revertResponse = $this->actingAs($this->groupAdmin)
-        ->putJson("/api/groups/{$this->subGroup->id}/advicestatus/{$this->subGroupStatus->id}", [
+        ->putJson("/api/groups/{$this->subGroup->uuid}/advicestatus/{$this->subGroupStatus->uuid}", [
             'visible_in_group' => true,
         ]);
 
     $revertResponse->assertOk()
         ->assertJsonFragment([
-            'id' => $this->subGroupStatus->id,
+            'id' => $this->subGroupStatus->uuid,
             'visible_in_group' => true,
         ]);
 
@@ -332,35 +333,35 @@ it('can toggle visibility of own status in own group', function () {
 
     // Finally, check with a GET request if the API returns the updated data again
     $finalResponse = $this->actingAs($this->groupAdmin)
-        ->getJson("/api/groups/{$this->subGroup->id}/advicestatus");
+        ->getJson("/api/groups/{$this->subGroup->uuid}/advicestatus");
 
     $finalResponse->assertOk();
     $finalStatusesData = collect($finalResponse->json());
-    $finalSubGroupStatus = $finalStatusesData->firstWhere('id', $this->subGroupStatus->id);
+    $finalSubGroupStatus = $finalStatusesData->firstWhere('id', $this->subGroupStatus->uuid);
     expect($finalSubGroupStatus['visible_in_group'])->toBeTrue();
 });
 
 test('normal group member cannot use group advice status', function () {
     $this->actingAs($this->user)
-        ->getJson("/api/groups/{$this->subGroup->id}/advicestatus")
+        ->getJson("/api/groups/{$this->subGroup->uuid}/advicestatus")
         ->assertForbidden();
 
     $this->actingAs($this->user)
-        ->postJson("/api/groups/{$this->subGroup->id}/advicestatus", [
+        ->postJson("/api/groups/{$this->subGroup->uuid}/advicestatus", [
             'name' => 'New Status',
             'result' => AdviceStatusResult::New->value,
         ])
         ->assertForbidden();
 
     $this->actingAs($this->user)
-        ->putJson("/api/groups/{$this->subGroup->id}/advicestatus/{$this->subGroupStatus->id}", [
+        ->putJson("/api/groups/{$this->subGroup->uuid}/advicestatus/{$this->subGroupStatus->uuid}", [
             'name' => 'Updated Status',
             'result' => AdviceStatusResult::Unsuccessfully->value,
         ])
         ->assertForbidden();
 
     $this->actingAs($this->user)
-        ->deleteJson("/api/groups/{$this->subGroup->id}/advicestatus/{$this->subGroupStatus->id}")
+        ->deleteJson("/api/groups/{$this->subGroup->uuid}/advicestatus/{$this->subGroupStatus->uuid}")
         ->assertForbidden();
 
 });

@@ -12,14 +12,14 @@ class Address implements Castable, Stringable
 {
     public function __construct(
         public string $street,
-        public string $streetNumber,
-        public int $zip,
+        public string $street_number,
+        public string $zip,
         public string $city
     ) {}
 
     public function streetWithNumber(): string
     {
-        return $this->street.' '.$this->streetNumber;
+        return $this->street.' '.$this->street_number;
     }
 
     public static function castUsing(array $attributes): string
@@ -29,7 +29,7 @@ class Address implements Castable, Stringable
 
     public function hash(): string
     {
-        return md5($this->street.$this->streetNumber.$this->zip.$this->city);
+        return md5($this->street.$this->street_number.$this->zip.$this->city);
     }
 
     public function __toString(): string

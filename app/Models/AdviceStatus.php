@@ -3,33 +3,46 @@
 namespace App\Models;
 
 use App\Enums\AdviceStatusResult;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Models\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property AdviceStatusResult $result
+ */
 class AdviceStatus extends Model
 {
     use HasFactory;
-    use HasUuids;
+    use HasUuid;
     use SoftDeletes;
 
     protected $table = 'advice_status';
 
     protected $fillable = ['name', 'result', 'group_id'];
 
+    /**
+     * @return BelongsTo<Advice, $this>
+     */
     public function advices(): BelongsTo
     {
         return $this->belongsTo(Advice::class);
     }
 
+    /**
+     * @return BelongsTo<Group, $this>
+     */
     public function ownerGroup(): BelongsTo
     {
         return $this->belongsTo(Group::class, 'group_id');
     }
 
+    /**
+     * @return BelongsToMany<Group, $this, AdviceStatusGroup>
+     */
     public function usingGroups(): BelongsToMany
     {
         return $this->belongsToMany(Group::class)

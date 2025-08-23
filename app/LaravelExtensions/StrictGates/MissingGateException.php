@@ -11,7 +11,7 @@ class MissingGateException extends OutOfBoundsException
         $argumentNames = [];
         foreach ($arguments as $argument) {
             if (is_object($argument)) {
-                $argumentNames[] = get_class($argument);
+                $argumentNames[] = $argument::class;
             } else {
                 $argumentNames[] = gettype($argument);
             }

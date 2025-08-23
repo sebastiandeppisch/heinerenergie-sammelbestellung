@@ -24,23 +24,23 @@ class StoreAdviceRequest extends FormRequest
     public function rules()
     {
         return [
-            'firstName' => 'required|string|max:100',
-            'lastName' => 'required|string|max:100',
+            'first_name' => 'required|string|max:100',
+            'last_name' => 'required|string|max:100',
             'email' => 'required|email|max:100',
             'phone' => 'required|string|max:100',
             'street' => 'required|string|max:100',
-            'streetNumber' => 'required|string|max:100',
+            'street_number' => 'required|string|max:100',
             'zip' => 'required|numeric|digits:5',
             'city' => 'required|string|max:100',
             'advisor_id' => 'nullable|uuid|exists:users,id',
             'commentary' => 'nullable|string|max:65535',
-            'helpType_place' => 'nullable|boolean',
-            'helpType_technical' => 'nullable|boolean',
-            'helpType_bureaucracy' => 'nullable|boolean',
+            'help_type_place' => 'nullable|boolean',
+            'help_type_technical' => 'nullable|boolean',
+            'help_type_bureaucracy' => 'nullable|boolean',
             'helpType_other' => 'nullable|boolean',
-            'houseType' => 'nullable|integer|between:0,2',
-            'landlordExists' => 'nullable|boolean',
-            'placeNotes' => 'nullable|string|max:65535',
+            'house_type' => 'nullable|integer|between:0,2',
+            'landlord_exists' => 'nullable|boolean',
+            'place_notes' => 'nullable|string|max:65535',
             'type' => 'integer|between:0,2',
         ];
     }

@@ -29,8 +29,8 @@ class AnonymizeAdvicesCommand extends Command
     public function handle()
     {
         Advice::all()->each(function ($advice) {
-            $advice->firstName = fake()->firstName();
-            $advice->lastName = fake()->lastName();
+            $advice->first_name = fake()->firstName();
+            $advice->last_name = fake()->lastName();
             $advice->email = fake()->safeEmail();
             $advice->phone = fake()->phoneNumber();
             $advice->save();

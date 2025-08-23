@@ -62,7 +62,6 @@ return [
 
     'writer' => \App\TypescriptWriter::class,
 
-
     /*
      * The generated TypeScript file can be formatted. We ship a Prettier formatter
      * out of the box: `PrettierFormatter` but you can also implement your own one.

@@ -3,13 +3,13 @@
 namespace App\Models;
 
 use App\Casts\AdviceEventCast;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Models\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AdviceEvent extends Model
 {
-    use HasUuids;
+    use HasUuid;
 
     protected $fillable = [
         'advice_id',
@@ -25,11 +25,17 @@ class AdviceEvent extends Model
         'event' => AdviceEventCast::class,
     ];
 
+    /**
+     * @return BelongsTo<Advice, $this>
+     */
     public function advice(): BelongsTo
     {
         return $this->belongsTo(Advice::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

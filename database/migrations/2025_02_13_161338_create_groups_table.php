@@ -14,13 +14,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('groups', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
+            $table->uuid('uuid')->unique();
+
             $table->timestamps();
 
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('logo_path')->nullable();
             $table->boolean('accepts_transfers')->default(true);
+            $table->json('consulting_area')->nullable();
         });
 
         Schema::table('groups', function (Blueprint $table) {

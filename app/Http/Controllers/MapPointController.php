@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Data\MapPointData;
 use App\Data\CategoryData;
 use App\Http\Requests\UpsertMapPointRequest;
-use App\Models\FormSubmission;
 use App\Models\MapPoint;
 use App\Models\Category;
 use Illuminate\Http\Request;
@@ -20,7 +19,7 @@ class MapPointController extends Controller
         $pointsByType = $mapPoints->groupBy('userReadablePointableType');
 
         return Inertia::render('MapPoints/Map', [
-            'pointsByType' => $pointsByType
+            'pointsByType' => $pointsByType,
         ]);
     }
 
@@ -29,7 +28,7 @@ class MapPointController extends Controller
         $mapPoints = MapPoint::with('category')->get()->map(fn (MapPoint $mapPoint): MapPointData => MapPointData::fromModel($mapPoint));
 
         return Inertia::render('MapPoints/Index', [
-            'mapPoints' => $mapPoints
+            'mapPoints' => $mapPoints,
         ]);
     }
 
@@ -43,7 +42,7 @@ class MapPointController extends Controller
         $pointsByType = $mapPoints->groupBy('userReadablePointableType');
 
         return Inertia::render('MapPoints/PublicMap', [
-            'pointsByType' => $pointsByType
+            'pointsByType' => $pointsByType,
         ]);
     }
 
@@ -57,16 +56,20 @@ class MapPointController extends Controller
         ]);
     }
 
-    public function update(MapPoint $mappoint, UpsertMapPointRequest $request){
+    public function update(MapPoint $mappoint, UpsertMapPointRequest $request)
+    {
         $mappoint->update($request->validated());
+
         return redirect()->back()->with('success', 'Der Kartenpunkt wurde aktualisiert');
     }
 
-    public function destroy(MapPoint $mappoint){
+    public function destroy(MapPoint $mappoint)
+    {
 
         $name = $mappoint->title;
 
         $mappoint->delete();
+
         return redirect()->back()->with('info', 'Der Kartenpunkt '.e($name).' wurde gelöscht');
     }
 

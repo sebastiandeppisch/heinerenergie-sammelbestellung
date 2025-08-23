@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Context\SessionGroupContextFactory;
+use App\Jobs\CacheUsersAdvicePolicies;
 use App\Models\Group;
 use App\Models\User;
 use App\Services\SessionService;
@@ -44,9 +46,14 @@ class UserController extends Controller
 
         $this->sessionService->actAsGroup($group, $asAdmin);
 
+        $groupContext = app(SessionGroupContextFactory::class)->createFromSession();
+        CacheUsersAdvicePolicies::dispatchAfterResponse($user, $groupContext);
+
         if ($redirectTo = $this->sessionService->getRedirectAfterSelectionAndForget()) {
             return redirect()->to($redirectTo);
         }
+
+        Log::info('User is acting as group', ['user' => $user->id, 'group' => $group->id]);
 
         return redirect()->back()->with('success', 'Du agierst jetzt als Gruppe '.$group->name);
     }
@@ -63,6 +70,9 @@ class UserController extends Controller
         }
 
         $this->sessionService->actAsSystemAdmin();
+
+        $groupContext = app(SessionGroupContextFactory::class)->createFromSession();
+        CacheUsersAdvicePolicies::dispatchAfterResponse($user, $groupContext);
 
         if ($redirectTo = $this->sessionService->getRedirectAfterSelectionAndForget()) {
             return redirect()->to($redirectTo);

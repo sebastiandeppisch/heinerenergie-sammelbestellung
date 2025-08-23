@@ -2,14 +2,13 @@
 
 namespace App\Contracts;
 
-use App\Models\MapPoint;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
+/**
+ * @template TPointable of Model
+ */
 interface Pointable
 {
-    /**
-     * @return MorphMany<MapPoint>
-     */
     public function points(): MorphMany;
-
 }

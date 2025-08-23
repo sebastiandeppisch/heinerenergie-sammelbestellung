@@ -2,7 +2,10 @@
     "private": true,
     "scripts": {
         "dev": "vite",
-        "build": "vue-tsc && vite build"
+        "build": "vue-tsc && vite build",
+        "format": "prettier --write resources/",
+        "format:check": "prettier --check resources/",
+        "lint": "eslint . --fix"
     },
     "dependencies": {
         "@fortawesome/fontawesome-svg-core": "^6.2.0",
@@ -23,8 +26,6 @@
         "core-js": "^3.8.3",
         "devextreme": "^21.2.12",
         "devextreme-vue": "^21.2.12",
-        "eslint": "^7.32.0",
-        "eslint-plugin-vue": "^8.0.3",
         "laravel-precognition-vue": "^0.7.2",
         "laravel-precognition-vue-inertia": "^0.7.2",
         "leaflet": "^1.7.1",
@@ -39,7 +40,6 @@
         "sortablejs": "^1.15.6",
         "tailwind-merge": "^3.2.0",
         "tw-animate-css": "^1.2.9",
-        "typescript": "^5.5.4",
         "uuid": "^11.1.0",
         "vee-validate": "^4.15.0",
         "vue": "^3.5.0",
@@ -51,16 +51,26 @@
         "zod": "^3.25.23"
     },
     "devDependencies": {
+        "@eslint/js": "^9.19.0",
         "@tailwindcss/vite": "^4.0.6",
         "@types/leaflet": "^1.9.12",
         "@types/uuid": "^10.0.0",
         "@vitejs/plugin-vue": "^5.2.1",
+        "@vue/eslint-config-typescript": "^14.3.0",
+        "eslint": "^9.17.0",
+        "eslint-config-prettier": "^10.0.1",
+        "eslint-plugin-vue": "^9.32.0",
+        "prettier": "^3.4.2",
+        "prettier-plugin-organize-imports": "^4.1.0",
+        "prettier-plugin-tailwindcss": "^0.6.11",
         "@vue-leaflet/vue-leaflet": "^0.10.0",
         "autoprefixer": "^10.4.20",
         "devextreme-themebuilder": "^21.2.4",
         "laravel-vite-plugin": "^1.0.2",
         "postcss": "^8.5.2",
         "tailwindcss": "^4.0.6",
+        "typescript": "^5.5.4",
+        "typescript-eslint": "^8.23.0",
         "vite": "^5.2.9",
         "vue-tsc": "^2.2.0"
     },

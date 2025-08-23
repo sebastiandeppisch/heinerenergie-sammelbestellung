@@ -10,13 +10,13 @@ class Address implements CastsAttributes
 {
     public function get($model, string $key, $value, array $attributes)
     {
-        if ($attributes['street'] === null || $attributes['streetNumber'] === null || $attributes['zip'] === null || $attributes['city'] === null) {
+        if ($attributes['street'] === null || $attributes['street_number'] === null || $attributes['zip'] === null || $attributes['city'] === null) {
             return null;
         }
 
         return new AddressValueObject(
             street: $attributes['street'],
-            streetNumber: $attributes['streetNumber'],
+            street_number: $attributes['street_number'],
             zip: $attributes['zip'],
             city: $attributes['city']
         );
@@ -34,7 +34,7 @@ class Address implements CastsAttributes
 
         return [
             'street' => $value->street,
-            'streetNumber' => $value->streetNumber,
+            'street_number' => $value->street_number,
             'zip' => $value->zip,
             'city' => $value->city,
         ];

@@ -26,12 +26,12 @@ class UpdateAdviceRequest extends FormRequest
     public function rules()
     {
         return [
-            'firstName' => 'string|max:100',
-            'lastName' => 'string|max:100',
+            'first_name' => 'string|max:100',
+            'last_name' => 'string|max:100',
             'email' => 'email|max:100',
             'phone' => 'string|max:100',
             'street' => 'string|max:100',
-            'streetNumber' => 'string|max:100',
+            'street_number' => 'string|max:100',
             'zip' => 'numeric|digits:5',
             'city' => 'string|max:100',
             'advisor_id' => 'nullable|integer|exists:users,id',

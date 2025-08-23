@@ -3,12 +3,12 @@
 namespace App\Data;
 
 use App\Enums\FieldType;
+use App\Models\FormField;
 use App\Models\SubmissionField;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
-use App\Models\FormField;
 
 #[TypeScript]
 class FormFieldData extends Data
@@ -29,14 +29,14 @@ class FormFieldData extends Data
         public ?float $min_value = null,
         public ?float $max_value = null,
         public ?array $accepted_file_types = null,
-    ) {
-    }
+    ) {}
 
     public static function fromModel(FormField $model): self
     {
         $model->loadMissing('options');
+
         return new self(
-            id: $model->id,
+            id: $model->uuid,
             type: $model->type,
             label: $model->label,
             placeholder: $model->placeholder,
@@ -49,19 +49,19 @@ class FormFieldData extends Data
             min_value: $model->min_value,
             max_value: $model->max_value,
             accepted_file_types: $model->accepted_file_types,
-            options: $model->options->map(fn($option) => FormFieldOptionData::fromModel($option)),
+            options: $model->options->map(fn ($option) => FormFieldOptionData::fromModel($option)),
         );
     }
 
-    public static function fromSubmissionField(SubmissionField $model): self{
+    public static function fromSubmissionField(SubmissionField $model): self
+    {
         return new self(
-            id: $model->id,
-            type: $model->field_type,
-            label: $model->field_label,
+            id: $model->uuid,
+            type: $model->type,
+            label: $model->label,
             required: false,
-            options: $model->formField->options->map(fn($option) => FormFieldOptionData::fromModel($option)), //TODO add archive options
+            options: $model->options->map(fn ($option) => FormFieldOptionData::fromSubmissionFieldOption($option)),
             placeholder: null
-
         );
     }
 }

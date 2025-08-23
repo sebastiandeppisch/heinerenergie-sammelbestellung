@@ -6,6 +6,7 @@ use App\Models\Advice;
 use App\Models\User;
 use App\Services\AdviceService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Override;
 use Tests\TestCase;
 
 class AdviceServiceTest extends TestCase
@@ -14,7 +15,7 @@ class AdviceServiceTest extends TestCase
 
     private AdviceService $adviceService;
 
-    #[\Override]
+    #[Override]
     protected function setUp(): void
     {
         parent::setUp();

@@ -14,7 +14,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('form_definition_to_map_points', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
+            $table->uuid('uuid')->unique();
+
             $table->timestamps();
 
             $table->foreignIdFor(FormDefinition::class)->constrained();

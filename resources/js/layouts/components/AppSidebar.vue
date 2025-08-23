@@ -2,13 +2,21 @@
 import NavFooter from '@/layouts/components/NavFooter.vue';
 import NavMain from '@/layouts/components/NavMain.vue';
 import NavUser from '@/layouts/components/NavUser.vue';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/shadcn/components/ui/sidebar';
 import { type NavItem } from '@/layouts/helper';
-import { Link } from '@inertiajs/vue3';
-import { LayoutGrid, Table, Map, Users, Settings, FileText, MessageSquare, User, Github } from 'lucide-vue-next';
-import AppLogo from './AppLogo.vue';
-import { route } from 'ziggy-js';
 import Card from '@/shadcn/components/ui/card/Card.vue';
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+} from '@/shadcn/components/ui/sidebar';
+import { Link } from '@inertiajs/vue3';
+import { FileText, Github, LayoutGrid, Map, MessageSquare, Settings, Table, User, UserCog, Users } from 'lucide-vue-next';
+import { route } from 'ziggy-js';
+import AppLogo from './AppLogo.vue';
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
@@ -16,49 +24,78 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Beratungen - Tabelle',
-        href: '/advices',
-        icon: Table,
-    },
-    {
-        title: 'Beratungen - Karte',
-        href: '/advicesmap',
-        icon: Map,
+        title: 'Beratungen',
+        icon: User,
+        children: [
+            {
+                title: 'Tabelle',
+                href: '/advices',
+                icon: Table,
+            },
+            {
+                title: 'Karte',
+                href: '/advicesmap',
+                icon: Map,
+            },
+        ],
     },
     {
         title: 'Initiativen',
-        href: '/groups',
-        icon: Users,
+        icon: UserCog,
+        admin: true,
+        children: [
+            {
+                title: 'Initiativen-Verwaltung',
+                href: '/groups',
+                icon: Users,
+            },
+            {
+                title: 'Berater*innen',
+                href: '/users',
+                icon: User,
+            },
+        ],
+    },
+
+    {
+        title: 'Formulare',
+        icon: FileText,
+        admin: true,
+        children: [
+            {
+                title: 'Formular-Verwaltung',
+                href: '/form-definitions',
+                icon: FileText,
+            },
+            {
+                title: 'Formulareinträge',
+                href: '/form-submissions',
+                icon: MessageSquare,
+            },
+        ],
     },
     {
-        title: 'Berater*innen',
-        href: '/users',
-        icon: User,
+        title: 'Kartenpunkte',
+        icon: Map,
+        children: [
+            {
+                title: 'Tabelle',
+                href: '/mappoints',
+                admin: true,
+                icon: Table,
+            },
+            {
+                title: 'Karte',
+                href: '/mappoints-map',
+                icon: Map,
+            },
+        ],
     },
     {
         title: 'Einstellungen',
         href: '/settings',
         icon: Settings,
-    },
-    {
-        title: 'Formulare',
-        href: '/form-definitions',
-        icon: FileText,
-    },
-    {
-        title: 'Formulareinträge',
-        href: '/form-submissions',
-        icon: MessageSquare,
-    },
-    {
-        title: 'Kartenpunkte - Tabelle',
-        href: '/mappoints',
-        icon: Table,
-    },
-    {
-        title: 'Kartenpunkte - Karte',
-        href: '/mappoints-map',
-        icon: Map,
+        admin: true,
     },
 ];
 
@@ -77,7 +114,7 @@ const footerNavItems: NavItem[] = [
         title: 'Datenschutzerklärung',
         href: '/datapolicy',
         icon: FileText,
-    }
+    },
 ];
 </script>
 
@@ -88,7 +125,7 @@ const footerNavItems: NavItem[] = [
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child class="bg-white hover:bg-white hover:shadow-md">
                         <Card>
-                            <Link :href="route('dashboard')" class="w-full h-full flex justify-center">
+                            <Link :href="route('dashboard')" class="flex h-full w-full justify-center">
                                 <AppLogo />
                             </Link>
                         </Card>

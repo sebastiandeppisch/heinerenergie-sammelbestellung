@@ -28,11 +28,11 @@ class PageController extends Controller
         // Nur in lokaler Umgebung Benutzer laden
         if (app()->environment('local')) {
             $users = User::all()->map(fn (User $user) => [
-                'id' => $user->id,
+                'id' => $user->uuid,
                 'name' => $user->name,
                 'email' => $user->email,
             ]);
-        }else{
+        } else {
             $users = [];
         }
 

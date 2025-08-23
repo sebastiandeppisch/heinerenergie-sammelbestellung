@@ -9,20 +9,30 @@ use App\Enums\HouseType;
 use App\Events\AdviceCreated;
 use App\Events\AdviceSaving;
 use App\Events\AdviceUpdated;
+use App\Models\Traits\HasUuid;
 use App\Traits\HasPoints;
 use App\ValueObjects\Address;
 use App\ValueObjects\Coordinate;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphPivot;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Wnx\Sends\Contracts\HasSends;
 use Wnx\Sends\Support\HasSendsTrait;
 
+/**
+ * @property ?Coordinate $coordinate
+ * @property ?Address $address
+ * @property AdviceType $type
+ * @property HouseType|null $house_type
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ */
 class Advice extends Model implements HasSends, Pointable
 {
     protected $table = 'advices';
@@ -30,15 +40,15 @@ class Advice extends Model implements HasSends, Pointable
     use HasFactory;
     use HasPoints;
     use HasSendsTrait;
-    use HasUuids;
+    use HasUuid;
     use Notifiable;
     use SoftDeletes;
 
     protected $fillable = [
-        'firstName',
-        'lastName',
+        'first_name',
+        'last_name',
         'street',
-        'streetNumber',
+        'street_number',
         'zip',
         'city',
         'email',
@@ -49,14 +59,14 @@ class Advice extends Model implements HasSends, Pointable
         'lng',
         'lat',
         'type',
-        'helpType_place',
-        'helpType_technical',
-        'helpType_bureaucracy',
+        'help_type_place',
+        'help_type_technical',
+        'help_type_bureaucracy',
         'helpType_other',
-        'houseType',
-        'landlordExists',
+        'house_type',
+        'landlord_exists',
         'group_id',
-        'placeNotes',
+        'place_notes',
         'address',
     ];
 
@@ -68,16 +78,25 @@ class Advice extends Model implements HasSends, Pointable
         'saving' => AdviceSaving::class,
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function advisor(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<AdviceStatus, $this>
+     */
     public function status(): BelongsTo
     {
         return $this->belongsTo(AdviceStatus::class, 'advice_status_id');
     }
 
+    /**
+     * @return MorphToMany<User, $this, MorphPivot>
+     */
     public function shares(): MorphToMany
     {
         return $this->morphToMany(User::class, 'sharing', 'sharings', 'sharing_id', 'advisor_id');
@@ -105,19 +124,25 @@ class Advice extends Model implements HasSends, Pointable
 
     public function getResultAttribute(): AdviceStatusResult
     {
-        return $this->status?->result ?? AdviceStatusResult::New;
+        return $this->status->result ?? AdviceStatusResult::New;
     }
 
     public function getNameAttribute(): string
     {
-        return sprintf('%s %s', $this->firstName, $this->lastName);
+        return sprintf('%s %s', $this->first_name, $this->last_name);
     }
 
+    /**
+     * @return BelongsTo<Group, $this>
+     */
     public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class);
     }
 
+    /**
+     * @return HasMany<AdviceEvent, $this>
+     */
     public function events(): HasMany
     {
         return $this->hasMany(AdviceEvent::class);
@@ -126,29 +151,29 @@ class Advice extends Model implements HasSends, Pointable
     protected function casts(): array
     {
         return [
-            'firstName' => 'string',
-            'lastName' => 'string',
+            'first_name' => 'string',
+            'last_name' => 'string',
             'street' => 'string',
-            'streetNumber' => 'string',
-            'zip' => 'integer',
+            'street_number' => 'string',
+            'zip' => 'string',
             'city' => 'string',
             'email' => 'string',
             'phone' => 'string',
             'commentary' => 'string',
-            'advisor_id' => 'string',
-            'advice_status_id' => 'string',
+            'advice_status_id' => 'int',
             'type' => AdviceType::class,
-            'helpType_place' => 'boolean',
-            'helpType_technical' => 'boolean',
-            'helpType_bureaucracy' => 'boolean',
+            'help_type_place' => 'boolean',
+            'help_type_technical' => 'boolean',
+            'help_type_bureaucracy' => 'boolean',
             'helpType_other' => 'boolean',
-            'houseType' => HouseType::class,
-            'landlordExists' => 'boolean',
-            'placeNotes' => 'string',
+            'house_type' => HouseType::class,
+            'landlord_exists' => 'boolean',
+            'place_notes' => 'string',
             'address' => Address::class,
             'coordinate' => Coordinate::class,
             'lng' => 'float',
             'lat' => 'float',
+            'advisor_id' => 'int',
         ];
     }
 }
