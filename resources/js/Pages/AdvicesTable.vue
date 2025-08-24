@@ -150,17 +150,32 @@ function userCanEdit(advice: App.Models.Advice) {
     return false;
 }
 
-function sortedAdvisors(e: { value: any[] }): Store {
-    if (!e.value) {
-        return new ArrayStore({
-            data: [],
+function sortedAdvisors(e: { key: string }): Store {
+    if (!e.key) {
+        const promiseUnsorted = axios.get('api/users').then((response) => response.data);
+
+        return new CustomStore({
+            key: 'id',
+            cacheRawData: true,
+            load: () => {
+                return promiseUnsorted;
+            },
+            byKey: (key) => {
+                return promiseUnsorted.then((data: any[]) => data.find((item) => item.id === key));
+            },
         });
     }
+
+    const promiseSorted = axios.get('api/advices/' + e.key + '/advisors').then((response) => response.data);
+
     return new CustomStore({
         key: 'id',
         cacheRawData: true,
         load: () => {
-            return axios.get('api/advices/' + e.value[0] + '/advisors').then((response) => response.data);
+            return promiseSorted;
+        },
+        byKey: (key) => {
+            return promiseSorted.then((data: any[]) => data.find((item) => item.id === key));
         },
     });
 }

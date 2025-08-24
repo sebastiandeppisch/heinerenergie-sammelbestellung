@@ -8,6 +8,7 @@ use App\ValueObjects\Coordinate;
 use Database\Factories\MapPointFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
 
@@ -47,7 +48,10 @@ class MapPoint extends Model
         return $this->morphTo();
     }
 
-    public function category()
+    /**
+     * @return BelongsTo<MapPointCategory, $this>
+     */
+    public function category(): BelongsTo
     {
         return $this->belongsTo(MapPointCategory::class, 'category_id');
     }

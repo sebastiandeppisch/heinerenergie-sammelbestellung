@@ -20,6 +20,6 @@ class AdviceStatusController extends Controller
     {
         $this->authorize('view', $advicestatus);
 
-        return $advicestatus;
+        return AdviceStatusNamesData::fromModel($advicestatus);
     }
 }

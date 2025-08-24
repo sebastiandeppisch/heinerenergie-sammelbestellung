@@ -7,6 +7,7 @@ use App\Enums\HouseType;
 use App\Models\Advice;
 use App\Models\User;
 use App\Services\AdviceService;
+use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
 
 class AdviceData extends Data
@@ -33,7 +34,7 @@ class AdviceData extends Data
         public ?HouseType $house_type,
         public ?bool $landlord_exists,
         public ?string $place_notes,
-        public array $shares_ids,
+        public Collection $shares_ids,
         public ?float $distance = null,
         public bool $can_edit = false,
     ) {}

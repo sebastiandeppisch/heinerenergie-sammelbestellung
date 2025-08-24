@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Override;
 
@@ -18,7 +19,10 @@ class MapPointCategory extends Model
         'image_path',
     ];
 
-    public function mapPoints()
+    /**
+     * @return HasMany<MapPoint, $this>
+     */
+    public function mapPoints(): HasMany
     {
         return $this->hasMany(MapPoint::class, 'category_id');
     }
