@@ -5,7 +5,6 @@ namespace App\Policies;
 use App\Models\Advice;
 use App\Models\User;
 use App\Policies\Concerns\GroupContextHelper;
-use Cache;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class AdvicePolicy
@@ -22,7 +21,6 @@ class AdvicePolicy
 
     public function view(User $user, Advice $advice)
     {
-        // return Cache::remember("advice.view.{$advice->id}.{$user->id}", $this->cacheSeconds, function () use ($advice, $user) {
         if ($advice->advisor_id === $user->id) {
             return true;
         }
@@ -32,12 +30,10 @@ class AdvicePolicy
         }
 
         return $this->groupContext->isActingAsTransitiveAdmin($user, $advice->group);
-        // });
     }
 
     public function viewDataProtected(User $user, Advice $advice)
     {
-        // return Cache::remember("advice.viewDataProtected.{$advice->id}.{$user->id}", $this->cacheSeconds, function () use ($advice, $user) {
 
         if ($advice->advisor_id !== null) {
             return $this->view($user, $advice);
@@ -47,7 +43,6 @@ class AdvicePolicy
         }
 
         return $this->view($user, $advice);
-        // });
     }
 
     public function create(User $user)
@@ -62,9 +57,7 @@ class AdvicePolicy
             return true;
         }
 
-        $shared = $advice->shares()->where('advisor_id', $user->id)->first();
-
-        if ($shared) {
+        if ($advice->shares_ids->contains($user->id)) {
             return true;
         }
 

@@ -19,7 +19,7 @@ class AdviceServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->adviceService = new AdviceService;
+        $this->adviceService = app(AdviceService::class);
     }
 
     public function test_get_distance_returns_null_for_null_user(): void

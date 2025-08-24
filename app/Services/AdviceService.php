@@ -2,21 +2,75 @@
 
 namespace App\Services;
 
+use App\Context\GroupContextContract;
 use App\Data\DataProtectedAdviceData;
 use App\Events\Advice\AdviceSharedAdvisorAdded;
 use App\Events\Advice\AdviceSharedAdvisorRemoved;
 use App\Models\Advice;
+use App\Models\Group;
 use App\Models\User;
 use App\ValueObjects\Meter;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class AdviceService
 {
+    public function __construct(
+        private readonly GroupContextContract $groupContext
+    ) {}
+
     public function getAdvicesListForUser(User $user): Collection
     {
+        $permissions = $this->getUserAdvicePermissions($user);
+
         return Advice::query()
-            ->with('status', 'group', 'group.parent', 'group.users', 'shares', 'advisor')->get()
-            ->filter(fn (Advice $advice) => $user->can('viewDataProtected', $advice))->values()->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice, $user));
+            ->with('status', 'group', 'group.parent', 'advisor', 'shares')
+            ->where(function ($query) use ($user, $permissions) {
+                $query
+                    // User is the advisor
+                    ->where('advisor_id', $user->id)
+                    // OR user is in shares
+                    ->orWhereIn('id', $permissions['sharedAdviceIds'])
+                    // OR advice has no advisor AND user is member/admin of group
+                    ->orWhere(function ($subQuery) use ($permissions) {
+                        $subQuery->whereNull('advisor_id')
+                            ->whereIn('group_id', $permissions['memberGroupIds']);
+                    })
+                    // OR user is admin of the group (can see all)
+                    ->orWhereIn('group_id', $permissions['adminGroupIds']);
+            })
+            ->get()
+            ->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice, $user));
+    }
+
+    private function getUserAdvicePermissions(User $user): array
+    {
+        $allGroups = Group::with('users')->get();
+
+        $adminGroupIds = collect();
+        foreach ($allGroups as $group) {
+            if ($this->groupContext->isActingAsTransitiveAdmin($user, $group)) {
+                $adminGroupIds->push($group->id);
+            }
+        }
+
+        $memberGroupIds = collect();
+        foreach ($allGroups as $group) {
+            if ($this->groupContext->isActingAsTransitiveMemberOrAdmin($user, $group)) {
+                $memberGroupIds->push($group->id);
+            }
+        }
+
+        $sharedAdviceIds = DB::table('sharings')
+            ->where('advisor_id', $user->id)
+            ->where('sharing_type', Advice::class)
+            ->pluck('sharing_id');
+
+        return [
+            'adminGroupIds' => $adminGroupIds,
+            'memberGroupIds' => $memberGroupIds,
+            'sharedAdviceIds' => $sharedAdviceIds,
+        ];
     }
 
     public function getDistance(Advice $advice, ?User $user = null): ?Meter
@@ -39,7 +93,7 @@ class AdviceService
 
     public function canEdit(Advice $advice, User $user): bool
     {
-        return $user->can('view', $advice);
+        return $user->can('update', $advice);
     }
 
     /**
