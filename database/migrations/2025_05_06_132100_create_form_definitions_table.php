@@ -113,11 +113,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('submission_field_options');
         Schema::dropIfExists('submission_fields');
         Schema::dropIfExists('form_submissions');
         Schema::dropIfExists('form_field_options');
         Schema::dropIfExists('form_fields');
         Schema::dropIfExists('form_definitions');
-
     }
 };

@@ -16,7 +16,7 @@ return new class extends Migration
         });
 
         Schema::table('users', function (Blueprint $table) {
-            $table->string('zip')->default('')->change();
+            $table->string('zip')->nullable()->change();
         });
     }
 
@@ -30,7 +30,7 @@ return new class extends Migration
         });
 
         Schema::table('users', function (Blueprint $table) {
-            $table->unsignedInteger('zip')->change();
+            $table->unsignedInteger('zip')->nullable()->change();
         });
     }
 };
