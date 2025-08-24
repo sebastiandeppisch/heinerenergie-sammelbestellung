@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Data\DataProtectedAdviceData;
 use App\Events\Advice\AdviceSharedAdvisorAdded;
 use App\Events\Advice\AdviceSharedAdvisorRemoved;
 use App\Models\Advice;
@@ -11,6 +12,13 @@ use Illuminate\Support\Collection;
 
 class AdviceService
 {
+    public function getAdvicesListForUser(User $user): Collection
+    {
+        return Advice::query()
+            ->with('status', 'group', 'group.parent', 'group.users', 'shares', 'advisor')->get()
+            ->filter(fn (Advice $advice) => $user->can('viewDataProtected', $advice))->values()->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice, $user));
+    }
+
     public function getDistance(Advice $advice, ?User $user = null): ?Meter
     {
         if ($user === null) {

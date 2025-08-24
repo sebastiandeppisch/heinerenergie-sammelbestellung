@@ -15,6 +15,7 @@ use App\Models\Advice;
 use App\Models\Group;
 use App\Models\User;
 use App\Notifications\AdviceTransferred;
+use App\Services\AdviceService;
 use App\Services\SessionService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -29,9 +30,7 @@ class AdviceController extends Controller
 
         $user = Auth::user();
 
-        $advices = Advice::query()
-            ->with('status', 'group', 'group.parent', 'group.users', 'shares', 'advisor')->get()
-            ->filter(fn (Advice $advice) => Auth::user()->can('viewDataProtected', $advice))->values()->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice, $user))->toArray();
+        $advices = app(AdviceService::class)->getAdvicesListForUser($user);
 
         $groups = Group::with('parent')->get()
         // ->filter(fn (Group $group) => Auth::user()->can('view', $group))
@@ -135,10 +134,8 @@ class AdviceController extends Controller
 
     public function map()
     {
-        $advices = Advice::query()
-            ->with('shares', 'status', 'group', 'group.parent', 'group.users', 'advisor')->get()
-            ->filter(fn (Advice $advice) => Auth::user()->can('viewDataProtected', $advice))
-            ->values()->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice));
+        $user = Auth::user();
+        $advices = app(AdviceService::class)->getAdvicesListForUser($user);
 
         $groups = Group::where('accepts_transfers', true)->get()->filter(fn (Group $group) => $group->consulting_area !== null)->map(fn (Group $group) => GroupMapData::fromModel($group))->values();
 
