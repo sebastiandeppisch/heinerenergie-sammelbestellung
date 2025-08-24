@@ -43,7 +43,7 @@ type: App.Enums.AdviceType | null;
 created_at: any;
 updated_at: any;
 distance: number | null;
-shares_ids: Array<any>;
+shares_ids: any;
 place_notes: string | null;
 house_type: App.Enums.HouseType | null;
 landlord_exists: boolean | null;

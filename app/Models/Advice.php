@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Wnx\Sends\Contracts\HasSends;
 use Wnx\Sends\Support\HasSendsTrait;
 
@@ -102,9 +103,9 @@ class Advice extends Model implements HasSends, Pointable
         return $this->morphToMany(User::class, 'sharing', 'sharings', 'sharing_id', 'advisor_id');
     }
 
-    public function getSharesIdsAttribute(): array
+    public function getSharesIdsAttribute(): Collection
     {
-        return $this->shares->pluck('id')->toArray();
+        return $this->shares->pluck('id');
     }
 
     public function isHome(): bool

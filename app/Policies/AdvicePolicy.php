@@ -22,33 +22,32 @@ class AdvicePolicy
 
     public function view(User $user, Advice $advice)
     {
-        return Cache::remember("advice.view.{$advice->id}.{$user->id}", $this->cacheSeconds, function () use ($advice, $user) {
-            if ($advice->advisor_id === $user->id) {
-                return true;
-            }
+        // return Cache::remember("advice.view.{$advice->id}.{$user->id}", $this->cacheSeconds, function () use ($advice, $user) {
+        if ($advice->advisor_id === $user->id) {
+            return true;
+        }
 
-            $shared = Cache::remember("advice.sharings.{$advice->id}.{$user->id}", $this->cacheSeconds, fn () => $advice->shares()->where('advisor_id', $user->id)->exists());
-            if ($shared) {
-                return true;
-            }
+        if ($advice->shares_ids->contains($user->id)) {
+            return true;
+        }
 
-            return $this->groupContext->isActingAsTransitiveAdmin($user, $advice->group);
-        });
+        return $this->groupContext->isActingAsTransitiveAdmin($user, $advice->group);
+        // });
     }
 
     public function viewDataProtected(User $user, Advice $advice)
     {
-        return Cache::remember("advice.viewDataProtected.{$advice->id}.{$user->id}", $this->cacheSeconds, function () use ($advice, $user) {
+        // return Cache::remember("advice.viewDataProtected.{$advice->id}.{$user->id}", $this->cacheSeconds, function () use ($advice, $user) {
 
-            if ($advice->advisor_id !== null) {
-                return $this->view($user, $advice);
-            }
-            if ($this->groupContext->isActingAsTransitiveMemberOrAdmin($user, $advice->group)) {
-                return true;
-            }
-
+        if ($advice->advisor_id !== null) {
             return $this->view($user, $advice);
-        });
+        }
+        if ($this->groupContext->isActingAsTransitiveMemberOrAdmin($user, $advice->group)) {
+            return true;
+        }
+
+        return $this->view($user, $advice);
+        // });
     }
 
     public function create(User $user)

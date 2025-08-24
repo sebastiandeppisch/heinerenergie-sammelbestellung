@@ -9,6 +9,7 @@ use App\Models\Advice;
 use App\Models\User;
 use App\Services\AdviceService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
@@ -35,7 +36,7 @@ class DataProtectedAdviceData extends Data
         public Carbon $created_at,
         public Carbon $updated_at,
         public ?float $distance,
-        public array $shares_ids,
+        public Collection $shares_ids,
         public ?string $place_notes,
         public ?HouseType $house_type,
         public ?bool $landlord_exists,
