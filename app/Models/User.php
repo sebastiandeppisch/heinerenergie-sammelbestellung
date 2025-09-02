@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Log;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
@@ -60,6 +61,10 @@ class User extends Authenticatable
         if ($this->coordinate === null || $this->advice_radius === null || $advice->coordinate === null) {
             return false;
         }
+
+        Log::info($this->coordinate->distanceTo($advice->coordinate)->getValue());
+
+        Log::info($this->advice_radius);
 
         return $this->coordinate->distanceTo($advice->coordinate)->getValue() <= $this->advice_radius;
     }

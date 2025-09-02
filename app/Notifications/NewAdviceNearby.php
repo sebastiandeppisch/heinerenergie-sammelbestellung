@@ -4,10 +4,12 @@ namespace App\Notifications;
 
 use App\Models\Advice;
 use App\ValueObjects\Meter;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use Override;
 
-class NewAdviceNearby extends BaseNotification
+class NewAdviceNearby extends BaseNotification implements ShouldQueue
 {
     public function __construct(public ?Advice $advice, public Meter $distance)
     {
@@ -19,7 +21,7 @@ class NewAdviceNearby extends BaseNotification
     #[Override]
     public function toMail($notifiable)
     {
-
+        Log::info('Notification to Mail');
         $distance = $this->distance->__toString();
 
         $mail = parent::toMail($notifiable);
@@ -29,6 +31,8 @@ class NewAdviceNearby extends BaseNotification
         $mail->action('Zur Beratungsanfrage', url('/advices/'.$this->advice->id));
 
         $mail->line('Wenn Du keine Benachrichtigungen mehr erhalten möchtest, kannst Du dies in Deinem Profil einstellen: '.url('/profile'));
+
+        Log::info('Notification to Mail fertig');
 
         return $mail;
     }

@@ -30,13 +30,13 @@ test('find group containing coordinates', function () {
 
     // Check if a coordinate inside the polygon finds the group
     $coordinate = new Coordinate(lat: 48.5, lng: 8.5);  // Inside the polygon
-    $foundGroup = $this->groupService->findGroupContainingCoordinates($coordinate);
+    $foundGroup = $this->groupService->findGroupsContainingCoordinates($coordinate)?->first();
     expect($foundGroup)->not->toBeNull();
     expect($foundGroup->id)->toBe($group->id);
 
     // Check if a coordinate outside the polygon returns no group
     $outsideCoordinate = new Coordinate(lat: 47.0, lng: 7.0);  // Outside the polygon
-    $notFoundGroup = $this->groupService->findGroupContainingCoordinates($outsideCoordinate);
+    $notFoundGroup = $this->groupService->findGroupsContainingCoordinates($outsideCoordinate)?->first();
     expect($notFoundGroup)->toBeNull();
 });
 

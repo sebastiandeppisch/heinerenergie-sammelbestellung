@@ -57,14 +57,21 @@ class AssignAdviceToGroupByAddress implements ShouldQueue
         // Check if geocoding was successful
         if ($advice->coordinate) {
             // Try to find an initiative whose polygon contains these coordinates
-            $group = $groupService->findGroupContainingCoordinates($advice->coordinate);
+
+            $parentGroup = $advice->group;
+
+            if ($parentGroup !== null) {
+                $group = $groupService->findSubGroupsContainingCoordinates($parentGroup, $advice->coordinate);
+            } else {
+                $group = $groupService->findGroupsContainingCoordinates($advice->coordinate);
+            }
 
             if ($group) {
                 // Assign the advice to the found group
                 $groupService->assignAdviceToGroup($advice, $group);
 
                 // Use existing job to notify advisors
-                SendNewAdviceInfoToAdvisors::dispatch($advice, $adviceService);
+                SendNewAdviceInfoToAdvisors::dispatch($advice);
             } else {
                 // No initiative found at the coordinates, fallback to postal code
                 AssignAdviceToGroupByZipcode::dispatch($advice);

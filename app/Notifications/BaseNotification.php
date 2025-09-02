@@ -2,16 +2,17 @@
 
 namespace App\Notifications;
 
-use App\Mail\BaseNotificationMail;
 use App\Models\Advice;
 use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
 
 class BaseNotification extends Notification
 {
     use Queueable;
 
-    public ?Advice $advice = null;
+    //    public ?Advice $advice = null;
 
     public function via($notifiable)
     {
@@ -20,14 +21,21 @@ class BaseNotification extends Notification
 
     public function toMail($notifiable)
     {
-        $mail = (new BaseNotificationMail)
+        Log::info('Base Notification toMail');
+        Log::info('notifiable', ['notifiable' => $notifiable]);
+
+        return (new MailMessage)
             ->greeting('Hallo '.$notifiable->first_name.',')
             ->salutation('Viele Grüße, das heiner*energie Team');
 
-        if ($this->advice) {
-            $mail->storeClassName()->associateWith($this->advice);
+        Log::info('created');
 
-        }
+        /*    if ($this->advice) {
+                $mail->storeClassName()->associateWith($this->advice);
+
+            }
+*/
+        Log::info('stored');
 
         return $mail;
     }

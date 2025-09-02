@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Events\Advice\AdviceCreatedByFormSubmission;
+use App\Jobs\SendNewAdviceInfoToAdvisors;
 use App\Mail\AdviceCreated;
 use App\Models\Traits\HasUuid;
 use Database\Factories\FormDefinitionToAdviceFactory;
@@ -10,6 +11,7 @@ use DB;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Log;
 use Mail;
 
 class FormDefinitionToAdvice extends Model
@@ -94,6 +96,12 @@ class FormDefinitionToAdvice extends Model
 
             return $advice;
         });
+
+        Log::info('Created advice from form submission', [
+            'advice_id' => $advice->id,
+            'form_submission_id' => $submission->id,
+        ]);
+        SendNewAdviceInfoToAdvisors::dispatch($advice);
 
         Mail::to($advice->email)->send(new AdviceCreated($advice));
 

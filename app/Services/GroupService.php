@@ -12,10 +12,19 @@ class GroupService
 {
     /**
      * Find a group whose consulting area contains the specified coordinates
+     *
+     * @return Collection<Group>
      */
-    public function findGroupContainingCoordinates(Coordinate $coordinate): ?Group
+    public function findGroupsContainingCoordinates(Coordinate $coordinate): ?Collection
     {
         return Group::whereNotNull('consulting_area')
+            ->get()
+            ->filter(fn ($group) => $group->consulting_area->containsPoint($coordinate));
+    }
+
+    public function findSubGroupsContainingCoordinates(Group $parent, Coordinate $coordinate): ?Group
+    {
+        return $parent->children()->whereNotNull('consulting_area')
             ->get()
             ->filter(fn ($group) => $group->consulting_area->containsPoint($coordinate))
             ->first();

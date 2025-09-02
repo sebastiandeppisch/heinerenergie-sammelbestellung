@@ -7,6 +7,7 @@ use App\Jobs\AssignAdviceToGroupByZipcode;
 use App\Models\Advice;
 use App\Models\Group;
 use App\Models\User;
+use App\Notifications\NewAdviceNearby;
 use App\Notifications\SystemErrorNotification;
 use App\ValueObjects\Address;
 use App\ValueObjects\Coordinate;
@@ -164,3 +165,79 @@ test('advice is assigned to main group even when subgroup is closer', function (
     expect($advice->group_id)->toBe($mainGroup->id);
     expect($advice->group_id)->not->toBe($subGroup->id);
 });
+
+// Test for assigning advice to subgroup when main group already exists
+test('advice is assigned to subgroup when main group already exists and address is found', function () {
+    // Create a main group first
+    $mainGroup = Group::factory()->create([
+        'name' => 'Main Group',
+        'parent_id' => null, // Main group
+        'consulting_area' => new Polygon([
+            ['lat' => 48.0, 'lng' => 8.0],
+            ['lat' => 48.0, 'lng' => 9.0],
+            ['lat' => 49.0, 'lng' => 9.0],
+            ['lat' => 49.0, 'lng' => 8.0],
+            ['lat' => 48.0, 'lng' => 8.0], // Close polygon
+        ]),
+    ]);
+
+    // Create a subgroup within the main group's area
+    $subGroup = Group::factory()->create([
+        'name' => 'Sub Group',
+        'parent_id' => $mainGroup->id,
+        'consulting_area' => new Polygon([
+            ['lat' => 48.2, 'lng' => 8.2],
+            ['lat' => 48.2, 'lng' => 8.8],
+            ['lat' => 48.8, 'lng' => 8.8],
+            ['lat' => 48.8, 'lng' => 8.2],
+            ['lat' => 48.2, 'lng' => 8.2], // Close polygon
+        ]),
+    ]);
+
+    // Create group admins to receive notifications
+    $mainGroupAdvisor = User::factory()->create([
+        'coordinate' => $mainGroup->consulting_area->getCenter(),
+    ]);
+    $subGroupAdvisor = User::factory()->create([
+        'coordinate' => $subGroup->consulting_area->getCenter(),
+    ]);
+    $mainGroup->users()->attach($mainGroupAdvisor);
+    $subGroup->users()->attach($subGroupAdvisor);
+
+    // Register the FetchCoordinateByAddress action to return coordinates inside the subgroup
+
+    $adviceCoordinates = $subGroup->consulting_area->getCenter();
+
+    App::bind(FetchCoordinateByAddress::class, fn () => function (Address $address) use ($adviceCoordinates) {
+        return $adviceCoordinates;
+    });
+
+    // Create a new advice with an existing group_id (main group already set)
+    $advice = Advice::factory()->create([
+        'street' => 'Teststraße',
+        'street_number' => '123',
+        'zip' => '12345',
+        'city' => 'Teststadt',
+        'group_id' => $mainGroup->id, // Main group already exists
+    ]);
+
+    // Catch notifications
+    Notification::fake();
+
+    // Run the job
+    new AssignAdviceToGroupByAddress($advice)->handle();
+
+    // Refresh advice from database
+    $advice = $advice->refresh();
+
+    // Check if the advice was assigned to the subgroup (not the main group anymore)
+    expect($advice->group_id)->toBe($subGroup->id);
+    expect($advice->group_id)->not->toBe($mainGroup->id);
+
+    // Verify that subgroup advisor was notified
+    Notification::assertSentTo(
+        $subGroupAdvisor,
+        NewAdviceNearby::class
+    );
+
+})->only();
