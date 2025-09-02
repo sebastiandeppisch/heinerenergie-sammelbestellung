@@ -23,6 +23,12 @@ class AdviceService
     {
         $permissions = $this->getUserAdvicePermissions($user);
 
+        if ($this->groupContext->getCurrentGroup()) {
+            $isGroupAdmin = $this->groupContext->isActingAsDirectAdmin($user, $this->groupContext->getCurrentGroup());
+        } elseif ($this->groupContext->isActingAsSystemAdmin($user)) {
+            $isGroupAdmin = true;
+        }
+
         return Advice::query()
             ->with('status', 'group', 'group.parent', 'advisor', 'shares')
             ->where(function ($query) use ($user, $permissions) {
@@ -40,7 +46,7 @@ class AdviceService
                     ->orWhereIn('group_id', $permissions['adminGroupIds']);
             })
             ->get()
-            ->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice, $user));
+            ->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice, $user, $isGroupAdmin));
     }
 
     private function getUserAdvicePermissions(User $user): array

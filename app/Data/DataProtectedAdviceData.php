@@ -49,11 +49,11 @@ class DataProtectedAdviceData extends Data
         public ?string $group_id,
     ) {}
 
-    public static function fromModel(Advice $advice, ?User $user = null): self
+    public static function fromModel(Advice $advice, ?User $user = null, $canViewAll = false): self
     {
         $email = $advice->email;
         $phone = $advice->phone;
-        if (! Auth::user()->can('view', $advice)) {
+        if (! $canViewAll && dd('test') && ! Auth::user()->can('view', $advice)) {
             $email = null;
             $phone = null;
         }
@@ -87,7 +87,7 @@ class DataProtectedAdviceData extends Data
             help_type_bureaucracy: $advice->help_type_bureaucracy,
             help_type_other: $advice->help_type_other,
             result: $advice->result,
-            can_edit: $user ? $adviceService->canEdit($advice, $user) : false,
+            can_edit: $canViewAll || ($user ? $adviceService->canEdit($advice, $user) : false),
             group_id: $advice->group->uuid,
             shares_ids: $advice->shares_ids
         );
