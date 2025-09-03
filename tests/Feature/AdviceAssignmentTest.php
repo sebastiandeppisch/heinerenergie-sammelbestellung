@@ -240,4 +240,4 @@ test('advice is assigned to subgroup when main group already exists and address 
         NewAdviceNearby::class
     );
 
-})->only();
+});
