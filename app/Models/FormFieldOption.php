@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Override;
+use Str;
 
 class FormFieldOption extends Model
 {
@@ -31,6 +32,11 @@ class FormFieldOption extends Model
         'is_required' => 'boolean',
     ];
 
+    protected $attributes = [
+        'is_default' => false,
+        'is_required' => false,
+    ];
+
     /**
      * @return BelongsTo<FormField, $this>
      */
@@ -43,10 +49,10 @@ class FormFieldOption extends Model
     {
         return $submissionField->options()->create([
             'form_field_option_id' => $this->id,
-            'value' => $this->value,
             'label' => $this->label,
             'sort_order' => $this->sort_order,
             'is_default' => $this->is_default,
+            'value' => $this->value,
         ]);
     }
 
@@ -56,5 +62,18 @@ class FormFieldOption extends Model
         SubmissionFieldOption::where('form_field_option_id', $this->id)->update(['form_field_option_id' => null]);
 
         return parent::delete();
+    }
+
+    public function save(array $options = []): bool
+    {
+        if ($this->sort_order === null) {
+            $this->sort_order = FormFieldOption::where('form_field_id', $this->form_field_id)->max('sort_order') + 1;
+        }
+
+        if ($this->value === null) {
+            $this->value = Str::uuid();
+        }
+
+        return parent::save($options);
     }
 }
