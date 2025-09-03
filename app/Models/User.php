@@ -62,9 +62,9 @@ class User extends Authenticatable
             return false;
         }
 
-        Log::info($this->coordinate->distanceTo($advice->coordinate)->getValue());
+        Log::info((string) $this->coordinate->distanceTo($advice->coordinate)->getValue());
 
-        Log::info($this->advice_radius);
+        Log::info((string) $this->advice_radius);
 
         return $this->coordinate->distanceTo($advice->coordinate)->getValue() <= $this->advice_radius;
     }

@@ -12,6 +12,8 @@ class SystemErrorNotification extends BaseNotification implements ShouldQueue
 {
     use Queueable;
 
+    public ?Advice $advice;
+
     /**
      * Create a new notification instance.
      */

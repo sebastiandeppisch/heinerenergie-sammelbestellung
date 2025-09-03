@@ -28,16 +28,6 @@ class BaseNotification extends Notification
             ->greeting('Hallo '.$notifiable->first_name.',')
             ->salutation('Viele Grüße, das heiner*energie Team');
 
-        Log::info('created');
-
-        /*    if ($this->advice) {
-                $mail->storeClassName()->associateWith($this->advice);
-
-            }
-*/
-        Log::info('stored');
-
-        return $mail;
     }
 
     public function toArray($notifiable)

@@ -27,6 +27,8 @@ class AdviceService
             $isGroupAdmin = $this->groupContext->isActingAsDirectAdmin($user, $this->groupContext->getCurrentGroup());
         } elseif ($this->groupContext->isActingAsSystemAdmin($user)) {
             $isGroupAdmin = true;
+        } else {
+            $isGroupAdmin = false;
         }
 
         return Advice::query()
