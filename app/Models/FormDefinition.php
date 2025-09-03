@@ -53,13 +53,22 @@ class FormDefinition extends Model
     #[Override]
     public function delete(): bool
     {
+        $this->loadMissing('fields.options');
+
         return DB::transaction(function () {
-            foreach ($this->fields as $field) {
-                $field->options()->delete();
-                $field->delete();
+
+            if ($this->adviceCreator) {
+                $this->adviceCreator->delete();
             }
 
-            $this->fields()->delete();
+            if ($this->mapPointCreator) {
+                $this->mapPointCreator->delete();
+            }
+
+            foreach ($this->fields as $field) {
+                $field->options->each->delete();
+                $field->delete();
+            }
 
             // TODO handle submissions
             return parent::delete();
