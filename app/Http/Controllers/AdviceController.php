@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Data\AdviceEventData;
 use App\Data\DataProtectedAdviceData;
+use App\Data\FormSubmissionData;
 use App\Data\GroupData;
 use App\Data\GroupMapData;
 use App\Data\UserData;
@@ -12,6 +13,7 @@ use App\Events\Advice\InitiativeTransferEvent;
 use App\Http\Requests\StoreAdviceCommentRequest;
 use App\Http\Requests\TransferAdviceRequest;
 use App\Models\Advice;
+use App\Models\FormSubmission;
 use App\Models\Group;
 use App\Models\User;
 use App\Notifications\AdviceTransferred;
@@ -80,12 +82,20 @@ class AdviceController extends Controller
             ->map(fn (Group $group) => GroupData::fromModel($group))
             ->values();
 
+        $formSubmission = FormSubmission::where('advice_id', $advice->id)->with('submissionFields', 'submissionFields.options')->first();
+        if ($formSubmission !== null) {
+            $formSubmission = FormSubmissionData::fromModel($formSubmission);
+
+            $formSubmission->fields = $formSubmission->fields->filter(fn ($field) => ! in_array($field->field->label, ['Vorname', 'Nachname', 'Adresse', 'E-Mail Adresse', 'Telefonnummer', 'Möchtest Du virtuell oder bei Dir vor Ort beraten werden?']));
+        }
+
         $advice = DataProtectedAdviceData::fromModel($advice, Auth::user());
 
         return Inertia::render('Advice', [
             'advice' => $advice,
             'events' => $timeline,
             'transferableGroups' => $transferableGroups,
+            'formSubmission' => $formSubmission,
         ]);
     }
 

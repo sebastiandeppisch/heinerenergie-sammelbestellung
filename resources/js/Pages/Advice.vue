@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import FormSubmissionRenderer from '@/components/FormBuilder/FormSubmissionRenderer.vue';
 import { ref } from 'vue';
 import { user } from '../authHelper';
 import AdviceActions from '../components/AdviceActions.vue';
@@ -13,6 +14,7 @@ const props = defineProps<{
     advice: App.Data.DataProtectedAdviceData;
     events: AdviceEvent[];
     transferableGroups: App.Data.GroupData[];
+    formSubmission: App.Data.FormSubmissionData | null;
 }>();
 
 const sharedIds = ref(props.advice.shares_ids || []);
@@ -58,9 +60,15 @@ const advisor = user.value;
                     <AdviceTimeline :events="events" :advice-id="advice.id" />
                 </div>
 
-                <div class="content-card">
+                <div class="content-card" v-if="props.formSubmission === null">
                     <h3 class="card-title">Zusätzliche Informationen</h3>
                     <AdviceDetails :advice="advice" />
+                </div>
+                <div class="content-card" v-else>
+                    <h3 class="card-title">Zusätzliche Informationen aus dem Formular</h3>
+                    <div style="padding: 1.5rem">
+                        <FormSubmissionRenderer :form-submission="props.formSubmission" />
+                    </div>
                 </div>
             </div>
         </div>
