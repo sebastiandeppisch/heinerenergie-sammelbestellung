@@ -65,6 +65,14 @@ class FormDefinitionToAdvice extends Model
     /**
      * @return BelongsTo<FormField, $this>
      */
+    public function adviceTypeField(): BelongsTo
+    {
+        return $this->belongsTo(FormField::class, 'advice_type_field_id');
+    }
+
+    /**
+     * @return BelongsTo<FormField, $this>
+     */
     public function lastNameField(): BelongsTo
     {
         return $this->belongsTo(FormField::class, 'last_name_field_id');
@@ -79,6 +87,8 @@ class FormDefinitionToAdvice extends Model
             $firstNameField = $this->firstNameField->getSubmissionField($submission);
             $lastNameField = $this->lastNameField->getSubmissionField($submission);
 
+            $adviceType = $this->adviceTypeField->getSubmissionField($submission);
+
             $advice = Advice::create([
                 'address' => $addressField->value,
                 'email' => $emailField->value,
@@ -86,6 +96,7 @@ class FormDefinitionToAdvice extends Model
                 'first_name' => $firstNameField->value,
                 'last_name' => $lastNameField->value,
                 'group_id' => $submission->group_id,
+                'type' => $adviceType->value,
             ]);
 
             $advice->save();

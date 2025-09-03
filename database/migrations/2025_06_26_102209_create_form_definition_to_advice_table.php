@@ -32,6 +32,8 @@ return new class extends Migration
 
             $table->foreignIdFor(FormField::class, 'last_name_field_id')->constrained();
 
+            $table->foreignIdFor(FormField::class, 'advice_type_field_id')->constrained();
+
             $table->foreignIdFor(Group::class, 'default_group_id')
                 ->constrained();
 

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\AdviceType;
 use App\Enums\FieldType;
 use App\Models\FormDefinition;
 use App\Models\FormDefinitionToAdvice;
@@ -53,6 +54,17 @@ class FormDefinitionToAdviceFactory extends Factory
             'required' => true,
         ]);
 
+        $typeField = FormField::factory()->create([
+            'type' => FieldType::RADIO,
+            'label' => 'Type',
+            'required' => true,
+        ]);
+
+        $typeField->options()->createMany([
+            ['label' => 'virtual', 'value' => AdviceType::Virtual->value],
+            ['label' => 'home', 'value' => AdviceType::Home->value],
+        ]);
+
         $formDefinition = FormDefinition::factory()->create();
         $formDefinition->fields()->saveMany([
             $mailField,
@@ -60,6 +72,7 @@ class FormDefinitionToAdviceFactory extends Factory
             $phoneField,
             $firstNameField,
             $lastNameField,
+            $typeField,
         ]);
 
         return [
@@ -69,6 +82,7 @@ class FormDefinitionToAdviceFactory extends Factory
             'phone_field_id' => $phoneField->id,
             'first_name_field_id' => $firstNameField->id,
             'last_name_field_id' => $lastNameField->id,
+            'advice_type_field_id' => $typeField->id,
             'default_group_id' => Group::factory(),
         ];
     }
@@ -93,7 +107,12 @@ class FormDefinitionToAdviceFactory extends Factory
 
             $creator->lastNameField->createSubmissionField($submission, fake()->name());
 
-            $creator->createAdvice($submission);
+            $creator->adviceTypeField->createSubmissionField($submission, fake()->randomElement(AdviceType::cases())->value);
+
+            $advice = $creator->createAdvice($submission);
+            $submission->update([
+                'advice_id' => $advice->id,
+            ]);
 
             return [];
         });

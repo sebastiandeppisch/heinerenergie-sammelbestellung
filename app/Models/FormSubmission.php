@@ -55,7 +55,10 @@ class FormSubmission extends Model implements Pointable
     public function handleCreators(): void
     {
         if ($this->formDefinition->adviceCreator) {
-            $this->formDefinition->adviceCreator->createAdvice($this);
+            $advice = $this->formDefinition->adviceCreator->createAdvice($this);
+            $this->update([
+                'advice_id' => $advice->id,
+            ]);
         }
 
         if ($this->formDefinition->mapPointCreator) {

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\AdviceType;
 use App\Models\Advice;
 use App\Models\FormDefinitionToAdvice;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -30,6 +31,7 @@ test('submitting the form produces an advice', function () {
             'zip' => fake()->postcode(),
         ],
         $config->phoneField->uuid => fake()->phoneNumber(),
+        $config->adviceTypeField->uuid => AdviceType::Virtual->value,
     ]);
 
     $response->assertSessionHasNoErrors();

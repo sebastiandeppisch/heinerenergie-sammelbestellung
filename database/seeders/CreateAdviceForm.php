@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\AdviceType;
 use App\Models\FormDefinition;
 use App\Models\Group;
 use Illuminate\Database\Seeder;
@@ -60,6 +61,17 @@ class CreateAdviceForm extends Seeder
             'placeholder' => 'Telefonnummer',
             'required' => true,
         ]));
+
+        $typeField = $formDefinition->fields()->create([
+            'type' => 'radio',
+            'label' => 'Möchtest Du virtuell oder bei Dir vor Ort beraten werden?',
+            'required' => true,
+        ]);
+        $typeField->options()->createMany([
+            ['label' => 'Virtuell, per Mail oder Telefon', 'value' => AdviceType::Virtual->value],
+            ['label' => 'Vor Ort', 'value' => AdviceType::Home->value],
+        ]);
+        $formToAdvice->adviceTypeField()->associate($typeField);
 
         $formToAdvice->default_group_id = $formDefinition->group_id;
 
