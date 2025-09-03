@@ -53,6 +53,7 @@ const fieldOptions = computed(() => {
             id: option.id,
             disabled: false,
             is_required: option.is_required,
+            value: option.value || option.id,
         }));
     }
     return [];
@@ -157,7 +158,7 @@ const inputClasses = computed(() => ({
             <SelectValue :placeholder="field.placeholder || 'Auswählen...'" />
         </SelectTrigger>
         <SelectContent>
-            <SelectItem v-for="option in fieldOptions" :key="option.id" :value="option.id">
+            <SelectItem v-for="option in fieldOptions" :key="option.id" :value="option.value">
                 {{ option.label }}
             </SelectItem>
         </SelectContent>
@@ -166,12 +167,13 @@ const inputClasses = computed(() => ({
     <RadioGroup
         v-else-if="field.type === FIELD_TYPES.RADIO"
         v-model="modelValue"
+        :id="fieldId"
         :disabled="disabled"
         class="space-y-2"
         @update:modelValue="handleChange"
     >
         <div v-for="option in fieldOptions" :key="option.id" class="flex items-center space-x-2">
-            <RadioGroupItem :value="option.id" :id="`${fieldId}_${option.id}`" />
+            <RadioGroupItem :value="option.value" :id="`${fieldId}_${option.id}`" />
             <Label :for="`${fieldId}_${option.id}`" class="text-sm font-normal">
                 {{ option.label }}
             </Label>
@@ -182,8 +184,8 @@ const inputClasses = computed(() => ({
         <div v-for="option in fieldOptions" :key="option.id" class="flex items-center space-x-2">
             <Checkbox
                 :id="`${fieldId}_${option.id}`"
-                :model-value="Array.isArray(modelValue) && modelValue.includes(option.id)"
-                @update:model-value="(checked) => handleCheckboxChange(option.id, checked)"
+                :model-value="Array.isArray(modelValue) && modelValue.includes(option.value)"
+                @update:model-value="(checked) => handleCheckboxChange(option.value, checked)"
                 :disabled="disabled"
                 :required="option.is_required"
             />

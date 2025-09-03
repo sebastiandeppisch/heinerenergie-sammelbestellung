@@ -76,7 +76,7 @@ class FormField extends Model
 
     public function getValidationRules(): array
     {
-        $inRule = Rule::in($this->options->pluck('uuid')->toArray());
+        $inRule = Rule::in($this->options->pluck('value')->toArray());
 
         $rules = match ($this->type) {
             FieldType::TEXT => ['string'],
@@ -115,7 +115,7 @@ class FormField extends Model
             // TODO
         }
 
-        $requiredOptions = $this->options->filter(fn ($option) => $option->is_required)->pluck('label', 'uuid');
+        $requiredOptions = $this->options->filter(fn ($option) => $option->is_required)->pluck('label', 'value');
 
         if ($requiredOptions->isNotEmpty()) {
             $rules[] = new CheckboxRequiredValidator(

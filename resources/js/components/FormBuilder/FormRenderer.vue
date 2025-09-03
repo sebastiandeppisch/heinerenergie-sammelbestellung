@@ -27,6 +27,8 @@ const createInitialFormData = () => {
             const defaultOption = field.options.find((option) => option.is_default);
             if (defaultOption) {
                 data[field.id] = defaultOption.value;
+            } else {
+                data[field.id] = null;
             }
         } else {
             data[field.id] = field.default_value || '';

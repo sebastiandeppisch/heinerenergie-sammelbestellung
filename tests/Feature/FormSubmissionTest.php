@@ -197,7 +197,7 @@ test('form with radio button can be submitted', function () {
     $this->withoutExceptionHandling();
 
     $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition]), [
-        $formField->uuid => $option1->uuid,
+        $formField->uuid => $option1->value,
     ]);
 
     $response->assertSessionHasNoErrors();
@@ -207,11 +207,11 @@ test('form with radio button can be submitted', function () {
     ]);
     $this->assertDatabaseHas('submission_fields', [
         'form_field_id' => $formField->id,
-        'value' => json_encode($option1->uuid),
+        'value' => json_encode($option1->value),
     ]);
 
     $field = SubmissionField::firstOrFail();
-    $this->assertSame($option1->uuid, $field->value);
+    $this->assertSame($option1->value, $field->value);
 });
 
 test('form with radiobutton is validated', function () {
