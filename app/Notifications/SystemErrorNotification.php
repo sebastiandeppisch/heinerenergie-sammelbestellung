@@ -12,17 +12,11 @@ class SystemErrorNotification extends BaseNotification implements ShouldQueue
 {
     use Queueable;
 
-    public ?Advice $advice;
-
     /**
      * Create a new notification instance.
      */
-    public function __construct(
-        public string $title,
-        public string $errorMessage,
-        ?Advice $advice = null
-    ) {
-        $this->advice = $advice;
+    public function __construct(public string $title, public string $errorMessage, public ?Advice $advice = null)
+    {
     }
 
     /**

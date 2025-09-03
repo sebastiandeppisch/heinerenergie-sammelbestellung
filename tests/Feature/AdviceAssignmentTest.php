@@ -208,9 +208,7 @@ test('advice is assigned to subgroup when main group already exists and address 
 
     $adviceCoordinates = $subGroup->consulting_area->getCenter();
 
-    App::bind(FetchCoordinateByAddress::class, fn () => function (Address $address) use ($adviceCoordinates) {
-        return $adviceCoordinates;
-    });
+    App::bind(FetchCoordinateByAddress::class, fn () => (fn(Address $address) => $adviceCoordinates));
 
     // Create a new advice with an existing group_id (main group already set)
     $advice = Advice::factory()->create([
