@@ -53,7 +53,7 @@ class DataProtectedAdviceData extends Data
     {
         $email = $advice->email;
         $phone = $advice->phone;
-        if (! $canViewAll && dd('test') && ! Auth::user()->can('view', $advice)) {
+        if (! $canViewAll && ! Auth::user()->can('view', $advice)) {
             $email = null;
             $phone = null;
         }
