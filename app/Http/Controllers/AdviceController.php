@@ -139,7 +139,7 @@ class AdviceController extends Controller
         $advice->advisor_id = null;
         $advice->save();
 
-        return redirect()->route('advices.show', $advice);
+        return redirect()->route('advices')->with('info', 'Die Beratung wurde wieder freigegeben');
     }
 
     public function map()
