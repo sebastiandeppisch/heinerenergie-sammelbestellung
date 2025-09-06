@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        db: [sqlite, mysql, postgres]
+        db: [sqlite, mysql, mariadb, postgres]
 
     services:
       mysql:
@@ -30,6 +30,15 @@ jobs:
         ports:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval=10s --health-timeout=5s --health-retries=3
+
+      mariadb:
+        image: mariadb:10
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: laravel_test
+        ports:
+          - 3307:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
     - uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
@@ -55,6 +64,8 @@ jobs:
           touch database/database.sqlite
         elif [ "${{ matrix.db }}" == "mysql" ]; then
           mysql -h 127.0.0.1 -P 3306 -u root -ppassword -e "CREATE DATABASE IF NOT EXISTS laravel_test;"
+        elif [ "${{ matrix.db }}" == "mariadb" ]; then
+          mysql -h 127.0.0.1 -P 3307 -u root -ppassword -e "CREATE DATABASE IF NOT EXISTS laravel_test;"
         elif [ "${{ matrix.db }}" == "postgres" ]; then
           PGPASSWORD=password psql -h 127.0.0.1 -p 5432 -U postgres -c "SELECT 1 FROM pg_database WHERE datname = 'laravel_test'" | grep -q 1 || PGPASSWORD=password psql -h 127.0.0.1 -p 5432 -U postgres -c "CREATE DATABASE laravel_test;"
         fi
@@ -64,7 +75,7 @@ jobs:
       run: npm run build
     - name: Execute tests (Unit and Feature tests) via PHPUnit
       env:
-        DB_URL: ${{ matrix.db == 'sqlite' && 'sqlite:///database/database.sqlite' || matrix.db == 'mysql' && 'mysql://root:password@127.0.0.1:3306/laravel_test' || 'pgsql://postgres:password@127.0.0.1:5432/laravel_test' }}
+        DB_URL: ${{ matrix.db == 'sqlite' && 'sqlite:///database/database.sqlite' || matrix.db == 'mysql' && 'mysql://root:password@127.0.0.1:3306/laravel_test' || matrix.db == 'mariadb' && 'mysql://root:password@127.0.0.1:3307/laravel_test' || 'pgsql://postgres:password@127.0.0.1:5432/laravel_test' }}
       run: php artisan test --log-junit test-results.xml
     - name: Run ESLint
       run: npx eslint .
