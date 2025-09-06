@@ -19,7 +19,7 @@ class NewAdviceAssignedToGroup extends BaseNotification implements ShouldQueue
      */
     public function __construct(
         public ?Advice $advice,
-        public Group $group
+        public Group $groupOfAdvice
     ) {
         if ($this->advice === null) {
             throw new InvalidArgumentException('Advice must not be null');
@@ -34,8 +34,8 @@ class NewAdviceAssignedToGroup extends BaseNotification implements ShouldQueue
     {
         $mail = parent::toMail($notifiable);
 
-        $mail->subject("Neue Beratungsanfrage für {$this->group->name}");
-        $mail->line("Eine neue Beratungsanfrage von {$this->advice->name} wurde der Initiative {$this->group->name} zugewiesen.");
+        $mail->subject("Neue Beratungsanfrage für {$this->groupOfAdvice->name}");
+        $mail->line("Eine neue Beratungsanfrage von {$this->advice->name} wurde der Initiative {$this->groupOfAdvice->name} zugewiesen.");
         $mail->line("Adresse: {$this->advice->address}");
 
         $mail->action('Zur Beratungsanfrage', url('/advices/'.$this->advice->id));
