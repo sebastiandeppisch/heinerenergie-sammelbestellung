@@ -187,4 +187,9 @@ class Group extends Model
     {
         return $this->hasMany(AdviceStatus::class);
     }
+
+    public function isLeaf(): bool
+    {
+        return $this->children()->count() === 0;
+    }
 }

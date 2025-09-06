@@ -28,7 +28,7 @@ class AdviceController extends Controller
 {
     public function index(SessionService $sessionService)
     {
-        $onlyOneGroup = $sessionService->getCurrentGroup() !== null && ! $sessionService->actsAsSystemAdmin() && ! $sessionService->actsAsGroupAdmin();
+        $onlyOneGroup = $sessionService->getCurrentGroup() !== null && $sessionService->getCurrentGroup()?->isLeaf();
 
         $user = Auth::user();
 
