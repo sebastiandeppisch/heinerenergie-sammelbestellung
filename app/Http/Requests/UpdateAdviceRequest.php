@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Enums\AdviceType;
+use App\Models\AdviceStatus;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 
@@ -34,10 +36,18 @@ class UpdateAdviceRequest extends FormRequest
             'street_number' => 'string|max:100',
             'zip' => 'numeric|digits:5',
             'city' => 'string|max:100',
-            'advisor_id' => 'nullable|integer|exists:users,id',
+            'advisor_id' => 'nullable|exists:users,id',
             'commentary' => 'nullable|string|max:65535',
             'type' => [new Enum(AdviceType::class)],
-            'advice_status_id' => 'nullable|string|exists:advice_status,id',
+            'advice_status_id' => 'nullable|exists:advice_status,id',
         ];
+    }
+
+    public function prepareForValidation(): void
+    {
+        $this->merge([
+            'advice_status_id' => AdviceStatus::where('uuid', $this->input('advice_status_id'))?->value('id'),
+            'advisor_id' => User::where('uuid', $this->input('advisor_id'))?->value('id'),
+        ]);
     }
 }
