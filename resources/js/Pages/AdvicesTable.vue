@@ -377,7 +377,7 @@ const adviceStatusResult = new ArrayDataSource([
 <style scoped>
 @media screen and (min-width: 680px) {
     .main-table {
-        margin: 30px 40px 30px 40px;
+        margin: 10px 00px 0px 0px;
     }
 }
 </style>
