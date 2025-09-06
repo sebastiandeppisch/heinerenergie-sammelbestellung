@@ -7,6 +7,10 @@ import AdviceDetails from '../components/AdviceDetails.vue';
 import AdviceForm from '../components/AdviceForm.vue';
 import AdviceSharing from '../components/AdviceSharing.vue';
 import AdviceTimeline from '../components/AdviceTimeline.vue';
+import Button from '@/shadcn/components/ui/button/Button.vue';
+import { Map } from 'lucide-vue-next';
+import { route } from 'ziggy-js';
+import { Link } from '@inertiajs/vue3';
 
 type AdviceEvent = App.Data.AdviceEventData;
 
@@ -43,12 +47,19 @@ const advisor = user.value;
             <!-- Left Column - Main Information -->
             <div class="content-main">
                 <div class="content-card">
-                    <h3 class="card-title">Kontaktdaten & Details</h3>
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 class="card-title">Kontaktdaten & Details</h3>
+                        <Link :href="route('advices.map') + '#18/' + advice.lat + '/' + advice.lng" v-if="advice.lat && advice.lng" target="_blank">
+                            <Button variant="outline" size="sm" title="Adresse auf der Karte anzeigen">
+                                <Map class="mr-2 h-4 w-4" />
+                            </Button>
+                        </Link>
+                    </div>
                     <AdviceForm :advice="advice" />
                 </div>
 
                 <div class="content-card">
-                    <h3 class="card-title">Beratungsteam</h3>
+                    <h3 class="card-title card-header">Beratungsteam</h3>
                     <AdviceSharing :advice-id="advice.id" v-model:shared-ids="sharedIds" />
                 </div>
             </div>
@@ -56,16 +67,16 @@ const advisor = user.value;
             <!-- Right Column - Timeline and Details -->
             <div class="content-sidebar">
                 <div class="content-card">
-                    <h3 class="card-title">Verlauf</h3>
+                    <h3 class="card-title card-header">Verlauf</h3>
                     <AdviceTimeline :events="events" :advice-id="advice.id" />
                 </div>
 
                 <div class="content-card" v-if="props.formSubmission === null">
-                    <h3 class="card-title">Zusätzliche Informationen</h3>
+                    <h3 class="card-title card-header">Zusätzliche Informationen</h3>
                     <AdviceDetails :advice="advice" />
                 </div>
                 <div class="content-card" v-else>
-                    <h3 class="card-title">Zusätzliche Informationen aus dem Formular</h3>
+                    <h3 class="card-title card-header">Zusätzliche Informationen aus dem Formular</h3>
                     <div style="padding: 1.5rem">
                         <FormSubmissionRenderer :form-submission="props.formSubmission" />
                     </div>
@@ -145,13 +156,16 @@ const advisor = user.value;
     overflow: hidden;
 }
 
-.card-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #2c3e50;
+.card-header {
     padding: 20px 24px;
     margin: 0;
     border-bottom: 1px solid #e9ecef;
+}
+
+.card-title{
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
 }
 
 @media (max-width: 1200px) {
