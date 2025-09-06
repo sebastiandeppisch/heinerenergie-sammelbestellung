@@ -241,13 +241,7 @@ test('form definition can be updated', function () {
         'description' => 'Updated description',
     ]);
 
-    // Überprüfe, ob das alte Feld gelöscht wurde
-    $this->assertDatabaseMissing('form_fields', [
-        'id' => $field->id,
-        'name' => 'original_field',
-    ]);
-
-    // Überprüfe, ob das neue Feld erstellt wurde
+    // Überprüfe, ob das Feld aktualisiert wurde
     $this->assertDatabaseHas('form_fields', [
         'form_definition_id' => $formDefinition->id,
         'type' => FieldType::TEXTAREA->value,

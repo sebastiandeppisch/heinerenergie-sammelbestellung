@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
 
-            $table->nullableUuidMorphs('pointable');
+            $table->nullableMorphs('pointable');
 
             $table->boolean('published');
         });

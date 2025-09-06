@@ -49,7 +49,7 @@ test('user with already selected group is redirected to dashboard', function () 
 
     // First set the group
     actingAs($this->user)
-        ->post("/actAsGroup/{$this->group->id}");
+        ->post("/actAsGroup/{$this->group->uuid}");
 
     // Then access backend
     $response = actingAs($this->user)

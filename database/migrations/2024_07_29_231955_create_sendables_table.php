@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('sendables', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('send_id')->index();
-            $table->uuidMorphs('sendable');
+            $table->morphs('sendable');
         });
     }
 

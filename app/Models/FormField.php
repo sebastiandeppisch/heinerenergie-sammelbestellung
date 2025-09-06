@@ -48,6 +48,7 @@ class FormField extends Model
         'max_value' => 'float',
         'sort_order' => 'integer',
         'accepted_file_types' => 'array',
+        'form_definition_id' => 'integer',
     ];
 
     /**
