@@ -63,7 +63,7 @@ class AdviceFactory extends Factory
 
     public function withoutCoordinates(): self
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'lat' => null,
             'lng' => null,
         ]);

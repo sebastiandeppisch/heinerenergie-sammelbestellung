@@ -175,7 +175,7 @@ test('advice is assigned to subgroup when main group already exists and address 
         'consulting_area' => Polygon::createSquare(
             new Coordinate(48.0, 8.0),
             1
-        )
+        ),
     ]);
 
     // Create a subgroup within the main group's area
