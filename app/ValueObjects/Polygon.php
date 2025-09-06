@@ -117,4 +117,15 @@ class Polygon implements Castable, JsonSerializable
 
         return $inside;
     }
+
+    public static function createSquare(Coordinate $center, float $halfSideLength): self
+    {
+        return new self([
+            new Coordinate($center->lat - $halfSideLength, $center->lng - $halfSideLength),
+            new Coordinate($center->lat - $halfSideLength, $center->lng + $halfSideLength),
+            new Coordinate($center->lat + $halfSideLength, $center->lng + $halfSideLength),
+            new Coordinate($center->lat + $halfSideLength, $center->lng - $halfSideLength),
+            new Coordinate($center->lat - $halfSideLength, $center->lng - $halfSideLength), // Close polygon
+        ]);
+    }
 }

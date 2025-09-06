@@ -60,4 +60,14 @@ class AdviceFactory extends Factory
             $advice->sends()->attach($sendable);
         });
     }
+
+    public function withoutCoordinates(): self
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'lat' => null,
+                'lng' => null,
+            ];
+        });
+    }
 }

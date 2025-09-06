@@ -172,26 +172,20 @@ test('advice is assigned to subgroup when main group already exists and address 
     $mainGroup = Group::factory()->create([
         'name' => 'Main Group',
         'parent_id' => null, // Main group
-        'consulting_area' => new Polygon([
-            ['lat' => 48.0, 'lng' => 8.0],
-            ['lat' => 48.0, 'lng' => 9.0],
-            ['lat' => 49.0, 'lng' => 9.0],
-            ['lat' => 49.0, 'lng' => 8.0],
-            ['lat' => 48.0, 'lng' => 8.0], // Close polygon
-        ]),
+        'consulting_area' => Polygon::createSquare(
+            new Coordinate(48.0, 8.0),
+            1
+        )
     ]);
 
     // Create a subgroup within the main group's area
     $subGroup = Group::factory()->create([
         'name' => 'Sub Group',
         'parent_id' => $mainGroup->id,
-        'consulting_area' => new Polygon([
-            ['lat' => 48.2, 'lng' => 8.2],
-            ['lat' => 48.2, 'lng' => 8.8],
-            ['lat' => 48.8, 'lng' => 8.8],
-            ['lat' => 48.8, 'lng' => 8.2],
-            ['lat' => 48.2, 'lng' => 8.2], // Close polygon
-        ]),
+        'consulting_area' => Polygon::createSquare(
+            new Coordinate(48.5, 8.5),
+            0.3
+        ),
     ]);
 
     // Create group admins to receive notifications
@@ -211,7 +205,7 @@ test('advice is assigned to subgroup when main group already exists and address 
     App::bind(FetchCoordinateByAddress::class, fn () => (fn (Address $address) => $adviceCoordinates));
 
     // Create a new advice with an existing group_id (main group already set)
-    $advice = Advice::factory()->create([
+    $advice = Advice::factory()->withoutCoordinates()->create([
         'street' => 'Teststraße',
         'street_number' => '123',
         'zip' => '12345',
