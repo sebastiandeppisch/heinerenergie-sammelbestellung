@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import FormSubmissionRenderer from '@/components/FormBuilder/FormSubmissionRenderer.vue';
+import Button from '@/shadcn/components/ui/button/Button.vue';
+import { Link } from '@inertiajs/vue3';
+import { Map } from 'lucide-vue-next';
 import { ref } from 'vue';
+import { route } from 'ziggy-js';
 import { user } from '../authHelper';
 import AdviceActions from '../components/AdviceActions.vue';
 import AdviceDetails from '../components/AdviceDetails.vue';
 import AdviceForm from '../components/AdviceForm.vue';
 import AdviceSharing from '../components/AdviceSharing.vue';
 import AdviceTimeline from '../components/AdviceTimeline.vue';
-import Button from '@/shadcn/components/ui/button/Button.vue';
-import { Map } from 'lucide-vue-next';
-import { route } from 'ziggy-js';
-import { Link } from '@inertiajs/vue3';
 
 type AdviceEvent = App.Data.AdviceEventData;
 
@@ -47,7 +47,7 @@ const advisor = user.value;
             <!-- Left Column - Main Information -->
             <div class="content-main">
                 <div class="content-card">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center">
                         <h3 class="card-title">Kontaktdaten & Details</h3>
                         <Link :href="route('advices.map') + '#18/' + advice.lat + '/' + advice.lng" v-if="advice.lat && advice.lng" target="_blank">
                             <Button variant="outline" size="sm" title="Adresse auf der Karte anzeigen">
@@ -162,7 +162,7 @@ const advisor = user.value;
     border-bottom: 1px solid #e9ecef;
 }
 
-.card-title{
+.card-title {
     font-size: 18px;
     font-weight: 600;
     color: #2c3e50;
