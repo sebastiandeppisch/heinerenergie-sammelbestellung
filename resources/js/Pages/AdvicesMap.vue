@@ -121,12 +121,12 @@ function runSearch() {
     axios
         .get('api/map/search', { params: { query: search.value } })
         .then((response) => response.data)
-        .then((data) => {
-            if (data['lat'] === undefined || data['long'] === undefined) {
+        .then((data: App.ValueObjects.Coordinate) => {
+            if (data['lat'] === undefined || data['lng'] === undefined) {
                 notify('Adresse nicht gefunden', 'error');
                 return;
             }
-            map.center = latLng(parseFloat(data.lat), parseFloat(data.long));
+            map.center = latLng(data.lat, data.lng);
             map.zoom = 18; //a better approach would be to set the bounding box
         });
 }
