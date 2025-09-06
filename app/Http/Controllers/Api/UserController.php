@@ -78,7 +78,7 @@ class UserController extends Controller
 
     public function show(User $user)
     {
-        return $user;
+        return UserData::fromModel($user, true);
     }
 
     public function picture(SetPictureRequest $request)

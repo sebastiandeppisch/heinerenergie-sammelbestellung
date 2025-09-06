@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreGroupUserRequest extends FormRequest
@@ -27,5 +28,12 @@ class StoreGroupUserRequest extends FormRequest
             ],
             'is_admin' => 'boolean',
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'id' => User::where('uuid', $this->input('id'))->value('id'),
+        ]);
     }
 }
