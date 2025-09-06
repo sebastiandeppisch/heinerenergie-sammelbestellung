@@ -127,18 +127,18 @@ function assignAdvice(id: number) {
 }
 
 function isOpenVisible(e: { row: any }): boolean {
-    const advice = e.row.data as App.Models.Advice;
+    const advice = e.row.data as App.Data.DataProtectedAdviceData;
     return userCanEdit(advice);
 }
 
 function rowCanBeEdited(e: { row: any }): boolean {
-    const advice = e.row.data as App.Models.Advice;
+    const advice = e.row.data as App.Data.DataProtectedAdviceData;
     return userCanEdit(advice);
 }
 
-function userCanEdit(advice: App.Models.Advice) {
+function userCanEdit(advice: App.Data.DataProtectedAdviceData) {
     const userId = user.value.id;
-    if (isAdmin) {
+    if (isAdmin.value) {
         return true;
     }
     if (advice.advisor_id === userId) {
@@ -277,8 +277,8 @@ const adviceStatusResult = new ArrayDataSource([
                 </DxColumn>
                 <DxColumn data-field="first_name" caption="Vorname" :allow-editing="false" />
                 <DxColumn data-field="last_name" caption="Nachname" :allow-editing="false" />
-                <DxColumn data-field="email" caption="E-Mail Adresse" :allow-editing="false" />
-                <DxColumn data-field="phone" caption="Telefonnummer" :allow-editing="false" />
+                <DxColumn data-field="email" caption="E-Mail Adresse" :allow-editing="false" cell-template="filledOrPrivate" />
+                <DxColumn data-field="phone" caption="Telefonnummer" :allow-editing="false" cell-template="filledOrPrivate" />
                 <DxColumn data-field="street" caption="Straße & Nr." :allow-editing="false" cell-template="street" />
                 <DxColumn data-field="zip" caption="Plz" :allow-editing="false" />
                 <DxColumn data-field="city" caption="Stadt" :allow-editing="false" />
@@ -304,6 +304,10 @@ const adviceStatusResult = new ArrayDataSource([
                     <div v-else-if="data.data.type === 1"><i class="dx-icon dx-icon-tel"></i></div>
                     <div v-else-if="data.data.type === 2"><i class="dx-icon dx-icon-cart"></i></div>
                     <div v-else>??</div>
+                </template>
+                <template #filledOrPrivate="{ data }">
+                    <span v-if="data.value !== null">{{ data.value }}</span>
+                    <span v-else style="font-style: italic; color: gray">verborgen</span>
                 </template>
             </DxDataGrid>
 
