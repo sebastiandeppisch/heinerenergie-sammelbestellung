@@ -94,10 +94,6 @@ test('form with single select can be submitted', function () {
     $this->assertDatabaseHas('form_submissions', [
         'form_definition_id' => $formDefinition->id,
     ]);
-    $this->assertDatabaseHas('submission_fields', [
-        'form_field_id' => $formField->id,
-        'value' => json_encode($option1->uuid),
-    ]);
 
     $field = SubmissionField::firstOrFail();
     $this->assertSame($option1->uuid, $field->value);
@@ -168,12 +164,10 @@ test('Selectboxes with multiple values can be submitted', function () {
     $this->assertDatabaseHas('form_submissions', [
         'form_definition_id' => $formDefinition->id,
     ]);
-    $this->assertDatabaseHas('submission_fields', [
-        'form_field_id' => $formField->id,
-        'value' => json_encode([$option1->uuid, $option2->uuid]),
-    ]);
 
     $field = SubmissionField::firstOrFail();
+    $this->assertSame(FieldType::SELECT, $field->type);
+    $this->assertSame($formField->id, $field->form_field_id);
     $this->assertSame([$option1->uuid, $option2->uuid], $field->value);
 });
 
@@ -205,10 +199,9 @@ test('form with radio button can be submitted', function () {
     $this->assertDatabaseHas('form_submissions', [
         'form_definition_id' => $formDefinition->id,
     ]);
-    $this->assertDatabaseHas('submission_fields', [
-        'form_field_id' => $formField->id,
-        'value' => json_encode($option1->value),
-    ]);
+
+    $submissionField = SubmissionField::where('form_field_id', $formField->id)->firstOrFail();
+    $this->assertEquals([$option1->value], [$submissionField->value]);
 
     $field = SubmissionField::firstOrFail();
     $this->assertSame($option1->value, $field->value);

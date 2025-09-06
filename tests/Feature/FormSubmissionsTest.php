@@ -72,13 +72,11 @@ test('form submissions can be sorted by form definition', function () {
     $submissionA = FormSubmission::factory()->create([
         'submitted_at' => now(),
         'form_name' => 'Test Form',
-        'form_definition_id' => 'Test Form',
     ]);
 
     $submissionB = FormSubmission::factory()->create([
         'submitted_at' => now()->tomorrow(),
         'form_name' => 'Another Form',
-        'form_definition_id' => 'Another Form',
     ]);
 
     $response = $this->get(route('form-submissions.index', ['groupByForm' => 'true']));
