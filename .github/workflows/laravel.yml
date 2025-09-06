@@ -76,6 +76,7 @@ jobs:
     - name: Execute tests (Unit and Feature tests) via PHPUnit
       env:
         DB_URL: ${{ matrix.db == 'sqlite' && 'sqlite:///database/database.sqlite' || matrix.db == 'mysql' && 'mysql://root:password@127.0.0.1:3306/laravel_test' || matrix.db == 'mariadb' && 'mysql://root:password@127.0.0.1:3307/laravel_test' || 'pgsql://postgres:password@127.0.0.1:5432/laravel_test' }}
+        DB_CONNECTION: ${{ matrix.db == 'sqlite' && 'sqlite' || matrix.db == 'mysql' && 'mysql' || matrix.db == 'mariadb' && 'mysql' || 'pgsql' }}
       run: php artisan test --log-junit test-results.xml
     - name: Run ESLint
       run: npx eslint .
