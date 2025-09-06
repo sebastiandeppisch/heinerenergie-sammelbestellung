@@ -27,7 +27,7 @@ trait HasUuid
      */
     public function resolveRouteBinding($value, $field = null)
     {
-        if (!Str::isUuid($value)) {
+        if (! Str::isUuid($value)) {
             throw (new ModelNotFoundException)->setModel(static::class, $value);
         }
 
