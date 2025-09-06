@@ -122,7 +122,7 @@ return [
         'string' => ':attribute muss :size Zeichen lang sein.',
     ],
     'starts_with' => ':attribute muss mit einem der folgenden Anfänge aufweisen: :values',
-    'string' => ':attribute muss ein String sein.',
+    'string' => ':attribute muss eine Zeichenfolge sein.',
     'timezone' => ':attribute muss eine gültige Zeitzone sein.',
     'unique' => ':attribute ist bereits vergeben.',
     'uploaded' => ':attribute konnte nicht hochgeladen werden.',
@@ -132,5 +132,19 @@ return [
         'attribute-name' => [
             'rule-name' => 'custom-message',
         ],
+    ],
+    'attributes' => [
+        'advisor_id' => 'Berater:in',
+        'advice_status_id' => 'Status',
+        'zip' => 'Postleitzahl',
+        'city' => 'Stadt',
+        'first_name' => 'Vorname',
+        'last_name' => 'Nachname',
+        'street' => 'Straße',
+        'street_number' => 'Hausnummer',
+        'email' => 'E-Mail Adresse',
+        'phone' => 'Telefonnummer',
+        'type' => 'Beratungsart',
+        'commentary' => 'Kommentar',
     ],
 ];
