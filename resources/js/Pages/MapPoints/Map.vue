@@ -93,7 +93,7 @@ function categoryIdToImagePath(category_id: string): string | undefined {
                 >
                     <LMarker v-for="point in points" :key="point.id" :lat-lng="latLng(point.coordinate.lat, point.coordinate.lng)">
                         <LIcon
-                            v-if="categoryIdToImagePath(category_id) !== null"
+                            v-if="categoryIdToImagePath(category_id) !== undefined"
                             :icon-url="categoryIdToImagePath(category_id)"
                             :icon-size="[50, 50]"
                         />

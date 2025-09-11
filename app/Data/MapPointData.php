@@ -30,7 +30,7 @@ class MapPointData extends Data
             id: $model->uuid,
             coordinate: $model->coordinate,
             title: $model->title,
-            description: $model->description,
+            description: $model->description ?? '',
             published: $model->published,
             userReadablePointableType: self::formatType($model->pointable_type),
             created_at: $model->created_at,

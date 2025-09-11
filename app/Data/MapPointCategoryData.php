@@ -22,7 +22,7 @@ class MapPointCategoryData extends Data
         return new self(
             id: $category->uuid,
             name: $category->name,
-            image_path: asset('storage/'.$category->image_path),
+            image_path: $category->image_path !== null ? asset('storage/'.$category->image_path) : null,
             map_points_count: $category->mapPoints_count ?? $category->mapPoints()->count(),
             created_at: $category->created_at?->toISOString(),
         );
