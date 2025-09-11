@@ -46,8 +46,18 @@ class UpdateAdviceRequest extends FormRequest
     public function prepareForValidation(): void
     {
         $this->merge([
-            'advice_status_id' => AdviceStatus::where('uuid', $this->input('advice_status_id'))?->value('id'),
-            'advisor_id' => User::where('uuid', $this->input('advisor_id'))?->value('id'),
+            'advice_status_id' => $this->adviceStatus()?->value('id'),
+            'advisor_id' => $this->advisor()?->value('id'),
         ]);
+    }
+
+    private function advisor(): ?User
+    {
+        return User::find($this->input('advisor_id'));
+    }
+
+    private function adviceStatus(): ?AdviceStatus
+    {
+        return AdviceStatus::find($this->input('advice_status_id'));
     }
 }
