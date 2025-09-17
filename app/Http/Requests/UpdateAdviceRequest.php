@@ -45,10 +45,17 @@ class UpdateAdviceRequest extends FormRequest
 
     public function prepareForValidation(): void
     {
-        $this->merge([
-            'advice_status_id' => $this->adviceStatus()?->value('id'),
-            'advisor_id' => $this->advisor()?->value('id'),
-        ]);
+        if ($this->has('advisor_id')) {
+            $this->merge([
+                'advisor_id' => $this->advisor()?->value('id'),
+            ]);
+        }
+
+        if ($this->has('advice_status_id')) {
+            $this->merge([
+                'advice_status_id' => $this->adviceStatus()?->value('id'),
+            ]);
+        }
     }
 
     private function advisor(): ?User
