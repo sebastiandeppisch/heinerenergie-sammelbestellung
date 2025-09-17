@@ -80,3 +80,20 @@ function createAdviceWithAndWithoutAdvisor(User $advisor)
     $advice[0]->update(['advisor_id' => $advisor->id]);
     $adviceWithSendAble[0]->update(['advisor_id' => $advisor->id]);
 }
+
+test('advisor can be updated', function () {
+
+    $this->actingAs($this->admin);
+
+    $advisors = User::factory()->count(3)->create();
+
+    $advice = Advice::factory()->create();
+
+    $advisor = $advisors->random();
+
+    $this->put(route('api.advices.update', $advice), [
+        'advisor_id' => $advisors[0]->uuid,
+    ])->assertJsonFragment([
+        'advisor_id' => $advisors[0]->uuid,
+    ]);
+});

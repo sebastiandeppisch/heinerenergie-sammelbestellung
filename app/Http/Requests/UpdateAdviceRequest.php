@@ -47,13 +47,13 @@ class UpdateAdviceRequest extends FormRequest
     {
         if ($this->has('advisor_id')) {
             $this->merge([
-                'advisor_id' => $this->advisor()?->value('id'),
+                'advisor_id' => $this->advisor()?->id,
             ]);
         }
 
         if ($this->has('advice_status_id')) {
             $this->merge([
-                'advice_status_id' => $this->adviceStatus()?->value('id'),
+                'advice_status_id' => $this->adviceStatus()?->id,
             ]);
         }
     }
