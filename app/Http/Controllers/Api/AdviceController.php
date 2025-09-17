@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Data\DataProtectedAdviceData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAdviceRequest;
 use App\Http\Requests\UpdateAdviceRequest;
@@ -29,7 +30,7 @@ class AdviceController extends Controller
 
     public function show(Advice $advice)
     {
-        return $advice;
+        return DataProtectedAdviceData::fromModel($advice, Auth::user());
     }
 
     public function update(UpdateAdviceRequest $request, Advice $advice)

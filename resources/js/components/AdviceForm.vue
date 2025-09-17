@@ -2,11 +2,14 @@
 import { router } from '@inertiajs/vue3';
 import { DxButtonItem, DxForm, DxGroupItem, DxItem } from 'devextreme-vue/form';
 import notify from 'devextreme/ui/notify';
+import { toRef } from 'vue';
 import LaravelDataSource from '../LaravelDataSource';
 
 const props = defineProps<{
     advice: App.Data.DataProtectedAdviceData;
 }>();
+
+const advice = toRef(props.advice);
 
 const adviceStatus = new LaravelDataSource('/api/advicestatus');
 const adviceTypes = new LaravelDataSource('/api/advicetypes');
@@ -31,7 +34,7 @@ function radioBoxLayout({ name }: { name: 'Home' | 'Virtual' | 'DirectOrder' }) 
 function onSubmit() {
     advicesDataSource
         .store()
-        .update(props.advice.id, props.advice)
+        .update(props.advice.id, advice.value)
         .then((result) => {
             notify('Beratung gespeichert', 'success', 2000);
             router.reload();

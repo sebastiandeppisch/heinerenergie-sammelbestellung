@@ -53,11 +53,11 @@ class UpdateAdviceRequest extends FormRequest
 
     private function advisor(): ?User
     {
-        return User::find($this->input('advisor_id'));
+        return User::where('uuid', $this->input('advisor_id'))->first();
     }
 
     private function adviceStatus(): ?AdviceStatus
     {
-        return AdviceStatus::find($this->input('advice_status_id'));
+        return AdviceStatus::where('uuid', $this->input('advice_status_id'))->first();
     }
 }
