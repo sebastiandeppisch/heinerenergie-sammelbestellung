@@ -38,7 +38,9 @@ class AdviceController extends Controller
         $advice->fill($request->validated());
         $advice->save();
 
-        return $advice;
+        $advice = $advice->fresh();
+
+        return DataProtectedAdviceData::fromModel($advice, Auth::user());
     }
 
     public function destroy(Advice $advice)

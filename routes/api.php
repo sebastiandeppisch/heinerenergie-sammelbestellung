@@ -27,7 +27,7 @@ require_once __DIR__.'/api.auth.php';
 
 Route::middleware('auth')->group(function () {
     Route::resource('users', UserController::class);
-    Route::resource('advices', AdviceController::class)->except(['index']);
+    Route::resource('advices', AdviceController::class)->except(['index'])->names('api.advices');
 
     Route::apiResource('groups.users', GroupUserController::class);
 

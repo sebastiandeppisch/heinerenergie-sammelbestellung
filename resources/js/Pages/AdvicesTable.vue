@@ -55,6 +55,9 @@ const advices = computed(() => {
     return new ArrayStore({
         data: props.advices,
         key: 'id',
+        onUpdated: (key, values) => {
+            return axios.put(route('api.advices.update', key), values);
+        },
     });
 });
 
