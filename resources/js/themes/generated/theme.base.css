@@ -85,7 +85,6 @@
   src: local("Roboto Bold"),local("Roboto-Bold"),url("../../../../node_modules/devextreme/dist/css/fonts/Roboto-700.woff2") format("woff2"),url("../../../../node_modules/devextreme/dist/css/fonts/Roboto-700.woff") format("woff"),url("../../../../node_modules/devextreme/dist/css/fonts/Roboto-700.ttf") format("truetype");
 }
 .dx-theme-material-typography {
-  background-color: #fff;
   color: rgba(0,0,0,.87);
   font-weight: 400;
   font-size: 14px;
