@@ -45,7 +45,6 @@ class InstallServiceProvider extends ServiceProvider
 
         if (Request::root() !== env('APP_URL')) {
             echo 'Du musst die APP_URL in der .env Datei anpassen. Aktuell ist sie: <b>'.env('APP_URL').'</b> Bitte ändere sie auf die URL, unter der du die Anwendung erreichen möchtest, vermutlich <b>'.Request::root().'</b>.';
-            dd(Request::root(), env('APP_URL'));
             exit;
         }
     }
