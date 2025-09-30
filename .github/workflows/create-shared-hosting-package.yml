@@ -56,7 +56,7 @@ jobs:
           ./ci/build-shared-hosting-package.sh "${{ steps.get-version.outputs.version }}"
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: shared-hosting-package
           path: heinerenergie-sammelbestellung-v${{ steps.get-version.outputs.version }}.zip
@@ -76,7 +76,7 @@ jobs:
 
       - name: Upload latest build for push events
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: shared-hosting-package-latest
           path: heinerenergie-sammelbestellung-latest.zip
