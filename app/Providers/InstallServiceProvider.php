@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Exception;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
@@ -34,7 +35,7 @@ class InstallServiceProvider extends ServiceProvider
         }
 
         // TODO this is just a hack, find a better solution
-        if (strlen(env('APP_KEY')) === 0) {
+        if (strlen((string) env('APP_KEY')) === 0) {
             Artisan::call('key:generate --force');
         }
 
@@ -55,7 +56,7 @@ class InstallServiceProvider extends ServiceProvider
             DB::table('migrations')->first();
 
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception) {
             return false;
         }
     }
