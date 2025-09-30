@@ -7,64 +7,67 @@ on:
 jobs:
   format:
     runs-on: ubuntu-latest
-    
+
+    permissions:
+      contents: write
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        ref: ${{ github.head_ref }}
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.head_ref }}
 
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.4'
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
 
-    - name: Install Composer dependencies
-      run: composer install --no-interaction --prefer-dist --optimize-autoloader
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-    - name: Install NPM dependencies
-      run: npm ci
+      - name: Install NPM dependencies
+        run: npm ci
 
-    - name: Run Laravel Pint (PHP formatter)
-      run: ./vendor/bin/pint
+      - name: Run Laravel Pint (PHP formatter)
+        run: ./vendor/bin/pint
 
-    - name: Run Rector (PHP refactoring)
-      run: ./vendor/bin/rector process
+      - name: Run Rector (PHP refactoring)
+        run: ./vendor/bin/rector process
 
-    - name: Run Prettier (JS/TS/Vue formatter)
-      run: npm run format
+      - name: Run Prettier (JS/TS/Vue formatter)
+        run: npm run format
 
-    - name: Run ESLint with auto-fix
-      run: npm run lint
+      - name: Run ESLint with auto-fix
+        run: npm run lint
 
-    - name: Check for changes
-      id: changes
-      run: |
-        if [ -n "$(git status --porcelain)" ]; then
-          echo "changes=true" >> $GITHUB_OUTPUT
-        else
-          echo "changes=false" >> $GITHUB_OUTPUT
-        fi
+      - name: Check for changes
+        id: changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
 
-    - name: Commit and push changes
-      if: steps.changes.outputs.changes == 'true'
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add .
-        git diff --staged --quiet || git commit -m "Auto-format code with Pint, Prettier, ESLint, and Rector
+      - name: Commit and push changes
+        if: steps.changes.outputs.changes == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git diff --staged --quiet || git commit -m "Auto-format code with Pint, Prettier, ESLint, and Rector
 
-        - Applied Laravel Pint formatting
-        - Applied Prettier formatting  
-        - Applied ESLint auto-fixes
-        - Applied Rector refactoring
-        
-        [skip ci]"
-        git push
+          - Applied Laravel Pint formatting
+          - Applied Prettier formatting  
+          - Applied ESLint auto-fixes
+          - Applied Rector refactoring
+
+          [skip ci]"
+          git push
