@@ -28,6 +28,12 @@ class InstallServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        if (app()->runningInConsole()) {
+            // only shared hosting admins who dont have access to console needs this
+            return;
+        }
+
+        // TODO this is just a hack, find a better solution
         if (strlen(env('APP_KEY')) === 0) {
             Artisan::call('key:generate --force');
         }
