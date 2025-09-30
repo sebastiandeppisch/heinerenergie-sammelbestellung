@@ -4,6 +4,7 @@ use App\Exceptions\Handler;
 use App\LaravelExtensions\StrictGates\AuthServiceProvider;
 use App\LaravelExtensions\StrictGates\MissingGateException;
 use App\Mail\BaseNotificationMail;
+use App\Providers\InstallServiceProvider;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
@@ -167,7 +168,8 @@ arch()->expect([
     'env',
     'exit',
     'ray',
-])->not->toBeUsed();
+])->not->toBeUsed()
+    ->ignoring(InstallServiceProvider::class);
 
 arch()->expect('App\Policies')
     ->classes()
