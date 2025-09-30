@@ -4,16 +4,16 @@ on:
   release:
     types: [published]
   push:
-    branches: [TODO]
+    branches: [main]
     paths-ignore:
-      - '**.md'
-      - 'LICENSE'
+      - "**.md"
+      - "LICENSE"
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version number for this release'
+        description: "Version number for this release"
         required: true
-        default: '1.0.0'
+        default: "1.0.0"
 
 jobs:
   build:
@@ -28,7 +28,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: "8.4"
           extensions: mbstring, intl, pdo_mysql, zip, exif, pcntl, bcmath, gd
           tools: composer:v2
           coverage: none
@@ -36,8 +36,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Get version
         id: get-version
