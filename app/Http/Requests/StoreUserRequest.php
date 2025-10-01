@@ -14,7 +14,8 @@ class StoreUserRequest extends FormRequest
      */
     public function authorize()
     {
-        return app(SessionService::class)->actsAsGroupAdmin();
+        $sessionService = app(SessionService::class);
+        return $sessionService->actsAsGroupAdmin() || $sessionService->actAsSystemAdmin(); 
     }
 
     /**
