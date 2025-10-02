@@ -95,3 +95,6 @@ Route::post('/forms/{formDefinition}', [FormSubmitController::class, 'submit'])
 
 Route::get('/map', [MapPointController::class, 'publicMap'])
     ->name('map.public');
+
+Route::put('/users/{user}/password', [UserController::class, 'changePassword'])
+    ->name('users.changePassword');
