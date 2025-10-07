@@ -21,7 +21,9 @@ class FormDefinitionData extends Data
         public bool $is_active,
         #[DataCollectionOf(FormFieldData::class)]
         public Collection $fields,
-        public string $group_id
+        public string $group_id,
+        public ?FormToAdviceMappingData $advice_mapping = null,
+        public ?FormToMapPointMappingData $map_point_mapping = null,
     ) {}
 
     public static function fromModel(FormDefinition $model): self
@@ -35,6 +37,8 @@ class FormDefinitionData extends Data
             is_active: $model->is_active,
             fields: $model->fields->map(fn ($field) => FormFieldData::fromModel($field)),
             group_id: $model->group->uuid,
+            advice_mapping: FormToAdviceMappingData::fromModel($model->adviceCreator),
+            map_point_mapping: FormToMapPointMappingData::fromModel($model->mapPointCreator),
         );
     }
 }

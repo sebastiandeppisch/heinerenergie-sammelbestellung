@@ -17,7 +17,7 @@ class FormDefinitionController extends Controller
      */
     public function index()
     {
-        $formDefinitions = FormDefinition::with(['fields', 'fields.options', 'group'])->get()->map(fn ($formDefinition) => FormDefinitionData::fromModel($formDefinition));
+        $formDefinitions = FormDefinition::with(['fields', 'fields.options', 'group', 'adviceCreator', 'mapPointCreator'])->get()->map(fn ($formDefinition) => FormDefinitionData::fromModel($formDefinition));
 
         $groups = Group::all()->map(fn (Group $group) => [
             'id' => $group->uuid,
@@ -63,11 +63,11 @@ class FormDefinitionController extends Controller
      */
     public function edit(FormDefinition $formDefinition)
     {
-        $formDefinition->load('fields.options');
+        $formDefinition->load('fields.options', 'adviceCreator.firstNameField', 'adviceCreator.lastNameField', 'adviceCreator.addressField', 'adviceCreator.emailField', 'adviceCreator.phoneField', 'adviceCreator.adviceTypeField', 'mapPointCreator.titleField', 'mapPointCreator.descriptionField', 'mapPointCreator.coordinateField');
         $formDefinitionData = FormDefinitionData::fromModel($formDefinition);
 
         $groups = Group::all()->map(fn (Group $group) => [
-            'id' => $group->id,
+            'id' => $group->uuid,
             'name' => $group->name,
         ]);
 

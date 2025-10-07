@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AdviceType;
 use App\Events\Advice\AdviceCreatedByFormSubmission;
 use App\Jobs\SendNewAdviceInfoToAdvisors;
 use App\Mail\AdviceCreated;
@@ -20,6 +21,11 @@ class FormDefinitionToAdvice extends Model
     use HasFactory;
 
     use HasUuid;
+
+    protected $fillable = [
+        'advice_type_home_option_value',
+        'advice_type_virtual_option_value',
+    ];
 
     /**
      * @return BelongsTo<FormDefinition, $this>
@@ -70,6 +76,7 @@ class FormDefinitionToAdvice extends Model
         return $this->belongsTo(FormField::class, 'advice_type_field_id');
     }
 
+
     /**
      * @return BelongsTo<FormField, $this>
      */
@@ -87,7 +94,12 @@ class FormDefinitionToAdvice extends Model
             $firstNameField = $this->firstNameField->getSubmissionField($submission);
             $lastNameField = $this->lastNameField->getSubmissionField($submission);
 
-            $adviceType = $this->adviceTypeField->getSubmissionField($submission);
+            $adviceTypeField = $this->adviceTypeField->getSubmissionField($submission);
+
+            // Map the submitted option value to the correct AdviceType enum
+            /** @var mixed $submittedValue */
+            $submittedValue = $adviceTypeField->value;
+            $adviceType = $this->mapAdviceType($submittedValue);
 
             $advice = Advice::create([
                 'address' => $addressField->value,
@@ -96,7 +108,7 @@ class FormDefinitionToAdvice extends Model
                 'first_name' => $firstNameField->value,
                 'last_name' => $lastNameField->value,
                 'group_id' => $submission->group_id,
-                'type' => $adviceType->value,
+                'type' => $adviceType,
             ]);
 
             $advice->save();
@@ -117,5 +129,27 @@ class FormDefinitionToAdvice extends Model
         Mail::to($advice->email)->send(new AdviceCreated($advice));
 
         return $advice;
+    }
+
+    /**
+     * Map a form option value to the correct AdviceType enum
+     */
+    private function mapAdviceType(mixed $optionValue): AdviceType
+    {
+        // Handle array value (from checkboxes/multi-select) by taking the first value
+        if (is_array($optionValue)) {
+            $optionValue = $optionValue[0] ?? null;
+        }
+
+        if ($optionValue === $this->advice_type_home_option_value) {
+            return AdviceType::Home;
+        }
+
+        if ($optionValue === $this->advice_type_virtual_option_value) {
+            return AdviceType::Virtual;
+        }
+
+        // Fallback to Virtual if no match found
+        return AdviceType::Virtual;
     }
 }
