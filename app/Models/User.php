@@ -82,7 +82,7 @@ class User extends Authenticatable
             'address' => Address::class,
             'coordinate' => Coordinate::class,
             'advice_radius' => 'int',
-            'password' => 'hashed'
+            'password' => 'hashed',
         ];
     }
 

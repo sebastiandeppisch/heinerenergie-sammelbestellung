@@ -15,7 +15,10 @@ class StoreUserRequest extends FormRequest
     public function authorize()
     {
         $sessionService = app(SessionService::class);
-        return $sessionService->actsAsGroupAdmin() || $sessionService->actAsSystemAdmin(); 
+        if ($sessionService->actsAsGroupAdmin()) {
+            return true;
+        }
+        return (bool) $sessionService->actAsSystemAdmin();
     }
 
     /**
