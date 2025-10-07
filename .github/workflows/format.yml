@@ -35,17 +35,17 @@ jobs:
       - name: Install NPM dependencies
         run: npm ci
 
-      - name: Run Laravel Pint (PHP formatter)
-        run: ./vendor/bin/pint
-
       - name: Run Rector (PHP refactoring)
         run: ./vendor/bin/rector process
 
-      - name: Run Prettier (JS/TS/Vue formatter)
-        run: npm run format
+      - name: Run Laravel Pint (PHP formatter)
+        run: ./vendor/bin/pint
 
       - name: Run ESLint with auto-fix
         run: npm run lint
+
+      - name: Run Prettier (JS/TS/Vue formatter)
+        run: npm run format
 
       - name: Check for changes
         id: changes
