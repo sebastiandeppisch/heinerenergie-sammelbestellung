@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Data\FormDefinitionData;
 use App\Enums\FieldType;
+use App\Http\Requests\StoreFormDefinitionFromTemplateRequest;
 use App\Http\Requests\UpsertFormDefinitionRequest;
 use App\Models\FormDefinition;
 use App\Models\Group;
@@ -98,6 +99,20 @@ class FormDefinitionController extends Controller
         app(FormDefinitionService::class)->updateFormDefinitionData($formDefinitionData);
 
         return back()->with('success', 'Formular wurde erfolgreich aktualisiert.');
+    }
+
+    /**
+     * Store a form definition from a template.
+     */
+    public function storeFromTemplate(StoreFormDefinitionFromTemplateRequest $request)
+    {
+        $formDefinition = app(FormDefinitionService::class)->createFromTemplate(
+            $request->input('template_type'),
+            $request->input('group_id')
+        );
+
+        return redirect()->route('form-definitions.edit', $formDefinition->uuid)
+            ->with('success', 'Formular wurde erfolgreich aus Vorlage erstellt.');
     }
 
     /**

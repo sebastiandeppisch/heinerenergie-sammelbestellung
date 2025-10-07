@@ -1,17 +1,24 @@
 <script setup lang="ts">
+import CreateFromTemplateModal from '@/components/CreateFromTemplateModal.vue';
 import Button from '@/shadcn/components/ui/button/Button.vue';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shadcn/components/ui/dropdown-menu';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { router } from '@inertiajs/vue3';
 import { DxButton } from 'devextreme-vue/button';
 import { DxColumn, DxDataGrid, DxLookup, DxPager, DxPaging, DxSearchPanel } from 'devextreme-vue/data-grid';
 import notify from 'devextreme/ui/notify';
+import { ChevronDown } from 'lucide-vue-next';
+import { ref } from 'vue';
 import { route } from 'ziggy-js';
 
 const props = defineProps<{
     formDefinitions: App.Data.FormDefinitionData[];
     groups: App.Data.GroupData[];
 }>();
+
+const showAdviceModal = ref(false);
+const showMapPointModal = ref(false);
 
 function confirmDeleteForm(formId: number) {
     if (confirm('Möchtest Du wirklich dieses Formular löschen?')) {
@@ -33,6 +40,14 @@ function createNewForm() {
 function editForm(formId: number) {
     router.visit(route('form-definitions.edit', formId));
 }
+
+function openAdviceTemplate() {
+    showAdviceModal.value = true;
+}
+
+function openMapPointTemplate() {
+    showMapPointModal.value = true;
+}
 </script>
 
 <template>
@@ -40,12 +55,25 @@ function editForm(formId: number) {
         <div class="page-header">
             <h2 class="page-title">Formular-Verwaltung</h2>
             <div class="page-actions">
-                <Button @click="createNewForm">
-                    <FontAwesomeIcon :icon="faPlus" />
-                    Neues Formular
-                </Button>
+                <DropdownMenu>
+                    <DropdownMenuTrigger as-child>
+                        <Button>
+                            <FontAwesomeIcon :icon="faPlus" />
+                            Neues Formular
+                            <ChevronDown class="ml-2 h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem @click="createNewForm">Leeres Formular</DropdownMenuItem>
+                        <DropdownMenuItem @click="openAdviceTemplate">Beratungsformular</DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
         </div>
+
+        <!-- Modals -->
+        <CreateFromTemplateModal v-model:open="showAdviceModal" template-type="advice" :groups="props.groups" />
+        <CreateFromTemplateModal v-model:open="showMapPointModal" template-type="map_point" :groups="props.groups" />
 
         <div class="page-content">
             <div class="dx-card p-4">

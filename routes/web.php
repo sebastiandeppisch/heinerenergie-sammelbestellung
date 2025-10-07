@@ -59,6 +59,8 @@ Route::middleware('auth')->group(function () {
         ->name('logout');
 
     Route::resource('form-definitions', FormDefinitionController::class);
+    Route::post('form-definitions/from-template', [FormDefinitionController::class, 'storeFromTemplate'])
+        ->name('form-definitions.from-template');
 
     Route::resource('form-submissions', FormSubmissionController::class)->only(['index']);
     Route::post('form-submissions/{formSubmission}/mark-seen', [FormSubmissionController::class, 'markSeen'])

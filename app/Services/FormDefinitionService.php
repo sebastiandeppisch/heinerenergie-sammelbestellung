@@ -7,6 +7,7 @@ use App\Data\FormFieldData;
 use App\Data\FormFieldOptionData;
 use App\Data\FormToAdviceMappingData;
 use App\Data\FormToMapPointMappingData;
+use App\Enums\AdviceType;
 use App\Models\FormDefinition;
 use App\Models\FormDefinitionToAdvice;
 use App\Models\FormDefinitionToMapPoint;
@@ -188,5 +189,116 @@ class FormDefinitionService
         }
 
         $creator->save();
+    }
+
+    /**
+     * Create a FormDefinition from a template
+     */
+    public function createFromTemplate(string $templateType, string $groupUuid): FormDefinition
+    {
+        return DB::transaction(function () use ($templateType, $groupUuid) {
+            $group = Group::where('uuid', $groupUuid)->firstOrFail();
+
+            return match ($templateType) {
+                'advice' => $this->createAdviceFormTemplate($group),
+                'map_point' => throw new \InvalidArgumentException('Map Point template not yet implemented'),
+                default => throw new \InvalidArgumentException("Unknown template type: {$templateType}"),
+            };
+        });
+    }
+
+    /**
+     * Create an Advice Form from template (like CreateAdviceForm seeder)
+     */
+    private function createAdviceFormTemplate(Group $group): FormDefinition
+    {
+        $formDefinition = new FormDefinition;
+        $formDefinition->name = 'Beratungsformular für '.$group->name;
+        $formDefinition->group()->associate($group);
+        $formDefinition->is_active = true;
+        $formDefinition->save();
+
+        // Create form fields
+        $firstNameField = $formDefinition->fields()->create([
+            'type' => 'text',
+            'label' => 'Vorname',
+            'min_length' => 1,
+            'max_length' => 255,
+            'placeholder' => 'Vorname',
+            'required' => true,
+            'sort_order' => 0,
+        ]);
+
+        $lastNameField = $formDefinition->fields()->create([
+            'type' => 'text',
+            'label' => 'Nachname',
+            'min_length' => 1,
+            'max_length' => 255,
+            'placeholder' => 'Nachname',
+            'required' => true,
+            'sort_order' => 1,
+        ]);
+
+        $addressField = $formDefinition->fields()->create([
+            'type' => 'address',
+            'label' => 'Adresse',
+            'required' => true,
+            'sort_order' => 2,
+        ]);
+
+        $emailField = $formDefinition->fields()->create([
+            'type' => 'email',
+            'label' => 'E-Mail Adresse',
+            'max_length' => 255,
+            'placeholder' => 'E-Mail',
+            'required' => true,
+            'sort_order' => 3,
+        ]);
+
+        $phoneField = $formDefinition->fields()->create([
+            'type' => 'phone',
+            'label' => 'Telefonnummer',
+            'max_length' => 255,
+            'placeholder' => 'Telefonnummer',
+            'required' => true,
+            'sort_order' => 4,
+        ]);
+
+        $typeField = $formDefinition->fields()->create([
+            'type' => 'radio',
+            'label' => 'Möchtest Du virtuell oder bei Dir vor Ort beraten werden?',
+            'required' => true,
+            'sort_order' => 5,
+        ]);
+
+        $typeField->options()->createMany([
+            [
+                'label' => 'Virtuell, per Mail oder Telefon',
+                'value' => (string) AdviceType::Virtual->value,
+                'sort_order' => 0,
+                'is_default' => false,
+            ],
+            [
+                'label' => 'Vor Ort',
+                'value' => (string) AdviceType::Home->value,
+                'sort_order' => 1,
+                'is_default' => false,
+            ],
+        ]);
+
+        // Create FormDefinitionToAdvice mapping
+        $formToAdvice = $formDefinition->adviceCreator()->make();
+        $formToAdvice->firstNameField()->associate($firstNameField);
+        $formToAdvice->lastNameField()->associate($lastNameField);
+        $formToAdvice->addressField()->associate($addressField);
+        $formToAdvice->emailField()->associate($emailField);
+        $formToAdvice->phoneField()->associate($phoneField);
+        $formToAdvice->adviceTypeField()->associate($typeField);
+        $formToAdvice->advice_type_home_option_value = (string) AdviceType::Home->value;
+        $formToAdvice->advice_type_virtual_option_value = (string) AdviceType::Virtual->value;
+        $formToAdvice->default_group_id = $formDefinition->group_id;
+        $formToAdvice->save();
+
+        return $formDefinition->fresh();
     }
 }
