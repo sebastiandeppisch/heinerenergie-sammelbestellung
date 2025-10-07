@@ -45,6 +45,3 @@ class FormToAdviceMappingData extends Data
         );
     }
 }
-
-
-

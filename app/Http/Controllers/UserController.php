@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Models\Group;
-use Illuminate\Http\Request;
-use App\Services\SessionService;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
-use App\Jobs\CacheUsersAdvicePolicies;
-use App\Http\Requests\ChangePasswordRequest;
-use App\Notifications\PasswordChangedByAdmin;
 use App\Http\Context\SessionGroupContextFactory;
+use App\Http\Requests\ChangePasswordRequest;
+use App\Jobs\CacheUsersAdvicePolicies;
+use App\Models\Group;
+use App\Models\User;
+use App\Notifications\PasswordChangedByAdmin;
+use App\Services\SessionService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -88,7 +88,7 @@ class UserController extends Controller
         $user->password = $request->input('password');
         $user->save();
 
-        $user->notify(new PasswordChangedByAdmin());
+        $user->notify(new PasswordChangedByAdmin);
 
         return redirect()->back()->with('success', 'Passwort erfolgreich geändert');
     }

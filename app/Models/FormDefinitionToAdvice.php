@@ -76,7 +76,6 @@ class FormDefinitionToAdvice extends Model
         return $this->belongsTo(FormField::class, 'advice_type_field_id');
     }
 
-
     /**
      * @return BelongsTo<FormField, $this>
      */

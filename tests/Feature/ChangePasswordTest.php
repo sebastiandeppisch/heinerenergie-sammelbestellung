@@ -1,11 +1,10 @@
 <?php
 
-use App\Models\User;
 use App\Models\Group;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
-
 
 beforeEach(function () {
     $this->user = User::factory()->create();
@@ -16,7 +15,7 @@ beforeEach(function () {
 
 test('system admin can change password of other users', function () {
     $this->withoutExceptionHandling();
-        $this->actingAs($this->admin)
+    $this->actingAs($this->admin)
         ->post('/actAsSystemAdmin');
 
     $this->put(route('users.changePassword', $this->user), ['password' => 'new-password'])
