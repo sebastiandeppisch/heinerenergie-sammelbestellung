@@ -86,7 +86,7 @@ class FormDefinitionService
     public function storeFormDefinitionData(FormDefinitionData $formDefinitionData): FormDefinition
     {
         return DB::transaction(function () use ($formDefinitionData) {
-            $data = collect($formDefinitionData->toArray())->forget(['id', 'fields', 'group_id'])->toArray();
+            $data = collect($formDefinitionData->toArray())->forget(['id', 'fields', 'group_id', 'advice_mapping', 'map_point_mapping'])->toArray();
             $data['group_id'] = Group::where('uuid', $formDefinitionData->group_id)->firstOrFail()->id;
             $formDefinition = FormDefinition::create($data);
             foreach ($formDefinitionData->fields as $field) {
