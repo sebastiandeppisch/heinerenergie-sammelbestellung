@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Override;
 
 class StoreFormDefinitionFromTemplateRequest extends FormRequest
 {
@@ -18,7 +20,7 @@ class StoreFormDefinitionFromTemplateRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -33,6 +35,7 @@ class StoreFormDefinitionFromTemplateRequest extends FormRequest
      *
      * @return array<string, string>
      */
+    #[Override]
     public function attributes(): array
     {
         return [
@@ -46,6 +49,7 @@ class StoreFormDefinitionFromTemplateRequest extends FormRequest
      *
      * @return array<string, string>
      */
+    #[Override]
     public function messages(): array
     {
         return [
@@ -54,4 +58,3 @@ class StoreFormDefinitionFromTemplateRequest extends FormRequest
         ];
     }
 }
-

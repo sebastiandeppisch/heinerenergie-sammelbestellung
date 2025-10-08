@@ -16,6 +16,7 @@ use App\Models\FormFieldOption;
 use App\Models\Group;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 
 class FormDefinitionService
 {
@@ -201,8 +202,8 @@ class FormDefinitionService
 
             return match ($templateType) {
                 'advice' => $this->createAdviceFormTemplate($group),
-                'map_point' => throw new \InvalidArgumentException('Map Point template not yet implemented'),
-                default => throw new \InvalidArgumentException("Unknown template type: {$templateType}"),
+                'map_point' => throw new InvalidArgumentException('Map Point template not yet implemented'),
+                default => throw new InvalidArgumentException("Unknown template type: {$templateType}"),
             };
         });
     }
