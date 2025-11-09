@@ -33,7 +33,7 @@ class StoreAdviceRequest extends FormRequest
             'street_number' => 'required|string|max:100',
             'zip' => 'required|numeric|digits:5',
             'city' => 'required|string|max:100',
-            'advisor_id' => 'nullable|uuid|exists:users,id',
+        //    'advisor_id' => 'nullable|uuid|exists:users,id',
             'commentary' => 'nullable|string|max:65535',
             'help_type_place' => 'nullable|boolean',
             'help_type_technical' => 'nullable|boolean',
