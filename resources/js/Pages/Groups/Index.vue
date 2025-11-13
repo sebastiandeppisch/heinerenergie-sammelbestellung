@@ -15,37 +15,58 @@
             <!-- Content section -->
             <div class="flex gap-6">
                 <!-- Tree view card -->
-                <div class="w-180 shrink-0 overflow-hidden bg-white shadow-sm sm:rounded-lg">
+                <div class="shrink-0 overflow-hidden bg-white shadow-sm sm:rounded-lg grow-1">
                     <div class="p-6">
                         <GroupTree :groups="props.groupTreeItems" :selected-group="selectedGroup" />
                     </div>
                 </div>
 
                 <!-- Details card -->
-                <div v-if="selectedGroup" class="flex-grow overflow-hidden bg-white shadow-sm sm:rounded-lg">
+                <div v-if="selectedGroup" class="flex-grow overflow-hidden bg-white shadow-sm sm:rounded-lg grow-2">
                     <div class="p-6">
-                        <DxTabPanel :selected-index="selectedTabIndex" @selection-changed="onTabSelectionChanged">
-                            <DxItem title="Stammdaten" icon="info">
-                                <template #default>
-                                    <GroupDetails :group="selectedGroup" :can-edit="canEditGroup" />
-                                </template>
-                            </DxItem>
-                            <DxItem title="Berater:innen" icon="user" v-if="canEditGroup">
-                                <template #default>
-                                    <GroupUsers :group="selectedGroup" />
-                                </template>
-                            </DxItem>
-                            <DxItem title="Beratungsgebiet" icon="map">
-                                <template #default>
-                                    <ConsultingAreaForm :group="selectedGroup" :polygon="polygon" />
-                                </template>
-                            </DxItem>
-                            <DxItem title="Beratungszustände" icon="tableproperties" v-if="canEditGroup">
-                                <template #default>
-                                    <AdviceStatusGroup :group="selectedGroup" :groups="groups" />
-                                </template>
-                            </DxItem>
-                        </DxTabPanel>
+                        <Tabs v-model="selectedTab" @update:model-value="onTabChanged">
+                            <TabsList class="grid w-full grid-cols-4" v-if="canEditGroup">
+                                <TabsTrigger value="stammdaten" class="flex items-center gap-2">
+                                    <Info class="h-4 w-4" />
+                                    Stammdaten
+                                </TabsTrigger>
+                                <TabsTrigger value="berater" class="flex items-center gap-2">
+                                    <Users class="h-4 w-4" />
+                                    Berater:innen
+                                </TabsTrigger>
+                                <TabsTrigger value="beratungsgebiet" class="flex items-center gap-2">
+                                    <Map class="h-4 w-4" />
+                                    Beratungsgebiet
+                                </TabsTrigger>
+                                <TabsTrigger value="beratungszustaende" class="flex items-center gap-2">
+                                    <Table class="h-4 w-4" />
+                                    Beratungszustände
+                                </TabsTrigger>
+                            </TabsList>
+                            <TabsList class="grid w-full grid-cols-2" v-else>
+                                <TabsTrigger value="stammdaten" class="flex items-center gap-2">
+                                    <Info class="h-4 w-4" />
+                                    Stammdaten
+                                </TabsTrigger>
+                                <TabsTrigger value="beratungsgebiet" class="flex items-center gap-2">
+                                    <Map class="h-4 w-4" />
+                                    Beratungsgebiet
+                                </TabsTrigger>
+                            </TabsList>
+                            
+                            <TabsContent value="stammdaten">
+                                <GroupDetails :group="selectedGroup" :can-edit="canEditGroup" />
+                            </TabsContent>
+                            <TabsContent value="berater" v-if="canEditGroup">
+                                <GroupUsers :group="selectedGroup" />
+                            </TabsContent>
+                            <TabsContent value="beratungsgebiet">
+                                <ConsultingAreaForm :group="selectedGroup" :polygon="polygon" />
+                            </TabsContent>
+                            <TabsContent value="beratungszustaende" v-if="canEditGroup">
+                                <AdviceStatusGroup :group="selectedGroup" :groups="groups" />
+                            </TabsContent>
+                        </Tabs>
                     </div>
                 </div>
                 <div v-else class="flex-grow overflow-hidden bg-white shadow-sm sm:rounded-lg">
@@ -73,11 +94,11 @@ import GroupDetails from '@/components/Groups/GroupDetails.vue';
 import GroupTree from '@/components/Groups/GroupTree.vue';
 import GroupUsers from '@/components/Groups/GroupUsers.vue';
 import { Button } from '@/shadcn/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';
 import AdviceStatusGroup from '@/views/AdviceStatusGroup.vue';
 import { DxPopup } from 'devextreme-vue/popup';
-import { DxItem, DxTabPanel } from 'devextreme-vue/tab-panel';
-import { Plus } from 'lucide-vue-next';
-import { computed, onMounted, ref } from 'vue';
+import { Info, Map, Table, Users, Plus } from 'lucide-vue-next';
+import { computed, onMounted, ref, watch } from 'vue';
 
 type GroupsIndexData = {
     groupTreeItems: Array<App.Data.GroupTreeItem>;
@@ -92,27 +113,50 @@ type GroupsIndexData = {
 const props = defineProps<GroupsIndexData>();
 
 const showCreateModal = ref(false);
-const selectedTabIndex = ref(0);
 
-const onTabSelectionChanged = (e: any) => {
-    const newIndex = e.component.option('selectedIndex');
-    selectedTabIndex.value = newIndex;
-    window.location.hash = `tab=${newIndex}`;
+// Tab values mapping
+const tabValues = ['stammdaten', 'berater', 'beratungsgebiet', 'beratungszustaende'];
+const tabValuesWithoutEdit = ['stammdaten', 'beratungsgebiet'];
+
+const selectedTab = ref<string>('stammdaten');
+
+const onTabChanged = (value: string | number) => {
+    const tabValue = String(value);
+    selectedTab.value = tabValue;
+    const tabIndex = canEditGroup.value 
+        ? tabValues.indexOf(tabValue)
+        : tabValuesWithoutEdit.indexOf(tabValue);
+    if (tabIndex !== -1) {
+        window.location.hash = `tab=${tabIndex}`;
+    }
 };
 
-// Function to get tab index from URL hash
-const getTabIndexFromHash = (): number => {
+// Function to get tab value from URL hash
+const getTabValueFromHash = (): string => {
     const hash = window.location.hash;
     if (hash && hash.includes('tab=')) {
         const tabIndex = parseInt(hash.split('tab=')[1], 10);
-        return !isNaN(tabIndex) ? tabIndex : 0;
+        if (!isNaN(tabIndex)) {
+            if (canEditGroup.value && tabIndex < tabValues.length) {
+                return tabValues[tabIndex];
+            } else if (!canEditGroup.value && tabIndex < tabValuesWithoutEdit.length) {
+                return tabValuesWithoutEdit[tabIndex];
+            }
+        }
     }
-    return 0;
+    return canEditGroup.value ? tabValues[0] : tabValuesWithoutEdit[0];
 };
 
-// Initialize tab index from URL on component mount
+const canEditGroup = computed(() => props.canEditGroup);
+
+// Initialize tab value from URL on component mount
 onMounted(() => {
-    selectedTabIndex.value = getTabIndexFromHash();
+    selectedTab.value = getTabValueFromHash();
+});
+
+// Watch for hash changes
+watch(() => window.location.hash, () => {
+    selectedTab.value = getTabValueFromHash();
 });
 
 const polygon = computed<App.ValueObjects.Polygon>(() => {
