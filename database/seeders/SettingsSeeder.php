@@ -31,6 +31,14 @@ class SettingsSeeder extends Seeder
                 'key' => 'newAdviceMail',
                 'value' => 'Neue Beratung E-Mail',
             ],
+            [
+                'key' => 'defaultLogo',
+                'value' => 'img/logo_without_background.png',
+            ],
+            [
+                'key' => 'defaultFavicon',
+                'value' => 'favicon.ico',
+            ],
         ];
 
         foreach ($settings as $setting) {

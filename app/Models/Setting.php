@@ -34,6 +34,14 @@ class Setting extends Model
                 'name' => 'Neue Beratung E-Mail',
                 'type' => 'text',
             ],
+            'defaultLogo' => [
+                'name' => 'Standard Logo',
+                'type' => 'image',
+            ],
+            'defaultFavicon' => [
+                'name' => 'Standard Favicon',
+                'type' => 'image',
+            ],
         ];
     }
 
@@ -100,7 +108,13 @@ class Setting extends Model
 
     private function nativeType()
     {
-        return str_replace('text', 'string', $this->getType());
+        if ($this->getType() === 'image') {
+            return 'string';
+        }
+        if ($this->getType() === 'text') {
+            return 'string';
+        }
+        return $this->getType();
     }
 
     private function nullable()

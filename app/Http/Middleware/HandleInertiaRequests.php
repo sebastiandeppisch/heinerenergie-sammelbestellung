@@ -10,6 +10,7 @@ use App\Services\CurrentGroupService;
 use App\Services\SessionService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use App\Models\Setting;
 use Override;
 
 class HandleInertiaRequests extends Middleware
@@ -60,6 +61,7 @@ class HandleInertiaRequests extends Middleware
             'auth.availableGroups' => fn () => $request->user()?->groups->map(fn (Group $group) => GroupData::fromModel($group)),
             'auth.currentGroup' => fn () => app(CurrentGroupService::class)->getGroup() ? GroupBaseData::fromModel(app(CurrentGroupService::class)->getGroup()) : null,
             'flashMessages' => $flashMessages,
+            'defaultLogo' => Setting::get('defaultLogo'),
         ]);
     }
 
