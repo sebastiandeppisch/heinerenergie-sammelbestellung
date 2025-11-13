@@ -42,6 +42,11 @@ class Setting extends Model
                 'name' => 'Standard Favicon',
                 'type' => 'image',
             ],
+            'defaultName' => [
+                'name' => 'Standard Name',
+                'type' => 'string',
+                'default' => 'CRM-System',
+            ],
         ];
     }
 

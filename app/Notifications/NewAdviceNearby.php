@@ -25,7 +25,7 @@ class NewAdviceNearby extends BaseNotification implements ShouldQueue
         $distance = $this->distance->__toString();
 
         $mail = parent::toMail($notifiable);
-        $mail->subject('Neue heiner*energie Beratungsanfrage in deiner Nähe');
+        $mail->subject('Neue '.app_name().' Beratungsanfrage in deiner Nähe');
         $mail->line(sprintf('Es gibt eine neue Beratungsanfrage von %s in deiner Nähe (%s entfernt).', $this->advice->name, $distance));
         $mail->line('Adresse: '.$this->advice->address);
         $mail->action('Zur Beratungsanfrage', url('/advices/'.$this->advice->id));

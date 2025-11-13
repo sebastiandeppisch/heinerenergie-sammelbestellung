@@ -26,7 +26,7 @@ class BaseNotification extends Notification
 
         return (new MailMessage)
             ->greeting('Hallo '.$notifiable->first_name.',')
-            ->salutation('Viele Grüße, das heiner*energie Team');
+            ->salutation('Viele Grüße, das '.app_name().' Team');
 
     }
 

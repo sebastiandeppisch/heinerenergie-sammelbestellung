@@ -58,7 +58,7 @@ class AppServiceProvider extends ServiceProvider
             $this->app->bind(function (): Nominatim {
                 $url = 'http://nominatim.openstreetmap.org/';
                 $defaultHeader = [
-                    'User-Agent' => 'heiner*energie CMS',
+                    'User-Agent' => app_name().' CMS',
                 ];
 
                 return new Nominatim($url, $defaultHeader);

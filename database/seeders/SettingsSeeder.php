@@ -39,6 +39,10 @@ class SettingsSeeder extends Seeder
                 'key' => 'defaultFavicon',
                 'value' => 'favicon.ico',
             ],
+            [
+                'key' => 'defaultName',
+                'value' => 'CRM-System',
+            ],
         ];
 
         foreach ($settings as $setting) {
