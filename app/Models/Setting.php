@@ -119,6 +119,7 @@ class Setting extends Model
         if ($this->getType() === 'text') {
             return 'string';
         }
+
         return $this->getType();
     }
 

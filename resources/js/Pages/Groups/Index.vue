@@ -5,11 +5,7 @@
             <div class="flex items-center justify-between">
                 <h2 class="text-xl font-semibold text-gray-800">Initiativen-Struktur</h2>
                 <div class="flex items-center gap-4">
-                    <Button
-                        v-if="canCreateGroups"
-                        variant="default"
-                        @click="showCreateModal = true"
-                    >
+                    <Button v-if="canCreateGroups" variant="default" @click="showCreateModal = true">
                         <Plus class="h-4 w-4" />
                         Neue Initiative anlegen
                     </Button>
@@ -76,12 +72,12 @@ import CreateGroupForm from '@/components/Groups/CreateGroupForm.vue';
 import GroupDetails from '@/components/Groups/GroupDetails.vue';
 import GroupTree from '@/components/Groups/GroupTree.vue';
 import GroupUsers from '@/components/Groups/GroupUsers.vue';
+import { Button } from '@/shadcn/components/ui/button';
 import AdviceStatusGroup from '@/views/AdviceStatusGroup.vue';
 import { DxPopup } from 'devextreme-vue/popup';
 import { DxItem, DxTabPanel } from 'devextreme-vue/tab-panel';
-import { computed, onMounted, ref } from 'vue';
-import { Button } from '@/shadcn/components/ui/button';
 import { Plus } from 'lucide-vue-next';
+import { computed, onMounted, ref } from 'vue';
 
 type GroupsIndexData = {
     groupTreeItems: Array<App.Data.GroupTreeItem>;

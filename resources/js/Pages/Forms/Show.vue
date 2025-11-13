@@ -16,11 +16,10 @@ const props = defineProps<{
 }>();
 
 useAutoResizeIframeIfIsIframe();
-
 </script>
 <template>
     <div class="flex flex-col items-center justify-center">
-        <Card class="max-w-200 w-full min-w-50">
+        <Card class="w-full max-w-200 min-w-50">
             <CardContent>
                 <FormRenderer :form-definition="props.formDefinition" :submit-url="route('form.submit', props.formDefinition.id)" method="post" />
             </CardContent>

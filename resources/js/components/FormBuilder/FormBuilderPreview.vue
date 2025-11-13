@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import notify from 'devextreme/ui/notify';
-import { ref } from 'vue';
 import { Button } from '@/shadcn/components/ui/button';
+import notify from 'devextreme/ui/notify';
 import { RotateCcw, Send } from 'lucide-vue-next';
+import { ref } from 'vue';
 import FormFieldRenderer from './FormFieldRenderer.vue';
 
 type FormDefinitionData = App.Data.FormDefinitionData;

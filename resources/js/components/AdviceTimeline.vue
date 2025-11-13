@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { Button } from '@/shadcn/components/ui/button';
 import { useForm } from '@inertiajs/vue3';
 import { DxTextArea } from 'devextreme-vue';
-import { Button } from '@/shadcn/components/ui/button';
 import { MessageSquarePlus } from 'lucide-vue-next';
 import { route } from 'ziggy-js';
 import TimelineItem from './TimelineItem.vue';
@@ -45,12 +45,7 @@ const submitComment = () => {
                     :disabled="form.processing"
                     value-change-event="keyup"
                 />
-                <Button
-                    variant="default"
-                    class="submit-comment-btn"
-                    :disabled="form.processing || !form.comment.trim()"
-                    @click="submitComment"
-                >
+                <Button variant="default" class="submit-comment-btn" :disabled="form.processing || !form.comment.trim()" @click="submitComment">
                     <MessageSquarePlus class="h-4 w-4" />
                     Notiz hinzufügen
                 </Button>

@@ -34,10 +34,10 @@
 </template>
 
 <script setup lang="ts">
+import { Button } from '@/shadcn/components/ui/button';
 import { useForm } from '@inertiajs/vue3';
 import { DxSelectBox, DxTextBox } from 'devextreme-vue';
 import notify from 'devextreme/ui/notify';
-import { Button } from '@/shadcn/components/ui/button';
 import { Plus } from 'lucide-vue-next';
 import { route } from 'ziggy-js';
 

@@ -4,10 +4,10 @@ import DxNumberBox from 'devextreme-vue/number-box';
 import DxSwitch from 'devextreme-vue/switch';
 import { computed, reactive, ref } from 'vue';
 
+import { Button } from '@/shadcn/components/ui/button';
 import axios from 'axios';
 import DxTextBox from 'devextreme-vue/text-box';
 import notify from 'devextreme/ui/notify';
-import { Button } from '@/shadcn/components/ui/button';
 import { Save, Upload } from 'lucide-vue-next';
 
 import editorToolbar from '../htmlEditorToolbar.json';
@@ -113,10 +113,10 @@ const triggerFileInput = () => {
                 <DxMediaResizing :enabled="true" />
                 <DxToolbar :multiline="true" :items="toolbar" />
                 <template #saveButton>
-                    <Button 
-                        type="button" 
-                        :variant="state.dirty ? 'default' : 'outline'" 
-                        @click="save" 
+                    <Button
+                        type="button"
+                        :variant="state.dirty ? 'default' : 'outline'"
+                        @click="save"
                         :disabled="!state.dirty"
                         :size="state.dirty ? 'default' : 'icon'"
                     >

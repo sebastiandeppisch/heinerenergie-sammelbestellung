@@ -78,12 +78,9 @@ class AdaptTableHeight {
 
 const isIframe = window.self !== window.top;
 
-
-
-function useAutoResizeIframeIfIsIframe(){
-
-    if(!isIframe){
-        return
+function useAutoResizeIframeIfIsIframe() {
+    if (!isIframe) {
+        return;
     }
 
     const frameId = new URLSearchParams(window.location.search).get('frameId');
@@ -98,4 +95,4 @@ function useAutoResizeIframeIfIsIframe(){
     document.body.style.backgroundColor = 'inherit';
 }
 
-export { AdaptTableHeight, formatDateCell, formatPrice, formatPriceCell, isIframe, notifyError, useOnResize, useAutoResizeIframeIfIsIframe };
+export { AdaptTableHeight, formatDateCell, formatPrice, formatPriceCell, isIframe, notifyError, useAutoResizeIframeIfIsIframe, useOnResize };

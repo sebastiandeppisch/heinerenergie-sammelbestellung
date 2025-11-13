@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { PageProps } from '@inertiajs/core';
 import { usePage } from '@inertiajs/vue3';
-import { computed, defineAsyncComponent } from 'vue';
+import { computed } from 'vue';
 import genericLogo from '../../../img/logo.png';
 
 interface CustomPageProps extends PageProps {

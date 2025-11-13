@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import { Button } from '@/shadcn/components/ui/button';
 import axios from 'axios';
 import { DxFileUploader } from 'devextreme-vue/file-uploader';
-import { reactive } from 'vue';
-import { Button } from '@/shadcn/components/ui/button';
 import { Trash2 } from 'lucide-vue-next';
+import { reactive } from 'vue';
 import { user } from '../authHelper';
 
 interface State {

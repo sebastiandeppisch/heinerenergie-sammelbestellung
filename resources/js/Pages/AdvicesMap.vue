@@ -5,13 +5,13 @@ import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { LControl, LControlLayers, LIcon, LLayerGroup, LMap, LMarker, LPopup, LTileLayer } from '@vue-leaflet/vue-leaflet';
 
 //import 'leaflet/dist/leaflet.css';
+import { Button } from '@/shadcn/components/ui/button';
 import { router, usePage } from '@inertiajs/vue3';
 import { LPolygon } from '@vue-leaflet/vue-leaflet';
 import axios from 'axios';
 import { DxTextBox, DxButton as DxTextBoxButton } from 'devextreme-vue/text-box';
 import notify from 'devextreme/ui/notify';
 import { latLng } from 'leaflet';
-import { Button } from '@/shadcn/components/ui/button';
 import { ExternalLink, UserCheck } from 'lucide-vue-next';
 import AdviceTypes from '../AdviceTypes';
 import { isAdmin, user as userRef } from '../authHelper';
@@ -250,21 +250,11 @@ function runSearch() {
                                 </b>
                                 <div v-if="advice.advisor_id !== null">Berater*in: {{ advisorName(advice.advisor_id) }}</div>
                                 <div v-if="advice.shares_ids.length > 0">Geteilt mit: {{ advice.shares_ids.map(advisorName).join(', ') }}</div>
-                                <Button
-                                    v-if="advice.advisor_id === null"
-                                    variant="default"
-                                    @click="addAdvice(advice)"
-                                    class="w-full mt-2"
-                                >
+                                <Button v-if="advice.advisor_id === null" variant="default" @click="addAdvice(advice)" class="mt-2 w-full">
                                     <UserCheck class="h-4 w-4" />
                                     Beratung übernehmen
                                 </Button>
-                                <Button
-                                    variant="outline"
-                                    @click="openAdvice(advice)"
-                                    class="w-full mt-2"
-                                    v-if="advice.can_edit"
-                                >
+                                <Button variant="outline" @click="openAdvice(advice)" class="mt-2 w-full" v-if="advice.can_edit">
                                     <ExternalLink class="h-4 w-4" />
                                     Beratung öffnen
                                 </Button>
@@ -290,12 +280,7 @@ function runSearch() {
                                 </b>
                                 <div v-if="advice.advisor_id !== null">Berater*in: {{ advisorName(advice.advisor_id) }}</div>
                                 <div v-if="advice.shares_ids.length > 0">Geteilt mit: {{ advice.shares_ids.map(advisorName).join(', ') }}</div>
-                                <Button
-                                    variant="outline"
-                                    @click="openAdvice(advice)"
-                                    class="w-full mt-2"
-                                    v-if="userCanOpen(advice)"
-                                >
+                                <Button variant="outline" @click="openAdvice(advice)" class="mt-2 w-full" v-if="userCanOpen(advice)">
                                     <ExternalLink class="h-4 w-4" />
                                     Beratung öffnen
                                 </Button>

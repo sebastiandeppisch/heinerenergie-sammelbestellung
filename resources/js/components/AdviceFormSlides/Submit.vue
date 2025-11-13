@@ -1,11 +1,11 @@
 <script setup lang="ts">
+import { Button } from '@/shadcn/components/ui/button';
 import axios from 'axios';
 import { DxLoadIndicator } from 'devextreme-vue/load-indicator';
 import DxTextArea from 'devextreme-vue/text-area';
 import notify from 'devextreme/ui/notify';
-import { computed, ref } from 'vue';
-import { Button } from '@/shadcn/components/ui/button';
 import { Send } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 import { route } from 'ziggy-js';
 
 type BaseAdvice = Pick<

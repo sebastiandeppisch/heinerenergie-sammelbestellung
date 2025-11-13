@@ -1,12 +1,12 @@
 <script setup lang="ts">
+import { Button } from '@/shadcn/components/ui/button';
 import { faWarning } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { router } from '@inertiajs/vue3';
 import { DxPopup, DxSelectBox, DxTextArea } from 'devextreme-vue';
 import notify from 'devextreme/ui/notify';
-import { ref } from 'vue';
-import { Button } from '@/shadcn/components/ui/button';
 import { ArrowRight, Send } from 'lucide-vue-next';
+import { ref } from 'vue';
 
 const props = defineProps<{
     adviceId: string;

@@ -10,7 +10,6 @@ use App\Services\CurrentGroupService;
 use App\Services\SessionService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
-use App\Models\Setting;
 use Override;
 
 class HandleInertiaRequests extends Middleware

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import { Button } from '@/shadcn/components/ui/button';
 import { ArrowLeft, ArrowRight } from 'lucide-vue-next';
+import { ref } from 'vue';
 
 defineProps({
     showBackward: {

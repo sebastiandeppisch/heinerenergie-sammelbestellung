@@ -29,13 +29,7 @@
                         <Upload class="h-4 w-4" />
                         Logo auswählen
                     </Button>
-                    <Button
-                        type="button"
-                        v-if="logoSrc && !form.remove_logo && canEdit"
-                        variant="outline"
-                        class="ml-2"
-                        @click="removeLogo"
-                    >
+                    <Button type="button" v-if="logoSrc && !form.remove_logo && canEdit" variant="outline" class="ml-2" @click="removeLogo">
                         <X class="h-4 w-4" />
                         Logo Entfernen
                     </Button>
@@ -59,12 +53,12 @@
 </template>
 
 <script setup lang="ts">
+import { Button } from '@/shadcn/components/ui/button';
 import { useForm } from '@inertiajs/vue3';
 import { DxCheckBox, DxTextArea, DxTextBox } from 'devextreme-vue';
 import { confirm } from 'devextreme/ui/dialog';
-import { computed, ref } from 'vue';
-import { Button } from '@/shadcn/components/ui/button';
 import { Save, Trash2, Upload, X } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 import { route } from 'ziggy-js';
 
 type GroupData = App.Data.GroupData;

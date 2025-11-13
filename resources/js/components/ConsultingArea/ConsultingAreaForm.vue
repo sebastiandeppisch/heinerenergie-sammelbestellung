@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import PolygonMap from '@/components/PolygonMap.vue';
-import { useForm } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
 import { Button } from '@/shadcn/components/ui/button';
+import { useForm } from '@inertiajs/vue3';
 import { Save, Trash2 } from 'lucide-vue-next';
+import { ref, watch } from 'vue';
 import { route } from 'ziggy-js';
 
 const props = defineProps<{

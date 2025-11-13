@@ -1,11 +1,11 @@
 <script setup lang="ts">
+import { Button } from '@/shadcn/components/ui/button';
 import { PageProps } from '@inertiajs/core';
 import { router, usePage } from '@inertiajs/vue3';
 import DxDropDownButton from 'devextreme-vue/drop-down-button';
+import { Mail, Phone, Unlock } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { route } from 'ziggy-js';
-import { Mail, Phone, Unlock } from 'lucide-vue-next';
-import { Button } from '@/shadcn/components/ui/button';
 import { user } from '../authHelper';
 import AdviceTransfer from './AdviceTransfer.vue';
 const props = defineProps<{

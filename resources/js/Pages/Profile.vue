@@ -1,13 +1,13 @@
 <script setup lang="ts">
+import { Button } from '@/shadcn/components/ui/button';
 import AdvisorMap from '@/views/AdvisorMap.vue';
 import ProfilePictureUpload from '@/views/ProfilePictureUpload.vue';
 import axios from 'axios';
 import { DxNumberBox } from 'devextreme-vue';
 import DxTextBox from 'devextreme-vue/text-box';
 import notify from 'devextreme/ui/notify';
-import { ref } from 'vue';
-import { Button } from '@/shadcn/components/ui/button';
 import { Save } from 'lucide-vue-next';
+import { ref } from 'vue';
 import { user as userData } from '../authHelper';
 
 const user = ref(userData.value);
