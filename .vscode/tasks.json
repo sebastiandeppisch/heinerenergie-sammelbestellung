@@ -66,7 +66,34 @@
         {
             "label": "Lint JS",
             "type": "shell",
-            "command": "npx vue-tsc",
+            "command": "npx vue-tsc && npm run lint",
         },
+		{
+			"label": "Format JS",
+			"type": "shell",
+			"command": "npm run format",
+		},
+		{
+			"label": "Format PHP",
+			"type": "shell",
+			"command": "vendor/bin/pint"
+		},
+		{
+			"label": "Refactor PHP",
+			"type": "shell",
+			"command": "vendor/bin/rector",
+		},
+		{
+			"label": "Run all code quality tools",
+			"dependsOn": [ "Refactor PHP", "Lint PHP", "Format PHP", "Lint JS", "Format JS"],
+			"icon": {
+				"id": "check"
+			},
+			"group": "build",
+			"presentation": {
+				"revealProblems": "onProblem",
+				"panel": "dedicated"
+			},
+		}
 	]
 }
