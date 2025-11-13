@@ -59,7 +59,7 @@ if (! function_exists('app_favicon')) {
      *
      * @return string|null
      */
-    function app_favicon(): ?string
+    function app_favicon(): string
     {
         return Setting::get('defaultFavicon');
     }
