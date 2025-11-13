@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { DxHtmlEditor, DxMediaResizing, DxToolbar } from 'devextreme-vue/html-editor';
-import DxNumberBox from 'devextreme-vue/number-box';
 import DxSwitch from 'devextreme-vue/switch';
 import { computed, reactive, ref } from 'vue';
 
 import { Button } from '@/shadcn/components/ui/button';
+import { Input } from '@/shadcn/components/ui/input';
 import axios from 'axios';
-import DxTextBox from 'devextreme-vue/text-box';
 import notify from 'devextreme/ui/notify';
 import { Save, Upload } from 'lucide-vue-next';
 
@@ -127,13 +126,13 @@ const triggerFileInput = () => {
             </DxHtmlEditor>
         </div>
         <div v-else-if="props.setting.type === 'integer'">
-            <DxNumberBox v-model:value="state.value" :on-value-changed="save" />
+            <Input type="number" v-model="state.value" @update:model-value="save" />
         </div>
         <div v-else-if="props.setting.type === 'boolean'">
             <DxSwitch v-model:value="state.value" :on-value-changed="save" />
         </div>
         <div v-else-if="props.setting.type === 'string'">
-            <DxTextBox v-model:value="state.value" :on-value-changed="save" />
+            <Input v-model="state.value" @update:model-value="save" />
         </div>
         <div v-else-if="props.setting.type === 'image'" class="space-y-4">
             <!-- Current Image Display -->

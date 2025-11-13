@@ -6,13 +6,13 @@ import { LControl, LControlLayers, LIcon, LLayerGroup, LMap, LMarker, LPopup, LT
 
 //import 'leaflet/dist/leaflet.css';
 import { Button } from '@/shadcn/components/ui/button';
+import { Input } from '@/shadcn/components/ui/input';
 import { router, usePage } from '@inertiajs/vue3';
 import { LPolygon } from '@vue-leaflet/vue-leaflet';
 import axios from 'axios';
-import { DxTextBox, DxButton as DxTextBoxButton } from 'devextreme-vue/text-box';
 import notify from 'devextreme/ui/notify';
 import { latLng } from 'leaflet';
-import { ExternalLink, UserCheck } from 'lucide-vue-next';
+import { ExternalLink, Search, UserCheck } from 'lucide-vue-next';
 import AdviceTypes from '../AdviceTypes';
 import { isAdmin, user as userRef } from '../authHelper';
 import { AdaptTableHeight } from '../helpers';
@@ -148,17 +148,11 @@ function runSearch() {
                 <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" layer-type="base" name="OpenStreetMap" />
                 <LControl position="topleft">
                     <div class="dx-card">
-                        <div style="display: flex">
-                            <DxTextBox placeholder="Springe zu Adresse" v-model="search" value-change-event="keyup" @enterKey="runSearch">
-                                <DxTextBoxButton
-                                    :options="{
-                                        icon: 'search',
-                                        onClick: runSearch,
-                                    }"
-                                    name="search"
-                                    location="after"
-                                />
-                            </DxTextBox>
+                        <div style="display: flex; gap: 4px">
+                            <Input placeholder="Springe zu Adresse" v-model="search" @keyup.enter="runSearch" />
+                            <Button variant="outline" @click="runSearch" size="icon">
+                                <Search class="h-4 w-4" />
+                            </Button>
                         </div>
                     </div>
                 </LControl>

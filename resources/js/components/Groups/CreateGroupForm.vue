@@ -2,8 +2,9 @@
     <div class="group-form">
         <form @submit.prevent="submit">
             <!-- Group name -->
-            <div class="mb-4">
-                <DxTextBox v-model="form.name" label="Name" labelMode="floating" :show-clear-button="true" :required="true" />
+            <div class="mb-4 space-y-2">
+                <Label for="name">Name</Label>
+                <Input id="name" v-model="form.name" required :class="{ 'border-destructive': form.errors.name }" />
                 <div v-if="form.errors.name" class="text-sm text-red-500">{{ form.errors.name }}</div>
             </div>
 
@@ -35,8 +36,10 @@
 
 <script setup lang="ts">
 import { Button } from '@/shadcn/components/ui/button';
+import { Input } from '@/shadcn/components/ui/input';
+import { Label } from '@/shadcn/components/ui/label';
 import { useForm } from '@inertiajs/vue3';
-import { DxSelectBox, DxTextBox } from 'devextreme-vue';
+import { DxSelectBox } from 'devextreme-vue';
 import notify from 'devextreme/ui/notify';
 import { Plus } from 'lucide-vue-next';
 import { route } from 'ziggy-js';

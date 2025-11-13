@@ -8,14 +8,16 @@
         </div>
         <form @submit.prevent="handleSubmit" class="space-y-6">
             <!-- Group name -->
-            <div>
-                <DxTextBox v-model="form.name" label="Name" labelMode="floating" :is-valid="form.errors.name === undefined" :read-only="!canEdit" />
+            <div class="space-y-2">
+                <Label for="name">Name</Label>
+                <Input id="name" v-model="form.name" :disabled="!canEdit" :class="{ 'border-destructive': form.errors.name }" />
                 <div v-if="form.errors.name" class="text-sm text-red-500">{{ form.errors.name }}</div>
             </div>
 
             <!-- Group description -->
-            <div>
-                <DxTextArea v-model="form.description" label="Beschreibung" labelMode="floating" :height="100" :read-only="!canEdit" />
+            <div class="space-y-2">
+                <Label for="description">Beschreibung</Label>
+                <Textarea id="description" v-model="form.description" class="min-h-[100px]" :disabled="!canEdit" :class="{ 'border-destructive': form.errors.description }" />
                 <div v-if="form.errors.description" class="text-sm text-red-500">{{ form.errors.description }}</div>
             </div>
 
@@ -54,8 +56,11 @@
 
 <script setup lang="ts">
 import { Button } from '@/shadcn/components/ui/button';
+import { Input } from '@/shadcn/components/ui/input';
+import { Label } from '@/shadcn/components/ui/label';
+import { Textarea } from '@/shadcn/components/ui/textarea';
 import { useForm } from '@inertiajs/vue3';
-import { DxCheckBox, DxTextArea, DxTextBox } from 'devextreme-vue';
+import { DxCheckBox } from 'devextreme-vue';
 import { confirm } from 'devextreme/ui/dialog';
 import { Save, Trash2, Upload, X } from 'lucide-vue-next';
 import { computed, ref } from 'vue';

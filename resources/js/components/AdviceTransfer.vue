@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { Button } from '@/shadcn/components/ui/button';
+import { Textarea } from '@/shadcn/components/ui/textarea';
 import { faWarning } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { router } from '@inertiajs/vue3';
-import { DxPopup, DxSelectBox, DxTextArea } from 'devextreme-vue';
+import { DxPopup, DxSelectBox } from 'devextreme-vue';
 import notify from 'devextreme/ui/notify';
 import { ArrowRight, Send } from 'lucide-vue-next';
 import { ref } from 'vue';
@@ -73,8 +74,9 @@ function transferAdvice() {
                     :show-clear-button="true"
                 />
 
-                <div class="mt-4">
-                    <DxTextArea v-model="reason" label="Grund für die Übertragung" label-mode="floating" :height="100" />
+                <div class="mt-4 space-y-2">
+                    <label class="text-sm font-medium">Grund für die Übertragung</label>
+                    <Textarea v-model="reason" class="min-h-[100px]" placeholder="Grund für die Übertragung..." />
                 </div>
 
                 <div class="transfer-info mt-4">

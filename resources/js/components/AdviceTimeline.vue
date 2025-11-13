@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Button } from '@/shadcn/components/ui/button';
+import { Textarea } from '@/shadcn/components/ui/textarea';
 import { useForm } from '@inertiajs/vue3';
-import { DxTextArea } from 'devextreme-vue';
 import { MessageSquarePlus } from 'lucide-vue-next';
 import { route } from 'ziggy-js';
 import TimelineItem from './TimelineItem.vue';
@@ -37,13 +37,11 @@ const submitComment = () => {
         <div class="new-comment-container">
             <h4>Neue Notiz hinzufügen</h4>
             <form @submit.prevent="submitComment">
-                <DxTextArea
+                <Textarea
                     v-model="form.comment"
-                    :height="100"
                     placeholder="Neue Notiz..."
-                    class="comment-textarea"
+                    class="comment-textarea min-h-[100px]"
                     :disabled="form.processing"
-                    value-change-event="keyup"
                 />
                 <Button variant="default" class="submit-comment-btn" :disabled="form.processing || !form.comment.trim()" @click="submitComment">
                     <MessageSquarePlus class="h-4 w-4" />

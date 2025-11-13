@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { Button } from '@/shadcn/components/ui/button';
+import { Input } from '@/shadcn/components/ui/input';
+import { Label } from '@/shadcn/components/ui/label';
 import AdvisorMap from '@/views/AdvisorMap.vue';
 import ProfilePictureUpload from '@/views/ProfilePictureUpload.vue';
 import axios from 'axios';
-import { DxNumberBox } from 'devextreme-vue';
-import DxTextBox from 'devextreme-vue/text-box';
 import notify from 'devextreme/ui/notify';
 import { Save } from 'lucide-vue-next';
 import { ref } from 'vue';
@@ -34,31 +34,31 @@ function saveAddress() {
                             <br />Trage hier die Adresse ein, von der Du Beratungen aus durchführen möchtest. Wenn Du Deine Adresse nicht mit anderen
                             Berater*innen teilen möchtest, kannst Du auch eine Adresse in Deiner Nähe angeben.
                             <div class="flex-row">
-                                <div class="flex-cell">
-                                    <DxTextBox label="Straße" style="margin: 10px" v-model="user.street" />
+                                <div class="flex-cell" style="margin: 10px">
+                                    <Label for="street">Straße</Label>
+                                    <Input id="street" v-model="user.street" />
                                 </div>
-                                <div>
-                                    <DxTextBox label="Nr." width="100px" style="margin: 10px" v-model="user.street_number" />
-                                </div>
-                            </div>
-
-                            <div class="flex-row">
-                                <div>
-                                    <DxNumberBox label="PLZ" width="100px" style="margin: 10px" v-model="user.zip" />
-                                </div>
-                                <div class="flex-cell">
-                                    <DxTextBox label="Stadt" style="margin: 10px" v-model="user.city" />
+                                <div style="margin: 10px">
+                                    <Label for="street_number">Nr.</Label>
+                                    <Input id="street_number" v-model="user.street_number" style="width: 100px" />
                                 </div>
                             </div>
 
                             <div class="flex-row">
-                                <div class="flex-cell">
-                                    <DxNumberBox
-                                        label="Beratungsgebiet (m)"
-                                        style="margin: 10px"
-                                        v-model="user.advice_radius"
-                                        :show-clear-button="true"
-                                    />
+                                <div style="margin: 10px">
+                                    <Label for="zip">PLZ</Label>
+                                    <Input id="zip" type="number" style="width: 100px" v-model="user.zip" />
+                                </div>
+                                <div class="flex-cell" style="margin: 10px">
+                                    <Label for="city">Stadt</Label>
+                                    <Input id="city" v-model="user.city" />
+                                </div>
+                            </div>
+
+                            <div class="flex-row">
+                                <div class="flex-cell" style="margin: 10px">
+                                    <Label for="advice_radius">Beratungsgebiet (m)</Label>
+                                    <Input id="advice_radius" type="number" v-model="user.advice_radius" />
                                 </div>
                             </div>
 
