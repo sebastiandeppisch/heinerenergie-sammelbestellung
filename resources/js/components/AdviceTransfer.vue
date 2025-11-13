@@ -2,9 +2,11 @@
 import { faWarning } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { router } from '@inertiajs/vue3';
-import { DxButton, DxPopup, DxSelectBox, DxTextArea } from 'devextreme-vue';
+import { DxPopup, DxSelectBox, DxTextArea } from 'devextreme-vue';
 import notify from 'devextreme/ui/notify';
 import { ref } from 'vue';
+import { Button } from '@/shadcn/components/ui/button';
+import { ArrowRight, Send } from 'lucide-vue-next';
 
 const props = defineProps<{
     adviceId: string;
@@ -47,7 +49,10 @@ function transferAdvice() {
 
 <template>
     <div>
-        <DxButton text="Beratung übertragen" @click="showTransferPopup" />
+        <Button variant="outline" @click="showTransferPopup">
+            <ArrowRight class="h-4 w-4" />
+            Beratung übertragen
+        </Button>
 
         <DxPopup
             v-model:visible="popupVisible"
@@ -82,7 +87,10 @@ function transferAdvice() {
                 </div>
 
                 <div class="mt-4">
-                    <DxButton text="Übertragen" type="default" @click="transferAdvice" width="100%" />
+                    <Button variant="default" @click="transferAdvice" class="w-full">
+                        <Send class="h-4 w-4" />
+                        Übertragen
+                    </Button>
                 </div>
             </div>
         </DxPopup>

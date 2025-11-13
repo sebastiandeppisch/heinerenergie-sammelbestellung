@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { DxButton } from 'devextreme-vue/button';
 import 'leaflet/dist/leaflet.css';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 
@@ -12,6 +11,8 @@ import axios from 'axios';
 import { DxTextBox, DxButton as DxTextBoxButton } from 'devextreme-vue/text-box';
 import notify from 'devextreme/ui/notify';
 import { latLng } from 'leaflet';
+import { Button } from '@/shadcn/components/ui/button';
+import { ExternalLink, UserCheck } from 'lucide-vue-next';
 import AdviceTypes from '../AdviceTypes';
 import { isAdmin, user as userRef } from '../authHelper';
 import { AdaptTableHeight } from '../helpers';
@@ -249,21 +250,24 @@ function runSearch() {
                                 </b>
                                 <div v-if="advice.advisor_id !== null">Berater*in: {{ advisorName(advice.advisor_id) }}</div>
                                 <div v-if="advice.shares_ids.length > 0">Geteilt mit: {{ advice.shares_ids.map(advisorName).join(', ') }}</div>
-                                <DxButton
+                                <Button
                                     v-if="advice.advisor_id === null"
-                                    type="default"
-                                    text="Beratung übernehmen"
+                                    variant="default"
                                     @click="addAdvice(advice)"
-                                    width="100%"
-                                    style="margin-top: 10px"
-                                />
-                                <DxButton
-                                    text="Beratung öffnen"
+                                    class="w-full mt-2"
+                                >
+                                    <UserCheck class="h-4 w-4" />
+                                    Beratung übernehmen
+                                </Button>
+                                <Button
+                                    variant="outline"
                                     @click="openAdvice(advice)"
-                                    width="100%"
-                                    style="margin-top: 10px"
+                                    class="w-full mt-2"
                                     v-if="advice.can_edit"
-                                />
+                                >
+                                    <ExternalLink class="h-4 w-4" />
+                                    Beratung öffnen
+                                </Button>
                             </div>
                         </LPopup>
                     </LMarker>
@@ -286,13 +290,15 @@ function runSearch() {
                                 </b>
                                 <div v-if="advice.advisor_id !== null">Berater*in: {{ advisorName(advice.advisor_id) }}</div>
                                 <div v-if="advice.shares_ids.length > 0">Geteilt mit: {{ advice.shares_ids.map(advisorName).join(', ') }}</div>
-                                <DxButton
-                                    text="Beratung öffnen"
+                                <Button
+                                    variant="outline"
                                     @click="openAdvice(advice)"
-                                    width="100%"
-                                    style="margin-top: 10px"
+                                    class="w-full mt-2"
                                     v-if="userCanOpen(advice)"
-                                />
+                                >
+                                    <ExternalLink class="h-4 w-4" />
+                                    Beratung öffnen
+                                </Button>
                             </div>
                         </LPopup>
                     </LMarker>

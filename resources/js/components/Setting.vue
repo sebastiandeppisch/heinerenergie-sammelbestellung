@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { DxButton } from 'devextreme-vue/button';
 import { DxHtmlEditor, DxMediaResizing, DxToolbar } from 'devextreme-vue/html-editor';
 import DxNumberBox from 'devextreme-vue/number-box';
 import DxSwitch from 'devextreme-vue/switch';
@@ -9,7 +8,7 @@ import axios from 'axios';
 import DxTextBox from 'devextreme-vue/text-box';
 import notify from 'devextreme/ui/notify';
 import { Button } from '@/shadcn/components/ui/button';
-import { Upload } from 'lucide-vue-next';
+import { Save, Upload } from 'lucide-vue-next';
 
 import editorToolbar from '../htmlEditorToolbar.json';
 
@@ -114,7 +113,16 @@ const triggerFileInput = () => {
                 <DxMediaResizing :enabled="true" />
                 <DxToolbar :multiline="true" :items="toolbar" />
                 <template #saveButton>
-                    <DxButton type="default" @click="save" :disabled="!state.dirty" icon="save" />
+                    <Button 
+                        type="button" 
+                        :variant="state.dirty ? 'default' : 'outline'" 
+                        @click="save" 
+                        :disabled="!state.dirty"
+                        :size="state.dirty ? 'default' : 'icon'"
+                    >
+                        <Save class="h-4 w-4" />
+                        <span v-if="state.dirty">Speichern</span>
+                    </Button>
                 </template>
             </DxHtmlEditor>
         </div>

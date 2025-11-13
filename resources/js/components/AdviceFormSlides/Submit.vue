@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import axios from 'axios';
-import DxButton from 'devextreme-vue/button';
 import { DxLoadIndicator } from 'devextreme-vue/load-indicator';
 import DxTextArea from 'devextreme-vue/text-area';
 import notify from 'devextreme/ui/notify';
 import { computed, ref } from 'vue';
+import { Button } from '@/shadcn/components/ui/button';
+import { Send } from 'lucide-vue-next';
 import { route } from 'ziggy-js';
 
 type BaseAdvice = Pick<
@@ -95,7 +96,10 @@ const advice = computed<Props['modelValue']>({
         <span style="font-size: 1.2em">Hast Du sonst noch Fragen oder möchtest ein Kommentar hinzufügen?</span>
         <DxTextArea v-model="advice.commentary" placeholder="Ich habe noch eine Frage zur Balkonhalterung..." height="calc(100% - 100px)" />
         <div style="height: 32px; display: block"></div>
-        <DxButton text="Beratungsanfrage abschicken" icon="fas fa-paper-plane" type="success" @click="submit" :disabled="loading" height="48px" />
+        <Button variant="default" @click="submit" :disabled="loading" class="h-12">
+            <Send class="h-4 w-4" />
+            Beratungsanfrage abschicken
+        </Button>
         <div style="align-items: center; display: flex; flex-direction: column; padding-top: 8px">
             <DxLoadIndicator :visible="loadIndicatorVisible" height="32px" width="32px" />
             <div style="display: block; height: 32px" v-if="!loadIndicatorVisible"></div>

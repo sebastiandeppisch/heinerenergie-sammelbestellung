@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { DxButton } from 'devextreme-vue/button';
 import notify from 'devextreme/ui/notify';
 import { ref } from 'vue';
+import { Button } from '@/shadcn/components/ui/button';
+import { RotateCcw, Send } from 'lucide-vue-next';
 import FormFieldRenderer from './FormFieldRenderer.vue';
 
 type FormDefinitionData = App.Data.FormDefinitionData;
@@ -47,8 +48,14 @@ function submitForm() {
         </div>
 
         <div class="form-actions">
-            <DxButton text="Zurücksetzen" styling-mode="outlined" @click="resetForm" />
-            <DxButton text="Absenden" type="default" @click="submitForm" />
+            <Button variant="outline" @click="resetForm">
+                <RotateCcw class="h-4 w-4" />
+                Zurücksetzen
+            </Button>
+            <Button variant="default" @click="submitForm">
+                <Send class="h-4 w-4" />
+                Absenden
+            </Button>
         </div>
     </div>
 </template>

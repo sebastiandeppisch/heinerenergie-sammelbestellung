@@ -1,7 +1,10 @@
 <template>
     <div class="group-details pt-6">
         <div class="mb-4 flex justify-end">
-            <DxButton v-if="canEdit" text="Löschen" type="danger" stylingMode="text" icon="trash" @click="confirmDelete" />
+            <Button v-if="canEdit" variant="ghost" @click="confirmDelete">
+                <Trash2 class="h-4 w-4" />
+                Löschen
+            </Button>
         </div>
         <form @submit.prevent="handleSubmit" class="space-y-6">
             <!-- Group name -->
@@ -22,15 +25,20 @@
                 <div class="flex items-center">
                     <img :src="logoSrc" :alt="group.name" class="mr-4 h-12 w-12 rounded" />
                     <input type="file" ref="logoInput" class="hidden" accept="image/*" @change="handleLogoChange" />
-                    <DxButton text="Logo auswählen" stylingMode="outlined" @click="logoInput?.click()" v-if="canEdit" />
-                    <DxButton
+                    <Button type="button" variant="outline" @click="logoInput?.click()" v-if="canEdit">
+                        <Upload class="h-4 w-4" />
+                        Logo auswählen
+                    </Button>
+                    <Button
+                        type="button"
                         v-if="logoSrc && !form.remove_logo && canEdit"
-                        text="Logo Entfernen"
-                        stylingMode="outlined"
-                        type="danger"
+                        variant="outline"
                         class="ml-2"
                         @click="removeLogo"
-                    />
+                    >
+                        <X class="h-4 w-4" />
+                        Logo Entfernen
+                    </Button>
                 </div>
                 <div v-if="form.errors.logo" class="text-sm text-red-500">{{ form.errors.logo }}</div>
             </div>
@@ -41,7 +49,10 @@
             </div>
 
             <div class="flex justify-end">
-                <DxButton v-if="canEdit" text="Speichern" type="default" stylingMode="contained" @click="handleSubmit" />
+                <Button type="button" v-if="canEdit" variant="default" @click="handleSubmit">
+                    <Save class="h-4 w-4" />
+                    Speichern
+                </Button>
             </div>
         </form>
     </div>
@@ -49,9 +60,11 @@
 
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
-import { DxButton, DxCheckBox, DxTextArea, DxTextBox } from 'devextreme-vue';
+import { DxCheckBox, DxTextArea, DxTextBox } from 'devextreme-vue';
 import { confirm } from 'devextreme/ui/dialog';
 import { computed, ref } from 'vue';
+import { Button } from '@/shadcn/components/ui/button';
+import { Save, Trash2, Upload, X } from 'lucide-vue-next';
 import { route } from 'ziggy-js';
 
 type GroupData = App.Data.GroupData;

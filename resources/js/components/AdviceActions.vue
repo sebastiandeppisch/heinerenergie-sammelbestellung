@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { router } from '@inertiajs/vue3';
-import DxButton from 'devextreme-vue/button';
+import { PageProps } from '@inertiajs/core';
+import { router, usePage } from '@inertiajs/vue3';
 import DxDropDownButton from 'devextreme-vue/drop-down-button';
 import { computed } from 'vue';
 import { route } from 'ziggy-js';
+import { Mail, Phone, Unlock } from 'lucide-vue-next';
+import { Button } from '@/shadcn/components/ui/button';
 import { user } from '../authHelper';
 import AdviceTransfer from './AdviceTransfer.vue';
 const props = defineProps<{
@@ -52,9 +54,16 @@ function openNavigation(e: { itemData: { id: string } }) {
     }
 }
 
+interface CustomPageProps extends PageProps {
+    appName: string;
+}
+
+const page = usePage<CustomPageProps>();
+
 const mailLink = computed(() => {
     const body = 'Hallo ' + props.advice.first_name + ',%0D%0A%0D%0A' + 'TEXT' + '%0D%0A%0D%0A' + 'Gruß,%0D%0A' + props.advisor?.first_name;
-    const subject = 'heiner*energie%20Beratung';
+    const appName = page.props.appName || 'CRM-System';
+    const subject = encodeURIComponent(appName + ' Beratung');
 
     return 'mailto:' + props.advice.email + '?subject=' + subject + '&body=' + body;
 });
@@ -83,9 +92,18 @@ const showUnassignButton = computed(() => {
             display-expr="name"
             key-expr="id"
         />
-        <a :href="phoneLink"><DxButton text="Anrufen" icon="tel" /></a>
-        <a :href="mailLink"><DxButton text="E-Mail verfassen" icon="email" /></a>
-        <DxButton v-if="showUnassignButton" text="Beratung freigeben" @click="unassignAdvice" hint="Beratung freigeben" />
+        <Button as="a" :href="phoneLink" variant="outline">
+            <Phone class="h-4 w-4" />
+            Anrufen
+        </Button>
+        <Button as="a" :href="mailLink" variant="outline">
+            <Mail class="h-4 w-4" />
+            E-Mail verfassen
+        </Button>
+        <Button v-if="showUnassignButton" variant="outline" @click="unassignAdvice" title="Beratung freigeben">
+            <Unlock class="h-4 w-4" />
+            Beratung freigeben
+        </Button>
         <AdviceTransfer :advice-id="advice.id" :transferable-groups="transferableGroups" />
     </div>
 </template>

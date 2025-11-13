@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import axios from 'axios';
-import { DxButton } from 'devextreme-vue/button';
 import { DxFileUploader } from 'devextreme-vue/file-uploader';
 import { reactive } from 'vue';
+import { Button } from '@/shadcn/components/ui/button';
+import { Trash2 } from 'lucide-vue-next';
 import { user } from '../authHelper';
 
 interface State {
@@ -59,7 +60,9 @@ function removeImage() {
 
         <div style="position: relative">
             <div style="position: absolute; right: 0px; padding: 5px" v-if="r.imageSource !== null">
-                <DxButton icon="trash" @click="removeImage" v-if="true" type="danger" />
+                <Button variant="destructive" size="icon" @click="removeImage" v-if="true">
+                    <Trash2 class="h-4 w-4" />
+                </Button>
             </div>
             <div
                 id="dropzone-external"

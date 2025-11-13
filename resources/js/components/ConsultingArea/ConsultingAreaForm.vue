@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import PolygonMap from '@/components/PolygonMap.vue';
 import { useForm } from '@inertiajs/vue3';
-import DxButton from 'devextreme-vue/button';
 import { ref, watch } from 'vue';
+import { Button } from '@/shadcn/components/ui/button';
+import { Save, Trash2 } from 'lucide-vue-next';
 import { route } from 'ziggy-js';
 
 const props = defineProps<{
@@ -62,24 +63,21 @@ const handleDelete = () => {
 
         <div class="mt-4 flex justify-between">
             <div>
-                <DxButton
+                <Button
                     v-if="props.polygon"
-                    text="Beratungsgebiet löschen"
+                    variant="outline"
                     :disabled="form.processing || form.polygon.coordinates.length === 0"
-                    stylingMode="outlined"
-                    icon="trash"
-                    type="danger"
                     @click="handleDelete"
-                />
+                >
+                    <Trash2 class="h-4 w-4" />
+                    Beratungsgebiet löschen
+                </Button>
             </div>
             <div>
-                <DxButton
-                    text="Beratungsgebiet speichern"
-                    :disabled="form.processing || !hasChanges"
-                    stylingMode="contained"
-                    @click="handleSave"
-                    type="default"
-                />
+                <Button variant="default" :disabled="form.processing || !hasChanges" @click="handleSave">
+                    <Save class="h-4 w-4" />
+                    Beratungsgebiet speichern
+                </Button>
             </div>
         </div>
     </div>

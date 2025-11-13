@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import DxButton from 'devextreme-vue/button';
 import { ref } from 'vue';
+import { Button } from '@/shadcn/components/ui/button';
+import { ArrowLeft, ArrowRight } from 'lucide-vue-next';
 
 defineProps({
     showBackward: {
@@ -36,10 +37,16 @@ function allowForward(allow: boolean) {
                 <slot :allow-forward="allowForward"></slot>
             </div>
             <div style="display: flex">
-                <DxButton text="Zurück" @click="backward" v-if="showBackward" />
+                <Button variant="outline" @click="backward" v-if="showBackward">
+                    <ArrowLeft class="h-4 w-4" />
+                    Zurück
+                </Button>
                 <div style="flex-grow: 1"></div>
 
-                <DxButton text="Weiter" type="default" @click="forward" :disabled="!forwardEnabled" v-if="showForward" />
+                <Button variant="default" @click="forward" :disabled="!forwardEnabled" v-if="showForward">
+                    Weiter
+                    <ArrowRight class="h-4 w-4" />
+                </Button>
             </div>
         </div>
     </div>

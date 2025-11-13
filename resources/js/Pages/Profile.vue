@@ -2,10 +2,12 @@
 import AdvisorMap from '@/views/AdvisorMap.vue';
 import ProfilePictureUpload from '@/views/ProfilePictureUpload.vue';
 import axios from 'axios';
-import { DxButton, DxNumberBox } from 'devextreme-vue';
+import { DxNumberBox } from 'devextreme-vue';
 import DxTextBox from 'devextreme-vue/text-box';
 import notify from 'devextreme/ui/notify';
 import { ref } from 'vue';
+import { Button } from '@/shadcn/components/ui/button';
+import { Save } from 'lucide-vue-next';
 import { user as userData } from '../authHelper';
 
 const user = ref(userData.value);
@@ -60,7 +62,10 @@ function saveAddress() {
                                 </div>
                             </div>
 
-                            <DxButton icon="save" text="Beratungsgebiet speichern" @click="saveAddress" width="100%" type="success" />
+                            <Button variant="default" @click="saveAddress" class="w-full">
+                                <Save class="h-4 w-4" />
+                                Beratungsgebiet speichern
+                            </Button>
 
                             <AdvisorMap :advisor="user" style="padding-top: 30px" />
                         </div>

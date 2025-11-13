@@ -24,7 +24,10 @@
 
             <!-- Action buttons -->
             <div class="flex justify-end space-x-3">
-                <DxButton text="Erstellen" type="default" styling-mode="contained" :disabled="form.processing" submit-button="true" @click="submit" />
+                <Button type="submit" variant="default" :disabled="form.processing" @click="submit">
+                    <Plus class="h-4 w-4" />
+                    Erstellen
+                </Button>
             </div>
         </form>
     </div>
@@ -32,8 +35,10 @@
 
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
-import { DxButton, DxSelectBox, DxTextBox } from 'devextreme-vue';
+import { DxSelectBox, DxTextBox } from 'devextreme-vue';
 import notify from 'devextreme/ui/notify';
+import { Button } from '@/shadcn/components/ui/button';
+import { Plus } from 'lucide-vue-next';
 import { route } from 'ziggy-js';
 
 type GroupData = App.Data.GroupData;
