@@ -78,4 +78,24 @@ class AdaptTableHeight {
 
 const isIframe = window.self !== window.top;
 
-export { AdaptTableHeight, formatDateCell, formatPrice, formatPriceCell, isIframe, notifyError, useOnResize };
+
+
+function useAutoResizeIframeIfIsIframe(){
+
+    if(!isIframe){
+        return
+    }
+
+    const frameId = new URLSearchParams(window.location.search).get('frameId');
+
+    const notifyResize = (): void => {
+        const height = document.documentElement.scrollHeight;
+        parent.postMessage({ type: 'resize', height, frameId }, '*');
+    };
+
+    window.addEventListener('load', notifyResize);
+    new ResizeObserver(notifyResize).observe(document.body);
+    document.body.style.backgroundColor = 'inherit';
+}
+
+export { AdaptTableHeight, formatDateCell, formatPrice, formatPriceCell, isIframe, notifyError, useOnResize, useAutoResizeIframeIfIsIframe };

@@ -37,7 +37,9 @@ function copyIframeCode() {
 }
 
 const iframeCode = computed(() => {
-    return `<iframe src="${route('form.show', props.formDefinition.id)}" width="100%" height="600" frameborder="0"></iframe>`;
+    const embedJsUrl = window.location.origin + '/js/embed-iframe.js';
+    const widgetUrl = route('form.show', props.formDefinition.id);
+    return '<scr' + 'ipt src="' + embedJsUrl + '" data-widget-url="' + widgetUrl + '"></scr' + 'ipt>';
 });
 </script>
 

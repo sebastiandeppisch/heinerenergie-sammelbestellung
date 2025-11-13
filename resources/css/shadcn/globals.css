@@ -71,7 +71,7 @@
 }
 
 @theme inline {
-    --color-background: inherit;
+    --color-background: white;
     --color-foreground: var(--foreground);
     --color-card: var(--card);
     --color-card-foreground: var(--card-foreground);
