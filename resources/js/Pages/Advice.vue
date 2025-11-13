@@ -19,6 +19,8 @@ const props = defineProps<{
     events: AdviceEvent[];
     transferableGroups: App.Data.GroupData[];
     formSubmission: App.Data.FormSubmissionData | null;
+    adviceStatusOptions: Array<{ id: string; name: string }>;
+    adviceTypesOptions: Array<{ id: number; name: string }>;
 }>();
 
 const sharedIds = ref(props.advice.shares_ids || []);
@@ -55,7 +57,7 @@ const advisor = user.value;
                             </Button>
                         </Link>
                     </div>
-                    <AdviceForm :advice="advice" />
+                    <AdviceForm :advice="advice" :advice-status-options="adviceStatusOptions" :advice-types-options="adviceTypesOptions" />
                 </div>
 
                 <div class="content-card">

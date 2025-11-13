@@ -3,16 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Data\AdviceEventData;
+use App\Data\AdviceStatusNamesData;
 use App\Data\DataProtectedAdviceData;
 use App\Data\FormSubmissionData;
 use App\Data\GroupData;
 use App\Data\GroupMapData;
 use App\Data\UserData;
+use App\Enums\AdviceType;
 use App\Events\Advice\CommentAddedEvent;
 use App\Events\Advice\InitiativeTransferEvent;
 use App\Http\Requests\StoreAdviceCommentRequest;
 use App\Http\Requests\TransferAdviceRequest;
+use App\Http\Requests\UpdateAdviceRequest;
 use App\Models\Advice;
+use App\Models\AdviceStatus;
 use App\Models\FormSubmission;
 use App\Models\Group;
 use App\Models\User;
@@ -89,14 +93,35 @@ class AdviceController extends Controller
             $formSubmission->fields = $formSubmission->fields->filter(fn ($field) => ! in_array($field->field->label, ['Vorname', 'Nachname', 'Adresse', 'E-Mail Adresse', 'Telefonnummer', 'Möchtest Du virtuell oder bei Dir vor Ort beraten werden?']));
         }
 
+        $adviceType = $advice->type;
+
         $advice = DataProtectedAdviceData::fromModel($advice, Auth::user());
+
+        // Get advice status options (filtered by user permissions)
+        $adviceStatusOptions = AdviceStatus::all()
+            ->filter(fn (AdviceStatus $status) => Auth::user()->can('view', $status))
+            ->map(fn (AdviceStatus $status) => AdviceStatusNamesData::fromModel($status))
+            ->values()
+            ->toArray();
+
+        // Get advice type options from enum
+        $adviceTypesOptions = AdviceType::getSelectableOptions($adviceType);
 
         return Inertia::render('Advice', [
             'advice' => $advice,
             'events' => $timeline,
             'transferableGroups' => $transferableGroups,
             'formSubmission' => $formSubmission,
+            'adviceStatusOptions' => $adviceStatusOptions,
+            'adviceTypesOptions' => $adviceTypesOptions,
         ]);
+    }
+
+    public function update(Advice $advice, UpdateAdviceRequest $request)
+    {
+        $advice->update($request->validated());
+
+        return redirect()->back()->with('success', 'Beratung gespeichert');
     }
 
     public function transfer(Advice $advice, TransferAdviceRequest $request)
