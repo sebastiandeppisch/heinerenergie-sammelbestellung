@@ -51,6 +51,26 @@ class UpsertFormDefinitionRequest extends FormRequest
             'fields.*.options.*.value' => 'required|string|max:255',
             'fields.*.options.*.is_default' => 'required|boolean',
             'fields.*.options.*.is_required' => 'required|boolean',
+
+            // Advice mapping (optional)
+            'advice_mapping' => 'nullable|array',
+            'advice_mapping.enabled' => 'boolean',
+            'advice_mapping.first_name_field_id' => 'nullable|string',
+            'advice_mapping.last_name_field_id' => 'nullable|string',
+            'advice_mapping.address_field_id' => 'nullable|string',
+            'advice_mapping.email_field_id' => 'nullable|string',
+            'advice_mapping.phone_field_id' => 'nullable|string',
+            'advice_mapping.advice_type_field_id' => 'nullable|string',
+            'advice_mapping.advice_type_home_option_value' => 'nullable|string',
+            'advice_mapping.advice_type_virtual_option_value' => 'nullable|string',
+            'advice_mapping.default_group_id' => 'nullable|string',
+
+            // Map point mapping (optional)
+            'map_point_mapping' => 'nullable|array',
+            'map_point_mapping.enabled' => 'boolean',
+            'map_point_mapping.title_field_id' => 'nullable|string',
+            'map_point_mapping.description_field_id' => 'nullable|string',
+            'map_point_mapping.coordinate_field_id' => 'nullable|string',
         ];
     }
 

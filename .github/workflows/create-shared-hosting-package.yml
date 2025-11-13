@@ -4,16 +4,16 @@ on:
   release:
     types: [published]
   push:
-    branches: [TODO]
+    branches: [main]
     paths-ignore:
-      - '**.md'
-      - 'LICENSE'
+      - "**.md"
+      - "LICENSE"
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version number for this release'
+        description: "Version number for this release"
         required: true
-        default: '1.0.0'
+        default: "1.0.0"
 
 jobs:
   build:
@@ -28,7 +28,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: "8.4"
           extensions: mbstring, intl, pdo_mysql, zip, exif, pcntl, bcmath, gd
           tools: composer:v2
           coverage: none
@@ -36,8 +36,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Get version
         id: get-version
@@ -56,28 +56,28 @@ jobs:
           ./ci/build-shared-hosting-package.sh "${{ steps.get-version.outputs.version }}"
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: shared-hosting-package
-          path: heinerenergie-sammelbestellung-v${{ steps.get-version.outputs.version }}.zip
+          path: /tmp/heinerenergie-sammelbestellung-v${{ steps.get-version.outputs.version }}.zip
           retention-days: 14
 
-      - name: Upload to release
-        if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v1
-        with:
-          files: ./heinerenergie-sammelbestellung-v${{ steps.get-version.outputs.version }}.zip
+      # - name: Upload to release
+      #   if: github.event_name == 'release'
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     files: ./heinerenergie-sammelbestellung-v${{ steps.get-version.outputs.version }}.zip
 
-      - name: Create latest tag for push events
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          ZIP_NAME="heinerenergie-sammelbestellung-latest.zip"
-          cp heinerenergie-sammelbestellung-v${{ steps.get-version.outputs.version }}.zip $ZIP_NAME
+      # - name: Create latest tag for push events
+      #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      #   run: |
+      #     ZIP_NAME="heinerenergie-sammelbestellung-latest.zip"
+      #     cp heinerenergie-sammelbestellung-v${{ steps.get-version.outputs.version }}.zip $ZIP_NAME
 
-      - name: Upload latest build for push events
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@v3
-        with:
-          name: shared-hosting-package-latest
-          path: heinerenergie-sammelbestellung-latest.zip
-          retention-days: 3
+      # - name: Upload latest build for push events
+      #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: shared-hosting-package-latest
+      #     path: heinerenergie-sammelbestellung-latest.zip
+      #     retention-days: 3

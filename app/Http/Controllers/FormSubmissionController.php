@@ -36,7 +36,7 @@ class FormSubmissionController extends Controller
             })->paginate(10);
 
         return Inertia::render('FormSubmissions/Index', [
-            'formDefinitions' => FormDefinition::with(['fields'])->get()->map(fn (FormDefinition $formDefinition) => FormDefinitionData::fromModel($formDefinition)),
+            'formDefinitions' => FormDefinition::with(['fields', 'adviceCreator', 'mapPointCreator'])->get()->map(fn (FormDefinition $formDefinition) => FormDefinitionData::fromModel($formDefinition)),
             'selectedFormDefinitions' => $request->selectedFormDefinitions(),
             'sortOrder' => $request->sorting(),
             'groupByForm' => $request->groupByForm(),

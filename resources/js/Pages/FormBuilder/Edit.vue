@@ -4,6 +4,7 @@ import FormBuilderPreview from '@/components/FormBuilder/FormBuilderPreview.vue'
 import FormBuilderProperties from '@/components/FormBuilder/FormBuilderProperties.vue';
 import FormBuilderToolbox from '@/components/FormBuilder/FormBuilderToolbox.vue';
 import FormEmbedDialog from '@/components/FormBuilder/FormEmbedDialog.vue';
+import FormTargets from '@/components/FormTargets.vue';
 import Button from '@/shadcn/components/ui/button/Button.vue';
 import { Card, CardContent } from '@/shadcn/components/ui/card';
 import { Checkbox } from '@/shadcn/components/ui/checkbox';
@@ -25,7 +26,6 @@ import { route } from 'ziggy-js';
 type FormDefinitionData = App.Data.FormDefinitionData;
 type FormFieldData = App.Data.FormFieldData;
 type FieldType = App.Enums.FieldType;
-type FormFieldOptionData = App.Data.FormFieldOptionData;
 
 const props = defineProps<{
     formDefinition: FormDefinitionData | null;
@@ -42,6 +42,8 @@ const formDefinition = reactive<FormDefinitionData>(
         is_active: true,
         fields: [],
         group_id: '-1',
+        advice_mapping: null,
+        map_point_mapping: null,
     },
 );
 
@@ -58,47 +60,20 @@ function handleFieldsUpdate(fields: FormFieldData[]) {
     formDefinition.fields = fields;
 }
 
-function handleFieldChange(field: FormFieldData) {
-    const index = formDefinition.fields.findIndex((f) => f.id === field.id);
-    if (index !== -1) {
-        formDefinition.fields[index] = field;
-    }
-}
-
 function saveForm() {
     if (props.isEdit) {
         router.put(route('form-definitions.update', formDefinition.id), formDefinition, {
-            onSuccess: () => {
-                toast({
-                    title: 'Gespeichert',
-                    description: 'Formular wurde erfolgreich gespeichert',
-                    variant: 'success',
-                });
-            },
             onError: (errors) => {
-                console.log('errors', errors);
-                toast({
-                    title: 'Fehler',
-                    description: `Fehler beim Speichern des Formulars: ${Object.values(errors).join(', ')}`,
-                    variant: 'destructive',
+                Object.values(errors).forEach((error) => {
+                    toast.error(error);
                 });
             },
         });
     } else {
         router.post(route('form-definitions.store'), formDefinition, {
-            onSuccess: () => {
-                toast({
-                    title: 'Erstellt',
-                    description: 'Formular wurde erfolgreich erstellt',
-                    variant: 'success',
-                });
-            },
             onError: (errors) => {
-                console.log('errors', errors);
-                toast({
-                    title: 'Fehler',
-                    description: `Fehler beim Erstellen des Formulars: ${Object.values(errors).join(', ')}`,
-                    variant: 'destructive',
+                Object.values(errors).forEach((error) => {
+                    toast.error(error);
                 });
             },
         });
@@ -259,6 +234,7 @@ const nullsafeDescription = computed<string>({
             <TabsList>
                 <TabsTrigger value="canvas">Canvas</TabsTrigger>
                 <TabsTrigger value="preview">Vorschau</TabsTrigger>
+                <TabsTrigger value="targets">Ziele</TabsTrigger>
             </TabsList>
 
             <TabsContent value="canvas">
@@ -279,6 +255,10 @@ const nullsafeDescription = computed<string>({
 
             <TabsContent value="preview">
                 <FormBuilderPreview v-if="props.formDefinition !== null" :form-definition="props.formDefinition" class="form-builder__preview" />
+            </TabsContent>
+
+            <TabsContent value="targets">
+                <FormTargets v-model:form-definition="formDefinition" />
             </TabsContent>
         </Tabs>
     </div>

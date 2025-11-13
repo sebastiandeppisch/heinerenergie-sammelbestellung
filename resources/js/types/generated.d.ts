@@ -62,6 +62,8 @@ description: string | null;
 is_active: boolean;
 fields: Array<App.Data.FormFieldData>;
 group_id: string;
+advice_mapping: App.Data.FormToAdviceMappingData | null;
+map_point_mapping: App.Data.FormToMapPointMappingData | null;
 };
 export type FormFieldData = {
 id: string;
@@ -93,6 +95,24 @@ form_name: string;
 fields: Array<App.Data.SubmissionFieldData>;
 submitted_at: any;
 seen: boolean;
+};
+export type FormToAdviceMappingData = {
+enabled: boolean;
+first_name_field_id: string | null;
+last_name_field_id: string | null;
+address_field_id: string | null;
+email_field_id: string | null;
+phone_field_id: string | null;
+advice_type_field_id: string | null;
+advice_type_home_option_value: string | null;
+advice_type_virtual_option_value: string | null;
+default_group_id: string | null;
+};
+export type FormToMapPointMappingData = {
+enabled: boolean;
+title_field_id: string | null;
+description_field_id: string | null;
+coordinate_field_id: string | null;
 };
 export type GroupBaseData = {
 id: string;

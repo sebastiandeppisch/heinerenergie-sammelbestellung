@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Data\FormDefinitionData;
 use App\Enums\FieldType;
+use App\Http\Requests\StoreFormDefinitionFromTemplateRequest;
 use App\Http\Requests\UpsertFormDefinitionRequest;
 use App\Models\FormDefinition;
 use App\Models\Group;
@@ -17,7 +18,7 @@ class FormDefinitionController extends Controller
      */
     public function index()
     {
-        $formDefinitions = FormDefinition::with(['fields', 'fields.options', 'group'])->get()->map(fn ($formDefinition) => FormDefinitionData::fromModel($formDefinition));
+        $formDefinitions = FormDefinition::with(['fields', 'fields.options', 'group', 'adviceCreator', 'mapPointCreator'])->get()->map(fn ($formDefinition) => FormDefinitionData::fromModel($formDefinition));
 
         $groups = Group::all()->map(fn (Group $group) => [
             'id' => $group->uuid,
@@ -63,11 +64,11 @@ class FormDefinitionController extends Controller
      */
     public function edit(FormDefinition $formDefinition)
     {
-        $formDefinition->load('fields.options');
+        $formDefinition->load('fields.options', 'adviceCreator.firstNameField', 'adviceCreator.lastNameField', 'adviceCreator.addressField', 'adviceCreator.emailField', 'adviceCreator.phoneField', 'adviceCreator.adviceTypeField', 'mapPointCreator.titleField', 'mapPointCreator.descriptionField', 'mapPointCreator.coordinateField');
         $formDefinitionData = FormDefinitionData::fromModel($formDefinition);
 
         $groups = Group::all()->map(fn (Group $group) => [
-            'id' => $group->id,
+            'id' => $group->uuid,
             'name' => $group->name,
         ]);
 
@@ -98,6 +99,20 @@ class FormDefinitionController extends Controller
         app(FormDefinitionService::class)->updateFormDefinitionData($formDefinitionData);
 
         return back()->with('success', 'Formular wurde erfolgreich aktualisiert.');
+    }
+
+    /**
+     * Store a form definition from a template.
+     */
+    public function storeFromTemplate(StoreFormDefinitionFromTemplateRequest $request)
+    {
+        $formDefinition = app(FormDefinitionService::class)->createFromTemplate(
+            $request->input('template_type'),
+            $request->input('group_id')
+        );
+
+        return redirect()->route('form-definitions.edit', $formDefinition->uuid)
+            ->with('success', 'Formular wurde erfolgreich aus Vorlage erstellt.');
     }
 
     /**
