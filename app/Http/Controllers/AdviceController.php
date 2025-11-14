@@ -150,6 +150,7 @@ class AdviceController extends Controller
         $groups = Group::where('accepts_transfers', true)->get()->filter(fn (Group $group) => $group->consulting_area !== null)->map(fn (Group $group) => GroupMapData::fromModel($group))->values();
 
         $advisors = User::all()->filter(fn (User $advisor) => $user->can('view', $advisor))->map(fn ($user) => UserData::fromModel($user, false));
+
         return Inertia::render('AdvicesMap', [
             'advices' => $advices,
             'advisors' => $advisors, // TODO filter

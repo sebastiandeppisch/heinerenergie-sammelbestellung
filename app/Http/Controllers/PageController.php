@@ -47,7 +47,7 @@ class PageController extends Controller
     {
         $currentGroup = $currentGroupService->getGroup();
         $advisorInfo = $currentGroup !== null ? $currentGroup->dashboard_info : null;
-        $advisorInfo = $advisorInfo ?? Setting::get('advisorInfo');
+        $advisorInfo ??= Setting::get('advisorInfo');
 
         return Inertia::render('Dashboard', [
             'advisorInfo' => $advisorInfo,

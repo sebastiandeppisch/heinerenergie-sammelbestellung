@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { DxHtmlEditor, DxMediaResizing, DxToolbar } from 'devextreme-vue/html-editor';
-import { computed, reactive, ref } from 'vue';
 import { PageProps } from '@inertiajs/core';
 import { router, usePage } from '@inertiajs/vue3';
+import { DxHtmlEditor, DxMediaResizing, DxToolbar } from 'devextreme-vue/html-editor';
 import { Edit, Save, X } from 'lucide-vue-next';
+import { computed, reactive, ref } from 'vue';
 import { route } from 'ziggy-js';
 
 import { Button } from '@/shadcn/components/ui/button';
@@ -64,7 +64,7 @@ const save = () => {
             onError: () => {
                 state.saving = false;
             },
-        }
+        },
     );
 };
 
@@ -87,24 +87,14 @@ const cancelEdit = () => {
         <Card style="margin: 2rem">
             <CardHeader class="flex flex-row items-center justify-between">
                 <h2>Berater*innen-Infos</h2>
-                <Button
-                    v-if="canEdit && !isEditMode"
-                    variant="outline"
-                    size="icon"
-                    @click="startEdit"
-                >
+                <Button v-if="canEdit && !isEditMode" variant="outline" size="icon" @click="startEdit">
                     <Edit class="h-4 w-4" />
                 </Button>
             </CardHeader>
             <CardContent>
                 <div v-if="!isEditMode" v-html="props.advisorInfo"></div>
                 <div v-else class="space-y-4">
-                    <DxHtmlEditor
-                        v-model:value="state.value"
-                        :on-value-changed="onValueChanged"
-                        :allow-soft-line-break="true"
-                        style="width: 100%;"
-                    >
+                    <DxHtmlEditor v-model:value="state.value" :on-value-changed="onValueChanged" :allow-soft-line-break="true" style="width: 100%">
                         <DxMediaResizing :enabled="true" />
                         <DxToolbar :multiline="true" :items="toolbar" />
                     </DxHtmlEditor>
