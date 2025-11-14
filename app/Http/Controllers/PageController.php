@@ -6,6 +6,7 @@ use App\Data\GroupData;
 use App\Models\Group;
 use App\Models\Setting;
 use App\Models\User;
+use App\Services\CurrentGroupService;
 use App\Services\SessionService;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\Request;
@@ -42,10 +43,14 @@ class PageController extends Controller
         ]);
     }
 
-    public function dashboard()
+    public function dashboard(CurrentGroupService $currentGroupService)
     {
+        $currentGroup = $currentGroupService->getGroup();
+        $advisorInfo = $currentGroup !== null ? $currentGroup->dashboard_info : null;
+        $advisorInfo = $advisorInfo ?? Setting::get('advisorInfo');
+
         return Inertia::render('Dashboard', [
-            'advisorInfo' => Setting::get('advisorInfo'),
+            'advisorInfo' => $advisorInfo,
         ]);
     }
 

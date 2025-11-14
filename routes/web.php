@@ -52,6 +52,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/groups/{group}/consulting-area', [GroupController::class, 'deleteConsultingArea'])
         ->name('groups.consulting-area.delete');
 
+    Route::put('/groups/{group}/dashboard-info', [GroupController::class, 'updateDashboardInfo'])
+        ->name('groups.dashboard-info.update');
+
     Route::post('advices/{advice}/unassign', [AdviceController::class, 'unassign'])->name('advices.unassign');
     Route::post('advices/{advice}/transfer', [AdviceController::class, 'transfer'])->name('advices.transfer');
 
