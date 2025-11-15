@@ -109,7 +109,7 @@ const form = useForm<FormData>({
 // Computed property to handle null to undefined conversion for description
 const formDescription = computed({
     get: () => form.description ?? undefined,
-    set: (value) => form.description = value || null
+    set: (value) => (form.description = value || null),
 });
 
 const logoInput = ref<HTMLInputElement | null>(null);
