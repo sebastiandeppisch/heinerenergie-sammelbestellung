@@ -35,7 +35,7 @@ test('index page can be rendered without data', function () {
 });
 
 test('formbuilder index page can be rendered with empty form definitions', function () {
-    $formDefinitions = FormDefinition::factory(3)->create();
+    $formDefinitions = FormDefinition::factory(3)->create(['group_id' => $this->group->id]);
 
     $response = $this->get(route('form-definitions.index'));
 
@@ -47,7 +47,7 @@ test('formbuilder index page can be rendered with empty form definitions', funct
 });
 
 test('index page can be rendered with form definitions', function () {
-    $formDefinitions = FormDefinition::factory(3)->withFields(10)->create();
+    $formDefinitions = FormDefinition::factory(3)->withFields(10)->create(['group_id' => $this->group->id]);
 
     $response = $this->get(route('form-definitions.index'));
 

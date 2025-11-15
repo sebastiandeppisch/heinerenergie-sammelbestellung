@@ -45,7 +45,7 @@ if (! function_exists('app_logo')) {
         }
 
         // Fallback to default logo setting
-        return Setting::get('defaultLogo');
+        return Setting::get('defaultLogo') ?? 'img/logo_without_background.png';
     }
 }
 
@@ -57,6 +57,6 @@ if (! function_exists('app_favicon')) {
      */
     function app_favicon(): string
     {
-        return Setting::get('defaultFavicon');
+        return Setting::get('defaultFavicon') ?? 'favicon.ico';
     }
 }

@@ -30,11 +30,14 @@ test('form submissions can be sorted by submitted_at ascending', function () {
     $submissionA = FormSubmission::factory()->create([
         'submitted_at' => now()->subDays(1),
         'form_name' => 'Test Form',
+        'group_id' => $this->group->id,
     ]);
 
     $submissionB = FormSubmission::factory()->create([
         'submitted_at' => now(),
         'form_name' => 'Test Form',
+        'group_id' => $this->group->id,
+
     ]);
 
     $response = $this->get(route('form-submissions.index', ['sortOrder' => 'asc']));
@@ -51,11 +54,13 @@ test('form submissions are sorted by submitted_at descending by default', functi
     $submissionA = FormSubmission::factory()->create([
         'submitted_at' => now()->subDays(1),
         'form_name' => 'Test Form',
+        'group_id' => $this->group->id,
     ]);
 
     $submissionB = FormSubmission::factory()->create([
         'submitted_at' => now(),
         'form_name' => 'Test Form',
+        'group_id' => $this->group->id,
     ]);
 
     $response = $this->get(route('form-submissions.index'));
@@ -72,11 +77,13 @@ test('form submissions can be sorted by form definition', function () {
     $submissionA = FormSubmission::factory()->create([
         'submitted_at' => now(),
         'form_name' => 'Test Form',
+        'group_id' => $this->group->id,
     ]);
 
     $submissionB = FormSubmission::factory()->create([
         'submitted_at' => now()->tomorrow(),
         'form_name' => 'Another Form',
+        'group_id' => $this->group->id,
     ]);
 
     $response = $this->get(route('form-submissions.index', ['groupByForm' => 'true']));
