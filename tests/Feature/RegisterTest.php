@@ -27,15 +27,3 @@ test('the first registered is logged in and can login again', function () {
 
     $this->assertAuthenticated();
 });
-
-test('a user can login', function () {
-    User::factory()->create([
-        'email' => 'john.doe@example.com',
-        'password' => 'password',
-    ]);
-
-    $this->post('/api/login', [
-        'email' => 'john.doe@example.com',
-        'password' => 'password',
-    ])->assertStatus(200);
-});
