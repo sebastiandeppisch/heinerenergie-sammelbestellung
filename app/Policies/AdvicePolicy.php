@@ -70,8 +70,7 @@ class AdvicePolicy
 
     public function delete(User $user, Advice $advice)
     {
-        // a advice can not be deleted, only set to done
-        return false;
+        return $this->groupContext->isActingAsSystemAdmin($user);
     }
 
     public function addAdvisors(User $user, Advice $advice)

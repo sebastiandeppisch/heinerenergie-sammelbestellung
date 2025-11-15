@@ -89,13 +89,18 @@ class AdviceController extends Controller
             $formSubmission->fields = $formSubmission->fields->filter(fn ($field) => ! in_array($field->field->label, ['Vorname', 'Nachname', 'Adresse', 'E-Mail Adresse', 'Telefonnummer', 'Möchtest Du virtuell oder bei Dir vor Ort beraten werden?']));
         }
 
+        $canDeleteAdvice = Auth::user()->can('delete', $advice);
+
+
         $advice = DataProtectedAdviceData::fromModel($advice, Auth::user());
+
 
         return Inertia::render('Advice', [
             'advice' => $advice,
             'events' => $timeline,
             'transferableGroups' => $transferableGroups,
             'formSubmission' => $formSubmission,
+            'canDeleteAdvice' => $canDeleteAdvice,
         ]);
     }
 
@@ -156,5 +161,14 @@ class AdviceController extends Controller
             'advisors' => $advisors, // TODO filter
             'groups' => $groups,
         ]);
+    }
+
+    public function delete(Advice $advice)
+    {
+        $this->authorize('delete', $advice);
+
+        $advice->delete();
+
+        return redirect()->route('advices')->with('success', 'Die Beratung wurde erfolgreich gelöscht.');
     }
 }
