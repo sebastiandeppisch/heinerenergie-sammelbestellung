@@ -35,7 +35,7 @@ class InstallServiceProvider extends ServiceProvider
         }
 
         // TODO this is just a hack, find a better solution
-        if (strlen((string)config('app.key')) === 0) {
+        if (strlen((string) config('app.key')) === 0) {
             Artisan::call('key:generate --force');
         }
 
