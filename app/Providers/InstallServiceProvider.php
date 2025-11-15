@@ -35,7 +35,7 @@ class InstallServiceProvider extends ServiceProvider
         }
 
         // TODO this is just a hack, find a better solution
-        if (strlen((string) env('APP_KEY')) === 0) {
+        if (strlen((string)config('app.key')) === 0) {
             Artisan::call('key:generate --force');
         }
 
@@ -43,8 +43,8 @@ class InstallServiceProvider extends ServiceProvider
             Artisan::call('migrate --force --seed');
         }
 
-        if (Request::root() !== env('APP_URL')) {
-            echo 'Du musst die APP_URL in der .env Datei anpassen. Aktuell ist sie: <b>'.env('APP_URL').'</b> Bitte ändere sie auf die URL, unter der du die Anwendung erreichen möchtest, vermutlich <b>'.Request::root().'</b>.';
+        if (Request::root() !== config('app.url')) {
+            echo 'Du musst die APP_URL in der .env Datei anpassen. Aktuell ist sie: <b>'.config('app.url').'</b> Bitte ändere sie auf die URL, unter der du die Anwendung erreichen möchtest, vermutlich <b>'.Request::root().'</b>.';
             exit;
         }
     }

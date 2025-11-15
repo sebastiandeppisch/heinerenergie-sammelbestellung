@@ -52,8 +52,6 @@ if (! function_exists('app_logo')) {
 if (! function_exists('app_favicon')) {
     /**
      * Get the application favicon path.
-     *
-     * @return string|null
      */
     function app_favicon(): string
     {

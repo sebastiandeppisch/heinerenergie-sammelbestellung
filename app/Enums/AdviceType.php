@@ -12,12 +12,12 @@ enum AdviceType: int
     {
         return collect(self::cases())
             ->filter(function (self $type) use ($currentType) {
-                if ($type === self::Home || $type === self::Virtual) {
+
+                if ($type !== self::DirectOrder) {
                     return true;
                 }
 
-                // Only include DirectOrder if the advice already has this type
-                return $type === self::DirectOrder && $currentType === self::DirectOrder;
+                return $currentType === self::DirectOrder;
             })
             ->map(fn (self $type, int $key) => [
                 'id' => $type->value,
