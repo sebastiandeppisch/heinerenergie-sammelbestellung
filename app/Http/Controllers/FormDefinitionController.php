@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Context\GroupContextContract;
 use App\Data\FormDefinitionData;
 use App\Enums\FieldType;
 use App\Http\Requests\StoreFormDefinitionFromTemplateRequest;
@@ -16,9 +17,15 @@ class FormDefinitionController extends Controller
     /**
      * Display a listing of the form definitions.
      */
-    public function index()
+    public function index(GroupContextContract $groupContext)
     {
-        $formDefinitions = FormDefinition::with(['fields', 'fields.options', 'group', 'adviceCreator', 'mapPointCreator'])->get()->map(fn ($formDefinition) => FormDefinitionData::fromModel($formDefinition));
+        $formDefinitions = FormDefinition::with(['fields', 'fields.options', 'group', 'adviceCreator', 'mapPointCreator']);
+
+        if($groupContext->getCurrentGroup() !== null) {
+            $formDefinitions = $formDefinitions->where('group_id', $groupContext->getCurrentGroup()->id);
+        }
+
+        $formDefinitions = $formDefinitions->get()->map(fn ($formDefinition) => FormDefinitionData::fromModel($formDefinition));
 
         $groups = Group::all()->map(fn (Group $group) => [
             'id' => $group->uuid,
