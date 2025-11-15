@@ -19,7 +19,7 @@
                 <Label for="description">Beschreibung</Label>
                 <Textarea
                     id="description"
-                    v-model="form.description"
+                    v-model="formDescription"
                     class="min-h-[100px]"
                     :disabled="!canEdit"
                     :class="{ 'border-destructive': form.errors.description }"
@@ -104,6 +104,12 @@ const form = useForm<FormData>({
     logo: null,
     remove_logo: false,
     _method: 'PUT',
+});
+
+// Computed property to handle null to undefined conversion for description
+const formDescription = computed({
+    get: () => form.description ?? undefined,
+    set: (value) => form.description = value || null
 });
 
 const logoInput = ref<HTMLInputElement | null>(null);
