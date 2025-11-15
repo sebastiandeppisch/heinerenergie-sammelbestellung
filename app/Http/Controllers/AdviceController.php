@@ -91,9 +91,7 @@ class AdviceController extends Controller
 
         $canDeleteAdvice = Auth::user()->can('delete', $advice);
 
-
         $advice = DataProtectedAdviceData::fromModel($advice, Auth::user());
-
 
         return Inertia::render('Advice', [
             'advice' => $advice,

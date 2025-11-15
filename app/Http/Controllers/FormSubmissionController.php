@@ -24,7 +24,7 @@ class FormSubmissionController extends Controller
             $formsubmissions = $formsubmissions->orderBy('form_definition_id');
         }
 
-        if($groupContext->getCurrentGroup() !== null) {
+        if ($groupContext->getCurrentGroup() !== null) {
             $formsubmissions = $formsubmissions->where('group_id', $groupContext->getCurrentGroup()->id);
         }
 
@@ -43,12 +43,11 @@ class FormSubmissionController extends Controller
 
         $formDefinitions = FormDefinition::with(['fields', 'adviceCreator', 'mapPointCreator']);
 
-        if($groupContext->getCurrentGroup() !== null) {
+        if ($groupContext->getCurrentGroup() !== null) {
             $formDefinitions = $formDefinitions->where('group_id', $groupContext->getCurrentGroup()->id);
         }
 
         $formDefinitions = $formDefinitions->get()->map(fn (FormDefinition $formDefinition) => FormDefinitionData::fromModel($formDefinition));
-
 
         $selectedFormDefinitions = FormDefinition::whereIn('id', $request->selectedFormDefinitions())->pluck('uuid')->toArray();
 

@@ -21,7 +21,7 @@ class FormDefinitionController extends Controller
     {
         $formDefinitions = FormDefinition::with(['fields', 'fields.options', 'group', 'adviceCreator', 'mapPointCreator']);
 
-        if($groupContext->getCurrentGroup() !== null) {
+        if ($groupContext->getCurrentGroup() !== null) {
             $formDefinitions = $formDefinitions->where('group_id', $groupContext->getCurrentGroup()->id);
         }
 
