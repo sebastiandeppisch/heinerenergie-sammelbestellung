@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Models\User;
 use App\Services\SessionService;
+use Auth;
 use Closure;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\Request;
@@ -17,7 +18,7 @@ class RedirectWhenGroupIsMissing
 
     public function handle(Request $request, Closure $next)
     {
-        if ($this->user && $this->sessionService->isGroupMissing()) {
+        if ($this->user && Auth::check() && $this->sessionService->isGroupMissing()) {
             $groups = $this->user->groups;
 
             $whitelistedRoutes = [
