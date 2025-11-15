@@ -37,12 +37,7 @@ const submitComment = () => {
         <div class="new-comment-container">
             <h4>Neue Notiz hinzufügen</h4>
             <form @submit.prevent="submitComment">
-                <Textarea
-                    v-model="form.comment"
-                    placeholder="Neue Notiz..."
-                    class="comment-textarea min-h-[100px]"
-                    :disabled="form.processing"
-                />
+                <Textarea v-model="form.comment" placeholder="Neue Notiz..." class="comment-textarea min-h-[100px]" :disabled="form.processing" />
                 <Button variant="default" class="submit-comment-btn" :disabled="form.processing || !form.comment.trim()" @click="submitComment">
                     <MessageSquarePlus class="h-4 w-4" />
                     Notiz hinzufügen

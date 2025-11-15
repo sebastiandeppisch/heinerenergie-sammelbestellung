@@ -17,7 +17,13 @@
             <!-- Group description -->
             <div class="space-y-2">
                 <Label for="description">Beschreibung</Label>
-                <Textarea id="description" v-model="form.description" class="min-h-[100px]" :disabled="!canEdit" :class="{ 'border-destructive': form.errors.description }" />
+                <Textarea
+                    id="description"
+                    v-model="form.description"
+                    class="min-h-[100px]"
+                    :disabled="!canEdit"
+                    :class="{ 'border-destructive': form.errors.description }"
+                />
                 <div v-if="form.errors.description" class="text-sm text-red-500">{{ form.errors.description }}</div>
             </div>
 

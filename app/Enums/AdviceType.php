@@ -15,6 +15,7 @@ enum AdviceType: int
                 if ($type === self::Home || $type === self::Virtual) {
                     return true;
                 }
+
                 // Only include DirectOrder if the advice already has this type
                 return $type === self::DirectOrder && $currentType === self::DirectOrder;
             })

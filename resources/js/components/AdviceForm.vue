@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { useForm } from '@inertiajs/vue3';
 import { Button } from '@/shadcn/components/ui/button';
 import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/shadcn/components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { Textarea } from '@/shadcn/components/ui/textarea';
-import { Home, Phone, ShoppingCart, Save } from 'lucide-vue-next';
-import { route } from 'ziggy-js';
+import { useForm } from '@inertiajs/vue3';
+import { Home, Phone, Save, ShoppingCart } from 'lucide-vue-next';
 import { toast } from 'vue-sonner';
+import { route } from 'ziggy-js';
 
 const props = defineProps<{
     advice: App.Data.DataProtectedAdviceData;
@@ -144,7 +144,7 @@ function onSubmit() {
                         <RadioGroup v-model="form.type" class="flex flex-row gap-4">
                             <div v-for="type in props.adviceTypesOptions" :key="type.id" class="flex items-center space-x-2">
                                 <RadioGroupItem :value="type.id" :id="`type_${type.id}`" />
-                                <Label :for="`type_${type.id}`" class="flex items-center gap-2 cursor-pointer">
+                                <Label :for="`type_${type.id}`" class="flex cursor-pointer items-center gap-2">
                                     <component :is="getAdviceTypeIcon(type.id)" class="h-5 w-5" :title="getAdviceTypeHelpText(type.id)" />
                                     <span>{{ type.name }}</span>
                                 </Label>

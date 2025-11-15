@@ -15,14 +15,14 @@
             <!-- Content section -->
             <div class="flex gap-6">
                 <!-- Tree view card -->
-                <div class="shrink-0 overflow-hidden bg-white shadow-sm sm:rounded-lg grow-1">
+                <div class="shrink-0 grow-1 overflow-hidden bg-white shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <GroupTree :groups="props.groupTreeItems" :selected-group="selectedGroup" />
                     </div>
                 </div>
 
                 <!-- Details card -->
-                <div v-if="selectedGroup" class="flex-grow overflow-hidden bg-white shadow-sm sm:rounded-lg grow-2">
+                <div v-if="selectedGroup" class="flex-grow grow-2 overflow-hidden bg-white shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <Tabs v-model="selectedTab" @update:model-value="onTabChanged">
                             <TabsList class="grid w-full grid-cols-4" v-if="canEditGroup">
@@ -53,7 +53,7 @@
                                     Beratungsgebiet
                                 </TabsTrigger>
                             </TabsList>
-                            
+
                             <TabsContent value="stammdaten">
                                 <GroupDetails :group="selectedGroup" :can-edit="canEditGroup" />
                             </TabsContent>
@@ -97,7 +97,7 @@ import { Button } from '@/shadcn/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';
 import AdviceStatusGroup from '@/views/AdviceStatusGroup.vue';
 import { DxPopup } from 'devextreme-vue/popup';
-import { Info, Map, Table, Users, Plus } from 'lucide-vue-next';
+import { Info, Map, Plus, Table, Users } from 'lucide-vue-next';
 import { computed, onMounted, ref, watch } from 'vue';
 
 type GroupsIndexData = {
@@ -123,9 +123,7 @@ const selectedTab = ref<string>('stammdaten');
 const onTabChanged = (value: string | number) => {
     const tabValue = String(value);
     selectedTab.value = tabValue;
-    const tabIndex = canEditGroup.value 
-        ? tabValues.indexOf(tabValue)
-        : tabValuesWithoutEdit.indexOf(tabValue);
+    const tabIndex = canEditGroup.value ? tabValues.indexOf(tabValue) : tabValuesWithoutEdit.indexOf(tabValue);
     if (tabIndex !== -1) {
         window.location.hash = `tab=${tabIndex}`;
     }
@@ -155,9 +153,12 @@ onMounted(() => {
 });
 
 // Watch for hash changes
-watch(() => window.location.hash, () => {
-    selectedTab.value = getTabValueFromHash();
-});
+watch(
+    () => window.location.hash,
+    () => {
+        selectedTab.value = getTabValueFromHash();
+    },
+);
 
 const polygon = computed<App.ValueObjects.Polygon>(() => {
     if (props.polygon === null) {

@@ -3,7 +3,7 @@ import { Button } from '@/shadcn/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shadcn/components/ui/dropdown-menu';
 import { PageProps } from '@inertiajs/core';
 import { router, usePage } from '@inertiajs/vue3';
-import { Map, Mail, Phone, Unlock, ChevronDown, Trash } from 'lucide-vue-next';
+import { ChevronDown, Mail, Map, Phone, Trash, Unlock } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { route } from 'ziggy-js';
 import { user } from '../authHelper';

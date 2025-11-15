@@ -106,7 +106,7 @@ const advisor = user.value;
     padding: 16px 24px;
     position: sticky;
     top: 0;
-   /* z-index: 100;*/
+    /* z-index: 100;*/
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 

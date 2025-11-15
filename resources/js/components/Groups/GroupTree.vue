@@ -20,7 +20,7 @@
                     >
                         <template #default="{ isExpanded, isSelected, handleToggle, handleSelect }">
                             <div
-                                class="flex items-center py-1.5 pl-1 cursor-pointer hover:bg-gray-50 rounded"
+                                class="flex cursor-pointer items-center rounded py-1.5 pl-1 hover:bg-gray-50"
                                 :class="{ 'bg-blue-50': isSelected }"
                                 @click="handleSelect"
                             >
@@ -73,8 +73,8 @@
 </template>
 
 <script setup lang="ts">
-import { TreeItem, TreeRoot } from 'reka-ui';
 import { router } from '@inertiajs/vue3';
+import { TreeItem, TreeRoot } from 'reka-ui';
 import { computed, ref } from 'vue';
 import { route } from 'ziggy-js';
 
@@ -86,9 +86,7 @@ const props = defineProps<{
     selectedGroup: GroupData | null;
 }>();
 
-const selectedItem = ref<Record<string, any> | undefined>(
-    props.selectedGroup ? (props.selectedGroup as unknown as Record<string, any>) : undefined
-);
+const selectedItem = ref<Record<string, any> | undefined>(props.selectedGroup ? (props.selectedGroup as unknown as Record<string, any>) : undefined);
 
 // Get root items (items without parent_id or with null parent_id)
 const rootItems = computed(() => {
