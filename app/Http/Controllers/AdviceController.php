@@ -94,6 +94,7 @@ class AdviceController extends Controller
         }
 
         $adviceType = $advice->type;
+        $canDeleteAdvice = Auth::user()->can('delete', $advice);
 
         $advice = DataProtectedAdviceData::fromModel($advice, Auth::user());
 
@@ -114,6 +115,7 @@ class AdviceController extends Controller
             'formSubmission' => $formSubmission,
             'adviceStatusOptions' => $adviceStatusOptions,
             'adviceTypesOptions' => $adviceTypesOptions,
+            'canDeleteAdvice' => $canDeleteAdvice,
         ]);
     }
 
@@ -174,10 +176,21 @@ class AdviceController extends Controller
 
         $groups = Group::where('accepts_transfers', true)->get()->filter(fn (Group $group) => $group->consulting_area !== null)->map(fn (Group $group) => GroupMapData::fromModel($group))->values();
 
+        $advisors = User::all()->filter(fn (User $advisor) => $user->can('view', $advisor))->map(fn ($user) => UserData::fromModel($user, false));
+
         return Inertia::render('AdvicesMap', [
             'advices' => $advices,
-            'advisors' => User::all()->map(fn ($user) => UserData::fromModel($user, false)), // TODO filter
+            'advisors' => $advisors, // TODO filter
             'groups' => $groups,
         ]);
+    }
+
+    public function delete(Advice $advice)
+    {
+        $this->authorize('delete', $advice);
+
+        $advice->delete();
+
+        return redirect()->route('advices')->with('success', 'Die Beratung wurde erfolgreich gelöscht.');
     }
 }

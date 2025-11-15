@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\FormDefinition;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -24,7 +25,7 @@ class IndexFormSubmissionRequest extends FormRequest
     {
         return [
             'selectedFormDefinitions' => 'array',
-            'selectedFormDefinitions.*' => 'string|exists:form_definitions,id',
+            'selectedFormDefinitions.*' => 'string|exists:form_definitions,uuid',
             'sortOrder' => 'string|in:asc,desc',
             'groupByForm' => 'string|in:true,false',
             'dateFrom' => 'nullable|date',
@@ -34,7 +35,7 @@ class IndexFormSubmissionRequest extends FormRequest
 
     public function selectedFormDefinitions(): array
     {
-        return $this->input('selectedFormDefinitions', []);
+        return FormDefinition::whereIn('uuid', $this->input('selectedFormDefinitions', []))->pluck('id')->toArray();
     }
 
     public function sorting(): string

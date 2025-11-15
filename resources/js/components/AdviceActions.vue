@@ -3,7 +3,7 @@ import { Button } from '@/shadcn/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shadcn/components/ui/dropdown-menu';
 import { PageProps } from '@inertiajs/core';
 import { router, usePage } from '@inertiajs/vue3';
-import { Map, Mail, Phone, Unlock, ChevronDown } from 'lucide-vue-next';
+import { Map, Mail, Phone, Unlock, ChevronDown, Trash } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { route } from 'ziggy-js';
 import { user } from '../authHelper';
@@ -17,6 +17,7 @@ const props = defineProps<{
         long: number | null;
     };
     transferableGroups: App.Data.GroupData[];
+    canDeleteAdvice: boolean;
 }>();
 
 const navigationTypes = [
@@ -79,6 +80,16 @@ const showUnassignButton = computed(() => {
     const userId = user.value.id;
     return props.advice.advisor_id === userId;
 });
+
+function deleteAdvice() {
+    if (confirm('Möchtest Du diese Beratung wirklich löschen?')) {
+        router.delete(route('advices.delete', props.advice.id), {
+            onSuccess: () => {
+                router.visit(route('advices'));
+            },
+        });
+    }
+}
 </script>
 
 <template>
@@ -110,5 +121,10 @@ const showUnassignButton = computed(() => {
             Beratung freigeben
         </Button>
         <AdviceTransfer :advice-id="advice.id" :transferable-groups="transferableGroups" />
+
+        <Button v-if="canDeleteAdvice" variant="destructive" @click="deleteAdvice">
+            <Trash class="h-4 w-4" />
+            Beratung löschen
+        </Button>
     </div>
 </template>

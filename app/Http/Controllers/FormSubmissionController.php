@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Context\GroupContextContract;
 use App\Data\FormDefinitionData;
 use App\Data\FormSubmissionData;
 use App\Data\PaginationData;
@@ -14,7 +15,7 @@ use Inertia\Inertia;
 
 class FormSubmissionController extends Controller
 {
-    public function index(IndexFormSubmissionRequest $request)
+    public function index(IndexFormSubmissionRequest $request, GroupContextContract $groupContext)
     {
         $formsubmissions = FormSubmission::query()
             ->with(['submissionFields', 'submissionFields.formField', 'submissionFields.formField.options', 'submissionFields.options']);
@@ -22,6 +23,11 @@ class FormSubmissionController extends Controller
         if ($request->groupByForm()) {
             $formsubmissions = $formsubmissions->orderBy('form_definition_id');
         }
+
+        if ($groupContext->getCurrentGroup() !== null) {
+            $formsubmissions = $formsubmissions->where('group_id', $groupContext->getCurrentGroup()->id);
+        }
+
         $formsubmissions = $formsubmissions->orderBy('submitted_at', $request->sorting())
             ->where(function ($query) use ($request) {
                 if ($request->dateFrom()) {
@@ -35,9 +41,19 @@ class FormSubmissionController extends Controller
                 $query->whereIn('form_definition_id', $request->selectedFormDefinitions());
             })->paginate(10);
 
+        $formDefinitions = FormDefinition::with(['fields', 'adviceCreator', 'mapPointCreator']);
+
+        if ($groupContext->getCurrentGroup() !== null) {
+            $formDefinitions = $formDefinitions->where('group_id', $groupContext->getCurrentGroup()->id);
+        }
+
+        $formDefinitions = $formDefinitions->get()->map(fn (FormDefinition $formDefinition) => FormDefinitionData::fromModel($formDefinition));
+
+        $selectedFormDefinitions = FormDefinition::whereIn('id', $request->selectedFormDefinitions())->pluck('uuid')->toArray();
+
         return Inertia::render('FormSubmissions/Index', [
-            'formDefinitions' => FormDefinition::with(['fields', 'adviceCreator', 'mapPointCreator'])->get()->map(fn (FormDefinition $formDefinition) => FormDefinitionData::fromModel($formDefinition)),
-            'selectedFormDefinitions' => $request->selectedFormDefinitions(),
+            'formDefinitions' => $formDefinitions,
+            'selectedFormDefinitions' => $selectedFormDefinitions,
             'sortOrder' => $request->sorting(),
             'groupByForm' => $request->groupByForm(),
             'dateTo' => $request->dateTo(),

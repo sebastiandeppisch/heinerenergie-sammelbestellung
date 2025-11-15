@@ -8,6 +8,7 @@ use App\Data\Pages\GroupsIndexData;
 use App\Http\Requests\Group\StoreGroupRequest;
 use App\Http\Requests\Group\UpdateGroupRequest;
 use App\Http\Requests\UpdateGroupConsultingAreaRequest;
+use App\Http\Requests\UpdateGroupDashboardInfoRequest;
 use App\Models\Group;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
@@ -184,5 +185,13 @@ class GroupController extends Controller
         $group->save();
 
         return redirect()->back()->with('warning', 'Beratungsgebiet wurde erfolgreich gelöscht.');
+    }
+
+    public function updateDashboardInfo(UpdateGroupDashboardInfoRequest $request, Group $group)
+    {
+        $group->dashboard_info = $request->validated('dashboard_info');
+        $group->save();
+
+        return redirect()->back()->with('success', 'Dashboard-Info wurde erfolgreich aktualisiert.');
     }
 }

@@ -21,6 +21,7 @@ const props = defineProps<{
     formSubmission: App.Data.FormSubmissionData | null;
     adviceStatusOptions: Array<{ id: string; name: string }>;
     adviceTypesOptions: Array<{ id: number; name: string }>;
+    canDeleteAdvice: boolean;
 }>();
 
 const sharedIds = ref(props.advice.shares_ids || []);
@@ -39,7 +40,12 @@ const advisor = user.value;
                     </h2>
                 </div>
                 <div class="header-actions">
-                    <AdviceActions :advice="advice" :advisor="advisor" :transferable-groups="transferableGroups" />
+                    <AdviceActions
+                        :advice="advice"
+                        :advisor="advisor"
+                        :transferable-groups="transferableGroups"
+                        :can-delete-advice="props.canDeleteAdvice"
+                    />
                 </div>
             </div>
         </div>
