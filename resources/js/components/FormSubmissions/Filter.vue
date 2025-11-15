@@ -8,12 +8,12 @@
                 </div>
             </div>
 
-            <div>
+            <!--<div>
                 <label class="mb-2 block text-sm font-medium">Zeitraum</label>
                 <div class="space-y-2">
                     <div class="flex items-center gap-2">TODO Datepicker</div>
                 </div>
-            </div>
+            </div>-->
 
             <div class="space-y-3">
                 <div>
