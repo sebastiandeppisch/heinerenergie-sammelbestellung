@@ -33,7 +33,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('advices/{advice}/advisors', [AdviceController::class, 'setAdvisors']);
 
-    Route::apiResource('settings', SettingController::class)->except(['store', 'destroy']);
+    Route::apiResource('settings', SettingController::class)->except(['store', 'destroy', 'index']);
 
     Route::post('upload', UploadController::class);
     Route::post('profile/picture', [UserController::class, 'picture']);

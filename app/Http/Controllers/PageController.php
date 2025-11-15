@@ -61,7 +61,9 @@ class PageController extends Controller
 
     public function settings()
     {
-        return Inertia::render('Settings');
+        return Inertia::render('Settings', [
+            'settings' => Setting::all(),
+        ]);
     }
 
     public function resetPassword()
