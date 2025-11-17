@@ -130,6 +130,7 @@ logo_path: string | null;
 parent_id: string | null;
 accepts_transfers: boolean;
 userCanActAsAdmin: boolean;
+new_advice_mail: string | null;
 };
 export type GroupMapData = {
 polygon: App.ValueObjects.Polygon;

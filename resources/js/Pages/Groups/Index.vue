@@ -25,7 +25,7 @@
                 <div v-if="selectedGroup" class="flex-grow grow-2 overflow-hidden bg-white shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <Tabs v-model="selectedTab" @update:model-value="onTabChanged">
-                            <TabsList class="grid w-full grid-cols-4" v-if="canEditGroup">
+                            <TabsList class="grid w-full grid-cols-5" v-if="canEditGroup">
                                 <TabsTrigger value="stammdaten" class="flex items-center gap-2">
                                     <Info class="h-4 w-4" />
                                     Stammdaten
@@ -41,6 +41,10 @@
                                 <TabsTrigger value="beratungszustaende" class="flex items-center gap-2">
                                     <Table class="h-4 w-4" />
                                     Beratungszustände
+                                </TabsTrigger>
+                                <TabsTrigger value="email" class="flex items-center gap-2">
+                                    <Mail class="h-4 w-4" />
+                                    E-Mail
                                 </TabsTrigger>
                             </TabsList>
                             <TabsList class="grid w-full grid-cols-2" v-else>
@@ -65,6 +69,9 @@
                             </TabsContent>
                             <TabsContent value="beratungszustaende" v-if="canEditGroup">
                                 <AdviceStatusGroup :group="selectedGroup" :groups="groups" />
+                            </TabsContent>
+                            <TabsContent value="email" v-if="canEditGroup">
+                                <GroupNewAdviceMail :group="selectedGroup" :can-edit="canEditGroup" />
                             </TabsContent>
                         </Tabs>
                     </div>
@@ -91,13 +98,14 @@
 import ConsultingAreaForm from '@/components/ConsultingArea/ConsultingAreaForm.vue';
 import CreateGroupForm from '@/components/Groups/CreateGroupForm.vue';
 import GroupDetails from '@/components/Groups/GroupDetails.vue';
+import GroupNewAdviceMail from '@/components/Groups/GroupNewAdviceMail.vue';
 import GroupTree from '@/components/Groups/GroupTree.vue';
 import GroupUsers from '@/components/Groups/GroupUsers.vue';
 import { Button } from '@/shadcn/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';
 import AdviceStatusGroup from '@/views/AdviceStatusGroup.vue';
 import { DxPopup } from 'devextreme-vue/popup';
-import { Info, Map, Plus, Table, Users } from 'lucide-vue-next';
+import { Info, Mail, Map, Plus, Table, Users } from 'lucide-vue-next';
 import { computed, onMounted, ref, watch } from 'vue';
 
 type GroupsIndexData = {
@@ -115,7 +123,7 @@ const props = defineProps<GroupsIndexData>();
 const showCreateModal = ref(false);
 
 // Tab values mapping
-const tabValues = ['stammdaten', 'berater', 'beratungsgebiet', 'beratungszustaende'];
+const tabValues = ['stammdaten', 'berater', 'beratungsgebiet', 'beratungszustaende', 'email'];
 const tabValuesWithoutEdit = ['stammdaten', 'beratungsgebiet'];
 
 const selectedTab = ref<string>('stammdaten');

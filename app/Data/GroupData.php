@@ -21,6 +21,7 @@ class GroupData extends Data
         public ?string $parent_id,
         public bool $accepts_transfers,
         public bool $userCanActAsAdmin,
+        public ?string $new_advice_mail,
         ?int $users_count,
         ?int $advices_count,
     ) {
@@ -44,6 +45,7 @@ class GroupData extends Data
             parent_id: $group->parent ? $group->parent->uuid : null,
             accepts_transfers: $group->accepts_transfers,
             userCanActAsAdmin: $canActAsAdmin,
+            new_advice_mail: $group->new_advice_mail,
             users_count: $group->users()->count(),
             advices_count: $group->advices()->count(),
         );

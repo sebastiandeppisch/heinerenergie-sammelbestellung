@@ -23,6 +23,7 @@ class Group extends Model
         'name',
         'description',
         'dashboard_info',
+        'new_advice_mail',
         'logo_path',
         'parent_id',
         'accepts_transfers',

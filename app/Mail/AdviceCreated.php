@@ -23,7 +23,8 @@ class AdviceCreated extends Mailable implements ShouldQueue
      */
     public function __construct(public Advice $advice)
     {
-        $this->adviceInfo = (string) Setting::get('newAdviceMail');
+        $group = $advice->group;
+        $this->adviceInfo = $group?->new_advice_mail ?? (string) Setting::get('newAdviceMail');
     }
 
     /**

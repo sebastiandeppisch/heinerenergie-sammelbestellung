@@ -59,6 +59,9 @@ Route::middleware('auth')->group(function () {
     Route::put('/groups/{group}/dashboard-info', [GroupController::class, 'updateDashboardInfo'])
         ->name('groups.dashboard-info.update');
 
+    Route::put('/groups/{group}/new-advice-mail', [GroupController::class, 'updateNewAdviceMail'])
+        ->name('groups.new-advice-mail.update');
+
     Route::post('advices/{advice}/unassign', [AdviceController::class, 'unassign'])->name('advices.unassign');
     Route::post('advices/{advice}/transfer', [AdviceController::class, 'transfer'])->name('advices.transfer');
 

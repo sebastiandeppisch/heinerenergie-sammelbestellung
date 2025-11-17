@@ -9,6 +9,7 @@ use App\Http\Requests\Group\StoreGroupRequest;
 use App\Http\Requests\Group\UpdateGroupRequest;
 use App\Http\Requests\UpdateGroupConsultingAreaRequest;
 use App\Http\Requests\UpdateGroupDashboardInfoRequest;
+use App\Http\Requests\UpdateGroupNewAdviceMailRequest;
 use App\Models\Group;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
@@ -193,5 +194,13 @@ class GroupController extends Controller
         $group->save();
 
         return redirect()->back()->with('success', 'Dashboard-Info wurde erfolgreich aktualisiert.');
+    }
+
+    public function updateNewAdviceMail(UpdateGroupNewAdviceMailRequest $request, Group $group)
+    {
+        $group->new_advice_mail = $request->validated('new_advice_mail');
+        $group->save();
+
+        return redirect()->back()->with('success', 'E-Mail-Vorlage wurde erfolgreich aktualisiert.');
     }
 }
