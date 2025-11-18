@@ -3,16 +3,9 @@
         <div class="space-y-4">
             <div class="space-y-2">
                 <Label for="new_advice_mail">E-Mail-Vorlage für neue Beratungen</Label>
-                <p class="text-sm text-gray-500">
-                    Dieser Text wird als E-Mail versendet, wenn eine neue Beratung erstellt wird.
-                </p>
+                <p class="text-sm text-gray-500">Dieser Text wird als E-Mail versendet, wenn eine neue Beratung erstellt wird.</p>
             </div>
-            <DxHtmlEditor
-                v-model:value="state.value"
-                :on-value-changed="onValueChanged"
-                :allow-soft-line-break="true"
-                :read-only="!canEdit"
-            >
+            <DxHtmlEditor v-model:value="state.value" :on-value-changed="onValueChanged" :allow-soft-line-break="true" :read-only="!canEdit">
                 <DxMediaResizing :enabled="true" />
                 <DxToolbar :multiline="true" :items="toolbar" />
                 <template #saveButton>
@@ -34,12 +27,12 @@
 </template>
 
 <script setup lang="ts">
-import { DxHtmlEditor, DxMediaResizing, DxToolbar } from 'devextreme-vue/html-editor';
-import { reactive, watch } from 'vue';
 import { Button } from '@/shadcn/components/ui/button';
 import { Label } from '@/shadcn/components/ui/label';
 import { useForm } from '@inertiajs/vue3';
+import { DxHtmlEditor, DxMediaResizing, DxToolbar } from 'devextreme-vue/html-editor';
 import { Save } from 'lucide-vue-next';
+import { reactive, watch } from 'vue';
 import { route } from 'ziggy-js';
 
 import editorToolbar from '../../htmlEditorToolbar.json';
@@ -78,7 +71,7 @@ watch(
     (newValue) => {
         state.value = newValue || '';
         state.dirty = false;
-    }
+    },
 );
 
 const save = () => {
@@ -98,4 +91,3 @@ const save = () => {
     });
 };
 </script>
-
