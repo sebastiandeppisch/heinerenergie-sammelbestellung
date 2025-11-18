@@ -31,7 +31,7 @@ class UpdateAdviceRequest extends FormRequest
             'first_name' => 'string|max:100',
             'last_name' => 'string|max:100',
             'email' => 'email|max:100',
-            'phone' => 'string|max:100',
+            'phone' => 'nullable|string|max:100',
             'street' => 'string|max:100',
             'street_number' => 'string|max:100',
             'zip' => 'numeric|digits:5',

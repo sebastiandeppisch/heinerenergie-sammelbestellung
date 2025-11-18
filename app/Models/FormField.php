@@ -84,7 +84,7 @@ class FormField extends Model
             FieldType::TEXTAREA => ['string'],
             FieldType::NUMBER => ['numeric'],
             FieldType::EMAIL => ['email'],
-            FieldType::PHONE => ['string', 'regex:/^[\+]?[0-9\s\-\(\)]+$/'],
+            FieldType::PHONE => ['nullable', 'regex:/^[\+]?[0-9\s\-\(\)]+$/'],
             // TODO fix array validation FieldType::SELECT => [$inRule],
             FieldType::RADIO => [$inRule],
             // TODO fix array validation FieldType::CHECKBOX => [$inRule],
