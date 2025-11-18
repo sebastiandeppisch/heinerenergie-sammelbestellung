@@ -14,7 +14,7 @@ import {
     SidebarMenuItem,
 } from '@/shadcn/components/ui/sidebar';
 import { Link } from '@inertiajs/vue3';
-import { FileText, Github, LayoutGrid, Map, MessageSquare, Settings, Table, User, UserCog, Users } from 'lucide-vue-next';
+import { Database, FileText, Github, LayoutGrid, Map, MessageSquare, Settings, Table, User, UserCog, Users } from 'lucide-vue-next';
 import { route } from 'ziggy-js';
 import AppLogo from './AppLogo.vue';
 const mainNavItems: NavItem[] = [
@@ -95,6 +95,12 @@ const mainNavItems: NavItem[] = [
         title: 'Einstellungen',
         href: '/settings',
         icon: Settings,
+        admin: true,
+    },
+    {
+        title: 'System-Admin',
+        href: '/system-admin',
+        icon: Database,
         admin: true,
     },
 ];

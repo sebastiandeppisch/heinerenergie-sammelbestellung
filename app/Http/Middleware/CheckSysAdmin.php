@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Context\GroupContextContract;
 use Closure;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;
@@ -10,6 +11,10 @@ use Illuminate\Http\Response;
 
 class CheckSysAdmin
 {
+    public function __construct(
+        private readonly GroupContextContract $groupContext
+    ) {}
+
     /**
      * Handle an incoming request.
      *
@@ -18,14 +23,13 @@ class CheckSysAdmin
      */
     public function handle(Request $request, Closure $next)
     {
-        if (! $request->user()) {
+        $user = $request->user();
+
+        if (! $user) {
             throw new AuthorizationException('You are not a sysadmin.');
         }
-        $mail = $request->user()->email;
 
-        $adminEmail = config('app.admin_email');
-
-        if ($mail !== $adminEmail) {
+        if (! $this->groupContext->isActingAsSystemAdmin($user)) {
             throw new AuthorizationException('You are not a sysadmin.');
         }
 

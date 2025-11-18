@@ -11,7 +11,9 @@ use App\Http\Controllers\GroupController;
 use App\Http\Controllers\MapPointCategoryController;
 use App\Http\Controllers\MapPointController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\SystemAdminController;
 use App\Http\Controllers\UserController;
+use App\Http\Middleware\CheckSysAdmin;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 use Illuminate\Support\Facades\Route;
 
@@ -82,6 +84,13 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('mappoints', MapPointController::class);
     Route::resource('mappoint-categories', MapPointCategoryController::class);
+
+    // System Admin Routes
+    Route::middleware(CheckSysAdmin::class)->group(function () {
+        Route::get('/system-admin', [SystemAdminController::class, 'index'])->name('system-admin');
+        Route::post('/system-admin/migrate', [SystemAdminController::class, 'migrate'])->name('system-admin.migrate');
+        Route::post('/system-admin/seed', [SystemAdminController::class, 'seed'])->name('system-admin.seed');
+    });
 });
 
 Route::get('/change-password', [PageController::class, 'changePassword'])->name('password.reset');
