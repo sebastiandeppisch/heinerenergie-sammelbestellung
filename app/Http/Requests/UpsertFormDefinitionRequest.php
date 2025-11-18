@@ -56,12 +56,12 @@ class UpsertFormDefinitionRequest extends FormRequest
             // Advice mapping (optional)
             'advice_mapping' => 'nullable|array',
             'advice_mapping.enabled' => 'boolean',
-            'advice_mapping.first_name_field_id' => ['nullable', 'string', new FormFieldExistsInRequest()],
-            'advice_mapping.last_name_field_id' => ['nullable', 'string', new FormFieldExistsInRequest()],
-            'advice_mapping.address_field_id' => ['nullable', 'string', new FormFieldExistsInRequest()],
-            'advice_mapping.email_field_id' => ['nullable', 'string', new FormFieldExistsInRequest()],
-            'advice_mapping.phone_field_id' => ['nullable', 'string', new FormFieldExistsInRequest()],
-            'advice_mapping.advice_type_field_id' => ['nullable', 'string', 'required_without:advice_mapping.advice_type_direct', new FormFieldExistsInRequest()],
+            'advice_mapping.first_name_field_id' => ['nullable', 'string', new FormFieldExistsInRequest],
+            'advice_mapping.last_name_field_id' => ['nullable', 'string', new FormFieldExistsInRequest],
+            'advice_mapping.address_field_id' => ['nullable', 'string', new FormFieldExistsInRequest],
+            'advice_mapping.email_field_id' => ['nullable', 'string', new FormFieldExistsInRequest],
+            'advice_mapping.phone_field_id' => ['nullable', 'string', new FormFieldExistsInRequest],
+            'advice_mapping.advice_type_field_id' => ['nullable', 'string', 'required_without:advice_mapping.advice_type_direct', new FormFieldExistsInRequest],
             'advice_mapping.advice_type_direct' => 'nullable|string|required_without:advice_mapping.advice_type_field_id',
             'advice_mapping.advice_type_home_option_value' => 'nullable|string|required_with:advice_mapping.advice_type_field_id',
             'advice_mapping.advice_type_virtual_option_value' => 'nullable|string|required_with:advice_mapping.advice_type_field_id',
@@ -70,9 +70,9 @@ class UpsertFormDefinitionRequest extends FormRequest
             // Map point mapping (optional)
             'map_point_mapping' => 'nullable|array',
             'map_point_mapping.enabled' => 'boolean',
-            'map_point_mapping.title_field_id' => ['nullable', 'string', new FormFieldExistsInRequest()],
-            'map_point_mapping.description_field_id' => ['nullable', 'string', new FormFieldExistsInRequest()],
-            'map_point_mapping.coordinate_field_id' => ['nullable', 'string', new FormFieldExistsInRequest()],
+            'map_point_mapping.title_field_id' => ['nullable', 'string', new FormFieldExistsInRequest],
+            'map_point_mapping.description_field_id' => ['nullable', 'string', new FormFieldExistsInRequest],
+            'map_point_mapping.coordinate_field_id' => ['nullable', 'string', new FormFieldExistsInRequest],
         ];
     }
 

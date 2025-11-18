@@ -44,6 +44,7 @@ class FormFieldExistsInRequest implements ValidationRule
 
         if (! is_array($fields)) {
             $fail('Die Felder müssen ein Array sein.');
+
             return;
         }
 
@@ -52,6 +53,7 @@ class FormFieldExistsInRequest implements ValidationRule
 
         if (empty($fieldIds)) {
             $fail('Es wurden keine Felder übermittelt.');
+
             return;
         }
 

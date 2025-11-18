@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\AdviceType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -33,9 +34,10 @@ return new class extends Migration
     {
         Schema::table('form_definition_to_advice', function (Blueprint $table) {
 
-            $table->string('advice_type_home_option_value')->nullable(false)->change();$table->string('advice_type_home_option_value')->nullable(false)->default(\App\Enums\AdviceType::Home->value)->change();
-            $table->string('advice_type_virtual_option_value')->nullable(false)->default(\App\Enums\AdviceType::Virtual->value)->change();
-            
+            $table->string('advice_type_home_option_value')->nullable(false)->change();
+            $table->string('advice_type_home_option_value')->nullable(false)->default(AdviceType::Home->value)->change();
+            $table->string('advice_type_virtual_option_value')->nullable(false)->default(AdviceType::Virtual->value)->change();
+
             $table->dropColumn('advice_type_direct');
             // Drop foreign key constraint
             $table->dropForeign(['advice_type_field_id']);

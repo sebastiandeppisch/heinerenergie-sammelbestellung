@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\JsonResponse;
+use Exception;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -43,7 +43,7 @@ class SystemAdminController extends Controller
             ]);
 
             return redirect()->route('system-admin')->with('success', 'Migration erfolgreich ausgeführt');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error executing migrate command', [
                 'error' => $e->getMessage(),
                 'user' => Auth::user()?->email,
@@ -76,7 +76,7 @@ class SystemAdminController extends Controller
             ]);
 
             return redirect()->route('system-admin')->with('success', 'Seeding erfolgreich ausgeführt');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error executing seed command', [
                 'error' => $e->getMessage(),
                 'user' => Auth::user()?->email,
@@ -90,4 +90,3 @@ class SystemAdminController extends Controller
         }
     }
 }
-

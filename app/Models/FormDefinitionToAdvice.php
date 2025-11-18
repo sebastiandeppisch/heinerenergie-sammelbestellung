@@ -146,6 +146,7 @@ class FormDefinitionToAdvice extends Model
         $adviceTypeField = $this->adviceTypeField->getSubmissionField($submission);
         /** @var mixed $submittedValue */
         $submittedValue = $adviceTypeField->value;
+
         return $this->mapAdviceType($submittedValue);
     }
 
