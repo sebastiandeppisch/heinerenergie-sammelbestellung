@@ -91,7 +91,7 @@ const logoSrc = computed(() => {
     return '/img/example_img.svg';
 });
 
-type FormData = Omit<GroupData, 'id' | 'logo_path' | 'parent_id' | 'users_count' | 'advices_count' | 'userCanActAsAdmin'> & {
+type FormData = Omit<GroupData, 'id' | 'logo_path' | 'parent_id' | 'users_count' | 'advices_count' | 'userCanActAsAdmin' | 'new_advice_mail'> & {
     logo: File | null;
     remove_logo: boolean;
     _method: string;
