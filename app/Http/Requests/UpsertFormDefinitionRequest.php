@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\FieldType;
+use App\Rules\FormFieldExistsInRequest;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -55,22 +56,23 @@ class UpsertFormDefinitionRequest extends FormRequest
             // Advice mapping (optional)
             'advice_mapping' => 'nullable|array',
             'advice_mapping.enabled' => 'boolean',
-            'advice_mapping.first_name_field_id' => 'nullable|string',
-            'advice_mapping.last_name_field_id' => 'nullable|string',
-            'advice_mapping.address_field_id' => 'nullable|string',
-            'advice_mapping.email_field_id' => 'nullable|string',
-            'advice_mapping.phone_field_id' => 'nullable|string',
-            'advice_mapping.advice_type_field_id' => 'nullable|string',
-            'advice_mapping.advice_type_home_option_value' => 'nullable|string',
-            'advice_mapping.advice_type_virtual_option_value' => 'nullable|string',
+            'advice_mapping.first_name_field_id' => ['nullable', 'string', new FormFieldExistsInRequest()],
+            'advice_mapping.last_name_field_id' => ['nullable', 'string', new FormFieldExistsInRequest()],
+            'advice_mapping.address_field_id' => ['nullable', 'string', new FormFieldExistsInRequest()],
+            'advice_mapping.email_field_id' => ['nullable', 'string', new FormFieldExistsInRequest()],
+            'advice_mapping.phone_field_id' => ['nullable', 'string', new FormFieldExistsInRequest()],
+            'advice_mapping.advice_type_field_id' => ['nullable', 'string', 'required_without:advice_mapping.advice_type_direct', new FormFieldExistsInRequest()],
+            'advice_mapping.advice_type_direct' => 'nullable|string|required_without:advice_mapping.advice_type_field_id',
+            'advice_mapping.advice_type_home_option_value' => 'nullable|string|required_with:advice_mapping.advice_type_field_id',
+            'advice_mapping.advice_type_virtual_option_value' => 'nullable|string|required_with:advice_mapping.advice_type_field_id',
             'advice_mapping.default_group_id' => 'nullable|string',
 
             // Map point mapping (optional)
             'map_point_mapping' => 'nullable|array',
             'map_point_mapping.enabled' => 'boolean',
-            'map_point_mapping.title_field_id' => 'nullable|string',
-            'map_point_mapping.description_field_id' => 'nullable|string',
-            'map_point_mapping.coordinate_field_id' => 'nullable|string',
+            'map_point_mapping.title_field_id' => ['nullable', 'string', new FormFieldExistsInRequest()],
+            'map_point_mapping.description_field_id' => ['nullable', 'string', new FormFieldExistsInRequest()],
+            'map_point_mapping.coordinate_field_id' => ['nullable', 'string', new FormFieldExistsInRequest()],
         ];
     }
 
@@ -96,6 +98,15 @@ class UpsertFormDefinitionRequest extends FormRequest
             'fields.*.options' => 'Optionen',
             'fields.*.options.*.label' => 'Optionsbezeichnung',
             'fields.*.options.*.value' => 'Optionswert',
+            'advice_mapping.first_name_field_id' => 'Vorname Feld',
+            'advice_mapping.last_name_field_id' => 'Nachname Feld',
+            'advice_mapping.address_field_id' => 'Adresse Feld',
+            'advice_mapping.email_field_id' => 'E-Mail Feld',
+            'advice_mapping.phone_field_id' => 'Telefon Feld',
+            'advice_mapping.advice_type_field_id' => 'Beratungstyp Feld',
+            'map_point_mapping.title_field_id' => 'Titel Feld',
+            'map_point_mapping.description_field_id' => 'Beschreibung Feld',
+            'map_point_mapping.coordinate_field_id' => 'Koordinaten Feld',
         ];
     }
 

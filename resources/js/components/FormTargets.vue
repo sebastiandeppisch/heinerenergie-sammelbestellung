@@ -25,11 +25,37 @@ const adviceValidation = computed(() => {
         'address_field_id',
         'email_field_id',
         'phone_field_id',
-        'advice_type_field_id',
-        'advice_type_home_option_value',
-        'advice_type_virtual_option_value',
     ] as const;
+    
+    // Check if advice type is configured (either direct or via field)
+    const hasAdviceType = mapping.advice_type_direct !== null && mapping.advice_type_direct !== undefined;
+    const hasAdviceTypeField = mapping.advice_type_field_id !== null && mapping.advice_type_field_id !== undefined;
+    
+    if (!hasAdviceType && !hasAdviceTypeField) {
+        // If no direct type and no field, advice type is missing
+        // We'll add it to missing array manually
+    }
+    
+    // If field is used, check for option values
+    if (hasAdviceTypeField && !hasAdviceType) {
+        if (!mapping.advice_type_home_option_value || !mapping.advice_type_virtual_option_value) {
+            // Options are missing
+        }
+    }
+    
     const missing = required.filter((field) => !mapping[field]);
+    
+    // Add advice type validation
+    if (!hasAdviceType && !hasAdviceTypeField) {
+        missing.push('advice_type_field_id' as any);
+    } else if (hasAdviceTypeField && !hasAdviceType) {
+        if (!mapping.advice_type_home_option_value) {
+            missing.push('advice_type_home_option_value' as any);
+        }
+        if (!mapping.advice_type_virtual_option_value) {
+            missing.push('advice_type_virtual_option_value' as any);
+        }
+    }
 
     const warnings: string[] = [];
 
@@ -94,6 +120,40 @@ const adviceTypeFieldOptions = computed(() => {
 
     const field = formDefinition.value.fields.find((f: any) => f.id === mapping.advice_type_field_id);
     return field?.options || [];
+});
+
+// Computed property for the advice type select value (field ID or direct type)
+const adviceTypeSelectValue = computed({
+    get: () => {
+        const mapping = formDefinition.value.advice_mapping;
+        if (!mapping) return null;
+        
+        // If direct type is set, return the direct value prefixed with "direct:"
+        if (mapping.advice_type_direct !== null && mapping.advice_type_direct !== undefined) {
+            return `direct:${mapping.advice_type_direct}`;
+        }
+        
+        // Otherwise return the field ID
+        return mapping.advice_type_field_id || null;
+    },
+    set: (value: string | null) => {
+        const mapping = formDefinition.value.advice_mapping;
+        if (!mapping) return;
+        
+        if (value && value.startsWith('direct:')) {
+            // Direct type selected
+            const directValue = value.replace('direct:', '');
+            mapping.advice_type_direct = directValue;
+            mapping.advice_type_field_id = null;
+            // Clear option values when using direct type
+            mapping.advice_type_home_option_value = null;
+            mapping.advice_type_virtual_option_value = null;
+        } else {
+            // Field selected
+            mapping.advice_type_field_id = value;
+            mapping.advice_type_direct = null;
+        }
+    }
 });
 </script>
 
@@ -238,11 +298,16 @@ const adviceTypeFieldOptions = computed(() => {
                             <FormField v-slot="{ componentField }" name="advice_type_field_id">
                                 <FormItem>
                                     <FormLabel>Beratungstyp *</FormLabel>
-                                    <Select v-model="formDefinition.advice_mapping.advice_type_field_id">
+                                    <Select v-model="adviceTypeSelectValue">
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Feld auswählen" />
+                                            <SelectValue placeholder="Feld oder Typ auswählen" />
                                         </SelectTrigger>
                                         <SelectContent>
+                                            <SelectItem value="direct:0">Vor Ort</SelectItem>
+                                            <SelectItem value="direct:1">Virtuell</SelectItem>
+                                            <template v-if="selectFields.length > 0">
+                                                <div class="border-t border-gray-200 my-1"></div>
+                                            </template>
                                             <SelectItem v-for="field in selectFields" :key="field.id" :value="field.id">
                                                 {{ field.label }}
                                             </SelectItem>
@@ -251,9 +316,9 @@ const adviceTypeFieldOptions = computed(() => {
                                 </FormItem>
                             </FormField>
 
-                            <!-- Enum Mapping: Show when advice type field is selected -->
+                            <!-- Enum Mapping: Show when advice type field is selected (not direct) -->
                             <div
-                                v-if="formDefinition.advice_mapping.advice_type_field_id && adviceTypeFieldOptions.length > 0"
+                                v-if="formDefinition.advice_mapping.advice_type_field_id && !formDefinition.advice_mapping.advice_type_direct && adviceTypeFieldOptions.length > 0"
                                 class="space-y-3 rounded-md border border-gray-200 bg-gray-50 p-4"
                             >
                                 <h4 class="text-sm font-medium text-gray-900">Beratungstyp-Zuordnung</h4>

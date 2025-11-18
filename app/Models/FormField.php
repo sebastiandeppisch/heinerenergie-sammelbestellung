@@ -159,6 +159,9 @@ class FormField extends Model
     public function delete(): ?bool
     {
         SubmissionField::where('form_field_id', $this->id)->update(['form_field_id' => null]);
+        FormDefinitionToAdvice::where('advice_type_field_id', $this->id)->update(['advice_type_field_id' => null]);
+
+        FormFieldOption::where('form_field_id', $this->id)->delete();
 
         return parent::delete();
     }

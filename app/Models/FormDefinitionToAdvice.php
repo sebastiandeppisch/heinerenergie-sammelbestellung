@@ -25,6 +25,7 @@ class FormDefinitionToAdvice extends Model
     protected $fillable = [
         'advice_type_home_option_value',
         'advice_type_virtual_option_value',
+        'advice_type_direct',
     ];
 
     /**
@@ -93,12 +94,8 @@ class FormDefinitionToAdvice extends Model
             $firstNameField = $this->firstNameField->getSubmissionField($submission);
             $lastNameField = $this->lastNameField->getSubmissionField($submission);
 
-            $adviceTypeField = $this->adviceTypeField->getSubmissionField($submission);
-
-            // Map the submitted option value to the correct AdviceType enum
-            /** @var mixed $submittedValue */
-            $submittedValue = $adviceTypeField->value;
-            $adviceType = $this->mapAdviceType($submittedValue);
+            // Determine advice type: use direct value if set, otherwise map from field
+            $adviceType = $this->getAdviceType($submission);
 
             $advice = Advice::create([
                 'address' => $addressField->value,
@@ -128,6 +125,28 @@ class FormDefinitionToAdvice extends Model
         Mail::to($advice->email)->send(new AdviceCreated($advice));
 
         return $advice;
+    }
+
+    /**
+     * Get the advice type from either direct value or mapped field value
+     */
+    private function getAdviceType(FormSubmission $submission): AdviceType
+    {
+        // If direct advice type is set, use it
+        if ($this->advice_type_direct !== null) {
+            return AdviceType::from((int) $this->advice_type_direct);
+        }
+
+        // Otherwise, map from field value
+        if ($this->adviceTypeField === null) {
+            // Fallback to Virtual if no field is set
+            return AdviceType::Virtual;
+        }
+
+        $adviceTypeField = $this->adviceTypeField->getSubmissionField($submission);
+        /** @var mixed $submittedValue */
+        $submittedValue = $adviceTypeField->value;
+        return $this->mapAdviceType($submittedValue);
     }
 
     /**

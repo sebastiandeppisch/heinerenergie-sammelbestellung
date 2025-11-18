@@ -104,6 +104,7 @@ address_field_id: string | null;
 email_field_id: string | null;
 phone_field_id: string | null;
 advice_type_field_id: string | null;
+advice_type_direct: string | null;
 advice_type_home_option_value: string | null;
 advice_type_virtual_option_value: string | null;
 default_group_id: string | null;

@@ -59,7 +59,8 @@ class FormDefinitionService
 
             $this->updateFieldOptions($field->options, $formField);
         }
-        FormField::whereNotIn('id', $formFieldIds)->get()->each->delete();
+
+        FormField::where('form_definition_id', $formDefinition->id)->whereNotIn('id', $formFieldIds)->get()->each->delete();
     }
 
     /**
@@ -124,7 +125,6 @@ class FormDefinitionService
         $address = FormField::where('uuid', $mapping->address_field_id)->firstOrFail();
         $email = FormField::where('uuid', $mapping->email_field_id)->firstOrFail();
         $phone = FormField::where('uuid', $mapping->phone_field_id)->firstOrFail();
-        $type = FormField::where('uuid', $mapping->advice_type_field_id)->firstOrFail();
 
         if ($firstName) {
             $creator->firstNameField()->associate($firstName);
@@ -141,16 +141,28 @@ class FormDefinitionService
         if ($phone) {
             $creator->phoneField()->associate($phone);
         }
-        if ($type) {
+
+        // Handle advice type: either direct or via field
+        if ($mapping->advice_type_direct !== null) {
+            // Direct type is set
+            $creator->advice_type_direct = $mapping->advice_type_direct;
+            $creator->advice_type_field_id = null;
+            // Clear option values when using direct type (will be nullable after migration)
+            $creator->advice_type_home_option_value = '';
+            $creator->advice_type_virtual_option_value = '';
+        } elseif ($mapping->advice_type_field_id !== null) {
+            // Field is set
+            $type = FormField::where('uuid', $mapping->advice_type_field_id)->firstOrFail();
             $creator->adviceTypeField()->associate($type);
-        }
+            $creator->advice_type_direct = null;
 
-        if ($mapping->advice_type_home_option_value) {
-            $creator->advice_type_home_option_value = $mapping->advice_type_home_option_value;
-        }
+            if ($mapping->advice_type_home_option_value) {
+                $creator->advice_type_home_option_value = $mapping->advice_type_home_option_value;
+            }
 
-        if ($mapping->advice_type_virtual_option_value) {
-            $creator->advice_type_virtual_option_value = $mapping->advice_type_virtual_option_value;
+            if ($mapping->advice_type_virtual_option_value) {
+                $creator->advice_type_virtual_option_value = $mapping->advice_type_virtual_option_value;
+            }
         }
 
         if ($mapping->default_group_id) {
