@@ -31,7 +31,7 @@ class AdviceService
             $isGroupAdmin = false;
         }
 
-        return Advice::query()
+        $query =  Advice::query()
             ->with('status', 'group', 'group.parent', 'advisor', 'shares')
             ->where(function ($query) use ($user, $permissions) {
                 $query
@@ -46,7 +46,17 @@ class AdviceService
                     })
                     // OR user is admin of the group (can see all)
                     ->orWhereIn('group_id', $permissions['adminGroupIds']);
-            })
+            });
+
+            if(count($permissions['memberGroupIds']) > 0) {
+                $query->whereIn('group_id', $permissions['memberGroupIds']);
+            }
+
+            if(count($permissions['adminGroupIds']) > 0) {
+                $query->whereIn('group_id', $permissions['adminGroupIds']);
+            }
+
+            return $query
             ->get()
             ->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice, $user, $isGroupAdmin));
     }
