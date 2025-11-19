@@ -51,6 +51,12 @@ const props = defineProps<{
 }>();
 console.log(props.advices);
 
+onMounted(() => {
+    advisors.reload();
+    adviceStatus.load();
+    adviceTypes.load();
+});
+
 const advices = computed(() => {
     return new ArrayStore({
         data: props.advices,
