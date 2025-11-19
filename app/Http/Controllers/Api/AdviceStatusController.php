@@ -13,7 +13,7 @@ class AdviceStatusController extends Controller
     {
         $user = Auth::user();
 
-        return AdviceStatus::all()->filter(fn (AdviceStatus $status) => $user->can('view', $status))->map(fn (AdviceStatus $status) => AdviceStatusNamesData::fromModel($status))->toArray();
+        return AdviceStatus::all()->filter(fn (AdviceStatus $status) => $user->can('view', $status))->map(fn (AdviceStatus $status) => AdviceStatusNamesData::fromModel($status))->values()->toArray();
     }
 
     public function show(AdviceStatus $advicestatus)

@@ -58,7 +58,7 @@ class GroupController extends Controller
         }
 
         $groups = $this->listGroups($user)
-            ->map(fn (Group $group) => GroupData::fromModel($group));
+            ->map(fn (Group $group) => GroupData::fromModel($group))->values();
 
         $groupTreeItems = $groups->map(fn (GroupData $groupData): GroupTreeItem => new GroupTreeItem(
             id: $groupData->id,
@@ -67,7 +67,7 @@ class GroupController extends Controller
             expanded: false,
             parent_id: $groupData->parent_id,
             logo_path: $groupData->logo_path,
-        ));
+        ))->values();
 
         return $this->showPage(
             $groupTreeItems,
