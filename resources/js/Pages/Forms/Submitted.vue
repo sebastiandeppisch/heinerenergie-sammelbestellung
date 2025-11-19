@@ -1,16 +1,20 @@
 <script setup lang="ts">
+import { isIframe, useAutoResizeIframeIfIsIframe } from '@/helpers';
+import NoLayout from '@/layouts/NoLayout.vue';
 import PublicLayout from '@/layouts/PublicLayout.vue';
 import Card from '@/shadcn/components/ui/card/Card.vue';
 import CardContent from '@/shadcn/components/ui/card/CardContent.vue';
 
 defineOptions({
-    layout: PublicLayout,
+    layout: isIframe ? NoLayout : PublicLayout,
 });
 
 const props = defineProps<{
     formDefinition: App.Data.FormDefinitionData;
     // embedded: boolean;
 }>();
+
+useAutoResizeIframeIfIsIframe();
 </script>
 <template>
     <div class="flex flex-col items-center justify-center">
