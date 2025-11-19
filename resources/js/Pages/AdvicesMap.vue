@@ -297,7 +297,7 @@ function runSearch() {
                     </LMarker>
                 </LLayerGroup>
 
-                <LLayerGroup name="Initiativen" layer-type="overlay">
+                <LLayerGroup name="Initiativen" layer-type="overlay" :visible="false">
                     <!-- eslint-disable vue/no-use-v-if-with-v-for -->
                     <LPolygon
                         v-if="props.groups && props.groups.length > 0"
