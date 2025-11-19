@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\FieldType;
 use App\Models\Traits\HasUuid;
+use App\Rules\AddressRule;
 use App\Rules\CheckboxRequiredValidator;
 use App\Rules\GeographicCoordinate;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -91,6 +92,7 @@ class FormField extends Model
             FieldType::FILE => [''], // TODO
             FieldType::DATE => ['date'],
             FieldType::GEO_COORDINATE => [new GeographicCoordinate],
+            FieldType::ADDRESS => [new AddressRule],
             default => [],
         };
 
@@ -118,7 +120,7 @@ class FormField extends Model
 
         $requiredOptions = $this->options->filter(fn ($option) => $option->is_required)->pluck('label', 'value');
 
-        if ($requiredOptions->isNotEmpty()) {
+        if ($requiredOptions->isNotEmpty() && $this->type === FieldType::CHECKBOX) {
             $rules[] = new CheckboxRequiredValidator(
                 requiredOptions: $requiredOptions->toArray()
             );
