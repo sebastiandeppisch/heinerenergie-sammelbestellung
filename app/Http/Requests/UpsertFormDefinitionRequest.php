@@ -65,7 +65,7 @@ class UpsertFormDefinitionRequest extends FormRequest
             'map_point_mapping.coordinate_field_id' => ['nullable', 'string', new FormFieldExistsInRequest],
         ];
 
-        if ($this->has('advice_mapping') && !is_null($this->input('advice_mapping')) && $this->input('advice_mapping.enabled') === true) {
+        if ($this->has('advice_mapping') && ! is_null($this->input('advice_mapping')) && $this->input('advice_mapping.enabled') === true) {
             $rules['advice_mapping.first_name_field_id'] = ['nullable', 'string', new FormFieldExistsInRequest];
             $rules['advice_mapping.last_name_field_id'] = ['nullable', 'string', new FormFieldExistsInRequest];
             $rules['advice_mapping.address_field_id'] = ['nullable', 'string', new FormFieldExistsInRequest];

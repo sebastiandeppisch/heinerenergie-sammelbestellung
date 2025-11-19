@@ -2,22 +2,21 @@
 
 namespace App\Services;
 
-use App\Models\Group;
-use App\Enums\AdviceType;
-use App\Models\FormField;
-use App\Data\FormFieldData;
-use InvalidArgumentException;
-use App\Models\FormDefinition;
-use App\Models\FormFieldOption;
 use App\Data\FormDefinitionData;
+use App\Data\FormFieldData;
 use App\Data\FormFieldOptionData;
+use App\Data\FormToAdviceMappingData;
+use App\Data\FormToMapPointMappingData;
+use App\Enums\AdviceType;
+use App\Models\FormDefinition;
+use App\Models\FormDefinitionToAdvice;
+use App\Models\FormDefinitionToMapPoint;
+use App\Models\FormField;
+use App\Models\FormFieldOption;
+use App\Models\Group;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use App\Data\FormToAdviceMappingData;
-use App\Models\FormDefinitionToAdvice;
-use App\Data\FormToMapPointMappingData;
-use App\Models\FormDefinitionToMapPoint;
+use InvalidArgumentException;
 
 class FormDefinitionService
 {
