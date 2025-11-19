@@ -27,7 +27,7 @@ class UpsertFormDefinitionRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'is_active' => 'boolean',
@@ -56,16 +56,6 @@ class UpsertFormDefinitionRequest extends FormRequest
             // Advice mapping (optional)
             'advice_mapping' => 'nullable|array',
             'advice_mapping.enabled' => 'boolean',
-            'advice_mapping.first_name_field_id' => ['nullable', 'string', new FormFieldExistsInRequest],
-            'advice_mapping.last_name_field_id' => ['nullable', 'string', new FormFieldExistsInRequest],
-            'advice_mapping.address_field_id' => ['nullable', 'string', new FormFieldExistsInRequest],
-            'advice_mapping.email_field_id' => ['nullable', 'string', new FormFieldExistsInRequest],
-            'advice_mapping.phone_field_id' => ['nullable', 'string', new FormFieldExistsInRequest],
-            'advice_mapping.advice_type_field_id' => ['nullable', 'string', 'required_without:advice_mapping.advice_type_direct', new FormFieldExistsInRequest],
-            'advice_mapping.advice_type_direct' => 'nullable|string|required_without:advice_mapping.advice_type_field_id',
-            'advice_mapping.advice_type_home_option_value' => 'nullable|string|required_with:advice_mapping.advice_type_field_id',
-            'advice_mapping.advice_type_virtual_option_value' => 'nullable|string|required_with:advice_mapping.advice_type_field_id',
-            'advice_mapping.default_group_id' => 'nullable|string',
 
             // Map point mapping (optional)
             'map_point_mapping' => 'nullable|array',
@@ -74,6 +64,21 @@ class UpsertFormDefinitionRequest extends FormRequest
             'map_point_mapping.description_field_id' => ['nullable', 'string', new FormFieldExistsInRequest],
             'map_point_mapping.coordinate_field_id' => ['nullable', 'string', new FormFieldExistsInRequest],
         ];
+
+        if ($this->has('advice_mapping') && !is_null($this->input('advice_mapping')) && $this->input('advice_mapping.enabled') === true) {
+            $rules['advice_mapping.first_name_field_id'] = ['nullable', 'string', new FormFieldExistsInRequest];
+            $rules['advice_mapping.last_name_field_id'] = ['nullable', 'string', new FormFieldExistsInRequest];
+            $rules['advice_mapping.address_field_id'] = ['nullable', 'string', new FormFieldExistsInRequest];
+            $rules['advice_mapping.email_field_id'] = ['nullable', 'string', new FormFieldExistsInRequest];
+            $rules['advice_mapping.phone_field_id'] = ['nullable', 'string', new FormFieldExistsInRequest];
+            $rules['advice_mapping.advice_type_field_id'] = ['nullable', 'string', 'required_without:advice_mapping.advice_type_direct', new FormFieldExistsInRequest];
+            $rules['advice_mapping.advice_type_direct'] = 'nullable|string|required_without:advice_mapping.advice_type_field_id';
+            $rules['advice_mapping.advice_type_home_option_value'] = 'nullable|string|required_with:advice_mapping.advice_type_field_id';
+            $rules['advice_mapping.advice_type_virtual_option_value'] = 'nullable|string|required_with:advice_mapping.advice_type_field_id';
+            $rules['advice_mapping.default_group_id'] = 'nullable|string';
+        }
+
+        return $rules;
     }
 
     /**
