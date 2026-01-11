@@ -64,6 +64,11 @@ class UserController extends Controller
 
         $user->save();
 
+        $group = $sessionService->getCurrentGroup();
+        if( $group !== null ) {
+            $user->groups()->attach($group->id, ['is_admin' => false]);
+        }
+
         return $user;
     }
 

@@ -3,10 +3,11 @@ import { Button } from '@/shadcn/components/ui/button';
 import { Dialog, DialogDescription, DialogTitle } from '@/shadcn/components/ui/dialog';
 import DialogContent from '@/shadcn/components/ui/dialog/DialogContent.vue';
 import { Input } from '@/shadcn/components/ui/input';
-import { router } from '@inertiajs/vue3';
+import { PageProps } from '@inertiajs/core';
+import { router, usePage } from '@inertiajs/vue3';
 import DxDataGrid, { DxButton, DxColumn, DxEditing, DxScrolling, DxSummary, DxTotalItem } from 'devextreme-vue/data-grid';
 import { ColumnButtonClickEvent } from 'devextreme/ui/data_grid';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { toast } from 'vue-sonner';
 import { route } from 'ziggy-js';
 import { AdaptTableHeight } from '../helpers';
@@ -53,12 +54,27 @@ function changePassword() {
         },
     );
 }
+
+interface CustomPageProps extends PageProps {
+    auth: {
+        user: App.Data.UserData;
+        currentGroup?: App.Data.GroupBaseData;
+        availableGroups?: App.Data.GroupData[];
+    };
+    defaultLogo?: string;
+}
+
+const page = usePage<CustomPageProps>();
+const currentGroup = computed(() => page.props.auth.currentGroup);
 </script>
 
 <template>
     <div ref="outer">
         <h2 class="content-block">Berater*innen</h2>
         <div style="margin: 30px 40px 30px 40px">
+            <div v-if="currentGroup !== undefined && currentGroup !== null">
+                Wenn Du eine*r Berater*in erstellt, wird er*sie der Gruppe <b>{{ currentGroup.name }}</b> zugewiesen.
+            </div>
             <DxDataGrid class="dx-card wide-card" :data-source="users" :show-borders="false" :column-auto-width="true" :height="r.height">
                 <DxScrolling mode="virtual" />
                 <DxEditing :allow-updating="true" :allow-adding="true" :allow-deleting="false" mode="cell" />
