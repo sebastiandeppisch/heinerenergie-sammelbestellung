@@ -30,7 +30,6 @@ class StoreUserRequest extends FormRequest
     public function rules()
     {
         return [
-            'is_admin' => 'boolean',
             'first_name' => 'string|required',
             'last_name' => 'string|required',
             'email' => 'email|required|unique:users,email',

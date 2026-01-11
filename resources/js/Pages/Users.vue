@@ -11,6 +11,11 @@ import { toast } from 'vue-sonner';
 import { route } from 'ziggy-js';
 import { AdaptTableHeight } from '../helpers';
 import LaravelDataSource from '../LaravelDataSource';
+
+const props = defineProps<{
+    canPromoteUsersToSystemAdmin: boolean;
+}>();
+
 const users = new LaravelDataSource('api/users');
 
 const outer = ref(null);
@@ -60,7 +65,7 @@ function changePassword() {
                 <DxColumn data-field="first_name" caption="Vorname" />
                 <DxColumn data-field="last_name" caption="Nachname" sort-order="asc" />
                 <DxColumn data-field="email" caption="E-Mail Adresse" :editor-options="{ mode: 'email' }" />
-                <DxColumn data-field="is_admin" caption="System Admin" />
+                <DxColumn v-if="canPromoteUsersToSystemAdmin" data-field="is_admin" caption="System Admin" />
                 <DxColumn type="buttons">
                     <DxButton name="changePassword" text="Passwort ändern" icon="key" @click="openDialog" />
                 </DxColumn>

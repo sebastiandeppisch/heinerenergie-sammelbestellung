@@ -59,9 +59,13 @@ class PageController extends Controller
         return Inertia::render('Profile');
     }
 
-    public function users()
+    public function users(SessionService $sessionService)
     {
-        return Inertia::render('Users');
+        $canPromoteUsersToSystemAdmin = $sessionService->actsAsSystemAdmin();
+
+        return Inertia::render('Users', [
+            'canPromoteUsersToSystemAdmin' => $canPromoteUsersToSystemAdmin,
+        ]);
     }
 
     public function settings()
