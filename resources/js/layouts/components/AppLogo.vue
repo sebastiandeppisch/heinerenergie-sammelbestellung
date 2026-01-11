@@ -16,8 +16,11 @@ interface CustomPageProps extends PageProps {
 const page = usePage<CustomPageProps>();
 const currentGroup = computed(() => page.props.auth.currentGroup);
 const logo = computed(() => {
-    if (currentGroup.value) {
-        return currentGroup.value.logo_path || page.props.defaultLogo;
+    if (currentGroup.value && currentGroup.value.logo_path) {
+        return currentGroup.value.logo_path;
+    }
+    if (page.props.defaultLogo) {
+        return page.props.defaultLogo;
     }
     return genericLogo;
 });
