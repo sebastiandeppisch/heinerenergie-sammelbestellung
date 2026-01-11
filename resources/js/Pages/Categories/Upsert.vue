@@ -12,12 +12,13 @@ const props = defineProps<{
     category?: App.Data.MapPointCategoryData;
 }>();
 
-const isEditing = !!props.category;
+const isEditing = computed(() => !!props.category);
 const fileInput = ref<HTMLInputElement>();
 
 const form = useForm({
     name: props.category?.name || '',
     image: null as File | null,
+    _method: isEditing.value ? 'put' : 'post',
 });
 
 const imagePreviewUrl = computed(() => {
@@ -28,10 +29,9 @@ const imagePreviewUrl = computed(() => {
 });
 
 function submit() {
-    if (isEditing) {
+    if (isEditing.value) {
         form.post(route('mappoint-categories.update', props.category!.id), {
             forceFormData: true,
-            method: 'put',
         });
     } else {
         form.post(route('mappoint-categories.store'), {
