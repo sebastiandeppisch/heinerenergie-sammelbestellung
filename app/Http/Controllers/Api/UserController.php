@@ -58,8 +58,7 @@ class UserController extends Controller
         $user = new User($request->validated());
         $user->password = '';
 
-
-        if($sessionService->actsAsSystemAdmin() && $request->has('is_admin')) {
+        if ($sessionService->actsAsSystemAdmin() && $request->has('is_admin')) {
             $user->is_admin = $request->boolean('is_admin');
         }
 
@@ -72,7 +71,7 @@ class UserController extends Controller
     {
         $user->fill($request->validated());
 
-        if($sessionService->actsAsSystemAdmin() && $request->has('is_admin')) {
+        if ($sessionService->actsAsSystemAdmin() && $request->has('is_admin')) {
             $user->is_admin = $request->boolean('is_admin');
         }
 

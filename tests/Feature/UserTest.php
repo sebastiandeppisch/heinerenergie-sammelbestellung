@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\User;
 use App\Models\Group;
+use App\Models\User;
 use App\Services\SessionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -28,7 +28,6 @@ test('non system admin cannot promote users to system admin', function () {
 test('system admin can promote users to system admin', function () {
     app(SessionService::class)->actAsSystemAdmin();
 
-
     $userToPromote = User::factory()->create([
         'is_admin' => false,
     ]);
@@ -46,11 +45,11 @@ test('non system admin cannot create system admin users', function () {
     ]);
 
     $createdUser = User::where('email', 'john.doe@example.com')->first();
-    
+
     $this->assertNotNull($createdUser);
 
     $this->assertFalse($createdUser->is_admin);
-}); 
+});
 
 test('system admin can create system admin users', function () {
     $this->user->is_admin = true;
