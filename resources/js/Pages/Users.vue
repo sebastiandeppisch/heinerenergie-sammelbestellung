@@ -73,7 +73,7 @@ const currentGroup = computed(() => page.props.auth.currentGroup);
         <h2 class="content-block">Berater*innen</h2>
         <div style="margin: 30px 40px 30px 40px">
             <div v-if="currentGroup !== undefined && currentGroup !== null">
-                Wenn Du eine*n Berater*in erstellst, wird er*sie der Gruppe <b>{{ currentGroup.name }}</b> zugewiesen.
+                Wenn Du eine*n Berater*in erstellst, wird er*sie der Initiative <b>{{ currentGroup.name }}</b> zugewiesen.
             </div>
             <DxDataGrid class="dx-card wide-card" :data-source="users" :show-borders="false" :column-auto-width="true" :height="r.height">
                 <DxScrolling mode="virtual" />
