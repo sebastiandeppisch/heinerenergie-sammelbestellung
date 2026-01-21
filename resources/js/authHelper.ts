@@ -6,7 +6,7 @@ interface CustomPageProps extends PageProps {
     auth: {
         user: App.Data.UserData | null;
     };
-    userRole: 'user' | 'group-admin' | 'system-admin'
+    userRole: 'user' | 'group-admin' | 'system-admin';
 }
 
 const page = usePage<CustomPageProps>();

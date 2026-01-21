@@ -62,24 +62,25 @@ class HandleInertiaRequests extends Middleware
             'flashMessages' => $flashMessages,
             'defaultLogo' => app_logo(),
             'appName' => fn () => app_name(),
-            'userRole' => fn() => $this->getUserRole()
+            'userRole' => fn () => $this->getUserRole(),
         ]);
     }
 
-    private function getUserRole(): string{
-        $userRole = 'user';
-
-        if($this->sessionService()->actsAsGroupAdmin()){
-            $userRole = 'group-admin';
+    private function getUserRole(): string
+    {
+        if ($this->sessionService()->actsAsGroupAdmin()) {
+            return 'group-admin';
         }
 
-        if($this->sessionService()->actsAsSystemAdmin()){
-            $userRole = 'system-admin';
+        if ($this->sessionService()->actsAsSystemAdmin()) {
+            return 'system-admin';
         }
-        return $userRole;
+
+        return 'user';
     }
 
-    private function sessionService(): SessionService{
+    private function sessionService(): SessionService
+    {
         return app(SessionService::class);
     }
 
