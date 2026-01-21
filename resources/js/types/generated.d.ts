@@ -128,6 +128,7 @@ id: string;
 name: string;
 description: string | null;
 logo_path: string | null;
+marker_path: string | null;
 parent_id: string | null;
 accepts_transfers: boolean;
 userCanActAsAdmin: boolean;
@@ -196,6 +197,7 @@ street_number: string | null;
 city: string | null;
 zip: string | null;
 is_admin: boolean;
+groups: Array<App.Data.GroupBaseData>;
 };
 }
 declare namespace App.Data.Pages {

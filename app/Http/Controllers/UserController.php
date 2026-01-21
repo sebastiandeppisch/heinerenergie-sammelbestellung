@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Data\UserData;
 use App\Http\Context\SessionGroupContextFactory;
 use App\Http\Requests\ChangePasswordRequest;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Jobs\CacheUsersAdvicePolicies;
 use App\Models\Group;
 use App\Models\User;
@@ -12,6 +15,7 @@ use App\Services\SessionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class UserController extends Controller
 {
@@ -22,6 +26,56 @@ class UserController extends Controller
     public function user(): User
     {
         return Auth::user();
+    }
+
+    public function index()
+    {
+        $canPromoteUsersToSystemAdmin = $this->sessionService->actsAsSystemAdmin();
+
+        $users = User::query()
+            ->with('groups')
+            ->get()
+            ->filter(fn (User $user) => Auth::user()->can('view', $user))
+            ->map(fn (User $user) => UserData::fromModel($user, false, true))
+            ->values()
+            ->all();
+
+        return Inertia::render('Users', [
+            'canPromoteUsersToSystemAdmin' => $canPromoteUsersToSystemAdmin,
+            'users' => $users,
+        ]);
+    }
+
+    public function store(StoreUserRequest $request)
+    {
+        $user = new User($request->validated());
+        $user->password = '';
+
+        if ($this->sessionService->actsAsSystemAdmin() && $request->has('is_admin')) {
+            $user->is_admin = $request->boolean('is_admin');
+        }
+
+        $user->save();
+
+        $group = $this->sessionService->getCurrentGroup();
+        if ($group !== null) {
+            $user->groups()->attach($group->id, ['is_admin' => false]);
+        }
+
+        return redirect()->route('users')->with('success', 'Berater*in wurde erfolgreich erstellt');
+    }
+
+    public function update(UpdateUserRequest $request, User $user)
+    {
+        $user->fill($request->validated());
+
+        if ($this->sessionService->actsAsSystemAdmin() && $request->has('is_admin')) {
+            $user->is_admin = $request->boolean('is_admin');
+        }
+
+        $user->save();
+
+        return redirect()->route('users')->with('success', 'Berater*in wurde erfolgreich aktualisiert');
     }
 
     public function actAsGroup(Request $request, Group $group)

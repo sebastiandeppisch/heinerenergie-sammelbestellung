@@ -32,7 +32,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [PageController::class, 'dashboard'])->name('dashboard');
     Route::get('/initiatives/select', [PageController::class, 'initiativeSelection'])->name('initiatives.select');
     Route::get('/profile', [PageController::class, 'profile'])->name('profile');
-    Route::get('/users', [PageController::class, 'users'])->name('users');
+    Route::get('/users', [UserController::class, 'index'])->name('users');
+    Route::post('/users', [UserController::class, 'store'])->name('users.store');
+    Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::get('/settings', [PageController::class, 'settings'])->name('settings');
     Route::get('/advices', [PageController::class, 'advices'])->name('advices');
     Route::get('/advices/{advice}', [PageController::class, 'showAdvice'])->name('advices.show');
