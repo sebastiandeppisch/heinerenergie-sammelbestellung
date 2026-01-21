@@ -53,44 +53,6 @@ class UserController extends Controller
         return $users->filter(fn (User $user) => $this->user()->can('view', $user))->values()->map(fn ($user) => UserData::fromModel($user, false));
     }
 
-    public function store(StoreUserRequest $request, SessionService $sessionService)
-    {
-        $user = new User($request->validated());
-        $user->password = '';
-
-        if ($sessionService->actsAsSystemAdmin() && $request->has('is_admin')) {
-            $user->is_admin = $request->boolean('is_admin');
-        }
-
-        $user->save();
-
-        $group = $sessionService->getCurrentGroup();
-        if ($group !== null) {
-            $user->groups()->attach($group->id, ['is_admin' => false]);
-        }
-
-        return $user;
-    }
-
-    public function update(UpdateUserRequest $request, User $user, SessionService $sessionService)
-    {
-        $user->fill($request->validated());
-
-        if ($sessionService->actsAsSystemAdmin() && $request->has('is_admin')) {
-            $user->is_admin = $request->boolean('is_admin');
-        }
-
-        $user->save();
-
-        return $user;
-    }
-
-    public function destroy(User $user)
-    {
-        $user->delete();
-
-        return response()->noContent();
-    }
 
     public function show(User $user)
     {
