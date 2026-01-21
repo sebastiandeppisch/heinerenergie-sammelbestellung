@@ -25,6 +25,7 @@ class Group extends Model
         'dashboard_info',
         'new_advice_mail',
         'logo_path',
+        'marker_path',
         'parent_id',
         'accepts_transfers',
     ];
@@ -144,11 +145,24 @@ class Group extends Model
         return $this->logo_path ? Storage::url($this->logo_path) : null;
     }
 
+    public function getFullMarkerPathAttribute()
+    {
+        if ($this->marker_path && str_starts_with($this->marker_path, 'http')) {
+            return $this->marker_path;
+        }
+
+        return $this->marker_path ? Storage::url($this->marker_path) : null;
+    }
+
     #[Override]
     public function delete(): ?bool
     {
         if ($this->logo_path) {
             Storage::disk('public')->delete($this->logo_path);
+        }
+
+        if ($this->marker_path) {
+            Storage::disk('public')->delete($this->marker_path);
         }
 
         return parent::delete();

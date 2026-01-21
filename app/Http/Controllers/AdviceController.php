@@ -22,6 +22,7 @@ use App\Models\Group;
 use App\Models\User;
 use App\Notifications\AdviceTransferred;
 use App\Services\AdviceService;
+use App\Services\CurrentGroupService;
 use App\Services\SessionService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -169,7 +170,7 @@ class AdviceController extends Controller
         return redirect()->route('advices')->with('info', 'Die Beratung wurde wieder freigegeben');
     }
 
-    public function map()
+    public function map(CurrentGroupService $currentGroupService)
     {
         $user = Auth::user();
         $advices = app(AdviceService::class)->getAdvicesListForUser($user);
@@ -178,10 +179,19 @@ class AdviceController extends Controller
 
         $advisors = User::all()->filter(fn (User $advisor) => $user->can('view', $advisor))->map(fn ($user) => UserData::fromModel($user, false))->values();
 
+        // Get marker from current group, or use default
+        $currentGroup = $currentGroupService->getGroup();
+        $advisorMarker = '/images/markers/he_yellow.svg'; // Default marker
+
+        if ($currentGroup && $currentGroup->full_marker_path) {
+            $advisorMarker = url($currentGroup->full_marker_path);
+        }
+
         return Inertia::render('AdvicesMap', [
             'advices' => $advices,
             'advisors' => $advisors, // TODO filter
             'groups' => $groups,
+            'advisorMarker' => $advisorMarker,
         ]);
     }
 

@@ -45,6 +45,24 @@
                 <div v-if="form.errors.logo" class="text-sm text-red-500">{{ form.errors.logo }}</div>
             </div>
 
+            <!-- Group marker -->
+            <div>
+                <label class="mb-2 block text-sm font-medium text-gray-700">Berater:in Kartenmarker</label>
+                <div class="flex items-center">
+                    <img :src="markerSrc" :alt="group.name + ' Marker'" class="mr-4 h-12 max-w-12 rounded object-contain" />
+                    <input type="file" ref="markerInput" class="hidden" accept="image/*" @change="handleMarkerChange" />
+                    <Button type="button" variant="outline" @click="markerInput?.click()" v-if="canEdit">
+                        <Upload class="h-4 w-4" />
+                        Berater:in Kartenmarker auswählen
+                    </Button>
+                    <Button type="button" v-if="markerSrc && !form.remove_marker && canEdit" variant="outline" class="ml-2" @click="removeMarker">
+                        <X class="h-4 w-4" />
+                        Marker Entfernen
+                    </Button>
+                </div>
+                <div v-if="form.errors.marker" class="text-sm text-red-500">{{ form.errors.marker }}</div>
+            </div>
+
             <div>
                 <DxCheckBox v-model="form.accepts_transfers" text="Beratungen von anderen Initiativen akzeptieren" :read-only="!canEdit" />
                 <div v-if="form.errors.accepts_transfers" class="text-sm text-red-500">{{ form.errors.accepts_transfers }}</div>
@@ -91,9 +109,23 @@ const logoSrc = computed(() => {
     return '/img/example_img.svg';
 });
 
-type FormData = Omit<GroupData, 'id' | 'logo_path' | 'parent_id' | 'users_count' | 'advices_count' | 'userCanActAsAdmin' | 'new_advice_mail'> & {
+const markerSrc = computed(() => {
+    if (form.marker) {
+        return URL.createObjectURL(form.marker);
+    }
+
+    if (props.group.marker_path) {
+        return props.group.marker_path;
+    }
+
+    return '/images/markers/he_yellow.svg';
+});
+
+type FormData = Omit<GroupData, 'id' | 'logo_path' | 'marker_path' | 'parent_id' | 'users_count' | 'advices_count' | 'userCanActAsAdmin' | 'new_advice_mail'> & {
     logo: File | null;
+    marker: File | null;
     remove_logo: boolean;
+    remove_marker: boolean;
     _method: string;
 };
 
@@ -102,7 +134,9 @@ const form = useForm<FormData>({
     description: props.group.description,
     accepts_transfers: props.group.accepts_transfers,
     logo: null,
+    marker: null,
     remove_logo: false,
+    remove_marker: false,
     _method: 'PUT',
 });
 
@@ -113,6 +147,7 @@ const formDescription = computed({
 });
 
 const logoInput = ref<HTMLInputElement | null>(null);
+const markerInput = ref<HTMLInputElement | null>(null);
 
 const handleLogoChange = (event: Event) => {
     const file = (event.target as HTMLInputElement).files?.[0];
@@ -122,12 +157,28 @@ const handleLogoChange = (event: Event) => {
     }
 };
 
+const handleMarkerChange = (event: Event) => {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+        form.marker = file;
+        form.remove_marker = false;
+    }
+};
+
 const removeLogo = () => {
     form.logo = null;
     if (logoInput.value) {
         logoInput.value.value = '';
     }
     form.remove_logo = true;
+};
+
+const removeMarker = () => {
+    form.marker = null;
+    if (markerInput.value) {
+        markerInput.value.value = '';
+    }
+    form.remove_marker = true;
 };
 
 const handleSubmit = () => {

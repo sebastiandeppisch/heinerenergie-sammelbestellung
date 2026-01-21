@@ -132,7 +132,7 @@ class GroupController extends Controller
 
     public function update(UpdateGroupRequest $request, Group $group)
     {
-        $validated = $request->safe()->except(['logo', 'remove_logo']);
+        $validated = $request->safe()->except(['logo', 'remove_logo', 'marker', 'remove_marker']);
 
         if ($request->hasFile('logo')) {
             if ($group->logo_path) {
@@ -146,6 +146,20 @@ class GroupController extends Controller
                 Storage::disk('public')->delete($group->logo_path);
             }
             $validated['logo_path'] = null;
+        }
+
+        if ($request->hasFile('marker')) {
+            if ($group->marker_path) {
+                Storage::disk('public')->delete($group->marker_path);
+            }
+            $validated['marker_path'] = $request->file('marker')->store('group-markers', 'public');
+        }
+
+        if ($request->remove_marker) {
+            if ($group->marker_path) {
+                Storage::disk('public')->delete($group->marker_path);
+            }
+            $validated['marker_path'] = null;
         }
 
         $group->update($validated);

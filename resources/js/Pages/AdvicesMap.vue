@@ -26,6 +26,7 @@ const props = defineProps<{
     advices: App.Data.DataProtectedAdviceData[];
     advisors: App.Data.UserData[];
     groups: App.Data.GroupMapData[];
+    advisorMarker?: string;
 }>();
 const advisors = props.advisors;
 
@@ -131,6 +132,10 @@ function runSearch() {
             map.zoom = 18; //a better approach would be to set the bounding box
         });
 }
+
+function getAdvisorMarker(): string {
+    return props.advisorMarker ?? '/images/markers/he_yellow.svg';
+}
 </script>
 
 <template>
@@ -185,7 +190,7 @@ function runSearch() {
                             <div style="display: flex; flex-direction: column; margin: 10px">
                                 <div><b>Berater*innen</b></div>
                                 <div style="display: flex; flex-direction: row; justify-content: center; gap: 15px; padding-top: 5px">
-                                    <img src="/images/markers/he_yellow.svg" style="height: 3em; display: inline" />
+                                    <img :src="getAdvisorMarker()" style="height: 3em; display: inline" />
                                 </div>
                             </div>
 
@@ -288,7 +293,7 @@ function runSearch() {
                         :key="advisor.id"
                         :lat-lng="latLng(advisor.lat ?? 0, advisor.long ?? 0)"
                     >
-                        <LIcon icon-url="/images/markers/he_yellow.svg" :icon-size="[50, 50]" />
+                        <LIcon :icon-url="getAdvisorMarker()" :icon-size="[50, 50]" />
                         <LPopup>
                             <div>
                                 {{ advisor.name }}
