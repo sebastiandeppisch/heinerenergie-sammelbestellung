@@ -1,19 +1,9 @@
 <script setup lang="ts">
+import ChangePasswordDialog from '@/components/Users/ChangePasswordDialog.vue';
+import UserFormDialog from '@/components/Users/UserFormDialog.vue';
 import { Button } from '@/shadcn/components/ui/button';
 import { Card, CardContent } from '@/shadcn/components/ui/card';
-import { Checkbox } from '@/shadcn/components/ui/checkbox';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/shadcn/components/ui/dialog';
-import { Input } from '@/shadcn/components/ui/input';
-import { Label } from '@/shadcn/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
-import { PageProps } from '@inertiajs/core';
 import { router, usePage } from '@inertiajs/vue3';
 import { Edit, Key, Plus } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
@@ -24,122 +14,40 @@ const props = defineProps<{
     users: App.Data.UserData[];
 }>();
 
-interface CustomPageProps extends PageProps {
-    auth: {
-        user: App.Data.UserData;
-        currentGroup?: App.Data.GroupBaseData;
-        availableGroups?: App.Data.GroupData[];
-    };
-    defaultLogo?: string;
-}
-
 const page = usePage<CustomPageProps>();
 const currentGroup = computed(() => page.props.auth.currentGroup);
 
 // Dialog states
 const createEditDialogOpen = ref(false);
 const passwordDialogOpen = ref(false);
-const isEditMode = ref(false);
 const editingUser = ref<App.Data.UserData | null>(null);
-
-// Form data
-const formData = ref({
-    first_name: '',
-    last_name: '',
-    email: '',
-    is_admin: false,
-});
-
-const newPassword = ref('');
-const selectedUser = ref<null | { id: string; first_name: string; last_name: string }>(null);
-
+const passwordUser = ref<App.Data.UserData | null>(null);
 
 // Open create dialog
 function openCreateDialog() {
-    isEditMode.value = false;
     editingUser.value = null;
-    formData.value = {
-        first_name: '',
-        last_name: '',
-        email: '',
-        is_admin: false,
-    };
     createEditDialogOpen.value = true;
 }
 
 // Open edit dialog
 function openEditDialog(user: App.Data.UserData) {
-    isEditMode.value = true;
     editingUser.value = user;
-    formData.value = {
-        first_name: user.first_name,
-        last_name: user.last_name,
-        email: user.email,
-        is_admin: user.is_admin,
-    };
     createEditDialogOpen.value = true;
-}
-
-// Save user (create or update)
-function saveUser() {
-    if (isEditMode.value && editingUser.value) {
-        router.put(
-            route('users.update', editingUser.value.id),
-            formData.value,
-            {
-                onSuccess: () => {
-                    createEditDialogOpen.value = false;
-                    router.reload();
-                },
-                onError: (errors) => {
-                    Object.values(errors).flat().forEach((message: any) => {
-                        toast.error(message);
-                    });
-                },
-            },
-        );
-    } else {
-        router.post(
-            route('users.store'),
-            formData.value,
-            {
-                onSuccess: () => {
-                    createEditDialogOpen.value = false;
-                    router.reload();
-                },
-                onError: (errors) => {
-                    Object.values(errors).flat().forEach((message: any) => {
-                        toast.error(message);
-                    });
-                },
-            },
-        );
-    }
 }
 
 // Open password dialog
 function openPasswordDialog(user: App.Data.UserData) {
-    selectedUser.value = user;
-    newPassword.value = '';
+    passwordUser.value = user;
     passwordDialogOpen.value = true;
 }
 
-// Change password
-function changePassword() {
-    if (newPassword.value.length < 8) {
-        toast.error('Das Passwort muss mindestens 8 Zeichen lang sein.');
-        return;
-    }
-    router.put(
-        route('users.changePassword', selectedUser.value?.id),
-        { password: newPassword.value },
-        {
-            onSuccess: () => {
-                passwordDialogOpen.value = false;
-                newPassword.value = '';
-            },
-        },
-    );
+// Handle success from dialogs
+function handleUserFormSuccess() {
+    router.reload();
+}
+
+function handlePasswordChangeSuccess() {
+    router.reload();
 }
 </script>
 
@@ -232,76 +140,14 @@ function changePassword() {
     </div>
 
     <!-- Create/Edit User Dialog -->
-    <Dialog v-model:open="createEditDialogOpen">
-        <DialogContent class="max-w-md">
-            <DialogHeader>
-                <DialogTitle>{{ isEditMode ? 'Berater*in bearbeiten' : 'Neue*n Berater*in anlegen' }}</DialogTitle>
-            </DialogHeader>
-
-            <div class="space-y-4 py-4">
-                <div v-if="!isEditMode && currentGroup" class="space-y-2">
-                    <Label>Initiative</Label>
-                    <div class="flex items-center gap-3 rounded-md border border-input bg-muted/50 px-3 py-2">
-                        <img
-                            v-if="currentGroup.logo_path"
-                            :src="currentGroup.logo_path"
-                            :alt="currentGroup.name"
-                            class="h-8 w-8 rounded object-cover"
-                        />
-                        <span class="text-sm font-medium">{{ currentGroup.name }}</span>
-                    </div>
-                    <p class="text-xs text-gray-500">Der:die Berater:in wird dieser Initiative zugewiesen.</p>
-                </div>
-
-                <div class="space-y-2">
-                    <Label for="first_name">Vorname *</Label>
-                    <Input id="first_name" v-model="formData.first_name" placeholder="Vorname" />
-                </div>
-
-                <div class="space-y-2">
-                    <Label for="last_name">Nachname *</Label>
-                    <Input id="last_name" v-model="formData.last_name" placeholder="Nachname" />
-                </div>
-
-                <div class="space-y-2">
-                    <Label for="email">E-Mail Adresse *</Label>
-                    <Input id="email" v-model="formData.email" type="email" placeholder="email@example.com" />
-                </div>
-
-                <div v-if="canPromoteUsersToSystemAdmin" class="flex items-center space-x-2">
-                    <Checkbox id="is_admin" v-model="formData.is_admin" />
-                    <Label for="is_admin" class="text-sm font-normal cursor-pointer">System Admin</Label>
-                </div>
-            </div>
-
-            <DialogFooter>
-                <Button variant="outline" @click="createEditDialogOpen = false">Abbrechen</Button>
-                <Button @click="saveUser">{{ isEditMode ? 'Speichern' : 'Erstellen' }}</Button>
-            </DialogFooter>
-        </DialogContent>
-    </Dialog>
+    <UserFormDialog
+        v-model:open="createEditDialogOpen"
+        :user="editingUser"
+        :can-promote-users-to-system-admin="canPromoteUsersToSystemAdmin"
+        :current-group="currentGroup"
+        @success="handleUserFormSuccess"
+    />
 
     <!-- Change Password Dialog -->
-    <Dialog v-model:open="passwordDialogOpen">
-        <DialogContent>
-            <DialogHeader>
-                <DialogTitle>Passwort ändern</DialogTitle>
-                <DialogDescription>
-                    Passwort von <b>{{ selectedUser?.first_name }} {{ selectedUser?.last_name }}</b> ändern
-                </DialogDescription>
-            </DialogHeader>
-            <div class="space-y-4 py-4">
-                <div class="space-y-2">
-                    <Label for="newPassword">Neues Passwort</Label>
-                    <Input id="newPassword" v-model="newPassword" type="password" placeholder="Neues Passwort" />
-                </div>
-                <p class="text-sm text-gray-600">Das Passwort muss mindestens 8 Zeichen lang sein.</p>
-                <p class="text-sm text-gray-600">Der Benutzer wird per E-Mail über die Passwortänderung informiert.</p>
-            </div>
-            <DialogFooter>
-                <Button variant="outline" @click="passwordDialogOpen = false">Abbrechen</Button>
-                <Button @click="changePassword">Passwort ändern</Button>
-            </DialogFooter>
-        </DialogContent>
-    </Dialog>
+    <ChangePasswordDialog v-model:open="passwordDialogOpen" :user="passwordUser" @success="handlePasswordChangeSuccess" />
 </template>
