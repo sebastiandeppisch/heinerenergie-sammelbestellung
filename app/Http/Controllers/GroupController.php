@@ -39,8 +39,8 @@ class GroupController extends Controller
         $selectedGroup = $selectedGroup ? GroupData::fromModel($selectedGroup) : null;
 
         $groupIndexData = new GroupsIndexData(
-            groupTreeItems: $groupTreeItems,
-            groups: GroupData::collect($groups),
+            groupTreeItems: $groupTreeItems->values(),
+            groups: GroupData::collect($groups)->values(),
             canCreateRootGroup: $canCreateRootGroup,
             selectedGroup: $selectedGroup,
             polygon: $polygon,
