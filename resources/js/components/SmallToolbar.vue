@@ -1,20 +1,13 @@
 <script setup lang="ts">
 import AppLogo from '@/layouts/components/AppLogo.vue';
-import { PageProps } from '@inertiajs/core';
 import { router, usePage } from '@inertiajs/vue3';
 import { User } from 'lucide-vue-next';
 import { computed } from 'vue';
+import type { CustomPageProps } from '@/types/pageProps';
+
 const openBackend = () => {
     router.visit('/backend');
 };
-
-interface CustomPageProps extends PageProps {
-    auth: {
-        user: App.Data.UserData;
-        currentGroup?: App.Data.GroupBaseData;
-        availableGroups?: App.Data.GroupData[];
-    };
-}
 
 const page = usePage<CustomPageProps>();
 const currentGroup = computed(() => page.props.auth.currentGroup);

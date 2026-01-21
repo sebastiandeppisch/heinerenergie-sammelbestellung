@@ -11,20 +11,13 @@ import {
     SidebarMenuSubButton,
     SidebarMenuSubItem,
 } from '@/shadcn/components/ui/sidebar';
-import { PageProps } from '@inertiajs/core';
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import type { CustomPageProps } from '@/types/pageProps';
 
 defineProps<{
     items: NavItem[];
 }>();
-
-interface CustomPageProps extends PageProps {
-    auth: {
-        user: App.Data.UserData;
-        currentGroup?: App.Data.GroupBaseData;
-    };
-}
 
 const page = usePage<CustomPageProps>();
 

@@ -1,13 +1,6 @@
-import { PageProps } from '@inertiajs/core';
 import { router, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
-
-interface CustomPageProps extends PageProps {
-    auth: {
-        user: App.Data.UserData | null;
-    };
-    userRole: 'user' | 'group-admin' | 'system-admin';
-}
+import type { CustomPageProps } from '@/types/pageProps';
 
 const page = usePage<CustomPageProps>();
 

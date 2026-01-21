@@ -17,8 +17,7 @@ import { PageProps } from '@inertiajs/core';
 import { router, usePage } from '@inertiajs/vue3';
 import { Edit, Key, Plus } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
-import { toast } from 'vue-sonner';
-import { route } from 'ziggy-js';
+import type { CustomPageProps } from '@/types/pageProps';
 
 const props = defineProps<{
     canPromoteUsersToSystemAdmin: boolean;

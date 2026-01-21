@@ -2,19 +2,11 @@
 import UserInfo from '@/layouts/components/UserInfo.vue';
 import { Badge } from '@/shadcn/components/ui/badge';
 import { DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/shadcn/components/ui/dropdown-menu';
-import { PageProps } from '@inertiajs/core';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import { Key, LogOut, User, Users } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { route } from 'ziggy-js';
-
-interface CustomPageProps extends PageProps {
-    auth: {
-        user: App.Data.UserData;
-        currentGroup?: App.Data.GroupBaseData;
-        availableGroups?: App.Data.GroupData[];
-    };
-}
+import type { CustomPageProps } from '@/types/pageProps';
 
 const page = usePage<CustomPageProps>();
 const user = computed(() => page.props.auth.user);

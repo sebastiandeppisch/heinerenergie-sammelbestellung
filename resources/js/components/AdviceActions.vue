@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { Button } from '@/shadcn/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shadcn/components/ui/dropdown-menu';
-import { PageProps } from '@inertiajs/core';
 import { router, usePage } from '@inertiajs/vue3';
 import { ChevronDown, Mail, Map, Phone, Trash, Unlock } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { route } from 'ziggy-js';
+import type { CustomPageProps } from '@/types/pageProps';
 import { user } from '../authHelper';
 import AdviceTransfer from './AdviceTransfer.vue';
 const props = defineProps<{
@@ -52,10 +52,6 @@ function openNavigation(type: string) {
             }
             break;
     }
-}
-
-interface CustomPageProps extends PageProps {
-    appName: string;
 }
 
 const page = usePage<CustomPageProps>();

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { PageProps } from '@inertiajs/core';
 import { router, usePage } from '@inertiajs/vue3';
+import type { CustomPageProps } from '@/types/pageProps';
 import { DxHtmlEditor, DxMediaResizing, DxToolbar } from 'devextreme-vue/html-editor';
 import { Edit, Save, X } from 'lucide-vue-next';
 import { computed, reactive, ref } from 'vue';
@@ -15,13 +15,6 @@ import editorToolbar from '../htmlEditorToolbar.json';
 
 interface Props {
     advisorInfo: string;
-}
-
-interface CustomPageProps extends PageProps {
-    auth: {
-        user: App.Data.UserData;
-        currentGroup?: App.Data.GroupBaseData;
-    };
 }
 
 const props = defineProps<Props>();

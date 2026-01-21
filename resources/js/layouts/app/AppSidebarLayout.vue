@@ -5,11 +5,11 @@ import AppSidebar from '@/layouts/components/AppSidebar.vue';
 import AppSidebarHeader from '@/layouts/components/AppSidebarHeader.vue';
 import type { BreadcrumbItemType } from '@/layouts/helper';
 import { Toaster } from '@/shadcn/components/ui/sonner';
-import { PageProps } from '@inertiajs/core';
 import { usePage } from '@inertiajs/vue3';
 import { watch } from 'vue';
 import { toast } from 'vue-sonner';
 import 'vue-sonner/style.css';
+import type { CustomPageProps } from '@/types/pageProps';
 
 interface Props {
     breadcrumbs?: BreadcrumbItemType[];
@@ -18,12 +18,6 @@ interface Props {
 withDefaults(defineProps<Props>(), {
     breadcrumbs: () => [],
 });
-
-interface CustomPageProps extends PageProps {
-    flashMessages: {
-        [key: string]: string;
-    };
-}
 const page = usePage<CustomPageProps>();
 
 watch(
