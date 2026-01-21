@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { isActingAsAdmin, isActingAsSystemAdmin } from '@/authHelper';
 import { type NavItem } from '@/layouts/helper';
 import {
     SidebarGroup,
@@ -40,6 +41,21 @@ const groupName = computed<string>(() => {
 
     return name;
 });
+
+function showItem(item: NavItem): boolean {
+    if (!item.role) {
+        return true;
+    }
+
+    if (item.role === 'group-admin' && isActingAsAdmin.value) {
+        return true;
+    }
+
+    if (item.role === 'system-admin' && isActingAsSystemAdmin.value) {
+        return true;
+    }
+    return false;
+}
 </script>
 
 <template>
@@ -48,7 +64,7 @@ const groupName = computed<string>(() => {
         <SidebarMenu>
             <template v-for="item in items" :key="item.title">
                 <!-- without children -->
-                <SidebarMenuItem v-if="!item.children && item.href && (!item.admin || page.props.auth.user.is_acting_as_admin)">
+                <SidebarMenuItem v-if="!item.children && item.href && showItem(item)">
                     <SidebarMenuButton as-child :is-active="item.href === page.url" :tooltip="item.title" class="text-sidebar-accent-foreground">
                         <Link :href="item.href">
                             <component :is="item.icon" class="text-sidebar-accent-foreground" />
@@ -58,7 +74,7 @@ const groupName = computed<string>(() => {
                 </SidebarMenuItem>
 
                 <!-- with children -->
-                <SidebarMenuItem v-else-if="item.children && (!item.admin || page.props.auth.user.is_acting_as_admin)">
+                <SidebarMenuItem v-else-if="item.children && showItem(item)">
                     <SidebarMenuButton class="text-sidebar-accent-foreground">
                         <component :is="item.icon" />
                         <span>{{ item.title }}</span>
@@ -66,7 +82,7 @@ const groupName = computed<string>(() => {
                     <SidebarMenuSub>
                         <SidebarMenuSubItem v-for="child in item.children" :key="child.title">
                             <SidebarMenuSubButton
-                                v-if="child.href && (!child.admin || page.props.auth.user.is_acting_as_admin)"
+                                v-if="child.href && showItem(child)"
                                 as-child
                                 :is-active="child.href === page.url"
                                 class="text-sidebar-accent-foreground"

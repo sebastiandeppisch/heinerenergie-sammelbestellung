@@ -6,6 +6,7 @@ interface CustomPageProps extends PageProps {
     auth: {
         user: App.Data.UserData | null;
     };
+    userRole: 'user' | 'group-admin' | 'system-admin'
 }
 
 const page = usePage<CustomPageProps>();
@@ -20,4 +21,6 @@ export const user = computed(() => {
     return user as App.Data.UserData;
 });
 export const email = computed(() => user.value?.email);
-export const isAdmin = computed(() => user.value !== null && user.value?.is_acting_as_admin);
+export const isActingAsAdmin = computed(() => user.value !== null && user.value?.is_acting_as_admin);
+export const isActingAsGroupAdmin = computed<boolean>(() => page.props.userRole === 'group-admin');
+export const isActingAsSystemAdmin = computed<boolean>(() => page.props.userRole === 'system-admin');

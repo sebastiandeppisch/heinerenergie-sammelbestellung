@@ -12,6 +12,6 @@ export interface NavItem {
     href?: string;
     icon?: LucideIcon;
     isActive?: boolean;
-    admin?: boolean;
+    role?: 'group-admin' | 'system-admin';
     children?: NavItem[];
 }

@@ -32,7 +32,7 @@ import CustomStore from 'devextreme/data/custom_store';
 import notify from 'devextreme/ui/notify';
 import { route } from 'ziggy-js';
 import LaravelLookupSource from '../LaravelLookupSource';
-import { isAdmin, user } from '../authHelper';
+import { isActingAsAdmin, user } from '../authHelper';
 const emit = defineEmits(['selectAdviceId']);
 
 const advisors = new LaravelDataSource('api/users');
@@ -147,7 +147,7 @@ function rowCanBeEdited(e: { row: any }): boolean {
 
 function userCanEdit(advice: App.Data.DataProtectedAdviceData) {
     const userId = user.value.id;
-    if (isAdmin.value) {
+    if (isActingAsAdmin.value) {
         return true;
     }
     if (advice.advisor_id === userId) {
@@ -274,10 +274,16 @@ const adviceStatusResult = new ArrayDataSource([
                 <DxColumn data-field="result" caption="Zusammenfassung" :allow-editing="false">
                     <DxLookup :data-source="adviceStatusResult" display-expr="name" value-expr="id" />
                 </DxColumn>
-                <DxColumn data-field="advisor_id" caption="Berater*in" v-if="isAdmin" width="350px">
+                <DxColumn data-field="advisor_id" caption="Berater*in" v-if="isActingAsAdmin" width="350px">
                     <DxLookup :data-source="sortedAdvisors" display-expr="name" value-expr="id" />
                 </DxColumn>
-                <DxColumn data-field="advisor_id" caption="Berater*in" :allow-editing="false" cell-template="simpleadvisorassignment" v-if="!isAdmin">
+                <DxColumn
+                    data-field="advisor_id"
+                    caption="Berater*in"
+                    :allow-editing="false"
+                    cell-template="simpleadvisorassignment"
+                    v-if="!isActingAsAdmin"
+                >
                     <DxLookup :data-source="sortedAdvisors" display-expr="name" value-expr="id" />
                 </DxColumn>
                 <DxColumn data-field="distance" caption="Luftlinie" cell-template="distance" :allow-editing="false" />

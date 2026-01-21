@@ -42,7 +42,7 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Initiativen',
         icon: UserCog,
-        admin: true,
+        role: 'group-admin',
         children: [
             {
                 title: 'Initiativen-Verwaltung',
@@ -60,7 +60,7 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Formulare',
         icon: FileText,
-        admin: true,
+        role: 'group-admin',
         children: [
             {
                 title: 'Formular-Verwaltung',
@@ -81,7 +81,7 @@ const mainNavItems: NavItem[] = [
             {
                 title: 'Tabelle',
                 href: '/mappoints',
-                admin: true,
+                role: 'group-admin',
                 icon: Table,
             },
             {
@@ -95,13 +95,13 @@ const mainNavItems: NavItem[] = [
         title: 'Einstellungen',
         href: '/settings',
         icon: Settings,
-        admin: true,
+        role: 'group-admin',
     },
     {
         title: 'System-Admin',
         href: '/system-admin',
         icon: Database,
-        admin: true,
+        role: 'system-admin',
     },
 ];
 

@@ -14,7 +14,7 @@ import notify from 'devextreme/ui/notify';
 import { latLng } from 'leaflet';
 import { ExternalLink, Search, UserCheck } from 'lucide-vue-next';
 import AdviceTypes from '../AdviceTypes';
-import { isAdmin, user as userRef } from '../authHelper';
+import { isActingAsAdmin, user as userRef } from '../authHelper';
 import { AdaptTableHeight } from '../helpers';
 
 const user = userRef.value;
@@ -76,7 +76,7 @@ function addAdvice(advice: App.Data.DataProtectedAdviceData) {
 }
 
 function userCanOpen(advice: App.Data.DataProtectedAdviceData) {
-    if (isAdmin) {
+    if (isActingAsAdmin.value) {
         return true;
     }
     if (advice.advisor_id === userId) {
