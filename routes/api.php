@@ -50,5 +50,3 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::resource('advicetypes', AdviceTypeController::class)->only(['index', 'show']);
-
-Route::post('newadvice', StoreAdviceController::class)->name('api.newadvice');
