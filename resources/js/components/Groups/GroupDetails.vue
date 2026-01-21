@@ -31,7 +31,7 @@
             <div>
                 <label class="mb-2 block text-sm font-medium text-gray-700">Logo</label>
                 <div class="flex items-center">
-                    <img :src="logoSrc" :alt="group.name" class="mr-4 h-12 w-12 rounded" />
+                    <img :src="logoSrc" :alt="group.name" class="mr-4 h-12 max-w-12 rounded object-contain" />
                     <input type="file" ref="logoInput" class="hidden" accept="image/*" @change="handleLogoChange" />
                     <Button type="button" variant="outline" @click="logoInput?.click()" v-if="canEdit">
                         <Upload class="h-4 w-4" />
