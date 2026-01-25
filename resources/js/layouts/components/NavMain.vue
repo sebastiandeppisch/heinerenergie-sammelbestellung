@@ -24,11 +24,11 @@ const page = usePage<CustomPageProps>();
 const groupName = computed<string>(() => {
     const name = page.props.auth.currentGroup?.name || '';
 
-    if (page.props.auth.currentGroup === null && page.props.auth.user.is_acting_as_admin) {
+    if (page.props.auth.currentGroup === null && page.props.auth.user?.is_acting_as_admin) {
         return 'Systemadministrator';
     }
 
-    if (page.props.auth.user.is_acting_as_admin) {
+    if (page.props.auth.user?.is_acting_as_admin ?? false) {
         return name + ' (Admin)';
     }
 

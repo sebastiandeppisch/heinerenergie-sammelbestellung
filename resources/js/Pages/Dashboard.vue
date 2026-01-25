@@ -21,7 +21,7 @@ const props = defineProps<Props>();
 const page = usePage<CustomPageProps>();
 
 const currentGroup = computed(() => page.props.auth.currentGroup);
-const isAdmin = computed(() => page.props.auth.user.is_acting_as_admin);
+const isAdmin = computed(() => page.props.auth.user?.is_acting_as_admin ?? false);
 const canEdit = computed(() => currentGroup.value !== null && isAdmin.value);
 
 const isEditMode = ref(false);

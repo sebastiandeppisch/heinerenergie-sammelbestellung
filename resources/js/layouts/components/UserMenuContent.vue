@@ -9,7 +9,12 @@ import { route } from 'ziggy-js';
 import type { CustomPageProps } from '@/types/pageProps';
 
 const page = usePage<CustomPageProps>();
-const user = computed(() => page.props.auth.user);
+const user = computed<App.Data.UserData>(() => {
+    if(page.props.auth.user) {
+        return page.props.auth.user;
+    }
+    throw new Error('User not found');
+});
 const currentGroup = computed(() => page.props.auth.currentGroup);
 const availableGroups = computed(() => page.props.auth.availableGroups || []);
 
