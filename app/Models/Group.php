@@ -62,7 +62,7 @@ class Group extends Model
     /**
      * Get the parent group
      *
-     * @return BelongsTo<\App\Models\Group, $this>
+     * @return BelongsTo<Group, $this>
      */
     public function parent(): BelongsTo
     {
@@ -72,7 +72,7 @@ class Group extends Model
     /**
      * Get the child groups
      *
-     * @return HasMany<\App\Models\Group, $this>
+     * @return HasMany<Group, $this>
      */
     public function children(): HasMany
     {

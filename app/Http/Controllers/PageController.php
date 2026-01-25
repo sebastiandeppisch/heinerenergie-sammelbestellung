@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Data\GroupData;
-use App\Data\UserData;
 use App\Models\Group;
 use App\Models\Setting;
 use App\Models\User;
@@ -59,7 +58,6 @@ class PageController extends Controller
     {
         return Inertia::render('Profile');
     }
-
 
     public function settings()
     {

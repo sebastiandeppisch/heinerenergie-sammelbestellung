@@ -72,37 +72,33 @@ function close() {
 
 function save() {
     if (isEditMode.value && props.user) {
-        router.put(
-            route('users.update', props.user.id),
-            formData.value,
-            {
-                onSuccess: () => {
-                    close();
-                    emit('success');
-                },
-                onError: (errors) => {
-                    Object.values(errors).flat().forEach((message: any) => {
+        router.put(route('users.update', props.user.id), formData.value, {
+            onSuccess: () => {
+                close();
+                emit('success');
+            },
+            onError: (errors) => {
+                Object.values(errors)
+                    .flat()
+                    .forEach((message: any) => {
                         toast.error(message);
                     });
-                },
             },
-        );
+        });
     } else {
-        router.post(
-            route('users.store'),
-            formData.value,
-            {
-                onSuccess: () => {
-                    close();
-                    emit('success');
-                },
-                onError: (errors) => {
-                    Object.values(errors).flat().forEach((message: any) => {
+        router.post(route('users.store'), formData.value, {
+            onSuccess: () => {
+                close();
+                emit('success');
+            },
+            onError: (errors) => {
+                Object.values(errors)
+                    .flat()
+                    .forEach((message: any) => {
                         toast.error(message);
                     });
-                },
             },
-        );
+        });
     }
 }
 </script>
@@ -146,7 +142,7 @@ function save() {
 
                 <div v-if="canPromoteUsersToSystemAdmin" class="flex items-center space-x-2">
                     <Checkbox id="is_admin" v-model="formData.is_admin" />
-                    <Label for="is_admin" class="text-sm font-normal cursor-pointer">System Admin</Label>
+                    <Label for="is_admin" class="cursor-pointer text-sm font-normal">System Admin</Label>
                 </div>
             </div>
 

@@ -7,7 +7,6 @@ use App\Http\Controllers\Api\GeoSearchController;
 use App\Http\Controllers\Api\GroupAdviceStatusController;
 use App\Http\Controllers\Api\GroupUserController;
 use App\Http\Controllers\Api\SettingController;
-use App\Http\Controllers\Api\StoreAdviceController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;

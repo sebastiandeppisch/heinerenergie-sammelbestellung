@@ -121,7 +121,10 @@ const markerSrc = computed(() => {
     return '/images/markers/he_yellow.svg';
 });
 
-type FormData = Omit<GroupData, 'id' | 'logo_path' | 'marker_path' | 'parent_id' | 'users_count' | 'advices_count' | 'userCanActAsAdmin' | 'new_advice_mail'> & {
+type FormData = Omit<
+    GroupData,
+    'id' | 'logo_path' | 'marker_path' | 'parent_id' | 'users_count' | 'advices_count' | 'userCanActAsAdmin' | 'new_advice_mail'
+> & {
     logo: File | null;
     marker: File | null;
     remove_logo: boolean;

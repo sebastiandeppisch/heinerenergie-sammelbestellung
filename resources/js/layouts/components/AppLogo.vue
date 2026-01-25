@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import type { CustomPageProps } from '@/types/pageProps';
 import { usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
-import type { CustomPageProps } from '@/types/pageProps';
 import genericLogo from '../../../img/logo.png';
 
 const page = usePage<CustomPageProps>();

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { router, usePage } from '@inertiajs/vue3';
 import type { CustomPageProps } from '@/types/pageProps';
+import { router, usePage } from '@inertiajs/vue3';
 import { DxHtmlEditor, DxMediaResizing, DxToolbar } from 'devextreme-vue/html-editor';
 import { Edit, Save, X } from 'lucide-vue-next';
 import { computed, reactive, ref } from 'vue';

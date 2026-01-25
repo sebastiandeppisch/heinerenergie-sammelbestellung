@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import type { CustomPageProps } from '@/types/pageProps';
 import { Head, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
-import type { CustomPageProps } from '@/types/pageProps';
 
 const page = usePage<CustomPageProps>();
 const currentGroup = computed(() => page.props.auth.currentGroup);

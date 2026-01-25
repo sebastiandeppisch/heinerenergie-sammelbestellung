@@ -1,6 +1,6 @@
+import type { CustomPageProps } from '@/types/pageProps';
 import { router, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
-import type { CustomPageProps } from '@/types/pageProps';
 
 const page = usePage<CustomPageProps>();
 
