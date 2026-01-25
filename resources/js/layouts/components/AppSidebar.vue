@@ -95,7 +95,7 @@ const mainNavItems: NavItem[] = [
         title: 'Einstellungen',
         href: '/settings',
         icon: Settings,
-        role: 'group-admin',
+        role: 'system-admin',
     },
     {
         title: 'System-Admin',
