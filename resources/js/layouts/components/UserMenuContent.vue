@@ -10,7 +10,7 @@ import { route } from 'ziggy-js';
 
 const page = usePage<CustomPageProps>();
 const user = computed<App.Data.UserData>(() => {
-    if(page.props.auth.user) {
+    if (page.props.auth.user) {
         return page.props.auth.user;
     }
     throw new Error('User not found');
