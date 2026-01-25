@@ -7,10 +7,7 @@ use App\Data\UserData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SetAddressRequest;
 use App\Http\Requests\SetPictureRequest;
-use App\Http\Requests\StoreUserRequest;
-use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
-use App\Services\SessionService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -52,7 +49,6 @@ class UserController extends Controller
         // @phpstan-ignore-next-line
         return $users->filter(fn (User $user) => $this->user()->can('view', $user))->values()->map(fn ($user) => UserData::fromModel($user, false));
     }
-
 
     public function show(User $user)
     {

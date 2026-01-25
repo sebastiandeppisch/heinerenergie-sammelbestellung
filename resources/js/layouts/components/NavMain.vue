@@ -11,9 +11,9 @@ import {
     SidebarMenuSubButton,
     SidebarMenuSubItem,
 } from '@/shadcn/components/ui/sidebar';
+import type { CustomPageProps } from '@/types/pageProps';
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
-import type { CustomPageProps } from '@/types/pageProps';
 
 defineProps<{
     items: NavItem[];

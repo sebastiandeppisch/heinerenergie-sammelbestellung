@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import AppLogo from '@/layouts/components/AppLogo.vue';
+import type { CustomPageProps } from '@/types/pageProps';
 import { router, usePage } from '@inertiajs/vue3';
 import { User } from 'lucide-vue-next';
 import { computed } from 'vue';
-import type { CustomPageProps } from '@/types/pageProps';
 
 const openBackend = () => {
     router.visit('/backend');

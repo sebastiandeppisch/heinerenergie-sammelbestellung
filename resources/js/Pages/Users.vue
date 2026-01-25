@@ -4,10 +4,10 @@ import UserFormDialog from '@/components/Users/UserFormDialog.vue';
 import { Button } from '@/shadcn/components/ui/button';
 import { Card, CardContent } from '@/shadcn/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
+import type { CustomPageProps } from '@/types/pageProps';
 import { router, usePage } from '@inertiajs/vue3';
 import { Edit, Key, Plus } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
-import type { CustomPageProps } from '@/types/pageProps';
 
 const props = defineProps<{
     canPromoteUsersToSystemAdmin: boolean;
@@ -86,11 +86,7 @@ function handlePasswordChangeSuccess() {
                                 <TableCell>{{ user.email }}</TableCell>
                                 <TableCell>
                                     <div class="flex flex-col gap-2">
-                                        <div
-                                            v-for="group in user.groups"
-                                            :key="group.id"
-                                            class="flex items-center gap-2"
-                                        >
+                                        <div v-for="group in user.groups" :key="group.id" class="flex items-center gap-2">
                                             <img
                                                 v-if="group.logo_path"
                                                 :src="group.logo_path"
@@ -99,9 +95,7 @@ function handlePasswordChangeSuccess() {
                                             />
                                             <span class="text-sm">{{ group.name }}</span>
                                         </div>
-                                        <span v-if="user.groups.length === 0" class="text-sm text-gray-400 italic">
-                                            Keine Gruppen
-                                        </span>
+                                        <span v-if="user.groups.length === 0" class="text-sm text-gray-400 italic"> Keine Gruppen </span>
                                     </div>
                                 </TableCell>
                                 <TableCell v-if="canPromoteUsersToSystemAdmin">

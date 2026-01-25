@@ -61,8 +61,8 @@ class HandleInertiaRequests extends Middleware
             'auth.currentGroup' => fn () => app(CurrentGroupService::class)->getGroup() ? GroupBaseData::fromModel(app(CurrentGroupService::class)->getGroup()) : null,
             'flashMessages' => $flashMessages,
             'defaultLogo' => app_logo(),
-            'appName' => fn () => app_name(),
-            'userRole' => fn () => $this->getUserRole(),
+            'appName' => app_name(...),
+            'userRole' => $this->getUserRole(...),
         ]);
     }
 
