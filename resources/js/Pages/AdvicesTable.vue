@@ -49,7 +49,6 @@ const props = defineProps<{
     advices: App.Models.Advice[];
     groups: App.Data.GroupData[];
 }>();
-console.log(props.advices);
 
 onMounted(() => {
     advisors.reload();
