@@ -24,6 +24,9 @@ class FormDefinitionData extends Data
         public string $group_id,
         public ?FormToAdviceMappingData $advice_mapping = null,
         public ?FormToMapPointMappingData $map_point_mapping = null,
+        public ?string $success_message = null,
+        public bool $show_next_form_button = false,
+        public ?string $next_form_button_text = null,
     ) {}
 
     public static function fromModel(FormDefinition $model): self
@@ -39,6 +42,9 @@ class FormDefinitionData extends Data
             group_id: $model->group->uuid,
             advice_mapping: FormToAdviceMappingData::fromModel($model->adviceCreator),
             map_point_mapping: FormToMapPointMappingData::fromModel($model->mapPointCreator),
+            success_message: $model->success_message,
+            show_next_form_button: $model->show_next_form_button ?? false,
+            next_form_button_text: $model->next_form_button_text,
         );
     }
 }

@@ -31,6 +31,9 @@ class UpsertFormDefinitionRequest extends FormRequest
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'is_active' => 'boolean',
+            'success_message' => 'nullable|string',
+            'show_next_form_button' => 'boolean',
+            'next_form_button_text' => 'nullable|string|max:255|required_if:show_next_form_button,true',
 
             // Felder-Array-Validierung
             'fields' => 'array',
@@ -93,6 +96,9 @@ class UpsertFormDefinitionRequest extends FormRequest
             'name' => 'Formularname',
             'description' => 'Beschreibung',
             'is_active' => 'Aktiv',
+            'success_message' => 'Erfolgsmeldung',
+            'show_next_form_button' => 'Button anzeigen',
+            'next_form_button_text' => 'Button-Text',
             'fields' => 'Formularfelder',
             'fields.*.type' => 'Feldtyp',
             'fields.*.label' => 'Feldbezeichnung',

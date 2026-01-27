@@ -21,6 +21,9 @@ class FormDefinition extends Model
         'description',
         'is_active',
         'group_id',
+        'success_message',
+        'show_next_form_button',
+        'next_form_button_text',
     ];
 
     /**
@@ -30,6 +33,7 @@ class FormDefinition extends Model
      */
     protected $casts = [
         'is_active' => 'boolean',
+        'show_next_form_button' => 'boolean',
     ];
 
     /**

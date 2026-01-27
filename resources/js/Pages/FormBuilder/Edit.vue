@@ -44,6 +44,9 @@ const formDefinition = reactive<FormDefinitionData>(
         group_id: '-1',
         advice_mapping: null,
         map_point_mapping: null,
+        success_message: null,
+        show_next_form_button: false,
+        next_form_button_text: null,
     },
 );
 
@@ -165,6 +168,24 @@ const nullsafeDescription = computed<string>({
         formDefinition.description = value;
     },
 });
+
+const nullsafeSuccessMessage = computed<string>({
+    get() {
+        return formDefinition.success_message || '';
+    },
+    set(value: string) {
+        formDefinition.success_message = value || null;
+    },
+});
+
+const nullsafeNextFormButtonText = computed<string>({
+    get() {
+        return formDefinition.next_form_button_text || '';
+    },
+    set(value: string) {
+        formDefinition.next_form_button_text = value || null;
+    },
+});
 </script>
 
 <template>
@@ -223,6 +244,38 @@ const nullsafeDescription = computed<string>({
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
+                            </FormControl>
+                        </FormItem>
+                    </FormField>
+                </Form>
+            </CardContent>
+        </Card>
+
+        <Card class="form-builder__header">
+            <CardContent>
+                <h3 class="mb-4 text-lg font-semibold">Erfolgsmeldung</h3>
+                <Form class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <FormField v-slot="{ componentField }" name="success_message" class="md:col-span-2">
+                        <FormItem>
+                            <FormLabel>Erfolgsmeldung</FormLabel>
+                            <FormControl>
+                                <Textarea v-model="nullsafeSuccessMessage" placeholder="Vielen Dank für Deine Anfrage" />
+                            </FormControl>
+                        </FormItem>
+                    </FormField>
+                    <FormField v-slot="{ componentField }" name="show_next_form_button">
+                        <FormItem class="flex flex-row items-center space-y-0 space-x-2">
+                            <FormControl>
+                                <Checkbox v-model="formDefinition.show_next_form_button" />
+                            </FormControl>
+                            <FormLabel>Button nach Absenden anzeigen</FormLabel>
+                        </FormItem>
+                    </FormField>
+                    <FormField v-slot="{ componentField }" name="next_form_button_text" v-if="formDefinition.show_next_form_button">
+                        <FormItem>
+                            <FormLabel>Button-Text</FormLabel>
+                            <FormControl>
+                                <Input v-model="nullsafeNextFormButtonText" placeholder="Nächstes Formular" />
                             </FormControl>
                         </FormItem>
                     </FormField>

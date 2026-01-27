@@ -64,6 +64,9 @@ fields: Array<App.Data.FormFieldData>;
 group_id: string;
 advice_mapping: App.Data.FormToAdviceMappingData | null;
 map_point_mapping: App.Data.FormToMapPointMappingData | null;
+success_message: string | null;
+show_next_form_button: boolean;
+next_form_button_text: string | null;
 };
 export type FormFieldData = {
 id: string;
