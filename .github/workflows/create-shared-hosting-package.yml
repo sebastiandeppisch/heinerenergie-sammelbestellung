@@ -55,18 +55,22 @@ jobs:
           chmod +x ci/build-shared-hosting-package.sh
           ./ci/build-shared-hosting-package.sh "${{ steps.get-version.outputs.version }}"
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Create or update draft release
+        uses: softprops/action-gh-release@v1
         with:
-          name: shared-hosting-package
-          path: shared-hosting-package-v${{ steps.get-version.outputs.version }}.zip
-          retention-days: 14
-
-      # - name: Upload to release
-      #   if: github.event_name == 'release'
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     files: ./heinerenergie-sammelbestellung-v${{ steps.get-version.outputs.version }}.zip
+          tag_name: latest-build
+          name: Latest Build (${{ steps.get-version.outputs.version }})
+          draft: true
+          prerelease: false
+          files: shared-hosting-package-v${{ steps.get-version.outputs.version }}.zip
+          body: |
+            Automatisch aktualisierter Build für Shared Hosting Package
+            
+            Version: ${{ steps.get-version.outputs.version }}
+            Commit: ${{ github.sha }}
+            Erstellt: ${{ github.event.head_commit.timestamp }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          overwrite: true
 
       # - name: Create latest tag for push events
       #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
