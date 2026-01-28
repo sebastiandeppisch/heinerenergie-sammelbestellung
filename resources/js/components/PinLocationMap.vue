@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { LControl, LMap, LMarker, LTileLayer } from '@vue-leaflet/vue-leaflet';
+import { LControl, LIcon, LMap, LMarker, LTileLayer } from '@vue-leaflet/vue-leaflet';
 import { computed, nextTick, onMounted, ref } from 'vue';
 
+import DummyPixel from '@/../img/dummy_pixel.png';
 import { useOnResize } from '@/helpers';
 import Button from '@/shadcn/components/ui/button/Button.vue';
 import L, { PointExpression } from 'leaflet';
@@ -143,6 +144,11 @@ const centerOfMap = computed<PointExpression>(() => {
                     :lat-lng="locationModel"
                     v-if="locationModel !== null && locationModel.lat !== undefined && locationModel.lng !== undefined"
                 />
+
+                <!-- Leaflet & Vite bug: if an LMarker is just created at runtime, some race condition occurs => create some hidden dummy marker -->
+                <LMarker :lat-lng="{ lat: 0, lng: 0 }">
+                    <LIcon :icon-url="DummyPixel" />
+                </LMarker>
 
                 <!-- Benutzerdefiniertes Kontrollelement für GPS-Lokalisierung -->
                 <LControl position="topright" v-if="!props.readonly">
