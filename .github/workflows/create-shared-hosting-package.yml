@@ -59,7 +59,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: shared-hosting-package
-          path: /tmp/heinerenergie-sammelbestellung-v${{ steps.get-version.outputs.version }}.zip
+          path: shared-hosting-package-v${{ steps.get-version.outputs.version }}.zip
           retention-days: 14
 
       # - name: Upload to release

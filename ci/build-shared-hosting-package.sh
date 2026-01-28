@@ -12,8 +12,10 @@ if [ -z "$1" ]; then
 fi
 VERSION="$1"
 
+# Store project root directory
+PROJECT_ROOT="$(pwd)"
 TEMP_DIR="/tmp/heinerenergie-build-$VERSION"
-ZIP_NAME="heinerenergie-sammelbestellung-v${VERSION}.zip"
+ZIP_NAME="shared-hosting-package-v${VERSION}.zip"
 
 if [ -f "$ZIP_NAME" ]; then
     echo "Removing existing ZIP archive..."
@@ -102,12 +104,11 @@ chmod -R 775 storage bootstrap/cache
 echo "Copying installation instructions..."
 cp INSTALLATION.md README.md
 
-# Return to project directory
-cd ..
-
-# Creating ZIP archive... in $PWD
-echo "Creating ZIP archive... in $PWD"
-zip -r "$ZIP_NAME" "$TEMP_DIR"
+# Creating ZIP archive with files directly in root...
+echo "Creating ZIP archive with files directly in root..."
+cd "$TEMP_DIR"
+zip -r "$PROJECT_ROOT/$ZIP_NAME" . -x "*.git*" "*.DS_Store*"
+cd "$PROJECT_ROOT"
 
 # Removing temporary directory...
 echo "Removing temporary directory..."
