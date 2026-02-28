@@ -1,7 +1,7 @@
 @component('mail::layout')
     {{-- Header --}}
     @slot('header')
-        @component('mail::header', ['url' => app_url()])
+        @component('mail::header', ['url' => group_url()])
             {{ config('app.name') }}
         @endcomponent
     @endslot
@@ -21,7 +21,7 @@
     {{-- Footer --}}
     @slot('footer')
         @component('mail::footer')
-            {{ app_url() }}
+            {{ group_url() }}
         @endcomponent
     @endslot
 @endcomponent

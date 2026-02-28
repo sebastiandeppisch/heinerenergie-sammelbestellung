@@ -59,12 +59,12 @@ if (! function_exists('app_favicon')) {
     }
 }
 
-if (! function_exists('app_url')) {
+if (! function_exists('group_url')) {
     /**
-     * Get the application URL.
+     * Get the group URL.
      * Returns the group URL if a group context is available and the group has a URL, otherwise returns APP_URL.
      */
-    function app_url(): string
+    function group_url(): string
     {
         if (app()->bound(GroupContextContract::class)) {
             $groupContext = app(GroupContextContract::class);
