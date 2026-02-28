@@ -22,6 +22,7 @@ class Group extends Model
     protected $fillable = [
         'name',
         'description',
+        'url',
         'dashboard_info',
         'new_advice_mail',
         'logo_path',

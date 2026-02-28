@@ -130,6 +130,7 @@ advices_count: number;
 id: string;
 name: string;
 description: string | null;
+url: string | null;
 logo_path: string | null;
 marker_path: string | null;
 parent_id: string | null;

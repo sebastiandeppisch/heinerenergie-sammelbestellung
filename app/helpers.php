@@ -40,7 +40,7 @@ if (! function_exists('app_logo')) {
             $currentGroup = $groupContext->getCurrentGroup();
 
             if ($currentGroup !== null && $currentGroup->logo_path) {
-                return $currentGroup->logo_path;
+                return url('storage/'.$currentGroup->logo_path);
             }
         }
 
@@ -56,5 +56,25 @@ if (! function_exists('app_favicon')) {
     function app_favicon(): string
     {
         return Setting::get('defaultFavicon') ?? 'favicon.ico';
+    }
+}
+
+if (! function_exists('app_url')) {
+    /**
+     * Get the application URL.
+     * Returns the group URL if a group context is available and the group has a URL, otherwise returns APP_URL.
+     */
+    function app_url(): string
+    {
+        if (app()->bound(GroupContextContract::class)) {
+            $groupContext = app(GroupContextContract::class);
+            $currentGroup = $groupContext->getCurrentGroup();
+
+            if ($currentGroup !== null && ! empty($currentGroup->url)) {
+                return $currentGroup->url;
+            }
+        }
+
+        return config('app.url');
     }
 }

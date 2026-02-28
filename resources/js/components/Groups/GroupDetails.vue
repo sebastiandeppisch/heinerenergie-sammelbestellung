@@ -27,6 +27,20 @@
                 <div v-if="form.errors.description" class="text-sm text-red-500">{{ form.errors.description }}</div>
             </div>
 
+            <!-- Group URL -->
+            <div class="space-y-2">
+                <Label for="url">URL</Label>
+                <Input
+                    id="url"
+                    v-model="formUrl"
+                    type="url"
+                    :disabled="!canEdit"
+                    placeholder="https://..."
+                    :class="{ 'border-destructive': form.errors.url }"
+                />
+                <div v-if="form.errors.url" class="text-sm text-red-500">{{ form.errors.url }}</div>
+            </div>
+
             <!-- Group logo -->
             <div>
                 <label class="mb-2 block text-sm font-medium text-gray-700">Logo</label>
@@ -135,6 +149,7 @@ type FormData = Omit<
 const form = useForm<FormData>({
     name: props.group.name,
     description: props.group.description,
+    url: props.group.url ?? null,
     accepts_transfers: props.group.accepts_transfers,
     logo: null,
     marker: null,
@@ -147,6 +162,12 @@ const form = useForm<FormData>({
 const formDescription = computed({
     get: () => form.description ?? undefined,
     set: (value) => (form.description = value || null),
+});
+
+// Computed property to handle null to undefined conversion for url
+const formUrl = computed({
+    get: () => form.url ?? undefined,
+    set: (value) => (form.url = value || null),
 });
 
 const logoInput = ref<HTMLInputElement | null>(null);
