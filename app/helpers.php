@@ -45,7 +45,7 @@ if (! function_exists('app_logo')) {
         }
 
         // Fallback to default logo setting
-        return Setting::get('defaultLogo') ?? 'img/logo_without_background.png';
+        return url(Setting::get('defaultLogo') ?? 'img/logo_without_background.png');
     }
 }
 
