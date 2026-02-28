@@ -62,7 +62,7 @@ class UserController extends Controller
             $user->groups()->attach($group->id, ['is_admin' => false]);
         }
 
-        return redirect()->route('users')->with('success', 'Berater*in wurde erfolgreich erstellt');
+        return redirect()->route('users.index')->with('success', 'Berater*in wurde erfolgreich erstellt');
     }
 
     public function update(UpdateUserRequest $request, User $user)
@@ -75,7 +75,7 @@ class UserController extends Controller
 
         $user->save();
 
-        return redirect()->route('users')->with('success', 'Berater*in wurde erfolgreich aktualisiert');
+        return redirect()->route('users.index')->with('success', 'Berater*in wurde erfolgreich aktualisiert');
     }
 
     public function actAsGroup(Request $request, Group $group)

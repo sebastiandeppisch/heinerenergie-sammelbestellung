@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Route;
 require_once __DIR__.'/api.auth.php';
 
 Route::middleware('auth')->group(function () {
-    Route::resource('users', UserController::class)->only(['index', 'show']);
+    Route::resource('users', UserController::class)->only(['index', 'show'])->names('api.users');
     Route::resource('advices', AdviceController::class)->except(['index'])->names('api.advices');
 
     Route::apiResource('groups.users', GroupUserController::class);
