@@ -97,3 +97,18 @@ test('advisor can be updated', function () {
         'advisor_id' => $advisors[0]->uuid,
     ]);
 });
+
+test('setAdvisors API sets shared advisors on advice', function () {
+    $advice = Advice::factory()->create(['group_id' => $this->group->id]);
+    $advisorsToShare = User::factory()->count(2)->create();
+
+    $response = $this->actingAs($this->admin)
+        ->postJson("/api/advices/{$advice->uuid}/advisors", [
+            'advisors' => $advisorsToShare->map(fn (User $u) => $u->uuid)->values()->all(),
+        ]);
+
+    $response->assertOk();
+    $advice->refresh();
+    expect($advice->shares->pluck('id')->sort()->values()->all())
+        ->toEqual($advisorsToShare->pluck('id')->sort()->values()->all());
+});
