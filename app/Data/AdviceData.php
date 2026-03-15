@@ -65,7 +65,7 @@ class AdviceData extends Data
             house_type: $advice->house_type,
             landlord_exists: $advice->landlord_exists,
             place_notes: $advice->place_notes,
-            shares_ids: $advice->shares_ids,
+            shares_ids: $advice->shares->pluck('uuid'),
             distance: $user ? $adviceService->getDistance($advice, $user)?->getValue() : null,
             can_edit: $user ? $adviceService->canEdit($advice, $user) : false,
         );

@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
-#[Typescript]
+#[TypeScript]
 class DataProtectedAdviceData extends Data
 {
     public function __construct(
@@ -89,7 +89,7 @@ class DataProtectedAdviceData extends Data
             result: $advice->result,
             can_edit: $canViewAll || ($user ? $adviceService->canEdit($advice, $user) : false),
             group_id: $advice->group->uuid,
-            shares_ids: $advice->shares_ids
+            shares_ids: $advice->shares->pluck('uuid')
         );
     }
 }
