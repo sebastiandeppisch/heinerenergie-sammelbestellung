@@ -64,6 +64,10 @@ function handleFieldsUpdate(fields: FormFieldData[]) {
 }
 
 function saveForm() {
+    formDefinition.fields.forEach((field, index) => {
+        field.sort_order = index;
+    });
+
     if (props.isEdit) {
         router.put(route('form-definitions.update', formDefinition.id), formDefinition, {
             onError: (errors) => {
