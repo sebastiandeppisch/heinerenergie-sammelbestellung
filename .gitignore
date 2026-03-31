@@ -26,4 +26,8 @@ coverage-report/**
 database/seeders/GroupAdvicesAdvisorsSeeder.php
 TODO.md
 
-
+.mcp.json
+AGENTS.md
+CLAUDE.md
+.claude/**
+.cursor/**
