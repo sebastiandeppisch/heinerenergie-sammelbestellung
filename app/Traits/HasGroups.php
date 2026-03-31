@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Traits;
 
 use App\Models\Group;
+use App\Models\GroupUser;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
@@ -21,6 +22,7 @@ trait HasGroups
     {
         return $this->belongsToMany(Group::class)
             ->withPivot('is_admin')
+            ->using(GroupUser::class)
             ->withTimestamps();
     }
 

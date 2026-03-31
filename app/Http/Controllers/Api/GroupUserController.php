@@ -29,7 +29,6 @@ class GroupUserController extends Controller
             id: $user->uuid,
             name: $user->name,
             email: $user->email,
-            // @phpstan-ignore-next-line
             is_admin: $group->pivot->is_admin,
         );
     }

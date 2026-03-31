@@ -11,6 +11,7 @@ class AdviceStatusGroup extends Pivot
 {
     public $casts = [
         'visible' => 'boolean',
+        'visible_in_group' => 'boolean',
     ];
 
     /**

@@ -38,6 +38,7 @@ class FormSubmission extends Model implements Pointable
     {
         return [
             'submitted_at' => 'datetime',
+            'seen' => 'boolean',
         ];
     }
 

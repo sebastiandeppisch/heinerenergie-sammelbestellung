@@ -141,7 +141,7 @@ class Group extends Model
 
     public function getFullLogoPathAttribute()
     {
-        if (str_starts_with($this->logo_path, 'http')) {
+        if ($this->logo_path && str_starts_with($this->logo_path, 'http')) {
             return $this->logo_path;
         }
 

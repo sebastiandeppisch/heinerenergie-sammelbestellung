@@ -171,7 +171,7 @@ class Advice extends Model implements HasSends, Pointable
             'help_type_place' => 'boolean',
             'help_type_technical' => 'boolean',
             'help_type_bureaucracy' => 'boolean',
-            'helpType_other' => 'boolean',
+            'help_type_other' => 'boolean',
             'house_type' => HouseType::class,
             'landlord_exists' => 'boolean',
             'place_notes' => 'string',
