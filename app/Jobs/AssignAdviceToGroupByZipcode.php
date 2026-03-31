@@ -20,7 +20,10 @@ use Throwable;
 
 class AssignAdviceToGroupByZipcode implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     /**
      * Maximum number of attempts

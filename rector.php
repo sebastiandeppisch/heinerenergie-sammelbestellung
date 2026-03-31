@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Rector\CodingStyle\Rector\Use_\SeparateMultiUseImportsRector;
 use Rector\Config\RectorConfig;
 use Rector\TypeDeclaration\Rector\StmtsAwareInterface\DeclareStrictTypesRector;
 use RectorLaravel\Rector\Class_\AddExtendsAnnotationToModelFactoriesRector;
@@ -24,6 +25,7 @@ return RectorConfig::configure()
         AddGenericReturnTypeToRelationsRector::class,
         DeclareStrictTypesRector::class,
         ValidationRuleArrayStringValueToArrayRector::class,
+        SeparateMultiUseImportsRector::class,
     ])->withSets([
         LaravelSetList::LARAVEL_120,
     ])->withPreparedSets(
