@@ -8,6 +8,7 @@ import { Textarea } from '@/shadcn/components/ui/textarea';
 import { computed } from 'vue';
 import PinLocationMap from '../PinLocationMap.vue';
 import AddressInput from './AddressInput.vue';
+import ImageUploadInput from './ImageUploadInput.vue';
 
 type FormFieldData = App.Data.FormFieldData;
 type FieldType = App.Enums.FieldType;
@@ -22,6 +23,7 @@ const FIELD_TYPES = {
     RADIO: 'radio' as FieldType,
     CHECKBOX: 'checkbox' as FieldType,
     FILE: 'file' as FieldType,
+    IMAGE: 'image' as FieldType,
     DATE: 'date' as FieldType,
     GEO_COORDINATE: 'geo_coordinate' as FieldType,
     ADDRESS: 'address' as FieldType,
@@ -195,6 +197,16 @@ const inputClasses = computed(() => ({
             </Label>
         </div>
     </div>
+
+    <ImageUploadInput
+        v-else-if="field.type === FIELD_TYPES.IMAGE"
+        v-model="modelValue"
+        :max-images="field.max_images ?? 1"
+        :disabled="disabled"
+        :has-error="hasError"
+        :stored-paths="disabled && Array.isArray(modelValue) && typeof modelValue[0] === 'string' ? modelValue : []"
+        @change="handleChange"
+    />
 
     <Input
         v-else-if="field.type === FIELD_TYPES.FILE"

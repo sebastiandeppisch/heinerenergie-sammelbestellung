@@ -83,6 +83,7 @@ max_length: number | null;
 min_value: number | null;
 max_value: number | null;
 accepted_file_types: Array<any> | null;
+max_images: number;
 };
 export type FormFieldOptionData = {
 id: string;
@@ -218,7 +219,7 @@ canCreateGroups: boolean;
 declare namespace App.Enums {
 export type AdviceStatusResult = 0 | 1 | 2 | 3;
 export type AdviceType = 0 | 1 | 2;
-export type FieldType = 'text' | 'textarea' | 'number' | 'email' | 'phone' | 'select' | 'radio' | 'checkbox' | 'file' | 'date' | 'geo_coordinate' | 'address';
+export type FieldType = 'text' | 'textarea' | 'number' | 'email' | 'phone' | 'select' | 'radio' | 'checkbox' | 'file' | 'image' | 'date' | 'geo_coordinate' | 'address';
 export type HouseType = 0 | 1 | 2;
 }
 declare namespace App.ValueObjects {

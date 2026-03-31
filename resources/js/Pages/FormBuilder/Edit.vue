@@ -107,6 +107,7 @@ function createField(type: FieldType): FormFieldData {
         required: false,
         sort_order: formDefinition.fields.length,
         options: [],
+        max_images: 1,
     };
 
     switch (type) {

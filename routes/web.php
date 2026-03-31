@@ -111,8 +111,7 @@ if (app()->environment('local')) {
 
 Route::get('/forms/{formDefinition}', [FormSubmitController::class, 'show'])
     ->name('form.show');
-Route::post('/forms/{formDefinition}', [FormSubmitController::class, 'submit'])
-    ->name('form.submit')->middleware([HandlePrecognitiveRequests::class]);
+Route::post('/forms/{formDefinition}', [FormSubmitController::class, 'submit'])->name('form.submit')->middleware([HandlePrecognitiveRequests::class, 'throttle:form-submit']);
 
 Route::get('/map', [MapPointController::class, 'publicMap'])
     ->name('map.public');

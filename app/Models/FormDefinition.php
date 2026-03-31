@@ -83,7 +83,10 @@ class FormDefinition extends Model
     {
         $this->loadMissing(['fields', 'fields.options']);
 
-        return $this->fields->mapWithKeys(fn (FormField $field) => [$field->uuid => $field->getValidationRules()])->toArray();
+        return $this->fields->reduce(
+            fn (array $carry, FormField $field) => array_merge($carry, $field->getValidationRules()),
+            []
+        );
     }
 
     public function getValidationAttributes(): array

@@ -58,7 +58,6 @@ class FormDefinitionController extends Controller
 
     private function activeFieldTypes(): array
     {
-        // TODO implement file
         $inactive = collect([
             FieldType::FILE,
         ]);

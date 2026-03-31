@@ -29,6 +29,7 @@ class FormFieldData extends Data
         public ?float $min_value = null,
         public ?float $max_value = null,
         public ?array $accepted_file_types = null,
+        public int $max_images = 1,
     ) {}
 
     public static function fromModel(FormField $model): self
@@ -49,6 +50,7 @@ class FormFieldData extends Data
             min_value: $model->min_value,
             max_value: $model->max_value,
             accepted_file_types: $model->accepted_file_types,
+            max_images: $model->max_images ?? 1,
             options: $model->options->map(fn ($option) => FormFieldOptionData::fromModel($option)),
         );
     }

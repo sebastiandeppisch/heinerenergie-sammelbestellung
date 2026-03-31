@@ -7,6 +7,7 @@ use App\Models\Traits\HasUuid;
 use App\Rules\AddressRule;
 use App\Rules\CheckboxRequiredValidator;
 use App\Rules\GeographicCoordinate;
+use App\Rules\MaxImagePixels;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -33,6 +34,7 @@ class FormField extends Model
         'min_value',
         'max_value',
         'accepted_file_types',
+        'max_images',
     ];
 
     /**
@@ -49,6 +51,7 @@ class FormField extends Model
         'max_value' => 'float',
         'sort_order' => 'integer',
         'accepted_file_types' => 'array',
+        'max_images' => 'integer',
         'form_definition_id' => 'integer',
     ];
 
@@ -76,11 +79,18 @@ class FormField extends Model
         return $this->hasMany(SubmissionField::class);
     }
 
+    /**
+     * Returns a keyed array of validation rules for this field.
+     * Most fields return a single entry [$uuid => $rules].
+     * Fields that validate nested values (e.g. IMAGE) may return additional entries.
+     *
+     * @return array<string, array>
+     */
     public function getValidationRules(): array
     {
         $inRule = Rule::in($this->options->pluck('value')->toArray());
 
-        $rules = match ($this->type) {
+        $fieldRules = match ($this->type) {
             FieldType::TEXT => ['string'],
             FieldType::TEXTAREA => ['string'],
             FieldType::NUMBER => ['numeric'],
@@ -89,7 +99,8 @@ class FormField extends Model
             // TODO fix array validation FieldType::SELECT => [$inRule],
             FieldType::RADIO => [$inRule],
             // TODO fix array validation FieldType::CHECKBOX => [$inRule],
-            FieldType::FILE => [''], // TODO
+            FieldType::FILE => [''],
+            FieldType::IMAGE => ['array', 'max:'.($this->max_images ?? 1)],
             FieldType::DATE => ['date'],
             FieldType::GEO_COORDINATE => [new GeographicCoordinate],
             FieldType::ADDRESS => [new AddressRule],
@@ -98,36 +109,38 @@ class FormField extends Model
 
         if ($this->type->supportsLengthValidation()) {
             if (isset($this->min_length)) {
-                $rules[] = 'min:'.$this->min_length;
+                $fieldRules[] = 'min:'.$this->min_length;
             }
             if (isset($this->max_length)) {
-                $rules[] = 'max:'.$this->max_length;
+                $fieldRules[] = 'max:'.$this->max_length;
             }
         }
 
         if ($this->type->supportsNumericValidation()) {
             if (isset($this->min_value)) {
-                $rules[] = 'min:'.$this->min_value;
+                $fieldRules[] = 'min:'.$this->min_value;
             }
             if (isset($this->max_value)) {
-                $rules[] = 'max:'.$this->max_value;
+                $fieldRules[] = 'max:'.$this->max_value;
             }
-        }
-
-        if ($this->type->requiresGeoCoordinate()) {
-            // TODO
         }
 
         $requiredOptions = $this->options->filter(fn ($option) => $option->is_required)->pluck('label', 'value');
 
         if ($requiredOptions->isNotEmpty() && $this->type === FieldType::CHECKBOX) {
-            $rules[] = new CheckboxRequiredValidator(
+            $fieldRules[] = new CheckboxRequiredValidator(
                 requiredOptions: $requiredOptions->toArray()
             );
         }
 
         if ($this->required) {
-            $rules[] = 'required';
+            $fieldRules[] = 'required';
+        }
+
+        $rules = [$this->uuid => $fieldRules];
+
+        if ($this->type === FieldType::IMAGE) {
+            $rules[$this->uuid.'.*'] = ['image', 'mimes:jpg,jpeg,png', 'max:10240', new MaxImagePixels];
         }
 
         return $rules;

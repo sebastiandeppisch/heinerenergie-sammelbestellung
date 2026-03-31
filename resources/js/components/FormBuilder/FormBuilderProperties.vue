@@ -26,6 +26,7 @@ const FIELD_TYPES = {
     RADIO: 'radio' as FieldType,
     CHECKBOX: 'checkbox' as FieldType,
     FILE: 'file' as FieldType,
+    IMAGE: 'image' as FieldType,
     DATE: 'date' as FieldType,
 };
 
@@ -49,6 +50,17 @@ const supportsValueValidation = computed(() => {
 
 const supportsFileTypes = computed(() => {
     return model.value.type === FIELD_TYPES.FILE;
+});
+
+const supportsMaxImages = computed(() => {
+    return model.value.type === FIELD_TYPES.IMAGE;
+});
+
+const maxImages = computed({
+    get: () => model.value.max_images?.toString() ?? '1',
+    set: (value: string) => {
+        model.value.max_images = value ? Math.min(10, Math.max(1, parseInt(value))) : 1;
+    },
 });
 
 const placeholder = computed({
@@ -213,6 +225,15 @@ function onValueChanged(e: any) {
                     <div class="mt-4 grid gap-2">
                         <Label for="field_max_value">Maximalwert</Label>
                         <Input id="field_max_value" v-model="maxValue" type="number" placeholder="Maximalwert" @input="onValueChanged" />
+                    </div>
+                </div>
+
+                <div v-if="supportsMaxImages" class="form-section">
+                    <h4 class="section-title">Bildupload</h4>
+                    <div class="grid gap-2">
+                        <Label for="field_max_images">Maximale Anzahl Bilder</Label>
+                        <Input id="field_max_images" v-model="maxImages" type="number" min="1" max="10" @input="onValueChanged" />
+                        <div class="text-hint">Maximal 10 Bilder erlaubt</div>
                     </div>
                 </div>
 

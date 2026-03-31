@@ -16,6 +16,7 @@ enum FieldType: string
     case RADIO = 'radio';
     case CHECKBOX = 'checkbox';
     case FILE = 'file';
+    case IMAGE = 'image';
     case DATE = 'date';
     case GEO_COORDINATE = 'geo_coordinate';
     case ADDRESS = 'address';
@@ -28,6 +29,7 @@ enum FieldType: string
 
     public const typesWithFileUpload = [
         self::FILE,
+        self::IMAGE,
     ];
 
     public const typesWithNumericValidation = [

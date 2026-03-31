@@ -34,7 +34,7 @@ const createInitialFormData = () => {
             data[field.id] = field.default_value || '';
         }
 
-        if (field.type === 'checkbox') {
+        if (field.type === 'checkbox' || field.type === 'image') {
             data[field.id] = [];
         }
     });
