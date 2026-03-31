@@ -36,6 +36,9 @@ class UpdateGroupAdviceStatusRequest extends FormRequest
         return $pivot;
     }
 
+    /**
+     * @return array<string, Enum|string>
+     */
     public function rules(): array
     {
         return [

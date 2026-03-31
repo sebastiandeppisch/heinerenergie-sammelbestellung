@@ -29,6 +29,9 @@ class FormSubmission extends Model implements Pointable
         'group_id',
     ];
 
+    /**
+     * @return array<string, string>
+     */
     public function casts()
     {
         return [

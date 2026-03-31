@@ -14,6 +14,9 @@ class Setting extends Model
 
     protected $appends = ['type', 'name'];
 
+    /**
+     * @return array<string, array<string, string>>
+     */
     protected static function defaultConfig(): array
     {
 

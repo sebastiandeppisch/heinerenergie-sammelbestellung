@@ -22,6 +22,9 @@ class Address implements CastsAttributes
         );
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function set($model, string $key, $value, array $attributes)
     {
         if (! $value instanceof AddressValueObject) {

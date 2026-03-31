@@ -149,6 +149,9 @@ class Advice extends Model implements HasSends, Pointable
         return $this->hasMany(AdviceEvent::class);
     }
 
+    /**
+     * @return array<string, class-string<AdviceType>|class-string<HouseType>|class-string<Address>|class-string<Coordinate>|string>
+     */
     protected function casts(): array
     {
         return [

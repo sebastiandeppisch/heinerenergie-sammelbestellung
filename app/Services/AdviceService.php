@@ -61,6 +61,9 @@ class AdviceService
             ->map(fn (Advice $advice): DataProtectedAdviceData => DataProtectedAdviceData::fromModel($advice, $user, $isGroupAdmin));
     }
 
+    /**
+     * @return array<string, Collection>
+     */
     private function getUserAdvicePermissions(User $user): array
     {
         $allGroups = Group::with('users')->get();

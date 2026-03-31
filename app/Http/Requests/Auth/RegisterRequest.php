@@ -12,6 +12,9 @@ class RegisterRequest extends FormRequest
         return User::empty();
     }
 
+    /**
+     * @return array<string, string[]>
+     */
     public function rules(): array
     {
         return [

@@ -66,6 +66,10 @@ class FormSubmitController extends Controller
         };
     }
 
+    /**
+     * @param string[] $storedImagePaths
+     * @return string[]
+     */
     private function storeImages(FormField $field, Request $request, FormSubmission $submission, array &$storedImagePaths): array
     {
         $paths = [];

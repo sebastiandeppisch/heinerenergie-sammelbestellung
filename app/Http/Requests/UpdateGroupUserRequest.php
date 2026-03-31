@@ -11,6 +11,9 @@ class UpdateGroupUserRequest extends FormRequest
         return $this->user()->can('manageUsers', $this->route('group'));
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function rules(): array
     {
         return [

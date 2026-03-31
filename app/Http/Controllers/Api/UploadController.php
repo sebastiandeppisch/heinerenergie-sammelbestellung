@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Storage;
 
 class UploadController extends Controller
 {
+    /**
+     * @return array<string, string>
+     */
     public function __invoke(Request $request): array
     {
         $file = $request->file('file');

@@ -21,6 +21,9 @@ class SettingController extends Controller
         return $setting->fresh();
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function advisorInfo(): array
     {
         return [

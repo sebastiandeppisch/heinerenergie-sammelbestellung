@@ -43,6 +43,9 @@ class InstallCommand extends Command
         return 0;
     }
 
+    /**
+     * @param string[] $cmds
+     */
     private function cmd(array $cmds): void
     {
         $process = new Process($cmds);

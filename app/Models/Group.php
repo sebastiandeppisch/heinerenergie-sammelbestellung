@@ -169,6 +169,9 @@ class Group extends Model
         return parent::delete();
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [

@@ -15,6 +15,9 @@ class AdviceTypeController extends Controller
         ]);
     }
 
+    /**
+     * @return array<string, int|string>
+     */
     public function show(int $advicestatus): array
     {
         return [

@@ -178,7 +178,7 @@ class AdviceController extends Controller
 
         $groups = Group::where('accepts_transfers', true)->get()->filter(fn (Group $group): bool => $group->consulting_area !== null)->map(fn (Group $group): GroupMapData => GroupMapData::fromModel($group))->values();
 
-        $advisors = User::all()->filter(fn (User $advisor) => $user->can('view', $advisor))->map(fn (User $user) => UserData::fromModel($user, false))->values();
+        $advisors = User::all()->filter(fn (User $advisor) => $user->can('view', $advisor))->map(fn (User $user): UserData => UserData::fromModel($user, false))->values();
 
         // Get marker from current group, or use default
         $currentGroup = $currentGroupService->getGroup();

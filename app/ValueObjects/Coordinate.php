@@ -17,6 +17,9 @@ readonly class Coordinate implements Castable
         public float $lng
     ) {}
 
+    /**
+     * @param array<string, mixed> $data
+     */
     public static function fromArray(array $data): self
     {
 

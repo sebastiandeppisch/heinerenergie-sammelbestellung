@@ -51,6 +51,9 @@ class AdviceStatus extends Model
             ->using(AdviceStatusGroup::class);
     }
 
+    /**
+     * @return array<string, class-string<AdviceStatusResult>|string>
+     */
     protected function casts(): array
     {
         return [

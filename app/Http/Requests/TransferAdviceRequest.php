@@ -20,6 +20,9 @@ class TransferAdviceRequest extends FormRequest
         return $this->user()->can('transfer', $advice);
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function rules(): array
     {
         return [

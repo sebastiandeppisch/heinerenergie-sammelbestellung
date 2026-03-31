@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Closure;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -12,6 +13,9 @@ class StoreGroupUserRequest extends FormRequest
         return $this->user()->can('manageUsers', $this->route('group'));
     }
 
+    /**
+     * @return array<string, Closure(mixed $attribute, mixed $value, mixed $fail):void[]|string[]|string>
+     */
     public function rules(): array
     {
         $group = $this->route('group');

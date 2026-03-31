@@ -36,6 +36,9 @@ class StatusChangedEvent extends AdviceEvent
         return "Status wurde von '{$this->fromStatus}' zu '{$this->toStatus}' geändert";
     }
 
+    /**
+     * @return array<string, string|null>
+     */
     public function __serialize(): array
     {
         return [

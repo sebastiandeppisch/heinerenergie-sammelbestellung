@@ -25,4 +25,5 @@ return RectorConfig::configure()
     ])->withPreparedSets(
         earlyReturn: true,
         typeDeclarations: true,
+        typeDeclarationDocblocks: true,
     )->withImportNames();

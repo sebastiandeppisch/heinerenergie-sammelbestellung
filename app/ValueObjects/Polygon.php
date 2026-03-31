@@ -46,6 +46,9 @@ class Polygon implements Castable, JsonSerializable
         return empty($this->coordinates) ? null : json_encode($this->jsonSerialize());
     }
 
+    /**
+     * @return array<Coordinate>
+     */
     public function getCoordinates(): array
     {
         return $this->coordinates;

@@ -73,22 +73,22 @@ class AdvicePolicy
         return $this->groupContext->isActingAsSystemAdmin($user);
     }
 
-    public function addAdvisors(User $user, Advice $advice)
+    public function addAdvisors(User $user, Advice $advice): bool
     {
         return $this->update($user, $advice);
     }
 
-    public function transfer(User $user, Advice $advice)
+    public function transfer(User $user, Advice $advice): bool
     {
         return $this->update($user, $advice);
     }
 
-    public function storeComment(User $user, Advice $advice)
+    public function storeComment(User $user, Advice $advice): bool
     {
         return $this->update($user, $advice);
     }
 
-    public function unassign(User $user, Advice $advice)
+    public function unassign(User $user, Advice $advice): bool
     {
         return $this->update($user, $advice);
     }

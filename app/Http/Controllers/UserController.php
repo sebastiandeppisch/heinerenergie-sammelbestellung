@@ -36,7 +36,7 @@ class UserController extends Controller
             ->with('groups')
             ->get()
             ->filter(fn (User $user) => Auth::user()->can('view', $user))
-            ->map(fn (User $user) => UserData::fromModel($user, false, true))
+            ->map(fn (User $user): UserData => UserData::fromModel($user, false, true))
             ->values()
             ->all();
 

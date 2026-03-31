@@ -47,10 +47,10 @@ class UserController extends Controller
         $users = $this->dxFilter($request, $query)->get();
 
         // @phpstan-ignore-next-line
-        return $users->filter(fn (User $user) => $this->user()->can('view', $user))->values()->map(fn (User $user) => UserData::fromModel($user, false));
+        return $users->filter(fn (User $user) => $this->user()->can('view', $user))->values()->map(fn (User $user): UserData => UserData::fromModel($user, false));
     }
 
-    public function show(User $user)
+    public function show(User $user): UserData
     {
         return UserData::fromModel($user, true);
     }

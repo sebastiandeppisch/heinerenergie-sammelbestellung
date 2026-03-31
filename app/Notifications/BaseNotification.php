@@ -13,7 +13,9 @@ class BaseNotification extends Notification
     use Queueable;
 
     //    public ?Advice $advice = null;
-
+    /**
+     * @return array<int, string>
+     */
     public function via($notifiable): array
     {
         return ['mail'];
@@ -30,6 +32,9 @@ class BaseNotification extends Notification
 
     }
 
+    /**
+     * @return array{}
+     */
     public function toArray($notifiable): array
     {
         return [
