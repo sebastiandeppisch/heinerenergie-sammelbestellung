@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
-use Closure;
 use App\Models\User;
+use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreGroupUserRequest extends FormRequest

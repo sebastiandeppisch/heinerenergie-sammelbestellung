@@ -27,8 +27,6 @@ class InstallCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle(): int
     {
@@ -46,7 +44,7 @@ class InstallCommand extends Command
     }
 
     /**
-     * @param string[] $cmds
+     * @param  string[]  $cmds
      */
     private function cmd(array $cmds): void
     {

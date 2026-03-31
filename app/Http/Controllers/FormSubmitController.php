@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use Throwable;
 use App\Data\FormDefinitionData;
 use App\Enums\FieldType;
 use App\Http\Requests\StoreFormSubmissionRequest;
@@ -19,6 +18,7 @@ use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Intervention\Image\Encoders\JpegEncoder;
 use Intervention\Image\Laravel\Facades\Image;
+use Throwable;
 
 class FormSubmitController extends Controller
 {
@@ -69,7 +69,7 @@ class FormSubmitController extends Controller
     }
 
     /**
-     * @param string[] $storedImagePaths
+     * @param  string[]  $storedImagePaths
      * @return string[]
      */
     private function storeImages(FormField $field, Request $request, FormSubmission $submission, array &$storedImagePaths): array

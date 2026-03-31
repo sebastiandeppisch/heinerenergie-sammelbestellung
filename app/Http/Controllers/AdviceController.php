@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\AdviceEvent;
 use App\Data\AdviceEventData;
 use App\Data\AdviceStatusNamesData;
 use App\Data\DataProtectedAdviceData;
@@ -19,6 +18,7 @@ use App\Http\Requests\StoreAdviceCommentRequest;
 use App\Http\Requests\TransferAdviceRequest;
 use App\Http\Requests\UpdateAdviceRequest;
 use App\Models\Advice;
+use App\Models\AdviceEvent;
 use App\Models\AdviceStatus;
 use App\Models\FormSubmission;
 use App\Models\Group;

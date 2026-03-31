@@ -8,8 +8,6 @@ class AddIsAdminToUsers extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
     public function up(): void
     {
@@ -20,8 +18,6 @@ class AddIsAdminToUsers extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down(): void
     {

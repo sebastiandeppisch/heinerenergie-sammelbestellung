@@ -15,8 +15,6 @@ class InstallServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
-     *
-     * @return void
      */
     #[Override]
     public function register(): void
@@ -26,8 +24,6 @@ class InstallServiceProvider extends ServiceProvider
 
     /**
      * Bootstrap any application services.
-     *
-     * @return void
      */
     public function boot(): void
     {

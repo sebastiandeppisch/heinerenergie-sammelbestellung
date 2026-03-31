@@ -110,6 +110,7 @@ class GroupService
 
     /**
      * Find all groups whose consulting areas overlap
+     *
      * @return array{}
      */
     public function findOverlappingGroups(): array
