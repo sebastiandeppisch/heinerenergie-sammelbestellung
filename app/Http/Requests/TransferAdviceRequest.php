@@ -23,7 +23,7 @@ class TransferAdviceRequest extends FormRequest
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string, array<string>>
      */
     public function rules(): array
     {

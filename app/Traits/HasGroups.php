@@ -16,7 +16,7 @@ trait HasGroups
     /**
      * Get all groups this user belongs to
      *
-     * @return BelongsToMany<Group, $this, Pivot>
+     * @return BelongsToMany<Group, $this, GroupUser>
      */
     public function groups(): BelongsToMany
     {

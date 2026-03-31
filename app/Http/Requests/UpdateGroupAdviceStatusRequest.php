@@ -39,7 +39,7 @@ class UpdateGroupAdviceStatusRequest extends FormRequest
     }
 
     /**
-     * @return array<string, Enum|string>
+     * @return array<string, Enum|list<string>>
      */
     public function rules(): array
     {

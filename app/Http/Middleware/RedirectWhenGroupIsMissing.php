@@ -39,7 +39,7 @@ class RedirectWhenGroupIsMissing
                 'logout',
             ];
 
-            if ($groups->count() === 1) {
+            if ($groups->count() === 1 && $groups->first() !== null) {
                 // If user has exactly one group, auto-select it
                 $this->sessionService->actAsGroup($groups->first());
             } elseif (! in_array($request->route()->getName(), $whitelistedRoutes)) {

@@ -16,7 +16,7 @@ class StoreGroupUserRequest extends FormRequest
     }
 
     /**
-     * @return array<string, Closure(mixed $attribute, mixed $value, mixed $fail):void[]|string[]|string>
+     * @return array<string, array<string|callable(string, mixed, Closure): void>>
      */
     public function rules(): array
     {

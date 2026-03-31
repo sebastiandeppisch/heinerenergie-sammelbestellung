@@ -74,7 +74,7 @@ class FormFieldOption extends Model
         }
 
         if ($this->value === null) {
-            $this->value = Str::uuid();
+            $this->value = (string) Str::uuid();
         }
 
         return parent::save($options);

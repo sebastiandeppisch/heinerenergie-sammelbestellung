@@ -86,7 +86,7 @@ class FormSubmitController extends Controller
             $image->scaleDown(width: 1920, height: 1920);
             $encoded = $image->encode(new JpegEncoder(quality: 80));
 
-            Storage::disk('public')->put($path, $encoded);
+            Storage::disk('public')->put($path, $encoded->toStream());
             $storedImagePaths[] = $path;
             $paths[] = $path;
         }

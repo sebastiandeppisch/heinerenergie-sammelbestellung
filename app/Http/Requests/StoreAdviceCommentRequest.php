@@ -14,7 +14,7 @@ class StoreAdviceCommentRequest extends FormRequest
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string, list<string>>
      */
     public function rules(): array
     {

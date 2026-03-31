@@ -16,6 +16,9 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Facades\Storage;
 use Override;
 
+/**
+ * @property AdviceStatusGroup $pivot
+ */
 class Group extends Model
 {
     use HasFactory;
@@ -41,25 +44,27 @@ class Group extends Model
     /**
      * Get the users that belong to this group
      *
-     * @return BelongsToMany<User, $this, Pivot>
+     * @return BelongsToMany<User, $this, GroupUser>
      */
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class)
             ->withPivot('is_admin')
-            ->withTimestamps();
+            ->withTimestamps()
+            ->using(GroupUser::class);
     }
 
     /**
      * Get the admins of this group
      *
-     * @return BelongsToMany<User, $this, Pivot>
+     * @return BelongsToMany<User, $this, GroupUser>
      */
     public function admins(): BelongsToMany
     {
         return $this->belongsToMany(User::class)
             ->wherePivot('is_admin', true)
-            ->withTimestamps();
+            ->withTimestamps()
+            ->using(GroupUser::class);
     }
 
     /**
