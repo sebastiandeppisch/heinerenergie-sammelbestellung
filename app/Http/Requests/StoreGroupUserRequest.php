@@ -32,7 +32,7 @@ class StoreGroupUserRequest extends FormRequest
                     }
                 },
             ],
-            'is_admin' => 'boolean',
+            'is_admin' => ['boolean'],
         ];
     }
 

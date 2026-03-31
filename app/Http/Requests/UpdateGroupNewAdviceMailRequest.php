@@ -25,7 +25,7 @@ class UpdateGroupNewAdviceMailRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'new_advice_mail' => 'nullable|string',
+            'new_advice_mail' => ['nullable', 'string'],
         ];
     }
 }

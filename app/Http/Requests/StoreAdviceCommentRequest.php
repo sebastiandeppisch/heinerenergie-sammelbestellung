@@ -19,7 +19,7 @@ class StoreAdviceCommentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'comment' => 'required|string|max:65535',
+            'comment' => ['required', 'string', 'max:65535'],
         ];
     }
 }

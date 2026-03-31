@@ -31,9 +31,9 @@ class StoreGroupAdviceStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string',
+            'name' => ['required', 'string'],
             'result' => ['required', new Enum(AdviceStatusResult::class)],
-            'visible' => 'boolean',
+            'visible' => ['boolean'],
         ];
     }
 }

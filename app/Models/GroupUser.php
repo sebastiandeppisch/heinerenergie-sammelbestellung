@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class GroupUser extends Pivot
 {
+    /**
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [

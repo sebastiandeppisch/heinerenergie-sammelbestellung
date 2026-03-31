@@ -64,8 +64,8 @@ class AdviceController extends Controller
         $this->auth($advice, 'addAdvisors');
 
         $validated = $request->validate([
-            'advisors' => 'array',
-            'advisors.*' => 'exists:users,uuid',
+            'advisors' => ['array'],
+            'advisors.*' => ['exists:users,uuid'],
         ]);
 
         app(AdviceService::class)->syncShares($advice, collect($validated['advisors'])->map(fn ($advisor) => User::where('uuid', $advisor)->first()), $request->user());

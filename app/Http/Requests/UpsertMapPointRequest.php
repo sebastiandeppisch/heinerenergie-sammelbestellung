@@ -28,11 +28,11 @@ class UpsertMapPointRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'required',
-            'description' => 'nullable',
+            'title' => ['required'],
+            'description' => ['nullable'],
             'coordinate' => new GeographicCoordinate,
-            'published' => 'boolean',
-            'category_id' => 'nullable|exists:map_point_categories,uuid',
+            'published' => ['boolean'],
+            'category_id' => ['nullable', 'exists:map_point_categories,uuid'],
         ];
     }
 

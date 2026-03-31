@@ -7,6 +7,7 @@ use Rector\TypeDeclaration\Rector\StmtsAwareInterface\DeclareStrictTypesRector;
 use RectorLaravel\Rector\Class_\AddExtendsAnnotationToModelFactoriesRector;
 use RectorLaravel\Rector\ClassMethod\AddGenericReturnTypeToRelationsRector;
 use RectorLaravel\Set\LaravelSetList;
+use RectorLaravel\Rector\MethodCall\ValidationRuleArrayStringValueToArrayRector;
 
 return RectorConfig::configure()
     ->withPaths([
@@ -21,7 +22,8 @@ return RectorConfig::configure()
     ->withRules([
         AddExtendsAnnotationToModelFactoriesRector::class,
         AddGenericReturnTypeToRelationsRector::class,
-        DeclareStrictTypesRector::class
+        DeclareStrictTypesRector::class,
+        ValidationRuleArrayStringValueToArrayRector::class,
     ])->withSets([
         LaravelSetList::LARAVEL_120,
     ])->withPreparedSets(

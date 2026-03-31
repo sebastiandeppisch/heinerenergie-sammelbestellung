@@ -26,7 +26,7 @@ class SetPictureRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'url' => 'nullable|url|max:255',
+            'url' => ['nullable', 'url', 'max:255'],
         ];
     }
 }

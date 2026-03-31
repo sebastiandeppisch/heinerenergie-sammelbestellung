@@ -19,7 +19,7 @@ class UpdateGroupUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'is_admin' => 'required|boolean',
+            'is_admin' => ['required', 'boolean'],
         ];
     }
 }

@@ -20,12 +20,12 @@ class UpdateGroupRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'url' => 'nullable|string|url|max:2048',
-            'accepts_transfers' => 'boolean',
-            'logo' => 'nullable|image|max:1024', // max 1MB
-            'remove_logo' => 'boolean',
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'url' => ['nullable', 'string', 'url', 'max:2048'],
+            'accepts_transfers' => ['boolean'],
+            'logo' => ['nullable', 'image', 'max:1024'], // max 1MB
+            'remove_logo' => ['boolean'],
         ];
     }
 }

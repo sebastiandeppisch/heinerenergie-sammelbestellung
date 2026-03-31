@@ -44,9 +44,9 @@ class UpdateGroupAdviceStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'string',
+            'name' => ['string'],
             'result' => new Enum(AdviceStatusResult::class),
-            'visible_in_group' => 'boolean',
+            'visible_in_group' => ['boolean'],
         ];
     }
 

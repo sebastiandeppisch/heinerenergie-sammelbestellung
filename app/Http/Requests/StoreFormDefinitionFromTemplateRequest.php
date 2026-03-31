@@ -27,8 +27,8 @@ class StoreFormDefinitionFromTemplateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'template_type' => 'required|string|in:advice,map_point',
-            'group_id' => 'required|string|exists:groups,uuid',
+            'template_type' => ['required', 'string', 'in:advice,map_point'],
+            'group_id' => ['required', 'string', 'exists:groups,uuid'],
         ];
     }
 

@@ -26,12 +26,12 @@ class IndexFormSubmissionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'selectedFormDefinitions' => 'array',
-            'selectedFormDefinitions.*' => 'string|exists:form_definitions,uuid',
-            'sortOrder' => 'string|in:asc,desc',
-            'groupByForm' => 'string|in:true,false',
-            'dateFrom' => 'nullable|date',
-            'dateTo' => 'nullable|date|after_or_equal:dateFrom',
+            'selectedFormDefinitions' => ['array'],
+            'selectedFormDefinitions.*' => ['string', 'exists:form_definitions,uuid'],
+            'sortOrder' => ['string', 'in:asc,desc'],
+            'groupByForm' => ['string', 'in:true,false'],
+            'dateFrom' => ['nullable', 'date'],
+            'dateTo' => ['nullable', 'date', 'after_or_equal:dateFrom'],
         ];
     }
 
