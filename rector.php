@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
+use Rector\TypeDeclaration\Rector\StmtsAwareInterface\DeclareStrictTypesRector;
 use RectorLaravel\Rector\Class_\AddExtendsAnnotationToModelFactoriesRector;
 use RectorLaravel\Rector\ClassMethod\AddGenericReturnTypeToRelationsRector;
 use RectorLaravel\Set\LaravelSetList;
@@ -20,6 +21,7 @@ return RectorConfig::configure()
     ->withRules([
         AddExtendsAnnotationToModelFactoriesRector::class,
         AddGenericReturnTypeToRelationsRector::class,
+        DeclareStrictTypesRector::class
     ])->withSets([
         LaravelSetList::LARAVEL_120,
     ])->withPreparedSets(

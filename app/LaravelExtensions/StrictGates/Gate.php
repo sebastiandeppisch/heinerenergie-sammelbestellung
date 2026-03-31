@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\LaravelExtensions\StrictGates;
 
 use Illuminate\Auth\Access\Gate as BaseGate;
