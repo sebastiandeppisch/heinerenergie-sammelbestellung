@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AdviceEvent;
 use App\Data\AdviceEventData;
 use App\Data\AdviceStatusNamesData;
 use App\Data\DataProtectedAdviceData;
@@ -41,7 +42,7 @@ class AdviceController extends Controller
 
         $groups = Group::with('parent')->get()
         // ->filter(fn (Group $group) => Auth::user()->can('view', $group))
-            ->map(fn (Group $group) => GroupData::fromModel($group))->values()->toArray();
+            ->map(fn (Group $group): GroupData => GroupData::fromModel($group))->values()->toArray();
 
         return Inertia::render('AdvicesTable', [
             'onlyOneGroup' => $onlyOneGroup,
@@ -62,14 +63,14 @@ class AdviceController extends Controller
         $events = $advice->events()
             ->with('user')
             ->get()
-            ->map(fn ($event) => AdviceEventData::fromModel($event));
+            ->map(fn (AdviceEvent $event): AdviceEventData => AdviceEventData::fromModel($event));
 
         /** @var Collection<int, Send> $mails */
         $mails = $advice->sends()->get();
-        $mails = $mails->map(fn ($mail) => AdviceEventData::fromMail($mail));
+        $mails = $mails->map(fn (Send $mail): AdviceEventData => AdviceEventData::fromMail($mail));
 
         $timeline = $events->concat($mails)
-            ->sortBy(fn ($item) => $item->created_at)
+            ->sortBy(fn ($item): string => $item->created_at)
             ->values();
 
         $coordinateOfAdvice = $advice->coordinate;
@@ -84,14 +85,14 @@ class AdviceController extends Controller
 
                 return $coordinateOfAdvice->distanceTo($center)->getValue();
             })
-            ->map(fn (Group $group) => GroupData::fromModel($group))
+            ->map(fn (Group $group): GroupData => GroupData::fromModel($group))
             ->values();
 
         $formSubmission = FormSubmission::where('advice_id', $advice->id)->with('submissionFields', 'submissionFields.options')->first();
         if ($formSubmission !== null) {
             $formSubmission = FormSubmissionData::fromModel($formSubmission);
 
-            $formSubmission->fields = $formSubmission->fields->filter(fn ($field) => ! in_array($field->field->label, ['Vorname', 'Nachname', 'Adresse', 'E-Mail Adresse', 'Telefonnummer', 'Möchtest Du virtuell oder bei Dir vor Ort beraten werden?']));
+            $formSubmission->fields = $formSubmission->fields->filter(fn ($field): bool => ! in_array($field->field->label, ['Vorname', 'Nachname', 'Adresse', 'E-Mail Adresse', 'Telefonnummer', 'Möchtest Du virtuell oder bei Dir vor Ort beraten werden?']));
         }
 
         $adviceType = $advice->type;
@@ -102,7 +103,7 @@ class AdviceController extends Controller
         // Get advice status options (filtered by user permissions)
         $adviceStatusOptions = AdviceStatus::all()
             ->filter(fn (AdviceStatus $status) => Auth::user()->can('view', $status))
-            ->map(fn (AdviceStatus $status) => AdviceStatusNamesData::fromModel($status))
+            ->map(fn (AdviceStatus $status): AdviceStatusNamesData => AdviceStatusNamesData::fromModel($status))
             ->values()
             ->toArray();
 
@@ -175,9 +176,9 @@ class AdviceController extends Controller
         $user = Auth::user();
         $advices = app(AdviceService::class)->getAdvicesListForUser($user);
 
-        $groups = Group::where('accepts_transfers', true)->get()->filter(fn (Group $group) => $group->consulting_area !== null)->map(fn (Group $group) => GroupMapData::fromModel($group))->values();
+        $groups = Group::where('accepts_transfers', true)->get()->filter(fn (Group $group): bool => $group->consulting_area !== null)->map(fn (Group $group): GroupMapData => GroupMapData::fromModel($group))->values();
 
-        $advisors = User::all()->filter(fn (User $advisor) => $user->can('view', $advisor))->map(fn ($user) => UserData::fromModel($user, false))->values();
+        $advisors = User::all()->filter(fn (User $advisor) => $user->can('view', $advisor))->map(fn (User $user) => UserData::fromModel($user, false))->values();
 
         // Get marker from current group, or use default
         $currentGroup = $currentGroupService->getGroup();

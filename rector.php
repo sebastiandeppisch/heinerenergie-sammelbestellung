@@ -23,5 +23,6 @@ return RectorConfig::configure()
     ])->withSets([
         LaravelSetList::LARAVEL_120,
     ])->withPreparedSets(
-        earlyReturn: true
+        earlyReturn: true,
+        typeDeclarations: true,
     )->withImportNames();

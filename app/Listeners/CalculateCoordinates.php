@@ -8,7 +8,7 @@ use App\Jobs\CalculateCoordinatesForAdvice;
 
 class CalculateCoordinates
 {
-    public function handle(AdviceUpdated|AdviceCreated $event)
+    public function handle(AdviceUpdated|AdviceCreated $event): void
     {
         $advice = $event->advice;
         if ($advice->lng === null || $advice->lat === null) {

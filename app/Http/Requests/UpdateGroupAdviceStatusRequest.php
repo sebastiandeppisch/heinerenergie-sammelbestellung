@@ -36,7 +36,7 @@ class UpdateGroupAdviceStatusRequest extends FormRequest
         return $pivot;
     }
 
-    public function rules()
+    public function rules(): array
     {
         return [
             'name' => 'string',
@@ -45,7 +45,7 @@ class UpdateGroupAdviceStatusRequest extends FormRequest
         ];
     }
 
-    public function isOnlySettingVisibility()
+    public function isOnlySettingVisibility(): bool
     {
         // Only check if the request is only changing the visibility status
         return count($this->all()) === 1 && isset($this->visible_in_group);

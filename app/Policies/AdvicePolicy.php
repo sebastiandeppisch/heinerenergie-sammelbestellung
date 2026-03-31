@@ -14,7 +14,7 @@ class AdvicePolicy
 
     // private int $cacheSeconds = 10 * 60;
 
-    public function viewAny(User $user)
+    public function viewAny(User $user): bool
     {
         return true;
     }
@@ -45,13 +45,13 @@ class AdvicePolicy
         return $this->view($user, $advice);
     }
 
-    public function create(User $user)
+    public function create(User $user): bool
     {
         // everyone, even guests can create advices
         return true;
     }
 
-    public function update(User $user, Advice $advice)
+    public function update(User $user, Advice $advice): bool
     {
         if ($advice->advisor_id === $user->id) {
             return true;
@@ -68,7 +68,7 @@ class AdvicePolicy
         return false;
     }
 
-    public function delete(User $user, Advice $advice)
+    public function delete(User $user, Advice $advice): bool
     {
         return $this->groupContext->isActingAsSystemAdmin($user);
     }

@@ -47,7 +47,7 @@ class UserController extends Controller
         $users = $this->dxFilter($request, $query)->get();
 
         // @phpstan-ignore-next-line
-        return $users->filter(fn (User $user) => $this->user()->can('view', $user))->values()->map(fn ($user) => UserData::fromModel($user, false));
+        return $users->filter(fn (User $user) => $this->user()->can('view', $user))->values()->map(fn (User $user) => UserData::fromModel($user, false));
     }
 
     public function show(User $user)
@@ -74,7 +74,7 @@ class UserController extends Controller
         return $user;
     }
 
-    private function fetchCoordinates(User $user)
+    private function fetchCoordinates(User $user): void
     {
         if ($user->address === null) {
             $user->coordinate = null;

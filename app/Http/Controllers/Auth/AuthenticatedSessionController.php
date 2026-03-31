@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use Illuminate\Routing\Redirector;
 use App\Http\Context\SessionGroupContextFactory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
@@ -29,7 +30,7 @@ class AuthenticatedSessionController extends Controller
      *
      * @return RedirectResponse
      */
-    public function destroy(Request $request)
+    public function destroy(Request $request): Redirector|RedirectResponse
     {
         Auth::guard('web')->logout();
 
@@ -40,7 +41,7 @@ class AuthenticatedSessionController extends Controller
         return redirect('/');
     }
 
-    public function index(Request $request)
+    public function index(Request $request): array
     {
         $user = Auth::user();
         if ($user === null) {

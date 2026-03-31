@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Storage;
 
 class UploadController extends Controller
 {
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): array
     {
         $file = $request->file('file');
         $path = $request->path.'/'.$file->getClientOriginalName();

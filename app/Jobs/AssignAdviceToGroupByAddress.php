@@ -85,7 +85,7 @@ class AssignAdviceToGroupByAddress implements ShouldQueue
     /**
      * Executed on final failure
      */
-    public function failed(Throwable $exception)
+    public function failed(Throwable $exception): void
     {
         // Notify system admins (Users with is_admin = true)
         $systemAdmins = User::where('is_admin', true)->get();

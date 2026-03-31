@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Throwable;
 use App\Data\FormDefinitionData;
 use App\Enums\FieldType;
 use App\Http\Requests\StoreFormSubmissionRequest;
@@ -35,14 +36,14 @@ class FormSubmitController extends Controller
         $storedImagePaths = [];
 
         try {
-            DB::transaction(function () use ($formDefinition, $request, &$storedImagePaths) {
+            DB::transaction(function () use ($formDefinition, $request, &$storedImagePaths): void {
                 $submission = $formDefinition->createSubmission();
                 foreach ($formDefinition->fields as $field) {
                     $field->createSubmissionField($submission, $this->getValueFromField($field, $request, $submission, $storedImagePaths));
                 }
                 $submission->handleCreators();
             });
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Storage::disk('public')->delete($storedImagePaths);
             throw $e;
         }

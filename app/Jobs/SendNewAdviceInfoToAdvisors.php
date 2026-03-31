@@ -27,7 +27,7 @@ class SendNewAdviceInfoToAdvisors implements ShouldQueue
         $this->adviceService = app(AdviceService::class);
     }
 
-    public function handle()
+    public function handle(): void
     {
         Log::info('Sending new advice info to advisors', [
             'advice_id' => $this->advice->id,

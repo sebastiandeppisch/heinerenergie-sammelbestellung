@@ -28,7 +28,7 @@ class AdviceStatusPolicy
         return $this->isGroupAdmin($user, $advicestatus->ownerGroup);
     }
 
-    private function isGroupAdmin(User $user, Group $group)
+    private function isGroupAdmin(User $user, Group $group): bool
     {
         if ($this->groupContext->isActingAsSystemAdmin($user)) {
             return true;
@@ -41,7 +41,7 @@ class AdviceStatusPolicy
         return false;
     }
 
-    public function view(User $user, AdviceStatus $status)
+    public function view(User $user, AdviceStatus $status): bool
     {
         $status->loadMissing('ownerGroup');
 

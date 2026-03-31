@@ -56,9 +56,9 @@ class HandleInertiaRequests extends Middleware
         }
 
         return array_merge(parent::share($request), [
-            'auth.user' => fn () => $this->getUserData($request),
-            'auth.availableGroups' => fn () => $request->user()?->groups->map(fn (Group $group) => GroupData::fromModel($group)),
-            'auth.currentGroup' => fn () => app(CurrentGroupService::class)->getGroup() ? GroupBaseData::fromModel(app(CurrentGroupService::class)->getGroup()) : null,
+            'auth.user' => fn (): ?UserData => $this->getUserData($request),
+            'auth.availableGroups' => fn () => $request->user()?->groups->map(fn (Group $group): GroupData => GroupData::fromModel($group)),
+            'auth.currentGroup' => fn (): ?GroupBaseData => app(CurrentGroupService::class)->getGroup() ? GroupBaseData::fromModel(app(CurrentGroupService::class)->getGroup()) : null,
             'flashMessages' => $flashMessages,
             'defaultLogo' => app_logo(),
             'appName' => app_name(...),

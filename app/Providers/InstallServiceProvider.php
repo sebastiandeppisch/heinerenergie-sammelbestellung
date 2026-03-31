@@ -17,7 +17,7 @@ class InstallServiceProvider extends ServiceProvider
      * @return void
      */
     #[Override]
-    public function register()
+    public function register(): void
     {
         //
     }
@@ -27,7 +27,7 @@ class InstallServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         if (app()->runningInConsole()) {
             // only shared hosting admins who dont have access to console needs this

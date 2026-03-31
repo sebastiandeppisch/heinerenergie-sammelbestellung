@@ -2,6 +2,7 @@
 
 namespace App\Data;
 
+use App\Models\FormField;
 use App\Models\FormDefinition;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
@@ -38,7 +39,7 @@ class FormDefinitionData extends Data
             name: $model->name,
             description: $model->description,
             is_active: $model->is_active,
-            fields: $model->fields->map(fn ($field) => FormFieldData::fromModel($field)),
+            fields: $model->fields->map(fn (FormField $field): FormFieldData => FormFieldData::fromModel($field)),
             group_id: $model->group->uuid,
             advice_mapping: FormToAdviceMappingData::fromModel($model->adviceCreator),
             map_point_mapping: FormToMapPointMappingData::fromModel($model->mapPointCreator),

@@ -10,7 +10,7 @@ class Gate extends BaseGate
 {
     public static $shouldBeStrict = false;
 
-    public static function shouldBeStrict($shouldBeStrict = true)
+    public static function shouldBeStrict($shouldBeStrict = true): void
     {
         self::$shouldBeStrict = $shouldBeStrict;
     }

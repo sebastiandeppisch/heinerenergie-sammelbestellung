@@ -33,14 +33,14 @@ class AdviceService
 
         $query = Advice::query()
             ->with('status', 'group', 'group.parent', 'advisor', 'shares')
-            ->where(function ($query) use ($user, $permissions) {
+            ->where(function ($query) use ($user, $permissions): void {
                 $query
                     // User is the advisor
                     ->where('advisor_id', $user->id)
                     // OR user is in shares
                     ->orWhereIn('id', $permissions['sharedAdviceIds'])
                     // OR advice has no advisor AND user is member/admin of group
-                    ->orWhere(function ($subQuery) use ($permissions) {
+                    ->orWhere(function ($subQuery) use ($permissions): void {
                         $subQuery->whereNull('advisor_id')
                             ->whereIn('group_id', $permissions['memberGroupIds']);
                     })
@@ -58,7 +58,7 @@ class AdviceService
 
         return $query
             ->get()
-            ->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice, $user, $isGroupAdmin));
+            ->map(fn (Advice $advice): DataProtectedAdviceData => DataProtectedAdviceData::fromModel($advice, $user, $isGroupAdmin));
     }
 
     private function getUserAdvicePermissions(User $user): array

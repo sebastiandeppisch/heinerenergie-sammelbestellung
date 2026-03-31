@@ -34,7 +34,7 @@ class AddressRule implements ValidationRule
                 'city' => 'Stadt',
             ];
 
-            $missingKeys = array_map(fn ($key) => $keyTranslations[$key], $missingKeys);
+            $missingKeys = array_map(fn (string $key): string => $keyTranslations[$key], $missingKeys);
 
             if (! empty($missingKeys)) {
                 $fail('Bitte die Felder '.implode(', ', $missingKeys).' ausfüllen.');

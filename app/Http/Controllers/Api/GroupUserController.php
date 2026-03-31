@@ -40,12 +40,12 @@ class GroupUserController extends Controller
         $this->authorize('manageUsers', $group);
 
         $users = $group->users;
-        $users->load(['groups' => function ($query) use ($group) {
+        $users->load(['groups' => function ($query) use ($group): void {
             $query->where('groups.id', $group->id);
         }]);
 
         return response()->json([
-            'data' => $users->map(fn (User $user) => $this->userToDTO($user)),
+            'data' => $users->map(fn (User $user): GroupUserData => $this->userToDTO($user)),
         ]);
     }
 
@@ -61,7 +61,7 @@ class GroupUserController extends Controller
         ]);
 
         $user = User::findOrFail($validated['id']);
-        $user->load(['groups' => function ($query) use ($group) {
+        $user->load(['groups' => function ($query) use ($group): void {
             $query->where('groups.id', $group->id);
         }]);
 
@@ -79,7 +79,7 @@ class GroupUserController extends Controller
             'is_admin' => $validated['is_admin'],
         ]);
 
-        $user->load(['groups' => function ($query) use ($group) {
+        $user->load(['groups' => function ($query) use ($group): void {
             $query->where('groups.id', $group->id);
         }]);
 

@@ -24,7 +24,7 @@ class MapPointData extends Data
         public ?string $category_id = null,
     ) {}
 
-    public static function fromModel(MapPoint $model)
+    public static function fromModel(MapPoint $model): self
     {
         return new self(
             id: $model->uuid,
@@ -38,7 +38,7 @@ class MapPointData extends Data
         );
     }
 
-    private static function formatType(?string $type)
+    private static function formatType(?string $type): string
     {
         // TODO load from model itself
         if ($type === FormSubmission::class) {

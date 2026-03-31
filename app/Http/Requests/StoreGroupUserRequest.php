@@ -20,7 +20,7 @@ class StoreGroupUserRequest extends FormRequest
             'id' => [
                 'required',
                 'exists:users,id',
-                function ($attribute, $value, $fail) use ($group) {
+                function ($attribute, $value, $fail) use ($group): void {
                     if ($group->users()->where('users.id', $value)->exists()) {
                         $fail('Der:die Berater:in ist bereits in dieser Initiative');
                     }

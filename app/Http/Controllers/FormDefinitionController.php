@@ -25,9 +25,9 @@ class FormDefinitionController extends Controller
             $formDefinitions = $formDefinitions->where('group_id', $groupContext->getCurrentGroup()->id);
         }
 
-        $formDefinitions = $formDefinitions->get()->map(fn ($formDefinition) => FormDefinitionData::fromModel($formDefinition));
+        $formDefinitions = $formDefinitions->get()->map(fn (FormDefinition $formDefinition): FormDefinitionData => FormDefinitionData::fromModel($formDefinition));
 
-        $groups = Group::all()->map(fn (Group $group) => [
+        $groups = Group::all()->map(fn (Group $group): array => [
             'id' => $group->uuid,
             'name' => $group->name,
         ]);
@@ -43,7 +43,7 @@ class FormDefinitionController extends Controller
      */
     public function create()
     {
-        $groups = Group::all()->map(fn (Group $group) => [
+        $groups = Group::all()->map(fn (Group $group): array => [
             'id' => $group->uuid,
             'name' => $group->name,
         ]);
@@ -62,7 +62,7 @@ class FormDefinitionController extends Controller
             FieldType::FILE,
         ]);
 
-        return collect(FieldType::cases())->filter(fn ($case) => ! $inactive->contains($case))->values()->toArray();
+        return collect(FieldType::cases())->filter(fn ($case): bool => ! $inactive->contains($case))->values()->toArray();
     }
 
     /**
@@ -73,7 +73,7 @@ class FormDefinitionController extends Controller
         $formDefinition->load('fields.options', 'adviceCreator.firstNameField', 'adviceCreator.lastNameField', 'adviceCreator.addressField', 'adviceCreator.emailField', 'adviceCreator.phoneField', 'adviceCreator.adviceTypeField', 'mapPointCreator.titleField', 'mapPointCreator.descriptionField', 'mapPointCreator.coordinateField');
         $formDefinitionData = FormDefinitionData::fromModel($formDefinition);
 
-        $groups = Group::all()->map(fn (Group $group) => [
+        $groups = Group::all()->map(fn (Group $group): array => [
             'id' => $group->uuid,
             'name' => $group->name,
         ]);

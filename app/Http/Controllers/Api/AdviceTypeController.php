@@ -9,13 +9,13 @@ class AdviceTypeController extends Controller
 {
     public function index()
     {
-        return collect(AdviceType::cases())->map(fn ($item, $key) => [
+        return collect(AdviceType::cases())->map(fn ($item, $key): array => [
             'id' => $key,
             'name' => $item->name,
         ]);
     }
 
-    public function show(int $advicestatus)
+    public function show(int $advicestatus): array
     {
         return [
             'id' => $advicestatus,

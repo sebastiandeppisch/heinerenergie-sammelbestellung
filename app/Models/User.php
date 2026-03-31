@@ -50,7 +50,7 @@ class User extends Authenticatable
         return $this->hasMany(Advice::class);
     }
 
-    public function getNameAttribute()
+    public function getNameAttribute(): string
     {
         return sprintf('%s %s', $this->first_name, $this->last_name);
     }

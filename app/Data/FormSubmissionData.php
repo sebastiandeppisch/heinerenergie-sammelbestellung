@@ -2,6 +2,7 @@
 
 namespace App\Data;
 
+use App\Models\SubmissionField;
 use App\Models\FormSubmission;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -28,7 +29,7 @@ class FormSubmissionData extends Data
             form_name: $model->form_name,
             submitted_at: $model->submitted_at,
             seen: $model->seen,
-            fields: $model->submissionFields->map(fn ($field) => SubmissionFieldData::fromModel($field)),
+            fields: $model->submissionFields->map(fn (SubmissionField $field): SubmissionFieldData => SubmissionFieldData::fromModel($field)),
         );
     }
 }

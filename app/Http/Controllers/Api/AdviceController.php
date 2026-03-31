@@ -25,7 +25,7 @@ class AdviceController extends Controller
         return app(GroupContextContract::class);
     }
 
-    public function store(StoreAdviceRequest $request)
+    public function store(StoreAdviceRequest $request): Advice
     {
         $advice = new Advice;
         $advice->fill($request->validated());
@@ -35,12 +35,12 @@ class AdviceController extends Controller
         return $advice;
     }
 
-    public function show(Advice $advice)
+    public function show(Advice $advice): DataProtectedAdviceData
     {
         return DataProtectedAdviceData::fromModel($advice, Auth::user());
     }
 
-    public function update(UpdateAdviceRequest $request, Advice $advice)
+    public function update(UpdateAdviceRequest $request, Advice $advice): DataProtectedAdviceData
     {
         $advice->fill($request->validated());
         $advice->save();
@@ -57,7 +57,7 @@ class AdviceController extends Controller
         return response()->noContent();
     }
 
-    public function setAdvisors(Advice $advice, Request $request)
+    public function setAdvisors(Advice $advice, Request $request): void
     {
         $this->auth($advice, 'addAdvisors');
 
@@ -69,14 +69,14 @@ class AdviceController extends Controller
         app(AdviceService::class)->syncShares($advice, collect($validated['advisors'])->map(fn ($advisor) => User::where('uuid', $advisor)->first()), $request->user());
     }
 
-    private function auth(Advice $advice, string $ability)
+    private function auth(Advice $advice, string $ability): void
     {
         if (! Auth::user()->can($ability, $advice)) {
             abort(403, 'Du hast keine Berechtigung, diese Beratung zu sehen');
         }
     }
 
-    public function assign(Advice $advice)
+    public function assign(Advice $advice): Advice
     {
         if ($advice->advisor_id === null) {
             $advice->advisor_id = Auth::user()->id;
@@ -90,7 +90,7 @@ class AdviceController extends Controller
 
     public function sortedAdvisors(Advice $advice, AdviceService $adviceService)
     {
-        return User::all()->map(function (User $user) use ($advice, $adviceService) {
+        return User::all()->map(function (User $user) use ($advice, $adviceService): array {
             $name = $user->name;
             $distance = $adviceService->getDistance($advice, $user);
             if ($distance !== null) {

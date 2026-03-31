@@ -11,7 +11,7 @@ enum AdviceType: int
     public static function getSelectableOptions(?self $currentType = null): array
     {
         return collect(self::cases())
-            ->filter(function (self $type) use ($currentType) {
+            ->filter(function (self $type) use ($currentType): bool {
 
                 if ($type !== self::DirectOrder) {
                     return true;
@@ -19,7 +19,7 @@ enum AdviceType: int
 
                 return $currentType === self::DirectOrder;
             })
-            ->map(fn (self $type, int $key) => [
+            ->map(fn (self $type, int $key): array => [
                 'id' => $type->value,
                 'name' => $type->name,
             ])

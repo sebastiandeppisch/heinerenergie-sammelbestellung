@@ -29,7 +29,7 @@ class PageController extends Controller
 
         // Nur in lokaler Umgebung Benutzer laden
         if (app()->environment('local')) {
-            $users = User::all()->map(fn (User $user) => [
+            $users = User::all()->map(fn (User $user): array => [
                 'id' => $user->uuid,
                 'name' => $user->name,
                 'email' => $user->email,
@@ -111,7 +111,7 @@ class PageController extends Controller
         }
 
         return Inertia::render('InitiativeSelection', [
-            'initiatives' => $user->groups->map(fn ($group) => GroupData::fromModel($group)),
+            'initiatives' => $user->groups->map(fn (Group $group): GroupData => GroupData::fromModel($group)),
             'canActAsSystemAdmin' => $user->is_admin,
         ]);
     }

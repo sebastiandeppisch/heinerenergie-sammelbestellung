@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Closure;
 use App\Actions\FetchCoordinateByAddress;
 use App\Actions\FetchCoordinateByFreeText;
 use App\Services\CurrentGroupService;
@@ -21,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
      * @return void
      */
     #[Override]
-    public function register()
+    public function register(): void
     {
         //
     }
@@ -31,28 +32,28 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot(): void
     {
-        LogViewer::auth(fn ($request) => $request->user()?->email === config('app.admin_email'));
+        LogViewer::auth(fn ($request): bool => $request->user()?->email === config('app.admin_email'));
 
         if (config('app.env') === 'testing') {
-            $this->app->bind(FetchCoordinateByAddress::class, function () {
+            $this->app->bind(FetchCoordinateByAddress::class, function (): Closure {
 
                 $coordinatesOfDarmstadtCenter = new Coordinate(
                     lat: 49.8728475,
                     lng: 8.6510204
                 );
 
-                return fn (Address $address) => $coordinatesOfDarmstadtCenter;
+                return fn (Address $address): Coordinate => $coordinatesOfDarmstadtCenter;
             });
 
-            $this->app->bind(FetchCoordinateByFreeText::class, function () {
+            $this->app->bind(FetchCoordinateByFreeText::class, function (): Closure {
                 $coordinatesOfDarmstadtCenter = new Coordinate(
                     lat: 49.8728475,
                     lng: 8.6510204
                 );
 
-                return fn (string $text) => $coordinatesOfDarmstadtCenter;
+                return fn (string $text): Coordinate => $coordinatesOfDarmstadtCenter;
             });
         } else {
             $this->app->bind(function (): Nominatim {

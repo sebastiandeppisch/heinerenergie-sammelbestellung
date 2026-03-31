@@ -33,7 +33,7 @@ class CheckboxRequiredValidator implements ValidationRule
             $missing = array_diff($this->values(), $value);
 
             $missingNames = collect($this->requiredOptions)
-                ->filter(fn ($option, $key) => in_array($key, $missing))
+                ->filter(fn ($option, $key): bool => in_array($key, $missing))
                 ->values()
                 ->toArray();
 

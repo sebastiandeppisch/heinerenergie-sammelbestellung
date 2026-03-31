@@ -41,7 +41,7 @@ class GroupService
             return null;
         }
 
-        $sortedgroups = $mainGroups->sortBy(function ($group) use ($coordinate) {
+        $sortedgroups = $mainGroups->sortBy(function ($group) use ($coordinate): float {
             $groupCenter = $group->consulting_area?->getCenter();
 
             if (! $groupCenter) {

@@ -25,7 +25,7 @@ class FetchCoordinateByFreeText
         Log::debug('Fetching coordinates for text', ['text' => $text]);
         $this->text = $text;
 
-        return Cache::rememberForever($this->key(), fn () => $this->handle());
+        return Cache::rememberForever($this->key(), fn (): ?Coordinate => $this->handle());
     }
 
     private function key(): string

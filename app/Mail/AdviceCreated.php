@@ -42,7 +42,7 @@ class AdviceCreated extends Mailable implements ShouldQueue
 
         app()->instance(GroupContextContract::class, new FixedGroupContext($this->advice->group));
 
-        $this->withSymfonyMessage(function () use ($previousContext) {
+        $this->withSymfonyMessage(function () use ($previousContext): void {
             if ($previousContext !== null) {
                 app()->instance(GroupContextContract::class, $previousContext);
             } else {

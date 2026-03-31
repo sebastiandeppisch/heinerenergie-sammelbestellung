@@ -19,7 +19,7 @@ class MapPointController extends Controller
 
         return Inertia::render('MapPoints/Map', [
             'pointsByCategory' => $pointsByCategory,
-            'categories' => MapPointCategory::all()->map(fn ($category) => MapPointCategoryData::fromModel($category)),
+            'categories' => MapPointCategory::all()->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel($category)),
         ]);
     }
 
@@ -29,7 +29,7 @@ class MapPointController extends Controller
 
         return Inertia::render('MapPoints/Index', [
             'mapPoints' => $mapPoints,
-            'categories' => MapPointCategory::all()->map(fn ($category) => MapPointCategoryData::fromModel($category)),
+            'categories' => MapPointCategory::all()->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel($category)),
         ]);
     }
 
