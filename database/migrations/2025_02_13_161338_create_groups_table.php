@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('groups', function (Blueprint $table) {
+        Schema::create('groups', function (Blueprint $table): void {
             $table->id();
             $table->uuid('uuid')->unique();
 
@@ -26,11 +26,11 @@ return new class extends Migration
             $table->json('consulting_area')->nullable();
         });
 
-        Schema::table('groups', function (Blueprint $table) {
+        Schema::table('groups', function (Blueprint $table): void {
             $table->foreignIdFor(Group::class, 'parent_id')->nullable()->constrained('groups');
         });
 
-        Schema::create('group_user', function (Blueprint $table) {
+        Schema::create('group_user', function (Blueprint $table): void {
             $table->foreignIdFor(Group::class)->constrained();
             $table->foreignIdFor(User::class)->constrained();
             $table->boolean('is_admin')->default(false);

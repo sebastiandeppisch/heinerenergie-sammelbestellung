@@ -14,7 +14,7 @@ use function Pest\Laravel\put;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     Storage::fake('public');
 
     $this->admin = User::factory()->create(['is_admin' => true]);
@@ -27,13 +27,13 @@ beforeEach(function () {
     Config::set('app.group_context', 'global');
 });
 
-it('can create group via factory', function () {
+it('can create group via factory', function (): void {
     $group = Group::factory()->create();
     expect($group)->toBeInstanceOf(Group::class);
     expect($group->name)->not->toBeEmpty();
 });
 
-test('can create group', function () {
+test('can create group', function (): void {
     actingAs($this->admin);
 
     $response = post(route('groups.store'), [
@@ -49,7 +49,7 @@ test('can create group', function () {
         ->description->toBe('New Description');
 });
 
-test('can update group with new logo', function () {
+test('can update group with new logo', function (): void {
     actingAs($this->admin);
 
     $oldLogo = UploadedFile::fake()->image('old-logo.jpg');
@@ -85,7 +85,7 @@ test('can update group with new logo', function () {
     Storage::disk('public')->assertExists($this->group->logo_path);
 });
 
-test('validates logo file size and type', function () {
+test('validates logo file size and type', function (): void {
     actingAs($this->admin);
 
     // Test file too large (over 1MB)
@@ -111,7 +111,7 @@ test('validates logo file size and type', function () {
     $response->assertSessionHasErrors('logo');
 });
 
-test('deleting group removes logo', function () {
+test('deleting group removes logo', function (): void {
     actingAs($this->admin);
 
     $logo = UploadedFile::fake()->image('logo.jpg');

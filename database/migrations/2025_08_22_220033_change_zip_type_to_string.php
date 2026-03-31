@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('advices', function (Blueprint $table) {
+        Schema::table('advices', function (Blueprint $table): void {
             $table->string('zip')->change();
         });
 
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->string('zip')->nullable()->change();
         });
     }
@@ -25,11 +25,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('advices', function (Blueprint $table) {
+        Schema::table('advices', function (Blueprint $table): void {
             $table->unsignedInteger('zip')->change();
         });
 
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->unsignedInteger('zip')->nullable()->change();
         });
     }

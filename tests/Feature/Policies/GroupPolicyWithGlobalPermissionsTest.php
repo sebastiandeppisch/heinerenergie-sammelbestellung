@@ -6,7 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->globalAdmin = User::factory()->create(['is_admin' => true]);
     $this->normalUser = User::factory()->create(['is_admin' => false]);
 
@@ -37,7 +37,7 @@ beforeEach(function () {
     config()->set('app.group_context', 'global');
 });
 
-test('global admin can manage all groups', function () {
+test('global admin can manage all groups', function (): void {
     expect($this->globalAdmin->can('viewAny', Group::class))->toBeTrue()
         ->and($this->globalAdmin->can('view', $this->mainGroup))->toBeTrue()
         ->and($this->globalAdmin->can('create', Group::class))->toBeTrue()
@@ -48,7 +48,7 @@ test('global admin can manage all groups', function () {
         ->and($this->globalAdmin->can('manageArea', $this->mainGroup))->toBeTrue();
 });
 
-test('initiative admin can manage their group and subgroups', function () {
+test('initiative admin can manage their group and subgroups', function (): void {
     // Make normal user admin of main group
     $this->mainGroup->users()->attach($this->normalUser->id, ['is_admin' => true]);
 
@@ -89,7 +89,7 @@ test('initiative admin can manage their group and subgroups', function () {
     expect($mainGroupAdmin->can('delete', $this->otherSubGroup))->toBeFalse();
 });
 
-test('subgroup admin cannot manage parent groups', function () {
+test('subgroup admin cannot manage parent groups', function (): void {
     // Make normal user admin of sub group
     $this->subGroup->users()->attach($this->normalUser->id, ['is_admin' => true]);
     $subGroupAdmin = $this->normalUser;
@@ -120,7 +120,7 @@ test('subgroup admin cannot manage parent groups', function () {
         ->and($subGroupAdmin->can('create', [Group::class, $this->otherMainGroup]))->toBeFalse();
 });
 
-test('normal user can only view groups they belong to', function () {
+test('normal user can only view groups they belong to', function (): void {
     // Add user to sub group
     $this->subGroup->users()->attach($this->normalUser->id, ['is_admin' => false]);
 
@@ -143,7 +143,7 @@ test('normal user can only view groups they belong to', function () {
         ->and($this->normalUser->can('manageArea', $this->subGroup))->toBeFalse();
 });
 
-test('group admin is also a regular member of the group', function () {
+test('group admin is also a regular member of the group', function (): void {
     // Make normal user admin of main group
     $this->mainGroup->users()->attach($this->normalUser->id, ['is_admin' => true]);
 

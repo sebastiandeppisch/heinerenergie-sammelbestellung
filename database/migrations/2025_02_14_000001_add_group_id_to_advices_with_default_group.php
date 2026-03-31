@@ -20,11 +20,11 @@ return new class extends Migration
             'updated_at' => now(),
         ]);
 
-        Schema::table('advices', function (Blueprint $table) use ($defaultGroupId) {
+        Schema::table('advices', function (Blueprint $table) use ($defaultGroupId): void {
             $table->foreignIdFor(Group::class)->default($defaultGroupId)->constrained();
         });
 
-        Schema::table('advices', function (Blueprint $table) {
+        Schema::table('advices', function (Blueprint $table): void {
             $table->foreignIdFor(Group::class)->default(null)->change();
         });
 
@@ -33,7 +33,7 @@ return new class extends Migration
             ->update(['group_id' => $defaultGroupId]);
 
         $users = DB::table('users')->select('id', 'is_admin')->get();
-        $groupUserRecords = $users->map(fn ($user) => [
+        $groupUserRecords = $users->map(fn ($user): array => [
             'group_id' => $defaultGroupId,
             'user_id' => $user->id,
             'is_admin' => $user->is_admin,
@@ -48,7 +48,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('advices', function (Blueprint $table) {
+        Schema::table('advices', function (Blueprint $table): void {
             $table->dropForeign(['group_id']);
             $table->dropColumn(['group_id']);
         });

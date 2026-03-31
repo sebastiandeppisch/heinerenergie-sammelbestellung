@@ -14,7 +14,7 @@ use function Pest\Laravel\post;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::factory()->create();
 
     // Create required statuses
@@ -37,7 +37,7 @@ beforeEach(function () {
     $this->actingAs($this->user);
 });
 
-test('it creates an event when status changes', function () {
+test('it creates an event when status changes', function (): void {
     $this->advice->advice_status_id = $this->status2->id;
     $this->advice->save();
 
@@ -52,7 +52,7 @@ test('it creates an event when status changes', function () {
         ->and($event->description)->toBe("Status wurde von '{$this->status1->name}' zu '{$this->status2->name}' geändert");
 });
 
-test('it creates an event when group is transferred', function () {
+test('it creates an event when group is transferred', function (): void {
     $this->actingAs($this->user);
 
     $newGroup = Group::factory()->create(['name' => 'New Initiative', 'accepts_transfers' => true]);
@@ -68,7 +68,7 @@ test('it creates an event when group is transferred', function () {
         ->and($event->description)->toBe('Beratung wurde von Test Initiative zu New Initiative übertragen');
 });
 
-test('it includes reason in transfer description when provided', function () {
+test('it includes reason in transfer description when provided', function (): void {
     $this->actingAs($this->user);
 
     $newGroup = Group::factory()->create(['name' => 'New Initiative']);
@@ -89,7 +89,7 @@ test('it includes reason in transfer description when provided', function () {
         ->and($event->description)->toBe("Beratung wurde von Test Initiative zu New Initiative übertragen (Grund: {$reason})");
 });
 
-test('events can be retrieved in chronological order', function () {
+test('events can be retrieved in chronological order', function (): void {
     $this->actingAs($this->user);
 
     // Create multiple events
@@ -109,7 +109,7 @@ test('events can be retrieved in chronological order', function () {
         );
 });
 
-test('events retain user who triggered them', function () {
+test('events retain user who triggered them', function (): void {
     $this->actingAs($this->user);
 
     $this->advice->advice_status_id = $this->status3->id;
@@ -122,7 +122,7 @@ test('events retain user who triggered them', function () {
         ->and($event->user_id)->toBe($this->user->id);
 });
 
-function transferAdvice(Advice $advice, Group $newGroup, ?string $reason = null)
+function transferAdvice(Advice $advice, Group $newGroup, ?string $reason = null): void
 {
     $response = post(route('advices.transfer', $advice), [
         'group_id' => $newGroup->uuid,

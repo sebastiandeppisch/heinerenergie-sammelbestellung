@@ -8,7 +8,7 @@ use function Pest\Laravel\actingAs;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->admin = User::factory()->create();
     $this->user = User::factory()->create();
     $this->group = Group::factory()->create();
@@ -19,7 +19,7 @@ beforeEach(function () {
     Config::set('app.group_context', 'global');
 });
 
-test('admin can list users in a group', function () {
+test('admin can list users in a group', function (): void {
     // Arrange
     $regularUser = User::factory()->create();
     $this->group->users()->attach($regularUser->id, ['is_admin' => false]);
@@ -41,13 +41,13 @@ test('admin can list users in a group', function () {
         ]);
 });
 
-test('non-admin cannot list users in a group', function () {
+test('non-admin cannot list users in a group', function (): void {
     actingAs($this->user)
         ->get("/api/groups/{$this->group->uuid}/users")
         ->assertForbidden();
 });
 
-test('admin can add user to group', function () {
+test('admin can add user to group', function (): void {
     actingAs($this->admin)
         ->post("/api/groups/{$this->group->uuid}/users", [
             'id' => $this->user->uuid,
@@ -72,7 +72,7 @@ test('admin can add user to group', function () {
     ]);
 });
 
-test('admin can add user as admin to group', function () {
+test('admin can add user as admin to group', function (): void {
     actingAs($this->admin)
         ->post("/api/groups/{$this->group->uuid}/users", [
             'id' => $this->user->uuid,
@@ -85,7 +85,7 @@ test('admin can add user as admin to group', function () {
         ]);
 });
 
-test('non-admin cannot add users to group', function () {
+test('non-admin cannot add users to group', function (): void {
     actingAs($this->user)
         ->post("/api/groups/{$this->group->uuid}/users", [
             'user_id' => User::factory()->create()->id,
@@ -93,7 +93,7 @@ test('non-admin cannot add users to group', function () {
         ->assertForbidden();
 });
 
-test('admin can update user role in group', function () {
+test('admin can update user role in group', function (): void {
     // Arrange
     $this->group->users()->attach($this->user->id, ['is_admin' => false]);
 
@@ -115,7 +115,7 @@ test('admin can update user role in group', function () {
     ]);
 });
 
-test('non-admin cannot update user role in group', function () {
+test('non-admin cannot update user role in group', function (): void {
     $this->group->users()->attach($this->user->id, ['is_admin' => false]);
 
     actingAs($this->user)
@@ -125,7 +125,7 @@ test('non-admin cannot update user role in group', function () {
         ->assertForbidden();
 });
 
-test('admin can remove user from group', function () {
+test('admin can remove user from group', function (): void {
     // Arrange
     $this->group->users()->attach($this->user->id, ['is_admin' => false]);
 
@@ -140,7 +140,7 @@ test('admin can remove user from group', function () {
     ]);
 });
 
-test('non-admin cannot remove user from group', function () {
+test('non-admin cannot remove user from group', function (): void {
     $this->group->users()->attach($this->user->id, ['is_admin' => false]);
 
     actingAs($this->user)
@@ -148,7 +148,7 @@ test('non-admin cannot remove user from group', function () {
         ->assertForbidden();
 });
 
-test('cannot add same user twice to group', function () {
+test('cannot add same user twice to group', function (): void {
     // First add
     actingAs($this->admin)
         ->post("/api/groups/{$this->group->uuid}/users", [

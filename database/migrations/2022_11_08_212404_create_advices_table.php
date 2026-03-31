@@ -13,16 +13,16 @@ return new class extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('advice_status', function (Blueprint $table) {
+        Schema::create('advice_status', function (Blueprint $table): void {
             $table->id();
             $table->timestamps();
 
             $table->string('name');
         });
 
-        Schema::create('advices', function (Blueprint $table) {
+        Schema::create('advices', function (Blueprint $table): void {
             $table->id();
             $table->timestamps();
 
@@ -49,7 +49,7 @@ return new class extends Migration
 
         });
 
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->decimal('long', 10, 7)->nullable()->default(null);
             $table->decimal('lat', 10, 7)->nullable()->default(null);
         });
@@ -60,11 +60,11 @@ return new class extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('advices');
         Schema::dropIfExists('advice_status');
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->dropColumn(['long', 'lat']);
         });
     }

@@ -7,12 +7,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-test('can be created by factory', function () {
+test('can be created by factory', function (): void {
     FormDefinitionToAdvice::factory()->create();
     $this->assertTrue(true);
 });
 
-test('submitting the form produces an advice', function () {
+test('submitting the form produces an advice', function (): void {
 
     $this->withoutExceptionHandling();
 
@@ -39,7 +39,7 @@ test('submitting the form produces an advice', function () {
     $this->assertEquals(1, Advice::count());
 });
 
-test('form can be created with seeder', function () {
+test('form can be created with seeder', function (): void {
     $this->artisan('db:seed --class=CreateAdviceForm');
     $this->assertTrue(true);
 });

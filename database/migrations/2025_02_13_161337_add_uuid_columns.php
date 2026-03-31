@@ -13,29 +13,29 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->uuid('uuid')->after('id');
         });
 
-        Schema::table('advices', function (Blueprint $table) {
+        Schema::table('advices', function (Blueprint $table): void {
             $table->uuid('uuid')->after('id');
         });
 
-        Schema::table('advice_status', function (Blueprint $table) {
+        Schema::table('advice_status', function (Blueprint $table): void {
             $table->uuid('uuid')->after('id');
         });
 
         $this->generateUuidsForExistingRecords();
 
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->uuid('uuid')->unique()->change();
         });
 
-        Schema::table('advices', function (Blueprint $table) {
+        Schema::table('advices', function (Blueprint $table): void {
             $table->uuid('uuid')->unique()->change();
         });
 
-        Schema::table('advice_status', function (Blueprint $table) {
+        Schema::table('advice_status', function (Blueprint $table): void {
             $table->uuid('uuid')->unique()->change();
         });
     }
@@ -60,15 +60,15 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->dropColumn('uuid');
         });
 
-        Schema::table('advices', function (Blueprint $table) {
+        Schema::table('advices', function (Blueprint $table): void {
             $table->dropColumn('uuid');
         });
 
-        Schema::table('advice_status', function (Blueprint $table) {
+        Schema::table('advice_status', function (Blueprint $table): void {
             $table->dropColumn('uuid');
         });
     }

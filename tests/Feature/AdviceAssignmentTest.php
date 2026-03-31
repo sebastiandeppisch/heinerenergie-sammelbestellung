@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Notification;
 uses(RefreshDatabase::class);
 
 // Test for assigning an advice to an initiative based on coordinates
-test('advice is assigned to correct group based on coordinates', function () {
+test('advice is assigned to correct group based on coordinates', function (): void {
     // Create two groups with defined areas (polygons)
     $correctGroup = Group::factory()->create([
         'name' => 'Correct Group',
@@ -44,12 +44,12 @@ test('advice is assigned to correct group based on coordinates', function () {
     ]);
 
     // Register the FetchCoordinateByAddress action in the container
-    App::bind(FetchCoordinateByAddress::class, fn () => function (Address $address) {
+    App::bind(FetchCoordinateByAddress::class, fn (): Closure => function (Address $address): Coordinate {
         return new Coordinate(48.5, 8.5); // Inside the correct group's area
     });
 
     // Also bind FetchCoordinateByFreeText to avoid issues if it's called
-    App::bind(FetchCoordinateByFreeText::class, fn () => fn (string $text) => new Coordinate(48.5, 8.5));
+    App::bind(FetchCoordinateByFreeText::class, fn (): Closure => fn (string $text): Coordinate => new Coordinate(48.5, 8.5));
 
     // Create a new advice
     $advice = Advice::factory()->create([
@@ -71,15 +71,15 @@ test('advice is assigned to correct group based on coordinates', function () {
 });
 
 // Test for system administrator notification on geocoding failure
-test('system administrators are notified on geocoding failure', function () {
+test('system administrators are notified on geocoding failure', function (): void {
     // Create system administrator
     $admin = User::factory()->create(['is_admin' => true]);
 
     // Register FetchCoordinateByAddress to return null (geocoding failure)
-    App::bind(FetchCoordinateByAddress::class, fn () => fn (Address $address) => null);
+    App::bind(FetchCoordinateByAddress::class, fn (): Closure => fn (Address $address): null => null);
 
     // Register FetchCoordinateByFreeText to return null (zipcode geocoding failure)
-    App::bind(FetchCoordinateByFreeText::class, fn () => fn (string $text) => null);
+    App::bind(FetchCoordinateByFreeText::class, fn (): Closure => fn (string $text): null => null);
 
     // Create advice
     $advice = Advice::factory()->create([
@@ -96,7 +96,7 @@ test('system administrators are notified on geocoding failure', function () {
     Notification::assertSentTo(
         $admin,
         SystemErrorNotification::class,
-        fn ($notification) => $notification->advice->id === $advice->id
+        fn ($notification): bool => $notification->advice->id === $advice->id
     );
 
     // This line verifies the job completes without exceptions
@@ -104,7 +104,7 @@ test('system administrators are notified on geocoding failure', function () {
 });
 
 // Test for assigning advice to main group even when a closer subgroup exists
-test('advice is assigned to main group even when subgroup is closer', function () {
+test('advice is assigned to main group even when subgroup is closer', function (): void {
     // Create a main group (no parent) with consulting area far from coordinates
     $mainGroup = Group::factory()->create([
         'name' => 'Main Group',
@@ -132,12 +132,12 @@ test('advice is assigned to main group even when subgroup is closer', function (
     ]);
 
     // Register FetchCoordinateByAddress to return null to force zipcode-based assignment
-    App::bind(FetchCoordinateByAddress::class, fn () => function (Address $address) {
+    App::bind(FetchCoordinateByAddress::class, fn (): Closure => function (Address $address): null {
         return null; // Force zipcode-based assignment
     });
 
     // Register FetchCoordinateByFreeText to return coordinates
-    App::bind(FetchCoordinateByFreeText::class, fn () => fn (string $text) =>
+    App::bind(FetchCoordinateByFreeText::class, fn (): Closure => fn (string $text): Coordinate =>
         // Return a coordinate that would be closer to the subgroup's polygon
         new Coordinate(1.5, 1.5));
 
@@ -167,7 +167,7 @@ test('advice is assigned to main group even when subgroup is closer', function (
 });
 
 // Test for assigning advice to subgroup when main group already exists
-test('advice is assigned to subgroup when main group already exists and address is found', function () {
+test('advice is assigned to subgroup when main group already exists and address is found', function (): void {
     // Create a main group first
     $mainGroup = Group::factory()->create([
         'name' => 'Main Group',
@@ -202,7 +202,7 @@ test('advice is assigned to subgroup when main group already exists and address 
 
     $adviceCoordinates = $subGroup->consulting_area->getCenter();
 
-    App::bind(FetchCoordinateByAddress::class, fn () => (fn (Address $address) => $adviceCoordinates));
+    App::bind(FetchCoordinateByAddress::class, fn (): Closure => (fn (Address $address) => $adviceCoordinates));
 
     // Create a new advice with an existing group_id (main group already set)
     $advice = Advice::factory()->withoutCoordinates()->create([

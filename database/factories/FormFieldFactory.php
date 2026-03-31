@@ -15,6 +15,9 @@ class FormFieldFactory extends Factory
 {
     protected $model = FormField::class;
 
+    /**
+     * @return array<string, mixed>
+     */
     public function definition()
     {
         $fieldTypes = [
@@ -55,7 +58,7 @@ class FormFieldFactory extends Factory
     #[Override]
     public function configure()
     {
-        return $this->afterCreating(function (FormField $formField) {
+        return $this->afterCreating(function (FormField $formField): void {
             if (in_array($formField->type, [FieldType::SELECT, FieldType::RADIO, FieldType::CHECKBOX])) {
 
                 $count = random_int(2, 5);

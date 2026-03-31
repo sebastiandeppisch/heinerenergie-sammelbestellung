@@ -6,16 +6,16 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
-        Schema::create('sendables', function (Blueprint $table) {
+        Schema::create('sendables', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('send_id')->index();
             $table->morphs('sendable');
         });
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('sendables');
     }

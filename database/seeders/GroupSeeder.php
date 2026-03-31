@@ -13,11 +13,11 @@ class GroupSeeder extends Seeder
     public function run(): void
     {
         // Create 5 main groups
-        Group::factory(5)->create()->each(function ($mainGroup) {
+        Group::factory(5)->create()->each(function ($mainGroup): void {
             // For each main group, create 2-4 child groups
             Group::factory(fake()->numberBetween(2, 4))
                 ->create(['parent_id' => $mainGroup->id])
-                ->each(function ($childGroup) {
+                ->each(function ($childGroup): void {
                     // For some child groups, create 1-3 sub-child groups
                     if (fake()->boolean(70)) {
                         Group::factory(fake()->numberBetween(1, 3))

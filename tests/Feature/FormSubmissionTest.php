@@ -10,9 +10,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {});
+beforeEach(function (): void {});
 
-test('form with text field can be submitted', function () {
+test('form with text field can be submitted', function (): void {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
@@ -39,7 +39,7 @@ test('form with text field can be submitted', function () {
     $this->assertSame('Sample text input', $field->value);
 });
 
-test('form with number field can be submitted', function () {
+test('form with number field can be submitted', function (): void {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
@@ -66,7 +66,7 @@ test('form with number field can be submitted', function () {
     $this->assertSame(123, $field->value);
 });
 
-test('form with single select can be submitted', function () {
+test('form with single select can be submitted', function (): void {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
@@ -98,7 +98,7 @@ test('form with single select can be submitted', function () {
     $field = SubmissionField::firstOrFail();
     $this->assertSame($option1->uuid, $field->value);
 });
-test('form with multiple select can be submitted', function () {
+test('form with multiple select can be submitted', function (): void {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
@@ -136,7 +136,7 @@ test('form with multiple select can be submitted', function () {
     $this->assertSame(json_encode([$option1->id, $option2->id]), $field->value);
 })->skip('Multiselect not implemented yet');
 
-test('Selectboxes with multiple values can be submitted', function () {
+test('Selectboxes with multiple values can be submitted', function (): void {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
@@ -171,7 +171,7 @@ test('Selectboxes with multiple values can be submitted', function () {
     $this->assertSame([$option1->uuid, $option2->uuid], $field->value);
 });
 
-test('form with radio button can be submitted', function () {
+test('form with radio button can be submitted', function (): void {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
@@ -207,7 +207,7 @@ test('form with radio button can be submitted', function () {
     $this->assertSame($option1->value, $field->value);
 });
 
-test('form with radiobutton is validated', function () {
+test('form with radiobutton is validated', function (): void {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
@@ -222,7 +222,7 @@ test('form with radiobutton is validated', function () {
     $response->assertSessionHasErrors($formField->uuid);
 });
 
-test('geoposition can be submitted', function () {
+test('geoposition can be submitted', function (): void {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
@@ -247,7 +247,7 @@ test('geoposition can be submitted', function () {
     $this->assertEquals(new Coordinate(49, 10), $field->asCoordinate());
 });
 
-it('validates geographic coordinates', function () {
+it('validates geographic coordinates', function (): void {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
@@ -265,7 +265,7 @@ it('validates geographic coordinates', function () {
     $response->assertSessionHasErrors();
 });
 
-test('submitting a required checkbox options produces a validation error', function () {
+test('submitting a required checkbox options produces a validation error', function (): void {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
@@ -302,7 +302,7 @@ test('submitting a required checkbox options produces a validation error', funct
     ]);
 });
 
-test('submitting a checkbox with required options passes validation when all required options are selected', function () {
+test('submitting a checkbox with required options passes validation when all required options are selected', function (): void {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,

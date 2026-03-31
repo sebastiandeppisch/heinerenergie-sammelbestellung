@@ -10,18 +10,18 @@ use function Pest\Laravel\actingAs;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::factory()->create();
     $this->group = Group::factory()->create();
 });
 
-test('user with no group is redirected to group selection', function () {
+test('user with no group is redirected to group selection', function (): void {
     actingAs($this->user)
         ->get('/backend')
         ->assertRedirect('/initiatives/select');
 });
 
-test('user with single group gets it auto-selected', function () {
+test('user with single group gets it auto-selected', function (): void {
     // Add user to single group
     $this->group->users()->attach($this->user);
 
@@ -33,7 +33,7 @@ test('user with single group gets it auto-selected', function () {
     expect(session('actAsGroupId'))->toBe($this->group->id);
 });
 
-test('user with multiple groups is redirected to selection', function () {
+test('user with multiple groups is redirected to selection', function (): void {
     // Create and attach multiple groups
     $this->group->users()->attach($this->user);
     $secondGroup = Group::factory()->create();
@@ -44,7 +44,7 @@ test('user with multiple groups is redirected to selection', function () {
         ->assertRedirect('/initiatives/select');
 });
 
-test('user with already selected group is redirected to dashboard', function () {
+test('user with already selected group is redirected to dashboard', function (): void {
     $this->group->users()->attach($this->user);
 
     // First set the group

@@ -4,7 +4,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-test('the first registered is logged in and can login again', function () {
+test('the first registered is logged in and can login again', function (): void {
     $this->post('/register', [
         'first_name' => 'Max',
         'last_name' => 'Mustermann',
@@ -27,7 +27,7 @@ test('the first registered is logged in and can login again', function () {
     $this->assertAuthenticated();
 })->skip();
 
-test('a user can login', function () {
+test('a user can login', function (): void {
     User::factory()->create([
         'email' => 'john.doe@example.com',
         'password' => 'password',

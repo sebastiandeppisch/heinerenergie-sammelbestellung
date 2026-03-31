@@ -14,6 +14,9 @@ class FormDefinitionFactory extends Factory
 {
     protected $model = FormDefinition::class;
 
+    /**
+     * @return array<string, mixed>
+     */
     public function definition()
     {
         return [
@@ -26,7 +29,7 @@ class FormDefinitionFactory extends Factory
 
     public function withFields(int $count = 3)
     {
-        return $this->afterCreating(function (FormDefinition $formDefinition) use ($count) {
+        return $this->afterCreating(function (FormDefinition $formDefinition) use ($count): void {
             FormField::factory()->count($count)->create([
                 'form_definition_id' => $formDefinition->id,
             ]);

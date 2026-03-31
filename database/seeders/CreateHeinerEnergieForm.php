@@ -16,7 +16,7 @@ class CreateHeinerEnergieForm extends Seeder
     public function run(): void
     {
 
-        DB::transaction(function () {
+        DB::transaction(function (): void {
 
             $group = Group::firstOrFail();
             $formDefinition = new FormDefinition;

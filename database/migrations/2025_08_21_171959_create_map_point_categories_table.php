@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('map_point_categories', function (Blueprint $table) {
+        Schema::create('map_point_categories', function (Blueprint $table): void {
             $table->id();
             $table->uuid('uuid');
             $table->string('name');
@@ -21,7 +21,7 @@ return new class extends Migration
         });
 
         // Add category_id to map_points table
-        Schema::table('map_points', function (Blueprint $table) {
+        Schema::table('map_points', function (Blueprint $table): void {
             $table->foreignIdFor(MapPointCategory::class, 'category_id')->nullable()->constrained();
         });
     }
@@ -31,7 +31,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('map_points', function (Blueprint $table) {
+        Schema::table('map_points', function (Blueprint $table): void {
             $table->dropForeign(['category_id']);
             $table->dropColumn('category_id');
         });

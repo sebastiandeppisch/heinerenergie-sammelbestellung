@@ -12,11 +12,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->groupService = new GroupService;
 });
 
-test('find group containing coordinates', function () {
+test('find group containing coordinates', function (): void {
     // Create a group with a polygonal consulting area
     $group = Group::factory()->create([
         'consulting_area' => new Polygon([
@@ -40,7 +40,7 @@ test('find group containing coordinates', function () {
     expect($notFoundGroup)->toBeNull();
 });
 
-test('find nearest main group', function () {
+test('find nearest main group', function (): void {
     // Create a main group (parent_id = null)
     $mainGroup1 = Group::factory()->create([
         'name' => 'Nearby Group',
@@ -91,7 +91,7 @@ test('find nearest main group', function () {
     expect($foundDistantGroup->name)->toBe('Distant Group');
 });
 
-test('assign advice to group', function () {
+test('assign advice to group', function (): void {
     // Create a group and an advice
     $group = Group::factory()->create();
     $advice = Advice::factory()->create();
@@ -103,7 +103,7 @@ test('assign advice to group', function () {
     expect($advice->group_id)->toBe($group->id);
 });
 
-test('identify main group correctly', function () {
+test('identify main group correctly', function (): void {
     // Create a main group and a subgroup
     $mainGroup = Group::factory()->create(['parent_id' => null]);
     $subGroup = Group::factory()->create(['parent_id' => $mainGroup->id]);
@@ -113,7 +113,7 @@ test('identify main group correctly', function () {
     expect($this->groupService->isMainGroup($subGroup))->toBeFalse();
 });
 
-test('get all main groups', function () {
+test('get all main groups', function (): void {
     // Create multiple main groups and subgroups
     $mainGroup1 = Group::factory()->create(['parent_id' => null]);
     $mainGroup2 = Group::factory()->create(['parent_id' => null]);
@@ -127,7 +127,7 @@ test('get all main groups', function () {
     expect($mainGroups->contains('id', $mainGroup2->id))->toBeTrue();
 });
 
-test('get subgroups of a main group', function () {
+test('get subgroups of a main group', function (): void {
     // Create a main group with multiple subgroups
     $mainGroup = Group::factory()->create(['parent_id' => null]);
     $subGroup1 = Group::factory()->create(['parent_id' => $mainGroup->id]);
@@ -147,7 +147,7 @@ test('get subgroups of a main group', function () {
     expect($emptySubgroups)->toHaveCount(0);
 });
 
-test('calculate distance between groups', function () {
+test('calculate distance between groups', function (): void {
     // Create two groups with polygons
     $group1 = Group::factory()->create([
         'consulting_area' => new Polygon([

@@ -10,7 +10,7 @@ use InvalidArgumentException;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Create users
     $this->systemAdmin = User::factory()->create(['is_admin' => true]);
     $this->normalUser = User::factory()->create(['is_admin' => false]);
@@ -46,7 +46,7 @@ beforeEach(function () {
     ]);
 });
 
-test('system admin is not group admin => being implicit group admin is concern of Policy, not GroupContext', function () {
+test('system admin is not group admin => being implicit group admin is concern of Policy, not GroupContext', function (): void {
     $context = new GroupContext(null, true, $this->systemAdmin);
 
     expect($context->isActingAsSystemAdmin($this->systemAdmin))->toBeTrue()
@@ -58,7 +58,7 @@ test('system admin is not group admin => being implicit group admin is concern o
         ->and($context->isActingAsDirectAdmin($this->systemAdmin, $this->subSubGroup))->toBeFalse();
 });
 
-test('normal user has no access without group membership', function () {
+test('normal user has no access without group membership', function (): void {
     $context = new GroupContext(null, false, $this->normalUser);
 
     expect($context->isActingAsSystemAdmin($this->normalUser))->toBeFalse()
@@ -70,7 +70,7 @@ test('normal user has no access without group membership', function () {
         ->and($context->isActingAsDirectAdmin($this->normalUser, $this->subSubGroup))->toBeFalse();
 });
 
-test('group admin has access to group and subgroups', function () {
+test('group admin has access to group and subgroups', function (): void {
     // Make normal user admin of main group
     $this->mainGroup->users()->attach($this->normalUser->id, ['is_admin' => true]);
 
@@ -85,7 +85,7 @@ test('group admin has access to group and subgroups', function () {
         ->and($context->isActingAsDirectAdmin($this->normalUser, $this->subSubGroup))->toBeTrue();
 });
 
-test('temporary group admin has scoped access', function () {
+test('temporary group admin has scoped access', function (): void {
     // Make normal user member of main group
     $this->mainGroup->users()->attach($this->normalUser->id, ['is_admin' => false]);
 
@@ -101,7 +101,7 @@ test('temporary group admin has scoped access', function () {
         ->and($context->isActingAsDirectAdmin($this->normalUser, $this->subSubGroup))->toBeTrue();
 });
 
-test('admin of sub group cannot access parent groups', function () {
+test('admin of sub group cannot access parent groups', function (): void {
     // Make normal user admin of sub group only
     $this->subGroup->users()->attach($this->normalUser->id, ['is_admin' => true]);
 
@@ -116,7 +116,7 @@ test('admin of sub group cannot access parent groups', function () {
         ->and($context->isActingAsDirectAdmin($this->normalUser, $this->subSubGroup))->toBeTrue();
 });
 
-test('user with multiple group memberships has correct access', function () {
+test('user with multiple group memberships has correct access', function (): void {
     // Make user member of multiple groups with different roles
     $this->mainGroup->users()->attach($this->normalUser->id, ['is_admin' => false]);
     $this->otherGroup->users()->attach($this->normalUser->id, ['is_admin' => true]);
@@ -155,7 +155,7 @@ test('user with multiple group memberships has correct access', function () {
         ->and($context->isActingAsDirectAdmin($this->normalUser, $this->subSubGroup))->toBeFalse();
 });
 
-test('temporary admin access works independently for different groups', function () {
+test('temporary admin access works independently for different groups', function (): void {
     // Make user member of both groups
     $this->mainGroup->users()->attach($this->normalUser->id, ['is_admin' => false]);
     $this->otherGroup->users()->attach($this->normalUser->id, ['is_admin' => false]);
@@ -174,13 +174,13 @@ test('temporary admin access works independently for different groups', function
         ->and($context2->isActingAsDirectAdmin($this->normalUser, $this->otherSubGroup))->toBeFalse();
 });
 
-test('access is denied for null user', function () {
+test('access is denied for null user', function (): void {
     $context = new GroupContext($this->mainGroup, false, null);
 
     $context->isActingAsTransitiveMemberOrAdmin($this->normalUser, $this->mainGroup);
 })->throws(InvalidArgumentException::class);
 
-test('admin of parent group has access to child group', function () {
+test('admin of parent group has access to child group', function (): void {
     // Make user admin of main group
     $this->mainGroup->users()->attach($this->normalUser->id, ['is_admin' => true]);
 

@@ -9,7 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->advisor = User::factory()->create();
     $this->admin = User::factory()->create(['is_admin' => true]);
     $this->group = Group::create([
@@ -21,17 +21,17 @@ beforeEach(function () {
     Config::set('app.group_context', 'global');
 });
 
-test('can be created with sharing', function () {
+test('can be created with sharing', function (): void {
     Advice::factory()->withSharing()->create();
     $this->assertTrue(true);
 });
 
-test('can be created with sendable', function () {
+test('can be created with sendable', function (): void {
     Advice::factory()->withSendable()->create();
     $this->assertTrue(true);
 });
 
-test('advices table can be indexed by regular advisor', function () {
+test('advices table can be indexed by regular advisor', function (): void {
     createAdviceWithAndWithoutAdvisor($this->advisor);
     createAdviceWithAndWithoutAdvisor($this->admin);
 
@@ -40,28 +40,28 @@ test('advices table can be indexed by regular advisor', function () {
     $this->actingAs($this->advisor)->get('advices')->assertOk();
 });
 
-test('advices table can be indexed by admin', function () {
+test('advices table can be indexed by admin', function (): void {
     createAdviceWithAndWithoutAdvisor($this->admin);
     createAdviceWithAndWithoutAdvisor($this->advisor);
 
     $this->actingAs($this->admin)->get('advices')->assertOk();
 });
 
-test('advices map can be indexed by regular advisor', function () {
+test('advices map can be indexed by regular advisor', function (): void {
     createAdviceWithAndWithoutAdvisor($this->advisor);
     createAdviceWithAndWithoutAdvisor($this->admin);
 
     $this->actingAs($this->advisor)->get('advicesmap')->assertOk();
 });
 
-test('advices map can be indexed by admin', function () {
+test('advices map can be indexed by admin', function (): void {
     createAdviceWithAndWithoutAdvisor($this->admin);
     createAdviceWithAndWithoutAdvisor($this->advisor);
 
     $this->actingAs($this->admin)->get('advicesmap')->assertOk();
 });
 
-function createAdviceWithAndWithoutAdvisor(User $advisor)
+function createAdviceWithAndWithoutAdvisor(User $advisor): void
 {
 
     FormDefinitionToAdvice::factory()->withAdvice()->create();
@@ -81,7 +81,7 @@ function createAdviceWithAndWithoutAdvisor(User $advisor)
     $adviceWithSendAble[0]->update(['advisor_id' => $advisor->id]);
 }
 
-test('advisor can be updated', function () {
+test('advisor can be updated', function (): void {
 
     $this->actingAs($this->admin);
 
@@ -98,7 +98,7 @@ test('advisor can be updated', function () {
     ]);
 });
 
-test('setAdvisors API sets shared advisors on advice', function () {
+test('setAdvisors API sets shared advisors on advice', function (): void {
     $advice = Advice::factory()->create(['group_id' => $this->group->id]);
     $advisorsToShare = User::factory()->count(2)->create();
 

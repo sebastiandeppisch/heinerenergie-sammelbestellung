@@ -10,11 +10,11 @@ use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     Storage::fake('public');
 });
 
-test('image field can be submitted with a jpeg', function () {
+test('image field can be submitted with a jpeg', function (): void {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
@@ -43,7 +43,7 @@ test('image field can be submitted with a jpeg', function () {
     Storage::disk('public')->assertExists($paths[0]);
 });
 
-test('image field can be submitted with a png', function () {
+test('image field can be submitted with a png', function (): void {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
@@ -65,7 +65,7 @@ test('image field can be submitted with a png', function () {
     Storage::disk('public')->assertExists($submissionField->value[0]);
 });
 
-test('image field stores multiple images up to max_images', function () {
+test('image field stores multiple images up to max_images', function (): void {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
@@ -95,7 +95,7 @@ test('image field stores multiple images up to max_images', function () {
     }
 });
 
-test('image field rejects too many images', function () {
+test('image field rejects too many images', function (): void {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
@@ -115,7 +115,7 @@ test('image field rejects too many images', function () {
     $response->assertSessionHasErrors($formField->uuid);
 });
 
-test('image field rejects non-image files', function () {
+test('image field rejects non-image files', function (): void {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
@@ -134,7 +134,7 @@ test('image field rejects non-image files', function () {
     $response->assertSessionHasErrors($formField->uuid.'.*');
 });
 
-test('required image field fails validation without file', function () {
+test('required image field fails validation without file', function (): void {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
@@ -151,7 +151,7 @@ test('required image field fails validation without file', function () {
     $response->assertSessionHasErrors($formField->uuid);
 });
 
-test('optional image field passes validation without file', function () {
+test('optional image field passes validation without file', function (): void {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
@@ -168,7 +168,7 @@ test('optional image field passes validation without file', function () {
     $response->assertSessionHasNoErrors();
 });
 
-test('image field stores files in submission-specific directory', function () {
+test('image field stores files in submission-specific directory', function (): void {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
@@ -190,7 +190,7 @@ test('image field stores files in submission-specific directory', function () {
     expect($path)->toStartWith('form-images/');
 });
 
-test('image bomb is rejected', function () {
+test('image bomb is rejected', function (): void {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
@@ -210,7 +210,7 @@ test('image bomb is rejected', function () {
     $response->assertSessionHasErrors($formField->uuid.'.*');
 });
 
-test('orphaned images are deleted when transaction fails', function () {
+test('orphaned images are deleted when transaction fails', function (): void {
     $formDefinition = FormDefinition::factory()->create();
     $imageField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
@@ -241,7 +241,7 @@ test('orphaned images are deleted when transaction fails', function () {
     Storage::disk('public')->assertDirectoryEmpty('form-images');
 });
 
-test('form submit is rate limited', function () {
+test('form submit is rate limited', function (): void {
     $formDefinition = FormDefinition::factory()->create();
 
     for ($i = 0; $i < 10; $i++) {

@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::factory()->create();
     $this->group = Group::factory()->create(['name' => 'Test Initiative']);
     $this->group->users()->attach($this->user, ['is_admin' => true]);
@@ -16,7 +16,7 @@ beforeEach(function () {
 
 });
 
-test('non system admin cannot promote users to system admin', function () {
+test('non system admin cannot promote users to system admin', function (): void {
     $userToPromote = User::factory()->create([
         'is_admin' => false,
     ]);
@@ -25,7 +25,7 @@ test('non system admin cannot promote users to system admin', function () {
     $this->assertFalse($userToPromote->fresh()->is_admin);
 });
 
-test('system admin can promote users to system admin', function () {
+test('system admin can promote users to system admin', function (): void {
     app(SessionService::class)->actAsSystemAdmin();
 
     $userToPromote = User::factory()->create([
@@ -36,7 +36,7 @@ test('system admin can promote users to system admin', function () {
     $this->assertTrue($userToPromote->fresh()->is_admin);
 });
 
-test('non system admin cannot create system admin users', function () {
+test('non system admin cannot create system admin users', function (): void {
     $response = $this->post(route('users.store'), [
         'first_name' => 'John',
         'last_name' => 'Doe',
@@ -51,7 +51,7 @@ test('non system admin cannot create system admin users', function () {
     $this->assertFalse($createdUser->is_admin);
 });
 
-test('system admin can create system admin users', function () {
+test('system admin can create system admin users', function (): void {
     $this->user->is_admin = true;
     $this->user->save();
 

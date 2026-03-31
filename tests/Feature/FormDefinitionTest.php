@@ -13,7 +13,7 @@ use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::factory()->create();
     $this->group = Group::factory()->create(['name' => 'Test Initiative']);
     $this->group->users()->attach($this->user, ['is_admin' => true]);
@@ -21,38 +21,38 @@ beforeEach(function () {
     $this->actingAs($this->user);
 });
 
-test('index page can be rendered without data', function () {
+test('index page can be rendered without data', function (): void {
 
     $this->withoutExceptionHandling();
 
     $response = $this->get(route('form-definitions.index'));
 
     $response->assertStatus(200);
-    $response->assertInertia(fn (Assert $page) => $page
+    $response->assertInertia(fn (Assert $page): Assert => $page
         ->component('FormBuilder/Index')
         ->has('formDefinitions', 0)
     );
 });
 
-test('formbuilder index page can be rendered with empty form definitions', function () {
+test('formbuilder index page can be rendered with empty form definitions', function (): void {
     $formDefinitions = FormDefinition::factory(3)->create(['group_id' => $this->group->id]);
 
     $response = $this->get(route('form-definitions.index'));
 
     $response->assertStatus(200);
-    $response->assertInertia(fn (Assert $page) => $page
+    $response->assertInertia(fn (Assert $page): Assert => $page
         ->component('FormBuilder/Index')
         ->has('formDefinitions', 3)
     );
 });
 
-test('index page can be rendered with form definitions', function () {
+test('index page can be rendered with form definitions', function (): void {
     $formDefinitions = FormDefinition::factory(3)->withFields(10)->create(['group_id' => $this->group->id]);
 
     $response = $this->get(route('form-definitions.index'));
 
     $response->assertStatus(200);
-    $response->assertInertia(fn (Assert $page) => $page
+    $response->assertInertia(fn (Assert $page): Assert => $page
         ->component('FormBuilder/Index')
         ->has('formDefinitions', 3)
         ->where('formDefinitions.0.id', $formDefinitions[0]->uuid)
@@ -61,18 +61,18 @@ test('index page can be rendered with form definitions', function () {
     );
 });
 
-test('formbuilder create page can be rendered', function () {
+test('formbuilder create page can be rendered', function (): void {
     $response = $this->get(route('form-definitions.create'));
 
     $response->assertStatus(200);
-    $response->assertInertia(fn (Assert $page) => $page
+    $response->assertInertia(fn (Assert $page): Assert => $page
         ->component('FormBuilder/Edit')
         ->where('formDefinition', null)
         ->has('fieldTypes')
     );
 });
 
-test('formbuilder edit page can be rendered', function () {
+test('formbuilder edit page can be rendered', function (): void {
     $formDefinition = FormDefinition::factory()
         ->hasFields(3)
         ->create();
@@ -90,7 +90,7 @@ test('formbuilder edit page can be rendered', function () {
     $response = $this->get(route('form-definitions.edit', $formDefinition));
 
     $response->assertStatus(200);
-    $response->assertInertia(fn (Assert $page) => $page
+    $response->assertInertia(fn (Assert $page): Assert => $page
         ->component('FormBuilder/Edit')
         ->has('formDefinition')
         ->has('formDefinition.fields')
@@ -98,7 +98,7 @@ test('formbuilder edit page can be rendered', function () {
     );
 });
 
-test('form definition can be created', function () {
+test('form definition can be created', function (): void {
 
     $this->withoutExceptionHandling();
 
@@ -196,7 +196,7 @@ test('form definition can be created', function () {
     ]);
 });
 
-test('form definition can be updated', function () {
+test('form definition can be updated', function (): void {
     // Erstelle ein Formular mit Feldern
     $formDefinition = FormDefinition::factory()->create([
         'name' => 'Original Form',
@@ -251,7 +251,7 @@ test('form definition can be updated', function () {
     ]);
 });
 
-test('form definition can be deleted', function () {
+test('form definition can be deleted', function (): void {
     // Erstelle ein Formular mit Feldern und Optionen
     $formDefinition = FormDefinition::factory()->withFields(10)->create();
 
@@ -269,7 +269,7 @@ test('form definition can be deleted', function () {
 
 todo('Should only admins create forms or can regular users view forms?');
 
-test('form fields can be saved with required field', function () {
+test('form fields can be saved with required field', function (): void {
 
     $this->withoutExceptionHandling();
 
@@ -295,7 +295,7 @@ test('form fields can be saved with required field', function () {
 
 });
 
-test('form fields can be updated to be required', function () {
+test('form fields can be updated to be required', function (): void {
     $this->withoutExceptionHandling();
     FormDefinition::factory()->withFields(1)->create();
 
@@ -315,7 +315,7 @@ test('form fields can be updated to be required', function () {
     $this->assertTrue(FormField::first()->required);
 });
 
-test('form fields are updated in-place', function () {
+test('form fields are updated in-place', function (): void {
     $this->withoutExceptionHandling();
 
     $id = FormDefinition::factory()->withFields()->create()->id;
@@ -332,7 +332,7 @@ test('form fields are updated in-place', function () {
     $this->assertEquals($ids, FormDefinition::firstOrFail()->fields()->pluck('id'));
 });
 
-test('form fields can be deleted', function () {
+test('form fields can be deleted', function (): void {
     $this->withoutExceptionHandling();
 
     $id = FormDefinition::factory()->withFields(3)->create()->id;
@@ -353,7 +353,7 @@ test('form fields can be deleted', function () {
     $this->assertEquals($ids, FormDefinition::firstOrFail()->fields()->pluck('id'));
 });
 
-test('form field options can be deleted', function () {
+test('form field options can be deleted', function (): void {
     $this->withoutExceptionHandling();
 
     $formDefinition = FormDefinition::factory()->withFields(1)->create();

@@ -8,7 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-test('advice can be saved', function () {
+test('advice can be saved', function (): void {
     Mail::fake();
     $data = [
         'help_type_place' => fake()->boolean(),
@@ -44,7 +44,7 @@ test('advice can be saved', function () {
     Mail::assertQueued(fn (AdviceCreated $mail) => $mail->hasTo($advice->email));
 })->skip('TODO determine the advices group from the form');
 
-test('direct order advice can be saved', function () {
+test('direct order advice can be saved', function (): void {
     Mail::fake();
     $data = [
         'first_name' => fake()->first_name(),

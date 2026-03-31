@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('form_fields', function (Blueprint $table) {
+        Schema::table('form_fields', function (Blueprint $table): void {
             $table->integer('max_images')->default(1)->after('accepted_file_types');
         });
     }
@@ -21,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('form_fields', function (Blueprint $table) {
+        Schema::table('form_fields', function (Blueprint $table): void {
             $table->dropColumn('max_images');
         });
     }

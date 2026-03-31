@@ -28,7 +28,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth')->group(function () {
+Route::middleware('auth')->group(function (): void {
     Route::get('/dashboard', [PageController::class, 'dashboard'])->name('dashboard');
     Route::get('/initiatives/select', [PageController::class, 'initiativeSelection'])->name('initiatives.select');
     Route::get('/profile', [PageController::class, 'profile'])->name('profile');
@@ -86,7 +86,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('mappoint-categories', MapPointCategoryController::class);
 
     // System Admin Routes
-    Route::middleware(CheckSysAdmin::class)->group(function () {
+    Route::middleware(CheckSysAdmin::class)->group(function (): void {
         Route::get('/system-admin', [SystemAdminController::class, 'index'])->name('system-admin');
         Route::post('/system-admin/migrate', [SystemAdminController::class, 'migrate'])->name('system-admin.migrate');
         Route::post('/system-admin/seed', [SystemAdminController::class, 'seed'])->name('system-admin.seed');
