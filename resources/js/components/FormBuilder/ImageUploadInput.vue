@@ -86,26 +86,12 @@ function removeFile(index: number) {
         </div>
 
         <div v-if="!disabled && canAddMore">
-            <input
-                ref="inputRef"
-                type="file"
-                class="hidden"
-                accept="image/jpeg,image/png"
-                :multiple="maxImages > 1"
-                @change="handleFiles"
-            />
-            <Button
-                type="button"
-                variant="outline"
-                :class="{ 'border-destructive text-destructive': hasError }"
-                @click="openPicker"
-            >
+            <input ref="inputRef" type="file" class="hidden" accept="image/jpeg,image/png" :multiple="maxImages > 1" @change="handleFiles" />
+            <Button type="button" variant="outline" :class="{ 'border-destructive text-destructive': hasError }" @click="openPicker">
                 <ImageIcon class="mr-2 h-4 w-4" />
                 {{ previews.length === 0 ? 'Bild auswählen' : 'Weiteres Bild hinzufügen' }}
             </Button>
-            <p v-if="maxImages > 1" class="mt-1 text-xs text-muted-foreground">
-                {{ previews.length }} / {{ maxImages }} Bilder
-            </p>
+            <p v-if="maxImages > 1" class="mt-1 text-xs text-muted-foreground">{{ previews.length }} / {{ maxImages }} Bilder</p>
         </div>
     </div>
 

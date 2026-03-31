@@ -16,6 +16,7 @@ use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Intervention\Image\Encoders\JpegEncoder;
 use Intervention\Image\Laravel\Facades\Image;
+use Throwable;
 
 class FormSubmitController extends Controller
 {
@@ -42,7 +43,7 @@ class FormSubmitController extends Controller
                 }
                 $submission->handleCreators();
             });
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Storage::disk('public')->delete($storedImagePaths);
             throw $e;
         }
