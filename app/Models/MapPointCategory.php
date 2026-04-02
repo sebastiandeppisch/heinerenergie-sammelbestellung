@@ -13,7 +13,9 @@ use Override;
 
 class MapPointCategory extends Model
 {
+    /** @use HasFactory<\Database\Factories\MapPointCategoryFactory> */
     use HasFactory;
+
     use HasUuid;
 
     protected $fillable = [

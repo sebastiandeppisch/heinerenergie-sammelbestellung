@@ -10,6 +10,9 @@ enum AdviceType: int
     case Virtual = 1;
     case DirectOrder = 2;
 
+    /**
+     * @return array<int, array{id: int, name: string}>
+     */
     public static function getSelectableOptions(?self $currentType = null): array
     {
         return collect(self::cases())

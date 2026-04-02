@@ -61,6 +61,9 @@ trait HasGroups
      * Get all groups this user can administer (including child groups)
      * Note: Admin rights ARE inherited downwards
      */
+    /**
+     * @return Collection<int, Group>
+     */
     public function getAllAdministrableGroups(): Collection
     {
         if ($this->isGlobalAdmin()) {

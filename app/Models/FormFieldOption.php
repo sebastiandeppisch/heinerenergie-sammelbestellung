@@ -13,7 +13,9 @@ use Str;
 
 class FormFieldOption extends Model
 {
+    /** @use HasFactory<\Database\Factories\FormFieldOptionFactory> */
     use HasFactory;
+
     use HasUuid;
 
     protected $fillable = [

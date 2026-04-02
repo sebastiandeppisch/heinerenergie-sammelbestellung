@@ -11,7 +11,7 @@ use Illuminate\Validation\Rules\Enum;
 
 class UpdateGroupAdviceStatusRequest extends FormRequest
 {
-    public function authorize()
+    public function authorize(): bool
     {
         if ($this->isOnlySettingVisibility()) {
 

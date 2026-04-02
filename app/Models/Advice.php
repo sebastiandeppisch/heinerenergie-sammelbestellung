@@ -35,13 +35,19 @@ use Wnx\Sends\Support\HasSendsTrait;
  * @property HouseType|null $house_type
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ *
+ * @implements Pointable<self>
  */
 class Advice extends Model implements HasSends, Pointable
 {
     protected $table = 'advices';
 
+    /** @use HasFactory<\Database\Factories\AdviceFactory> */
     use HasFactory;
+
+    /** @use HasPoints<self> */
     use HasPoints;
+
     use HasSendsTrait;
     use HasUuid;
     use Notifiable;
@@ -65,7 +71,7 @@ class Advice extends Model implements HasSends, Pointable
         'help_type_place',
         'help_type_technical',
         'help_type_bureaucracy',
-        'helpType_other',
+        'help_type_other',
         'house_type',
         'landlord_exists',
         'group_id',
@@ -105,6 +111,9 @@ class Advice extends Model implements HasSends, Pointable
         return $this->morphToMany(User::class, 'sharing', 'sharings', 'sharing_id', 'advisor_id');
     }
 
+    /**
+     * @return Collection<int, int>
+     */
     public function getSharesIdsAttribute(): Collection
     {
         return $this->shares->pluck('id');

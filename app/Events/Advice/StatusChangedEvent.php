@@ -49,6 +49,9 @@ class StatusChangedEvent extends AdviceEvent
         ];
     }
 
+    /**
+     * @param  array<string, string|null>  $data
+     */
     public function __unserialize(array $data): void
     {
         $this->fromStatus = $data['fromStatus'];

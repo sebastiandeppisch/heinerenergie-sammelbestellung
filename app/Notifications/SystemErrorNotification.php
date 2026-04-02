@@ -23,7 +23,7 @@ class SystemErrorNotification extends BaseNotification implements ShouldQueue
      * Get the mail representation of the notification.
      */
     #[Override]
-    public function toMail($notifiable): MailMessage
+    public function toMail(mixed $notifiable): MailMessage
     {
         $mail = parent::toMail($notifiable);
 

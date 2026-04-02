@@ -35,6 +35,9 @@ class IndexFormSubmissionRequest extends FormRequest
         ];
     }
 
+    /**
+     * @return array<int, FormDefinition>
+     */
     public function selectedFormDefinitions(): array
     {
         return FormDefinition::whereIn('uuid', $this->input('selectedFormDefinitions', []))->pluck('id')->toArray();

@@ -16,13 +16,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Inertia\Response;
 use Intervention\Image\Encoders\JpegEncoder;
 use Intervention\Image\Laravel\Facades\Image;
 use Throwable;
 
 class FormSubmitController extends Controller
 {
-    public function show(FormDefinition $formDefinition)
+    public function show(FormDefinition $formDefinition): Response
     {
         app(CurrentGroupService::class)->setGroup($formDefinition->group);
 
@@ -31,7 +32,7 @@ class FormSubmitController extends Controller
         ]);
     }
 
-    public function submit(StoreFormSubmissionRequest $request, FormDefinition $formDefinition)
+    public function submit(StoreFormSubmissionRequest $request, FormDefinition $formDefinition): Response
     {
         app(CurrentGroupService::class)->setGroup($formDefinition->group);
 
@@ -55,14 +56,18 @@ class FormSubmitController extends Controller
         ]);
     }
 
-    private function getValueFromField(FormField $field, Request $request, FormSubmission $submission, array &$storedImagePaths)
+    /**
+     * @param  string[]  $storedImagePaths
+     * @return string|int|string[]|null
+     */
+    private function getValueFromField(FormField $field, Request $request, FormSubmission $submission, array &$storedImagePaths): string|int|array|null
     {
         if ($field->type === FieldType::IMAGE) {
             return $this->storeImages($field, $request, $submission, $storedImagePaths);
         }
 
         return match ($field->type) {
-            FieldType::TEXT => $request->string($field->uuid),
+            FieldType::TEXT => (string) $request->string($field->uuid),
             FieldType::NUMBER => $request->integer($field->uuid),
             default => $request->input($field->uuid),
         };

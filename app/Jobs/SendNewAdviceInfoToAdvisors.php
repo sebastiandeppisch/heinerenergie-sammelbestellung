@@ -25,7 +25,7 @@ class SendNewAdviceInfoToAdvisors implements ShouldQueue
 
     private AdviceService $adviceService;
 
-    public $tries = 2;
+    public int $tries = 2;
 
     public function __construct(public Advice $advice)
     {
@@ -71,7 +71,7 @@ class SendNewAdviceInfoToAdvisors implements ShouldQueue
     }
 
     /**
-     * @return Collection<User>
+     * @return Collection<int, User>
      */
     private function advisors(): Collection
     {

@@ -12,7 +12,10 @@ use App\Http\Requests\UpdateAdviceRequest;
 use App\Models\Advice;
 use App\Models\User;
 use App\Services\AdviceService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 
 class AdviceController extends Controller
@@ -52,7 +55,7 @@ class AdviceController extends Controller
         return DataProtectedAdviceData::fromModel($advice, Auth::user());
     }
 
-    public function destroy(Advice $advice)
+    public function destroy(Advice $advice): Response
     {
         $advice->delete();
 
@@ -68,7 +71,11 @@ class AdviceController extends Controller
             'advisors.*' => ['exists:users,uuid'],
         ]);
 
-        app(AdviceService::class)->syncShares($advice, collect($validated['advisors'])->map(fn ($advisor) => User::where('uuid', $advisor)->first()), $request->user());
+        /** @var array<int, string> $advisors */
+        $advisors = $validated['advisors'] ?? [];
+        /** @var Collection<int, User> $newAdvisors */
+        $newAdvisors = User::whereIn('uuid', $advisors)->get();
+        app(AdviceService::class)->syncShares($advice, $newAdvisors, $request->user());
     }
 
     private function auth(Advice $advice, string $ability): void
@@ -90,9 +97,9 @@ class AdviceController extends Controller
         return $advice;
     }
 
-    public function sortedAdvisors(Advice $advice, AdviceService $adviceService)
+    public function sortedAdvisors(Advice $advice, AdviceService $adviceService): JsonResponse
     {
-        return User::all()->map(function (User $user) use ($advice, $adviceService): array {
+        return response()->json(User::all()->map(function (User $user) use ($advice, $adviceService): array {
             $name = $user->name;
             $distance = $adviceService->getDistance($advice, $user);
             if ($distance !== null) {
@@ -111,6 +118,6 @@ class AdviceController extends Controller
                 'name' => $name,
                 'distance' => $distance,
             ];
-        })->sortBy('distance')->values();
+        })->sortBy('distance')->values());
     }
 }

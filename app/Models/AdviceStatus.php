@@ -18,7 +18,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class AdviceStatus extends Model
 {
+    /** @use HasFactory<\Database\Factories\AdviceStatusFactory> */
     use HasFactory;
+
     use HasUuid;
     use SoftDeletes;
 

@@ -18,7 +18,7 @@ class RedirectWhenGroupIsMissing
         #[CurrentUser] private readonly ?User $user
     ) {}
 
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): mixed
     {
         if ($this->user && Auth::check() && $this->sessionService->isGroupMissing()) {
             $groups = $this->user->groups;

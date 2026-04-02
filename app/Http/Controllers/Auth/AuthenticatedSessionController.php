@@ -8,6 +8,7 @@ use App\Http\Context\SessionGroupContextFactory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Jobs\CacheUsersAdvicePolicies;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
@@ -15,7 +16,7 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthenticatedSessionController extends Controller
 {
-    public function store(LoginRequest $request)
+    public function store(LoginRequest $request): User
     {
         $request->authenticate();
 
@@ -43,6 +44,9 @@ class AuthenticatedSessionController extends Controller
         return redirect('/');
     }
 
+    /**
+     * @return array{isLoggedIn: bool, user: User|null}
+     */
     public function index(Request $request): array
     {
         $user = Auth::user();

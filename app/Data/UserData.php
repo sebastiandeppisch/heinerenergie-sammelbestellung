@@ -29,7 +29,7 @@ class UserData extends Data
         public ?string $city,
         public ?string $zip,
         public bool $is_admin,
-        /** @var Collection<GroupBaseData> */
+        /** @var Collection<int, GroupBaseData> */
         public Collection $groups,
     ) {}
 

@@ -18,12 +18,12 @@ class BaseNotification extends Notification
     /**
      * @return array<int, string>
      */
-    public function via($notifiable): array
+    public function via(mixed $notifiable): array
     {
         return ['mail'];
     }
 
-    public function toMail($notifiable)
+    public function toMail(mixed $notifiable): MailMessage
     {
         Log::info('Base Notification toMail');
         Log::info('notifiable', ['notifiable' => $notifiable]);
@@ -37,7 +37,7 @@ class BaseNotification extends Notification
     /**
      * @return array{}
      */
-    public function toArray($notifiable): array
+    public function toArray(mixed $notifiable): array
     {
         return [
             //

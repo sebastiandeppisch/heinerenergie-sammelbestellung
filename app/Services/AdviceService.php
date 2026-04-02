@@ -21,6 +21,9 @@ class AdviceService
         private readonly GroupContextContract $groupContext
     ) {}
 
+    /**
+     * @return Collection<int, DataProtectedAdviceData>
+     */
     public function getAdvicesListForUser(User $user): Collection
     {
         $permissions = $this->getUserAdvicePermissions($user);
@@ -64,7 +67,7 @@ class AdviceService
     }
 
     /**
-     * @return array<string, Collection>
+     * @return array<string, Collection<int, mixed>>
      */
     private function getUserAdvicePermissions(User $user): array
     {
@@ -120,17 +123,17 @@ class AdviceService
     }
 
     /**
-     * @param  Collection<User>  $newAdvisors
+     * @param  Collection<int, User>|Collection<int, int>  $newAdvisors
      */
     public function syncShares(Advice $advice, Collection $newAdvisors, ?User $user): void
     {
 
-        $newAdvisors = $newAdvisors->map(function (mixed $user): User {
-            if (! $user instanceof User) {
-                return User::findOrFail($user);
+        $newAdvisors = $newAdvisors->map(function (User|int $user): User {
+            if ($user instanceof User) {
+                return $user;
             }
 
-            return $user;
+            return User::findOrFail($user);
         });
 
         // Get current advisors before sync

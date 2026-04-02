@@ -20,7 +20,7 @@ readonly class Coordinate implements Castable
     ) {}
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param  array<string, float>  $data
      */
     public static function fromArray(array $data): self
     {
@@ -41,6 +41,9 @@ readonly class Coordinate implements Castable
         return is_numeric($value) && $value >= -180 && $value <= 180;
     }
 
+    /**
+     * @return class-string<CoordinateCast>
+     */
     public static function castUsing(array $attributes): string
     {
         return CoordinateCast::class;

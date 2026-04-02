@@ -14,10 +14,12 @@ use App\Models\Group;
 use App\Models\User;
 use App\Notifications\PasswordChangedByAdmin;
 use App\Services\SessionService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class UserController extends Controller
 {
@@ -30,7 +32,7 @@ class UserController extends Controller
         return Auth::user();
     }
 
-    public function index()
+    public function index(): Response
     {
         $canPromoteUsersToSystemAdmin = $this->sessionService->actsAsSystemAdmin();
 
@@ -48,7 +50,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function store(StoreUserRequest $request)
+    public function store(StoreUserRequest $request): RedirectResponse
     {
         $user = new User($request->validated());
         $user->password = '';
@@ -67,7 +69,7 @@ class UserController extends Controller
         return redirect()->route('users.index')->with('success', 'Berater*in wurde erfolgreich erstellt');
     }
 
-    public function update(UpdateUserRequest $request, User $user)
+    public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
         $user->fill($request->validated());
 
@@ -80,7 +82,7 @@ class UserController extends Controller
         return redirect()->route('users.index')->with('success', 'Berater*in wurde erfolgreich aktualisiert');
     }
 
-    public function actAsGroup(Request $request, Group $group)
+    public function actAsGroup(Request $request, Group $group): RedirectResponse
     {
         $user = $this->user();
 
@@ -116,7 +118,7 @@ class UserController extends Controller
         return redirect()->back()->with('success', 'Du agierst jetzt als Gruppe '.$group->name);
     }
 
-    public function actAsSystemAdmin()
+    public function actAsSystemAdmin(): RedirectResponse
     {
         $user = $this->user();
 
@@ -139,7 +141,7 @@ class UserController extends Controller
         return redirect()->back()->with('success', 'Du agierst jetzt als Systemadministrator');
     }
 
-    public function changePassword(ChangePasswordRequest $request, User $user)
+    public function changePassword(ChangePasswordRequest $request, User $user): RedirectResponse
     {
         $user->password = $request->input('password');
         $user->save();

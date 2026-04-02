@@ -9,11 +9,13 @@ use App\Data\MapPointData;
 use App\Http\Requests\UpsertMapPointRequest;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class MapPointController extends Controller
 {
-    public function map()
+    public function map(): Response
     {
         $mapPoints = MapPoint::with('category')->get()->map(fn (MapPoint $mapPoint): MapPointData => MapPointData::fromModel($mapPoint));
 
@@ -25,7 +27,7 @@ class MapPointController extends Controller
         ]);
     }
 
-    public function index()
+    public function index(): Response
     {
         $mapPoints = MapPoint::with('category')->get()->map(fn (MapPoint $mapPoint): MapPointData => MapPointData::fromModel($mapPoint));
 
@@ -35,7 +37,7 @@ class MapPointController extends Controller
         ]);
     }
 
-    public function publicMap()
+    public function publicMap(): Response
     {
         $mapPoints = MapPoint::where('published', true)
             ->with('category')
@@ -49,7 +51,7 @@ class MapPointController extends Controller
         ]);
     }
 
-    public function edit(MapPoint $mappoint)
+    public function edit(MapPoint $mappoint): Response
     {
         $categories = MapPointCategory::all()->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel($category));
 
@@ -59,14 +61,14 @@ class MapPointController extends Controller
         ]);
     }
 
-    public function update(MapPoint $mappoint, UpsertMapPointRequest $request)
+    public function update(MapPoint $mappoint, UpsertMapPointRequest $request): RedirectResponse
     {
         $mappoint->update($request->getData());
 
         return redirect()->back()->with('success', 'Der Kartenpunkt wurde aktualisiert');
     }
 
-    public function destroy(MapPoint $mappoint)
+    public function destroy(MapPoint $mappoint): RedirectResponse
     {
 
         $name = $mappoint->title;
@@ -76,7 +78,7 @@ class MapPointController extends Controller
         return redirect()->back()->with('info', 'Der Kartenpunkt '.e($name).' wurde gelöscht');
     }
 
-    public function create()
+    public function create(): Response
     {
         $categories = MapPointCategory::all()->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel($category));
 
@@ -85,7 +87,7 @@ class MapPointController extends Controller
         ]);
     }
 
-    public function store(UpsertMapPointRequest $request)
+    public function store(UpsertMapPointRequest $request): RedirectResponse
     {
         $mapPoint = MapPoint::create($request->getData());
 

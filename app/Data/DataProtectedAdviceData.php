@@ -38,6 +38,7 @@ class DataProtectedAdviceData extends Data
         public Carbon $created_at,
         public Carbon $updated_at,
         public ?float $distance,
+        /** @var Collection<int, string> */
         public Collection $shares_ids,
         public ?string $place_notes,
         public ?HouseType $house_type,
@@ -51,7 +52,7 @@ class DataProtectedAdviceData extends Data
         public ?string $group_id,
     ) {}
 
-    public static function fromModel(Advice $advice, ?User $user = null, $canViewAll = false): self
+    public static function fromModel(Advice $advice, ?User $user = null, bool $canViewAll = false): self
     {
         $email = $advice->email;
         $phone = $advice->phone;

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 use Throwable;
 
+/** @implements CastsAttributes<AdviceEventContract, AdviceEventContract> */
 class AdviceEventCast implements CastsAttributes
 {
     /**

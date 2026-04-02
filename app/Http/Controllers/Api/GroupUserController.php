@@ -10,6 +10,8 @@ use App\Http\Requests\StoreGroupUserRequest;
 use App\Http\Requests\UpdateGroupUserRequest;
 use App\Models\Group;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use RuntimeException;
 
 class GroupUserController extends Controller
@@ -36,7 +38,7 @@ class GroupUserController extends Controller
     /**
      * list users of a group
      */
-    public function index(Group $group)
+    public function index(Group $group): JsonResponse
     {
         $this->authorize('manageUsers', $group);
 
@@ -53,7 +55,7 @@ class GroupUserController extends Controller
     /**
      * Add a user to a group
      */
-    public function store(StoreGroupUserRequest $request, Group $group)
+    public function store(StoreGroupUserRequest $request, Group $group): JsonResponse
     {
         $validated = $request->validated();
 
@@ -90,7 +92,7 @@ class GroupUserController extends Controller
     /**
      * Remove a user from a group
      */
-    public function destroy(Group $group, User $user)
+    public function destroy(Group $group, User $user): Response
     {
         $this->authorize('manageUsers', $group);
 

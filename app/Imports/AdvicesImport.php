@@ -21,6 +21,9 @@ class AdvicesImport implements ToModel, WithHeadingRow
         HeadingRowFormatter::extend('custom', fn ($value) => Str::lower($value));
     }
 
+    /**
+     * @param  array<string, mixed>  $row
+     */
     public function model(array $row)
     {
         if ($row['vorname'] === null && $row['nachname'] === null) {

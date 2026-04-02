@@ -55,7 +55,7 @@ class Setting extends Model
         ];
     }
 
-    public static function set(string $key, $value): void
+    public static function set(string $key, mixed $value): void
     {
         if (! static::exists($key)) {
             throw new InvalidArgumentException("Key $key not found");
@@ -65,7 +65,7 @@ class Setting extends Model
         $setting->save();
     }
 
-    public static function get($key): mixed
+    public static function get(string $key): mixed
     {
         if (! static::exists($key)) {
             throw new InvalidArgumentException("Key $key not found");
@@ -98,12 +98,15 @@ class Setting extends Model
         $this->attributes['value'] = $value;
     }
 
-    private function config()
+    /**
+     * @return array<string, mixed>
+     */
+    private function config(): array
     {
         return static::defaultConfig()[$this->key];
     }
 
-    private function getType()
+    private function getType(): string
     {
         if ($this->hasConfig()) {
             if (array_key_exists('type', $this->config())) {
@@ -116,7 +119,7 @@ class Setting extends Model
         return gettype($this->config());
     }
 
-    private function nativeType()
+    private function nativeType(): string
     {
         if ($this->getType() === 'image') {
             return 'string';
@@ -128,12 +131,12 @@ class Setting extends Model
         return $this->getType();
     }
 
-    private function nullable()
+    private function nullable(): bool
     {
         if ($this->hasConfig()) {
             $config = $this->config();
             if (array_key_exists('nullable', $config)) {
-                return $config['nullable'];
+                return (bool) $config['nullable'];
             }
         }
 
@@ -142,7 +145,7 @@ class Setting extends Model
 
     private function hasConfig(): bool
     {
-        return is_array($this->config());
+        return true;
     }
 
     public static function exists(string $key): bool
@@ -152,12 +155,7 @@ class Setting extends Model
 
     public function getNameAttribute(): string
     {
-        $config = $this->config();
-        if (is_array($config)) {
-            return $config['name'];
-        }
-
-        return $config;
+        return $this->config()['name'];
     }
 
     public function getTypeAttribute(): string

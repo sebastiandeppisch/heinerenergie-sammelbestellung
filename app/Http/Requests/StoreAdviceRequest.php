@@ -47,6 +47,9 @@ class StoreAdviceRequest extends FormRequest
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getData(): array
     {
         $validated = $this->validated();

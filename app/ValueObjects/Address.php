@@ -24,6 +24,9 @@ class Address implements Castable, Stringable
         return $this->street.' '.$this->street_number;
     }
 
+    /**
+     * @return class-string<AddressCast>
+     */
     public static function castUsing(array $attributes): string
     {
         return AddressCast::class;

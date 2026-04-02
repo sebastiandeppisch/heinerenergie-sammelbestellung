@@ -17,6 +17,9 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 #[TypeScript]
 class FormFieldData extends Data
 {
+    /**
+     * @param  Collection<int, FormFieldOptionData>  $options
+     */
     public function __construct(
         public string $id,
         public FieldType $type,
@@ -32,6 +35,7 @@ class FormFieldData extends Data
         public ?int $max_length = null,
         public ?float $min_value = null,
         public ?float $max_value = null,
+        /** @var array<int, string>|null */
         public ?array $accepted_file_types = null,
         public int $max_images = 1,
     ) {}

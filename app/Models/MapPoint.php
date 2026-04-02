@@ -42,7 +42,7 @@ class MapPoint extends Model
     ];
 
     /**
-     * @return MorphTo<Pointable&Model, $this>
+     * @return MorphTo<Pointable<Model>&Model, $this>
      */
     public function pointable(): MorphTo
     {

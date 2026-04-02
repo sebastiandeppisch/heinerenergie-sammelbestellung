@@ -5,17 +5,19 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use Exception;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class SystemAdminController extends Controller
 {
     /**
      * Show the system admin page
      */
-    public function index()
+    public function index(): Response
     {
         $migrateResult = session()->pull('migrate_result');
         $seedResult = session()->pull('seed_result');
@@ -29,7 +31,7 @@ class SystemAdminController extends Controller
     /**
      * Execute artisan migrate --force command
      */
-    public function migrate()
+    public function migrate(): RedirectResponse
     {
         try {
             Log::info('System admin executing migrate command', [
@@ -62,7 +64,7 @@ class SystemAdminController extends Controller
     /**
      * Execute artisan db:seed --force command
      */
-    public function seed()
+    public function seed(): RedirectResponse
     {
         try {
             Log::info('System admin executing seed command', [

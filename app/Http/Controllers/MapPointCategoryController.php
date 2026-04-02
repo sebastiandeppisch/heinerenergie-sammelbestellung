@@ -7,12 +7,14 @@ namespace App\Http\Controllers;
 use App\Data\MapPointCategoryData;
 use App\Http\Requests\UpsertMapPointsCategoryRequest;
 use App\Models\MapPointCategory;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class MapPointCategoryController extends Controller
 {
-    public function index()
+    public function index(): Response
     {
         $this->authorize('viewAny', MapPointCategory::class);
         $categories = MapPointCategory::withCount('mapPoints')->get()
@@ -23,14 +25,14 @@ class MapPointCategoryController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(): Response
     {
         $this->authorize('create', MapPointCategory::class);
 
         return Inertia::render('Categories/Upsert');
     }
 
-    public function store(UpsertMapPointsCategoryRequest $request)
+    public function store(UpsertMapPointsCategoryRequest $request): RedirectResponse
     {
         $this->authorize('create', MapPointCategory::class);
         $data = $request->validated();
@@ -46,7 +48,7 @@ class MapPointCategoryController extends Controller
         return redirect()->route('mappoint-categories.edit', $category)->with('success', 'Die Kategorie wurde erstellt');
     }
 
-    public function edit(MapPointCategory $mappointCategory)
+    public function edit(MapPointCategory $mappointCategory): Response
     {
         $this->authorize('update', $mappointCategory);
 
@@ -55,7 +57,7 @@ class MapPointCategoryController extends Controller
         ]);
     }
 
-    public function update(UpsertMapPointsCategoryRequest $request, MapPointCategory $mappointCategory)
+    public function update(UpsertMapPointsCategoryRequest $request, MapPointCategory $mappointCategory): RedirectResponse
     {
         $this->authorize('update', $mappointCategory);
         $data = $request->getData();
@@ -73,7 +75,7 @@ class MapPointCategoryController extends Controller
         return redirect()->back()->with('success', 'Die Kategorie wurde aktualisiert');
     }
 
-    public function destroy(MapPointCategory $mappointCategory)
+    public function destroy(MapPointCategory $mappointCategory): RedirectResponse
     {
         $this->authorize('delete', $mappointCategory);
         $name = $mappointCategory->name;

@@ -7,7 +7,6 @@ namespace App\Models;
 use App\Enums\FieldType;
 use App\Models\Traits\HasUuid;
 use App\ValueObjects\Coordinate;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -15,7 +14,6 @@ use RuntimeException;
 
 class SubmissionField extends Model
 {
-    use HasFactory;
     use HasUuid;
 
     protected $fillable = [

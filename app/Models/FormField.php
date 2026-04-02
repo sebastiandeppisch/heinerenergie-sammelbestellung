@@ -19,7 +19,9 @@ use Override;
 
 class FormField extends Model
 {
+    /** @use HasFactory<\Database\Factories\FormFieldFactory> */
     use HasFactory;
+
     use HasUuid;
 
     protected $fillable = [
@@ -86,7 +88,7 @@ class FormField extends Model
      * Most fields return a single entry [$uuid => $rules].
      * Fields that validate nested values (e.g. IMAGE) may return additional entries.
      *
-     * @return array<string, array>
+     * @return array<string, array<int, mixed>>
      */
     public function getValidationRules(): array
     {

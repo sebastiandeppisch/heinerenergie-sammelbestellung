@@ -20,7 +20,9 @@ use Override;
  */
 class Group extends Model
 {
+    /** @use HasFactory<\Database\Factories\GroupFactory> */
     use HasFactory;
+
     use HasUuid;
 
     protected $fillable = [
@@ -107,7 +109,7 @@ class Group extends Model
     /**
      * Get all ancestor groups
      *
-     * @return Collection<Group>
+     * @return Collection<int, Group>
      */
     public function ancestors(): Collection
     {
@@ -127,7 +129,7 @@ class Group extends Model
     /**
      * Get all descendant groups
      *
-     * @return Collection<Group>
+     * @return Collection<int, Group>
      */
     public function descendants(): Collection
     {
@@ -143,7 +145,7 @@ class Group extends Model
         return $descendants;
     }
 
-    public function getFullLogoPathAttribute()
+    public function getFullLogoPathAttribute(): ?string
     {
         if ($this->logo_path && str_starts_with($this->logo_path, 'http')) {
             return $this->logo_path;
@@ -152,7 +154,7 @@ class Group extends Model
         return $this->logo_path ? Storage::url($this->logo_path) : null;
     }
 
-    public function getFullMarkerPathAttribute()
+    public function getFullMarkerPathAttribute(): ?string
     {
         if ($this->marker_path && str_starts_with($this->marker_path, 'http')) {
             return $this->marker_path;
@@ -185,6 +187,9 @@ class Group extends Model
         ];
     }
 
+    /**
+     * @return array<int, int>
+     */
     public function getHierarchyIds(): array
     {
         $ids = [$this->id];

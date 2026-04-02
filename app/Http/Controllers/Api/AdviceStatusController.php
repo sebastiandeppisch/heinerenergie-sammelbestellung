@@ -11,7 +11,10 @@ use Illuminate\Support\Facades\Auth;
 
 class AdviceStatusController extends Controller
 {
-    public function index()
+    /**
+     * @return array<int, AdviceStatusNamesData>
+     */
+    public function index(): array
     {
         $user = Auth::user();
 

@@ -15,7 +15,9 @@ use Override;
 
 class FormDefinition extends Model
 {
+    /** @use HasFactory<\Database\Factories\FormDefinitionFactory> */
     use HasFactory;
+
     use HasUuid;
 
     protected $fillable = [
@@ -81,6 +83,9 @@ class FormDefinition extends Model
         });
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getValidationRules(): array
     {
         $this->loadMissing(['fields', 'fields.options']);
@@ -91,6 +96,9 @@ class FormDefinition extends Model
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getValidationAttributes(): array
     {
         return $this->fields->mapWithKeys(fn (FormField $field): array => [$field->uuid => $field->label])->toArray();

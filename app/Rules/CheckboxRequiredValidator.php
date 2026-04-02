@@ -19,6 +19,9 @@ class CheckboxRequiredValidator implements ValidationRule
         protected array $requiredOptions = []
     ) {}
 
+    /**
+     * @return array<int, string>
+     */
     private function values(): array
     {
         return collect($this->requiredOptions)->keys()->values()->toArray();

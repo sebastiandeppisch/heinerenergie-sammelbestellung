@@ -6,11 +6,13 @@ namespace App\Casts;
 
 use App\ValueObjects\Address as AddressValueObject;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
+use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 
+/** @implements CastsAttributes<AddressValueObject|null, AddressValueObject|array<string, mixed>|null> */
 class Address implements CastsAttributes
 {
-    public function get($model, string $key, $value, array $attributes)
+    public function get(Model $model, string $key, mixed $value, array $attributes): ?AddressValueObject
     {
         if ($attributes['street'] === null || $attributes['street_number'] === null || $attributes['zip'] === null || $attributes['city'] === null) {
             return null;
@@ -25,9 +27,9 @@ class Address implements CastsAttributes
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string, mixed>
      */
-    public function set($model, string $key, $value, array $attributes)
+    public function set(Model $model, string $key, mixed $value, array $attributes)
     {
         if (! $value instanceof AddressValueObject) {
             $value = $this->get($model, $key, $value, $value);

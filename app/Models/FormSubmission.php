@@ -15,11 +15,17 @@ use Illuminate\Support\Carbon;
 
 /**
  * @property Carbon $submitted_at
+ *
+ * @implements Pointable<self>
  */
 class FormSubmission extends Model implements Pointable
 {
+    /** @use HasFactory<\Database\Factories\FormSubmissionFactory> */
     use HasFactory;
+
+    /** @use HasPoints<self> */
     use HasPoints;
+
     use HasUuid;
 
     protected $fillable = [

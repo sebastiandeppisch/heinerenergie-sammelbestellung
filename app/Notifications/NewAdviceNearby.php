@@ -7,6 +7,7 @@ namespace App\Notifications;
 use App\Models\Advice;
 use App\ValueObjects\Meter;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use Override;
@@ -21,7 +22,7 @@ class NewAdviceNearby extends BaseNotification implements ShouldQueue
     }
 
     #[Override]
-    public function toMail($notifiable)
+    public function toMail(mixed $notifiable): MailMessage
     {
         Log::info('Notification to Mail');
         $distance = $this->distance->__toString();

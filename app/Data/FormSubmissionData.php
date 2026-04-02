@@ -15,6 +15,9 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 #[TypeScript]
 class FormSubmissionData extends Data
 {
+    /**
+     * @param  Collection<int, SubmissionFieldData>  $fields
+     */
     public function __construct(
         public string $id,
         public string $form_name,

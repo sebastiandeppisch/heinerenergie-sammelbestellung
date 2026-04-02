@@ -11,15 +11,17 @@ use App\Models\User;
 use App\Services\CurrentGroupService;
 use App\Services\SessionService;
 use Illuminate\Container\Attributes\CurrentUser;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class PageController extends Controller
 {
     // TODO move all the pages to their own controllers
 
-    public function login()
+    public function login(): RedirectResponse|Response
     {
         if (Auth::check()) {
             return redirect()->route('dashboard');
@@ -45,7 +47,7 @@ class PageController extends Controller
         ]);
     }
 
-    public function dashboard(CurrentGroupService $currentGroupService)
+    public function dashboard(CurrentGroupService $currentGroupService): Response
     {
         $currentGroup = $currentGroupService->getGroup();
         $advisorInfo = $currentGroup !== null ? $currentGroup->dashboard_info : null;
@@ -56,19 +58,19 @@ class PageController extends Controller
         ]);
     }
 
-    public function profile()
+    public function profile(): Response
     {
         return Inertia::render('Profile');
     }
 
-    public function settings()
+    public function settings(): Response
     {
         return Inertia::render('Settings', [
             'settings' => Setting::all(),
         ]);
     }
 
-    public function resetPassword()
+    public function resetPassword(): Response
     {
         /*if(auth()->check()){
             return redirect()->route('dashboard');
@@ -77,7 +79,7 @@ class PageController extends Controller
         return Inertia::render('ResetPasswordForm');
     }
 
-    public function changePassword(Request $request)
+    public function changePassword(Request $request): Response
     {
         return Inertia::render('ChangePasswordForm', [
             'token' => $request->get('token'),
@@ -85,28 +87,28 @@ class PageController extends Controller
         ]);
     }
 
-    public function newAdvice()
+    public function newAdvice(): Response
     {
         return Inertia::render('NewAdvice', [
             'groupId' => Group::latest()->first()?->uuid,
         ]);
     }
 
-    public function impress()
+    public function impress(): Response
     {
         return Inertia::render('HtmlContent', [
             'content' => Setting::get('impress'),
         ]);
     }
 
-    public function dataPolicy()
+    public function dataPolicy(): Response
     {
         return Inertia::render('HtmlContent', [
             'content' => Setting::get('datapolicy'),
         ]);
     }
 
-    public function initiativeSelection(#[CurrentUser] User $user, SessionService $sessionService)
+    public function initiativeSelection(#[CurrentUser] User $user, SessionService $sessionService): RedirectResponse|Response
     {
         if (! $sessionService->isGroupMissing()) {
             return redirect()->route('dashboard');

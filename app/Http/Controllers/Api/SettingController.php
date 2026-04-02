@@ -7,15 +7,16 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateSettingRequest;
 use App\Models\Setting;
+use Illuminate\Database\Eloquent\Model;
 
 class SettingController extends Controller
 {
-    public function show(string $key)
+    public function show(string $key): Setting
     {
         return Setting::where('key', $key)->firstOrFail();
     }
 
-    public function update(UpdateSettingRequest $request, Setting $setting)
+    public function update(UpdateSettingRequest $request, Setting $setting): Model
     {
         $setting->fill($request->all());
         $setting->save();

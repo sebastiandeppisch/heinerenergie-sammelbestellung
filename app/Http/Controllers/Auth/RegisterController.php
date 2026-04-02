@@ -8,11 +8,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
 use Auth;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class RegisterController extends Controller
 {
-    public function show()
+    public function show(): RedirectResponse|Response
     {
         if (User::count() > 0) {
             return redirect()->route('dashboard');
@@ -21,7 +23,7 @@ class RegisterController extends Controller
         return Inertia::render('RegisterForm');
     }
 
-    public function store(RegisterRequest $request)
+    public function store(RegisterRequest $request): RedirectResponse
     {
         $user = User::create($request->validated());
 
