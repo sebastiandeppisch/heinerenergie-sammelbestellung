@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Contracts\Pointable;
 use App\Models\Traits\HasUuid;
 use App\Traits\HasPoints;
+use Database\Factories\FormSubmissionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,7 +21,7 @@ use Illuminate\Support\Carbon;
  */
 class FormSubmission extends Model implements Pointable
 {
-    /** @use HasFactory<\Database\Factories\FormSubmissionFactory> */
+    /** @use HasFactory<FormSubmissionFactory> */
     use HasFactory;
 
     /** @use HasPoints<self> */

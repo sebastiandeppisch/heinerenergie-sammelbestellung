@@ -15,6 +15,7 @@ use App\Models\Traits\HasUuid;
 use App\Traits\HasPoints;
 use App\ValueObjects\Address;
 use App\ValueObjects\Coordinate;
+use Database\Factories\AdviceFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -42,7 +43,7 @@ class Advice extends Model implements HasSends, Pointable
 {
     protected $table = 'advices';
 
-    /** @use HasFactory<\Database\Factories\AdviceFactory> */
+    /** @use HasFactory<AdviceFactory> */
     use HasFactory;
 
     /** @use HasPoints<self> */

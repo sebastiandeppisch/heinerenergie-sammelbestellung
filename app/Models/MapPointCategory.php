@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Traits\HasUuid;
+use Database\Factories\MapPointCategoryFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,7 +14,7 @@ use Override;
 
 class MapPointCategory extends Model
 {
-    /** @use HasFactory<\Database\Factories\MapPointCategoryFactory> */
+    /** @use HasFactory<MapPointCategoryFactory> */
     use HasFactory;
 
     use HasUuid;

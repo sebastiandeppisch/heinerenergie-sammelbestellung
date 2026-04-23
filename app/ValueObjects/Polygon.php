@@ -20,7 +20,7 @@ class Polygon implements Castable, JsonSerializable
      */
     public function __construct(array $coordinates = [])
     {
-        $this->coordinates = array_map(fn ($coordinate): Coordinate => $coordinate instanceof Coordinate ? $coordinate : Coordinate::fromArray($coordinate), $coordinates);
+        $this->coordinates = array_map(fn (Coordinate|array $coordinate): Coordinate => $coordinate instanceof Coordinate ? $coordinate : Coordinate::fromArray($coordinate), $coordinates);
     }
 
     /**

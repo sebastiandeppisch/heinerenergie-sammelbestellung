@@ -12,6 +12,9 @@ use InvalidArgumentException;
 /** @implements CastsAttributes<AddressValueObject|null, AddressValueObject|array<string, mixed>|null> */
 class Address implements CastsAttributes
 {
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
     public function get(Model $model, string $key, mixed $value, array $attributes): ?AddressValueObject
     {
         if ($attributes['street'] === null || $attributes['street_number'] === null || $attributes['zip'] === null || $attributes['city'] === null) {

@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\AdviceStatusResult;
 use App\Models\Traits\HasUuid;
+use Database\Factories\AdviceStatusFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,7 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class AdviceStatus extends Model
 {
-    /** @use HasFactory<\Database\Factories\AdviceStatusFactory> */
+    /** @use HasFactory<AdviceStatusFactory> */
     use HasFactory;
 
     use HasUuid;

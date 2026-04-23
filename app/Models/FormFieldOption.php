@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Traits\HasUuid;
+use Database\Factories\FormFieldOptionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,7 +14,7 @@ use Str;
 
 class FormFieldOption extends Model
 {
-    /** @use HasFactory<\Database\Factories\FormFieldOptionFactory> */
+    /** @use HasFactory<FormFieldOptionFactory> */
     use HasFactory;
 
     use HasUuid;

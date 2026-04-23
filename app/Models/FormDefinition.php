@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Traits\HasUuid;
+use Database\Factories\FormDefinitionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,7 +16,7 @@ use Override;
 
 class FormDefinition extends Model
 {
-    /** @use HasFactory<\Database\Factories\FormDefinitionFactory> */
+    /** @use HasFactory<FormDefinitionFactory> */
     use HasFactory;
 
     use HasUuid;

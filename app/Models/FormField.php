@@ -10,6 +10,7 @@ use App\Rules\AddressRule;
 use App\Rules\CheckboxRequiredValidator;
 use App\Rules\GeographicCoordinate;
 use App\Rules\MaxImagePixels;
+use Database\Factories\FormFieldFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,7 +20,7 @@ use Override;
 
 class FormField extends Model
 {
-    /** @use HasFactory<\Database\Factories\FormFieldFactory> */
+    /** @use HasFactory<FormFieldFactory> */
     use HasFactory;
 
     use HasUuid;
