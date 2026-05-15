@@ -56,6 +56,18 @@ class FormFieldOption extends Model
         ]);
     }
 
+    public function createChecklistEntryFieldOption(ChecklistEntryField $checklistEntryField): ChecklistEntryFieldOption
+    {
+        return $checklistEntryField->options()->create([
+            'form_field_option_id' => $this->id,
+            'label' => $this->label,
+            'value' => $this->value,
+            'sort_order' => $this->sort_order,
+            'is_default' => $this->is_default,
+            'is_required' => $this->is_required,
+        ]);
+    }
+
     #[Override]
     public function delete(): ?bool
     {

@@ -67,6 +67,9 @@ Route::middleware('auth')->group(function () {
     Route::post('advices/{advice}/unassign', [AdviceController::class, 'unassign'])->name('advices.unassign');
     Route::post('advices/{advice}/transfer', [AdviceController::class, 'transfer'])->name('advices.transfer');
 
+    Route::post('advices/{advice}/checklist-entries', [AdviceController::class, 'storeChecklistEntry'])->name('checklist-entries.store');
+    Route::put('advices/{advice}/checklist-entries/{checklistEntry}', [AdviceController::class, 'updateChecklistEntry'])->name('checklist-entries.update');
+
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 

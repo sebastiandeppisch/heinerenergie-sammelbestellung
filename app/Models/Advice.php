@@ -149,6 +149,14 @@ class Advice extends Model implements HasSends, Pointable
         return $this->hasMany(AdviceEvent::class);
     }
 
+    /**
+     * @return HasMany<ChecklistEntry, $this>
+     */
+    public function checklistEntries(): HasMany
+    {
+        return $this->hasMany(ChecklistEntry::class);
+    }
+
     protected function casts(): array
     {
         return [

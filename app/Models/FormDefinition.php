@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\FormType;
 use App\Models\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -21,20 +22,24 @@ class FormDefinition extends Model
         'description',
         'is_active',
         'group_id',
+        'type',
         'success_message',
         'show_next_form_button',
         'next_form_button_text',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'is_active' => 'boolean',
-        'show_next_form_button' => 'boolean',
+    protected $attributes = [
+        'type' => 0,
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+            'show_next_form_button' => 'boolean',
+            'type' => FormType::class,
+        ];
+    }
 
     /**
      * @return HasMany<FormField, $this>
@@ -126,5 +131,13 @@ class FormDefinition extends Model
     public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class);
+    }
+
+    /**
+     * @return HasMany<ChecklistEntry, $this>
+     */
+    public function checklistEntries(): HasMany
+    {
+        return $this->hasMany(ChecklistEntry::class);
     }
 }

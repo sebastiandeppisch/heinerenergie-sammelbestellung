@@ -2,6 +2,7 @@
 
 namespace App\Data;
 
+use App\Enums\FormType;
 use App\Models\FormDefinition;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
@@ -27,17 +28,19 @@ class FormDefinitionData extends Data
         public ?string $success_message = null,
         public bool $show_next_form_button = false,
         public ?string $next_form_button_text = null,
+        public FormType $type = FormType::Form,
     ) {}
 
     public static function fromModel(FormDefinition $model): self
     {
-        $model->loadMissing('group');
+        $model->loadMissing('group', 'adviceCreator', 'mapPointCreator');
 
         return new self(
             id: $model->uuid,
             name: $model->name,
             description: $model->description,
             is_active: $model->is_active,
+            type: $model->type,
             fields: $model->fields->map(fn ($field) => FormFieldData::fromModel($field)),
             group_id: $model->group->uuid,
             advice_mapping: FormToAdviceMappingData::fromModel($model->adviceCreator),

@@ -165,6 +165,27 @@ class FormField extends Model
         return $submissionField;
     }
 
+    public function createChecklistEntryField(ChecklistEntry $checklistEntry): ChecklistEntryField
+    {
+        $this->loadMissing('options');
+
+        $checklistEntryField = $checklistEntry->fields()->create([
+            'form_field_id' => $this->id,
+            'value' => null,
+            'sort_order' => $this->sort_order,
+            'type' => $this->type,
+            'label' => $this->label,
+            'help_text' => $this->help_text,
+            'required' => $this->required,
+        ]);
+
+        foreach ($this->options as $option) {
+            $option->createChecklistEntryFieldOption($checklistEntryField);
+        }
+
+        return $checklistEntryField;
+    }
+
     public function getSubmissionField(FormSubmission $submission): SubmissionField
     {
         return $this->submissionFields()->where('form_submission_id', $submission->id)->firstOrFail();
@@ -174,6 +195,8 @@ class FormField extends Model
     public function delete(): ?bool
     {
         SubmissionField::where('form_field_id', $this->id)->update(['form_field_id' => null]);
+        ChecklistEntryField::where('form_field_id', $this->id)->update(['form_field_id' => null]);
+
         FormDefinitionToAdvice::where('advice_type_field_id', $this->id)->update(['advice_type_field_id' => null]);
 
         FormFieldOption::where('form_field_id', $this->id)->get()->each->delete();

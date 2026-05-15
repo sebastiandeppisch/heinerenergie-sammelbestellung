@@ -1,0 +1,268 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 775" width="880" height="775"
+     font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+
+  <!-- ── HINTERGRUND ── -->
+  <rect width="880" height="775" fill="#F1F5F9"/>
+
+  <!-- ── TITEL ── -->
+  <text x="440" y="36" text-anchor="middle" font-size="20" font-weight="700" fill="#0F172A">Ihre Daten bei der Energieberatung</text>
+  <text x="440" y="58" text-anchor="middle" font-size="13" fill="#64748B">Was wird gespeichert — und wer darf es einsehen?</text>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- DATENKATEGORIEN                          -->
+  <!-- ════════════════════════════════════════ -->
+
+  <!-- BOX 1: Persönliche Daten (blau) -->
+  <rect x="20" y="72" width="264" height="158" rx="10" fill="white" stroke="#BFDBFE" stroke-width="1.5"/>
+  <rect x="20" y="72" width="264" height="38" rx="10" fill="#3B82F6"/>
+  <rect x="20"  y="92" width="264" height="18" fill="#3B82F6"/>
+  <text x="152" y="97" text-anchor="middle" font-size="13" font-weight="600" fill="white">Persönliche Daten</text>
+  <text x="42"  y="133" font-size="13" fill="#1E3A5F">Vorname &amp; Nachname</text>
+  <text x="42"  y="156" font-size="13" fill="#1E3A5F">E-Mail-Adresse</text>
+  <text x="42"  y="179" font-size="13" fill="#1E3A5F">Telefonnummer</text>
+  <!-- geschützt-Badges -->
+  <rect x="196" y="146" width="76" height="19" rx="9" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1"/>
+  <text x="234" y="159" text-anchor="middle" font-size="10" font-weight="600" fill="#92400E">🔒 geschützt</text>
+  <rect x="196" y="169" width="76" height="19" rx="9" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1"/>
+  <text x="234" y="182" text-anchor="middle" font-size="10" font-weight="600" fill="#92400E">🔒 geschützt</text>
+
+  <!-- BOX 2: Standortdaten (grün) -->
+  <rect x="308" y="72" width="264" height="158" rx="10" fill="white" stroke="#A7F3D0" stroke-width="1.5"/>
+  <rect x="308" y="72" width="264" height="38" rx="10" fill="#10B981"/>
+  <rect x="308" y="92" width="264" height="18" fill="#10B981"/>
+  <text x="440" y="97" text-anchor="middle" font-size="13" font-weight="600" fill="white">Standortdaten</text>
+  <text x="330" y="133" font-size="13" fill="#064E3B">Straße &amp; Hausnummer</text>
+  <text x="330" y="156" font-size="13" fill="#064E3B">Postleitzahl &amp; Ort</text>
+  <text x="330" y="179" font-size="13" fill="#064E3B">GPS-Koordinaten</text>
+
+  <!-- BOX 3: Beratungsdaten (lila) -->
+  <rect x="596" y="72" width="264" height="158" rx="10" fill="white" stroke="#DDD6FE" stroke-width="1.5"/>
+  <rect x="596" y="72" width="264" height="38" rx="10" fill="#8B5CF6"/>
+  <rect x="596" y="92" width="264" height="18" fill="#8B5CF6"/>
+  <text x="728" y="97" text-anchor="middle" font-size="13" font-weight="600" fill="white">Beratungsdaten</text>
+  <text x="618" y="133" font-size="13" fill="#2E1065">Gebäudetyp &amp; Eigentümer</text>
+  <text x="618" y="156" font-size="13" fill="#2E1065">Art des Hilfsbedarfs</text>
+  <text x="618" y="179" font-size="13" fill="#2E1065">Notizen vom Berater</text>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- VERBINDUNGSPFEIL                         -->
+  <!-- ════════════════════════════════════════ -->
+  <line x1="440" y1="232" x2="440" y2="256" stroke="#CBD5E1" stroke-width="2" stroke-dasharray="5,3"/>
+  <polygon points="434,254 440,266 446,254" fill="#CBD5E1"/>
+  <text x="440" y="285" text-anchor="middle" font-size="14" font-weight="700" fill="#374151">Wer darf diese Daten einsehen?</text>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- ZUGRIFFSTABELLE                          -->
+  <!--                                          -->
+  <!-- Spalten:                                 -->
+  <!--   Rolle:     x=20,  w=250  → Ende: 270  -->
+  <!--   Persönl.:  x=270, w=203  → Ende: 473  -->
+  <!--   Standort:  x=473, w=203  → Ende: 676  -->
+  <!--   Beratung:  x=676, w=184  → Ende: 860  -->
+  <!--                                          -->
+  <!-- Zeilen:                                  -->
+  <!--   Header:    y=295, h=40   → Ende: 335  -->
+  <!--   Zeile 1-5: je h=40       → Ende: 535  -->
+  <!-- ════════════════════════════════════════ -->
+
+  <!-- Clip-Path damit runde Ecken auch für Zellen gelten -->
+  <defs>
+    <clipPath id="tableClip">
+      <rect x="20" y="295" width="840" height="240" rx="10"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#tableClip)">
+
+    <!-- Tabellen-Hintergrund -->
+    <rect x="20" y="295" width="840" height="240" fill="white"/>
+
+    <!-- ── KOPFZEILE ── -->
+    <rect x="20"  y="295" width="250" height="40" fill="#F8FAFC"/>
+    <rect x="270" y="295" width="203" height="40" fill="#DBEAFE"/>
+    <rect x="473" y="295" width="203" height="40" fill="#D1FAE5"/>
+    <rect x="676" y="295" width="184" height="40" fill="#EDE9FE"/>
+    <text x="371" y="320" text-anchor="middle" font-size="12" font-weight="600" fill="#1D4ED8">Persönliche Daten</text>
+    <text x="574" y="320" text-anchor="middle" font-size="12" font-weight="600" fill="#065F46">Standortdaten</text>
+    <text x="768" y="320" text-anchor="middle" font-size="12" font-weight="600" fill="#4C1D95">Beratungsdaten</text>
+    <line x1="20" y1="335" x2="860" y2="335" stroke="#E2E8F0" stroke-width="1"/>
+
+    <!-- ── ZEILE 1: Zuständige/r Berater/in ── -->
+    <rect x="20"  y="335" width="250" height="40" fill="#F8FAFC"/>
+    <rect x="270" y="335" width="203" height="40" fill="#F0FDF4"/>
+    <rect x="473" y="335" width="203" height="40" fill="#F0FDF4"/>
+    <rect x="676" y="335" width="184" height="40" fill="#F0FDF4"/>
+    <text x="42"  y="360" font-size="13" fill="#1E293B">👤  Zuständige/r Berater/in</text>
+    <text x="371" y="362" text-anchor="middle" font-size="20" fill="#16A34A">✓</text>
+    <text x="574" y="362" text-anchor="middle" font-size="20" fill="#16A34A">✓</text>
+    <text x="768" y="362" text-anchor="middle" font-size="20" fill="#16A34A">✓</text>
+    <line x1="20" y1="375" x2="860" y2="375" stroke="#E2E8F0" stroke-width="1"/>
+
+    <!-- ── ZEILE 2: Freigegebene Berater ── -->
+    <rect x="20"  y="375" width="250" height="40" fill="white"/>
+    <rect x="270" y="375" width="203" height="40" fill="#F0FDF4"/>
+    <rect x="473" y="375" width="203" height="40" fill="#F0FDF4"/>
+    <rect x="676" y="375" width="184" height="40" fill="#F0FDF4"/>
+    <text x="42"  y="400" font-size="13" fill="#1E293B">👥  Freigegebene Berater</text>
+    <text x="371" y="402" text-anchor="middle" font-size="20" fill="#16A34A">✓</text>
+    <text x="574" y="402" text-anchor="middle" font-size="20" fill="#16A34A">✓</text>
+    <text x="768" y="402" text-anchor="middle" font-size="20" fill="#16A34A">✓</text>
+    <line x1="20" y1="415" x2="860" y2="415" stroke="#E2E8F0" stroke-width="1"/>
+
+    <!-- ── ZEILE 3: Administrator der Initiative ── -->
+    <rect x="20"  y="415" width="250" height="40" fill="#F8FAFC"/>
+    <rect x="270" y="415" width="203" height="40" fill="#F0FDF4"/>
+    <rect x="473" y="415" width="203" height="40" fill="#F0FDF4"/>
+    <rect x="676" y="415" width="184" height="40" fill="#F0FDF4"/>
+    <text x="42"  y="440" font-size="13" fill="#1E293B">🏢  Administrator der Initiative</text>
+    <text x="371" y="442" text-anchor="middle" font-size="20" fill="#16A34A">✓</text>
+    <text x="574" y="442" text-anchor="middle" font-size="20" fill="#16A34A">✓</text>
+    <text x="768" y="442" text-anchor="middle" font-size="20" fill="#16A34A">✓</text>
+    <line x1="20" y1="455" x2="860" y2="455" stroke="#E2E8F0" stroke-width="1"/>
+
+    <!-- ── ZEILE 4: Andere Berater ── -->
+    <rect x="20"  y="455" width="250" height="40" fill="white"/>
+    <rect x="270" y="455" width="203" height="40" fill="#FEF2F2"/>
+    <rect x="473" y="455" width="203" height="40" fill="#FEF2F2"/>
+    <rect x="676" y="455" width="184" height="40" fill="#FEF2F2"/>
+    <text x="42"  y="480" font-size="13" fill="#6B7280">🚫  Andere Berater</text>
+    <text x="371" y="482" text-anchor="middle" font-size="20" fill="#DC2626">✗</text>
+    <text x="574" y="482" text-anchor="middle" font-size="20" fill="#DC2626">✗</text>
+    <text x="768" y="482" text-anchor="middle" font-size="20" fill="#DC2626">✗</text>
+    <line x1="20" y1="495" x2="860" y2="495" stroke="#E2E8F0" stroke-width="1"/>
+
+    <!-- ── ZEILE 5: Öffentlich / Internet ── -->
+    <rect x="20"  y="495" width="250" height="40" fill="#F8FAFC"/>
+    <rect x="270" y="495" width="203" height="40" fill="#FEF2F2"/>
+    <rect x="473" y="495" width="203" height="40" fill="#FEF2F2"/>
+    <rect x="676" y="495" width="184" height="40" fill="#FEF2F2"/>
+    <text x="42"  y="520" font-size="13" fill="#6B7280">🌐  Öffentlich / Internet</text>
+    <text x="371" y="522" text-anchor="middle" font-size="20" fill="#DC2626">✗</text>
+    <text x="574" y="522" text-anchor="middle" font-size="20" fill="#DC2626">✗</text>
+    <text x="768" y="522" text-anchor="middle" font-size="20" fill="#DC2626">✗</text>
+
+    <!-- ── VERTIKALE TRENNLINIEN ── -->
+    <line x1="270" y1="295" x2="270" y2="535" stroke="#E2E8F0" stroke-width="1"/>
+    <line x1="473" y1="295" x2="473" y2="535" stroke="#E2E8F0" stroke-width="1"/>
+    <line x1="676" y1="295" x2="676" y2="535" stroke="#E2E8F0" stroke-width="1"/>
+
+  </g>
+
+  <!-- Tabellen-Rahmen oben drauf (übermalt Zell-Ecken sauber) -->
+  <rect x="20" y="295" width="840" height="240" rx="10" fill="none" stroke="#E2E8F0" stroke-width="1.5"/>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- STUFENWEISER ZUGRIFF                    -->
+  <!-- ════════════════════════════════════════ -->
+
+  <!-- Clip-Paths für saubere Ecken der Phase-Boxen -->
+  <defs>
+    <clipPath id="phase1Clip"><rect x="28"  y="582" width="375" height="173" rx="8"/></clipPath>
+    <clipPath id="phase2Clip"><rect x="477" y="582" width="375" height="173" rx="8"/></clipPath>
+  </defs>
+
+  <rect x="20" y="545" width="840" height="230" rx="10" fill="#FFFBEB" stroke="#FDE68A" stroke-width="1.5"/>
+  <text x="440" y="566" text-anchor="middle" font-size="14" font-weight="700" fill="#92400E">Was ändert sich durch die Beraterzuweisung?</text>
+
+  <!-- ──────────────────────────────────── -->
+  <!-- PHASE 1: Vor der Beraterzuweisung   -->
+  <!-- Spalten: Rolle (195px) | Standort (90px) | E-Mail & Tel. (90px) -->
+  <!-- ──────────────────────────────────── -->
+  <g clip-path="url(#phase1Clip)">
+    <rect x="28"  y="582" width="375" height="173" fill="white"/>
+    <rect x="28"  y="582" width="375" height="34"  fill="#F59E0B"/>
+    <rect x="28"  y="616" width="375" height="22"  fill="#FEF9C3"/>
+    <!-- Standort-Tint: grün für Zeilen 1+2 (✓), neutral für Zeile 3 (✗) -->
+    <rect x="223" y="638" width="90" height="52"  fill="#F0FDF4"/>
+    <rect x="223" y="690" width="90" height="65"  fill="#F8FAFC"/>
+    <!-- E-Mail-Tint: grün Zeile 1 (✓), rot Zeile 2 (✗), neutral Zeile 3 (✗) -->
+    <rect x="313" y="638" width="90" height="26"  fill="#F0FDF4"/>
+    <rect x="313" y="664" width="90" height="26"  fill="#FEF2F2"/>
+    <rect x="313" y="690" width="90" height="65"  fill="#F8FAFC"/>
+    <!-- Zeilen-Hintergründe (Rolle-Spalte) -->
+    <rect x="28"  y="638" width="195" height="26" fill="white"/>
+    <rect x="28"  y="664" width="195" height="26" fill="#F8FAFC"/>
+    <rect x="28"  y="690" width="195" height="26" fill="white"/>
+  </g>
+  <rect x="28" y="582" width="375" height="173" rx="8" fill="none" stroke="#FCD34D" stroke-width="1"/>
+  <!-- Vertikale Spaltentrennlinien -->
+  <line x1="223" y1="616" x2="223" y2="755" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="313" y1="616" x2="313" y2="755" stroke="#E2E8F0" stroke-width="1"/>
+  <!-- Header -->
+  <text x="215" y="603" text-anchor="middle" font-size="12" font-weight="600" fill="white">Vor der Beraterzuweisung</text>
+  <!-- Mini-Spalten-Header -->
+  <text x="115" y="631" text-anchor="middle" font-size="10" font-weight="600" fill="#78716C">Wer hat Zugriff?</text>
+  <text x="268" y="631" text-anchor="middle" font-size="10" font-weight="600" fill="#065F46">📍 Standort</text>
+  <text x="358" y="631" text-anchor="middle" font-size="10" font-weight="600" fill="#B45309">✉️ Kontakt</text>
+  <line x1="28" y1="638" x2="403" y2="638" stroke="#E2E8F0" stroke-width="1"/>
+  <!-- Zeile 1: Administratoren → ✓ ✓ -->
+  <text x="46" y="655" font-size="12" fill="#1E293B">🏢  Administratoren</text>
+  <text x="268" y="658" text-anchor="middle" font-size="18" fill="#16A34A">✓</text>
+  <text x="358" y="658" text-anchor="middle" font-size="18" fill="#16A34A">✓</text>
+  <line x1="28" y1="664" x2="403" y2="664" stroke="#E2E8F0" stroke-width="1"/>
+  <!-- Zeile 2: Andere Berater → Standort ✓ / E-Mail ✗ -->
+  <text x="46" y="681" font-size="12" fill="#1E293B">👤  Andere Berater</text>
+  <text x="268" y="684" text-anchor="middle" font-size="18" fill="#16A34A">✓</text>
+  <text x="358" y="684" text-anchor="middle" font-size="18" fill="#DC2626">✗</text>
+  <line x1="28" y1="690" x2="403" y2="690" stroke="#E2E8F0" stroke-width="1"/>
+  <!-- Zeile 3: Öffentlich → ✗ ✗ -->
+  <text x="46" y="707" font-size="12" fill="#9CA3AF">🌐  Öffentlich</text>
+  <text x="268" y="710" text-anchor="middle" font-size="18" fill="#D1D5DB">✗</text>
+  <text x="358" y="710" text-anchor="middle" font-size="18" fill="#D1D5DB">✗</text>
+
+  <!-- PFEIL -->
+  <line x1="411" y1="668" x2="465" y2="668" stroke="#B45309" stroke-width="2.5"/>
+  <polygon points="459,662 471,668 459,674" fill="#B45309"/>
+  <text x="440" y="658" text-anchor="middle" font-size="10" font-weight="600" fill="#B45309">Zuweisung</text>
+
+  <!-- ──────────────────────────────────── -->
+  <!-- PHASE 2: Nach der Beraterzuweisung  -->
+  <!-- ──────────────────────────────────── -->
+  <g clip-path="url(#phase2Clip)">
+    <rect x="477" y="582" width="375" height="173" fill="white"/>
+    <rect x="477" y="582" width="375" height="34"  fill="#10B981"/>
+    <rect x="477" y="616" width="375" height="22"  fill="#D1FAE5"/>
+    <!-- Spalten-Tints: grün für Zeilen 1–3 (✓), neutral für Zeile 4 (✗) -->
+    <rect x="672" y="638" width="90" height="78"  fill="#F0FDF4"/>
+    <rect x="762" y="638" width="90" height="78"  fill="#F0FDF4"/>
+    <rect x="672" y="716" width="90" height="39"  fill="#F8FAFC"/>
+    <rect x="762" y="716" width="90" height="39"  fill="#F8FAFC"/>
+    <!-- Zeilen-Hintergründe (Rolle-Spalte) -->
+    <rect x="477" y="638" width="195" height="26" fill="white"/>
+    <rect x="477" y="664" width="195" height="26" fill="#ECFDF5"/>
+    <rect x="477" y="690" width="195" height="26" fill="#ECFDF5"/>
+    <rect x="477" y="716" width="195" height="26" fill="#F8FAFC"/>
+    <rect x="477" y="742" width="195" height="13" fill="white"/>
+  </g>
+  <rect x="477" y="582" width="375" height="173" rx="8" fill="none" stroke="#6EE7B7" stroke-width="1"/>
+  <!-- Vertikale Spaltentrennlinien -->
+  <line x1="672" y1="616" x2="672" y2="755" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="762" y1="616" x2="762" y2="755" stroke="#E2E8F0" stroke-width="1"/>
+  <!-- Header -->
+  <text x="664" y="603" text-anchor="middle" font-size="12" font-weight="600" fill="white">Nach der Beraterzuweisung</text>
+  <!-- Mini-Spalten-Header -->
+  <text x="574" y="631" text-anchor="middle" font-size="10" font-weight="600" fill="#78716C">Wer hat Zugriff?</text>
+  <text x="717" y="631" text-anchor="middle" font-size="10" font-weight="600" fill="#065F46">📍 Standort</text>
+  <text x="807" y="631" text-anchor="middle" font-size="10" font-weight="600" fill="#065F46">✉️ Kontakt</text>
+  <line x1="477" y1="638" x2="852" y2="638" stroke="#E2E8F0" stroke-width="1"/>
+  <!-- Zeile 1: Administratoren → ✓ ✓ -->
+  <text x="495" y="655" font-size="12" fill="#1E293B">🏢  Administratoren</text>
+  <text x="717" y="658" text-anchor="middle" font-size="18" fill="#16A34A">✓</text>
+  <text x="807" y="658" text-anchor="middle" font-size="18" fill="#16A34A">✓</text>
+  <line x1="477" y1="664" x2="852" y2="664" stroke="#E2E8F0" stroke-width="1"/>
+  <!-- Zeile 2: Zuständige/r Berater/in → ✓ ✓ (neu) -->
+  <text x="495" y="681" font-size="12" fill="#1E293B">👤  Zuständige/r Berater/in</text>
+  <text x="717" y="684" text-anchor="middle" font-size="18" fill="#16A34A">✓</text>
+  <text x="807" y="684" text-anchor="middle" font-size="18" fill="#16A34A">✓</text>
+  <line x1="477" y1="690" x2="852" y2="690" stroke="#E2E8F0" stroke-width="1"/>
+  <!-- Zeile 3: Freigegebene Berater → ✓ ✓ (neu) -->
+  <text x="495" y="707" font-size="12" fill="#1E293B">👥  Freigegebene Berater</text>
+  <text x="717" y="710" text-anchor="middle" font-size="18" fill="#16A34A">✓</text>
+  <text x="807" y="710" text-anchor="middle" font-size="18" fill="#16A34A">✓</text>
+  <line x1="477" y1="716" x2="852" y2="716" stroke="#E2E8F0" stroke-width="1"/>
+  <!-- Zeile 4: Andere Berater → ✗ ✗ (verlieren auch Standort-Zugriff) -->
+  <text x="495" y="733" font-size="12" fill="#9CA3AF">👤  Andere Berater</text>
+  <text x="717" y="736" text-anchor="middle" font-size="18" fill="#D1D5DB">✗</text>
+  <text x="807" y="736" text-anchor="middle" font-size="18" fill="#D1D5DB">✗</text>
+
+</svg>

@@ -26,20 +26,23 @@ import { route } from 'ziggy-js';
 type FormDefinitionData = App.Data.FormDefinitionData;
 type FormFieldData = App.Data.FormFieldData;
 type FieldType = App.Enums.FieldType;
+type FormType = App.Enums.FormType;
 
 const props = defineProps<{
     formDefinition: FormDefinitionData | null;
     fieldTypes: FieldType[];
     isEdit: boolean;
     groups: App.Data.GroupData[];
+    initialType?: FormType;
 }>();
 
 const formDefinition = reactive<FormDefinitionData>(
     props.formDefinition || {
         id: uuidv4(),
-        name: 'Neues Formular',
+        name: props.initialType === (1 as FormType) ? 'Neue Checkliste' : 'Neues Formular',
         description: null,
         is_active: true,
+        type: (props.initialType ?? 0) as FormType,
         fields: [],
         group_id: '-1',
         advice_mapping: null,
@@ -49,6 +52,8 @@ const formDefinition = reactive<FormDefinitionData>(
         next_form_button_text: null,
     },
 );
+
+const isChecklist = computed(() => formDefinition.type === (1 as FormType));
 
 const selectedField = ref<FormFieldData | null>(null);
 
@@ -199,8 +204,8 @@ const nullsafeNextFormButtonText = computed<string>({
             <Button @click="goBack" variant="outline">Zurück zur Übersicht</Button>
 
             <div class="form-builder__toolbar">
-                <FormEmbedDialog :form-definition="props.formDefinition" v-if="props.isEdit && props.formDefinition !== null" />
-                <Button @click="openFormular" variant="outline" v-if="props.isEdit">
+                <FormEmbedDialog :form-definition="props.formDefinition" v-if="props.isEdit && props.formDefinition !== null && !isChecklist" />
+                <Button @click="openFormular" variant="outline" v-if="props.isEdit && !isChecklist">
                     Formular öffnen
                     <ArrowUpRightFromSquare />
                 </Button>
@@ -235,6 +240,26 @@ const nullsafeNextFormButtonText = computed<string>({
                             <FormLabel>Aktiv</FormLabel>
                         </FormItem>
                     </FormField>
+                    <FormField v-slot="{ componentField }" name="type">
+                        <FormItem class="flex flex-row items-center space-y-0 space-x-2">
+                            <FormLabel>Typ</FormLabel>
+                            <FormControl>
+                                <Select
+                                    v-bind="componentField"
+                                    :model-value="String(formDefinition.type)"
+                                    @update:model-value="(v) => (formDefinition.type = Number(v) as FormType)"
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Typ wählen" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="0">Formular</SelectItem>
+                                        <SelectItem value="1">Checkliste</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </FormControl>
+                        </FormItem>
+                    </FormField>
                     <FormField v-slot="{ componentField }" name="group_id">
                         <FormItem class="flex flex-row items-center space-y-0 space-x-2">
                             <FormLabel>Initiative</FormLabel>
@@ -256,7 +281,7 @@ const nullsafeNextFormButtonText = computed<string>({
             </CardContent>
         </Card>
 
-        <Card class="form-builder__header">
+        <Card class="form-builder__header" v-if="!isChecklist">
             <CardContent>
                 <h3 class="mb-4 text-lg font-semibold">Erfolgsmeldung</h3>
                 <Form class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -292,7 +317,7 @@ const nullsafeNextFormButtonText = computed<string>({
             <TabsList>
                 <TabsTrigger value="canvas">Canvas</TabsTrigger>
                 <TabsTrigger value="preview">Vorschau</TabsTrigger>
-                <TabsTrigger value="targets">Ziele</TabsTrigger>
+                <TabsTrigger value="targets" v-if="!isChecklist">Ziele</TabsTrigger>
             </TabsList>
 
             <TabsContent value="canvas">

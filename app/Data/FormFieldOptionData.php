@@ -2,6 +2,7 @@
 
 namespace App\Data;
 
+use App\Models\ChecklistEntryFieldOption;
 use App\Models\FormFieldOption;
 use App\Models\SubmissionFieldOption;
 use Spatie\LaravelData\Data;
@@ -40,6 +41,18 @@ class FormFieldOptionData extends Data
             sort_order: $model->sort_order,
             is_default: $model->is_default,
             is_required: $model->is_required
+        );
+    }
+
+    public static function fromChecklistEntryFieldOption(ChecklistEntryFieldOption $model): self
+    {
+        return new self(
+            id: $model->uuid,
+            label: $model->label,
+            value: $model->value,
+            sort_order: $model->sort_order,
+            is_default: $model->is_default,
+            is_required: $model->is_required,
         );
     }
 }

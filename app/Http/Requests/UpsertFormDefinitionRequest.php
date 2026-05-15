@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\FieldType;
+use App\Enums\FormType;
 use App\Rules\FormFieldExistsInRequest;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -31,6 +32,7 @@ class UpsertFormDefinitionRequest extends FormRequest
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'is_active' => 'boolean',
+            'type' => ['nullable', Rule::enum(FormType::class)],
             'success_message' => 'nullable|string',
             'show_next_form_button' => 'boolean',
             'next_form_button_text' => 'nullable|string|max:255|required_if:show_next_form_button,true',
@@ -66,6 +68,8 @@ class UpsertFormDefinitionRequest extends FormRequest
             'map_point_mapping.title_field_id' => ['nullable', 'string', new FormFieldExistsInRequest],
             'map_point_mapping.description_field_id' => ['nullable', 'string', new FormFieldExistsInRequest],
             'map_point_mapping.coordinate_field_id' => ['nullable', 'string', new FormFieldExistsInRequest],
+
+            'group_id' => 'required|exists:groups,uuid',
         ];
 
         if ($this->has('advice_mapping') && ! is_null($this->input('advice_mapping')) && $this->input('advice_mapping.enabled') === true) {

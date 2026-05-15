@@ -24,6 +24,16 @@ id: string;
 name: string;
 result: App.Enums.AdviceStatusResult;
 };
+export type ChecklistEntryData = {
+id: string;
+form_definition: App.Data.FormDefinitionData;
+fields: Array<App.Data.ChecklistEntryFieldData>;
+updated_at: any;
+};
+export type ChecklistEntryFieldData = {
+field: App.Data.FormFieldData;
+value: number | string | Array<string> | null;
+};
 export type DataProtectedAdviceData = {
 id: string;
 first_name: string;
@@ -67,6 +77,7 @@ map_point_mapping: App.Data.FormToMapPointMappingData | null;
 success_message: string | null;
 show_next_form_button: boolean;
 next_form_button_text: string | null;
+type: App.Enums.FormType;
 };
 export type FormFieldData = {
 id: string;
@@ -220,6 +231,7 @@ declare namespace App.Enums {
 export type AdviceStatusResult = 0 | 1 | 2 | 3;
 export type AdviceType = 0 | 1 | 2;
 export type FieldType = 'text' | 'textarea' | 'number' | 'email' | 'phone' | 'select' | 'radio' | 'checkbox' | 'file' | 'image' | 'date' | 'geo_coordinate' | 'address';
+export type FormType = 0 | 1;
 export type HouseType = 0 | 1 | 2;
 }
 declare namespace App.ValueObjects {

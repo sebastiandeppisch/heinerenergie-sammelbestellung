@@ -4,19 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Data\AdviceEventData;
 use App\Data\AdviceStatusNamesData;
+use App\Data\ChecklistEntryData;
 use App\Data\DataProtectedAdviceData;
+use App\Data\FormDefinitionData;
 use App\Data\FormSubmissionData;
 use App\Data\GroupData;
 use App\Data\GroupMapData;
 use App\Data\UserData;
 use App\Enums\AdviceType;
+use App\Enums\FormType;
 use App\Events\Advice\CommentAddedEvent;
 use App\Events\Advice\InitiativeTransferEvent;
+use App\Http\Controllers\Concerns\HandlesChecklistEntries;
 use App\Http\Requests\StoreAdviceCommentRequest;
 use App\Http\Requests\TransferAdviceRequest;
 use App\Http\Requests\UpdateAdviceRequest;
 use App\Models\Advice;
 use App\Models\AdviceStatus;
+use App\Models\FormDefinition;
 use App\Models\FormSubmission;
 use App\Models\Group;
 use App\Models\User;
@@ -31,6 +36,8 @@ use Wnx\Sends\Models\Send;
 
 class AdviceController extends Controller
 {
+    use HandlesChecklistEntries;
+
     public function index(SessionService $sessionService)
     {
         $onlyOneGroup = $sessionService->getCurrentGroup() !== null && $sessionService->getCurrentGroup()->isLeaf();
@@ -97,6 +104,16 @@ class AdviceController extends Controller
         $adviceType = $advice->type;
         $canDeleteAdvice = Auth::user()->can('delete', $advice);
 
+        $checklistEntries = $advice->checklistEntries()->with('formDefinition.fields.options')->get()
+            ->map(fn ($entry) => ChecklistEntryData::fromModel($entry));
+
+        $availableChecklists = FormDefinition::where('group_id', $advice->group_id)
+            ->where('type', FormType::Checklist)
+            ->whereNotIn('id', $advice->checklistEntries()->pluck('form_definition_id'))
+            ->with('fields.options', 'group')
+            ->get()
+            ->map(fn ($fd) => FormDefinitionData::fromModel($fd));
+
         $advice = DataProtectedAdviceData::fromModel($advice, Auth::user());
 
         // Get advice status options (filtered by user permissions)
@@ -117,6 +134,8 @@ class AdviceController extends Controller
             'adviceStatusOptions' => $adviceStatusOptions,
             'adviceTypesOptions' => $adviceTypesOptions,
             'canDeleteAdvice' => $canDeleteAdvice,
+            'checklistEntries' => $checklistEntries,
+            'availableChecklists' => $availableChecklists,
         ]);
     }
 

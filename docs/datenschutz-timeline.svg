@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 680" width="880" height="680">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#94A3B8"/>
+    </marker>
+  </defs>
+
+  <rect width="880" height="680" fill="#F1F5F9"/>
+
+  <text x="440" y="32" text-anchor="middle" font-family="system-ui,sans-serif" font-size="17" font-weight="700" fill="#1E293B">Lebenszyklus der Kundendaten</text>
+
+  <!-- Column headers -->
+  <rect x="10" y="46" width="270" height="26" rx="7" fill="#E2E8F0"/>
+  <text x="145" y="63" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#334155">Administratoren</text>
+  <rect x="600" y="46" width="270" height="26" rx="7" fill="#E2E8F0"/>
+  <text x="735" y="63" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#334155">Berater</text>
+
+  <!-- Timeline line -->
+  <line x1="440" y1="82" x2="440" y2="630" stroke="#CBD5E1" stroke-width="2" stroke-dasharray="5,4"/>
+
+  <!-- ===== 1: Formular eingereicht ===== -->
+  <circle cx="440" cy="100" r="13" fill="#6366F1" stroke="white" stroke-width="2"/>
+  <text x="440" y="105" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="700" fill="white">1</text>
+
+  <rect x="335" y="116" width="210" height="50" rx="9" fill="#6366F1"/>
+  <text x="440" y="136" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="700" fill="white">Formular eingereicht</text>
+  <text x="440" y="154" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="#C7D2FE">Anonym &#x2192; FormSubmission</text>
+
+  <rect x="10" y="113" width="290" height="55" rx="7" fill="white" stroke="#C7D2FE" stroke-width="1.5"/>
+  <text x="25" y="131" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#4338CA">Gruppen-Admin:</text>
+  <text x="25" y="148" font-family="system-ui,sans-serif" font-size="11" fill="#374151">&#x2713; Alle Formularfelder der Gruppe</text>
+  <line x1="301" y1="141" x2="333" y2="141" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <rect x="580" y="113" width="290" height="55" rx="7" fill="white" stroke="#C7D2FE" stroke-width="1.5"/>
+  <text x="595" y="131" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#4338CA">Berater (eigene Gruppe):</text>
+  <text x="595" y="148" font-family="system-ui,sans-serif" font-size="11" fill="#374151">&#x2713; Alle Formularfelder der Gruppe</text>
+  <line x1="579" y1="141" x2="547" y2="141" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <text x="440" y="188" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" font-style="italic" fill="#94A3B8">&#x2193; Advice automatisch erstellt</text>
+
+  <!-- ===== 2: Advice angelegt ===== -->
+  <circle cx="440" cy="207" r="13" fill="#F59E0B" stroke="white" stroke-width="2"/>
+  <text x="440" y="212" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="700" fill="white">2</text>
+
+  <rect x="335" y="223" width="210" height="50" rx="9" fill="#F59E0B"/>
+  <text x="440" y="243" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="700" fill="white">Advice angelegt</text>
+  <text x="440" y="261" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="#FEF3C7">Noch kein Berater</text>
+
+  <rect x="10" y="220" width="290" height="55" rx="7" fill="white" stroke="#FDE68A" stroke-width="1.5"/>
+  <text x="25" y="238" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#B45309">Gruppen-Admin:</text>
+  <text x="25" y="256" font-family="system-ui,sans-serif" font-size="11" fill="#374151">&#x2713; Alle Daten inkl. E-Mail &amp; Telefon &#x1F512;</text>
+  <line x1="301" y1="248" x2="333" y2="248" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <rect x="580" y="220" width="290" height="55" rx="7" fill="white" stroke="#FDE68A" stroke-width="1.5"/>
+  <text x="595" y="238" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#B45309">Alle Berater (gleiche Gruppe):</text>
+  <text x="595" y="256" font-family="system-ui,sans-serif" font-size="11" fill="#374151">&#x2713; Standort&#160;&#160;&#x2717; E-Mail &amp; Telefon</text>
+  <line x1="579" y1="248" x2="547" y2="248" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <text x="440" y="293" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" font-style="italic" fill="#94A3B8">&#x2193; Berater wird zugewiesen</text>
+
+  <!-- ===== 3: Berater zugewiesen ===== -->
+  <circle cx="440" cy="312" r="13" fill="#10B981" stroke="white" stroke-width="2"/>
+  <text x="440" y="317" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="700" fill="white">3</text>
+
+  <rect x="335" y="328" width="210" height="50" rx="9" fill="#10B981"/>
+  <text x="440" y="348" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="700" fill="white">Berater zugewiesen</text>
+  <text x="440" y="366" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="#D1FAE5">Zugriff wird eingeschr&#xE4;nkt</text>
+
+  <rect x="10" y="325" width="290" height="55" rx="7" fill="white" stroke="#A7F3D0" stroke-width="1.5"/>
+  <text x="25" y="343" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#065F46">Gruppen-Admin:</text>
+  <text x="25" y="361" font-family="system-ui,sans-serif" font-size="11" fill="#374151">&#x2713; Weiterhin alle Daten</text>
+  <line x1="301" y1="353" x2="333" y2="353" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <rect x="580" y="325" width="290" height="55" rx="7" fill="white" stroke="#A7F3D0" stroke-width="1.5"/>
+  <text x="595" y="343" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#065F46">Zugewiesener Berater:</text>
+  <text x="595" y="361" font-family="system-ui,sans-serif" font-size="11" fill="#374151">&#x2713; Alle Daten&#160;&#160;Andere: &#x2717; kein Zugriff</text>
+  <line x1="579" y1="353" x2="547" y2="353" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <text x="440" y="398" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" font-style="italic" fill="#94A3B8">&#x2193; Beratung l&#xE4;uft</text>
+
+  <!-- ===== 4: Beratung ===== -->
+  <circle cx="440" cy="417" r="13" fill="#3B82F6" stroke="white" stroke-width="2"/>
+  <text x="440" y="422" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="700" fill="white">4</text>
+
+  <rect x="335" y="433" width="210" height="50" rx="9" fill="#3B82F6"/>
+  <text x="440" y="453" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="700" fill="white">Beratung</text>
+  <text x="440" y="471" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="#DBEAFE">Audit-Trail wird gef&#xFC;hrt</text>
+
+  <rect x="10" y="430" width="290" height="55" rx="7" fill="white" stroke="#BFDBFE" stroke-width="1.5"/>
+  <text x="25" y="448" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#1D4ED8">Gruppen-Admin:</text>
+  <text x="25" y="466" font-family="system-ui,sans-serif" font-size="11" fill="#374151">&#x2713; Alle Daten + Audit-Trail</text>
+  <line x1="301" y1="458" x2="333" y2="458" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <rect x="580" y="430" width="290" height="55" rx="7" fill="white" stroke="#BFDBFE" stroke-width="1.5"/>
+  <text x="595" y="448" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#1D4ED8">Zugewiesener + Freigegebene:</text>
+  <text x="595" y="466" font-family="system-ui,sans-serif" font-size="11" fill="#374151">&#x2713; Alle Daten&#160;&#160;Andere: &#x2717; kein Zugriff</text>
+  <line x1="579" y1="458" x2="547" y2="458" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <text x="440" y="503" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" font-style="italic" fill="#94A3B8">&#x2193; Auf Wunsch des Klienten</text>
+
+  <!-- ===== 5: Gelöscht ===== -->
+  <circle cx="440" cy="522" r="13" fill="#6B7280" stroke="white" stroke-width="2"/>
+  <text x="440" y="527" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="700" fill="white">5</text>
+
+  <rect x="335" y="538" width="210" height="50" rx="9" fill="#6B7280"/>
+  <text x="440" y="558" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="700" fill="white">Daten gel&#xF6;scht</text>
+  <text x="440" y="576" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="#F3F4F6">optional, auf Wunsch</text>
+
+  <rect x="10" y="535" width="290" height="55" rx="7" fill="white" stroke="#D1D5DB" stroke-width="1.5"/>
+  <text x="25" y="553" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#374151">System-Admin:</text>
+  <text x="25" y="571" font-family="system-ui,sans-serif" font-size="11" fill="#374151">&#x2713; Kann Advice l&#xF6;schen</text>
+  <line x1="301" y1="563" x2="333" y2="563" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <rect x="580" y="535" width="290" height="55" rx="7" fill="white" stroke="#D1D5DB" stroke-width="1.5"/>
+  <text x="595" y="553" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#374151">Alle Berater:</text>
+  <text x="595" y="571" font-family="system-ui,sans-serif" font-size="11" fill="#DC2626">&#x2717; Kein Zugriff mehr</text>
+  <line x1="579" y1="563" x2="547" y2="563" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
+
+</svg>

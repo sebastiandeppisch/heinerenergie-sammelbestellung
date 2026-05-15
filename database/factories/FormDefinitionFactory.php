@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\FormType;
 use App\Models\FormDefinition;
 use App\Models\FormField;
 use App\Models\Group;
@@ -20,8 +21,14 @@ class FormDefinitionFactory extends Factory
             'name' => $this->faker->words(3, true).' Form',
             'description' => $this->faker->optional(0.8)->sentence(),
             'is_active' => $this->faker->boolean(80),
+            'type' => FormType::Form,
             'group_id' => Group::factory(),
         ];
+    }
+
+    public function checklist(): self
+    {
+        return $this->state(['type' => FormType::Checklist]);
     }
 
     public function withFields(int $count = 3)

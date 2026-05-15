@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ChecklistPanel from '@/components/ChecklistPanel.vue';
 import FormSubmissionRenderer from '@/components/FormBuilder/FormSubmissionRenderer.vue';
 import Button from '@/shadcn/components/ui/button/Button.vue';
 import { Link } from '@inertiajs/vue3';
@@ -22,6 +23,8 @@ const props = defineProps<{
     adviceStatusOptions: Array<{ id: string; name: string }>;
     adviceTypesOptions: Array<{ id: number; name: string }>;
     canDeleteAdvice: boolean;
+    checklistEntries: App.Data.ChecklistEntryData[];
+    availableChecklists: App.Data.FormDefinitionData[];
 }>();
 
 const sharedIds = ref(props.advice.shares_ids || []);
@@ -69,6 +72,13 @@ const advisor = user.value;
                 <div class="content-card">
                     <h3 class="card-title card-header">Beratungsteam</h3>
                     <AdviceSharing :advice-id="advice.id" v-model:shared-ids="sharedIds" />
+                </div>
+
+                <div v-if="checklistEntries.length > 0 || availableChecklists.length > 0" class="content-card">
+                    <h3 class="card-title card-header">Checklisten</h3>
+                    <div style="padding: 16px">
+                        <ChecklistPanel :checklist-entries="checklistEntries" :available-checklists="availableChecklists" :advice-id="advice.id" />
+                    </div>
                 </div>
             </div>
 

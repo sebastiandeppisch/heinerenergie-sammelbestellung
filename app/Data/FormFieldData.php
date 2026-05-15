@@ -3,6 +3,7 @@
 namespace App\Data;
 
 use App\Enums\FieldType;
+use App\Models\ChecklistEntryField;
 use App\Models\FormField;
 use App\Models\SubmissionField;
 use Illuminate\Support\Collection;
@@ -64,6 +65,22 @@ class FormFieldData extends Data
             required: false,
             options: $model->options->map(fn ($option) => FormFieldOptionData::fromSubmissionFieldOption($option)),
             placeholder: null
+        );
+    }
+
+    public static function fromChecklistEntryField(ChecklistEntryField $model): self
+    {
+        $model->loadMissing('options');
+
+        return new self(
+            id: $model->uuid,
+            type: $model->type,
+            label: $model->label,
+            required: $model->required,
+            help_text: $model->help_text,
+            sort_order: $model->sort_order,
+            options: $model->options->map(fn ($option) => FormFieldOptionData::fromChecklistEntryFieldOption($option)),
+            placeholder: null,
         );
     }
 }

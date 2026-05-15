@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Context\GroupContextContract;
 use App\Data\FormDefinitionData;
 use App\Enums\FieldType;
+use App\Enums\FormType;
 use App\Http\Requests\StoreFormDefinitionFromTemplateRequest;
 use App\Http\Requests\UpsertFormDefinitionRequest;
 use App\Models\FormDefinition;
 use App\Models\Group;
 use App\Services\FormDefinitionService;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class FormDefinitionController extends Controller
@@ -19,13 +21,16 @@ class FormDefinitionController extends Controller
      */
     public function index(GroupContextContract $groupContext)
     {
-        $formDefinitions = FormDefinition::with(['fields', 'fields.options', 'group', 'adviceCreator', 'mapPointCreator']);
+        $query = FormDefinition::with(['fields', 'fields.options', 'group', 'adviceCreator', 'mapPointCreator']);
 
         if ($groupContext->getCurrentGroup() !== null) {
-            $formDefinitions = $formDefinitions->where('group_id', $groupContext->getCurrentGroup()->id);
+            $query = $query->where('group_id', $groupContext->getCurrentGroup()->id);
         }
 
-        $formDefinitions = $formDefinitions->get()->map(fn ($formDefinition) => FormDefinitionData::fromModel($formDefinition));
+        $all = $query->get();
+
+        $formDefinitions = $all->where('type', FormType::Form)->map(fn ($fd) => FormDefinitionData::fromModel($fd))->values();
+        $checklists = $all->where('type', FormType::Checklist)->map(fn ($fd) => FormDefinitionData::fromModel($fd))->values();
 
         $groups = Group::all()->map(fn (Group $group) => [
             'id' => $group->uuid,
@@ -34,6 +39,7 @@ class FormDefinitionController extends Controller
 
         return Inertia::render('FormBuilder/Index', [
             'formDefinitions' => $formDefinitions,
+            'checklists' => $checklists,
             'groups' => $groups,
         ]);
     }
@@ -41,18 +47,21 @@ class FormDefinitionController extends Controller
     /**
      * Show the form for creating a new form definition.
      */
-    public function create()
+    public function create(Request $request)
     {
         $groups = Group::all()->map(fn (Group $group) => [
             'id' => $group->uuid,
             'name' => $group->name,
         ]);
 
+        $initialType = FormType::tryFrom($request->integer('type')) ?? FormType::Form;
+
         return Inertia::render('FormBuilder/Edit', [
             'formDefinition' => null,
             'fieldTypes' => $this->activeFieldTypes(),
             'isEdit' => false,
             'groups' => $groups,
+            'initialType' => $initialType,
         ]);
     }
 
