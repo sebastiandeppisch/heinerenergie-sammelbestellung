@@ -69,6 +69,8 @@ class Advice extends Model implements HasSends, Pointable
         'group_id',
         'place_notes',
         'address',
+        'nextcloud_folder_id',
+        'nextcloud_folder_path',
     ];
 
     protected $appends = ['shares_ids'];

@@ -64,6 +64,8 @@ help_type_other: boolean | null;
 result: App.Enums.AdviceStatusResult;
 can_edit: boolean | null;
 group_id: string | null;
+nextcloud_folder_id: string | null;
+nextcloud_folder_path: string | null;
 };
 export type FormDefinitionData = {
 id: string;
@@ -233,6 +235,21 @@ export type AdviceType = 0 | 1 | 2;
 export type FieldType = 'text' | 'textarea' | 'number' | 'email' | 'phone' | 'select' | 'radio' | 'checkbox' | 'file' | 'image' | 'date' | 'geo_coordinate' | 'address';
 export type FormType = 0 | 1;
 export type HouseType = 0 | 1 | 2;
+}
+declare namespace App.Nextcloud.Data {
+export type NextcloudDir = {
+fileId: string;
+path: string;
+name: string;
+};
+export type NextcloudFile = {
+fileId: string;
+path: string;
+name: string;
+size: number;
+mimeType: string;
+lastModified: string;
+};
 }
 declare namespace App.ValueObjects {
 export type Address = {

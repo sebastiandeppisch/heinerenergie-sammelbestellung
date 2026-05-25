@@ -29,6 +29,7 @@ class Group extends Model
         'marker_path',
         'parent_id',
         'accepts_transfers',
+        'nextcloud_search_path',
     ];
 
     protected $casts = [

@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AdviceTypeController;
 use App\Http\Controllers\Api\GeoSearchController;
 use App\Http\Controllers\Api\GroupAdviceStatusController;
 use App\Http\Controllers\Api\GroupUserController;
+use App\Http\Controllers\Api\NextcloudAdviceController;
 use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\UserController;
@@ -42,6 +43,17 @@ Route::middleware('auth')->group(function () {
     Route::get('advices/{advice}/advisors', [AdviceController::class, 'sortedAdvisors']);
 
     Route::get('map/search', GeoSearchController::class);
+
+    Route::prefix('advices/{advice}/nextcloud')->group(function () {
+        Route::get('search', [NextcloudAdviceController::class, 'search'])->name('api.nextcloud.search');
+        Route::get('browse', [NextcloudAdviceController::class, 'browse'])->name('api.nextcloud.browse');
+        Route::post('folder', [NextcloudAdviceController::class, 'createFolder'])->name('api.nextcloud.createFolder');
+        Route::post('link', [NextcloudAdviceController::class, 'link'])->name('api.nextcloud.link');
+        Route::delete('link', [NextcloudAdviceController::class, 'unlink'])->name('api.nextcloud.unlink');
+        Route::post('upload', [NextcloudAdviceController::class, 'upload'])->name('api.nextcloud.upload');
+        Route::get('download/{fileId}', [NextcloudAdviceController::class, 'download'])->name('api.nextcloud.download');
+        Route::get('files', [NextcloudAdviceController::class, 'files'])->name('api.nextcloud.files');
+    });
 
     Route::apiResource('groups.advicestatus', GroupAdviceStatusController::class);
 
