@@ -20,7 +20,7 @@ function save() {
     saving.value = true;
     router.put(
         route('checklist-entries.update', { advice: props.adviceId, checklistEntry: props.entry.id }),
-        { data: data.value },
+        { data: data.value as Record<string, string | number | boolean | null> },
         {
             preserveScroll: true,
             onSuccess: () => {
