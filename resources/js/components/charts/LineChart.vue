@@ -8,6 +8,7 @@
 </template>
 
 <script setup lang="ts">
+import type { ApexOptions } from 'apexcharts';
 import { computed, ref } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
 
@@ -51,7 +52,7 @@ const series = computed(() => {
     return result;
 });
 
-const chartOptions = computed(() => {
+const chartOptions = computed((): ApexOptions => {
     return {
         chart: {
             type: 'line',
@@ -112,7 +113,7 @@ const chartOptions = computed(() => {
                     colors: '#616161',
                     fontSize: '12px',
                 },
-                formatter: (value: number) => Math.round(value),
+                formatter: (value: number) => String(Math.round(value)),
             },
         },
         tooltip: {
