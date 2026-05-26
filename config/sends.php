@@ -1,10 +1,12 @@
 <?php
 
+use Wnx\Sends\Models\Send;
+
 return [
     /*
      * The fully qualified class name of the `Send` model.
      */
-    'send_model' => \Wnx\Sends\Models\Send::class,
+    'send_model' => Send::class,
 
     /**
      * If set to true, the content of sent mails is saved to the database.

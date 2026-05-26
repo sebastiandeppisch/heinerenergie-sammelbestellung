@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import Button from '@/shadcn/components/ui/button/Button.vue';
+import axios from 'axios';
 import { Download, File, Folder, Upload } from 'lucide-vue-next';
 import { ref } from 'vue';
-import axios from 'axios';
 
 type Item = App.Nextcloud.Data.NextcloudFile | App.Nextcloud.Data.NextcloudDir;
 
@@ -50,9 +50,7 @@ async function handleUpload(event: Event) {
 
 <template>
     <div>
-        <div v-if="items.length === 0" class="text-sm text-gray-500 px-4 py-2">
-            Keine Dateien vorhanden.
-        </div>
+        <div v-if="items.length === 0" class="px-4 py-2 text-sm text-gray-500">Keine Dateien vorhanden.</div>
 
         <ul v-else class="divide-y divide-gray-100">
             <li v-for="item in items" :key="item.fileId" class="flex items-center gap-3 px-4 py-2 text-sm">
@@ -61,7 +59,7 @@ async function handleUpload(event: Event) {
 
                 <span class="flex-1 truncate">{{ item.name }}</span>
 
-                <span v-if="isFile(item)" class="text-gray-400 text-xs shrink-0">
+                <span v-if="isFile(item)" class="shrink-0 text-xs text-gray-400">
                     {{ formatSize(item.size) }}
                 </span>
 
@@ -73,10 +71,10 @@ async function handleUpload(event: Event) {
             </li>
         </ul>
 
-        <div class="px-4 py-3 border-t border-gray-100">
+        <div class="border-t border-gray-100 px-4 py-3">
             <input ref="fileInput" type="file" class="hidden" @change="handleUpload" />
             <Button variant="outline" size="sm" :disabled="uploading" @click="fileInput?.click()">
-                <Upload class="h-4 w-4 mr-2" />
+                <Upload class="mr-2 h-4 w-4" />
                 {{ uploading ? 'Wird hochgeladen…' : 'Datei hochladen' }}
             </Button>
         </div>

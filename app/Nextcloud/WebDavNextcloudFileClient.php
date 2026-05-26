@@ -14,9 +14,9 @@ use Sabre\HTTP\ClientHttpException;
 
 class WebDavNextcloudFileClient implements NextcloudFileClientContract
 {
-    private Client $client;
+    private readonly Client $client;
 
-    private string $username;
+    private readonly string $username;
 
     public function __construct(private readonly CurrentGroupService $groupService)
     {
@@ -25,7 +25,7 @@ class WebDavNextcloudFileClient implements NextcloudFileClientContract
         $password = config('nextcloud.password');
 
         $this->client = new Client([
-            'baseUri' => rtrim($baseUrl, '/').'/remote.php/dav/files/'.rawurlencode($this->username).'/',
+            'baseUri' => rtrim((string) $baseUrl, '/').'/remote.php/dav/files/'.rawurlencode($this->username).'/',
             'userName' => $this->username,
             'password' => $password,
         ]);
@@ -156,7 +156,7 @@ class WebDavNextcloudFileClient implements NextcloudFileClientContract
         }
 
         $stream = fopen('php://temp', 'r+');
-        fwrite($stream, $response['body']);
+        fwrite($stream, (string) $response['body']);
         rewind($stream);
 
         return $stream;
@@ -269,7 +269,7 @@ class WebDavNextcloudFileClient implements NextcloudFileClientContract
     {
         $segments = array_filter(explode('/', $path), fn ($s) => $s !== '');
 
-        return implode('/', array_map('rawurlencode', $segments));
+        return implode('/', array_map(rawurlencode(...), $segments));
     }
 
     private function hrefToPath(string $href): string

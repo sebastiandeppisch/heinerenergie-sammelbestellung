@@ -34,13 +34,7 @@ class MockNextcloudFileClient implements NextcloudFileClientContract
 
     public function folderExists(string $path): bool
     {
-        foreach ($this->dirs as $dir) {
-            if ($dir->path === $path) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($this->dirs, fn ($dir) => $dir->path === $path);
     }
 
     public function dirListing(string $path): array
