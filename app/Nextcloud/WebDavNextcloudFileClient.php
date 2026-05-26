@@ -116,11 +116,13 @@ class WebDavNextcloudFileClient implements NextcloudFileClientContract
         $absRoot = $this->absolutePath($rootPath);
 
         try {
+            // the nextcloud client has invalid type annotations
+            // @phpstan-ignore argument.type
             $props = $this->client->propFind($this->toSabrePath($absRoot), [
                 '{DAV:}displayname',
                 '{DAV:}resourcetype',
                 '{http://owncloud.org/ns}fileid',
-            ], 1);
+            ], 'infinity');
         } catch (ClientHttpException $e) {
             throw new RuntimeException("Cannot search in {$rootPath}: HTTP {$e->getHttpStatus()}", 0, $e);
         }
@@ -296,5 +298,43 @@ class WebDavNextcloudFileClient implements NextcloudFileClientContract
     private function normalizePath(string $path): string
     {
         return '/'.trim($path, '/');
+    }
+
+    /**
+     * @param  string[]  $properties
+     * @return array<string, array<string, mixed>>
+     */
+    private function propFindInfinity(string $url, array $properties): array
+    {
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        $dom->formatOutput = true;
+        $root = $dom->createElementNS('DAV:', 'd:propfind');
+        $prop = $dom->createElement('d:prop');
+
+        foreach ($properties as $property) {
+            [$namespace, $elementName] = \Sabre\Xml\Service::parseClarkNotation($property);
+            if ($namespace === 'DAV:') {
+                $element = $dom->createElement('d:'.$elementName);
+            } else {
+                $element = $dom->createElementNS($namespace, 'x:'.$elementName);
+            }
+            $prop->appendChild($element);
+        }
+
+        $dom->appendChild($root)->appendChild($prop);
+
+        $response = $this->client->request('PROPFIND', $url, $dom->saveXML(), [
+            'Depth' => 'infinity',
+            'Content-Type' => 'application/xml',
+        ]);
+
+        $parsed = $this->client->parseMultiStatus((string) $response['body']);
+
+        $result = [];
+        foreach ($parsed as $href => $statusList) {
+            $result[$href] = $statusList[200] ?? [];
+        }
+
+        return $result;
     }
 }
