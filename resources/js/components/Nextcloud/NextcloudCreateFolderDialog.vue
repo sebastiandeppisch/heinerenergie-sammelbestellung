@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import Button from '@/shadcn/components/ui/button/Button.vue';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/shadcn/components/ui/dialog';
-import { ref, watch } from 'vue';
-import axios from 'axios';
 import { router } from '@inertiajs/vue3';
+import axios from 'axios';
+import { ref, watch } from 'vue';
 import NextcloudDirBrowser from './NextcloudDirBrowser.vue';
 
 const props = defineProps<{
@@ -61,19 +61,14 @@ async function submit() {
                         id="nextcloud-folder-name"
                         v-model="name"
                         type="text"
-                        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         @keydown.enter="submit"
                     />
                 </div>
 
                 <div class="space-y-1.5">
                     <label class="text-sm font-medium">Speicherort</label>
-                    <NextcloudDirBrowser
-                        v-if="open"
-                        v-model:selected-path="parentPath"
-                        :advice-id="adviceId"
-                        :initial-path="initialPath ?? '/'"
-                    />
+                    <NextcloudDirBrowser v-if="open" v-model:selected-path="parentPath" :advice-id="adviceId" :initial-path="initialPath ?? '/'" />
                 </div>
 
                 <p v-if="error" class="text-sm text-red-600">{{ error }}</p>

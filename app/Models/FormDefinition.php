@@ -32,6 +32,7 @@ class FormDefinition extends Model
         'type' => 0,
     ];
 
+    #[Override]
     protected function casts(): array
     {
         return [

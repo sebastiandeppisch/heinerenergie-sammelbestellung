@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Override;
 
 /**
  * @property AdviceStatusResult $result
@@ -51,6 +52,7 @@ class AdviceStatus extends Model
             ->using(AdviceStatusGroup::class);
     }
 
+    #[Override]
     protected function casts(): array
     {
         return [

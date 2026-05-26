@@ -7,6 +7,7 @@ use App\Models\AdviceStatus;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
+use Override;
 
 class UpdateAdviceRequest extends FormRequest
 {
@@ -43,6 +44,7 @@ class UpdateAdviceRequest extends FormRequest
         ];
     }
 
+    #[Override]
     public function prepareForValidation(): void
     {
         if ($this->has('advisor_id')) {

@@ -2,10 +2,10 @@
 import Button from '@/shadcn/components/ui/button/Button.vue';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shadcn/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';
+import { router } from '@inertiajs/vue3';
+import axios from 'axios';
 import { ChevronRight, Folder, Search } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
-import axios from 'axios';
-import { router } from '@inertiajs/vue3';
 
 const props = defineProps<{
     adviceId: string;
@@ -108,27 +108,25 @@ browse('/');
                             v-model="searchQuery"
                             type="text"
                             placeholder="Suchbegriff…"
-                            class="w-full border border-gray-300 rounded-md px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="w-full rounded-md border border-gray-300 px-3 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         />
-                        <Search class="absolute right-2.5 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
+                        <Search class="pointer-events-none absolute top-2.5 right-2.5 h-4 w-4 text-gray-400" />
                     </div>
 
-                    <div v-if="searching" class="text-sm text-gray-500 py-4 text-center">Suche…</div>
+                    <div v-if="searching" class="py-4 text-center text-sm text-gray-500">Suche…</div>
 
-                    <div v-else-if="searchResults.length === 0" class="text-sm text-gray-500 py-4 text-center">
-                        Keine Treffer.
-                    </div>
+                    <div v-else-if="searchResults.length === 0" class="py-4 text-center text-sm text-gray-500">Keine Treffer.</div>
 
-                    <ul v-else class="divide-y divide-gray-100 border rounded-md max-h-60 overflow-y-auto">
+                    <ul v-else class="max-h-60 divide-y divide-gray-100 overflow-y-auto rounded-md border">
                         <li
                             v-for="dir in searchResults"
                             :key="dir.fileId"
-                            class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer"
+                            class="flex cursor-pointer items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50"
                             @click="linkFolder(dir)"
                         >
                             <Folder class="h-4 w-4 shrink-0 text-blue-400" />
                             <span class="flex-1 truncate">{{ dir.name }}</span>
-                            <span class="text-xs text-gray-400 truncate max-w-32">{{ dir.path }}</span>
+                            <span class="max-w-32 truncate text-xs text-gray-400">{{ dir.path }}</span>
                         </li>
                     </ul>
                 </TabsContent>
@@ -136,38 +134,20 @@ browse('/');
                 <!-- Browse Tab -->
                 <TabsContent value="browse" class="space-y-3 pt-2">
                     <div class="flex items-center gap-2">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            :disabled="browseHistory.length === 0"
-                            @click="browseUp"
-                        >
-                            ← Zurück
-                        </Button>
-                        <span class="text-xs text-gray-500 truncate flex-1">{{ browsePath }}</span>
+                        <Button variant="ghost" size="sm" :disabled="browseHistory.length === 0" @click="browseUp"> ← Zurück </Button>
+                        <span class="flex-1 truncate text-xs text-gray-500">{{ browsePath }}</span>
                     </div>
 
-                    <div v-if="browsing" class="text-sm text-gray-500 py-4 text-center">Lädt…</div>
+                    <div v-if="browsing" class="py-4 text-center text-sm text-gray-500">Lädt…</div>
 
-                    <div v-else-if="browseItems.length === 0" class="text-sm text-gray-500 py-4 text-center">
-                        Keine Unterordner.
-                    </div>
+                    <div v-else-if="browseItems.length === 0" class="py-4 text-center text-sm text-gray-500">Keine Unterordner.</div>
 
-                    <ul v-else class="divide-y divide-gray-100 border rounded-md max-h-60 overflow-y-auto">
-                        <li
-                            v-for="dir in browseItems"
-                            :key="dir.fileId"
-                            class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50"
-                        >
+                    <ul v-else class="max-h-60 divide-y divide-gray-100 overflow-y-auto rounded-md border">
+                        <li v-for="dir in browseItems" :key="dir.fileId" class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50">
                             <Folder class="h-4 w-4 shrink-0 text-blue-400" />
-                            <span class="flex-1 truncate cursor-pointer" @click="openDir(dir)">{{ dir.name }}</span>
-                            <Button variant="ghost" size="sm" :disabled="linking" @click="linkFolder(dir)">
-                                Verknüpfen
-                            </Button>
-                            <ChevronRight
-                                class="h-4 w-4 shrink-0 text-gray-400 cursor-pointer"
-                                @click="openDir(dir)"
-                            />
+                            <span class="flex-1 cursor-pointer truncate" @click="openDir(dir)">{{ dir.name }}</span>
+                            <Button variant="ghost" size="sm" :disabled="linking" @click="linkFolder(dir)"> Verknüpfen </Button>
+                            <ChevronRight class="h-4 w-4 shrink-0 cursor-pointer text-gray-400" @click="openDir(dir)" />
                         </li>
                     </ul>
                 </TabsContent>

@@ -170,6 +170,7 @@ class Group extends Model
         return parent::delete();
     }
 
+    #[Override]
     protected function casts(): array
     {
         return [
