@@ -7,16 +7,16 @@ use App\Nextcloud\Data\NextcloudFile;
 
 interface NextcloudFileClientContract
 {
-    public function resolveFileId(string $fileId): string;
+    public function folderExists(string $path): bool;
 
     /** @return array<NextcloudDir|NextcloudFile> */
-    public function dirListing(string $fileIdOrPath): array;
+    public function dirListing(string $path): array;
 
     /** @return array<NextcloudDir> */
     public function searchDirs(string $rootPath, string $slugSubstring): array;
 
     /** @return resource */
-    public function downloadFile(string $fileId): mixed;
+    public function downloadFile(string $path): mixed;
 
     public function createDir(string $parentPath, string $name): NextcloudDir;
 

@@ -26,8 +26,8 @@ function formatSize(bytes: number): string {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function downloadUrl(fileId: string): string {
-    return `/api/advices/${props.adviceId}/nextcloud/download/${fileId}`;
+function downloadUrl(path: string): string {
+    return `/api/advices/${props.adviceId}/nextcloud/download?path=${encodeURIComponent(path)}`;
 }
 
 async function handleUpload(event: Event) {
@@ -65,7 +65,7 @@ async function handleUpload(event: Event) {
                     {{ formatSize(item.size) }}
                 </span>
 
-                <a v-if="isFile(item)" :href="downloadUrl(item.fileId)" target="_blank">
+                <a v-if="isFile(item)" :href="downloadUrl(item.path)" target="_blank">
                     <Button variant="ghost" size="sm">
                         <Download class="h-4 w-4" />
                     </Button>

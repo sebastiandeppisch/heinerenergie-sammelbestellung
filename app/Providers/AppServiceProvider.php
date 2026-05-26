@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Actions\FetchCoordinateByAddress;
 use App\Actions\FetchCoordinateByFreeText;
 use App\Contracts\NextcloudFileClientContract;
+use App\Nextcloud\WebDavNextcloudFileClient;
 use App\Services\CurrentGroupService;
 use App\ValueObjects\Address;
 use App\ValueObjects\Coordinate;
@@ -25,8 +26,10 @@ class AppServiceProvider extends ServiceProvider
     #[Override]
     public function register()
     {
-        // TODO remove this later,
-        $this->app->bind(NextcloudFileClientContract::class, MockNextcloudFileClient::class);
+        $this->app->bind(
+            NextcloudFileClientContract::class,
+            config('nextcloud.base_url') ? WebDavNextcloudFileClient::class : MockNextcloudFileClient::class
+        );
     }
 
     /**

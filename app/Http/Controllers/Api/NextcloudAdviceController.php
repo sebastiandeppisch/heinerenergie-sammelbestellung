@@ -25,10 +25,9 @@ class NextcloudAdviceController extends Controller
     {
         $this->authorize('update', $advice);
 
-        $searchPath = $advice->group->nextcloud_search_path ?? '/';
         $slug = $request->string('q')->toString();
 
-        $dirs = $this->nextcloud->searchDirs($searchPath, $slug);
+        $dirs = $this->nextcloud->searchDirs('/', $slug);
 
         return response()->json($dirs);
     }
@@ -38,9 +37,14 @@ class NextcloudAdviceController extends Controller
         $this->authorize('update', $advice);
 
         $path = $request->string('path', '/')->toString() ?: '/';
+
+        if (str_contains($path, '..')) {
+            abort(403, 'Path traversal not allowed.');
+        }
+
         $items = $this->nextcloud->dirListing($path);
 
-        return response()->json($items);
+        return response()->json(['path' => $path, 'items' => $items]);
     }
 
     public function createFolder(CreateNextcloudFolderRequest $request, Advice $advice): JsonResponse
@@ -89,11 +93,23 @@ class NextcloudAdviceController extends Controller
         return response()->json($file);
     }
 
-    public function download(Advice $advice, string $fileId): StreamedResponse
+    public function download(Advice $advice, Request $request): StreamedResponse
     {
         $this->authorize('view', $advice);
 
-        $stream = $this->nextcloud->downloadFile($fileId);
+        $path = $request->string('path')->toString();
+
+        try {
+            $folderPath = $this->resolver->resolve($advice);
+        } catch (RuntimeException) {
+            abort(422);
+        }
+
+        if (str_contains($path, '..') || ! str_starts_with($path, rtrim($folderPath, '/').'/')) {
+            abort(403);
+        }
+
+        $stream = $this->nextcloud->downloadFile($path);
 
         return response()->stream(function () use ($stream) {
             fpassthru($stream);

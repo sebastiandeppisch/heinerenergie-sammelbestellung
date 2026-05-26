@@ -13,37 +13,18 @@ class NextcloudFolderResolver
     ) {}
 
     /**
-     * Resolve the current Nextcloud path for an advice folder.
-     * Heals the stored path if it has changed (e.g. folder moved in Nextcloud).
-     *
-     * @throws RuntimeException when the folder cannot be found via path or fileId
+     * @throws RuntimeException when the linked folder is missing or not found in Nextcloud
      */
     public function resolve(Advice $advice): string
     {
-        if (! $advice->nextcloud_folder_id) {
+        if (! $advice->nextcloud_folder_id || ! $advice->nextcloud_folder_path) {
             throw new RuntimeException('Advice has no linked Nextcloud folder.');
         }
 
-        // Primary: try stored path and verify fileId matches
-        if ($advice->nextcloud_folder_path) {
-            try {
-                $currentPath = $this->client->resolveFileId($advice->nextcloud_folder_id);
-
-                if ($currentPath !== $advice->nextcloud_folder_path) {
-                    // Self-heal: path changed (folder moved), update stored path
-                    $advice->update(['nextcloud_folder_path' => $currentPath]);
-                }
-
-                return $currentPath;
-            } catch (RuntimeException) {
-                // Fall through to fileId-based lookup
-            }
+        if (! $this->client->folderExists($advice->nextcloud_folder_path)) {
+            throw new RuntimeException('Linked Nextcloud folder not found.');
         }
 
-        // Fallback: resolve via fileId only
-        $path = $this->client->resolveFileId($advice->nextcloud_folder_id);
-        $advice->update(['nextcloud_folder_path' => $path]);
-
-        return $path;
+        return $advice->nextcloud_folder_path;
     }
 }

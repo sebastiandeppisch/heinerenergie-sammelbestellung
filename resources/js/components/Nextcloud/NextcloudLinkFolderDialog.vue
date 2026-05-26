@@ -52,9 +52,8 @@ async function browse(path: string) {
         const { data } = await axios.get(`/api/advices/${props.adviceId}/nextcloud/browse`, {
             params: { path },
         });
-        // Only show directories
-        browseItems.value = data.filter((item: any) => !('size' in item));
-        browsePath.value = path;
+        browseItems.value = data.items.filter((item: any) => !('size' in item));
+        browsePath.value = data.path;
     } finally {
         browsing.value = false;
     }

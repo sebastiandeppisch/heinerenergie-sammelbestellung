@@ -22,9 +22,9 @@ async function browse(path: string) {
         const { data } = await axios.get(`/api/advices/${props.adviceId}/nextcloud/browse`, {
             params: { path },
         });
-        items.value = data.filter((item: any) => !('size' in item));
-        currentPath.value = path;
-        selectedPath.value = path;
+        items.value = data.items.filter((item: any) => !('size' in item));
+        currentPath.value = data.path;
+        selectedPath.value = data.path;
     } finally {
         loading.value = false;
     }

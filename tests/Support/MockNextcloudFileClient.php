@@ -6,7 +6,6 @@ use App\Contracts\NextcloudFileClientContract;
 use App\Nextcloud\Data\NextcloudDir;
 use App\Nextcloud\Data\NextcloudFile;
 use Carbon\Carbon;
-use RuntimeException;
 
 class MockNextcloudFileClient implements NextcloudFileClientContract
 {
@@ -21,34 +20,32 @@ class MockNextcloudFileClient implements NextcloudFileClientContract
     public function __construct()
     {
         $this->dirs = [
-            new NextcloudDir('1', '/Beratungen', 'Beratungen'),
-            new NextcloudDir('2', '/Beratungen/Offen', 'Offen'),
-            new NextcloudDir('3', '/Beratungen/Fertig', 'Fertig'),
-            new NextcloudDir('10', '/Beratungen/Offen/2024-01-15_beratung-mueller', '2024-01-15_beratung-mueller'),
-            new NextcloudDir('11', '/Beratungen/Fertig/2023-12-01_beratung-schmidt', '2023-12-01_beratung-schmidt'),
+            new NextcloudDir('2', '/Offen', 'Offen'),
+            new NextcloudDir('3', '/Fertig', 'Fertig'),
+            new NextcloudDir('10', '/Offen/2024-01-15_beratung-mueller', '2024-01-15_beratung-mueller'),
+            new NextcloudDir('11', '/Fertig/2023-12-01_beratung-schmidt', '2023-12-01_beratung-schmidt'),
         ];
 
         $this->files = [
-            new NextcloudFile('20', '/Beratungen/Offen/2024-01-15_beratung-mueller/dokument.pdf', 'dokument.pdf', 102400, 'application/pdf', Carbon::now()->subDays(5)),
-            new NextcloudFile('21', '/Beratungen/Offen/2024-01-15_beratung-mueller/foto.jpg', 'foto.jpg', 512000, 'image/jpeg', Carbon::now()->subDays(3)),
+            new NextcloudFile('20', '/Offen/2024-01-15_beratung-mueller/dokument.pdf', 'dokument.pdf', 102400, 'application/pdf', Carbon::now()->subDays(5)),
+            new NextcloudFile('21', '/Offen/2024-01-15_beratung-mueller/foto.jpg', 'foto.jpg', 512000, 'image/jpeg', Carbon::now()->subDays(3)),
         ];
     }
 
-    public function resolveFileId(string $fileId): string
+    public function folderExists(string $path): bool
     {
         foreach ($this->dirs as $dir) {
-            if ($dir->fileId === $fileId) {
-                return $dir->path;
+            if ($dir->path === $path) {
+                return true;
             }
         }
 
-        throw new RuntimeException("FileId not found: {$fileId}");
+        return false;
     }
 
-    public function dirListing(string $fileIdOrPath): array
+    public function dirListing(string $path): array
     {
-        $normalized = str_starts_with($fileIdOrPath, '/') ? $fileIdOrPath : $this->resolveFileId($fileIdOrPath);
-        $path = rtrim($normalized, '/') ?: '/';
+        $path = rtrim($path, '/') ?: '/';
 
         $result = [];
 
@@ -81,10 +78,10 @@ class MockNextcloudFileClient implements NextcloudFileClientContract
         return $result;
     }
 
-    public function downloadFile(string $fileId): mixed
+    public function downloadFile(string $path): mixed
     {
         $stream = fopen('php://memory', 'r+');
-        fwrite($stream, "Mock file content for fileId: {$fileId}");
+        fwrite($stream, "Mock file content for path: {$path}");
         rewind($stream);
 
         return $stream;

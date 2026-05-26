@@ -51,7 +51,7 @@ Route::middleware('auth')->group(function () {
         Route::post('link', [NextcloudAdviceController::class, 'link'])->name('api.nextcloud.link');
         Route::delete('link', [NextcloudAdviceController::class, 'unlink'])->name('api.nextcloud.unlink');
         Route::post('upload', [NextcloudAdviceController::class, 'upload'])->name('api.nextcloud.upload');
-        Route::get('download/{fileId}', [NextcloudAdviceController::class, 'download'])->name('api.nextcloud.download');
+        Route::get('download', [NextcloudAdviceController::class, 'download'])->name('api.nextcloud.download');
         Route::get('files', [NextcloudAdviceController::class, 'files'])->name('api.nextcloud.files');
     });
 
