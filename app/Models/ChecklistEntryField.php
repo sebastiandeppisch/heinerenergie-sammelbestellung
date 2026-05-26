@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Override;
 
 class ChecklistEntryField extends Model
 {
@@ -26,12 +25,12 @@ class ChecklistEntryField extends Model
         'required',
     ];
 
-    protected $casts =  [
-            'sort_order' => 'integer',
-            'required' => 'boolean',
-            'type' => FieldType::class,
-            'value' => 'json',
-        ];
+    protected $casts = [
+        'sort_order' => 'integer',
+        'required' => 'boolean',
+        'type' => FieldType::class,
+        'value' => 'json',
+    ];
 
     /**
      * @return BelongsTo<ChecklistEntry, $this>

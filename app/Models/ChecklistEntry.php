@@ -19,7 +19,7 @@ class ChecklistEntry extends Model
 
     protected $casts = [
         'updated_at' => 'datetime',
-        'created_at' => 'datetime'
+        'created_at' => 'datetime',
     ];
 
     protected $fillable = [

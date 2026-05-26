@@ -58,8 +58,7 @@ const state = computed<'loading' | 'unlinked' | 'linked' | 'broken'>(() => {
 });
 
 const defaultFolderName = computed(() => {
-    return props.advice.first_name.slice(0, 2) +
-    props.advice.last_name.slice(0, 2);
+    return props.advice.first_name.slice(0, 2) + props.advice.last_name.slice(0, 2);
 });
 
 async function unlink() {

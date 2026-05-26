@@ -7,13 +7,13 @@ use App\Contracts\NextcloudFileClientContract;
 use App\Models\Group;
 use App\Nextcloud\Data\NextcloudDir;
 use App\Nextcloud\Data\NextcloudFile;
-use App\Services\CurrentGroupService;
 use Carbon\Carbon;
-use Error;
+use DOMDocument;
 use RuntimeException;
 use Sabre\DAV\Client;
 use Sabre\DAV\Xml\Property\ResourceType;
 use Sabre\HTTP\ClientHttpException;
+use Sabre\Xml\Service;
 
 class WebDavNextcloudFileClient implements NextcloudFileClientContract
 {
@@ -26,7 +26,6 @@ class WebDavNextcloudFileClient implements NextcloudFileClientContract
         $baseUrl = config('nextcloud.base_url');
         $this->username = config('nextcloud.username');
         $password = config('nextcloud.password');
-
 
         $this->client = new Client([
             'baseUri' => rtrim((string) $baseUrl, '/').'/remote.php/dav/files/'.rawurlencode($this->username).'/',
@@ -306,13 +305,13 @@ class WebDavNextcloudFileClient implements NextcloudFileClientContract
      */
     private function propFindInfinity(string $url, array $properties): array
     {
-        $dom = new \DOMDocument('1.0', 'UTF-8');
+        $dom = new DOMDocument('1.0', 'UTF-8');
         $dom->formatOutput = true;
         $root = $dom->createElementNS('DAV:', 'd:propfind');
         $prop = $dom->createElement('d:prop');
 
         foreach ($properties as $property) {
-            [$namespace, $elementName] = \Sabre\Xml\Service::parseClarkNotation($property);
+            [$namespace, $elementName] = Service::parseClarkNotation($property);
             if ($namespace === 'DAV:') {
                 $element = $dom->createElement('d:'.$elementName);
             } else {
