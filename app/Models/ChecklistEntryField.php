@@ -26,16 +26,12 @@ class ChecklistEntryField extends Model
         'required',
     ];
 
-    #[Override]
-    protected function casts(): array
-    {
-        return [
+    protected $casts =  [
             'sort_order' => 'integer',
             'required' => 'boolean',
             'type' => FieldType::class,
             'value' => 'json',
         ];
-    }
 
     /**
      * @return BelongsTo<ChecklistEntry, $this>

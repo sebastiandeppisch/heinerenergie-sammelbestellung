@@ -2,11 +2,14 @@
 
 namespace App\Nextcloud;
 
+use App\Context\GroupContextContract;
 use App\Contracts\NextcloudFileClientContract;
+use App\Models\Group;
 use App\Nextcloud\Data\NextcloudDir;
 use App\Nextcloud\Data\NextcloudFile;
 use App\Services\CurrentGroupService;
 use Carbon\Carbon;
+use Error;
 use RuntimeException;
 use Sabre\DAV\Client;
 use Sabre\DAV\Xml\Property\ResourceType;
@@ -18,17 +21,23 @@ class WebDavNextcloudFileClient implements NextcloudFileClientContract
 
     private readonly string $username;
 
-    public function __construct(private readonly CurrentGroupService $groupService)
+    public function __construct()
     {
         $baseUrl = config('nextcloud.base_url');
         $this->username = config('nextcloud.username');
         $password = config('nextcloud.password');
+
 
         $this->client = new Client([
             'baseUri' => rtrim((string) $baseUrl, '/').'/remote.php/dav/files/'.rawurlencode($this->username).'/',
             'userName' => $this->username,
             'password' => $password,
         ]);
+    }
+
+    private function group(): Group
+    {
+        return app(GroupContextContract::class)->getCurrentGroup();
     }
 
     public function folderExists(string $path): bool
@@ -111,7 +120,7 @@ class WebDavNextcloudFileClient implements NextcloudFileClientContract
                 '{DAV:}displayname',
                 '{DAV:}resourcetype',
                 '{http://owncloud.org/ns}fileid',
-            ], 'infinity');
+            ], 1);
         } catch (ClientHttpException $e) {
             throw new RuntimeException("Cannot search in {$rootPath}: HTTP {$e->getHttpStatus()}", 0, $e);
         }
@@ -225,7 +234,7 @@ class WebDavNextcloudFileClient implements NextcloudFileClientContract
 
     private function basePath(): string
     {
-        return $this->groupService->getGroup()?->nextcloud_search_path ?? '/';
+        return $this->group()->nextcloud_search_path ?? '/';
     }
 
     private function absolutePath(string $relativePath): string

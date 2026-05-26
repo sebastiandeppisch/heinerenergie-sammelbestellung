@@ -26,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
     #[Override]
     public function register()
     {
-        $this->app->bind(
+        $this->app->singleton(
             NextcloudFileClientContract::class,
             config('nextcloud.base_url') ? WebDavNextcloudFileClient::class : MockNextcloudFileClient::class
         );

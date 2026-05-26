@@ -3,7 +3,7 @@
 namespace App\Data;
 
 use App\Models\ChecklistEntry;
-use Illuminate\Support\Carbon;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Data;
