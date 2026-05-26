@@ -57,7 +57,10 @@ const state = computed<'loading' | 'unlinked' | 'linked' | 'broken'>(() => {
     return 'linked';
 });
 
-const defaultFolderName = computed(() => props.advice.last_name);
+const defaultFolderName = computed(() => {
+    return props.advice.first_name.slice(0, 2) +
+    props.advice.last_name.slice(0, 2);
+});
 
 async function unlink() {
     unlinking.value = true;
