@@ -46,12 +46,14 @@ class FormDefinitionToAdviceFactory extends Factory
             'type' => FieldType::TEXT,
             'label' => 'First Name',
             'required' => true,
+            'min_length' => null,
         ]);
 
         $lastNameField = FormField::factory()->create([
             'type' => FieldType::TEXT,
             'label' => 'Last Name',
             'required' => true,
+            'min_length' => null,
         ]);
 
         $typeField = FormField::factory()->create([
