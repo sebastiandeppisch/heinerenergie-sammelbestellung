@@ -25,15 +25,6 @@ class AdviceController extends Controller
         return app(GroupContextContract::class);
     }
 
-    public function store(StoreAdviceRequest $request)
-    {
-        $advice = new Advice;
-        $advice->fill($request->validated());
-        $advice->group_id = $this->groupContext()->getCurrentGroup()?->id;
-        $advice->save();
-
-        return $advice;
-    }
 
     public function show(Advice $advice)
     {

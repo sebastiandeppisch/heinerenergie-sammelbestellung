@@ -3,27 +3,30 @@
 namespace App\Http\Requests;
 
 use App\Models\Group;
+use App\Services\SessionService;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreAdviceRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
-    public function authorize()
+    public function __construct(private readonly SessionService $sessionService)
+    {
+        parent::__construct();
+    }
+
+    public function authorize(): bool
     {
         return true;
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
      * @return array<string, mixed>
      */
-    public function rules()
+    public function rules(): array
     {
+        $groupIdRule = $this->sessionService->getCurrentGroup() === null
+            ? 'required|uuid|exists:groups,uuid'
+            : 'nullable|uuid|exists:groups,uuid';
+
         return [
             'first_name' => 'required|string|max:100',
             'last_name' => 'required|string|max:100',
@@ -33,7 +36,6 @@ class StoreAdviceRequest extends FormRequest
             'street_number' => 'required|string|max:100',
             'zip' => 'required|numeric|digits:5',
             'city' => 'required|string|max:100',
-            //    'advisor_id' => 'nullable|uuid|exists:users,id',
             'commentary' => 'nullable|string|max:65535',
             'help_type_place' => 'nullable|boolean',
             'help_type_technical' => 'nullable|boolean',
@@ -43,7 +45,7 @@ class StoreAdviceRequest extends FormRequest
             'landlord_exists' => 'nullable|boolean',
             'place_notes' => 'nullable|string|max:65535',
             'type' => 'integer|between:0,2',
-            'group_id' => 'uuid|exists:groups,uuid',
+            'group_id' => $groupIdRule,
         ];
     }
 
