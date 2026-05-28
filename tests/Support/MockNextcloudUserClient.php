@@ -60,7 +60,7 @@ class MockNextcloudUserClient implements NextcloudUserClientContract
     public function getGroupMembersWithDetails(string $groupId): array
     {
         return array_map(
-            fn (string $id) => $this->getUser($id),
+            $this->getUser(...),
             $this->getGroupMembers($groupId),
         );
     }

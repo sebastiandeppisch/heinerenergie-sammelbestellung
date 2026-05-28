@@ -90,19 +90,19 @@ const unmatchedCount = computed(() => props.items.filter((i) => !i.crm_user || !
             </div>
 
             <div class="bg-white shadow-sm sm:rounded-lg">
-                <div class="p-6 space-y-4">
+                <div class="space-y-4 p-6">
                     <div>
                         <h2 class="text-xl font-semibold text-gray-800">Nextcloud-Abgleich — {{ group.name }}</h2>
-                        <p v-if="group.nextcloud_group_name" class="text-sm text-gray-500 mt-1">
+                        <p v-if="group.nextcloud_group_name" class="mt-1 text-sm text-gray-500">
                             Nextcloud-Gruppe: <span class="font-mono">{{ group.nextcloud_group_name }}</span>
                         </p>
-                        <p class="text-sm text-gray-500 mt-1">Berater*innen werden über die E-Mail Adresse und ihre Gruppen-Zuordnung abgeglichen</p>
+                        <p class="mt-1 text-sm text-gray-500">Berater*innen werden über die E-Mail Adresse und ihre Gruppen-Zuordnung abgeglichen</p>
                     </div>
 
                     <!-- Not configured -->
                     <div v-if="!nextcloudConfigured" class="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
                         Kein Nextcloud-Gruppenname konfiguriert. Bitte trage den Nextcloud-Gruppenname in den
-                        <a :href="route('groups.show', group.id)" class="underline font-medium">Stammdaten der Initiative</a>
+                        <a :href="route('groups.show', group.id)" class="font-medium underline">Stammdaten der Initiative</a>
                         ein.
                     </div>
 
@@ -114,14 +114,13 @@ const unmatchedCount = computed(() => props.items.filter((i) => !i.crm_user || !
                     <!-- User table -->
                     <template v-else>
                         <p v-if="unmatchedCount > 0" class="text-sm text-amber-700">
-                            {{ unmatchedCount }} {{ unmatchedCount === 1 ? 'Benutzer ist' : 'Benutzer sind' }} noch nicht vollständig im CRM/Gruppe vorhanden.
+                            {{ unmatchedCount }} {{ unmatchedCount === 1 ? 'Benutzer ist' : 'Benutzer sind' }} noch nicht vollständig im CRM/Gruppe
+                            vorhanden.
                         </p>
                         <p v-else-if="items.length > 0" class="text-sm text-green-700">
                             Alle {{ items.length }} Nextcloud-Benutzer sind im CRM und in dieser Gruppe vorhanden.
                         </p>
-                        <p v-else class="text-sm text-gray-500">
-                            Keine Benutzer in der Nextcloud-Gruppe gefunden.
-                        </p>
+                        <p v-else class="text-sm text-gray-500">Keine Benutzer in der Nextcloud-Gruppe gefunden.</p>
 
                         <Table v-if="items.length > 0">
                             <TableHeader>
@@ -140,23 +139,15 @@ const unmatchedCount = computed(() => props.items.filter((i) => !i.crm_user || !
                                     </TableCell>
                                     <TableCell class="text-gray-600">{{ item.nc_email ?? item.crm_user?.email }}</TableCell>
                                     <TableCell>
-                                        <Badge v-if="item.nc_id !== null" class="bg-green-100 text-green-800 border-green-200">
-                                            In Nextcloud
-                                        </Badge>
-                                        <Badge v-else class="bg-yellow-100 text-yellow-800 border-yellow-200">
-                                            Nicht in Nextcloud
-                                        </Badge>
+                                        <Badge v-if="item.nc_id !== null" class="border-green-200 bg-green-100 text-green-800"> In Nextcloud </Badge>
+                                        <Badge v-else class="border-yellow-200 bg-yellow-100 text-yellow-800"> Nicht in Nextcloud </Badge>
                                     </TableCell>
                                     <TableCell>
-                                        <Badge v-if="item.crm_is_group_member" class="bg-green-100 text-green-800 border-green-200">
-                                            Im CRM
-                                        </Badge>
-                                        <Badge v-else-if="item.crm_user" class="bg-yellow-100 text-yellow-800 border-yellow-200">
+                                        <Badge v-if="item.crm_is_group_member" class="border-green-200 bg-green-100 text-green-800"> Im CRM </Badge>
+                                        <Badge v-else-if="item.crm_user" class="border-yellow-200 bg-yellow-100 text-yellow-800">
                                             Im CRM, nicht in Gruppe
                                         </Badge>
-                                        <Badge v-else variant="outline" class="text-amber-700 border-amber-300">
-                                            Nicht im CRM
-                                        </Badge>
+                                        <Badge v-else variant="outline" class="border-amber-300 text-amber-700"> Nicht im CRM </Badge>
                                     </TableCell>
                                     <TableCell class="text-right">
                                         <!-- Not in CRM at all → Import (only if NC user exists) -->
@@ -217,9 +208,7 @@ const unmatchedCount = computed(() => props.items.filter((i) => !i.crm_user || !
 
                 <div class="flex items-center gap-2">
                     <Checkbox id="import-send-email" v-model="sendEmail" />
-                    <Label for="import-send-email" class="font-normal cursor-pointer">
-                        E-Mail zum Passwort-Setzen senden
-                    </Label>
+                    <Label for="import-send-email" class="cursor-pointer font-normal"> E-Mail zum Passwort-Setzen senden </Label>
                 </div>
 
                 <p v-if="importError" class="text-sm text-red-600">{{ importError }}</p>

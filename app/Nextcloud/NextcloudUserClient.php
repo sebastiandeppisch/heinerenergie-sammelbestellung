@@ -7,6 +7,7 @@ use App\Nextcloud\Data\NextcloudUser;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
+use Throwable;
 
 class NextcloudUserClient implements NextcloudUserClientContract
 {
@@ -83,23 +84,21 @@ class NextcloudUserClient implements NextcloudUserClientContract
         $baseUrl = $this->baseUrl;
         $http = $this->http;
 
-        $responses = Http::pool(function ($pool) use ($userIds, $baseUrl, $http) {
-            return array_map(
-                fn (string $userId) => $pool
-                    ->withBasicAuth(
-                        (string) config('nextcloud.username'),
-                        (string) config('nextcloud.password'),
-                    )
-                    ->withHeaders(['OCS-APIRequest' => 'true'])
-                    ->accept('application/json')
-                    ->get("{$baseUrl}/ocs/v1.php/cloud/users/".rawurlencode($userId)),
-                $userIds
-            );
-        });
+        $responses = Http::pool(fn ($pool) => array_map(
+            fn (string $userId) => $pool
+                ->withBasicAuth(
+                    (string) config('nextcloud.username'),
+                    (string) config('nextcloud.password'),
+                )
+                ->withHeaders(['OCS-APIRequest' => 'true'])
+                ->accept('application/json')
+                ->get("{$baseUrl}/ocs/v1.php/cloud/users/".rawurlencode($userId)),
+            $userIds
+        ));
 
         $users = [];
         foreach ($responses as $index => $response) {
-            if ($response instanceof \Throwable) {
+            if ($response instanceof Throwable) {
                 continue;
             }
 

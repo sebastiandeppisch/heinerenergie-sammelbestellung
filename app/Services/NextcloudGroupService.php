@@ -12,6 +12,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use RuntimeException;
 
 class NextcloudGroupService
 {
@@ -23,7 +24,8 @@ class NextcloudGroupService
      * Returns a merged comparison of Nextcloud group members and CRM group members.
      *
      * @return Collection<int, NextcloudGroupUserData>
-     * @throws \RuntimeException if the Nextcloud group cannot be fetched
+     *
+     * @throws RuntimeException if the Nextcloud group cannot be fetched
      */
     public function getComparisonItems(Group $group): Collection
     {
@@ -61,7 +63,7 @@ class NextcloudGroupService
     }
 
     /**
-     * @throws \RuntimeException if the Nextcloud user cannot be fetched
+     * @throws RuntimeException if the Nextcloud user cannot be fetched
      */
     public function getNcUser(string $ncUserId): NextcloudUser
     {
@@ -85,7 +87,7 @@ class NextcloudGroupService
 
     public function createAndAttachUser(Group $group, NextcloudUser $ncUser, string $firstName, string $lastName, bool $sendEmail): User
     {
-        return DB::transaction(function() use ($firstName, $lastName, $sendEmail, $ncUser, $group): User{
+        return DB::transaction(function () use ($firstName, $lastName, $sendEmail, $ncUser, $group): User {
             $user = User::create([
                 'first_name' => $firstName,
                 'last_name' => $lastName,
@@ -98,7 +100,6 @@ class NextcloudGroupService
             if ($sendEmail) {
                 Password::sendResetLink(['email' => $user->email]);
             }
-
 
             return $user;
         });
