@@ -89,17 +89,15 @@ class NextcloudUserClient implements NextcloudUserClientContract
 
         $baseUrl = $this->baseUrl;
 
-        $responses = Http::pool(function (Pool $pool) use ($userIds, $baseUrl) {
-            return array_map(
-                fn (string $userId) => $this->buildRequest($pool)
-                    ->get("{$baseUrl}/ocs/v1.php/cloud/users/".rawurlencode($userId)),
-                $userIds,
-            );
-        });
+        $responses = Http::pool(fn (Pool $pool) => array_map(
+            fn (string $userId) => $this->buildRequest($pool)
+                ->get("{$baseUrl}/ocs/v1.php/cloud/users/".rawurlencode($userId)),
+            $userIds,
+        ));
 
         $users = [];
         foreach ($responses as $response) {
-            if ($response instanceof \Throwable) {
+            if ($response instanceof Throwable) {
                 continue;
             }
 
