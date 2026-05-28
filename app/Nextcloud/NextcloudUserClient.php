@@ -5,6 +5,7 @@ namespace App\Nextcloud;
 use App\Contracts\NextcloudUserClientContract;
 use App\Nextcloud\Data\NextcloudUser;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\Pool;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
@@ -17,11 +18,16 @@ class NextcloudUserClient implements NextcloudUserClientContract
     public function __construct()
     {
         $this->baseUrl = rtrim((string) config('nextcloud.base_url'), '/');
+        $this->http = $this->buildRequest();
+    }
 
-        $this->http = Http::withBasicAuth(
-            (string) config('nextcloud.username'),
-            (string) config('nextcloud.password'),
-        )
+    private function buildRequest(?Pool $pool = null): PendingRequest
+    {
+        return ($pool ?? Http::getFacadeRoot())
+            ->withBasicAuth(
+                (string) config('nextcloud.username'),
+                (string) config('nextcloud.password'),
+            )
             ->withHeaders(['OCS-APIRequest' => 'true'])
             ->accept('application/json');
     }
@@ -81,32 +87,24 @@ class NextcloudUserClient implements NextcloudUserClientContract
         }
 
         $baseUrl = $this->baseUrl;
-        $http = $this->http;
 
-        $responses = Http::pool(function ($pool) use ($userIds, $baseUrl, $http) {
+        $responses = Http::pool(function (Pool $pool) use ($userIds, $baseUrl) {
             return array_map(
-                fn (string $userId) => $pool
-                    ->withBasicAuth(
-                        (string) config('nextcloud.username'),
-                        (string) config('nextcloud.password'),
-                    )
-                    ->withHeaders(['OCS-APIRequest' => 'true'])
-                    ->accept('application/json')
+                fn (string $userId) => $this->buildRequest($pool)
                     ->get("{$baseUrl}/ocs/v1.php/cloud/users/".rawurlencode($userId)),
-                $userIds
+                $userIds,
             );
         });
 
         $users = [];
-        foreach ($responses as $index => $response) {
+        foreach ($responses as $response) {
             if ($response instanceof \Throwable) {
                 continue;
             }
 
             $data = $response->json();
-            $statuscode = $data['ocs']['meta']['statuscode'] ?? 0;
 
-            if ($statuscode !== 100) {
+            if (($data['ocs']['meta']['statuscode'] ?? 0) !== 100) {
                 continue;
             }
 

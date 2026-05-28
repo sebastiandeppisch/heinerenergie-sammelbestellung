@@ -187,6 +187,7 @@ test('import creates crm user and attaches to group', function () {
     $this->post(route('groups.nextcloud.import', [$this->group, 'nc-new']), [
         'first_name' => 'Max',
         'last_name' => 'Mustermann',
+        'send_email' => false,
     ]);
 
     $user = User::where('email', 'new@example.com')->first();
@@ -208,6 +209,7 @@ test('import fails when crm user with that email already exists', function () {
     $response = $this->post(route('groups.nextcloud.import', [$this->group, 'nc-existing']), [
         'first_name' => 'Max',
         'last_name' => 'Mustermann',
+        'send_email' => false,
     ]);
 
     $response->assertSessionHasErrors('email');
