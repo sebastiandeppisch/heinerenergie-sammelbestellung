@@ -28,11 +28,16 @@ export type ChecklistEntryData = {
 id: string;
 form_definition: App.Data.FormDefinitionData;
 fields: Array<App.Data.ChecklistEntryFieldData>;
-updated_at: any;
+updated_at: string;
 };
 export type ChecklistEntryFieldData = {
 field: App.Data.FormFieldData;
 value: number | string | Array<string> | null;
+};
+export type CrmUserData = {
+id: string;
+name: string;
+email: string;
 };
 export type DataProtectedAdviceData = {
 id: string;
@@ -151,6 +156,7 @@ parent_id: string | null;
 accepts_transfers: boolean;
 userCanActAsAdmin: boolean;
 new_advice_mail: string | null;
+nextcloud_group_name: string | null;
 };
 export type GroupMapData = {
 polygon: App.ValueObjects.Polygon;
@@ -188,6 +194,14 @@ published: boolean;
 userReadablePointableType: string;
 created_at: any;
 category_id: string | null;
+};
+export type NextcloudGroupUserData = {
+nc_id: string | null;
+nc_email: string | null;
+nc_displayname: string | null;
+nc_enabled: boolean | null;
+crm_user: App.Data.CrmUserData | null;
+crm_is_group_member: boolean | null;
 };
 export type PaginationData = {
 total: number;
@@ -249,6 +263,13 @@ name: string;
 size: number;
 mimeType: string;
 lastModified: string;
+};
+export type NextcloudUser = {
+id: string;
+email: string;
+displayname: string;
+enabled: boolean;
+groups: Array<string>;
 };
 }
 declare namespace App.ValueObjects {

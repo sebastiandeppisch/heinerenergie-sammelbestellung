@@ -24,6 +24,7 @@ class GroupData extends Data
         public bool $accepts_transfers,
         public bool $userCanActAsAdmin,
         public ?string $new_advice_mail,
+        public ?string $nextcloud_group_name,
         ?int $users_count,
         ?int $advices_count,
     ) {
@@ -50,6 +51,7 @@ class GroupData extends Data
             accepts_transfers: $group->accepts_transfers,
             userCanActAsAdmin: $canActAsAdmin,
             new_advice_mail: $group->new_advice_mail,
+            nextcloud_group_name: $group->nextcloud_group_name,
             users_count: $group->users()->count(),
             advices_count: $group->advices()->count(),
         );

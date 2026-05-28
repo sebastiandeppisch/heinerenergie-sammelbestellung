@@ -30,6 +30,7 @@ class Group extends Model
         'parent_id',
         'accepts_transfers',
         'nextcloud_search_path',
+        'nextcloud_group_name',
     ];
 
     protected $casts = [

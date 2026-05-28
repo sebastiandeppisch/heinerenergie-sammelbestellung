@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Actions\FetchCoordinateByAddress;
 use App\Actions\FetchCoordinateByFreeText;
 use App\Contracts\NextcloudFileClientContract;
+use App\Contracts\NextcloudUserClientContract;
+use App\Nextcloud\NextcloudUserClient;
 use App\Nextcloud\WebDavNextcloudFileClient;
 use App\Services\CurrentGroupService;
 use App\ValueObjects\Address;
@@ -15,6 +17,7 @@ use maxh\Nominatim\Nominatim;
 use Opcodes\LogViewer\Facades\LogViewer;
 use Override;
 use Tests\Support\MockNextcloudFileClient;
+use Tests\Support\MockNextcloudUserClient;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -29,6 +32,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(
             NextcloudFileClientContract::class,
             config('nextcloud.base_url') ? WebDavNextcloudFileClient::class : MockNextcloudFileClient::class
+        );
+
+        $this->app->singleton(
+            NextcloudUserClientContract::class,
+            config('nextcloud.base_url') ? NextcloudUserClient::class : MockNextcloudUserClient::class
         );
     }
 

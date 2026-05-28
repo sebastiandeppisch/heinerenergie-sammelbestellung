@@ -8,6 +8,7 @@ use App\Http\Controllers\FormDefinitionController;
 use App\Http\Controllers\FormSubmissionController;
 use App\Http\Controllers\FormSubmitController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\NextcloudGroupController;
 use App\Http\Controllers\MapPointCategoryController;
 use App\Http\Controllers\MapPointController;
 use App\Http\Controllers\PageController;
@@ -63,6 +64,13 @@ Route::middleware('auth')->group(function () {
 
     Route::put('/groups/{group}/new-advice-mail', [GroupController::class, 'updateNewAdviceMail'])
         ->name('groups.new-advice-mail.update');
+
+    Route::get('/groups/{group}/nextcloud', [NextcloudGroupController::class, 'index'])
+        ->name('groups.nextcloud');
+    Route::post('/groups/{group}/nextcloud/{ncUser}/import', [NextcloudGroupController::class, 'import'])
+        ->name('groups.nextcloud.import');
+    Route::post('/groups/{group}/nextcloud/{ncUser}/add-to-group', [NextcloudGroupController::class, 'addToGroup'])
+        ->name('groups.nextcloud.add-to-group');
 
     Route::post('advices/{advice}/unassign', [AdviceController::class, 'unassign'])->name('advices.unassign');
     Route::post('advices/{advice}/transfer', [AdviceController::class, 'transfer'])->name('advices.transfer');
