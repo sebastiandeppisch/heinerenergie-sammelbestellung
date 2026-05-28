@@ -8,9 +8,6 @@ use Override;
 
 class PersonDataChangedEvent extends AdviceEvent
 {
-    /** @var array<string, array{from: ?string, to: ?string}> */
-    public array $changes;
-
     private const array FIELD_LABELS = [
         'first_name' => 'Vorname',
         'last_name' => 'Nachname',
@@ -28,10 +25,9 @@ class PersonDataChangedEvent extends AdviceEvent
     public function __construct(
         Advice $advice,
         ?User $user,
-        array $changes
+        public array $changes
     ) {
         parent::__construct($advice, $user);
-        $this->changes = $changes;
     }
 
     public function getDescription(): string

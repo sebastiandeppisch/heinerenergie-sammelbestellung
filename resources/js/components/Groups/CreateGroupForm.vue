@@ -40,8 +40,8 @@ import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
 import { useForm } from '@inertiajs/vue3';
 import { DxSelectBox } from 'devextreme-vue';
-import { toast } from 'vue-sonner';
 import { Plus } from 'lucide-vue-next';
+import { toast } from 'vue-sonner';
 import { route } from 'ziggy-js';
 
 type GroupData = App.Data.GroupData;

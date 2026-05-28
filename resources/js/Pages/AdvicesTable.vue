@@ -258,7 +258,6 @@ const adviceStatusResult = new ArrayDataSource([
                     <span v-else style="font-style: italic; color: gray">verborgen</span>
                 </template>
             </DxDataGrid>
-
         </div>
     </div>
 </template>

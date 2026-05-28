@@ -5,9 +5,9 @@ import { faWarning } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { router } from '@inertiajs/vue3';
 import { DxPopup, DxSelectBox } from 'devextreme-vue';
-import { toast } from 'vue-sonner';
 import { ArrowRight, Send } from 'lucide-vue-next';
 import { ref } from 'vue';
+import { toast } from 'vue-sonner';
 
 const props = defineProps<{
     adviceId: string;

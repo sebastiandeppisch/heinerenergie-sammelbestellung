@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import DxDataGrid, { DxColumn, DxEditing, DxLookup } from 'devextreme-vue/data-grid';
-import { toast } from 'vue-sonner';
 import { computed } from 'vue';
+import { toast } from 'vue-sonner';
 import LaravelDataSource from '../LaravelDataSource';
 
 // Define props for the component

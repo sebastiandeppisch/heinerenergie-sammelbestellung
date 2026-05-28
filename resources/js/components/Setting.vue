@@ -6,8 +6,8 @@ import { computed, reactive, ref } from 'vue';
 import { Button } from '@/shadcn/components/ui/button';
 import { Input } from '@/shadcn/components/ui/input';
 import axios from 'axios';
-import { toast } from 'vue-sonner';
 import { Save, Upload } from 'lucide-vue-next';
+import { toast } from 'vue-sonner';
 
 import editorToolbar from '../htmlEditorToolbar.json';
 

@@ -2,8 +2,8 @@
 import { Link, router } from '@inertiajs/vue3';
 import DxForm, { DxButtonItem, DxButtonOptions, DxEmailRule, DxItem, DxLabel, DxRequiredRule } from 'devextreme-vue/form';
 import DxLoadIndicator from 'devextreme-vue/load-indicator';
-import { toast } from 'vue-sonner';
 import { defineOptions, reactive, ref } from 'vue';
+import { toast } from 'vue-sonner';
 import auth from '../auth';
 import MainPublic from '../layouts/MainPublic.vue';
 import SingleCard from '../layouts/SingleCard.vue';

@@ -133,11 +133,7 @@ function save() {
                 <div class="col-span-2 space-y-2">
                     <Label>Beratungstyp</Label>
                     <RadioGroup v-model="adviceTypeValue" class="flex gap-4">
-                        <div
-                            v-for="typeItem in adviceTypeItems"
-                            :key="typeItem.id"
-                            class="flex items-center gap-2"
-                        >
+                        <div v-for="typeItem in adviceTypeItems" :key="typeItem.id" class="flex items-center gap-2">
                             <RadioGroupItem :id="`type-${typeItem.id}`" :value="String(typeItem.id)" />
                             <Label :for="`type-${typeItem.id}`" class="flex cursor-pointer items-center gap-1">
                                 <component :is="typeIcons[typeItem.name]" class="h-4 w-4" />
@@ -154,11 +150,7 @@ function save() {
                             <SelectValue placeholder="Status wählen" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem
-                                v-for="status in adviceStatusItems"
-                                :key="status.id"
-                                :value="String(status.id)"
-                            >
+                            <SelectItem v-for="status in adviceStatusItems" :key="status.id" :value="String(status.id)">
                                 {{ status.name }}
                             </SelectItem>
                         </SelectContent>

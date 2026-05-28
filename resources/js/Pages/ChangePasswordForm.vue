@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { router } from '@inertiajs/vue3';
 import DxForm, { DxButtonItem, DxButtonOptions, DxCustomRule, DxItem, DxLabel, DxRequiredRule } from 'devextreme-vue/form';
-import { toast } from 'vue-sonner';
 import { reactive, ref } from 'vue';
+import { toast } from 'vue-sonner';
 import auth from '../auth';
 import MainPublic from '../layouts/MainPublic.vue';
 import SingleCard from '../layouts/SingleCard.vue';
