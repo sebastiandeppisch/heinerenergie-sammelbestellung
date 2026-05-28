@@ -8,12 +8,10 @@ use App\Models\Group;
 use App\Nextcloud\Data\NextcloudDir;
 use App\Nextcloud\Data\NextcloudFile;
 use Carbon\Carbon;
-use DOMDocument;
 use RuntimeException;
 use Sabre\DAV\Client;
 use Sabre\DAV\Xml\Property\ResourceType;
 use Sabre\HTTP\ClientHttpException;
-use Sabre\Xml\Service;
 
 class WebDavNextcloudFileClient implements NextcloudFileClientContract
 {
@@ -297,5 +295,4 @@ class WebDavNextcloudFileClient implements NextcloudFileClientContract
     {
         return '/'.trim($path, '/');
     }
-
 }
