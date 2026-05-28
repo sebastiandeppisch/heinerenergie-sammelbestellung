@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button } from '@/shadcn/components/ui/button';
-import notify from 'devextreme/ui/notify';
+import { toast } from 'vue-sonner';
 import { RotateCcw, Send } from 'lucide-vue-next';
 import { ref } from 'vue';
 import FormFieldRenderer from './FormFieldRenderer.vue';
@@ -21,11 +21,11 @@ function submitForm() {
     const missingRequiredFields = props.formDefinition.fields.filter((field) => field.required && !formValues.value[field.id]);
 
     if (missingRequiredFields.length > 0) {
-        notify('Bitte füllen alle Pflichtfelder aus', 'error', 3000);
+        toast.error('Bitte füllen alle Pflichtfelder aus', { duration: 3000 });
         return;
     }
 
-    notify('Formular erfolgreich gesendet', 'success', 2000);
+    toast.success('Formular erfolgreich gesendet', { duration: 2000 });
     console.log('Formulardaten:', formValues.value);
 
     setTimeout(() => {

@@ -6,7 +6,7 @@ import { computed, reactive, ref } from 'vue';
 import { Button } from '@/shadcn/components/ui/button';
 import { Input } from '@/shadcn/components/ui/input';
 import axios from 'axios';
-import notify from 'devextreme/ui/notify';
+import { toast } from 'vue-sonner';
 import { Save, Upload } from 'lucide-vue-next';
 
 import editorToolbar from '../htmlEditorToolbar.json';
@@ -39,13 +39,13 @@ const save = () => {
             state.dirty = false;
             //timeout 100ms to make sure the value is updated
             setTimeout(() => {
-                notify('Einstellung gespeichert', 'success', 1000);
+                toast.success('Einstellung gespeichert', { duration: 1000 });
             }, 1);
         })
         .catch((error) => {
             state.saving = false;
             setTimeout(() => {
-                notify('Einstellung konnte nicht gespeichert werden', 'error', 1000);
+                toast.error('Einstellung konnte nicht gespeichert werden', { duration: 1000 });
             }, 1);
         });
 };
@@ -85,11 +85,11 @@ const uploadFile = async (file: File) => {
         state.dirty = true;
         await save();
         setTimeout(() => {
-            notify('Bild hochgeladen', 'success', 1000);
+            toast.success('Bild hochgeladen', { duration: 1000 });
         }, 1);
     } catch (error) {
         setTimeout(() => {
-            notify('Bild konnte nicht hochgeladen werden', 'error', 1000);
+            toast.error('Bild konnte nicht hochgeladen werden', { duration: 1000 });
         }, 1);
     } finally {
         state.uploading = false;

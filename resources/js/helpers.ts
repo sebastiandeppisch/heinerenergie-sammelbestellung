@@ -1,5 +1,5 @@
 import { AxiosError } from 'axios';
-import notify from 'devextreme/ui/notify';
+import { toast } from 'vue-sonner';
 import moment from 'moment';
 import { onMounted, onUnmounted, reactive, Ref } from 'vue';
 
@@ -23,9 +23,9 @@ function notifyError(error: AxiosError<LaravelValidationError>): void {
         for (const prop in error.response.data.errors) {
             validationErrors = validationErrors.concat(error.response.data.errors[prop] as Array<string>);
         }
-        notify(validationErrors.join(','), 'error');
+        toast.error(validationErrors.join(','));
     } else {
-        notify(error, 'error');
+        toast.error(error.message);
     }
 }
 

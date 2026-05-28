@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Context\GroupContextContract;
 use App\Data\DataProtectedAdviceData;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreAdviceRequest;
 use App\Http\Requests\UpdateAdviceRequest;
 use App\Models\Advice;
 use App\Models\User;
@@ -24,7 +23,6 @@ class AdviceController extends Controller
     {
         return app(GroupContextContract::class);
     }
-
 
     public function show(Advice $advice)
     {

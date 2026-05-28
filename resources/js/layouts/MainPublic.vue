@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { Toaster } from '@/shadcn/components/ui/sonner';
 import { computed, onMounted, reactive } from 'vue';
+import 'vue-sonner/style.css';
 import { getScreenSizeInfo } from '../utils/media-query';
 import AppFooter from './AppFooter.vue';
 
@@ -27,6 +29,7 @@ const cssClasses = computed(() => {
                 <AppFooter />
             </div>
         </div>
+        <Toaster :richColors="true" position="top-center" />
     </div>
 </template>
 

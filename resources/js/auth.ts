@@ -1,5 +1,5 @@
 import axios from 'axios';
-import notify from 'devextreme/ui/notify';
+import { toast } from 'vue-sonner';
 import { isLoggedIn } from './authHelper';
 export default {
     async logIn(email: string, password: string) {
@@ -26,10 +26,10 @@ export default {
         await axios
             .post('api/logout')
             .then((response) => {
-                notify('Du wurdest ausgeloggt', 'success');
+                toast.success('Du wurdest ausgeloggt');
             })
             .catch((error) => {
-                notify('Fehler beim ausloggen', 'error');
+                toast.error('Fehler beim ausloggen');
             });
     },
 

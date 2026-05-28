@@ -4,7 +4,7 @@ import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
 import AdvisorMap from '@/views/AdvisorMap.vue';
 import axios from 'axios';
-import notify from 'devextreme/ui/notify';
+import { toast } from 'vue-sonner';
 import { Save } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import { user as userData } from '../authHelper';
@@ -42,7 +42,7 @@ function saveAddress() {
         console.log(response.data);
 
         user.value = response.data;
-        notify('Adresse gespeichert', 'success');
+        toast.success('Adresse gespeichert');
     });
 }
 </script>

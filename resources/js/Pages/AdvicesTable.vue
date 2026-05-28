@@ -27,7 +27,7 @@ import DxDataGrid, {
 import Store from 'devextreme/data/abstract_store';
 import { default as ArrayDataSource, default as ArrayStore } from 'devextreme/data/array_store';
 import CustomStore from 'devextreme/data/custom_store';
-import notify from 'devextreme/ui/notify';
+import { toast } from 'vue-sonner';
 import { route } from 'ziggy-js';
 import LaravelLookupSource from '../LaravelLookupSource';
 import { isActingAsAdmin, user } from '../authHelper';
@@ -94,7 +94,7 @@ function assignAdvice(id: number) {
         .then((response) => response.data)
         .then(() => {
             router.reload();
-            notify('Die Beratung wurde Dir zugewiesen', 'success', 3000);
+            toast.success('Die Beratung wurde Dir zugewiesen', { duration: 3000 });
         });
 }
 

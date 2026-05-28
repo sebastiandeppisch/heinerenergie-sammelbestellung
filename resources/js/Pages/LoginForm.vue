@@ -2,7 +2,7 @@
 import { Link, router } from '@inertiajs/vue3';
 import DxForm, { DxButtonItem, DxButtonOptions, DxEmailRule, DxItem, DxLabel, DxRequiredRule } from 'devextreme-vue/form';
 import DxLoadIndicator from 'devextreme-vue/load-indicator';
-import notify from 'devextreme/ui/notify';
+import { toast } from 'vue-sonner';
 import { defineOptions, reactive, ref } from 'vue';
 import auth from '../auth';
 import MainPublic from '../layouts/MainPublic.vue';
@@ -30,7 +30,7 @@ async function onSubmit() {
     const result = await auth.logIn(email, password);
     if (!result.isOk) {
         loading.value = false;
-        notify(result.message, 'error', 2000);
+        toast.error(result.message ?? 'Login fehlgeschlagen', { duration: 2000 });
     } else {
         router.visit('/backend');
     }

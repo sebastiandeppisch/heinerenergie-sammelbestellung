@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import DxDataGrid, { DxColumn, DxEditing, DxLookup } from 'devextreme-vue/data-grid';
-import notify from 'devextreme/ui/notify';
+import { toast } from 'vue-sonner';
 import { computed } from 'vue';
 import LaravelDataSource from '../LaravelDataSource';
 
@@ -47,7 +47,7 @@ const groupsSource = computed(() => {
 function onVisibilityChanged(e: any) {
     console.log(e);
     if (e.dataField === 'visible_in_group') {
-        notify(`Status Sichtbarkeit wurde ${e.value ? 'aktiviert' : 'deaktiviert'}.`, 'success', 3000);
+        toast.success(`Status Sichtbarkeit wurde ${e.value ? 'aktiviert' : 'deaktiviert'}.`, { duration: 3000 });
     }
 }
 
