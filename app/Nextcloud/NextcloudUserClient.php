@@ -8,6 +8,7 @@ use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Pool;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
+use Throwable;
 
 class NextcloudUserClient implements NextcloudUserClientContract
 {

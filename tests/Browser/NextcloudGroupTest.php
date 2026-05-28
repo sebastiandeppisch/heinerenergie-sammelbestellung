@@ -3,8 +3,8 @@
 use App\Models\Group;
 use App\Models\User;
 use App\Services\SessionService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 

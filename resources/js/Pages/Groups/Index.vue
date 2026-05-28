@@ -114,8 +114,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui
 import AdviceStatusGroup from '@/views/AdviceStatusGroup.vue';
 import { DxPopup } from 'devextreme-vue/popup';
 import { Cloud, Info, Mail, Map, Plus, Table, Users } from 'lucide-vue-next';
-import { route } from 'ziggy-js';
 import { computed, onMounted, ref, watch } from 'vue';
+import { route } from 'ziggy-js';
 
 type GroupsIndexData = {
     groupTreeItems: Array<App.Data.GroupTreeItem>;
