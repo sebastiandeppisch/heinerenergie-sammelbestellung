@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { router } from '@inertiajs/vue3';
 import DxForm, { DxButtonItem, DxButtonOptions, DxCustomRule, DxItem, DxLabel, DxRequiredRule } from 'devextreme-vue/form';
-import notify from 'devextreme/ui/notify';
 import { reactive, ref } from 'vue';
+import { toast } from 'vue-sonner';
 import auth from '../auth';
 import MainPublic from '../layouts/MainPublic.vue';
 import SingleCard from '../layouts/SingleCard.vue';
@@ -30,10 +30,10 @@ async function onSubmit() {
     loading.value = false;
     if (result.isOk) {
         router.get('login-form');
-        notify('Dein Passwort wurde geändert', 'success');
+        toast.success('Dein Passwort wurde geändert');
     } else {
         if (!result.isOk && 'message' in result) {
-            notify(result.message, 'error', 2000);
+            toast.error(result.message, { duration: 2000 });
         }
     }
 }

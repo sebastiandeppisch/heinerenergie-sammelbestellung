@@ -29,6 +29,8 @@ class Group extends Model
         'marker_path',
         'parent_id',
         'accepts_transfers',
+        'nextcloud_search_path',
+        'nextcloud_group_name',
     ];
 
     protected $casts = [
@@ -169,6 +171,7 @@ class Group extends Model
         return parent::delete();
     }
 
+    #[Override]
     protected function casts(): array
     {
         return [

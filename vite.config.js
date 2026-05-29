@@ -28,6 +28,9 @@ export default defineConfig({
         "process.env": {},
     },
     server: {
-        host: 'localhost'
+        host: '0.0.0.0',
+        hmr: {
+            host: 'localhost'
+        }
     }
 });

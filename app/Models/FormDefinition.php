@@ -32,14 +32,11 @@ class FormDefinition extends Model
         'type' => 0,
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'is_active' => 'boolean',
-            'show_next_form_button' => 'boolean',
-            'type' => FormType::class,
-        ];
-    }
+    protected $casts = [
+        'is_active' => 'boolean',
+        'show_next_form_button' => 'boolean',
+        'type' => FormType::class,
+    ];
 
     /**
      * @return HasMany<FormField, $this>

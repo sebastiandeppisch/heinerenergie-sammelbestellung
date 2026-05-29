@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
 import DxTagBox from 'devextreme-vue/tag-box';
-import notify from 'devextreme/ui/notify';
+import { toast } from 'vue-sonner';
 import LaravelDataSource from '../LaravelDataSource';
 
 const props = defineProps<{
@@ -19,7 +19,7 @@ const advisors = new LaravelDataSource('/api/users?withoutself=true');
 
 function updateAdvisors(e: { value: string[] }) {
     axios.post('/api/advices/' + props.adviceId + '/advisors', { advisors: e.value }).then(() => {
-        notify('Teilung aktualisiert', 'success', 2000);
+        toast.success('Teilung aktualisiert', { duration: 2000 });
         router.reload();
     });
 }

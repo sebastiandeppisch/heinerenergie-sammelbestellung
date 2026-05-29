@@ -82,6 +82,19 @@
                 <div v-if="form.errors.accepts_transfers" class="text-sm text-red-500">{{ form.errors.accepts_transfers }}</div>
             </div>
 
+            <!-- Nextcloud group name -->
+            <div class="space-y-2">
+                <Label for="nextcloud_group_name">Nextcloud-Gruppenname</Label>
+                <Input
+                    id="nextcloud_group_name"
+                    v-model="formNextcloudGroupName"
+                    :disabled="!canEdit"
+                    placeholder="z. B. Initiative-Hamburg"
+                    :class="{ 'border-destructive': form.errors.nextcloud_group_name }"
+                />
+                <div v-if="form.errors.nextcloud_group_name" class="text-sm text-red-500">{{ form.errors.nextcloud_group_name }}</div>
+            </div>
+
             <div class="flex justify-end">
                 <Button type="button" v-if="canEdit" variant="default" @click="handleSubmit">
                     <Save class="h-4 w-4" />
@@ -151,6 +164,7 @@ const form = useForm<FormData>({
     description: props.group.description,
     url: props.group.url ?? null,
     accepts_transfers: props.group.accepts_transfers,
+    nextcloud_group_name: props.group.nextcloud_group_name,
     logo: null,
     marker: null,
     remove_logo: false,
@@ -168,6 +182,11 @@ const formDescription = computed({
 const formUrl = computed({
     get: () => form.url ?? undefined,
     set: (value) => (form.url = value || null),
+});
+
+const formNextcloudGroupName = computed({
+    get: () => form.nextcloud_group_name ?? undefined,
+    set: (value) => (form.nextcloud_group_name = value || null),
 });
 
 const logoInput = ref<HTMLInputElement | null>(null);

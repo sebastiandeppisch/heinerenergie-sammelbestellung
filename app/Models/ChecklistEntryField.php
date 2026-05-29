@@ -25,15 +25,12 @@ class ChecklistEntryField extends Model
         'required',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'sort_order' => 'integer',
-            'required' => 'boolean',
-            'type' => FieldType::class,
-            'value' => 'json',
-        ];
-    }
+    protected $casts = [
+        'sort_order' => 'integer',
+        'required' => 'boolean',
+        'type' => FieldType::class,
+        'value' => 'json',
+    ];
 
     /**
      * @return BelongsTo<ChecklistEntry, $this>

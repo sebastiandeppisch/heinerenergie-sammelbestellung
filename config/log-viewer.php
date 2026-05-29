@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Middleware\CheckSysAdmin;
+use Opcodes\LogViewer\Http\Middleware\AuthorizeLogViewer;
+use Opcodes\LogViewer\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 return [
 
@@ -75,7 +77,7 @@ return [
 
     'middleware' => [
         'web',
-        \Opcodes\LogViewer\Http\Middleware\AuthorizeLogViewer::class,
+        AuthorizeLogViewer::class,
         CheckSysAdmin::class,
     ],
 
@@ -90,8 +92,8 @@ return [
 
     'api_middleware' => [
         'auth',
-        \Opcodes\LogViewer\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-        \Opcodes\LogViewer\Http\Middleware\AuthorizeLogViewer::class,
+        EnsureFrontendRequestsAreStateful::class,
+        AuthorizeLogViewer::class,
         CheckSysAdmin::class,
     ],
 

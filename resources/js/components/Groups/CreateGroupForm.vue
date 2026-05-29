@@ -40,8 +40,8 @@ import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
 import { useForm } from '@inertiajs/vue3';
 import { DxSelectBox } from 'devextreme-vue';
-import notify from 'devextreme/ui/notify';
 import { Plus } from 'lucide-vue-next';
+import { toast } from 'vue-sonner';
 import { route } from 'ziggy-js';
 
 type GroupData = App.Data.GroupData;
@@ -65,12 +65,12 @@ const form = useForm<{
 
 const submit = () => {
     if (form.name.length === 0) {
-        notify('Bitte gib einen Namen für die Initiative ein.', 'error');
+        toast.error('Bitte gib einen Namen für die Initiative ein.');
         return;
     }
 
     if (form.parent_id === null && props.parentRequired) {
-        notify('Du kannst nur Untergruppen erstellen, wenn du eine übergeordnete Initiative auswählst.', 'error');
+        toast.error('Du kannst nur Untergruppen erstellen, wenn du eine übergeordnete Initiative auswählst.');
         return;
     }
 

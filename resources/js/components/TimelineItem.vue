@@ -42,7 +42,7 @@ function parseEmail(emailString: string[] | null): string {
                     <div><strong>An:</strong> {{ props.event.to }}</div>
                     <div><strong>Betreff:</strong> {{ props.event.subject }}</div>
                 </div>
-                <div v-else>{{ props.event.description }}</div>
+                <div v-else style="white-space: pre-line">{{ props.event.description }}</div>
                 <i v-if="isMail" :class="isExpanded ? 'dx-icon-chevronup' : 'dx-icon-chevrondown'" class="expand-icon"></i>
             </div>
             <!-- E-Mail Content -->

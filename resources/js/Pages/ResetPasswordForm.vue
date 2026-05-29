@@ -2,8 +2,8 @@
 import { router } from '@inertiajs/vue3';
 import DxForm, { DxButtonItem, DxButtonOptions, DxEmailRule, DxItem, DxLabel, DxRequiredRule } from 'devextreme-vue/form';
 import DxLoadIndicator from 'devextreme-vue/load-indicator';
-import notify from 'devextreme/ui/notify';
 import { reactive, ref } from 'vue';
+import { toast } from 'vue-sonner';
 
 import { Link } from '@inertiajs/vue3';
 import auth from '../auth';
@@ -25,10 +25,10 @@ async function onSubmit() {
 
     if (result.isOk) {
         router.get('login-form');
-        notify(notificationText, 'success', 2500);
+        toast.success(notificationText, { duration: 2500 });
     } else {
         if (!result.isOk && 'message' in result) {
-            notify(result.message, 'error', 2000);
+            toast.error(result.message, { duration: 2000 });
         }
     }
 }

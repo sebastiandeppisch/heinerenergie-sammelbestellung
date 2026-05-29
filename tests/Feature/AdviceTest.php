@@ -112,3 +112,35 @@ test('setAdvisors API sets shared advisors on advice', function () {
     expect($advice->shares->pluck('id')->sort()->values()->all())
         ->toEqual($advisorsToShare->pluck('id')->sort()->values()->all());
 });
+
+$validAdviceData = [
+    'first_name' => 'Max',
+    'last_name' => 'Mustermann',
+    'phone' => '01234567890',
+    'email' => 'max@mustermann.de',
+    'street' => 'Musterstraße',
+    'street_number' => '1',
+    'zip' => '12345',
+    'city' => 'Musterstadt',
+    'type' => 0,
+];
+
+test('system admin must select a group when creating an advice', function () use (&$validAdviceData) {
+    app(SessionService::class)->actAsSystemAdmin();
+
+    $this->actingAs($this->admin)
+        ->post(route('advices.store'), $validAdviceData)
+        ->assertSessionHasErrors('group_id');
+
+    expect(Advice::count())->toBe(0);
+});
+
+test('system admin can create an advice when group is provided', function () use (&$validAdviceData) {
+    app(SessionService::class)->actAsSystemAdmin();
+
+    $this->actingAs($this->admin)
+        ->post(route('advices.store'), array_merge($validAdviceData, ['group_id' => $this->group->uuid]))
+        ->assertRedirect();
+
+    expect(Advice::where('first_name', 'Max')->exists())->toBeTrue();
+});

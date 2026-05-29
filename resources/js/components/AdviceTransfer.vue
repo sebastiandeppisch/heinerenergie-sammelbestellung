@@ -5,9 +5,9 @@ import { faWarning } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { router } from '@inertiajs/vue3';
 import { DxPopup, DxSelectBox } from 'devextreme-vue';
-import notify from 'devextreme/ui/notify';
 import { ArrowRight, Send } from 'lucide-vue-next';
 import { ref } from 'vue';
+import { toast } from 'vue-sonner';
 
 const props = defineProps<{
     adviceId: string;
@@ -24,12 +24,12 @@ function showTransferPopup() {
 
 function transferAdvice() {
     if (!selectedGroup.value) {
-        notify('Bitte wähle eine Initiative aus', 'error', 2000);
+        toast.error('Bitte wähle eine Initiative aus', { duration: 2000 });
         return;
     }
 
     if (!reason.value) {
-        notify('Bitte gib einen Grund für die Übertragung ein', 'error', 2000);
+        toast.error('Bitte gib einen Grund für die Übertragung ein', { duration: 2000 });
         return;
     }
 

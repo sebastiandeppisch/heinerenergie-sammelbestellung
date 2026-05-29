@@ -10,6 +10,7 @@ use App\Http\Controllers\FormSubmitController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\MapPointCategoryController;
 use App\Http\Controllers\MapPointController;
+use App\Http\Controllers\NextcloudGroupController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\SystemAdminController;
 use App\Http\Controllers\UserController;
@@ -57,12 +58,20 @@ Route::middleware('auth')->group(function () {
     Route::delete('/groups/{group}/consulting-area', [GroupController::class, 'deleteConsultingArea'])
         ->name('groups.consulting-area.delete');
 
+    Route::post('/advices', [AdviceController::class, 'store'])->name('advices.store');
     Route::put('advices/{advice}', [AdviceController::class, 'update'])->name('advices.update');
     Route::put('/groups/{group}/dashboard-info', [GroupController::class, 'updateDashboardInfo'])
         ->name('groups.dashboard-info.update');
 
     Route::put('/groups/{group}/new-advice-mail', [GroupController::class, 'updateNewAdviceMail'])
         ->name('groups.new-advice-mail.update');
+
+    Route::get('/groups/{group}/nextcloud', [NextcloudGroupController::class, 'index'])
+        ->name('groups.nextcloud');
+    Route::post('/groups/{group}/nextcloud/{ncUser}/import', [NextcloudGroupController::class, 'import'])
+        ->name('groups.nextcloud.import');
+    Route::post('/groups/{group}/nextcloud/{ncUser}/add-to-group', [NextcloudGroupController::class, 'addToGroup'])
+        ->name('groups.nextcloud.add-to-group');
 
     Route::post('advices/{advice}/unassign', [AdviceController::class, 'unassign'])->name('advices.unassign');
     Route::post('advices/{advice}/transfer', [AdviceController::class, 'transfer'])->name('advices.transfer');

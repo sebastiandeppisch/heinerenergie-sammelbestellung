@@ -39,7 +39,6 @@ function submit() {
     }
 }
 
-// @ts-expect-error Type instantiation is excessively deep and possibly infinite.
 const errors: Record<string, string> = form.errors;
 </script>
 

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Context\GroupContextContract;
 use App\Data\DataProtectedAdviceData;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreAdviceRequest;
 use App\Http\Requests\UpdateAdviceRequest;
 use App\Models\Advice;
 use App\Models\User;
@@ -23,16 +22,6 @@ class AdviceController extends Controller
     private function groupContext(): GroupContextContract
     {
         return app(GroupContextContract::class);
-    }
-
-    public function store(StoreAdviceRequest $request)
-    {
-        $advice = new Advice;
-        $advice->fill($request->validated());
-        $advice->group_id = $this->groupContext()->getCurrentGroup()?->id;
-        $advice->save();
-
-        return $advice;
     }
 
     public function show(Advice $advice)

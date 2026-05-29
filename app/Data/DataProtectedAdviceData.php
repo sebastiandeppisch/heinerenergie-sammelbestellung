@@ -47,6 +47,8 @@ class DataProtectedAdviceData extends Data
         public AdviceStatusResult $result,
         public ?bool $can_edit,
         public ?string $group_id,
+        public ?string $nextcloud_folder_id,
+        public ?string $nextcloud_folder_path,
     ) {}
 
     public static function fromModel(Advice $advice, ?User $user = null, $canViewAll = false): self
@@ -89,7 +91,9 @@ class DataProtectedAdviceData extends Data
             result: $advice->result,
             can_edit: $canViewAll || ($user ? $adviceService->canEdit($advice, $user) : false),
             group_id: $advice->group->uuid,
-            shares_ids: $advice->shares->pluck('uuid')
+            shares_ids: $advice->shares->pluck('uuid'),
+            nextcloud_folder_id: $advice->nextcloud_folder_id,
+            nextcloud_folder_path: $advice->nextcloud_folder_path,
         );
     }
 }

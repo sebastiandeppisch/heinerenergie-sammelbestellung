@@ -17,6 +17,7 @@ use App\Events\Advice\CommentAddedEvent;
 use App\Events\Advice\InitiativeTransferEvent;
 use App\Http\Controllers\Concerns\HandlesChecklistEntries;
 use App\Http\Requests\StoreAdviceCommentRequest;
+use App\Http\Requests\StoreAdviceRequest;
 use App\Http\Requests\TransferAdviceRequest;
 use App\Http\Requests\UpdateAdviceRequest;
 use App\Models\Advice;
@@ -55,6 +56,27 @@ class AdviceController extends Controller
             'advices' => $advices,
             'groups' => $groups,
         ]);
+    }
+
+    public function store(StoreAdviceRequest $request, SessionService $sessionService)
+    {
+        $this->authorize('create', Advice::class);
+
+        $currentGroup = $sessionService->getCurrentGroup();
+
+        $advice = new Advice;
+        $advice->fill($request->validated());
+        $advice->advisor_id = Auth::id();
+        if ($currentGroup !== null) {
+            $advice->group_id = $currentGroup->id;
+        } else {
+            $groupUuid = $request->validated()['group_id'];
+            $advice->group_id = Group::where('uuid', $groupUuid)->firstOrFail()->id;
+        }
+        $advice->save();
+
+        return redirect()->route('advices.show', $advice)
+            ->with('success', 'Beratung erfolgreich angelegt');
     }
 
     public function show(Advice $advice)

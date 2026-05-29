@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Override;
 use Wnx\Sends\Contracts\HasSends;
 use Wnx\Sends\Support\HasSendsTrait;
 
@@ -69,6 +70,8 @@ class Advice extends Model implements HasSends, Pointable
         'group_id',
         'place_notes',
         'address',
+        'nextcloud_folder_id',
+        'nextcloud_folder_path',
     ];
 
     protected $appends = ['shares_ids'];
@@ -157,6 +160,7 @@ class Advice extends Model implements HasSends, Pointable
         return $this->hasMany(ChecklistEntry::class);
     }
 
+    #[Override]
     protected function casts(): array
     {
         return [

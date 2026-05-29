@@ -10,9 +10,9 @@ import { Input } from '@/shadcn/components/ui/input';
 import { router, usePage } from '@inertiajs/vue3';
 import { LPolygon } from '@vue-leaflet/vue-leaflet';
 import axios from 'axios';
-import notify from 'devextreme/ui/notify';
 import { latLng } from 'leaflet';
 import { ExternalLink, Search, UserCheck } from 'lucide-vue-next';
+import { toast } from 'vue-sonner';
 import AdviceTypes from '../AdviceTypes';
 import { isActingAsAdmin, user as userRef } from '../authHelper';
 import { AdaptTableHeight } from '../helpers';
@@ -125,7 +125,7 @@ function runSearch() {
         .then((response) => response.data)
         .then((data: App.ValueObjects.Coordinate) => {
             if (data['lat'] === undefined || data['lng'] === undefined) {
-                notify('Adresse nicht gefunden', 'error');
+                toast.error('Adresse nicht gefunden');
                 return;
             }
             map.center = latLng(data.lat, data.lng);

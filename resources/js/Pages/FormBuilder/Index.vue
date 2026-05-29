@@ -10,7 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { router } from '@inertiajs/vue3';
-import notify from 'devextreme/ui/notify';
 import { ChevronDown, Edit, Trash2 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import { route } from 'ziggy-js';
@@ -55,14 +54,7 @@ const filteredChecklists = computed(() => filterByQuery(props.checklists, checkl
 
 function confirmDeleteForm(formId: string) {
     if (confirm('Möchtest Du wirklich dieses Formular löschen?')) {
-        router.delete(route('form-definitions.destroy', formId), {
-            onSuccess: () => {
-                notify('Formular wurde gelöscht', 'success', 2000);
-            },
-            onError: (errors) => {
-                notify(`Fehler beim Löschen des Formulars: ${Object.values(errors).join(', ')}`, 'error', 4000);
-            },
-        });
+        router.delete(route('form-definitions.destroy', formId));
     }
 }
 

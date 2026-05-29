@@ -62,6 +62,14 @@
                                 <GroupDetails :group="selectedGroup" :can-edit="canEditGroup" />
                             </TabsContent>
                             <TabsContent value="berater" v-if="canEditGroup">
+                                <div class="flex justify-end pt-4 pb-2">
+                                    <Button variant="outline" size="sm" :as-child="true">
+                                        <a :href="route('groups.nextcloud', selectedGroup.id)">
+                                            <Cloud class="mr-1 h-4 w-4" />
+                                            Nextcloud-Abgleich
+                                        </a>
+                                    </Button>
+                                </div>
                                 <GroupUsers :group="selectedGroup" />
                             </TabsContent>
                             <TabsContent value="beratungsgebiet">
@@ -105,8 +113,9 @@ import { Button } from '@/shadcn/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';
 import AdviceStatusGroup from '@/views/AdviceStatusGroup.vue';
 import { DxPopup } from 'devextreme-vue/popup';
-import { Info, Mail, Map, Plus, Table, Users } from 'lucide-vue-next';
+import { Cloud, Info, Mail, Map, Plus, Table, Users } from 'lucide-vue-next';
 import { computed, onMounted, ref, watch } from 'vue';
+import { route } from 'ziggy-js';
 
 type GroupsIndexData = {
     groupTreeItems: Array<App.Data.GroupTreeItem>;

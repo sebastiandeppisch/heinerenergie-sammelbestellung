@@ -8,6 +8,7 @@
 </template>
 
 <script setup lang="ts">
+import type { ApexOptions } from 'apexcharts';
 import { computed, ref } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
 // Typdefinitionen
@@ -27,7 +28,7 @@ const loading = ref(false);
 const series = computed(() => Object.values(props.data.statusCounts));
 const labels = computed(() => Object.keys(props.data.statusCounts));
 
-const chartOptions = computed(() => {
+const chartOptions = computed((): ApexOptions => {
     return {
         chart: {
             type: 'donut',
@@ -40,13 +41,8 @@ const chartOptions = computed(() => {
             position: 'bottom',
             fontSize: '13px',
             fontFamily: 'Arial, sans-serif',
-            markers: {
-                width: 12,
-                height: 12,
-                radius: 12,
-            },
             formatter: function (seriesName: string, opts: any) {
-                return [seriesName, ' - ', opts.w.globals.series[opts.seriesIndex]];
+                return seriesName + ' - ' + opts.w.globals.series[opts.seriesIndex];
             },
         },
         dataLabels: {
@@ -124,7 +120,6 @@ const chartOptions = computed(() => {
             hover: {
                 filter: {
                     type: 'darken',
-                    value: 0.8,
                 },
             },
         },

@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
+use Override;
 
 class StoreGroupUserRequest extends FormRequest
 {
@@ -30,6 +31,7 @@ class StoreGroupUserRequest extends FormRequest
         ];
     }
 
+    #[Override]
     protected function prepareForValidation(): void
     {
         $this->merge([

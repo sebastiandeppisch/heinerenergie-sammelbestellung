@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import DxPopup from 'devextreme-vue/popup';
-import { DxScrollView } from 'devextreme-vue/scroll-view';
+import CreateAdviceDialog from '@/components/CreateAdviceDialog.vue';
 import { computed, onMounted, reactive, ref } from 'vue';
 import LaravelDataSource from '../LaravelDataSource';
 import { AdaptTableHeight } from '../helpers';
@@ -25,14 +24,14 @@ import DxDataGrid, {
     DxToolbar,
     DxTotalItem,
 } from 'devextreme-vue/data-grid';
-import { DxButtonItem, DxForm, DxGroupItem as DxFormGroupItem, DxItem as DxFormItem } from 'devextreme-vue/form';
 import Store from 'devextreme/data/abstract_store';
 import { default as ArrayDataSource, default as ArrayStore } from 'devextreme/data/array_store';
 import CustomStore from 'devextreme/data/custom_store';
-import notify from 'devextreme/ui/notify';
+import { toast } from 'vue-sonner';
 import { route } from 'ziggy-js';
 import LaravelLookupSource from '../LaravelLookupSource';
 import { isActingAsAdmin, user } from '../authHelper';
+
 const emit = defineEmits(['selectAdviceId']);
 
 const advisors = new LaravelDataSource('api/users');
@@ -54,6 +53,7 @@ onMounted(() => {
     advisors.reload();
     adviceStatus.load();
     adviceTypes.load();
+    tableHeight.calcHeight();
 });
 
 const advices = computed(() => {
@@ -73,41 +73,9 @@ const groups = computed(() => {
     });
 });
 
-const newadvice = reactive({
-    first_name: '',
-    last_name: '',
-    phone: '',
-    email: '',
-    street: '',
-    street_number: '',
-    zip: '',
-    city: '',
-    advice_status_id: 1,
-    type: 0,
-    commentary: '',
-    advisor_id: user.value.id,
-});
-
-function radioBoxLayout({ name }: { name: 'Home' | 'Virtual' | 'DirectOrder' }) {
-    const icons = {
-        Home: 'home',
-        Virtual: 'tel',
-        DirectOrder: 'cart',
-    };
-
-    const helpText = {
-        Home: 'Beratung vor Ort',
-        Virtual: 'Beratung per Telefon',
-        DirectOrder: 'Direktbestellung',
-    };
-
-    return `<i style="font-size:1.5em;" class="dx-icon-${icons[name]}" title='${helpText[name]}'></i>`;
-}
-
 const r = reactive({
     advisorNames: new Map<number, string>(),
     autoExpand: false,
-    newAdvicePopupVisible: false,
 });
 
 advisors.load().then(() => {
@@ -120,17 +88,13 @@ function openAdvice(e: { row: any }) {
     router.get(route('advices.show', e.row.data.id));
 }
 
-onMounted(() => {
-    tableHeight.calcHeight();
-});
-
 function assignAdvice(id: number) {
     axios
         .post('api/advices/' + id + '/assign')
         .then((response) => response.data)
-        .then((advice) => {
+        .then(() => {
             router.reload();
-            notify('Die Beratung wurde Dir zugewiesen', 'success', 3000);
+            toast.success('Die Beratung wurde Dir zugewiesen', { duration: 3000 });
         });
 }
 
@@ -188,36 +152,6 @@ function sortedAdvisors(e: { key: string }): Store {
     });
 }
 
-function openNewAdvice() {
-    r.newAdvicePopupVisible = true;
-}
-
-function saveNewAdvice() {
-    axios
-        .post('api/advices', newadvice)
-        .then((response) => response.data)
-        .then((advice) => {
-            notify('Beratung erfolgreich angelegt', 'success', 3000);
-            router.reload();
-            r.newAdvicePopupVisible = false;
-            newadvice.first_name = '';
-            newadvice.last_name = '';
-            newadvice.phone = '';
-            newadvice.email = '';
-            newadvice.street = '';
-            newadvice.street_number = '';
-            newadvice.zip = '';
-            newadvice.city = '';
-            newadvice.advice_status_id = 1;
-            newadvice.type = 0;
-            newadvice.commentary = '';
-            newadvice.advisor_id = user.value.id;
-        })
-        .catch((error) => {
-            notify(error.response.data.message, 'error', 3000);
-        });
-}
-
 const adviceStatusResult = new ArrayDataSource([
     { id: 0, name: 'Offen' },
     { id: 1, name: 'In Bearbeitung' },
@@ -252,7 +186,7 @@ const adviceStatusResult = new ArrayDataSource([
                     <DxItem location="after" template="newadvice" />
                 </DxToolbar>
                 <template #newadvice>
-                    <DxButton icon="add" @click="openNewAdvice" />
+                    <CreateAdviceDialog :groups="props.groups" />
                 </template>
                 <template #autoexpand>
                     <div>
@@ -324,71 +258,6 @@ const adviceStatusResult = new ArrayDataSource([
                     <span v-else style="font-style: italic; color: gray">verborgen</span>
                 </template>
             </DxDataGrid>
-
-            <DxPopup
-                v-model:visible="r.newAdvicePopupVisible"
-                title="Neue Beratung"
-                hide-on-outside-click="true"
-                :show-close-button="true"
-                max-width="900px"
-            >
-                <DxScrollView width="100%" height="100%">
-                    <DxForm label-mode="floating" :col-count="2" :form-data="newadvice">
-                        <DxFormGroupItem caption="Name">
-                            <DxFormItem data-field="first_name" :label="{ text: 'Vorname' }" />
-                            <DxFormItem data-field="last_name" :label="{ text: 'Nachname' }" />
-                        </DxFormGroupItem>
-
-                        <DxFormGroupItem caption="Kontakt">
-                            <DxFormItem data-field="phone" :label="{ text: 'Telefonnummer' }" />
-                            <DxFormItem data-field="email" :label="{ text: 'E-Mail Adresse' }" />
-                        </DxFormGroupItem>
-
-                        <DxFormGroupItem caption="Adresse">
-                            <DxFormItem data-field="street" :label="{ text: 'Straße' }" />
-                            <DxFormItem data-field="street_number" :label="{ text: 'Hausnummer' }" />
-                            <DxFormItem data-field="zip" :label="{ text: 'Postleitzahl' }" />
-                            <DxFormItem data-field="city" :label="{ text: 'Stadt' }" />
-                        </DxFormGroupItem>
-
-                        <DxFormGroupItem caption="Beratung">
-                            <DxFormItem
-                                data-field="advice_status_id"
-                                :label="{ text: 'Status' }"
-                                editor-type="dxSelectBox"
-                                :editor-options="{
-                                    dataSource: adviceStatus,
-                                    displayExpr: 'name',
-                                    valueExpr: 'id',
-                                }"
-                            />
-                            <DxFormItem
-                                data-field="type"
-                                :label="{ text: 'Typ' }"
-                                editor-type="dxRadioGroup"
-                                :editor-options="{
-                                    dataSource: adviceTypes,
-                                    displayExpr: 'name',
-                                    valueExpr: 'id',
-                                    layout: 'horizontal',
-                                    itemTemplate: radioBoxLayout,
-                                }"
-                            />
-                            <DxFormItem
-                                data-field="commentary"
-                                :label="{ text: 'Kommentar' }"
-                                editor-type="dxTextArea"
-                                :editor-options="{ autoResizeEnabled: true }"
-                            />
-                        </DxFormGroupItem>
-
-                        <DxButtonItem
-                            :button-options="{ text: 'Speichern', type: 'success', useSubmitBehavior: true, width: '100%', onClick: saveNewAdvice }"
-                            :col-span="2"
-                        />
-                    </DxForm>
-                </DxScrollView>
-            </DxPopup>
         </div>
     </div>
 </template>

@@ -6,6 +6,7 @@ use App\Models\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 class ChecklistEntryFieldOption extends Model
 {
@@ -22,6 +23,7 @@ class ChecklistEntryFieldOption extends Model
         'is_required',
     ];
 
+    #[Override]
     protected function casts(): array
     {
         return [

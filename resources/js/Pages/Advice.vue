@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import ChecklistPanel from '@/components/ChecklistPanel.vue';
 import FormSubmissionRenderer from '@/components/FormBuilder/FormSubmissionRenderer.vue';
+import AdviceNextcloud from '@/components/Nextcloud/AdviceNextcloud.vue';
 import Button from '@/shadcn/components/ui/button/Button.vue';
 import { Link } from '@inertiajs/vue3';
 import { Map } from 'lucide-vue-next';
@@ -79,6 +80,11 @@ const advisor = user.value;
                     <div style="padding: 16px">
                         <ChecklistPanel :checklist-entries="checklistEntries" :available-checklists="availableChecklists" :advice-id="advice.id" />
                     </div>
+                </div>
+
+                <div class="content-card">
+                    <h3 class="card-title card-header">Dateien (Nextcloud)</h3>
+                    <AdviceNextcloud :advice="advice" />
                 </div>
             </div>
 
