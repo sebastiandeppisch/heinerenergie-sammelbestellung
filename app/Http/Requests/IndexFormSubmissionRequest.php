@@ -30,6 +30,7 @@ class IndexFormSubmissionRequest extends FormRequest
             'groupByForm' => 'string|in:true,false',
             'dateFrom' => 'nullable|date',
             'dateTo' => 'nullable|date|after_or_equal:dateFrom',
+            'view' => 'string|in:cards,table',
         ];
     }
 
@@ -56,5 +57,10 @@ class IndexFormSubmissionRequest extends FormRequest
     public function dateTo(): ?string
     {
         return $this->input('dateTo', null);
+    }
+
+    public function view(): string
+    {
+        return $this->input('view', 'cards');
     }
 }

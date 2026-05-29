@@ -13,27 +13,14 @@
             :show-group-header="props.groupByForm && isFirstInGroup(index)"
             :show-group-badge="!props.groupByForm"
         />
-        <WhenVisible
-            always
-            :params="{
-                data: {
-                    page: pagination.currentPage + 1,
-                },
-                only: ['formSubmissions', 'pagination'],
-                preserveUrl: true,
-            }"
-        >
-            <div v-if="pagination.currentPage >= pagination.lastPage">Ende der Liste</div>
-            <template #fallback>
-                <div>Loading...</div>
-            </template>
-        </WhenVisible>
     </div>
+
+    <SubmissionPagination v-if="pagination.lastPage > 1" :pagination="pagination" class="mt-4" />
 </template>
 <script lang="ts" setup>
 import SubmissionCard from '@/components/FormSubmissions/SubmissionCard.vue';
+import SubmissionPagination from '@/components/FormSubmissions/SubmissionPagination.vue';
 import Badge from '@/shadcn/components/ui/badge/Badge.vue';
-import { WhenVisible } from '@inertiajs/vue3';
 
 const props = defineProps<{
     formSubmissions: App.Data.FormSubmissionData[] | Record<number, App.Data.FormSubmissionData>;
@@ -41,7 +28,12 @@ const props = defineProps<{
     groupByForm: boolean;
 }>();
 
-function isFirstInGroup(index: number) {
-    return index === 0 || props.formSubmissions[index].form_name !== props.formSubmissions[index - 1].form_name;
+function isFirstInGroup(index: number | string) {
+    const i = Number(index);
+    if (i === 0) {
+        return true;
+    }
+    const list = props.formSubmissions as Record<number, App.Data.FormSubmissionData>;
+    return list[i].form_name !== list[i - 1]?.form_name;
 }
 </script>

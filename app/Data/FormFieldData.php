@@ -58,6 +58,8 @@ class FormFieldData extends Data
 
     public static function fromSubmissionField(SubmissionField $model): self
     {
+        $model->loadMissing('options');
+
         return new self(
             id: $model->uuid,
             type: $model->type,

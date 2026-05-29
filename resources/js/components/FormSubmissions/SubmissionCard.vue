@@ -3,13 +3,13 @@
         <h3 class="m-0 basis-full p-0">{{ submission.form_name }}</h3>
     </Card>
 
-    <Card class="mr-4 mb-4 h-full transition-shadow hover:shadow-lg">
+    <Card :class="variant === 'dialog' ? 'h-full' : 'mr-4 mb-4 h-full transition-shadow hover:shadow-lg'">
         <CardHeader class="pb-3">
             <div class="mb-2 flex items-start justify-between">
                 <Badge variant="outline" class="text-xs" v-if="showGroupBadge">
                     {{ submission.form_name }}
                 </Badge>
-                <span class="text-xs text-gray-500">{{ formatDate(submission.submitted_at) }}</span>
+                <span class="text-xs text-gray-500">{{ formatDateTime(submission.submitted_at) }}</span>
             </div>
             <!--  <p class="text-sm text-gray-600 font-medium">
         {{ submission.advice_id || '' }}
@@ -47,42 +47,46 @@ import { router } from '@inertiajs/vue3';
 import { MailCheck, MailOpen } from 'lucide-vue-next';
 import { route } from 'ziggy-js';
 import FormSubmissionRenderer from '../FormBuilder/FormSubmissionRenderer.vue';
-const props = defineProps<{
-    submission: App.Data.FormSubmissionData;
-    index: number | string;
-    showGroupHeader: boolean;
-    showGroupBadge: boolean;
-}>();
+const props = withDefaults(
+    defineProps<{
+        submission: App.Data.FormSubmissionData;
+        index: number | string;
+        showGroupHeader: boolean;
+        showGroupBadge: boolean;
+        variant?: 'default' | 'dialog';
+    }>(),
+    {
+        variant: 'default',
+    },
+);
 
-const formatDate = (date: Date | string): string => {
+const formatDateTime = (date: Date | string): string => {
     const dateObj = typeof date === 'string' ? new Date(date) : date;
-    return dateObj.toLocaleDateString('de-DE');
+    return dateObj.toLocaleString('de-DE', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
 };
 
 function seen(id: string) {
     router.post(
-        route('form-submissions.mark-seen', {
-            formSubmission: id,
-            index: props.index,
-        }),
+        route('form-submissions.mark-seen', id),
         {},
         {
-            only: ['formSubmissions'],
-            preserveUrl: true,
+            preserveScroll: true,
         },
     );
 }
 
 function unseen(id: string) {
     router.post(
-        route('form-submissions.mark-unseen', {
-            formSubmission: id,
-            index: props.index,
-        }),
+        route('form-submissions.mark-unseen', id),
         {},
         {
-            only: ['formSubmissions'],
-            preserveUrl: true,
+            preserveScroll: true,
         },
     );
 }

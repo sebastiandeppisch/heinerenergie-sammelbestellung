@@ -11,12 +11,33 @@
             v-model:group-by-form="groupByFormModel"
         />
 
-        <Grid :form-submissions="formSubmissions" :pagination="props.pagination" :group-by-form="groupByFormModel" />
+        <Tabs v-model="viewModel" class="w-full">
+            <TabsList>
+                <TabsTrigger value="cards">Kachelansicht</TabsTrigger>
+                <TabsTrigger value="table">Tabellenansicht</TabsTrigger>
+            </TabsList>
+            <TabsContent value="cards">
+                <Grid :form-submissions="formSubmissions" :pagination="props.pagination" :group-by-form="groupByFormModel" />
+            </TabsContent>
+            <TabsContent value="table">
+                <SubmissionsTable
+                    :form-submissions="formSubmissions"
+                    :form-definitions="formDefinitions"
+                    :selected-form-definitions="selectedFormDefinitions"
+                    :pagination="props.pagination"
+                />
+            </TabsContent>
+        </Tabs>
     </div>
 </template>
 <script lang="ts" setup>
 import Filter from '@/components/FormSubmissions/Filter.vue';
 import Grid from '@/components/FormSubmissions/Grid.vue';
+import SubmissionsTable from '@/components/FormSubmissions/SubmissionsTable.vue';
+import Tabs from '@/shadcn/components/ui/tabs/Tabs.vue';
+import TabsContent from '@/shadcn/components/ui/tabs/TabsContent.vue';
+import TabsList from '@/shadcn/components/ui/tabs/TabsList.vue';
+import TabsTrigger from '@/shadcn/components/ui/tabs/TabsTrigger.vue';
 import { router } from '@inertiajs/vue3';
 import { computed, ComputedRef } from 'vue';
 
@@ -27,6 +48,7 @@ const props = defineProps<{
     selectedFormDefinitions: string[];
     sortOrder: 'asc' | 'desc';
     groupByForm: boolean;
+    view: 'cards' | 'table';
     formSubmissions: App.Data.FormSubmissionData[] | any;
     pagination: App.Data.PaginationData;
 }>();
@@ -49,6 +71,9 @@ const filter = computed(() => {
     }
     if (props.groupByForm) {
         result['groupByForm'] = props.groupByForm;
+    }
+    if (props.view === 'table') {
+        result['view'] = props.view;
     }
     return result;
 });
@@ -80,7 +105,11 @@ function filterQuery(query: any) {
     } else {
         result['groupByForm'] = undefined;
     }
-    console.log(result);
+    if (query.view === 'table') {
+        result['view'] = query.view;
+    } else {
+        result['view'] = undefined;
+    }
     return result;
 }
 
@@ -88,7 +117,6 @@ function computedTriggerReload<T>(key: keyof typeof props): ComputedRef<T> {
     return computed({
         get: () => props[key],
         set: (value: T) => {
-            console.log(value);
             const data = filterQuery({
                 ...filter.value,
                 [key]: value,
@@ -101,9 +129,9 @@ function computedTriggerReload<T>(key: keyof typeof props): ComputedRef<T> {
 }
 
 const dateFromModel = computedTriggerReload<Date | null>('dateFrom');
-
 const dateToModel = computedTriggerReload<Date | null>('dateTo');
 const selectedFormDefinitionsModel = computedTriggerReload<string[]>('selectedFormDefinitions');
 const sortOrderModel = computedTriggerReload<'asc' | 'desc'>('sortOrder');
 const groupByFormModel = computedTriggerReload<boolean>('groupByForm');
+const viewModel = computedTriggerReload<'cards' | 'table'>('view');
 </script>

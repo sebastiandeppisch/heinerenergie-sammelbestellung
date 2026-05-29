@@ -6,6 +6,7 @@ use App\Context\GroupContextContract;
 use App\Data\FormDefinitionData;
 use App\Data\FormSubmissionData;
 use App\Data\PaginationData;
+use App\Enums\FormType;
 use App\Http\Requests\IndexFormSubmissionRequest;
 use App\Models\FormDefinition;
 use App\Models\FormSubmission;
@@ -29,6 +30,9 @@ class FormSubmissionController extends Controller
         }
 
         $formsubmissions = $formsubmissions->orderBy('submitted_at', $request->sorting())
+            ->whereHas('formDefinition', function ($query) {
+                $query->where('type', FormType::Form);
+            })
             ->where(function ($query) use ($request) {
                 if ($request->dateFrom()) {
                     $query->where('submitted_at', '>=', $request->dateFrom());
@@ -41,7 +45,8 @@ class FormSubmissionController extends Controller
                 $query->whereIn('form_definition_id', $request->selectedFormDefinitions());
             })->paginate(10);
 
-        $formDefinitions = FormDefinition::with(['fields', 'adviceCreator', 'mapPointCreator']);
+        $formDefinitions = FormDefinition::with(['fields', 'adviceCreator', 'mapPointCreator'])
+            ->where('type', FormType::Form);
 
         if ($groupContext->getCurrentGroup() !== null) {
             $formDefinitions = $formDefinitions->where('group_id', $groupContext->getCurrentGroup()->id);
@@ -58,7 +63,8 @@ class FormSubmissionController extends Controller
             'groupByForm' => $request->groupByForm(),
             'dateTo' => $request->dateTo(),
             'dateFrom' => $request->dateFrom(),
-            'formSubmissions' => Inertia::deepMerge($this->addPagedIndex($formsubmissions->items(), $formsubmissions->currentPage())),
+            'view' => $request->view(),
+            'formSubmissions' => $this->addPagedIndex($formsubmissions->items(), $formsubmissions->currentPage()),
             'pagination' => PaginationData::fromPagination($formsubmissions),
         ]);
     }
@@ -74,24 +80,12 @@ class FormSubmissionController extends Controller
         });
     }
 
-    private function singleSubmission(FormSubmission $formSubmission, Request $request)
-    {
-        $index = $request->input('index');
-        $data = [];
-        $data[$index] = FormSubmissionData::fromModel($formSubmission);
-
-        return Inertia::render('FormSubmissions/Index', [
-            'formSubmissions' => Inertia::deepMerge($data),
-        ]);
-
-    }
-
     public function markSeen(Request $request, FormSubmission $formSubmission)
     {
         $formSubmission->seen = true;
         $formSubmission->save();
 
-        return $this->singleSubmission($formSubmission, $request)->with('success', 'Der Formulareintrag wurde als gelesen markiert');
+        return back()->with('success', 'Der Formulareintrag wurde als gelesen markiert');
     }
 
     public function markUnseen(Request $request, FormSubmission $formSubmission)
@@ -99,6 +93,6 @@ class FormSubmissionController extends Controller
         $formSubmission->seen = false;
         $formSubmission->save();
 
-        return $this->singleSubmission($formSubmission, $request)->with('success', 'Der Formulareintrag wurde als ungelesen markiert');
+        return back()->with('success', 'Der Formulareintrag wurde als ungelesen markiert');
     }
 }

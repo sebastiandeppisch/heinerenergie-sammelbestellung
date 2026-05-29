@@ -95,3 +95,26 @@ test('form submissions can be sorted by form definition', function () {
         ->where('formSubmissions.1.form_name', 'Test Form')
     );
 });
+
+test('view defaults to cards', function () {
+    $response = $this->get(route('form-submissions.index'));
+    $response->assertStatus(200);
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('FormSubmissions/Index')
+        ->where('view', 'cards')
+    );
+});
+
+test('view can be set to table via query parameter', function () {
+    $response = $this->get(route('form-submissions.index', ['view' => 'table']));
+    $response->assertStatus(200);
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('FormSubmissions/Index')
+        ->where('view', 'table')
+    );
+});
+
+test('invalid view value is rejected', function () {
+    $response = $this->get(route('form-submissions.index', ['view' => 'invalid']));
+    $response->assertSessionHasErrors('view');
+});
