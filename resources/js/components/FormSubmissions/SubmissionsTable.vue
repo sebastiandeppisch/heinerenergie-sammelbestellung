@@ -64,8 +64,8 @@
                         </template>
                         <template v-else>
                             <TableCell>{{ submission.form_name }}</TableCell>
-                            <TableCell class="max-w-md truncate text-sm text-gray-600">
-                                {{ getPreview(submission) }}
+                            <TableCell class="max-w-md text-sm text-gray-600">
+                                <SubmissionPreview :submission="submission" />
                             </TableCell>
                         </template>
                     </TableRow>
@@ -83,6 +83,7 @@
 <script lang="ts" setup>
 import SubmissionDialog from '@/components/FormSubmissions/SubmissionDialog.vue';
 import SubmissionPagination from '@/components/FormSubmissions/SubmissionPagination.vue';
+import SubmissionPreview from '@/components/FormSubmissions/SubmissionPreview.vue';
 import Badge from '@/shadcn/components/ui/badge/Badge.vue';
 import Button from '@/shadcn/components/ui/button/Button.vue';
 import Table from '@/shadcn/components/ui/table/Table.vue';
@@ -173,21 +174,6 @@ function getFieldValue(submission: App.Data.FormSubmissionData, label: string): 
     return formatValue(match.value);
 }
 
-function getPreview(submission: App.Data.FormSubmissionData): string {
-    const parts: string[] = [];
-    for (const field of submission.fields) {
-        const text = formatValue(field.value).trim();
-        if (text === '') {
-            continue;
-        }
-        parts.push(`${field.field.label}: ${text}`);
-        if (parts.length >= 3) {
-            break;
-        }
-    }
-    const joined = parts.join(' · ');
-    return joined.length > 120 ? joined.slice(0, 117) + '…' : joined;
-}
 
 function openDetail(submission: App.Data.FormSubmissionData, index: number | string) {
     selectedSubmission.value = submission;
