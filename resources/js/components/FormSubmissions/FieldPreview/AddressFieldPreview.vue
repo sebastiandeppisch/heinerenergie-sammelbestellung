@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { MapPin } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
 import Tooltip from '@/shadcn/components/ui/tooltip/Tooltip.vue';
 import TooltipContent from '@/shadcn/components/ui/tooltip/TooltipContent.vue';
 import TooltipTrigger from '@/shadcn/components/ui/tooltip/TooltipTrigger.vue';
+import { MapPin } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 
 type Address = App.ValueObjects.Address;
 
@@ -46,7 +46,14 @@ async function geocode() {
 <template>
     <Tooltip :delay-duration="300">
         <TooltipTrigger as-child>
-            <a :href="osmUrl" target="_blank" rel="noopener" class="inline-flex items-center gap-0.5 hover:underline" @mouseenter="geocode" @click.stop>
+            <a
+                :href="osmUrl"
+                target="_blank"
+                rel="noopener"
+                class="inline-flex items-center gap-0.5 hover:underline"
+                @mouseenter="geocode"
+                @click.stop
+            >
                 <MapPin class="h-3 w-3 shrink-0 text-gray-400" />
                 {{ formatted }}
             </a>
@@ -54,8 +61,6 @@ async function geocode() {
         <TooltipContent v-if="osmEmbedUrl" class="overflow-hidden p-0" :side-offset="8">
             <iframe :src="osmEmbedUrl" width="300" height="200" class="block border-none" style="pointer-events: none" loading="lazy" />
         </TooltipContent>
-        <TooltipContent v-else-if="geocodingFailed" :side-offset="8">
-            Adresse nicht gefunden
-        </TooltipContent>
+        <TooltipContent v-else-if="geocodingFailed" :side-offset="8"> Adresse nicht gefunden </TooltipContent>
     </Tooltip>
 </template>
