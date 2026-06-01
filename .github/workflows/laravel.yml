@@ -71,6 +71,8 @@ jobs:
         fi
     - name: Install NPM dependencies
       run: npm ci
+    - name: Install Playwright browsers
+      run: npx playwright install
     - name: Build frontend assets
       run: npm run build
     - name: Execute tests (Unit and Feature tests) via PHPUnit
