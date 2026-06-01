@@ -13,5 +13,6 @@ class GroupUserData extends Data
         public string $name,
         public string $email,
         public bool $is_admin,
+        public bool $is_active,
     ) {}
 }

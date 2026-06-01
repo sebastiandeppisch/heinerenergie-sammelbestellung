@@ -26,6 +26,7 @@ class UserData extends Data
         public ?string $city,
         public ?string $zip,
         public bool $is_admin,
+        public bool $is_active,
         /** @var Collection<GroupBaseData> */
         public Collection $groups,
     ) {}
@@ -53,6 +54,7 @@ class UserData extends Data
             city: $user->city,
             zip: $user->zip,
             is_admin: $user->is_admin,
+            is_active: $user->is_active,
             groups: $groups
         );
     }

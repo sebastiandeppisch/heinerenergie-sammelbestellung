@@ -53,6 +53,15 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        if (! Auth::user()->is_active) {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => 'Dein Konto wurde deaktiviert. Bitte wende dich an einen Administrator.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

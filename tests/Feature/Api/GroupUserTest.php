@@ -148,6 +148,19 @@ test('non-admin cannot remove user from group', function () {
         ->assertForbidden();
 });
 
+test('inactive user does not appear in group user list', function () {
+    $activeUser = User::factory()->create(['is_active' => true]);
+    $inactiveUser = User::factory()->create(['is_active' => false]);
+    $this->group->users()->attach($activeUser->id, ['is_admin' => false]);
+    $this->group->users()->attach($inactiveUser->id, ['is_admin' => false]);
+
+    actingAs($this->admin)
+        ->get("/api/groups/{$this->group->uuid}/users")
+        ->assertOk()
+        ->assertJsonFragment(['id' => $activeUser->uuid])
+        ->assertJsonMissing(['id' => $inactiveUser->uuid]);
+});
+
 test('cannot add same user twice to group', function () {
     // First add
     actingAs($this->admin)

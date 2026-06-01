@@ -79,7 +79,7 @@ class AdviceController extends Controller
 
     public function sortedAdvisors(Advice $advice, AdviceService $adviceService)
     {
-        return User::all()->map(function (User $user) use ($advice, $adviceService) {
+        return User::where('is_active', true)->get()->map(function (User $user) use ($advice, $adviceService) {
             $name = $user->name;
             $distance = $adviceService->getDistance($advice, $user);
             if ($distance !== null) {

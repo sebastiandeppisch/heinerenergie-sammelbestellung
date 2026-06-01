@@ -29,6 +29,7 @@ class GroupUserController extends Controller
             email: $user->email,
             // @phpstan-ignore-next-line
             is_admin: $group->pivot->is_admin,
+            is_active: $user->is_active,
         );
     }
 
@@ -39,7 +40,7 @@ class GroupUserController extends Controller
     {
         $this->authorize('manageUsers', $group);
 
-        $users = $group->users;
+        $users = $group->users()->where('users.is_active', true)->get();
         $users->load(['groups' => function ($query) use ($group) {
             $query->where('groups.id', $group->id);
         }]);

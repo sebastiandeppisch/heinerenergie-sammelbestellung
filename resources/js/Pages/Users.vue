@@ -3,19 +3,31 @@ import ChangePasswordDialog from '@/components/Users/ChangePasswordDialog.vue';
 import UserFormDialog from '@/components/Users/UserFormDialog.vue';
 import { Button } from '@/shadcn/components/ui/button';
 import { Card, CardContent } from '@/shadcn/components/ui/card';
+import { Label } from '@/shadcn/components/ui/label';
+import { Switch } from '@/shadcn/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import type { CustomPageProps } from '@/types/pageProps';
+import { user as currentUser } from '@/authHelper';
 import { router, usePage } from '@inertiajs/vue3';
-import { Edit, Key, Plus } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { Edit, Key, Plus, UserCheck, UserX } from 'lucide-vue-next';
+import { computed, ref, toRef, watch } from 'vue';
+import { toast } from 'vue-sonner';
+import { route } from 'ziggy-js';
 
 const props = defineProps<{
     canPromoteUsersToSystemAdmin: boolean;
+    showInactive: boolean;
     users: App.Data.UserData[];
 }>();
 
 const page = usePage<CustomPageProps>();
 const currentGroup = computed(() => page.props.auth.currentGroup);
+
+const showInactive = toRef(props.showInactive);
+
+watch(showInactive, (value) => {
+    router.get(route('users.index'), { show_inactive: value ? '1' : undefined }, { preserveScroll: true });
+});
 
 // Dialog states
 const createEditDialogOpen = ref(false);
@@ -49,6 +61,12 @@ function handleUserFormSuccess() {
 function handlePasswordChangeSuccess() {
     router.reload();
 }
+
+function toggleActive(user: App.Data.UserData) {
+    router.put(route('users.update', user.id), { is_active: !user.is_active } as any, {
+        onError: () => toast.error('Fehler beim Ändern des Status'),
+    });
+}
 </script>
 
 <template>
@@ -60,10 +78,16 @@ function handlePasswordChangeSuccess() {
                     <p class="mt-2 text-gray-600">Verwalte Berater*innen</p>
                 </div>
 
-                <Button @click="openCreateDialog">
-                    <Plus class="mr-2 h-4 w-4" />
-                    Neue*n Berater*in anlegen
-                </Button>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2">
+                        <Switch v-model="showInactive" id="show-inactive" />
+                        <Label for="show-inactive">Inaktive anzeigen</Label>
+                    </div>
+                    <Button @click="openCreateDialog">
+                        <Plus class="mr-2 h-4 w-4" />
+                        Neue*n Berater*in anlegen
+                    </Button>
+                </div>
             </div>
 
             <Card>
@@ -76,6 +100,7 @@ function handlePasswordChangeSuccess() {
                                 <TableHead>E-Mail Adresse</TableHead>
                                 <TableHead>Gruppen</TableHead>
                                 <TableHead v-if="canPromoteUsersToSystemAdmin">System Admin</TableHead>
+                                <TableHead>Status</TableHead>
                                 <TableHead class="text-right">Aktionen</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -109,6 +134,17 @@ function handlePasswordChangeSuccess() {
                                         {{ user.is_admin ? 'Ja' : 'Nein' }}
                                     </span>
                                 </TableCell>
+                                <TableCell>
+                                    <span
+                                        :class="{
+                                            'rounded px-2 py-1 text-xs font-medium': true,
+                                            'bg-green-100 text-green-800': user.is_active,
+                                            'bg-gray-100 text-gray-800': !user.is_active,
+                                        }"
+                                    >
+                                        {{ user.is_active ? 'Aktiv' : 'Inaktiv' }}
+                                    </span>
+                                </TableCell>
                                 <TableCell class="text-right">
                                     <div class="flex justify-end gap-2">
                                         <Button variant="outline" size="sm" @click="openEditDialog(user)">
@@ -117,12 +153,22 @@ function handlePasswordChangeSuccess() {
                                         <Button variant="outline" size="sm" @click="openPasswordDialog(user)">
                                             <Key class="h-4 w-4" />
                                         </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            @click="toggleActive(user)"
+                                            :title="user.is_active ? 'Deaktivieren' : 'Reaktivieren'"
+                                            :disabled="user.id === currentUser?.id"
+                                        >
+                                            <UserX v-if="user.is_active" class="h-4 w-4" />
+                                            <UserCheck v-else class="h-4 w-4" />
+                                        </Button>
                                     </div>
                                 </TableCell>
                             </TableRow>
 
                             <TableRow v-if="props.users.length === 0">
-                                <TableCell :colspan="canPromoteUsersToSystemAdmin ? 6 : 5" class="py-8 text-center text-gray-500">
+                                <TableCell :colspan="canPromoteUsersToSystemAdmin ? 7 : 6" class="py-8 text-center text-gray-500">
                                     Noch keine Berater*innen erstellt
                                 </TableCell>
                             </TableRow>

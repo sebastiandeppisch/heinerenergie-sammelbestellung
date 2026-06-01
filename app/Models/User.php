@@ -32,6 +32,7 @@ class User extends Authenticatable
         'zip',
         'city',
         'advice_radius',
+        'is_active',
     ];
 
     protected $hidden = [
@@ -80,6 +81,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'is_admin' => 'bool',
+            'is_active' => 'bool',
             'address' => Address::class,
             'coordinate' => Coordinate::class,
             'advice_radius' => 'int',

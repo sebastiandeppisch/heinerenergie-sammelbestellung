@@ -38,12 +38,10 @@ class UserController extends Controller
     public function index(Request $request)
     {
 
+        $query = User::query()->where('is_active', true);
         if ($request->has(('withoutself'))) {
-            $query = User::query()->where('id', '!=', $this->user()->id);
-        } else {
-            $query = User::query();
+            $query = $query->where('id', '!=', $this->user()->id);
         }
-
         $users = $this->dxFilter($request, $query)->get();
 
         // @phpstan-ignore-next-line

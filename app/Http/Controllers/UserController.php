@@ -28,12 +28,17 @@ class UserController extends Controller
         return Auth::user();
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $canPromoteUsersToSystemAdmin = $this->sessionService->actsAsSystemAdmin();
+        $showInactive = $request->boolean('show_inactive');
 
-        $users = User::query()
-            ->with('groups')
+        $query = User::query()->with('groups');
+        if (! $showInactive) {
+            $query->where('is_active', true);
+        }
+
+        $users = $query
             ->get()
             ->filter(fn (User $user) => Auth::user()->can('view', $user))
             ->map(fn (User $user) => UserData::fromModel($user, false, true))
@@ -42,6 +47,7 @@ class UserController extends Controller
 
         return Inertia::render('Users', [
             'canPromoteUsersToSystemAdmin' => $canPromoteUsersToSystemAdmin,
+            'showInactive' => $showInactive,
             'users' => $users,
         ]);
     }
@@ -75,7 +81,7 @@ class UserController extends Controller
 
         $user->save();
 
-        return redirect()->route('users.index')->with('success', 'Berater*in wurde erfolgreich aktualisiert');
+        return redirect()->back()->with('success', 'Berater*in wurde erfolgreich aktualisiert');
     }
 
     public function actAsGroup(Request $request, Group $group)

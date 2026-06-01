@@ -177,6 +177,7 @@ id: string;
 name: string;
 email: string;
 is_admin: boolean;
+is_active: boolean;
 };
 export type MapPointCategoryData = {
 id: string;
@@ -229,6 +230,7 @@ street_number: string | null;
 city: string | null;
 zip: string | null;
 is_admin: boolean;
+is_active: boolean;
 groups: Array<App.Data.GroupBaseData>;
 };
 }
