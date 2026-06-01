@@ -18,7 +18,13 @@ class NextcloudUserClient implements NextcloudUserClientContract
 
     public function __construct()
     {
-        $this->baseUrl = rtrim((string) config('nextcloud.base_url'), '/');
+        $baseUrl = rtrim((string) config('nextcloud.base_url'), '/');
+
+        if(strlen($baseUrl) === 0){
+            $baseUrl = 'localhost';
+        }
+
+        $this->baseUrl = $baseUrl;
         $this->http = $this->buildRequest();
     }
 
