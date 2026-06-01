@@ -95,3 +95,4 @@ jobs:
           test-results.xml
           storage/logs/
           ./laravel.log
+          tests/Browser/Screenshots/
