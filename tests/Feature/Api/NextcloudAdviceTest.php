@@ -52,8 +52,7 @@ describe('browse', function () {
             ->assertOk()
             ->assertJsonStructure(['path', 'items'])
             ->assertJsonFragment(['path' => '/'])
-            ->assertJsonFragment(['name' => 'Offen'])
-            ->assertJsonFragment(['name' => 'Fertig']);
+            ->assertJsonFragment(['name' => 'Beratungen']);
     });
 
     test('browsing without path defaults to root', function () {
@@ -71,7 +70,7 @@ describe('browse', function () {
 
     test('browsing a nested directory returns its children', function () {
         actingAs($this->user)
-            ->get("/api/advices/{$this->advice->uuid}/nextcloud/browse?path=/Offen")
+            ->get("/api/advices/{$this->advice->uuid}/nextcloud/browse?path=/Beratungen/Offen")
             ->assertOk()
             ->assertJsonFragment(['name' => '2024-01-15_beratung-mueller']);
     });
@@ -137,7 +136,7 @@ describe('unlink', function () {
     test('can unlink a nextcloud folder', function () {
         $this->advice->update([
             'nextcloud_folder_id' => '10',
-            'nextcloud_folder_path' => '/Offen/2024-01-15_beratung-mueller',
+            'nextcloud_folder_path' => '/Beratungen/Offen/2024-01-15_beratung-mueller',
         ]);
 
         actingAs($this->user)
@@ -154,7 +153,7 @@ describe('upload', function () {
     test('can upload a file to linked nextcloud folder', function () {
         $this->advice->update([
             'nextcloud_folder_id' => '10',
-            'nextcloud_folder_path' => '/Offen/2024-01-15_beratung-mueller',
+            'nextcloud_folder_path' => '/Beratungen/Offen/2024-01-15_beratung-mueller',
         ]);
 
         $file = UploadedFile::fake()->create('dokument.pdf', 100, 'application/pdf');
@@ -183,7 +182,7 @@ describe('files', function () {
     test('returns file listing when folder is linked', function () {
         $this->advice->update([
             'nextcloud_folder_id' => '10',
-            'nextcloud_folder_path' => '/Offen/2024-01-15_beratung-mueller',
+            'nextcloud_folder_path' => '/Beratungen/Offen/2024-01-15_beratung-mueller',
         ]);
 
         actingAs($this->user)
@@ -208,10 +207,10 @@ describe('download', function () {
     test('can download a file by path', function () {
         $this->advice->update([
             'nextcloud_folder_id' => '10',
-            'nextcloud_folder_path' => '/Offen/2024-01-15_beratung-mueller',
+            'nextcloud_folder_path' => '/Beratungen/Offen/2024-01-15_beratung-mueller',
         ]);
 
-        $path = '/Offen/2024-01-15_beratung-mueller/dokument.pdf';
+        $path = '/Beratungen/Offen/2024-01-15_beratung-mueller/dokument.pdf';
 
         actingAs($this->user)
             ->get("/api/advices/{$this->advice->uuid}/nextcloud/download?path=".urlencode($path))
@@ -221,7 +220,7 @@ describe('download', function () {
     test('cannot download file outside linked folder', function () {
         $this->advice->update([
             'nextcloud_folder_id' => '10',
-            'nextcloud_folder_path' => '/Offen/2024-01-15_beratung-mueller',
+            'nextcloud_folder_path' => '/Beratungen/Offen/2024-01-15_beratung-mueller',
         ]);
 
         actingAs($this->user)

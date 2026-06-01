@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\FormDefinition;
 use App\Models\FormSubmission;
 use App\Models\Group;
 use App\Models\User;
@@ -17,10 +18,15 @@ beforeEach(function () {
 });
 
 test('group admin can switch from cards to table view and open detail dialog', function () {
+    $formDefinition = FormDefinition::factory()->create([
+        'group_id' => $this->group->id,
+    ]);
+
     FormSubmission::factory()->create([
         'submitted_at' => now(),
         'form_name' => 'Beratungsanfrage',
         'group_id' => $this->group->id,
+        'form_definition_id' => $formDefinition->id,
     ]);
 
     $page = visit(route('form-submissions.index'));

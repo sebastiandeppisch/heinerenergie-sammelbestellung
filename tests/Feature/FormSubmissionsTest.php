@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\FormDefinition;
 use App\Models\FormSubmission;
 use App\Models\Group;
 use App\Models\User;
@@ -26,18 +27,20 @@ test('index page can be rendered', function () {
 });
 
 test('form submissions can be sorted by submitted_at ascending', function () {
+    $formDefinition = FormDefinition::factory()->create(['group_id' => $this->group->id]);
 
     $submissionA = FormSubmission::factory()->create([
         'submitted_at' => now()->subDays(1),
         'form_name' => 'Test Form',
         'group_id' => $this->group->id,
+        'form_definition_id' => $formDefinition->id,
     ]);
 
     $submissionB = FormSubmission::factory()->create([
         'submitted_at' => now(),
         'form_name' => 'Test Form',
         'group_id' => $this->group->id,
-
+        'form_definition_id' => $formDefinition->id,
     ]);
 
     $response = $this->get(route('form-submissions.index', ['sortOrder' => 'asc']));
@@ -51,16 +54,20 @@ test('form submissions can be sorted by submitted_at ascending', function () {
 });
 
 test('form submissions are sorted by submitted_at descending by default', function () {
+    $formDefinition = FormDefinition::factory()->create(['group_id' => $this->group->id]);
+
     $submissionA = FormSubmission::factory()->create([
         'submitted_at' => now()->subDays(1),
         'form_name' => 'Test Form',
         'group_id' => $this->group->id,
+        'form_definition_id' => $formDefinition->id,
     ]);
 
     $submissionB = FormSubmission::factory()->create([
         'submitted_at' => now(),
         'form_name' => 'Test Form',
         'group_id' => $this->group->id,
+        'form_definition_id' => $formDefinition->id,
     ]);
 
     $response = $this->get(route('form-submissions.index'));
@@ -74,16 +81,22 @@ test('form submissions are sorted by submitted_at descending by default', functi
 });
 
 test('form submissions can be sorted by form definition', function () {
+    // Create formDefForAnother first so it gets a smaller ID and sorts first
+    $formDefForAnother = FormDefinition::factory()->create(['group_id' => $this->group->id]);
+    $formDefForTest = FormDefinition::factory()->create(['group_id' => $this->group->id]);
+
     $submissionA = FormSubmission::factory()->create([
         'submitted_at' => now(),
         'form_name' => 'Test Form',
         'group_id' => $this->group->id,
+        'form_definition_id' => $formDefForTest->id,
     ]);
 
     $submissionB = FormSubmission::factory()->create([
         'submitted_at' => now()->tomorrow(),
         'form_name' => 'Another Form',
         'group_id' => $this->group->id,
+        'form_definition_id' => $formDefForAnother->id,
     ]);
 
     $response = $this->get(route('form-submissions.index', ['groupByForm' => 'true']));
