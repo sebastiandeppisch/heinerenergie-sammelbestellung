@@ -3,6 +3,8 @@
 use App\Http\Controllers\AdviceController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\DevLoginController;
+use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\FormDefinitionController;
 use App\Http\Controllers\FormSubmissionController;
@@ -106,13 +108,16 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::get('/change-password', [PageController::class, 'changePassword'])->name('password.reset');
+Route::post('/change-password', [NewPasswordController::class, 'store'])->name('change-password.store');
 
 Route::get('/', fn () => redirect()->route('dashboard'))->name('home');
 
 Route::get('/login-form', [PageController::class, 'login'])->name('login');
+Route::post('/login-form', [AuthenticatedSessionController::class, 'store'])->name('login.store');
 Route::get('/register', [RegisterController::class, 'show'])->name('register');
 Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
 Route::get('/reset-password', [PageController::class, 'resetPassword'])->name('reset-password');
+Route::post('/reset-password', [PasswordResetLinkController::class, 'store'])->name('forgot-password');
 Route::get('newadvice', [PageController::class, 'newAdvice'])->name('newadvice');
 Route::get('impress', [PageController::class, 'impress'])->name('impress');
 Route::get('datapolicy', [PageController::class, 'datapolicy'])->name('datapolicy');

@@ -1,9 +1,11 @@
 <script lang="ts" setup>
-import { router } from '@inertiajs/vue3';
-import DxForm, { DxButtonItem, DxButtonOptions, DxCustomRule, DxItem, DxLabel, DxRequiredRule } from 'devextreme-vue/form';
-import { reactive, ref } from 'vue';
-import { toast } from 'vue-sonner';
-import auth from '../auth';
+import { useForm } from '@inertiajs/vue3';
+import { defineOptions } from 'vue';
+import { route } from 'ziggy-js';
+import InputError from '@/components/InputError.vue';
+import { Button } from '@/shadcn/components/ui/button';
+import { Input } from '@/shadcn/components/ui/input';
+import { Label } from '@/shadcn/components/ui/label';
 import MainPublic from '../layouts/MainPublic.vue';
 import SingleCard from '../layouts/SingleCard.vue';
 
@@ -13,33 +15,16 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const recoveryCode = props.token;
-const email = props.email;
 
-const loading = ref(false);
-const formData = reactive({
+const form = useForm({
+    token: props.token,
+    email: props.email,
     password: '',
-    confirmedPassword: '',
+    password_confirmation: '',
 });
 
-async function onSubmit() {
-    const { password, confirmedPassword } = formData;
-    loading.value = true;
-
-    const result = await auth.changePassword(email, password, confirmedPassword, recoveryCode);
-    loading.value = false;
-    if (result.isOk) {
-        router.get('login-form');
-        toast.success('Dein Passwort wurde geändert');
-    } else {
-        if (!result.isOk && 'message' in result) {
-            toast.error(result.message, { duration: 2000 });
-        }
-    }
-}
-
-function confirmPassword(e: { value: string | number }) {
-    return e.value.toString() === formData.password.toString();
+function onSubmit() {
+    form.post(route('change-password.store'));
 }
 
 defineOptions({
@@ -49,40 +34,29 @@ defineOptions({
 
 <template>
     <SingleCard title="Neues Passwort setzen">
-        <form @submit.prevent="onSubmit">
-            <dx-form :form-data="formData" :disabled="loading">
-                <dx-item
-                    data-field="password"
-                    editor-type="dxTextBox"
-                    :editor-options="{ stylingMode: 'filled', placeholder: 'Passwort', mode: 'password' }"
-                >
-                    <dx-required-rule message="Gib bitte Dein neues Passwort ein" />
-                    <dx-label :visible="false" />
-                </dx-item>
-                <dx-item
-                    data-field="confirmedPassword"
-                    editor-type="dxTextBox"
-                    :editor-options="{ stylingMode: 'filled', placeholder: 'Passwort bestätigen', mode: 'password' }"
-                >
-                    <dx-required-rule message="Gib bitte Dein neues Passwort ein" />
-                    <dx-custom-rule message="Die Passwort stimmen nicht überein" :validation-callback="confirmPassword" />
-                    <dx-label :visible="false" />
-                </dx-item>
-                <dx-button-item>
-                    <dx-button-options width="100%" type="default" template="changePassword" :use-submit-behavior="true"> </dx-button-options>
-                </dx-button-item>
+        <form class="space-y-4" @submit.prevent="onSubmit">
+            <div class="grid gap-2">
+                <Label for="password">Passwort</Label>
+                <Input id="password" v-model="form.password" type="password" placeholder="Passwort" autocomplete="new-password" />
+                <InputError :message="form.errors.password" />
+            </div>
 
-                <template #changePassword>
-                    <div>
-                        <span class="dx-button-text">
-                            <dx-loadIndicator v-if="loading" width="24px" height="24px" :visible="true" />
-                            <span v-if="!loading">Continue</span>
-                        </span>
-                    </div>
-                </template>
-            </dx-form>
+            <div class="grid gap-2">
+                <Label for="password_confirmation">Passwort bestätigen</Label>
+                <Input
+                    id="password_confirmation"
+                    v-model="form.password_confirmation"
+                    type="password"
+                    placeholder="Passwort bestätigen"
+                    autocomplete="new-password"
+                />
+                <InputError :message="form.errors.password_confirmation" />
+            </div>
+
+            <Button type="submit" class="w-full" :disabled="form.processing">
+                <span v-if="form.processing">Wird gespeichert...</span>
+                <span v-else>Passwort setzen</span>
+            </Button>
         </form>
     </SingleCard>
 </template>
-
-<style></style>

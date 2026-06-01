@@ -1,36 +1,20 @@
 <script lang="ts" setup>
-import { router } from '@inertiajs/vue3';
-import DxForm, { DxButtonItem, DxButtonOptions, DxEmailRule, DxItem, DxLabel, DxRequiredRule } from 'devextreme-vue/form';
-import DxLoadIndicator from 'devextreme-vue/load-indicator';
-import { reactive, ref } from 'vue';
-import { toast } from 'vue-sonner';
-
-import { Link } from '@inertiajs/vue3';
-import auth from '../auth';
+import { Link, useForm } from '@inertiajs/vue3';
+import { defineOptions } from 'vue';
+import { route } from 'ziggy-js';
+import InputError from '@/components/InputError.vue';
+import { Button } from '@/shadcn/components/ui/button';
+import { Input } from '@/shadcn/components/ui/input';
+import { Label } from '@/shadcn/components/ui/label';
 import MainPublic from '../layouts/MainPublic.vue';
 import SingleCard from '../layouts/SingleCard.vue';
-const notificationText = 'Du hast eine E-Mail mit einem Passwort-Reset Link erhalten';
 
-const loading = ref(false);
-const formData = reactive({
+const form = useForm({
     email: '',
 });
 
-async function onSubmit() {
-    const { email } = formData;
-    loading.value = true;
-
-    const result = await auth.resetPassword(email);
-    loading.value = false;
-
-    if (result.isOk) {
-        router.get('login-form');
-        toast.success(notificationText, { duration: 2500 });
-    } else {
-        if (!result.isOk && 'message' in result) {
-            toast.error(result.message, { duration: 2000 });
-        }
-    }
+function onSubmit() {
+    form.post(route('forgot-password'));
 }
 
 defineOptions({
@@ -40,59 +24,21 @@ defineOptions({
 
 <template>
     <SingleCard title="Neues Passwort" description="Trage hier Deine E-Mail Adresse ein, um ein neues Passwort zu erhalten">
-        <form class="reset-password-form" @submit.prevent="onSubmit">
-            <dx-form :form-data="formData" :disabled="loading">
-                <dx-item data-field="email" editor-type="dxTextBox" :editor-options="{ stylingMode: 'filled', placeholder: 'E-Mail', mode: 'email' }">
-                    <dx-required-rule message="Du musst eine E-Mail Adresse eintragan" />
-                    <dx-email-rule message="Die E-Mail Adresse ist ungültig" />
-                    <dx-label :visible="false" />
-                </dx-item>
-                <dx-button-item>
-                    <dx-button-options
-                        :element-attr="{ class: 'submit-button' }"
-                        width="100%"
-                        type="default"
-                        template="resetTemplate"
-                        :use-submit-behavior="true"
-                    >
-                    </dx-button-options>
-                </dx-button-item>
-                <dx-item>
-                    <template #default>
-                        <div class="login-link">
-                            <Link href="/login-form">Zurück zum Login</Link>
-                        </div>
-                    </template>
-                </dx-item>
-                <template #resetTemplate>
-                    <div>
-                        <span class="dx-button-text">
-                            <dx-load-indicator v-if="loading" width="24px" height="24px" :visible="true" />
-                            <span v-if="!loading">Passwort zurücksetzen</span>
-                        </span>
-                    </div>
-                </template>
-            </dx-form>
+        <form class="space-y-4" @submit.prevent="onSubmit">
+            <div class="grid gap-2">
+                <Label for="email">E-Mail</Label>
+                <Input id="email" v-model="form.email" type="email" placeholder="E-Mail" autocomplete="email" />
+                <InputError :message="form.errors.email" />
+            </div>
+
+            <Button type="submit" class="w-full" :disabled="form.processing">
+                <span v-if="form.processing">Wird gesendet...</span>
+                <span v-else>Passwort zurücksetzen</span>
+            </Button>
+
+            <div class="text-center text-sm">
+                <Link href="/login-form" class="text-muted-foreground hover:text-foreground">Zurück zum Login</Link>
+            </div>
         </form>
     </SingleCard>
 </template>
-
-<style lang="scss">
-@import '../themes/generated/variables.base.scss';
-
-.reset-password-form {
-    .submit-button {
-        margin-top: 10px;
-    }
-
-    .login-link {
-        text-align: center;
-        font-size: 16px;
-        font-style: normal;
-
-        a {
-            text-decoration: none;
-        }
-    }
-}
-</style>

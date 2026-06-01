@@ -20,7 +20,7 @@ class NextcloudUserClient implements NextcloudUserClientContract
     {
         $baseUrl = rtrim((string) config('nextcloud.base_url'), '/');
 
-        if(strlen($baseUrl) === 0){
+        if (strlen($baseUrl) === 0) {
             $baseUrl = 'localhost';
         }
 

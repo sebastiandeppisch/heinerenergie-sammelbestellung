@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { Link, router } from '@inertiajs/vue3';
-import DxForm, { DxButtonItem, DxButtonOptions, DxEmailRule, DxItem, DxLabel, DxRequiredRule } from 'devextreme-vue/form';
-import DxLoadIndicator from 'devextreme-vue/load-indicator';
-import { defineOptions, reactive, ref } from 'vue';
+import { Link, useForm, usePage } from '@inertiajs/vue3';
+import { defineOptions, onMounted } from 'vue';
 import { toast } from 'vue-sonner';
-import auth from '../auth';
+import { route } from 'ziggy-js';
+import InputError from '@/components/InputError.vue';
+import { Button } from '@/shadcn/components/ui/button';
+import { Checkbox } from '@/shadcn/components/ui/checkbox';
+import { Input } from '@/shadcn/components/ui/input';
+import { Label } from '@/shadcn/components/ui/label';
 import MainPublic from '../layouts/MainPublic.vue';
 import SingleCard from '../layouts/SingleCard.vue';
 
@@ -18,23 +21,23 @@ const props = defineProps<{
     devUsers?: User[];
 }>();
 
-const formData = reactive({
+const form = useForm({
     email: '',
     password: '',
+    remember: false,
 });
-const loading = ref(false);
 
-async function onSubmit() {
-    const { email, password } = formData;
-    loading.value = true;
-    const result = await auth.logIn(email, password);
-    if (!result.isOk) {
-        loading.value = false;
-        toast.error(result.message ?? 'Login fehlgeschlagen', { duration: 2000 });
-    } else {
-        router.visit('/backend');
-    }
+function onSubmit() {
+    form.post(route('login.store'));
 }
+
+const page = usePage();
+onMounted(() => {
+    const flash = page.props.flashMessages as Record<string, string> | undefined;
+    if (flash?.success) {
+        toast.success(flash.success);
+    }
+});
 
 defineOptions({
     layout: MainPublic,
@@ -43,58 +46,43 @@ defineOptions({
 
 <template>
     <SingleCard title="Login" description="für Berater:innen">
-        <form class="login-form" @submit.prevent="onSubmit">
-            <dx-form :form-data="formData" :disabled="loading">
-                <dx-item
-                    data-field="email"
-                    editor-type="dxTextBox"
-                    :editor-options="{ stylingMode: 'filled', placeholder: 'Email', mode: 'email', validationMessageMode: 'always' }"
-                >
-                    <dx-required-rule message="Gib bitte Deine E-Mail Adresse ein" />
-                    <dx-email-rule message="Gib bitte eine gültige E-Mail Adresse ein" />
-                    <dx-label :visible="false" />
-                </dx-item>
-                <dx-item
-                    data-field="password"
-                    editor-type="dxTextBox"
-                    :editor-options="{ stylingMode: 'filled', placeholder: 'Password', mode: 'password', validationMessageMode: 'always' }"
-                >
-                    <dx-required-rule message="Gib bitte Dein Passwort ein" />
-                    <dx-label :visible="false" />
-                </dx-item>
-                <dx-item
-                    data-field="rememberMe"
-                    editor-type="dxCheckBox"
-                    :editor-options="{ text: 'Eingeloggt bleiben', elementAttr: { class: 'form-text' } }"
-                >
-                    <dx-label :visible="false" />
-                </dx-item>
-                <dx-button-item>
-                    <dx-button-options width="100%" type="default" template="signInTemplate" :use-submit-behavior="true"> </dx-button-options>
-                </dx-button-item>
-                <dx-item>
-                    <template #default>
-                        <div class="link">
-                            <Link href="/reset-password">Passwort vergessen</Link>
-                        </div>
-                    </template>
-                </dx-item>
-                <template #signInTemplate>
-                    <div>
-                        <span class="dx-button-text">
-                            <dx-load-indicator v-if="loading" width="24px" height="24px" :visible="true" />
-                            <span v-if="!loading">Login</span>
-                        </span>
-                    </div>
-                </template>
-            </dx-form>
+        <form class="space-y-4" @submit.prevent="onSubmit">
+            <div class="grid gap-2">
+                <Label for="email">E-Mail</Label>
+                <Input id="email" v-model="form.email" type="email" placeholder="E-Mail" autocomplete="email" />
+                <InputError :message="form.errors.email" />
+            </div>
+
+            <div class="grid gap-2">
+                <Label for="password">Passwort</Label>
+                <Input id="password" v-model="form.password" type="password" placeholder="Passwort" autocomplete="current-password" />
+                <InputError :message="form.errors.password" />
+            </div>
+
+            <div class="flex items-center gap-2">
+                <Checkbox id="remember" v-model:checked="form.remember" />
+                <Label for="remember" class="cursor-pointer font-normal">Eingeloggt bleiben</Label>
+            </div>
+
+            <Button type="submit" class="w-full" :disabled="form.processing">
+                <span v-if="form.processing">Einloggen...</span>
+                <span v-else>Login</span>
+            </Button>
+
+            <div class="text-center text-sm">
+                <Link href="/reset-password" class="text-muted-foreground hover:text-foreground">Passwort vergessen</Link>
+            </div>
         </form>
 
-        <div v-if="props.devUsers && props.devUsers.length > 0" class="dev-login-section">
+        <div v-if="props.devUsers && props.devUsers.length > 0" class="mt-6 border-t pt-6">
             <h3 class="mb-4 text-lg font-medium text-gray-600">Direkter Login</h3>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3">
-                <div v-for="user in props.devUsers" :key="user.id" class="dev-user-item">
-                    <Link :href="`/dev-login/${user.id}`" class="dev-user-link" :title="user.email">
+                <div v-for="user in props.devUsers" :key="user.id">
+                    <Link
+                        :href="`/dev-login/${user.id}`"
+                        :title="user.email"
+                        class="block w-full truncate rounded border border-gray-300 p-3 text-center text-sm transition-colors hover:bg-gray-100"
+                    >
                         {{ user.name }}
                     </Link>
                 </div>
@@ -102,34 +90,3 @@ defineOptions({
         </div>
     </SingleCard>
 </template>
-
-<style lang="scss">
-@import '../themes/generated/variables.base.scss';
-
-.login-form {
-    .link {
-        text-align: center;
-        font-size: 16px;
-        font-style: normal;
-
-        a {
-            text-decoration: none;
-        }
-    }
-
-    .form-text {
-        margin: 10px 0;
-        color: rgba($base-text-color, alpha($base-text-color) * 0.7);
-    }
-}
-
-.dev-login-section {
-    margin-top: 30px;
-    padding-top: 20px;
-    border-top: 1px solid #eee;
-}
-
-.dev-user-link {
-    @apply block w-full truncate rounded border border-gray-300 p-3 text-center text-sm transition-colors hover:bg-gray-100;
-}
-</style>

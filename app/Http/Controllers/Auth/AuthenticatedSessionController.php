@@ -21,7 +21,7 @@ class AuthenticatedSessionController extends Controller
         $groupContext = app(SessionGroupContextFactory::class)->createFromSession();
         CacheUsersAdvicePolicies::dispatchAfterResponse(Auth::user(), $groupContext);
 
-        return Auth::user();
+        return redirect()->intended(route('dashboard'));
     }
 
     /**
@@ -38,21 +38,5 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/');
-    }
-
-    public function index(Request $request)
-    {
-        $user = Auth::user();
-        if ($user === null) {
-            return [
-                'isLoggedIn' => false,
-                'user' => null,
-            ];
-        }
-
-        return [
-            'isLoggedIn' => true,
-            'user' => $user,
-        ];
     }
 }

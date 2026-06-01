@@ -19,10 +19,8 @@ test('inactive user cannot log in', function () {
         'is_active' => false,
     ]);
 
-    $this->withHeaders(['Accept' => 'application/json'])
-        ->post('/api/login', ['email' => $user->email, 'password' => 'password'])
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors('email');
+    $this->post(route('login.store'), ['email' => $user->email, 'password' => 'password'])
+        ->assertSessionHasErrors('email');
 
     $this->assertGuest();
 });
@@ -33,9 +31,8 @@ test('active user can log in', function () {
         'is_active' => true,
     ]);
 
-    $this->withHeaders(['Accept' => 'application/json'])
-        ->post('/api/login', ['email' => $user->email, 'password' => 'password'])
-        ->assertOk();
+    $this->post(route('login.store'), ['email' => $user->email, 'password' => 'password'])
+        ->assertRedirect(route('dashboard'));
 
     $this->assertAuthenticatedAs($user);
 });
