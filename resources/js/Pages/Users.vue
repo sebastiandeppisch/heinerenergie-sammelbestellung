@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { user as currentUser } from '@/authHelper';
 import ChangePasswordDialog from '@/components/Users/ChangePasswordDialog.vue';
 import UserFormDialog from '@/components/Users/UserFormDialog.vue';
 import { Button } from '@/shadcn/components/ui/button';
@@ -7,7 +8,6 @@ import { Label } from '@/shadcn/components/ui/label';
 import { Switch } from '@/shadcn/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import type { CustomPageProps } from '@/types/pageProps';
-import { user as currentUser } from '@/authHelper';
 import { router, usePage } from '@inertiajs/vue3';
 import { Edit, Key, Plus, UserCheck, UserX } from 'lucide-vue-next';
 import { computed, ref, toRef, watch } from 'vue';
