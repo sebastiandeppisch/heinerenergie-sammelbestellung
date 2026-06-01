@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { MapPin } from 'lucide-vue-next';
-import { computed } from 'vue';
 import Tooltip from '@/shadcn/components/ui/tooltip/Tooltip.vue';
 import TooltipContent from '@/shadcn/components/ui/tooltip/TooltipContent.vue';
 import TooltipTrigger from '@/shadcn/components/ui/tooltip/TooltipTrigger.vue';
+import { MapPin } from 'lucide-vue-next';
+import { computed } from 'vue';
 
 type Coordinate = App.ValueObjects.Coordinate;
 

@@ -174,7 +174,6 @@ function getFieldValue(submission: App.Data.FormSubmissionData, label: string): 
     return formatValue(match.value);
 }
 
-
 function openDetail(submission: App.Data.FormSubmissionData, index: number | string) {
     selectedSubmission.value = submission;
     selectedIndex.value = index;

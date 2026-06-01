@@ -23,7 +23,7 @@ const previewFields = computed(() => {
 <template>
     <span class="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
         <template v-for="(field, i) in previewFields" :key="field.field.id">
-            <span v-if="i > 0" class="select-none text-gray-300" aria-hidden="true">·</span>
+            <span v-if="i > 0" class="text-gray-300 select-none" aria-hidden="true">·</span>
             <SubmissionFieldPreview :submission-field="field" />
         </template>
     </span>
