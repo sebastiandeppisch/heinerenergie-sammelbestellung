@@ -1,7 +1,9 @@
 <?php
 
+use App\Contracts\NextcloudUserClientContract;
 use App\Models\Group;
 use App\Models\User;
+use App\Nextcloud\NextcloudUserClient;
 use App\Services\SessionService;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,6 +18,10 @@ const NC_DISPLAY_NAME = 'Max Mustermann';
 const NC_GROUP_NAME = 'TestGruppe';
 
 beforeEach(function () {
+    app()->singleton(
+        NextcloudUserClientContract::class,
+        NextcloudUserClient::class
+    );
     Http::fake([
         '*/ocs/v1.php/cloud/groups/*' => Http::response([
             'ocs' => [
