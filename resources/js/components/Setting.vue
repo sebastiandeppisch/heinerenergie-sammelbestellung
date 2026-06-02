@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { DxHtmlEditor, DxMediaResizing, DxToolbar } from 'devextreme-vue/html-editor';
+import RichTextEditor from '@/components/RichTextEditor.vue';
 import { Switch } from '@/shadcn/components/ui/switch';
 import { computed, reactive, ref } from 'vue';
 
@@ -9,21 +9,15 @@ import axios from 'axios';
 import { Save, Upload } from 'lucide-vue-next';
 import { toast } from 'vue-sonner';
 
-import editorToolbar from '../htmlEditorToolbar.json';
-
 interface Props {
     setting: App.Models.Setting;
 }
 const props = defineProps<Props>();
 
-const toolbar = [...(editorToolbar as any[])];
-toolbar.push({
-    template: 'saveButton',
-});
-const state = reactive({ value: props.setting.value, dirty: false, toolbar, saving: false, uploading: false });
+const state = reactive({ value: props.setting.value, dirty: false, saving: false, uploading: false });
 const fileInput = ref<HTMLInputElement>();
 
-const onValueChanged = (e: { value: string }) => {
+const onValueChanged = () => {
     state.dirty = true;
 };
 
@@ -108,10 +102,8 @@ const triggerFileInput = () => {
 <template>
     <div>
         <div v-if="props.setting.type === 'text'">
-            <DxHtmlEditor v-model:value="state.value" :on-value-changed="onValueChanged" :allow-soft-line-break="true">
-                <DxMediaResizing :enabled="true" />
-                <DxToolbar :multiline="true" :items="toolbar" />
-                <template #saveButton>
+            <RichTextEditor v-model="state.value" @change="onValueChanged">
+                <template #toolbar-end>
                     <Button
                         type="button"
                         :variant="state.dirty ? 'default' : 'outline'"
@@ -123,13 +115,21 @@ const triggerFileInput = () => {
                         <span v-if="state.dirty">Speichern</span>
                     </Button>
                 </template>
-            </DxHtmlEditor>
+            </RichTextEditor>
         </div>
         <div v-else-if="props.setting.type === 'integer'">
             <Input type="number" v-model="state.value" @update:model-value="save" />
         </div>
         <div v-else-if="props.setting.type === 'boolean'">
-            <Switch :checked="Boolean(state.value)" @update:checked="(v) => { (state as any).value = v; save(); }" />
+            <Switch
+                :checked="Boolean(state.value)"
+                @update:checked="
+                    (v: boolean) => {
+                        (state as any).value = v;
+                        save();
+                    }
+                "
+            />
         </div>
         <div v-else-if="props.setting.type === 'string'">
             <Input v-model="state.value" @update:model-value="save" />

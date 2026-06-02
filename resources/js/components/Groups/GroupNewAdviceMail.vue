@@ -5,10 +5,8 @@
                 <Label for="new_advice_mail">E-Mail-Vorlage für neue Beratungen</Label>
                 <p class="text-sm text-gray-500">Dieser Text wird als E-Mail versendet, wenn eine neue Beratung erstellt wird.</p>
             </div>
-            <DxHtmlEditor v-model:value="state.value" :on-value-changed="onValueChanged" :allow-soft-line-break="true" :read-only="!canEdit">
-                <DxMediaResizing :enabled="true" />
-                <DxToolbar :multiline="true" :items="toolbar" />
-                <template #saveButton>
+            <RichTextEditor v-model="state.value" :readonly="!canEdit" @change="onValueChanged">
+                <template #toolbar-end>
                     <Button
                         type="button"
                         :variant="state.dirty ? 'default' : 'outline'"
@@ -20,22 +18,20 @@
                         <span v-if="state.dirty">Speichern</span>
                     </Button>
                 </template>
-            </DxHtmlEditor>
+            </RichTextEditor>
             <div v-if="form.errors.new_advice_mail" class="text-sm text-red-500">{{ form.errors.new_advice_mail }}</div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
+import RichTextEditor from '@/components/RichTextEditor.vue';
 import { Button } from '@/shadcn/components/ui/button';
 import { Label } from '@/shadcn/components/ui/label';
 import { useForm } from '@inertiajs/vue3';
-import { DxHtmlEditor, DxMediaResizing, DxToolbar } from 'devextreme-vue/html-editor';
 import { Save } from 'lucide-vue-next';
 import { reactive, watch } from 'vue';
 import { route } from 'ziggy-js';
-
-import editorToolbar from '../../htmlEditorToolbar.json';
 
 type GroupData = App.Data.GroupData;
 
@@ -48,24 +44,16 @@ const form = useForm({
     new_advice_mail: props.group.new_advice_mail || '',
 });
 
-const toolbar = [...(editorToolbar as any[])];
-toolbar.push({
-    template: 'saveButton',
-});
-
 const state = reactive({
     value: props.group.new_advice_mail || '',
     dirty: false,
     saving: false,
-    toolbar,
 });
 
-const onValueChanged = (e: { value: string }) => {
+const onValueChanged = () => {
     state.dirty = true;
-    state.value = e.value;
 };
 
-// Update state when group changes
 watch(
     () => props.group.new_advice_mail,
     (newValue) => {
