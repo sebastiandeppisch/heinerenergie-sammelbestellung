@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { Button } from '@/shadcn/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shadcn/components/ui/dialog';
+import { Label } from '@/shadcn/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { Textarea } from '@/shadcn/components/ui/textarea';
 import { faWarning } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { router } from '@inertiajs/vue3';
-import { DxPopup, DxSelectBox } from 'devextreme-vue';
 import { ArrowRight, Send } from 'lucide-vue-next';
 import { ref } from 'vue';
 import { toast } from 'vue-sonner';
@@ -55,63 +57,48 @@ function transferAdvice() {
             Beratung übertragen
         </Button>
 
-        <DxPopup
-            v-model:visible="popupVisible"
-            :drag-enabled="false"
-            :show-close-button="true"
-            width="auto"
-            height="auto"
-            title="Beratung übertragen"
-        >
-            <div class="popup-content">
-                <DxSelectBox
-                    :data-source="transferableGroups"
-                    display-expr="name"
-                    value-expr="id"
-                    v-model="selectedGroup"
-                    label="Initiative auswählen"
-                    label-mode="floating"
-                    :show-clear-button="true"
-                />
-
-                <div class="mt-4 space-y-2">
-                    <label class="text-sm font-medium">Grund für die Übertragung</label>
-                    <Textarea v-model="reason" class="min-h-[100px]" placeholder="Grund für die Übertragung..." />
-                </div>
-
-                <div class="transfer-info mt-4">
-                    <p class="info-text">
-                        Die Beratung wird an die ausgewählte Initiative übertragen. Der/Die Klient:in wird per E-Mail benachrichtigt.
-                    </p>
-                    <p class="warning-text">
-                        <FontAwesomeIcon :icon="faWarning" /> Du hast danach evtl. keine Berechtigung mehr, die Beratung zu sehen.
-                    </p>
-                </div>
-
-                <div class="mt-4">
+        <Dialog v-model:open="popupVisible">
+            <DialogContent class="sm:max-w-[500px]">
+                <DialogHeader>
+                    <DialogTitle>Beratung übertragen</DialogTitle>
+                </DialogHeader>
+                <div class="space-y-4">
+                    <div class="space-y-2">
+                        <Label>Initiative auswählen</Label>
+                        <Select v-model="selectedGroup">
+                            <SelectTrigger>
+                                <SelectValue placeholder="Initiative auswählen" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem v-for="group in transferableGroups" :key="group.id" :value="String(group.id)">
+                                    {{ group.name }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium">Grund für die Übertragung</label>
+                        <Textarea v-model="reason" class="min-h-[100px]" placeholder="Grund für die Übertragung..." />
+                    </div>
+                    <div class="transfer-info">
+                        <p class="info-text">
+                            Die Beratung wird an die ausgewählte Initiative übertragen. Der/Die Klient:in wird per E-Mail benachrichtigt.
+                        </p>
+                        <p class="warning-text">
+                            <FontAwesomeIcon :icon="faWarning" /> Du hast danach evtl. keine Berechtigung mehr, die Beratung zu sehen.
+                        </p>
+                    </div>
                     <Button variant="default" @click="transferAdvice" class="w-full">
                         <Send class="h-4 w-4" />
                         Übertragen
                     </Button>
                 </div>
-            </div>
-        </DxPopup>
+            </DialogContent>
+        </Dialog>
     </div>
 </template>
 
 <style scoped>
-.transfer-container {
-    padding: 24px;
-}
-
-.mt-4 {
-    margin-top: 16px;
-}
-
-.popup-content {
-    padding: 20px;
-}
-
 .transfer-info {
     display: flex;
     flex-direction: column;

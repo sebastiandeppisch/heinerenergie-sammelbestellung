@@ -7,8 +7,8 @@ import PhysicalValue from '../views/PhysicalValue.vue';
 
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
-import { DxSwitch } from 'devextreme-vue';
-import DxButton from 'devextreme-vue/button';
+import { Button } from '@/shadcn/components/ui/button';
+import { Switch } from '@/shadcn/components/ui/switch';
 import DxDataGrid, {
     DxColumn,
     DxEditing,
@@ -189,9 +189,9 @@ const adviceStatusResult = new ArrayDataSource([
                     <CreateAdviceDialog :groups="props.groups" />
                 </template>
                 <template #autoexpand>
-                    <div>
-                        <DxSwitch v-model:value="r.autoExpand" />
-                        <span style="position: relative; top: -8px; opacity: 60%"> Gruppen aufklappen </span>
+                    <div class="flex items-center gap-2">
+                        <Switch v-model:checked="r.autoExpand" />
+                        <span class="text-sm opacity-60">Gruppen aufklappen</span>
                     </div>
                 </template>
                 <DxColumn type="buttons" caption="Öffnen">
@@ -244,7 +244,7 @@ const adviceStatusResult = new ArrayDataSource([
                 <template #simpleadvisorassignment="{ data }">
                     <div v-if="data.data.advisor_id !== null">{{ r.advisorNames.get(data.data.advisor_id) }}</div>
                     <div v-else>
-                        <DxButton text="Übernehmen" @click="assignAdvice(data.data.id)" type="default" />
+                        <Button variant="default" size="sm" @click="assignAdvice(data.data.id)">Übernehmen</Button>
                     </div>
                 </template>
                 <template #typeIcon="{ data }">

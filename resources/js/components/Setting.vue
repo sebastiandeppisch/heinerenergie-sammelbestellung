@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { DxHtmlEditor, DxMediaResizing, DxToolbar } from 'devextreme-vue/html-editor';
-import DxSwitch from 'devextreme-vue/switch';
+import { Switch } from '@/shadcn/components/ui/switch';
 import { computed, reactive, ref } from 'vue';
 
 import { Button } from '@/shadcn/components/ui/button';
@@ -129,7 +129,7 @@ const triggerFileInput = () => {
             <Input type="number" v-model="state.value" @update:model-value="save" />
         </div>
         <div v-else-if="props.setting.type === 'boolean'">
-            <DxSwitch v-model:value="state.value" :on-value-changed="save" />
+            <Switch :checked="Boolean(state.value)" @update:checked="(v) => { (state as any).value = v; save(); }" />
         </div>
         <div v-else-if="props.setting.type === 'string'">
             <Input v-model="state.value" @update:model-value="save" />

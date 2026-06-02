@@ -90,16 +90,14 @@
             </div>
         </div>
     </div>
-    <DxPopup
-        v-model:visible="showCreateModal"
-        :title="'Neue Initiative anlegen'"
-        :show-title="true"
-        :width="600"
-        :height="'auto'"
-        :show-close-button="true"
-    >
-        <CreateGroupForm :parent-groups="groups" :parent-required="!canCreateRootGroup" @close="showCreateModal = false" />
-    </DxPopup>
+    <Dialog v-model:open="showCreateModal">
+        <DialogContent class="sm:max-w-[600px]">
+            <DialogHeader>
+                <DialogTitle>Neue Initiative anlegen</DialogTitle>
+            </DialogHeader>
+            <CreateGroupForm :parent-groups="groups" :parent-required="!canCreateRootGroup" @close="showCreateModal = false" />
+        </DialogContent>
+    </Dialog>
 </template>
 
 <script setup lang="ts">
@@ -110,9 +108,9 @@ import GroupNewAdviceMail from '@/components/Groups/GroupNewAdviceMail.vue';
 import GroupTree from '@/components/Groups/GroupTree.vue';
 import GroupUsers from '@/components/Groups/GroupUsers.vue';
 import { Button } from '@/shadcn/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shadcn/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';
 import AdviceStatusGroup from '@/views/AdviceStatusGroup.vue';
-import { DxPopup } from 'devextreme-vue/popup';
 import { Cloud, Info, Mail, Map, Plus, Table, Users } from 'lucide-vue-next';
 import { computed, onMounted, ref, watch } from 'vue';
 import { route } from 'ziggy-js';
