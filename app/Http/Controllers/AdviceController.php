@@ -30,6 +30,8 @@ use App\Notifications\AdviceTransferred;
 use App\Services\AdviceService;
 use App\Services\CurrentGroupService;
 use App\Services\SessionService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -51,10 +53,22 @@ class AdviceController extends Controller
         // ->filter(fn (Group $group) => Auth::user()->can('view', $group))
             ->map(fn (Group $group) => GroupData::fromModel($group))->values()->toArray();
 
-        return Inertia::render('AdvicesTable', [
+        $adviceStatuses = AdviceStatus::all()->map(fn (AdviceStatus $status) => ['id' => $status->uuid, 'name' => $status->name]);
+        $advisors = User::all()
+            ->map(fn (User $u) => ['id' => $u->uuid, 'name' => "{$u->first_name} {$u->last_name}"])
+            ->toArray();
+
+        return Inertia::render('Advices', [
             'onlyOneGroup' => $onlyOneGroup,
             'advices' => $advices,
             'groups' => $groups,
+            'adviceStatuses' => $adviceStatuses,
+            'adviceTypes' => [
+                ['id' => 0, 'name' => 'Zuhause'],
+                ['id' => 1, 'name' => 'Virtuell'],
+                ['id' => 2, 'name' => 'Sammelbestellung'],
+            ],
+            'advisors' => $advisors,
         ]);
     }
 
@@ -243,5 +257,51 @@ class AdviceController extends Controller
         $advice->delete();
 
         return redirect()->route('advices')->with('success', 'Die Beratung wurde erfolgreich gelöscht.');
+    }
+
+    public function updateStatus(Advice $advice, Request $request): RedirectResponse
+    {
+        $this->authorize('update', $advice);
+
+        $validated = $request->validate([
+            'advice_status_id' => 'required|uuid|exists:advice_status,uuid',
+        ]);
+
+        $status = AdviceStatus::where('uuid', $validated['advice_status_id'])->firstOrFail();
+
+        $advice->advice_status_id = $status->id;
+        $advice->save();
+
+        return back();
+    }
+
+    public function updateAdvisor(Advice $advice, Request $request): RedirectResponse
+    {
+        $this->authorize('update', $advice);
+
+        $validated = $request->validate([
+            'advisor_id' => 'required|integer|nullable|exists:users,uuid',
+        ]);
+
+        $advisor = User::where('uuid', $validated['advisor_id'])->firstOrFail();
+
+        $advice->advisor_id = $advisor->id;
+        $advice->save();
+
+        return back()->with('success', 'Der/Die Berater/in wurde aktualisiert');
+    }
+
+    public function assign(Advice $advice): RedirectResponse
+    {
+        $this->authorize('viewDataProtected', $advice);
+
+        if ($advice->advisor_id === null) {
+            $advice->advisor_id = Auth::user()->id;
+            $advice->save();
+        } else {
+            abort(403, 'Diese Beratung wurde bereits einem Berater zugewiesen');
+        }
+
+        return back()->with('success', 'Die Beratung wurde Dir zugewiesen');
     }
 }

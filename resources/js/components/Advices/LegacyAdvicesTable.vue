@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import CreateAdviceDialog from '@/components/CreateAdviceDialog.vue';
 import { computed, onMounted, reactive, ref } from 'vue';
-import LaravelDataSource from '../LaravelDataSource';
-import { AdaptTableHeight } from '../helpers';
-import PhysicalValue from '../views/PhysicalValue.vue';
+import LaravelDataSource from '../../LaravelDataSource';
+import { AdaptTableHeight } from '../../helpers';
+import PhysicalValue from '../../views/PhysicalValue.vue';
 
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
@@ -29,8 +29,8 @@ import { default as ArrayDataSource, default as ArrayStore } from 'devextreme/da
 import CustomStore from 'devextreme/data/custom_store';
 import { toast } from 'vue-sonner';
 import { route } from 'ziggy-js';
-import LaravelLookupSource from '../LaravelLookupSource';
-import { isActingAsAdmin, user } from '../authHelper';
+import LaravelLookupSource from '../../LaravelLookupSource';
+import { isActingAsAdmin, user } from '../../authHelper';
 
 const emit = defineEmits(['selectAdviceId']);
 
