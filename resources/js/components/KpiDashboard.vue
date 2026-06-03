@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import AdviceStatusDistributionChart from './charts/AdviceStatusDistributionChart.vue';
 import AdviceMonthlyCountChart from './charts/AdviceMonthlyCountChart.vue';
+import AdviceStatusDistributionChart from './charts/AdviceStatusDistributionChart.vue';
 import CurrentStatusDistributionChart from './charts/CurrentStatusDistributionChart.vue';
 </script>

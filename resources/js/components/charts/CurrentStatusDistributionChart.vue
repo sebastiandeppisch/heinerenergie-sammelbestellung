@@ -15,21 +15,21 @@
                 </SelectContent>
             </Select>
         </CardHeader>
-        <CardContent class="pt-4 min-h-[350px]">
-            <Skeleton v-if="isLoading" class="w-full h-[350px]" />
+        <CardContent class="min-h-[350px] pt-4">
+            <Skeleton v-if="isLoading" class="h-[350px] w-full" />
             <VueApexCharts v-else type="donut" height="350" :options="chartOptions" :series="series" />
         </CardContent>
     </Card>
 </template>
 
 <script setup lang="ts">
+import { Card, CardContent, CardHeader, CardTitle } from '@/shadcn/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
+import { Skeleton } from '@/shadcn/components/ui/skeleton';
 import type { ApexOptions } from 'apexcharts';
 import axios from 'axios';
 import { computed, onMounted, ref } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shadcn/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
-import { Skeleton } from '@/shadcn/components/ui/skeleton';
 
 const selectedResult = ref<string>('all');
 const isLoading = ref(false);
@@ -46,53 +46,52 @@ const filtered = computed(() => {
 const series = computed(() => filtered.value.map((d) => d.count));
 const labels = computed(() => filtered.value.map((d) => d.name));
 
-const chartOptions = computed((): ApexOptions => ({
-    chart: {
-        type: 'donut',
-        fontFamily: 'Arial, sans-serif',
-        background: 'transparent',
-    },
-    labels: labels.value,
-    colors: ['#FBBC05', '#4285F4', '#34A853', '#EA4335', '#8B5CF6', '#F97316', '#06B6D4'],
-    legend: {
-        position: 'bottom',
-        fontSize: '13px',
-        formatter: (name: string, opts: any) => `${name} – ${opts.w.globals.series[opts.seriesIndex]}`,
-    },
-    dataLabels: {
-        enabled: true,
-        formatter: (_val: number, opts: any) =>
-            `${opts.w.globals.series[opts.seriesIndex]} (${Math.round(_val)}%)`,
-        style: { fontSize: '12px' },
-        dropShadow: { enabled: false },
-    },
-    plotOptions: {
-        pie: {
-            donut: {
-                size: '65%',
-                labels: {
-                    show: true,
-                    total: {
+const chartOptions = computed(
+    (): ApexOptions => ({
+        chart: {
+            type: 'donut',
+            fontFamily: 'Arial, sans-serif',
+            background: 'transparent',
+        },
+        labels: labels.value,
+        colors: ['#FBBC05', '#4285F4', '#34A853', '#EA4335', '#8B5CF6', '#F97316', '#06B6D4'],
+        legend: {
+            position: 'bottom',
+            fontSize: '13px',
+            formatter: (name: string, opts: any) => `${name} – ${opts.w.globals.series[opts.seriesIndex]}`,
+        },
+        dataLabels: {
+            enabled: true,
+            formatter: (_val: number, opts: any) => `${opts.w.globals.series[opts.seriesIndex]} (${Math.round(_val)}%)`,
+            style: { fontSize: '12px' },
+            dropShadow: { enabled: false },
+        },
+        plotOptions: {
+            pie: {
+                donut: {
+                    size: '65%',
+                    labels: {
                         show: true,
-                        label: 'Gesamt',
-                        fontSize: '16px',
-                        fontWeight: 600,
-                        formatter: (w: any) => w.globals.seriesTotals.reduce((a: number, b: number) => a + b, 0),
+                        total: {
+                            show: true,
+                            label: 'Gesamt',
+                            fontSize: '16px',
+                            fontWeight: 600,
+                            formatter: (w: any) => w.globals.seriesTotals.reduce((a: number, b: number) => a + b, 0),
+                        },
                     },
                 },
             },
         },
-    },
-    stroke: { width: 0 },
-    tooltip: { y: { formatter: (v: number) => String(v) } },
-}));
+        stroke: { width: 0 },
+        tooltip: { y: { formatter: (v: number) => String(v) } },
+    }),
+);
 
 async function loadData() {
     isLoading.value = true;
     try {
-        const response = await axios.get<App.Data.StatusNameCountData[]>(
-            route('api.kpi.current-status-distribution'),
-        );
+        const response = await axios.get<App.Data.StatusNameCountData[]>(route('api.kpi.current-status-distribution'));
         allData.value = response.data;
     } finally {
         isLoading.value = false;
