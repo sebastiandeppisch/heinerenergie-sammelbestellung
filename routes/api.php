@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AdviceTypeController;
 use App\Http\Controllers\Api\GeoSearchController;
 use App\Http\Controllers\Api\GroupAdviceStatusController;
 use App\Http\Controllers\Api\GroupUserController;
+use App\Http\Controllers\Api\KpiController;
 use App\Http\Controllers\Api\NextcloudAdviceController;
 use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\UploadController;
@@ -26,6 +27,8 @@ use Illuminate\Support\Facades\Route;
 require __DIR__.'/api.auth.php';
 
 Route::middleware('auth')->group(function () {
+    Route::get('kpi/status-distribution', [KpiController::class, 'statusDistribution'])->name('api.kpi.status-distribution');
+
     Route::resource('users', UserController::class)->only(['index', 'show'])->names('api.users');
     Route::resource('advices', AdviceController::class)->except(['index', 'store'])->names('api.advices');
 

@@ -210,6 +210,10 @@ perPage: number;
 currentPage: number;
 lastPage: number;
 };
+export type StatusDistributionPointData = {
+date: string;
+statusCounts: Record<string, number>;
+};
 export type SubmissionFieldData = {
 value: number | string | Array<string> | null;
 field: App.Data.FormFieldData;
@@ -248,6 +252,7 @@ canCreateGroups: boolean;
 declare namespace App.Enums {
 export type AdviceStatusResult = 0 | 1 | 2 | 3;
 export type AdviceType = 0 | 1 | 2;
+export type Aggregation = 'day' | 'week' | 'month' | 'quarter';
 export type FieldType = 'text' | 'textarea' | 'number' | 'email' | 'phone' | 'select' | 'radio' | 'checkbox' | 'file' | 'image' | 'date' | 'geo_coordinate' | 'address';
 export type FormType = 0 | 1;
 export type HouseType = 0 | 1 | 2;
