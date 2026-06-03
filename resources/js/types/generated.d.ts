@@ -214,6 +214,11 @@ export type StatusDistributionPointData = {
 date: string;
 statusCounts: Record<string, number>;
 };
+export type StatusNameCountData = {
+name: string;
+result: App.Enums.AdviceStatusResult;
+count: number;
+};
 export type SubmissionFieldData = {
 value: number | string | Array<string> | null;
 field: App.Data.FormFieldData;
@@ -236,6 +241,10 @@ zip: string | null;
 is_admin: boolean;
 is_active: boolean;
 groups: Array<App.Data.GroupBaseData>;
+};
+export type YearlyAdviceCountData = {
+label: string;
+counts: number[];
 };
 }
 declare namespace App.Data.Pages {

@@ -28,6 +28,8 @@ require __DIR__.'/api.auth.php';
 
 Route::middleware('auth')->group(function () {
     Route::get('kpi/status-distribution', [KpiController::class, 'statusDistribution'])->name('api.kpi.status-distribution');
+    Route::get('kpi/monthly-count', [KpiController::class, 'monthlyCount'])->name('api.kpi.monthly-count');
+    Route::get('kpi/current-status-distribution', [KpiController::class, 'currentStatusDistribution'])->name('api.kpi.current-status-distribution');
 
     Route::resource('users', UserController::class)->only(['index', 'show'])->names('api.users');
     Route::resource('advices', AdviceController::class)->except(['index', 'store'])->names('api.advices');

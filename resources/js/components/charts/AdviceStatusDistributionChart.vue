@@ -1,8 +1,8 @@
 <template>
-    <div class="dashboard-card">
-        <div class="card-header">
-            <h2>Beratungen nach Status</h2>
-            <div class="card-controls">
+    <Card>
+        <CardHeader class="flex flex-row items-start justify-between gap-3 border-b">
+            <CardTitle>Beratungen nach Status</CardTitle>
+            <div class="flex flex-col items-end gap-2">
                 <Select v-model="selectedPreset">
                     <SelectTrigger class="w-44">
                         <SelectValue />
@@ -16,17 +16,17 @@
                     </SelectContent>
                 </Select>
 
-                <div v-if="isCustomMode" class="custom-controls">
-                    <div class="custom-field">
-                        <span class="custom-label">Von</span>
+                <div v-if="isCustomMode" class="flex flex-wrap justify-end items-center gap-2">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-xs text-muted-foreground whitespace-nowrap">Von</span>
                         <DatePickerInput v-model="customFrom" :max="customTo" @update:model-value="loadData" />
                     </div>
-                    <div class="custom-field">
-                        <span class="custom-label">Bis</span>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-xs text-muted-foreground whitespace-nowrap">Bis</span>
                         <DatePickerInput v-model="customTo" :min="customFrom" :max="today" @update:model-value="loadData" />
                     </div>
-                    <div class="custom-field">
-                        <span class="custom-label">Aggregation</span>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-xs text-muted-foreground whitespace-nowrap">Aggregation</span>
                         <Select
                             :model-value="customAggregation"
                             @update:model-value="(v) => { customAggregation = v as App.Enums.Aggregation; loadData(); }"
@@ -44,18 +44,19 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="card-body">
+        </CardHeader>
+        <CardContent class="pt-4 min-h-[300px]">
             <Skeleton v-if="isLoading" class="w-full h-[300px]" />
             <AreaChart v-else :data="chartData" />
-        </div>
-    </div>
+        </CardContent>
+    </Card>
 </template>
 
 <script setup lang="ts">
 import axios from 'axios';
 import { computed, onMounted, ref, watch } from 'vue';
 import AreaChart from './AreaChart.vue';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shadcn/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { Skeleton } from '@/shadcn/components/ui/skeleton';
 import DatePickerInput from '@/shadcn/components/ui/date-picker/DatePickerInput.vue';
@@ -129,77 +130,3 @@ async function loadData() {
 
 onMounted(loadData);
 </script>
-
-<style scoped>
-.dashboard-card {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-}
-
-.card-header {
-    padding: 15px 20px;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 12px;
-}
-
-.card-header h2 {
-    margin: 0;
-    font-size: 1.2rem;
-    color: #333;
-    flex-shrink: 0;
-    padding-top: 6px;
-}
-
-.card-controls {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 8px;
-}
-
-.custom-controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: flex-end;
-    align-items: center;
-}
-
-.custom-field {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.custom-label {
-    font-size: 0.8rem;
-    color: #666;
-    white-space: nowrap;
-}
-
-.card-body {
-    padding: 20px;
-    min-height: 300px;
-}
-
-@media (max-width: 768px) {
-    .card-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .card-controls {
-        align-items: flex-start;
-        width: 100%;
-    }
-
-    .custom-controls {
-        justify-content: flex-start;
-    }
-}
-</style>
