@@ -11,8 +11,8 @@ import Card from '@/shadcn/components/ui/card/Card.vue';
 import CardContent from '@/shadcn/components/ui/card/CardContent.vue';
 import CardHeader from '@/shadcn/components/ui/card/CardHeader.vue';
 
-import editorToolbar from '../htmlEditorToolbar.json';
 import KpiDashboard from '@/components/KpiDashboard.vue';
+import editorToolbar from '../htmlEditorToolbar.json';
 
 interface Props {
     advisorInfo: string;
@@ -107,9 +107,7 @@ const cancelEdit = () => {
         </Card>
 
         <div class="m-6">
-         <KpiDashboard /> 
-
-
+            <KpiDashboard />
         </div>
     </div>
 </template>

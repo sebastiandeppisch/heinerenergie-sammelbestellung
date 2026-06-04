@@ -16,20 +16,25 @@
                     </SelectContent>
                 </Select>
 
-                <div v-if="isCustomMode" class="flex flex-wrap justify-end items-center gap-2">
+                <div v-if="isCustomMode" class="flex flex-wrap items-center justify-end gap-2">
                     <div class="flex items-center gap-1.5">
-                        <span class="text-xs text-muted-foreground whitespace-nowrap">Von</span>
+                        <span class="text-xs whitespace-nowrap text-muted-foreground">Von</span>
                         <DatePickerInput v-model="customFrom" :max="customTo" @update:model-value="loadData" />
                     </div>
                     <div class="flex items-center gap-1.5">
-                        <span class="text-xs text-muted-foreground whitespace-nowrap">Bis</span>
+                        <span class="text-xs whitespace-nowrap text-muted-foreground">Bis</span>
                         <DatePickerInput v-model="customTo" :min="customFrom" :max="today" @update:model-value="loadData" />
                     </div>
                     <div class="flex items-center gap-1.5">
-                        <span class="text-xs text-muted-foreground whitespace-nowrap">Aggregation</span>
+                        <span class="text-xs whitespace-nowrap text-muted-foreground">Aggregation</span>
                         <Select
                             :model-value="customAggregation"
-                            @update:model-value="(v) => { customAggregation = v as App.Enums.Aggregation; loadData(); }"
+                            @update:model-value="
+                                (v) => {
+                                    customAggregation = v as App.Enums.Aggregation;
+                                    loadData();
+                                }
+                            "
                         >
                             <SelectTrigger class="w-36">
                                 <SelectValue />
@@ -45,21 +50,21 @@
                 </div>
             </div>
         </CardHeader>
-        <CardContent class="pt-4 min-h-[300px]">
-            <Skeleton v-if="isLoading" class="w-full h-[300px]" />
+        <CardContent class="min-h-[300px] pt-4">
+            <Skeleton v-if="isLoading" class="h-[300px] w-full" />
             <AreaChart v-else :data="chartData" />
         </CardContent>
     </Card>
 </template>
 
 <script setup lang="ts">
+import { Card, CardContent, CardHeader, CardTitle } from '@/shadcn/components/ui/card';
+import DatePickerInput from '@/shadcn/components/ui/date-picker/DatePickerInput.vue';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
+import { Skeleton } from '@/shadcn/components/ui/skeleton';
 import axios from 'axios';
 import { computed, onMounted, ref, watch } from 'vue';
 import AreaChart from './AreaChart.vue';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shadcn/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
-import { Skeleton } from '@/shadcn/components/ui/skeleton';
-import DatePickerInput from '@/shadcn/components/ui/date-picker/DatePickerInput.vue';
 
 type Preset = 'week' | 'month' | 'quarter' | 'year' | 'custom';
 
@@ -84,10 +89,14 @@ const today = formatDate(new Date());
 function presetParams(preset: Exclude<Preset, 'custom'>): { from: string; to: string; aggregation: App.Enums.Aggregation } {
     const now = new Date();
     switch (preset) {
-        case 'week':    return { from: formatDate(subDays(now, 7)),    to: today, aggregation: 'day'   };
-        case 'month':   return { from: formatDate(subMonths(now, 1)),  to: today, aggregation: 'week'  };
-        case 'quarter': return { from: formatDate(subMonths(now, 3)),  to: today, aggregation: 'month' };
-        case 'year':    return { from: formatDate(subMonths(now, 12)), to: today, aggregation: 'month' };
+        case 'week':
+            return { from: formatDate(subDays(now, 7)), to: today, aggregation: 'day' };
+        case 'month':
+            return { from: formatDate(subMonths(now, 1)), to: today, aggregation: 'week' };
+        case 'quarter':
+            return { from: formatDate(subMonths(now, 3)), to: today, aggregation: 'month' };
+        case 'year':
+            return { from: formatDate(subMonths(now, 12)), to: today, aggregation: 'month' };
     }
 }
 

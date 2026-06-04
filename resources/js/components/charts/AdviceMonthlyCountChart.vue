@@ -15,21 +15,21 @@
                 </SelectContent>
             </Select>
         </CardHeader>
-        <CardContent class="pt-4 min-h-[350px]">
-            <Skeleton v-if="isLoading" class="w-full h-[350px]" />
+        <CardContent class="min-h-[350px] pt-4">
+            <Skeleton v-if="isLoading" class="h-[350px] w-full" />
             <VueApexCharts v-else type="line" height="350" :options="chartOptions" :series="series" />
         </CardContent>
     </Card>
 </template>
 
 <script setup lang="ts">
+import { Card, CardContent, CardHeader, CardTitle } from '@/shadcn/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
+import { Skeleton } from '@/shadcn/components/ui/skeleton';
 import type { ApexOptions } from 'apexcharts';
 import axios from 'axios';
 import { computed, onMounted, ref, watch } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shadcn/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
-import { Skeleton } from '@/shadcn/components/ui/skeleton';
 
 const COLORS = ['#4285F4', '#EA4335', '#34A853', '#FBBC05', '#8B5CF6'];
 
@@ -47,43 +47,44 @@ const series = computed(() =>
     })),
 );
 
-const chartOptions = computed((): ApexOptions => ({
-    chart: {
-        type: 'line',
-        zoom: { enabled: false },
-        toolbar: { show: false },
-        fontFamily: 'Arial, sans-serif',
-        background: 'transparent',
-    },
-    stroke: { curve: 'smooth', width: 3 },
-    colors: COLORS,
-    dataLabels: { enabled: false },
-    grid: { borderColor: '#e0e0e0' },
-    xaxis: {
-        categories: monthLabels.value,
-        labels: { style: { colors: '#616161', fontSize: '12px' } },
-    },
-    yaxis: {
-        title: {
-            text: 'Anzahl Beratungen',
-            style: { fontSize: '14px', fontWeight: 'normal', color: '#616161' },
+const chartOptions = computed(
+    (): ApexOptions => ({
+        chart: {
+            type: 'line',
+            zoom: { enabled: false },
+            toolbar: { show: false },
+            fontFamily: 'Arial, sans-serif',
+            background: 'transparent',
         },
-        labels: {
-            style: { colors: '#616161', fontSize: '12px' },
-            formatter: (v: number) => String(Math.round(v)),
+        stroke: { curve: 'smooth', width: 3 },
+        colors: COLORS,
+        dataLabels: { enabled: false },
+        grid: { borderColor: '#e0e0e0' },
+        xaxis: {
+            categories: monthLabels.value,
+            labels: { style: { colors: '#616161', fontSize: '12px' } },
         },
-    },
-    tooltip: { shared: true, intersect: false },
-    legend: { position: 'top', horizontalAlign: 'right', fontSize: '13px' },
-}));
+        yaxis: {
+            title: {
+                text: 'Anzahl Beratungen',
+                style: { fontSize: '14px', fontWeight: 'normal', color: '#616161' },
+            },
+            labels: {
+                style: { colors: '#616161', fontSize: '12px' },
+                formatter: (v: number) => String(Math.round(v)),
+            },
+        },
+        tooltip: { shared: true, intersect: false },
+        legend: { position: 'top', horizontalAlign: 'right', fontSize: '13px' },
+    }),
+);
 
 async function loadData() {
     isLoading.value = true;
     try {
-        const response = await axios.get<{ series: App.Data.YearlyAdviceCountData[]; monthLabels: string[] }>(
-            route('api.kpi.monthly-count'),
-            { params: { years: selectedYears.value } },
-        );
+        const response = await axios.get<{ series: App.Data.YearlyAdviceCountData[]; monthLabels: string[] }>(route('api.kpi.monthly-count'), {
+            params: { years: selectedYears.value },
+        });
         seriesData.value = response.data.series;
         monthLabels.value = response.data.monthLabels;
     } finally {
