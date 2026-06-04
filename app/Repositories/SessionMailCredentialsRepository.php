@@ -9,7 +9,7 @@ use RuntimeException;
 
 class SessionMailCredentialsRepository implements MailCredentialsRepository
 {
-    private const SESSION_KEY = 'mail_credentials';
+    private const string SESSION_KEY = 'mail_credentials';
 
     public function __construct(private readonly UserEncryptionService $encryptionService) {}
 
@@ -22,7 +22,7 @@ class SessionMailCredentialsRepository implements MailCredentialsRepository
         }
 
         try {
-            $key = base64_encode(app('user.enc_key'));
+            $key = base64_encode((string) app('user.enc_key'));
             $json = $this->encryptionService->decrypt($encrypted, $key);
             $data = json_decode($json, true);
 
@@ -52,7 +52,7 @@ class SessionMailCredentialsRepository implements MailCredentialsRepository
             'password' => $data->password,
         ]);
 
-        $key = base64_encode(app('user.enc_key'));
+        $key = base64_encode((string) app('user.enc_key'));
         $encrypted = $this->encryptionService->encrypt($json, $key);
 
         session()->put(self::SESSION_KEY, $encrypted);

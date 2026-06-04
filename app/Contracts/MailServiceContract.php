@@ -7,6 +7,7 @@ use App\Data\MailCredentialsData;
 use App\Data\MailHeaderData;
 use App\Models\Advice;
 use Illuminate\Support\Collection;
+use RuntimeException;
 
 interface MailServiceContract
 {
@@ -17,6 +18,6 @@ interface MailServiceContract
 
     public function sendMail(Advice $case, string $subject, string $body): void;
 
-    /** @throws \RuntimeException when the connection cannot be established */
+    /** @throws RuntimeException when the connection cannot be established */
     public function testConnection(MailCredentialsData $credentials): void;
 }

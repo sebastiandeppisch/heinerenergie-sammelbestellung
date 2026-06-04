@@ -10,7 +10,6 @@ import { route } from 'ziggy-js';
 
 type MailHeader = App.Data.MailHeaderData;
 
-
 type MailBody = App.Data.MailBodyData;
 
 const props = defineProps<{
@@ -205,7 +204,7 @@ onMounted(loadMails);
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <p class="whitespace-pre-wrap text-sm text-foreground">{{ selectedMail.body }}</p>
+                    <p class="text-sm whitespace-pre-wrap text-foreground">{{ selectedMail.body }}</p>
                 </CardContent>
             </Card>
         </template>

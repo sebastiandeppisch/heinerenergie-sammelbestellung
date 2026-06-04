@@ -89,7 +89,13 @@ function removeAccount() {
                 <CheckCircle class="h-5 w-5" />
                 <span class="text-sm font-medium">Mail-Konto ist eingerichtet</span>
             </div>
-            <Button variant="outline" size="sm" class="text-destructive hover:text-destructive" :disabled="deleteForm.processing" @click="removeAccount">
+            <Button
+                variant="outline"
+                size="sm"
+                class="text-destructive hover:text-destructive"
+                :disabled="deleteForm.processing"
+                @click="removeAccount"
+            >
                 <Loader2 v-if="deleteForm.processing" class="mr-1 h-4 w-4 animate-spin" />
                 <Trash2 v-else class="mr-1 h-4 w-4" />
                 Entfernen
@@ -104,22 +110,14 @@ function removeAccount() {
             <CardContent class="space-y-3">
                 <p class="text-sm text-muted-foreground">E-Mail-Adresse eingeben, um die Servereinstellungen automatisch zu ermitteln.</p>
                 <div class="flex gap-2">
-                    <Input
-                        v-model="discoverForm.email"
-                        type="email"
-                        placeholder="deine@email.de"
-                        class="flex-1"
-                        @keydown.enter.prevent="discover"
-                    />
+                    <Input v-model="discoverForm.email" type="email" placeholder="deine@email.de" class="flex-1" @keydown.enter.prevent="discover" />
                     <Button variant="outline" :disabled="discoverForm.processing || !discoverForm.email" @click="discover">
                         <Loader2 v-if="discoverForm.processing" class="mr-2 h-4 w-4 animate-spin" />
                         <Search v-else class="mr-2 h-4 w-4" />
                         Suchen
                     </Button>
                 </div>
-                <p v-if="discoverFailed" class="text-sm text-muted-foreground">
-                    Keine automatische Konfiguration gefunden. Bitte manuell ausfüllen.
-                </p>
+                <p v-if="discoverFailed" class="text-sm text-muted-foreground">Keine automatische Konfiguration gefunden. Bitte manuell ausfüllen.</p>
             </CardContent>
         </Card>
 

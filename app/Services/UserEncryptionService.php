@@ -6,15 +6,15 @@ use RuntimeException;
 
 class UserEncryptionService
 {
-    private const CIPHER = 'aes-256-gcm';
+    private const string CIPHER = 'aes-256-gcm';
 
-    private const ITERATIONS = 100_000;
+    private const int ITERATIONS = 100_000;
 
-    private const KEY_LENGTH = 32;
+    private const int KEY_LENGTH = 32;
 
-    private const NONCE_LENGTH = 12;
+    private const int NONCE_LENGTH = 12;
 
-    private const TAG_LENGTH = 16;
+    private const int TAG_LENGTH = 16;
 
     /** @return string base64-encoded 32-byte key */
     public function deriveKey(string $password, string $salt): string
@@ -56,7 +56,7 @@ class UserEncryptionService
             throw new RuntimeException('Invalid encrypted payload format');
         }
 
-        [$nonce, $ciphertext, $tag] = array_map('base64_decode', $parts);
+        [$nonce, $ciphertext, $tag] = array_map(base64_decode(...), $parts);
 
         $plaintext = openssl_decrypt(
             $ciphertext,

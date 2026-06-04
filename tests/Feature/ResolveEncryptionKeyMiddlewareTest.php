@@ -9,9 +9,7 @@ uses(RefreshDatabase::class);
 beforeEach(function () {
     $this->user = User::factory()->create();
 
-    Route::middleware(['auth', 'enc_key'])->get('/test-enc-key', function () {
-        return response()->json(['key' => base64_encode(app('user.enc_key'))]);
-    });
+    Route::middleware(['auth', 'enc_key'])->get('/test-enc-key', fn () => response()->json(['key' => base64_encode((string) app('user.enc_key'))]));
 });
 
 test('request without enc_key cookie returns 403', function () {

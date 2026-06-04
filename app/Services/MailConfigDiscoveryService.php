@@ -9,7 +9,7 @@ use Throwable;
 
 class MailConfigDiscoveryService
 {
-    private const TIMEOUT = 5;
+    private const int TIMEOUT = 5;
 
     public function discover(string $email): ?MailConfigData
     {
