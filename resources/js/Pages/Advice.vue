@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AdviceMails from '@/components/AdviceMails.vue';
 import ChecklistPanel from '@/components/ChecklistPanel.vue';
 import FormSubmissionRenderer from '@/components/FormBuilder/FormSubmissionRenderer.vue';
 import AdviceNextcloud from '@/components/Nextcloud/AdviceNextcloud.vue';
@@ -85,6 +86,11 @@ const advisor = user.value;
                 <div class="content-card">
                     <h3 class="card-title card-header">Dateien (Nextcloud)</h3>
                     <AdviceNextcloud :advice="advice" />
+                </div>
+
+                <div class="content-card" v-if="advice.email && user?.is_admin">
+                    <h3 class="card-title card-header">E-Mails</h3>
+                    <AdviceMails :advice-id="advice.id" :contact-email="advice.email" />
                 </div>
             </div>
 

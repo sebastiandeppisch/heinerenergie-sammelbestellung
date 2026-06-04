@@ -179,6 +179,24 @@ email: string;
 is_admin: boolean;
 is_active: boolean;
 };
+export type MailBodyData = {
+uid: string;
+folder: string;
+subject: string;
+from: string;
+to: string;
+date: string;
+body: string;
+};
+export type MailHeaderData = {
+uid: string;
+folder: string;
+subject: string;
+from: string;
+date: string;
+hasBeenRead: boolean;
+dateTimestamp: number;
+};
 export type MapPointCategoryData = {
 id: string;
 name: string;
