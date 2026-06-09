@@ -108,7 +108,8 @@
                     <!-- Simple mode: color picker -->
                     <TabsContent value="simple" class="mt-3 space-y-3">
                         <p class="text-xs text-muted-foreground">
-                            Die gewählte Farbe wird für optimale Lesbarkeit und Barrierefreiheit leicht angepasst (Helligkeit und Sättigung werden normiert). Im
+                            Die gewählte Farbe wird für optimale Lesbarkeit und Barrierefreiheit leicht angepasst (Helligkeit und Sättigung werden
+                            normiert). Im
                             <span class="font-medium">Expert-Modus</span> kannst du alle Werte manuell einstellen.
                         </p>
                         <div class="flex items-end gap-4">
@@ -121,10 +122,7 @@
                                 />
                             </div>
                             <div class="flex flex-col items-center gap-1">
-                                <div
-                                    class="h-10 w-10 rounded border border-input"
-                                    :style="{ backgroundColor: previewColorLight }"
-                                />
+                                <div class="h-10 w-10 rounded border border-input" :style="{ backgroundColor: previewColorLight }" />
                                 <span class="text-xs text-muted-foreground">Hell</span>
                             </div>
                             <div class="flex flex-col items-center gap-1">
@@ -171,7 +169,7 @@
                                     step="0.1"
                                     :model-value="form.primary_hue ?? 47.604"
                                     :disabled="!canEdit"
-                                    @update:model-value="(v) => form.primary_hue = v != null ? parseFloat(String(v)) : null"
+                                    @update:model-value="(v) => (form.primary_hue = v != null ? parseFloat(String(v)) : null)"
                                     class="w-24"
                                 />
                             </div>
@@ -199,7 +197,7 @@
                                     step="0.001"
                                     :model-value="form.primary_lightness ?? 0.705"
                                     :disabled="!canEdit"
-                                    @update:model-value="(v) => form.primary_lightness = v != null ? parseFloat(String(v)) : null"
+                                    @update:model-value="(v) => (form.primary_lightness = v != null ? parseFloat(String(v)) : null)"
                                     class="w-24"
                                 />
                             </div>
@@ -227,7 +225,7 @@
                                     step="0.001"
                                     :model-value="form.primary_chroma ?? 0.213"
                                     :disabled="!canEdit"
-                                    @update:model-value="(v) => form.primary_chroma = v != null ? parseFloat(String(v)) : null"
+                                    @update:model-value="(v) => (form.primary_chroma = v != null ? parseFloat(String(v)) : null)"
                                     class="w-24"
                                 />
                             </div>
@@ -236,10 +234,7 @@
 
                         <div class="flex items-end gap-4">
                             <div class="flex flex-col items-center gap-1">
-                                <div
-                                    class="h-10 w-10 rounded border border-input"
-                                    :style="{ backgroundColor: previewColorLight }"
-                                />
+                                <div class="h-10 w-10 rounded border border-input" :style="{ backgroundColor: previewColorLight }" />
                                 <span class="text-xs text-muted-foreground">Hell</span>
                             </div>
                             <div class="flex flex-col items-center gap-1">
@@ -248,9 +243,7 @@
                                 </div>
                                 <span class="text-xs text-muted-foreground">Dunkel</span>
                             </div>
-                            <Button v-if="canEdit" type="button" variant="ghost" size="sm" @click="resetColor">
-                                Zurücksetzen
-                            </Button>
+                            <Button v-if="canEdit" type="button" variant="ghost" size="sm" @click="resetColor"> Zurücksetzen </Button>
                         </div>
                     </TabsContent>
                 </Tabs>
@@ -281,6 +274,7 @@ import { DxCheckBox } from 'devextreme-vue';
 import { confirm } from 'devextreme/ui/dialog';
 import { Save, Trash2, Upload, X } from 'lucide-vue-next';
 import { computed, onUnmounted, ref, watchEffect } from 'vue';
+import { route } from 'ziggy-js';
 
 function hexToHue(hex: string): number {
     const r = parseInt(hex.slice(1, 3), 16) / 255;
@@ -314,7 +308,6 @@ function hslToHex(h: number, s: number, l: number): string {
     };
     return `#${f(0)}${f(8)}${f(4)}`;
 }
-import { route } from 'ziggy-js';
 
 type GroupData = App.Data.GroupData;
 

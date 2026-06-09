@@ -59,7 +59,7 @@ class HandleInertiaRequests extends Middleware
             'auth.user' => fn () => $this->getUserData($request),
             'auth.availableGroups' => fn () => $request->user()?->groups->map(fn (Group $group) => GroupData::fromModel($group)),
             'auth.currentGroup' => fn () => app(CurrentGroupService::class)->getGroup() ? GroupBaseData::fromModel(app(CurrentGroupService::class)->getGroup()) : null,
-            'theme' => fn () => $this->getThemeProps(),
+            'theme' => $this->getThemeProps(...),
             'flashMessages' => $flashMessages,
             'defaultLogo' => app_logo(),
             'appName' => app_name(...),
