@@ -157,6 +157,9 @@ accepts_transfers: boolean;
 userCanActAsAdmin: boolean;
 new_advice_mail: string | null;
 nextcloud_group_name: string | null;
+primary_hue: number | null;
+primary_lightness: number | null;
+primary_chroma: number | null;
 };
 export type GroupMapData = {
 polygon: App.ValueObjects.Polygon;

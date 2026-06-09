@@ -31,6 +31,9 @@ class Group extends Model
         'accepts_transfers',
         'nextcloud_search_path',
         'nextcloud_group_name',
+        'primary_hue',
+        'primary_lightness',
+        'primary_chroma',
     ];
 
     protected $casts = [
@@ -176,6 +179,9 @@ class Group extends Model
     {
         return [
             'accepts_transfers' => 'boolean',
+            'primary_hue' => 'float',
+            'primary_lightness' => 'float',
+            'primary_chroma' => 'float',
         ];
     }
 

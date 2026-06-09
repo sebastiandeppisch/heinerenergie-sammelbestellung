@@ -6,6 +6,11 @@ export interface CustomPageProps extends PageProps {
         currentGroup?: App.Data.GroupBaseData;
         availableGroups?: App.Data.GroupData[];
     };
+    theme: {
+        primaryHue: number | null;
+        primaryLightness: number | null;
+        primaryChroma: number | null;
+    };
     userRole?: 'user' | 'group-admin' | 'system-admin';
     flashMessages?: {
         [key: string]: string;
