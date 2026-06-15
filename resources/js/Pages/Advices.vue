@@ -6,11 +6,11 @@ import LegacyAdvicesTable from '@/components/Advices/LegacyAdvicesTable.vue';
 
 defineProps<{
     onlyOneGroup: boolean;
-    advices: App.Models.Advice[];
+    advices: App.Data.DataProtectedAdviceData[];
     groups: App.Data.GroupData[];
-    adviceStatuses: { id: number; name: string }[];
+    adviceStatuses: { id: string; name: string }[];
     adviceTypes: { id: number; name: string }[];
-    advisors: { id: number; name: string }[];
+    advisors: { id: string; name: string }[];
 }>();
 
 const activeTab = ref('new');

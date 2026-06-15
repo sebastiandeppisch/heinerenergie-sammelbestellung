@@ -45,7 +45,7 @@ const reactiveHeight = tableHeight.getReactive();
 
 const props = defineProps<{
     onlyOneGroup: boolean;
-    advices: App.Models.Advice[];
+    advices: App.Data.DataProtectedAdviceData[];
     groups: App.Data.GroupData[];
 }>();
 
