@@ -126,7 +126,7 @@ const centerOfMap = computed<PointExpression>(() => {
 </script>
 
 <template>
-    <div class="pin-location-map-container">
+    <div class="pin-location-map-container isolate">
         <div ref="mapContainerRef" class="map-container">
             <LMap
                 ref="mapRef"

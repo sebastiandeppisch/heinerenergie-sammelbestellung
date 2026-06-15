@@ -54,7 +54,7 @@ watch(map, () => {
 
 <template>
     <div class="h-screen w-full">
-        <div class="h-full w-full">
+        <div class="h-full w-full isolate">
             <LMap
                 ref="map"
                 :zoom="map.zoom"

@@ -13,7 +13,7 @@ const zoom = ref(15);
 </script>
 
 <template>
-    <div style="height: 300px; width: 100%" v-if="advisor.lat !== null && advisor.long">
+    <div style="height: 300px; width: 100%" class="isolate" v-if="advisor.lat !== null && advisor.long">
         <LMap ref="map" :zoom="zoom" :center="[advisor.lat, advisor.long]" :minZoom="3" :maxZoom="18">
             <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" layer-type="base" name="OpenStreetMap" />
             <LMarker :lat-lng="latLng(advisor.lat, advisor.long)">
