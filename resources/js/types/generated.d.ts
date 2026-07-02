@@ -191,6 +191,13 @@ to: string;
 date: string;
 body: string;
 };
+export type MailConfigData = {
+imapHost: string;
+imapPort: number;
+smtpHost: string;
+smtpPort: number;
+username: string;
+};
 export type MailHeaderData = {
 uid: string;
 folder: string;

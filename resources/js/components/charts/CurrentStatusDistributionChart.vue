@@ -30,6 +30,7 @@ import type { ApexOptions } from 'apexcharts';
 import axios from 'axios';
 import { computed, onMounted, ref } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
+import { route } from 'ziggy-js';
 
 const selectedResult = ref<string>('all');
 const isLoading = ref(false);

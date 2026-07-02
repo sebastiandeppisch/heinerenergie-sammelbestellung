@@ -8,12 +8,12 @@ uses(RefreshDatabase::class);
 test('login sets enc_key cookie', function () {
     $user = User::factory()->create(['password' => bcrypt('password123')]);
 
-    $response = $this->postJson('/api/login', [
+    $response = $this->post('/login-form', [
         'email' => $user->email,
         'password' => 'password123',
     ]);
 
-    $response->assertOk();
+    $response->assertRedirect(route('dashboard'));
     expect($response->headers->getCookies())->not->toBeEmpty();
 
     $cookieNames = array_map(fn ($c) => $c->getName(), $response->headers->getCookies());
@@ -23,7 +23,7 @@ test('login sets enc_key cookie', function () {
 test('enc_key cookie is session-based (no expiry)', function () {
     $user = User::factory()->create(['password' => bcrypt('password123')]);
 
-    $response = $this->postJson('/api/login', [
+    $response = $this->post('/login-form', [
         'email' => $user->email,
         'password' => 'password123',
     ]);
@@ -39,7 +39,7 @@ test('enc_key cookie is session-based (no expiry)', function () {
 test('enc_key cookie is HttpOnly', function () {
     $user = User::factory()->create(['password' => bcrypt('password123')]);
 
-    $response = $this->postJson('/api/login', [
+    $response = $this->post('/login-form', [
         'email' => $user->email,
         'password' => 'password123',
     ]);
@@ -53,7 +53,7 @@ test('enc_key cookie is HttpOnly', function () {
 test('login stores enc_salt in session', function () {
     $user = User::factory()->create(['password' => bcrypt('password123')]);
 
-    $this->postJson('/api/login', [
+    $this->post('/login-form', [
         'email' => $user->email,
         'password' => 'password123',
     ]);
