@@ -5,6 +5,9 @@ use App\Http\Controllers\Api\AdviceStatusController;
 use App\Http\Controllers\Api\AdviceTypeController;
 use App\Http\Controllers\Api\GeoSearchController;
 use App\Http\Controllers\Api\GroupAdviceStatusController;
+use App\Http\Controllers\Api\GroupUserController;
+use App\Http\Controllers\Api\KpiController;
+use App\Http\Controllers\Api\MailController;
 use App\Http\Controllers\Api\NextcloudAdviceController;
 use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\UploadController;
@@ -23,6 +26,10 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware('auth')->group(function () {
+    Route::get('kpi/status-distribution', [KpiController::class, 'statusDistribution'])->name('api.kpi.status-distribution');
+    Route::get('kpi/monthly-count', [KpiController::class, 'monthlyCount'])->name('api.kpi.monthly-count');
+    Route::get('kpi/current-status-distribution', [KpiController::class, 'currentStatusDistribution'])->name('api.kpi.current-status-distribution');
+
     Route::resource('users', UserController::class)->only(['index', 'show'])->names('api.users');
     Route::resource('advices', AdviceController::class)->except(['index', 'store'])->names('api.advices');
 
@@ -53,6 +60,13 @@ Route::middleware('auth')->group(function () {
     Route::apiResource('groups.advicestatus', GroupAdviceStatusController::class);
 
     Route::apiResource('advicestatus', AdviceStatusController::class)->only(['index', 'show']);
+
+    Route::middleware('enc_key')->prefix('advices/{advice}/mails')->group(function () {
+        Route::get('/', [MailController::class, 'index'])->name('api.mail.index');
+        Route::post('/', [MailController::class, 'store'])->name('api.mail.store');
+        Route::get('{folder}/{uid}', [MailController::class, 'show'])->name('api.mail.show')
+            ->where('folder', '[^/]+');
+    });
 });
 
 Route::resource('advicetypes', AdviceTypeController::class)->only(['index', 'show']);

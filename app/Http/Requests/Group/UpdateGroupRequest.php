@@ -25,6 +25,9 @@ class UpdateGroupRequest extends FormRequest
             'logo' => 'nullable|image|max:1024', // max 1MB
             'remove_logo' => 'boolean',
             'nextcloud_group_name' => 'nullable|string|max:255',
+            'primary_hue' => 'nullable|numeric|min:0|max:360',
+            'primary_lightness' => 'nullable|numeric|min:0|max:1',
+            'primary_chroma' => 'nullable|numeric|min:0|max:0.4',
         ];
     }
 }

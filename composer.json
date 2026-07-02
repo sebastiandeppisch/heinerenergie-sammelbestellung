@@ -25,6 +25,7 @@
         "spatie/laravel-data": "^4.15",
         "spatie/laravel-typescript-transformer": "^2.5",
         "tightenco/ziggy": "^2.5",
+        "webklex/laravel-imap": "^6.2",
         "wnx/laravel-sends": "^2.4"
     },
     "require-dev": {

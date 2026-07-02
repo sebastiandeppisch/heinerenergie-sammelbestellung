@@ -11,6 +11,7 @@ use App\Http\Controllers\FormSubmissionController;
 use App\Http\Controllers\FormSubmitController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\Groups\GroupUserController;
+use App\Http\Controllers\MailAccountController;
 use App\Http\Controllers\MapPointCategoryController;
 use App\Http\Controllers\MapPointController;
 use App\Http\Controllers\NextcloudGroupController;
@@ -103,6 +104,17 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('mappoints', MapPointController::class);
     Route::resource('mappoint-categories', MapPointCategoryController::class);
+
+    // Mail account page (no enc_key required – user can always view setup)
+    Route::get('/mail/account', [MailAccountController::class, 'show'])->name('mail.account.show');
+    // Mail routes that do not require the encryption key
+    Route::post('/mail/discover', [MailAccountController::class, 'discover'])->name('mail.discover');
+
+    // Mail operations that require the encryption key cookie
+    Route::middleware('enc_key')->group(function () {
+        Route::post('/mail/account', [MailAccountController::class, 'store'])->name('mail.account.store');
+        Route::delete('/mail/account', [MailAccountController::class, 'destroy'])->name('mail.account.destroy');
+    });
 
     // System Admin Routes
     Route::middleware(CheckSysAdmin::class)->group(function () {

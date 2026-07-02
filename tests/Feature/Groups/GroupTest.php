@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\delete;
+use function Pest\Laravel\get;
 use function Pest\Laravel\post;
 use function Pest\Laravel\put;
 
@@ -109,6 +110,139 @@ test('validates logo file size and type', function () {
     ]);
 
     $response->assertSessionHasErrors('logo');
+});
+
+test('can update primary hue', function () {
+    actingAs($this->admin);
+
+    $response = put(route('groups.update', $this->group), [
+        'name' => 'Test Group',
+        'primary_hue' => 180.5,
+    ]);
+
+    $response->assertRedirect();
+    $response->assertSessionHas('success');
+
+    expect($this->group->refresh()->primary_hue)->toBe(180.5);
+});
+
+test('can update primary lightness and chroma', function () {
+    actingAs($this->admin);
+
+    $response = put(route('groups.update', $this->group), [
+        'name' => 'Test Group',
+        'primary_hue' => 200.0,
+        'primary_lightness' => 0.65,
+        'primary_chroma' => 0.18,
+    ]);
+
+    $response->assertRedirect();
+    $response->assertSessionHas('success');
+
+    $this->group->refresh();
+    expect($this->group->primary_hue)->toBe(200.0)
+        ->and($this->group->primary_lightness)->toBe(0.65)
+        ->and($this->group->primary_chroma)->toBe(0.18);
+});
+
+test('can reset primary color to null', function () {
+    $this->group->update(['primary_hue' => 120.0, 'primary_lightness' => 0.7, 'primary_chroma' => 0.2]);
+
+    actingAs($this->admin);
+
+    $response = put(route('groups.update', $this->group), [
+        'name' => 'Test Group',
+        'primary_hue' => null,
+        'primary_lightness' => null,
+        'primary_chroma' => null,
+    ]);
+
+    $response->assertRedirect();
+
+    $this->group->refresh();
+    expect($this->group->primary_hue)->toBeNull()
+        ->and($this->group->primary_lightness)->toBeNull()
+        ->and($this->group->primary_chroma)->toBeNull();
+});
+
+test('rejects primary_hue outside 0-360 range', function (mixed $invalidHue) {
+    actingAs($this->admin);
+
+    $response = put(route('groups.update', $this->group), [
+        'name' => 'Test Group',
+        'primary_hue' => $invalidHue,
+    ]);
+
+    $response->assertSessionHasErrors('primary_hue');
+})->with([
+    'above max' => 361,
+    'negative' => -1,
+]);
+
+test('rejects primary_lightness outside 0-1 range', function (mixed $invalidValue) {
+    actingAs($this->admin);
+
+    $response = put(route('groups.update', $this->group), [
+        'name' => 'Test Group',
+        'primary_lightness' => $invalidValue,
+    ]);
+
+    $response->assertSessionHasErrors('primary_lightness');
+})->with([
+    'above max' => 1.1,
+    'negative' => -0.1,
+]);
+
+test('rejects primary_chroma outside 0-0.4 range', function (mixed $invalidValue) {
+    actingAs($this->admin);
+
+    $response = put(route('groups.update', $this->group), [
+        'name' => 'Test Group',
+        'primary_chroma' => $invalidValue,
+    ]);
+
+    $response->assertSessionHasErrors('primary_chroma');
+})->with([
+    'above max' => 0.41,
+    'negative' => -0.01,
+]);
+
+test('theme props contain primary color values when group is selected', function () {
+    $this->group->update(['primary_hue' => 120.5, 'primary_lightness' => 0.65, 'primary_chroma' => 0.18]);
+
+    $user = User::factory()->create();
+    $this->group->users()->attach($user, ['is_admin' => true]);
+
+    actingAs($user)
+        ->post("/actAsGroup/{$this->group->uuid}", ['asAdmin' => true])
+        ->assertSessionHasNoErrors();
+
+    $response = get(route('groups.index'));
+
+    $response->assertInertia(
+        fn ($page) => $page
+            ->where('theme.primaryHue', 120.5)
+            ->where('theme.primaryLightness', 0.65)
+            ->where('theme.primaryChroma', 0.18)
+    );
+});
+
+test('theme props are null when group has no color set', function () {
+    $user = User::factory()->create();
+    $this->group->users()->attach($user, ['is_admin' => true]);
+
+    actingAs($user)
+        ->post("/actAsGroup/{$this->group->uuid}", ['asAdmin' => true])
+        ->assertSessionHasNoErrors();
+
+    $response = get(route('groups.index'));
+
+    $response->assertInertia(
+        fn ($page) => $page
+            ->where('theme.primaryHue', null)
+            ->where('theme.primaryLightness', null)
+            ->where('theme.primaryChroma', null)
+    );
 });
 
 test('deleting group removes logo', function () {

@@ -59,6 +59,7 @@ class HandleInertiaRequests extends Middleware
             'auth.user' => fn () => $this->getUserData($request),
             'auth.availableGroups' => fn () => $request->user()?->groups->map(fn (Group $group) => GroupData::fromModel($group)),
             'auth.currentGroup' => fn () => app(CurrentGroupService::class)->getGroup() ? GroupBaseData::fromModel(app(CurrentGroupService::class)->getGroup()) : null,
+            'theme' => $this->getThemeProps(...),
             'flashMessages' => $flashMessages,
             'defaultLogo' => app_logo(),
             'appName' => app_name(...),
@@ -77,6 +78,20 @@ class HandleInertiaRequests extends Middleware
         }
 
         return 'user';
+    }
+
+    /**
+     * @return array{primaryHue: float|null, primaryLightness: float|null, primaryChroma: float|null}
+     */
+    private function getThemeProps(): array
+    {
+        $group = app(CurrentGroupService::class)->getGroup();
+
+        return [
+            'primaryHue' => $group?->primary_hue,
+            'primaryLightness' => $group?->primary_lightness,
+            'primaryChroma' => $group?->primary_chroma,
+        ];
     }
 
     private function sessionService(): SessionService
