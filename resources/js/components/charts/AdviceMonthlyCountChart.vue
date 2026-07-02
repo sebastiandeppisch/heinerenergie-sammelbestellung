@@ -30,6 +30,7 @@ import type { ApexOptions } from 'apexcharts';
 import axios from 'axios';
 import { computed, onMounted, ref, watch } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
+import { route } from 'ziggy-js';
 
 const COLORS = ['#4285F4', '#EA4335', '#34A853', '#FBBC05', '#8B5CF6'];
 

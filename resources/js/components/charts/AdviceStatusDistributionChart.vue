@@ -65,6 +65,7 @@ import { Skeleton } from '@/shadcn/components/ui/skeleton';
 import axios from 'axios';
 import { computed, onMounted, ref, watch } from 'vue';
 import AreaChart from './AreaChart.vue';
+import { route } from 'ziggy-js';
 
 type Preset = 'week' | 'month' | 'quarter' | 'year' | 'custom';
 

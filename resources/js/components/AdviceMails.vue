@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shadcn/components/ui
 import Input from '@/shadcn/components/ui/input/Input.vue';
 import Label from '@/shadcn/components/ui/label/Label.vue';
 import { Link } from '@inertiajs/vue3';
+import axios from 'axios';
 import { Loader2, Mail, MailOpen, Plus, Send, Settings, X } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
 import { route } from 'ziggy-js';
