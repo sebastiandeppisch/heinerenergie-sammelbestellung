@@ -26,7 +26,7 @@ const form = useForm({
     smtp_port: 587,
     username: '',
     password: '',
-    connection: null
+    connection: null,
 });
 
 watch(

@@ -64,8 +64,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/shadcn/components/ui/skeleton';
 import axios from 'axios';
 import { computed, onMounted, ref, watch } from 'vue';
-import AreaChart from './AreaChart.vue';
 import { route } from 'ziggy-js';
+import AreaChart from './AreaChart.vue';
 
 type Preset = 'week' | 'month' | 'quarter' | 'year' | 'custom';
 
