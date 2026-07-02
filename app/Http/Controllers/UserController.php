@@ -14,6 +14,7 @@ use App\Notifications\PasswordChangedByAdmin;
 use App\Services\SessionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
@@ -149,6 +150,12 @@ class UserController extends Controller
         $user->save();
 
         $user->notify(new PasswordChangedByAdmin);
+
+        // Invalidate the encryption key for the affected user when they change their own password
+        if ($user->is(Auth::user())) {
+            $request->session()->forget(['enc_salt', 'mail_credentials']);
+            Cookie::queue(Cookie::forget('enc_key'));
+        }
 
         return redirect()->back()->with('success', 'Passwort erfolgreich geändert');
     }

@@ -157,6 +157,9 @@ accepts_transfers: boolean;
 userCanActAsAdmin: boolean;
 new_advice_mail: string | null;
 nextcloud_group_name: string | null;
+primary_hue: number | null;
+primary_lightness: number | null;
+primary_chroma: number | null;
 };
 export type GroupMapData = {
 polygon: App.ValueObjects.Polygon;
@@ -178,6 +181,24 @@ name: string;
 email: string;
 is_admin: boolean;
 is_active: boolean;
+};
+export type MailBodyData = {
+uid: string;
+folder: string;
+subject: string;
+from: string;
+to: string;
+date: string;
+body: string;
+};
+export type MailHeaderData = {
+uid: string;
+folder: string;
+subject: string;
+from: string;
+date: string;
+hasBeenRead: boolean;
+dateTimestamp: number;
 };
 export type MapPointCategoryData = {
 id: string;
@@ -210,6 +231,15 @@ perPage: number;
 currentPage: number;
 lastPage: number;
 };
+export type StatusDistributionPointData = {
+date: string;
+statusCounts: Record<string, number>;
+};
+export type StatusNameCountData = {
+name: string;
+result: App.Enums.AdviceStatusResult;
+count: number;
+};
 export type SubmissionFieldData = {
 value: number | string | Array<string> | null;
 field: App.Data.FormFieldData;
@@ -233,6 +263,10 @@ is_admin: boolean;
 is_active: boolean;
 groups: Array<App.Data.GroupBaseData>;
 };
+export type YearlyAdviceCountData = {
+label: string;
+counts: number[];
+};
 }
 declare namespace App.Data.Pages {
 export type GroupsIndexData = {
@@ -248,6 +282,7 @@ canCreateGroups: boolean;
 declare namespace App.Enums {
 export type AdviceStatusResult = 0 | 1 | 2 | 3;
 export type AdviceType = 0 | 1 | 2;
+export type Aggregation = 'day' | 'week' | 'month' | 'quarter';
 export type FieldType = 'text' | 'textarea' | 'number' | 'email' | 'phone' | 'select' | 'radio' | 'checkbox' | 'file' | 'image' | 'date' | 'geo_coordinate' | 'address';
 export type FormType = 0 | 1;
 export type HouseType = 0 | 1 | 2;

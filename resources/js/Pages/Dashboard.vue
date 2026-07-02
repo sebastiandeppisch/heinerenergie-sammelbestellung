@@ -11,6 +11,7 @@ import Card from '@/shadcn/components/ui/card/Card.vue';
 import CardContent from '@/shadcn/components/ui/card/CardContent.vue';
 import CardHeader from '@/shadcn/components/ui/card/CardHeader.vue';
 
+import KpiDashboard from '@/components/KpiDashboard.vue';
 import editorToolbar from '../htmlEditorToolbar.json';
 
 interface Props {
@@ -76,8 +77,8 @@ const cancelEdit = () => {
 
 <template>
     <div ref="outer">
-        <h2 class="content-block">Dashboard</h2>
-        <Card style="margin: 2rem">
+        <h2 class="content-block m-6">Dashboard</h2>
+        <Card class="mx-6">
             <CardHeader class="flex flex-row items-center justify-between">
                 <h2>Berater*innen-Infos</h2>
                 <Button v-if="canEdit && !isEditMode" variant="outline" size="icon" @click="startEdit">
@@ -105,6 +106,8 @@ const cancelEdit = () => {
             </CardContent>
         </Card>
 
-        <!-- <KpiDashboard /> -->
+        <div class="m-6">
+            <KpiDashboard />
+        </div>
     </div>
 </template>

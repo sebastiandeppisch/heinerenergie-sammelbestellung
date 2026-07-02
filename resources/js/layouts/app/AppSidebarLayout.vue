@@ -7,7 +7,7 @@ import type { BreadcrumbItemType } from '@/layouts/helper';
 import { Toaster } from '@/shadcn/components/ui/sonner';
 import type { CustomPageProps } from '@/types/pageProps';
 import { usePage } from '@inertiajs/vue3';
-import { watch } from 'vue';
+import { onMounted, watch } from 'vue';
 import { toast } from 'vue-sonner';
 import 'vue-sonner/style.css';
 
@@ -19,6 +19,28 @@ withDefaults(defineProps<Props>(), {
     breadcrumbs: () => [],
 });
 const page = usePage<CustomPageProps>();
+
+function applyTheme(theme: CustomPageProps['theme']) {
+    const el = document.documentElement;
+    if (theme?.primaryHue != null) {
+        el.style.setProperty('--primary-hue', String(theme.primaryHue));
+    } else {
+        el.style.removeProperty('--primary-hue');
+    }
+    if (theme?.primaryLightness != null) {
+        el.style.setProperty('--primary-lightness', String(theme.primaryLightness));
+    } else {
+        el.style.removeProperty('--primary-lightness');
+    }
+    if (theme?.primaryChroma != null) {
+        el.style.setProperty('--primary-chroma', String(theme.primaryChroma));
+    } else {
+        el.style.removeProperty('--primary-chroma');
+    }
+}
+
+onMounted(() => applyTheme(page.props.theme));
+watch(() => page.props.theme, applyTheme, { deep: true });
 
 watch(
     () => page.props.flashMessages,

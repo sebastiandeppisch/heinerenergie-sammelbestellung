@@ -12,15 +12,8 @@ import type { ApexOptions } from 'apexcharts';
 import { computed, ref } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
 
-// Typdefinitionen
-interface StatusData {
-    date: string;
-    statusCounts: Record<string, number>;
-}
-
-// Props definieren
 const props = defineProps<{
-    data: StatusData[];
+    data: App.Data.StatusDistributionPointData[];
 }>();
 
 // Reaktive Zustände

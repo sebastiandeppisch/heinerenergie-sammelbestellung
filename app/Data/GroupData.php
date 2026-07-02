@@ -25,6 +25,9 @@ class GroupData extends Data
         public bool $userCanActAsAdmin,
         public ?string $new_advice_mail,
         public ?string $nextcloud_group_name,
+        public ?float $primary_hue,
+        public ?float $primary_lightness,
+        public ?float $primary_chroma,
         ?int $users_count,
         ?int $advices_count,
     ) {
@@ -52,6 +55,9 @@ class GroupData extends Data
             userCanActAsAdmin: $canActAsAdmin,
             new_advice_mail: $group->new_advice_mail,
             nextcloud_group_name: $group->nextcloud_group_name,
+            primary_hue: $group->primary_hue,
+            primary_lightness: $group->primary_lightness,
+            primary_chroma: $group->primary_chroma,
             users_count: $group->users()->count(),
             advices_count: $group->advices()->count(),
         );

@@ -4,11 +4,15 @@ namespace App\Providers;
 
 use App\Actions\FetchCoordinateByAddress;
 use App\Actions\FetchCoordinateByFreeText;
+use App\Contracts\MailCredentialsRepository;
+use App\Contracts\MailServiceContract;
 use App\Contracts\NextcloudFileClientContract;
 use App\Contracts\NextcloudUserClientContract;
 use App\Nextcloud\NextcloudUserClient;
 use App\Nextcloud\WebDavNextcloudFileClient;
+use App\Repositories\SessionMailCredentialsRepository;
 use App\Services\CurrentGroupService;
+use App\Services\MailService;
 use App\ValueObjects\Address;
 use App\ValueObjects\Coordinate;
 use Illuminate\Database\Eloquent\Model;
@@ -29,6 +33,16 @@ class AppServiceProvider extends ServiceProvider
     #[Override]
     public function register()
     {
+        $this->app->bind(
+            MailCredentialsRepository::class,
+            SessionMailCredentialsRepository::class,
+        );
+
+        $this->app->bind(
+            MailServiceContract::class,
+            MailService::class,
+        );
+
         $this->app->singleton(
             NextcloudFileClientContract::class,
             config('nextcloud.base_url') ? WebDavNextcloudFileClient::class : MockNextcloudFileClient::class
