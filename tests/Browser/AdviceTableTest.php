@@ -18,7 +18,6 @@ beforeEach(function () {
     $this->actingAs($this->user);
 });
 
-
 test('advices table renders without errors', function () {
     visit(route('advices'))
         ->assertNoSmoke()
