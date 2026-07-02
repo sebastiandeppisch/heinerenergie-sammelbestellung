@@ -25,7 +25,7 @@ test('admin can open and use the dashboard rich text editor', function () {
     visit(route('dashboard'))
         ->assertNoSmoke()
         ->assertNoJavaScriptErrors()
-        ->click('[data-slot="button"]') // Edit button
+        ->click('[data-test="edit-dashboard-text"]')
         ->waitForText('Abbrechen')
         ->assertSee('Abbrechen')
         ->assertSee('Speichern');
@@ -34,7 +34,7 @@ test('admin can open and use the dashboard rich text editor', function () {
 test('admin can edit and save dashboard info', function () {
     visit(route('dashboard'))
         ->assertNoSmoke()
-        ->click('[data-slot="button"]')
+        ->click('[data-test="edit-dashboard-text"]')
         ->waitForText('Abbrechen')
         ->click('.ProseMirror')
         ->type('.ProseMirror', 'Willkommen beim Dashboard')

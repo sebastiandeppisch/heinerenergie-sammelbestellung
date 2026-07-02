@@ -76,7 +76,7 @@ const cancelEdit = () => {
         <Card class="mx-6">
             <CardHeader class="flex flex-row items-center justify-between">
                 <h2>Berater*innen-Infos</h2>
-                <Button v-if="canEdit && !isEditMode" variant="outline" size="icon" @click="startEdit">
+                <Button v-if="canEdit && !isEditMode" variant="outline" size="icon" @click="startEdit" data-test="edit-dashboard-text">
                     <Edit class="h-4 w-4" />
                 </Button>
             </CardHeader>
