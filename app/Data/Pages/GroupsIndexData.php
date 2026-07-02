@@ -22,5 +22,7 @@ class GroupsIndexData extends Data
         public ?Polygon $polygon,
         public bool $canEditGroup,
         public bool $canCreateGroups,
+        /** @var Collection */
+        public ?Collection $groupUsers = null,
     ) {}
 }

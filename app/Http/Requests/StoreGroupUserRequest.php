@@ -38,4 +38,9 @@ class StoreGroupUserRequest extends FormRequest
             'id' => User::where('uuid', $this->input('id'))->value('id'),
         ]);
     }
+
+    public function isAdmin(): bool
+    {
+        return $this->boolean('is_admin', false);
+    }
 }

@@ -10,6 +10,7 @@ use App\Http\Controllers\FormDefinitionController;
 use App\Http\Controllers\FormSubmissionController;
 use App\Http\Controllers\FormSubmitController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\Groups\GroupUserController;
 use App\Http\Controllers\MapPointCategoryController;
 use App\Http\Controllers\MapPointController;
 use App\Http\Controllers\NextcloudGroupController;
@@ -50,6 +51,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/backend', fn () => redirect()->route('dashboard'))->middleware('auth')->name('backend');
 
     Route::resource('groups', GroupController::class);
+    Route::resource('groups.users', GroupUserController::class);
 
     Route::post('actAsGroup/{group}', [UserController::class, 'actAsGroup'])->name('actAsGroup');
     Route::post('actAsSystemAdmin', [UserController::class, 'actAsSystemAdmin'])->name('actAsSystemAdmin');

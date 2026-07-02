@@ -70,7 +70,7 @@
                                         </a>
                                     </Button>
                                 </div>
-                                <GroupUsers :group="selectedGroup" />
+                                <GroupUsers :group="selectedGroup" :group-users="groupUsers" :all-users="allUsers" />
                             </TabsContent>
                             <TabsContent value="beratungsgebiet">
                                 <ConsultingAreaForm :group="selectedGroup" :polygon="polygon" />
@@ -123,6 +123,12 @@ type GroupsIndexData = {
     polygon: App.ValueObjects.Polygon;
     canEditGroup: boolean;
     canCreateGroups: boolean;
+    groupUsers?: any;
+    allUsers: Array<{
+        id: string,
+        name: string,
+        email: string
+    }>;
 };
 
 const props = defineProps<GroupsIndexData>();

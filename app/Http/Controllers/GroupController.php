@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Data\GroupData;
 use App\Data\GroupTreeItem;
-use App\Data\Pages\GroupsIndexData;
+use App\Data\GroupUserData;
 use App\Http\Requests\Group\StoreGroupRequest;
 use App\Http\Requests\Group\UpdateGroupRequest;
 use App\Http\Requests\UpdateGroupConsultingAreaRequest;
@@ -25,10 +25,22 @@ class GroupController extends Controller
         // there is no authorization here, as its done in the methods themself or in the Request classes
     }
 
+    private function userToDTO(User $user): GroupUserData
+    {
+        return new GroupUserData(
+            id: $user->uuid,
+            name: $user->name,
+            email: $user->email,
+            // @phpstan-ignore-next-line pivot is set by the belongsToMany query in show()
+            is_admin: $user->pivot->is_admin,
+            is_active: $user->is_active,
+        );
+    }
+
     /**
      * @param  Collection<GroupData>  $groups
      */
-    private function showPage(Collection $groupTreeItems, Collection $groups, bool $canCreateRootGroup, ?Group $selectedGroup)
+    private function showPage(Collection $groupTreeItems, Collection $groups, bool $canCreateRootGroup, ?Group $selectedGroup, $groupUsers = null, $allUsers = [])
     {
         $polygon = $selectedGroup?->consulting_area;
 
@@ -38,17 +50,17 @@ class GroupController extends Controller
 
         $selectedGroup = $selectedGroup ? GroupData::fromModel($selectedGroup) : null;
 
-        $groupIndexData = new GroupsIndexData(
-            groupTreeItems: $groupTreeItems->values(),
-            groups: GroupData::collect($groups)->values(),
-            canCreateRootGroup: $canCreateRootGroup,
-            selectedGroup: $selectedGroup,
-            polygon: $polygon,
-            canEditGroup: $canEditGroup,
-            canCreateGroups: $user->can('createAny', Group::class),
-        );
-
-        return Inertia::render('Groups/Index', $groupIndexData);
+        return Inertia::render('Groups/Index', [
+            'groupTreeItems' => $groupTreeItems->values(),
+            'groups' => GroupData::collect($groups)->values(),
+            'canCreateRootGroup' => $canCreateRootGroup,
+            'selectedGroup' => $selectedGroup,
+            'polygon' => $polygon,
+            'canEditGroup' => $canEditGroup,
+            'canCreateGroups' => $user->can('createAny', Group::class),
+            'groupUsers' => $groupUsers,
+            'allUsers' => $allUsers,
+        ]);
     }
 
     public function index(Request $request, #[CurrentUser] User $user)
@@ -111,11 +123,28 @@ class GroupController extends Controller
             logo_path: $groupData->logo_path,
         ));
 
+        $this->authorize('manageUsers', $group);
+
+        // belongsToMany sets $user->pivot to the pivot row for THIS group,
+        // so userToDTO reads the correct is_admin for the current group.
+        $groupUsers = $group->users()
+            ->where('users.is_active', true)
+            ->get()
+            ->map(fn (User $user) => $this->userToDTO($user));
+
+        $allUsers = User::where('is_active', true)->get()->map(fn (User $user) => [
+            'id' => $user->uuid,
+            'name' => $user->name,
+            'email' => $user->email,
+        ]);
+
         return $this->showPage(
             $groupTreeItems,
             $groups,
             $request->user()->can('create', Group::class),
-            $group
+            $group,
+            $groupUsers,
+            $allUsers
         );
     }
 

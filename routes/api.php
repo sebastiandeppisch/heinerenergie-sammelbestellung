@@ -5,7 +5,6 @@ use App\Http\Controllers\Api\AdviceStatusController;
 use App\Http\Controllers\Api\AdviceTypeController;
 use App\Http\Controllers\Api\GeoSearchController;
 use App\Http\Controllers\Api\GroupAdviceStatusController;
-use App\Http\Controllers\Api\GroupUserController;
 use App\Http\Controllers\Api\NextcloudAdviceController;
 use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\UploadController;
@@ -26,8 +25,6 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth')->group(function () {
     Route::resource('users', UserController::class)->only(['index', 'show'])->names('api.users');
     Route::resource('advices', AdviceController::class)->except(['index', 'store'])->names('api.advices');
-
-    Route::apiResource('groups.users', GroupUserController::class);
 
     Route::post('advices/{advice}/advisors', [AdviceController::class, 'setAdvisors']);
 
