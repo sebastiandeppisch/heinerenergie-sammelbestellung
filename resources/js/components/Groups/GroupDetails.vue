@@ -81,8 +81,7 @@
                 <div class="flex items-center gap-2">
                     <Checkbox
                         id="accepts_transfers"
-                        :checked="form.accepts_transfers"
-                        @update:checked="(v) => (form.accepts_transfers = v === true)"
+                        v-model="form.accepts_transfers"
                         :disabled="!canEdit"
                     />
                     <label for="accepts_transfers" class="text-sm font-medium leading-none">
