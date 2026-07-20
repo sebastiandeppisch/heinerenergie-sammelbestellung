@@ -89,7 +89,7 @@ class MailService implements MailServiceContract
             from: $this->formatAddress($message->getFrom()),
             date: $date?->format('d.m.Y H:i') ?? '',
             hasBeenRead: (bool) $message->flags?->contains('\\Seen'),
-            dateTimestamp: $date?->timestamp ?? 0,
+            dateTimestamp: $date->timestamp ?? 0,
         );
     }
 
@@ -180,8 +180,12 @@ class MailService implements MailServiceContract
             return '';
         }
 
-        $name = method_exists($first, 'personal') ? $first->personal : (property_exists($first, 'personal') ? $first->personal : '');
-        $mail = method_exists($first, 'mail') ? $first->mail : (property_exists($first, 'mail') ? $first->mail : (string) $first);
+        if (! is_object($first)) {
+            return is_string($first) ? $first : '';
+        }
+
+        $name = property_exists($first, 'personal') ? $first->personal : '';
+        $mail = property_exists($first, 'mail') ? $first->mail : (string) $first;
 
         return $name ? "{$name} <{$mail}>" : $mail;
     }

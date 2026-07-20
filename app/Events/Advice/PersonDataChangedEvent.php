@@ -39,9 +39,9 @@ class PersonDataChangedEvent extends AdviceEvent
             $from = $change['from'] ?? '';
             $to = $change['to'] ?? '';
 
-            if ($from === '' || $from === null) {
+            if ($from === '') {
                 $parts[] = "{$label} auf '{$to}' gesetzt";
-            } elseif ($to === '' || $to === null) {
+            } elseif ($to === '') {
                 $parts[] = "{$label} entfernt (war '{$from}')";
             } else {
                 $parts[] = "{$label} von '{$from}' zu '{$to}' geändert";

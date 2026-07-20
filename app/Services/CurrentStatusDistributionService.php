@@ -4,8 +4,8 @@ namespace App\Services;
 
 use App\Data\StatusNameCountData;
 use App\Enums\AdviceStatusResult;
-use App\Models\Advice;
 use App\Models\Group;
+use Illuminate\Support\Facades\DB;
 
 class CurrentStatusDistributionService
 {
@@ -17,7 +17,7 @@ class CurrentStatusDistributionService
      */
     public function getDistribution(?Group $group): array
     {
-        $rows = Advice::query()
+        $rows = DB::table('advices')
             ->leftJoin('advice_status', 'advices.advice_status_id', '=', 'advice_status.id')
             ->whereNull('advices.deleted_at')
             ->when($group, fn ($q) => $q->where('advices.group_id', $group->id))

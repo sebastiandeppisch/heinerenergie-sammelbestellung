@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Context\GroupContextContract;
 use App\Data\DataProtectedAdviceData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateAdviceRequest;
@@ -17,11 +16,6 @@ class AdviceController extends Controller
     public function __construct()
     {
         $this->authorizeResource(Advice::class);
-    }
-
-    private function groupContext(): GroupContextContract
-    {
-        return app(GroupContextContract::class);
     }
 
     public function show(Advice $advice)

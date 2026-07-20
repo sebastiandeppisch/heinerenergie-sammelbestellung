@@ -32,7 +32,7 @@ class AdviceStatusDistributionService
                 return $this->computeForDate($group, $cutoffDate);
             }
 
-            $cacheKey = 'kpi.status.'.($group?->id ?? 'all').'.'.$cutoffDate->format('Y-m-d');
+            $cacheKey = 'kpi.status.'.($group->id ?? 'all').'.'.$cutoffDate->format('Y-m-d');
 
             return Cache::rememberForever($cacheKey, fn () => $this->computeForDate($group, $cutoffDate));
         }, $cutoffDates));
@@ -109,7 +109,7 @@ class AdviceStatusDistributionService
      */
     public function getResultAtDate(Advice $advice, Collection $events, Carbon $cutoffDate): AdviceStatusResult
     {
-        $result = $advice->status?->result ?? AdviceStatusResult::New;
+        $result = $advice->status->result ?? AdviceStatusResult::New;
 
         foreach ($events as $adviceEvent) {
             $event = $adviceEvent->event;
