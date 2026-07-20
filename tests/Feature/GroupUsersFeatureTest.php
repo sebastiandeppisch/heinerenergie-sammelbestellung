@@ -116,3 +116,120 @@ test('all users only contains active users with id, name and email', function ()
             )
         );
 });
+
+test('non-admin cannot view the group users list', function () {
+    $groupAdmin = User::factory()->create();
+    $member = User::factory()->create();
+    $group = Group::factory()->create();
+    $group->users()->attach($groupAdmin->id, ['is_admin' => true]);
+    $group->users()->attach($member->id, ['is_admin' => false]);
+
+    Config::set('app.group_context', 'global');
+
+    $this->actingAs($member)
+        ->get(route('groups.show', $group))
+        ->assertForbidden();
+});
+
+test('admin can add a user to the group as admin', function () {
+    $groupAdmin = User::factory()->create();
+    $candidate = User::factory()->create();
+    $group = Group::factory()->create();
+    $group->users()->attach($groupAdmin->id, ['is_admin' => true]);
+
+    Config::set('app.group_context', 'global');
+
+    $this->actingAs($groupAdmin)
+        ->post(route('groups.users.store', $group), [
+            'id' => $candidate->uuid,
+            'is_admin' => true,
+        ])
+        ->assertRedirect();
+
+    $this->assertDatabaseHas('group_user', [
+        'group_id' => $group->id,
+        'user_id' => $candidate->id,
+        'is_admin' => true,
+    ]);
+});
+
+test('non-admin cannot add users to the group', function () {
+    $groupAdmin = User::factory()->create();
+    $member = User::factory()->create();
+    $candidate = User::factory()->create();
+    $group = Group::factory()->create();
+    $group->users()->attach($groupAdmin->id, ['is_admin' => true]);
+    $group->users()->attach($member->id, ['is_admin' => false]);
+
+    Config::set('app.group_context', 'global');
+
+    $this->actingAs($member)
+        ->post(route('groups.users.store', $group), [
+            'id' => $candidate->uuid,
+            'is_admin' => false,
+        ])
+        ->assertForbidden();
+
+    $this->assertDatabaseMissing('group_user', [
+        'group_id' => $group->id,
+        'user_id' => $candidate->id,
+    ]);
+});
+
+test('non-admin cannot update a user role in the group', function () {
+    $groupAdmin = User::factory()->create();
+    $member = User::factory()->create();
+    $group = Group::factory()->create();
+    $group->users()->attach($groupAdmin->id, ['is_admin' => true]);
+    $group->users()->attach($member->id, ['is_admin' => false]);
+
+    Config::set('app.group_context', 'global');
+
+    $this->actingAs($member)
+        ->put(route('groups.users.update', [$group, $groupAdmin]), [
+            'is_admin' => false,
+        ])
+        ->assertForbidden();
+
+    $this->assertDatabaseHas('group_user', [
+        'group_id' => $group->id,
+        'user_id' => $groupAdmin->id,
+        'is_admin' => true,
+    ]);
+});
+
+test('non-admin cannot remove a user from the group', function () {
+    $groupAdmin = User::factory()->create();
+    $member = User::factory()->create();
+    $group = Group::factory()->create();
+    $group->users()->attach($groupAdmin->id, ['is_admin' => true]);
+    $group->users()->attach($member->id, ['is_admin' => false]);
+
+    Config::set('app.group_context', 'global');
+
+    $this->actingAs($member)
+        ->delete(route('groups.users.destroy', [$group, $groupAdmin]))
+        ->assertForbidden();
+
+    $this->assertDatabaseHas('group_user', [
+        'group_id' => $group->id,
+        'user_id' => $groupAdmin->id,
+    ]);
+});
+
+test('cannot add the same user twice to a group', function () {
+    $groupAdmin = User::factory()->create();
+    $candidate = User::factory()->create();
+    $group = Group::factory()->create();
+    $group->users()->attach($groupAdmin->id, ['is_admin' => true]);
+    $group->users()->attach($candidate->id, ['is_admin' => false]);
+
+    Config::set('app.group_context', 'global');
+
+    $this->actingAs($groupAdmin)
+        ->post(route('groups.users.store', $group), [
+            'id' => $candidate->uuid,
+            'is_admin' => false,
+        ])
+        ->assertSessionHasErrors('id');
+});
