@@ -19,12 +19,12 @@ class AdviceMonthlyCountService
         $currentMonthStart = now()->startOfMonth();
         $from = $currentMonthStart->copy()->subMonths($years * 12 - 1);
 
-        $monthlyCounts = Advice::selectRaw('SUBSTR(created_at, 1, 7) as ym, COUNT(*) as count')
+        $monthlyCounts = Advice::select('created_at')
             ->where('created_at', '>=', $from)
             ->where('created_at', '<=', now()->endOfMonth())
             ->when($group, fn ($q) => $q->where('group_id', $group->id))
-            ->groupBy('ym')
-            ->pluck('count', 'ym')
+            ->pluck('created_at')
+            ->countBy(fn ($createdAt) => $createdAt->format('Y-m'))
             ->toArray();
 
         $series = [];
