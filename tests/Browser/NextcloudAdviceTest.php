@@ -102,6 +102,7 @@ test('unlink removes folder association', function () {
         ->assertNoSmoke()
         ->assertSee('dokument.pdf')
         ->click('Verknüpfung aufheben')
+        ->waitForEvent('networkidle')
         ->assertSee('Ordner anlegen')
         ->assertSee('Ordner verknüpfen')
         ->assertDontSee('dokument.pdf');
