@@ -125,9 +125,9 @@ type GroupsIndexData = {
     canCreateGroups: boolean;
     groupUsers?: any;
     allUsers: Array<{
-        id: string,
-        name: string,
-        email: string
+        id: string;
+        name: string;
+        email: string;
     }>;
 };
 

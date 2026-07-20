@@ -134,7 +134,7 @@ async function onFeatureGroupReady() {
 const coordinatedOfDarmstadtCityCenter: PointExpression = [49.8728, 8.6512];
 </script>
 <template>
-    <div class="isolate w-full h-full">
+    <div class="isolate h-full w-full">
         <LMap
             ref="mapRef"
             :zoom="15"
@@ -143,20 +143,20 @@ const coordinatedOfDarmstadtCityCenter: PointExpression = [49.8728, 8.6512];
             :options="{ attributionControl: false }"
             @ready="onLeafletReady"
         >
-        <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" layer-type="base" name="OpenStreetMap" />
-        <LFeatureGroup @ready="onFeatureGroupReady" />
-        <LMarker :lat-lng="centerOfPolygon">
-            <LIcon v-if="logo !== null" :icon-url="logo" :icon-size="logoSize" />
-        </LMarker>
+            <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" layer-type="base" name="OpenStreetMap" />
+            <LFeatureGroup @ready="onFeatureGroupReady" />
+            <LMarker :lat-lng="centerOfPolygon">
+                <LIcon v-if="logo !== null" :icon-url="logo" :icon-size="logoSize" />
+            </LMarker>
 
-        <!-- eslint-disable vue/no-use-v-if-with-v-for -->
-        <LPolygon
-            v-for="(item, index) in [polygonModel]"
-            :key="index"
-            :lat-lngs="item.coordinates"
-            v-if="polygonModel && polygonModel.coordinates.length > 0"
-        />
-        <!-- eslint-disable -->
+            <!-- eslint-disable vue/no-use-v-if-with-v-for -->
+            <LPolygon
+                v-for="(item, index) in [polygonModel]"
+                :key="index"
+                :lat-lngs="item.coordinates"
+                v-if="polygonModel && polygonModel.coordinates.length > 0"
+            />
+            <!-- eslint-disable -->
         </LMap>
     </div>
 </template>

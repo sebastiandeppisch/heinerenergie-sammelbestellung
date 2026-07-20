@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import axios from 'axios';
-import { useFilter } from 'reka-ui';
 import { Button } from '@/shadcn/components/ui/button';
 import { Combobox, ComboboxAnchor, ComboboxEmpty, ComboboxGroup, ComboboxInput, ComboboxItem, ComboboxList } from '@/shadcn/components/ui/combobox';
 import { Label } from '@/shadcn/components/ui/label';
 import { TagsInput, TagsInputInput, TagsInputItem, TagsInputItemDelete, TagsInputItemText } from '@/shadcn/components/ui/tags-input';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import axios from 'axios';
+import { useFilter } from 'reka-ui';
 import { computed, onMounted, ref } from 'vue';
 import { toast } from 'vue-sonner';
 

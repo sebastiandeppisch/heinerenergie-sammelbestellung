@@ -5,7 +5,6 @@ use App\Http\Controllers\Api\AdviceStatusController;
 use App\Http\Controllers\Api\AdviceTypeController;
 use App\Http\Controllers\Api\GeoSearchController;
 use App\Http\Controllers\Api\GroupAdviceStatusController;
-use App\Http\Controllers\Api\GroupUserController;
 use App\Http\Controllers\Api\KpiController;
 use App\Http\Controllers\Api\MailController;
 use App\Http\Controllers\Api\NextcloudAdviceController;

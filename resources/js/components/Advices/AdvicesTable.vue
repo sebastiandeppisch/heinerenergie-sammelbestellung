@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import CreateAdviceDialog from '@/components/CreateAdviceDialog.vue';
+import { Badge } from '@/shadcn/components/ui/badge';
 import { Button } from '@/shadcn/components/ui/button';
 import Card from '@/shadcn/components/ui/card/Card.vue';
 import { Input } from '@/shadcn/components/ui/input';
@@ -16,11 +17,10 @@ import {
     type ColumnFiltersState,
     type SortingState,
 } from '@tanstack/vue-table';
-import { Home, Phone, ShoppingCart, Clock, Loader2, CheckCircle2, AlertCircle } from 'lucide-vue-next';
-import { Badge } from '@/shadcn/components/ui/badge';
+import { AlertCircle, CheckCircle2, Clock, Home, Loader2, Phone, ShoppingCart } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 import { route } from 'ziggy-js';
-import { isActingAsAdmin, user } from '../../authHelper';
+import { isActingAsAdmin } from '../../authHelper';
 import PhysicalValue from '../../views/PhysicalValue.vue';
 
 const emit = defineEmits(['selectAdviceId']);
@@ -49,11 +49,9 @@ const adviceStatusList = computed(() => props.adviceStatuses);
 const adviceTypeList = computed(() => props.adviceTypes);
 const advisorMap = computed(() => new Map(props.advisors.map((a) => [a.id, a.name])));
 
-
 function statusName(id: string | null) {
     return adviceStatusList.value.find((s) => s.id === id)?.name ?? '-';
 }
-
 
 function typeName(id: number | null) {
     return adviceTypeList.value.find((t) => t.id === id)?.name ?? '-';
@@ -341,18 +339,24 @@ const totalCount = computed(() => table.getFilteredRowModel().rows.length);
                                         class="cursor-pointer"
                                         @click="startEdit(row.id, 'advice_status_id', row.original.advice_status_id)"
                                     >
-                                        <Badge :variant="getResultBadgeVariant(row.original.result).variant" :class="getResultBadgeVariant(row.original.result).extraClass">
+                                        <Badge
+                                            :variant="getResultBadgeVariant(row.original.result).variant"
+                                            :class="getResultBadgeVariant(row.original.result).extraClass"
+                                        >
                                             <component :is="getResultBadgeVariant(row.original.result).icon" class="mr-1 h-3 w-3" />
                                             {{ statusName(row.original.advice_status_id) }}
                                         </Badge>
                                     </div>
-                                    <Badge v-else :variant="getResultBadgeVariant(row.original.result).variant" :class="getResultBadgeVariant(row.original.result).extraClass">
+                                    <Badge
+                                        v-else
+                                        :variant="getResultBadgeVariant(row.original.result).variant"
+                                        :class="getResultBadgeVariant(row.original.result).extraClass"
+                                    >
                                         <component :is="getResultBadgeVariant(row.original.result).icon" class="mr-1 h-3 w-3" />
                                         {{ statusName(row.original.advice_status_id) }}
                                     </Badge>
                                 </template>
                             </TableCell>
-
 
                             <!-- Advisor -->
                             <TableCell>

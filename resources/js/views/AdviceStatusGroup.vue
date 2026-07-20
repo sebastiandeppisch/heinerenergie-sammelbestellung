@@ -248,10 +248,18 @@ const allTable = useVueTable({
                             <TableCell class="w-20">
                                 <div class="flex gap-1">
                                     <div data-test="edit-status">
-                                        <Button variant="ghost" size="icon" class="h-7 w-7" @click="startEdit(row.original)"><Pencil class="h-3.5 w-3.5" /></Button>
+                                        <Button variant="ghost" size="icon" class="h-7 w-7" @click="startEdit(row.original)"
+                                            ><Pencil class="h-3.5 w-3.5"
+                                        /></Button>
                                     </div>
                                     <div data-test="delete-status">
-                                        <Button variant="ghost" size="icon" class="h-7 w-7 text-destructive hover:text-destructive" @click="openRemoveDialog(row.original.id)"><Trash2 class="h-3.5 w-3.5" /></Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            class="h-7 w-7 text-destructive hover:text-destructive"
+                                            @click="openRemoveDialog(row.original.id)"
+                                            ><Trash2 class="h-3.5 w-3.5"
+                                        /></Button>
                                     </div>
                                 </div>
                             </TableCell>
@@ -340,9 +348,11 @@ const allTable = useVueTable({
                         </SelectContent>
                     </Select>
                 </div>
-                <div class="flex gap-2 justify-end pt-4">
+                <div class="flex justify-end gap-2 pt-4">
                     <Button variant="outline" @click="closeDialog" :disabled="isSaving">Abbrechen</Button>
-                    <Button data-test="save-status" :disabled="isSaving" @click="saveEdit">{{ isSaving ? 'Wird gespeichert...' : 'Speichern' }}</Button>
+                    <Button data-test="save-status" :disabled="isSaving" @click="saveEdit">{{
+                        isSaving ? 'Wird gespeichert...' : 'Speichern'
+                    }}</Button>
                 </div>
             </div>
         </DialogContent>
@@ -353,9 +363,11 @@ const allTable = useVueTable({
         <DialogContent>
             <DialogHeader>
                 <DialogTitle>Beratungszustand löschen?</DialogTitle>
-                <DialogDescription>Soll dieser Beratungszustand wirklich gelöscht werden? Dies kann nicht rückgängig gemacht werden.</DialogDescription>
+                <DialogDescription
+                    >Soll dieser Beratungszustand wirklich gelöscht werden? Dies kann nicht rückgängig gemacht werden.</DialogDescription
+                >
             </DialogHeader>
-            <div class="flex gap-2 justify-end pt-4">
+            <div class="flex justify-end gap-2 pt-4">
                 <Button variant="outline" @click="removeDialogOpen = false" :disabled="isSaving">Abbrechen</Button>
                 <Button variant="destructive" :disabled="isSaving" data-test="confirm-delete" @click="confirmDelete">
                     {{ isSaving ? 'Wird gelöscht...' : 'Löschen' }}

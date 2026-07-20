@@ -79,14 +79,8 @@
 
             <div>
                 <div class="flex items-center gap-2">
-                    <Checkbox
-                        id="accepts_transfers"
-                        v-model="form.accepts_transfers"
-                        :disabled="!canEdit"
-                    />
-                    <label for="accepts_transfers" class="text-sm font-medium leading-none">
-                        Beratungen von anderen Initiativen akzeptieren
-                    </label>
+                    <Checkbox id="accepts_transfers" v-model="form.accepts_transfers" :disabled="!canEdit" />
+                    <label for="accepts_transfers" class="text-sm leading-none font-medium"> Beratungen von anderen Initiativen akzeptieren </label>
                 </div>
                 <div v-if="form.errors.accepts_transfers" class="text-sm text-red-500">{{ form.errors.accepts_transfers }}</div>
             </div>
@@ -288,14 +282,7 @@
 <script setup lang="ts">
 import { Button } from '@/shadcn/components/ui/button';
 import { Checkbox } from '@/shadcn/components/ui/checkbox';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/shadcn/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/shadcn/components/ui/dialog';
 import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';

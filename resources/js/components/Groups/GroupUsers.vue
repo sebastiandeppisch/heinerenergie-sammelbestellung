@@ -1,22 +1,15 @@
 <script setup lang="ts">
+import { Badge } from '@/shadcn/components/ui/badge';
 import { Button } from '@/shadcn/components/ui/button';
+import { Checkbox } from '@/shadcn/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/shadcn/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
-import { Badge } from '@/shadcn/components/ui/badge';
-import { Checkbox } from '@/shadcn/components/ui/checkbox';
 import { router } from '@inertiajs/vue3';
-import {
-    createColumnHelper,
-    getCoreRowModel,
-    getSortedRowModel,
-    useVueTable,
-    type SortingState,
-} from '@tanstack/vue-table';
+import { createColumnHelper, getCoreRowModel, getSortedRowModel, useVueTable, type SortingState } from '@tanstack/vue-table';
 import { Edit2, Plus, Trash2 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import { route } from 'ziggy-js';
-
 
 interface UserOption {
     id: string;
@@ -84,7 +77,7 @@ function saveNewUser() {
 }
 
 function openEditDialog(userId: string) {
-    const user = props.groupUsers.find(u => u.id === userId);
+    const user = props.groupUsers.find((u) => u.id === userId);
     if (user) {
         editUserId.value = userId;
         editIsAdmin.value = user.is_admin;
@@ -117,15 +110,12 @@ function confirmRemove() {
     if (!removeUserId.value) return;
 
     isMutating.value = true;
-    router.delete(
-        route('groups.users.destroy', { group: props.group.id, user: removeUserId.value }),
-        {
-            onFinish: () => {
-                removeDialogOpen.value = false;
-                isMutating.value = false;
-            },
+    router.delete(route('groups.users.destroy', { group: props.group.id, user: removeUserId.value }), {
+        onFinish: () => {
+            removeDialogOpen.value = false;
+            isMutating.value = false;
         },
-    );
+    });
 }
 
 const columnHelper = createColumnHelper<App.Data.GroupUserData>();
@@ -168,9 +158,7 @@ const table = useVueTable({
     getSortedRowModel: getSortedRowModel(),
 });
 
-const availableUsers = computed(() =>
-    props.allUsers.filter((u) => !props.groupUsers.some((gu) => gu.id === u.id)),
-);
+const availableUsers = computed(() => props.allUsers.filter((u) => !props.groupUsers.some((gu) => gu.id === u.id)));
 </script>
 
 <template>
@@ -182,7 +170,6 @@ const availableUsers = computed(() =>
                 Berater:in hinzufügen
             </Button>
         </div>
-
 
         <!-- Users Table -->
         <div class="rounded-md border">
@@ -242,9 +229,7 @@ const availableUsers = computed(() =>
                         </TableCell>
                     </TableRow>
 
-                    <TableEmpty v-if="table.getRowModel().rows.length === 0" :colspan="4">
-                        Keine Berater:innen in dieser Initiative.
-                    </TableEmpty>
+                    <TableEmpty v-if="table.getRowModel().rows.length === 0" :colspan="4"> Keine Berater:innen in dieser Initiative. </TableEmpty>
                 </TableBody>
             </Table>
         </div>
@@ -264,11 +249,13 @@ const availableUsers = computed(() =>
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem v-for="user in availableUsers" :key="user.id" :value="user.id">
-                            <div><span>{{ user.name }}</span> - {{ user.email }}</div>
+                            <div>
+                                <span>{{ user.name }}</span> - {{ user.email }}
+                            </div>
                         </SelectItem>
                     </SelectContent>
                 </Select>
-                <div class="flex gap-2 justify-end pt-4">
+                <div class="flex justify-end gap-2 pt-4">
                     <Button variant="outline" @click="closeAddDialog" :disabled="isMutating">Abbrechen</Button>
                     <Button :disabled="!selectedUserId || isMutating" data-test="confirm-add" @click="saveNewUser">
                         {{ isMutating ? 'Wird hinzugefügt...' : 'Hinzufügen' }}
@@ -287,11 +274,11 @@ const availableUsers = computed(() =>
             <div class="space-y-4">
                 <div class="flex items-center space-x-2">
                     <Checkbox v-model="editIsAdmin" id="admin-checkbox" />
-                    <label for="admin-checkbox" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    <label for="admin-checkbox" class="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                         Admin-Rechte
                     </label>
                 </div>
-                <div class="flex gap-2 justify-end pt-4">
+                <div class="flex justify-end gap-2 pt-4">
                     <Button variant="outline" @click="editDialogOpen = false" :disabled="isMutating">Abbrechen</Button>
                     <Button :disabled="isMutating" @click="saveEdit" data-test="save-edit">
                         {{ isMutating ? 'Wird gespeichert...' : 'Speichern' }}
@@ -306,9 +293,12 @@ const availableUsers = computed(() =>
         <DialogContent>
             <DialogHeader>
                 <DialogTitle>Berater:in entfernen?</DialogTitle>
-                <DialogDescription>Bist du sicher, dass du diese Person aus der Initiative entfernen möchtest? Der Account bleibt erhalten, der/die Berater:in hat anschließend keinen Zugriff mehr auf die Initiative. </DialogDescription>
+                <DialogDescription
+                    >Bist du sicher, dass du diese Person aus der Initiative entfernen möchtest? Der Account bleibt erhalten, der/die Berater:in hat
+                    anschließend keinen Zugriff mehr auf die Initiative.
+                </DialogDescription>
             </DialogHeader>
-            <div class="flex gap-2 justify-end pt-4">
+            <div class="flex justify-end gap-2 pt-4">
                 <Button variant="outline" @click="removeDialogOpen = false" :disabled="isMutating">Abbrechen</Button>
                 <Button variant="destructive" :disabled="isMutating" @click="confirmRemove" data-test="confirm-remove">
                     {{ isMutating ? 'Wird entfernt...' : 'Entfernen' }}

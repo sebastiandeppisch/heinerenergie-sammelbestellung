@@ -5,10 +5,10 @@ import LaravelDataSource from '../../LaravelDataSource';
 import { AdaptTableHeight } from '../../helpers';
 import PhysicalValue from '../../views/PhysicalValue.vue';
 
-import { router } from '@inertiajs/vue3';
-import axios from 'axios';
 import { Button } from '@/shadcn/components/ui/button';
 import { Switch } from '@/shadcn/components/ui/switch';
+import { router } from '@inertiajs/vue3';
+import axios from 'axios';
 import DxDataGrid, {
     DxColumn,
     DxEditing,

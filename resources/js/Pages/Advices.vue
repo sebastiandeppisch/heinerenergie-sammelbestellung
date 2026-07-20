@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';
 import AdvicesTable from '@/components/Advices/AdvicesTable.vue';
 import LegacyAdvicesTable from '@/components/Advices/LegacyAdvicesTable.vue';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';
+import { ref } from 'vue';
 
 defineProps<{
     onlyOneGroup: boolean;
@@ -35,11 +35,7 @@ const activeTab = ref('new');
         </TabsContent>
 
         <TabsContent value="legacy">
-            <LegacyAdvicesTable
-                :only-one-group="onlyOneGroup"
-                :advices="advices"
-                :groups="groups"
-            />
+            <LegacyAdvicesTable :only-one-group="onlyOneGroup" :advices="advices" :groups="groups" />
         </TabsContent>
     </Tabs>
 </template>
