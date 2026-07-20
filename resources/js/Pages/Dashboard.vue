@@ -1,18 +1,16 @@
 <script setup lang="ts">
-import type { CustomPageProps } from '@/types/pageProps';
-import { router, usePage } from '@inertiajs/vue3';
-import { DxHtmlEditor, DxMediaResizing, DxToolbar } from 'devextreme-vue/html-editor';
-import { Edit, Save, X } from 'lucide-vue-next';
-import { computed, reactive, ref } from 'vue';
-import { route } from 'ziggy-js';
-
+import RichTextEditor from '@/components/RichTextEditor.vue';
 import { Button } from '@/shadcn/components/ui/button';
 import Card from '@/shadcn/components/ui/card/Card.vue';
 import CardContent from '@/shadcn/components/ui/card/CardContent.vue';
 import CardHeader from '@/shadcn/components/ui/card/CardHeader.vue';
+import type { CustomPageProps } from '@/types/pageProps';
+import { router, usePage } from '@inertiajs/vue3';
+import { Edit, Save, X } from 'lucide-vue-next';
+import { computed, reactive, ref } from 'vue';
+import { route } from 'ziggy-js';
 
 import KpiDashboard from '@/components/KpiDashboard.vue';
-import editorToolbar from '../htmlEditorToolbar.json';
 
 interface Props {
     advisorInfo: string;
@@ -32,11 +30,8 @@ const state = reactive({
     saving: false,
 });
 
-const toolbar = [...(editorToolbar as any[])];
-
-const onValueChanged = (e: { value: string }) => {
+const onValueChanged = () => {
     state.dirty = true;
-    state.value = e.value;
 };
 
 const save = () => {
@@ -81,17 +76,14 @@ const cancelEdit = () => {
         <Card class="mx-6">
             <CardHeader class="flex flex-row items-center justify-between">
                 <h2>Berater*innen-Infos</h2>
-                <Button v-if="canEdit && !isEditMode" variant="outline" size="icon" @click="startEdit">
+                <Button v-if="canEdit && !isEditMode" variant="outline" size="icon" @click="startEdit" data-test="edit-dashboard-text">
                     <Edit class="h-4 w-4" />
                 </Button>
             </CardHeader>
             <CardContent>
                 <div v-if="!isEditMode" v-html="props.advisorInfo"></div>
                 <div v-else class="space-y-4">
-                    <DxHtmlEditor v-model:value="state.value" :on-value-changed="onValueChanged" :allow-soft-line-break="true" style="width: 100%">
-                        <DxMediaResizing :enabled="true" />
-                        <DxToolbar :multiline="true" :items="toolbar" />
-                    </DxHtmlEditor>
+                    <RichTextEditor v-model="state.value" @change="onValueChanged" />
                     <div class="flex justify-end gap-2">
                         <Button variant="outline" @click="cancelEdit" :disabled="state.saving">
                             <X class="mr-2 h-4 w-4" />

@@ -19,6 +19,9 @@ class AdviceService
         private readonly GroupContextContract $groupContext
     ) {}
 
+    /**
+     * @return Collection<DataProtectedAdviceData>
+     */
     public function getAdvicesListForUser(User $user): Collection
     {
         $permissions = $this->getUserAdvicePermissions($user);

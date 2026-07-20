@@ -134,14 +134,15 @@ async function onFeatureGroupReady() {
 const coordinatedOfDarmstadtCityCenter: PointExpression = [49.8728, 8.6512];
 </script>
 <template>
-    <LMap
-        ref="mapRef"
-        :zoom="15"
-        :center="coordinatedOfDarmstadtCityCenter"
-        use-global-leaflet
-        :options="{ attributionControl: false }"
-        @ready="onLeafletReady"
-    >
+    <div class="isolate w-full h-full">
+        <LMap
+            ref="mapRef"
+            :zoom="15"
+            :center="coordinatedOfDarmstadtCityCenter"
+            use-global-leaflet
+            :options="{ attributionControl: false }"
+            @ready="onLeafletReady"
+        >
         <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" layer-type="base" name="OpenStreetMap" />
         <LFeatureGroup @ready="onFeatureGroupReady" />
         <LMarker :lat-lng="centerOfPolygon">
@@ -156,5 +157,6 @@ const coordinatedOfDarmstadtCityCenter: PointExpression = [49.8728, 8.6512];
             v-if="polygonModel && polygonModel.coordinates.length > 0"
         />
         <!-- eslint-disable -->
-    </LMap>
+        </LMap>
+    </div>
 </template>

@@ -9,17 +9,18 @@
             </div>
 
             <!-- Parent Group -->
-            <div class="mb-4">
-                <DxSelectBox
-                    v-model="form.parent_id"
-                    :data-source="parentGroups"
-                    display-expr="name"
-                    value-expr="id"
-                    label="Übergeordnete Initiative"
-                    labelMode="floating"
-                    :show-clear-button="!parentRequired"
-                    :required="parentRequired"
-                />
+            <div class="mb-4 space-y-2">
+                <Label>Übergeordnete Initiative</Label>
+                <Select v-model="parentIdString">
+                    <SelectTrigger>
+                        <SelectValue placeholder="Übergeordnete Initiative auswählen" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem v-for="group in parentGroups" :key="group.id" :value="String(group.id)">
+                            {{ group.name }}
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
                 <div v-if="form.errors.parent_id" class="text-sm text-red-500">{{ form.errors.parent_id }}</div>
             </div>
 
@@ -38,9 +39,10 @@
 import { Button } from '@/shadcn/components/ui/button';
 import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { useForm } from '@inertiajs/vue3';
-import { DxSelectBox } from 'devextreme-vue';
 import { Plus } from 'lucide-vue-next';
+import { computed } from 'vue';
 import { toast } from 'vue-sonner';
 import { route } from 'ziggy-js';
 
@@ -61,6 +63,13 @@ const form = useForm<{
 }>({
     name: '',
     parent_id: null,
+});
+
+const parentIdString = computed({
+    get: () => (form.parent_id !== null ? String(form.parent_id) : undefined),
+    set: (v: string | undefined) => {
+        form.parent_id = v ? Number(v) : null;
+    },
 });
 
 const submit = () => {

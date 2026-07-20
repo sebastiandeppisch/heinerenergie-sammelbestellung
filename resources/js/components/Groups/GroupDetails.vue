@@ -78,7 +78,16 @@
             </div>
 
             <div>
-                <DxCheckBox v-model="form.accepts_transfers" text="Beratungen von anderen Initiativen akzeptieren" :read-only="!canEdit" />
+                <div class="flex items-center gap-2">
+                    <Checkbox
+                        id="accepts_transfers"
+                        v-model="form.accepts_transfers"
+                        :disabled="!canEdit"
+                    />
+                    <label for="accepts_transfers" class="text-sm font-medium leading-none">
+                        Beratungen von anderen Initiativen akzeptieren
+                    </label>
+                </div>
                 <div v-if="form.errors.accepts_transfers" class="text-sm text-red-500">{{ form.errors.accepts_transfers }}</div>
             </div>
 
@@ -261,17 +270,37 @@
             </div>
         </form>
     </div>
+
+    <Dialog v-model:open="showDeleteConfirm">
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Initiative löschen</DialogTitle>
+                <DialogDescription>Soll diese Initiative wirklich gelöscht werden?</DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+                <Button variant="outline" @click="showDeleteConfirm = false">Abbrechen</Button>
+                <Button variant="destructive" @click="doDelete">Löschen</Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
 </template>
 
 <script setup lang="ts">
 import { Button } from '@/shadcn/components/ui/button';
+import { Checkbox } from '@/shadcn/components/ui/checkbox';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/shadcn/components/ui/dialog';
 import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';
 import { Textarea } from '@/shadcn/components/ui/textarea';
 import { useForm } from '@inertiajs/vue3';
-import { DxCheckBox } from 'devextreme-vue';
-import { confirm } from 'devextreme/ui/dialog';
 import { Save, Trash2, Upload, X } from 'lucide-vue-next';
 import { computed, onUnmounted, ref, watchEffect } from 'vue';
 import { route } from 'ziggy-js';
@@ -472,13 +501,16 @@ const handleSubmit = () => {
     });
 };
 
+const showDeleteConfirm = ref(false);
+
 const confirmDelete = () => {
-    confirm('Soll diese Initiative wirklich gelöscht werden?', 'Initiative löschen').then((result) => {
-        if (result) {
-            form.delete(route('groups.destroy', props.group.id), {
-                preserveScroll: true,
-            });
-        }
+    showDeleteConfirm.value = true;
+};
+
+const doDelete = () => {
+    showDeleteConfirm.value = false;
+    form.delete(route('groups.destroy', props.group.id), {
+        preserveScroll: true,
     });
 };
 </script>

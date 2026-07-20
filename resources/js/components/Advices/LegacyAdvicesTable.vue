@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import CreateAdviceDialog from '@/components/CreateAdviceDialog.vue';
 import { computed, onMounted, reactive, ref } from 'vue';
-import LaravelDataSource from '../LaravelDataSource';
-import { AdaptTableHeight } from '../helpers';
-import PhysicalValue from '../views/PhysicalValue.vue';
+import LaravelDataSource from '../../LaravelDataSource';
+import { AdaptTableHeight } from '../../helpers';
+import PhysicalValue from '../../views/PhysicalValue.vue';
 
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
-import { DxSwitch } from 'devextreme-vue';
-import DxButton from 'devextreme-vue/button';
+import { Button } from '@/shadcn/components/ui/button';
+import { Switch } from '@/shadcn/components/ui/switch';
 import DxDataGrid, {
     DxColumn,
     DxEditing,
@@ -29,8 +29,8 @@ import { default as ArrayDataSource, default as ArrayStore } from 'devextreme/da
 import CustomStore from 'devextreme/data/custom_store';
 import { toast } from 'vue-sonner';
 import { route } from 'ziggy-js';
-import LaravelLookupSource from '../LaravelLookupSource';
-import { isActingAsAdmin, user } from '../authHelper';
+import LaravelLookupSource from '../../LaravelLookupSource';
+import { isActingAsAdmin, user } from '../../authHelper';
 
 const emit = defineEmits(['selectAdviceId']);
 
@@ -45,7 +45,7 @@ const reactiveHeight = tableHeight.getReactive();
 
 const props = defineProps<{
     onlyOneGroup: boolean;
-    advices: App.Models.Advice[];
+    advices: App.Data.DataProtectedAdviceData[];
     groups: App.Data.GroupData[];
 }>();
 
@@ -189,9 +189,9 @@ const adviceStatusResult = new ArrayDataSource([
                     <CreateAdviceDialog :groups="props.groups" />
                 </template>
                 <template #autoexpand>
-                    <div>
-                        <DxSwitch v-model:value="r.autoExpand" />
-                        <span style="position: relative; top: -8px; opacity: 60%"> Gruppen aufklappen </span>
+                    <div class="flex items-center gap-2">
+                        <Switch v-model:checked="r.autoExpand" />
+                        <span class="text-sm opacity-60">Gruppen aufklappen</span>
                     </div>
                 </template>
                 <DxColumn type="buttons" caption="Öffnen">
@@ -244,7 +244,7 @@ const adviceStatusResult = new ArrayDataSource([
                 <template #simpleadvisorassignment="{ data }">
                     <div v-if="data.data.advisor_id !== null">{{ r.advisorNames.get(data.data.advisor_id) }}</div>
                     <div v-else>
-                        <DxButton text="Übernehmen" @click="assignAdvice(data.data.id)" type="default" />
+                        <Button variant="default" size="sm" @click="assignAdvice(data.data.id)">Übernehmen</Button>
                     </div>
                 </template>
                 <template #typeIcon="{ data }">

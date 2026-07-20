@@ -17,4 +17,9 @@ class UpdateGroupUserRequest extends FormRequest
             'is_admin' => 'required|boolean',
         ];
     }
+
+    public function isAdmin(): bool
+    {
+        return $this->boolean('is_admin');
+    }
 }

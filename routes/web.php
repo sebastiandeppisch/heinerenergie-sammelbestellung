@@ -10,6 +10,7 @@ use App\Http\Controllers\FormDefinitionController;
 use App\Http\Controllers\FormSubmissionController;
 use App\Http\Controllers\FormSubmitController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\Groups\GroupUserController;
 use App\Http\Controllers\MailAccountController;
 use App\Http\Controllers\MapPointCategoryController;
 use App\Http\Controllers\MapPointController;
@@ -51,6 +52,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/backend', fn () => redirect()->route('dashboard'))->middleware('auth')->name('backend');
 
     Route::resource('groups', GroupController::class);
+    Route::resource('groups.users', GroupUserController::class);
 
     Route::post('actAsGroup/{group}', [UserController::class, 'actAsGroup'])->name('actAsGroup');
     Route::post('actAsSystemAdmin', [UserController::class, 'actAsSystemAdmin'])->name('actAsSystemAdmin');
@@ -63,6 +65,8 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/advices', [AdviceController::class, 'store'])->name('advices.store');
     Route::put('advices/{advice}', [AdviceController::class, 'update'])->name('advices.update');
+    Route::put('advices/{advice}/status', [AdviceController::class, 'updateStatus'])->name('advices.updateStatus');
+    Route::put('advices/{advice}/advisor', [AdviceController::class, 'updateAdvisor'])->name('advices.updateAdvisor');
     Route::put('/groups/{group}/dashboard-info', [GroupController::class, 'updateDashboardInfo'])
         ->name('groups.dashboard-info.update');
 
@@ -76,6 +80,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/groups/{group}/nextcloud/{ncUser}/add-to-group', [NextcloudGroupController::class, 'addToGroup'])
         ->name('groups.nextcloud.add-to-group');
 
+    Route::post('advices/{advice}/assign', [AdviceController::class, 'assign'])->name('advices.assign');
     Route::post('advices/{advice}/unassign', [AdviceController::class, 'unassign'])->name('advices.unassign');
     Route::post('advices/{advice}/transfer', [AdviceController::class, 'transfer'])->name('advices.transfer');
 

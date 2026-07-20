@@ -33,8 +33,6 @@ Route::middleware('auth')->group(function () {
     Route::resource('users', UserController::class)->only(['index', 'show'])->names('api.users');
     Route::resource('advices', AdviceController::class)->except(['index', 'store'])->names('api.advices');
 
-    Route::apiResource('groups.users', GroupUserController::class);
-
     Route::post('advices/{advice}/advisors', [AdviceController::class, 'setAdvisors']);
 
     Route::apiResource('settings', SettingController::class)->except(['store', 'destroy', 'index']);

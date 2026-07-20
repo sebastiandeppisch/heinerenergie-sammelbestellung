@@ -140,7 +140,7 @@ function getAdvisorMarker(): string {
 
 <template>
     <div ref="outer">
-        <div :style="{ height: reactiveHeight.height + 170 + 'px', width: '100%' }">
+        <div :style="{ height: reactiveHeight.height + 170 + 'px', width: '100%' }" class="isolate">
             <LMap
                 :zoom="map.zoom"
                 @update:zoom="zoomChanged"
