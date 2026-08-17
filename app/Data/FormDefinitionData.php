@@ -29,6 +29,7 @@ class FormDefinitionData extends Data
         public bool $show_next_form_button = false,
         public ?string $next_form_button_text = null,
         public FormType $type = FormType::Form,
+        public ?array $allowed_embed_domains = null,
     ) {}
 
     public static function fromModel(FormDefinition $model): self
@@ -48,6 +49,7 @@ class FormDefinitionData extends Data
             success_message: $model->success_message,
             show_next_form_button: $model->show_next_form_button ?? false,
             next_form_button_text: $model->next_form_button_text,
+            allowed_embed_domains: $model->allowed_embed_domains,
         );
     }
 }

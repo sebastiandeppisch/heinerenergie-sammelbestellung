@@ -7,8 +7,9 @@ use App\Models\SubmissionField;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Tests\Concerns\AutoAttachesFormEmbedToken;
 
-uses(RefreshDatabase::class);
+uses(RefreshDatabase::class, AutoAttachesFormEmbedToken::class);
 
 beforeEach(function () {
     Storage::fake('public');

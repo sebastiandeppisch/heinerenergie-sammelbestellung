@@ -26,6 +26,7 @@ class FormDefinition extends Model
         'success_message',
         'show_next_form_button',
         'next_form_button_text',
+        'allowed_embed_domains',
     ];
 
     protected $attributes = [
@@ -36,6 +37,7 @@ class FormDefinition extends Model
         'is_active' => 'boolean',
         'show_next_form_button' => 'boolean',
         'type' => FormType::class,
+        'allowed_embed_domains' => 'array',
     ];
 
     /**

@@ -50,6 +50,7 @@ const formDefinition = reactive<FormDefinitionData>(
         success_message: null,
         show_next_form_button: false,
         next_form_button_text: null,
+        allowed_embed_domains: null,
     },
 );
 
@@ -196,6 +197,19 @@ const nullsafeNextFormButtonText = computed<string>({
         formDefinition.next_form_button_text = value || null;
     },
 });
+
+const allowedEmbedDomainsText = computed<string>({
+    get() {
+        return (formDefinition.allowed_embed_domains || []).join('\n');
+    },
+    set(value: string) {
+        const domains = value
+            .split('\n')
+            .map((domain) => domain.trim())
+            .filter((domain) => domain.length > 0);
+        formDefinition.allowed_embed_domains = domains.length > 0 ? domains : null;
+    },
+});
 </script>
 
 <template>
@@ -307,6 +321,26 @@ const nullsafeNextFormButtonText = computed<string>({
                             <FormControl>
                                 <Input v-model="nullsafeNextFormButtonText" placeholder="Nächstes Formular" />
                             </FormControl>
+                        </FormItem>
+                    </FormField>
+                </Form>
+            </CardContent>
+        </Card>
+
+        <Card class="form-builder__header" v-if="!isChecklist">
+            <CardContent>
+                <h3 class="mb-4 text-lg font-semibold">Einbettung (iframe)</h3>
+                <Form class="grid grid-cols-1 gap-4">
+                    <FormField v-slot="{ componentField }" name="allowed_embed_domains">
+                        <FormItem>
+                            <FormLabel>Erlaubte Domains für Einbettung</FormLabel>
+                            <FormControl>
+                                <Textarea v-model="allowedEmbedDomainsText" placeholder="beispiel.de&#10;www.andere-domain.de" />
+                            </FormControl>
+                            <p class="text-muted-foreground text-sm">
+                                Eine Domain pro Zeile. Nur Seiten dieser Domains dürfen das Formular per iframe einbetten. Ist die Liste leer, ist
+                                die Einbettung per iframe auf fremden Domains gesperrt.
+                            </p>
                         </FormItem>
                     </FormField>
                 </Form>

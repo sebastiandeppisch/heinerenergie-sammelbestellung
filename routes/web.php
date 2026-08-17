@@ -20,6 +20,7 @@ use App\Http\Controllers\SystemAdminController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\CheckSysAdmin;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -145,7 +146,10 @@ if (app()->environment('local')) {
 
 Route::get('/forms/{formDefinition}', [FormSubmitController::class, 'show'])
     ->name('form.show');
-Route::post('/forms/{formDefinition}', [FormSubmitController::class, 'submit'])->name('form.submit')->middleware([HandlePrecognitiveRequests::class, 'throttle:form-submit']);
+Route::post('/forms/{formDefinition}', [FormSubmitController::class, 'submit'])
+    ->name('form.submit')
+    ->withoutMiddleware(PreventRequestForgery::class)
+    ->middleware([HandlePrecognitiveRequests::class, 'throttle:form-submit']);
 
 Route::get('/map', [MapPointController::class, 'publicMap'])
     ->name('map.public');

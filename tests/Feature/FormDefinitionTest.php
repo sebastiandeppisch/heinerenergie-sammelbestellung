@@ -251,6 +251,30 @@ test('form definition can be updated', function () {
     ]);
 });
 
+test('allowed embed domains can be saved and updated', function () {
+    $formDefinition = FormDefinition::factory()->create(['allowed_embed_domains' => null]);
+
+    $data = FormDefinitionData::fromModel($formDefinition);
+    $data->allowed_embed_domains = ['example.com', 'sub.example.org'];
+
+    $response = $this->put(route('form-definitions.update', $formDefinition), $data->toArray());
+
+    $response->assertSessionHasNoErrors();
+    expect($formDefinition->fresh()->allowed_embed_domains)->toBe(['example.com', 'sub.example.org']);
+});
+
+test('allowed embed domains reject values that are not a bare hostname', function () {
+    $formDefinition = FormDefinition::factory()->create(['allowed_embed_domains' => null]);
+
+    $data = FormDefinitionData::fromModel($formDefinition);
+    $data->allowed_embed_domains = ['https://example.com/embed'];
+
+    $response = $this->put(route('form-definitions.update', $formDefinition), $data->toArray());
+
+    $response->assertSessionHasErrors('allowed_embed_domains.0');
+    expect($formDefinition->fresh()->allowed_embed_domains)->toBeNull();
+});
+
 test('form definition can be deleted', function () {
     // Erstelle ein Formular mit Feldern und Optionen
     $formDefinition = FormDefinition::factory()->withFields(10)->create();

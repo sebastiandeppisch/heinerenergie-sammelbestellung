@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Enums\FieldType;
 use App\Enums\FormType;
 use App\Rules\FormFieldExistsInRequest;
+use App\Rules\Hostname;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -36,6 +37,8 @@ class UpsertFormDefinitionRequest extends FormRequest
             'success_message' => 'nullable|string',
             'show_next_form_button' => 'boolean',
             'next_form_button_text' => 'nullable|string|max:255|required_if:show_next_form_button,true',
+            'allowed_embed_domains' => 'nullable|array',
+            'allowed_embed_domains.*' => ['string', 'max:255', new Hostname],
 
             // Felder-Array-Validierung
             'fields' => 'array',
@@ -103,6 +106,7 @@ class UpsertFormDefinitionRequest extends FormRequest
             'success_message' => 'Erfolgsmeldung',
             'show_next_form_button' => 'Button anzeigen',
             'next_form_button_text' => 'Button-Text',
+            'allowed_embed_domains' => 'Erlaubte Domains für Einbettung',
             'fields' => 'Formularfelder',
             'fields.*.type' => 'Feldtyp',
             'fields.*.label' => 'Feldbezeichnung',

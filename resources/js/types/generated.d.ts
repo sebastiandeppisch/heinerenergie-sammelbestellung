@@ -85,6 +85,7 @@ success_message: string | null;
 show_next_form_button: boolean;
 next_form_button_text: string | null;
 type: App.Enums.FormType;
+allowed_embed_domains: Array<any> | null;
 };
 export type FormFieldData = {
 id: string;
@@ -284,6 +285,7 @@ selectedGroup: App.Data.GroupData | null;
 polygon: App.ValueObjects.Polygon | null;
 canEditGroup: boolean;
 canCreateGroups: boolean;
+groupUsers: any | null;
 };
 }
 declare namespace App.Enums {

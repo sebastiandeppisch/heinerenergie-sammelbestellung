@@ -57,6 +57,10 @@ const iframeCode = computed(() => {
                 <DialogTitle>Formular einbetten</DialogTitle>
                 <DialogDescription> Kopiere den folgenden iframe-Code, um das Formular in Deine Webseite einzubetten. </DialogDescription>
             </DialogHeader>
+            <p v-if="!props.formDefinition.allowed_embed_domains?.length" class="text-destructive text-sm">
+                Es sind noch keine erlaubten Domains hinterlegt. Die Einbettung per iframe auf fremden Domains ist deshalb aktuell gesperrt.
+                Trage die Domain unten im Formular-Editor unter „Einbettung (iframe)" ein.
+            </p>
             <div class="flex items-center space-x-2">
                 <div class="grid flex-1 gap-2">
                     <Textarea :model-value="iframeCode" readonly class="min-h-[120px] font-mono text-sm" />

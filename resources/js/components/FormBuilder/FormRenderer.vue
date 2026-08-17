@@ -11,6 +11,7 @@ const props = defineProps<{
     submitUrl: string;
     method?: 'post' | 'put' | 'patch';
     initialData?: Record<string, any>;
+    formToken?: string;
 }>();
 
 const emit = defineEmits<{
@@ -42,6 +43,8 @@ const createInitialFormData = () => {
     if (props.initialData) {
         Object.assign(data, props.initialData);
     }
+
+    data._form_token = props.formToken || '';
 
     return data;
 };

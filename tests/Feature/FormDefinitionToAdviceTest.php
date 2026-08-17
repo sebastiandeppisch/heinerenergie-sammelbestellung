@@ -4,8 +4,9 @@ use App\Enums\AdviceType;
 use App\Models\Advice;
 use App\Models\FormDefinitionToAdvice;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Concerns\AutoAttachesFormEmbedToken;
 
-uses(RefreshDatabase::class);
+uses(RefreshDatabase::class, AutoAttachesFormEmbedToken::class);
 
 test('can be created by factory', function () {
     FormDefinitionToAdvice::factory()->create();

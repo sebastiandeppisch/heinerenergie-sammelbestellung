@@ -5,8 +5,9 @@ use App\Models\FormDefinitionToMapPoint;
 use App\Models\MapPoint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
+use Tests\Concerns\AutoAttachesFormEmbedToken;
 
-uses(RefreshDatabase::class);
+uses(RefreshDatabase::class, AutoAttachesFormEmbedToken::class);
 
 test('can be created by factory', function () {
     FormDefinitionToMapPoint::factory()->create();

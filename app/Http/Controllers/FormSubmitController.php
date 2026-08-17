@@ -9,6 +9,7 @@ use App\Models\FormDefinition;
 use App\Models\FormField;
 use App\Models\FormSubmission;
 use App\Services\CurrentGroupService;
+use App\Services\FormEmbedAccessService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -16,21 +17,37 @@ use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Intervention\Image\Encoders\JpegEncoder;
 use Intervention\Image\Laravel\Facades\Image;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
 class FormSubmitController extends Controller
 {
-    public function show(FormDefinition $formDefinition)
+    public function __construct(private readonly FormEmbedAccessService $embedAccess) {}
+
+    public function show(FormDefinition $formDefinition, Request $request)
     {
+        if (! $this->embedAccess->isEmbedAllowed($formDefinition, $request)) {
+            return Inertia::render('Forms/Show', [
+                'formDefinition' => null,
+                'embedBlocked' => true,
+            ]);
+        }
+
         app(CurrentGroupService::class)->setGroup($formDefinition->group);
 
         return Inertia::render('Forms/Show', [
-            'formDefinition' => FormDefinitionData::fromModel($formDefinition),
+            'formDefinition' => $this->publicFormData($formDefinition),
+            'formToken' => $this->embedAccess->issueToken($formDefinition),
+            'embedBlocked' => false,
         ]);
     }
 
     public function submit(StoreFormSubmissionRequest $request, FormDefinition $formDefinition)
     {
+        if (! $this->embedAccess->verifyToken($formDefinition, $request->input('_form_token'))) {
+            throw new HttpException(422, 'Ungültiges oder abgelaufenes Formular, bitte Seite neu laden.');
+        }
+
         app(CurrentGroupService::class)->setGroup($formDefinition->group);
 
         $storedImagePaths = [];
@@ -49,8 +66,21 @@ class FormSubmitController extends Controller
         }
 
         return Inertia::render('Forms/Submitted', [
-            'formDefinition' => FormDefinitionData::fromModel($formDefinition),
+            'formDefinition' => $this->publicFormData($formDefinition),
         ]);
+    }
+
+    /**
+     * Form data for the public, anonymous-facing pages. Strips the embed domain
+     * whitelist, which is an internal access-control detail and must not be
+     * exposed to visitors of the public form.
+     */
+    private function publicFormData(FormDefinition $formDefinition): FormDefinitionData
+    {
+        $data = FormDefinitionData::fromModel($formDefinition);
+        $data->allowed_embed_domains = null;
+
+        return $data;
     }
 
     private function getValueFromField(FormField $field, Request $request, FormSubmission $submission, array &$storedImagePaths)

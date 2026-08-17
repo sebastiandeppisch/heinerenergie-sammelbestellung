@@ -7,8 +7,9 @@ use App\Models\FormFieldOption;
 use App\Models\SubmissionField;
 use App\ValueObjects\Coordinate;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Concerns\AutoAttachesFormEmbedToken;
 
-uses(RefreshDatabase::class);
+uses(RefreshDatabase::class, AutoAttachesFormEmbedToken::class);
 
 beforeEach(function () {});
 

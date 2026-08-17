@@ -12,7 +12,9 @@ defineOptions({
 });
 
 const props = defineProps<{
-    formDefinition: App.Data.FormDefinitionData;
+    formDefinition: App.Data.FormDefinitionData | null;
+    formToken?: string;
+    embedBlocked?: boolean;
 }>();
 
 useAutoResizeIframeIfIsIframe();
@@ -21,7 +23,16 @@ useAutoResizeIframeIfIsIframe();
     <div class="flex flex-col items-center justify-center">
         <Card class="w-full max-w-200 min-w-50">
             <CardContent>
-                <FormRenderer :form-definition="props.formDefinition" :submit-url="route('form.submit', props.formDefinition.id)" method="post" />
+                <p v-if="props.embedBlocked" class="text-muted-foreground text-center">
+                    Dieses Formular darf auf dieser Domain nicht eingebettet werden.
+                </p>
+                <FormRenderer
+                    v-else-if="props.formDefinition"
+                    :form-definition="props.formDefinition"
+                    :submit-url="route('form.submit', props.formDefinition.id)"
+                    :form-token="props.formToken"
+                    method="post"
+                />
             </CardContent>
         </Card>
     </div>
