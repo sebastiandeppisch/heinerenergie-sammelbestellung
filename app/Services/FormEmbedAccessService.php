@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Crypt;
 
 class FormEmbedAccessService
 {
-    private const TOKEN_TTL_MINUTES = 30;
+    private const int TOKEN_TTL_MINUTES = 30;
 
     /**
      * Determine whether the current request is allowed to load the given form.

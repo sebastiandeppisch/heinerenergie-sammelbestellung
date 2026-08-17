@@ -24,9 +24,7 @@ test('a freshly issued token is valid', function () {
 test('an expired token is rejected', function () {
     $formDefinition = FormDefinition::factory()->create();
 
-    $token = Carbon::withTestNow(now()->subHour(), function () use ($formDefinition) {
-        return embedAccessService()->issueToken($formDefinition);
-    });
+    $token = Carbon::withTestNow(now()->subHour(), fn () => embedAccessService()->issueToken($formDefinition));
 
     expect(embedAccessService()->verifyToken($formDefinition, $token))->toBeFalse();
 });

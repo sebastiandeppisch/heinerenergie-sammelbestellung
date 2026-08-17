@@ -337,9 +337,9 @@ const allowedEmbedDomainsText = computed<string>({
                             <FormControl>
                                 <Textarea v-model="allowedEmbedDomainsText" placeholder="beispiel.de&#10;www.andere-domain.de" />
                             </FormControl>
-                            <p class="text-muted-foreground text-sm">
-                                Eine Domain pro Zeile. Nur Seiten dieser Domains dürfen das Formular per iframe einbetten. Ist die Liste leer, ist
-                                die Einbettung per iframe auf fremden Domains gesperrt.
+                            <p class="text-sm text-muted-foreground">
+                                Eine Domain pro Zeile. Nur Seiten dieser Domains dürfen das Formular per iframe einbetten. Ist die Liste leer, ist die
+                                Einbettung per iframe auf fremden Domains gesperrt.
                             </p>
                         </FormItem>
                     </FormField>
