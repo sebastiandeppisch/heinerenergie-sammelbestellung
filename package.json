@@ -61,7 +61,7 @@
         "vue3-apexcharts": "^1.8.0",
         "vuedraggable": "^4.1.0",
         "vuex": "^4.0.2",
-        "ziggy-js": "^2.5.1",
+        "ziggy-js": "^2.6.3",
         "zod": "^3.25.23"
     },
     "devDependencies": {
