@@ -43,6 +43,10 @@ class InstallServiceProvider extends ServiceProvider
             Artisan::call('migrate --force --seed');
         }
 
+        if (! file_exists(public_path('storage'))) {
+            Artisan::call('storage:link');
+        }
+
         if (Request::root() !== config('app.url') && ! app()->environment('local')) {
             echo 'Du musst die APP_URL in der .env Datei anpassen. Aktuell ist sie: <b>'.config('app.url').'</b> Bitte ändere sie auf die URL, unter der du die Anwendung erreichen möchtest, vermutlich <b>'.Request::root().'</b>.';
             exit;
