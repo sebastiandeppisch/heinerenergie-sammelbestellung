@@ -208,6 +208,14 @@ date: string;
 hasBeenRead: boolean;
 dateTimestamp: number;
 };
+export type MapEmbedData = {
+id: string;
+name: string | null;
+categories: Array<MapPointCategoryData>;
+coordinate: App.ValueObjects.Coordinate;
+zoom: number;
+created_at: string | null;
+};
 export type MapPointCategoryData = {
 id: string;
 name: string;

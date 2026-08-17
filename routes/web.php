@@ -12,6 +12,7 @@ use App\Http\Controllers\FormSubmitController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\Groups\GroupUserController;
 use App\Http\Controllers\MailAccountController;
+use App\Http\Controllers\MapEmbedController;
 use App\Http\Controllers\MapPointCategoryController;
 use App\Http\Controllers\MapPointController;
 use App\Http\Controllers\NextcloudGroupController;
@@ -105,6 +106,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('mappoints', MapPointController::class);
     Route::resource('mappoint-categories', MapPointCategoryController::class);
+    Route::resource('map-embeds', MapEmbedController::class);
 
     // Mail account page (no enc_key required – user can always view setup)
     Route::get('/mail/account', [MailAccountController::class, 'show'])->name('mail.account.show');
@@ -151,7 +153,7 @@ Route::post('/forms/{formDefinition}', [FormSubmitController::class, 'submit'])
     ->withoutMiddleware(PreventRequestForgery::class)
     ->middleware([HandlePrecognitiveRequests::class, 'throttle:form-submit']);
 
-Route::get('/map', [MapPointController::class, 'publicMap'])
+Route::get('/map/{mapEmbed}', [MapPointController::class, 'publicMap'])
     ->name('map.public');
 
 Route::put('/users/{user}/password', [UserController::class, 'changePassword'])

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Data\MapPointCategoryData;
 use App\Data\MapPointData;
 use App\Http\Requests\UpsertMapPointRequest;
+use App\Models\MapEmbed;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
 use Inertia\Inertia;
@@ -33,17 +34,21 @@ class MapPointController extends Controller
         ]);
     }
 
-    public function publicMap()
+    public function publicMap(MapEmbed $mapEmbed)
     {
+        $categories = $mapEmbed->mapPointCategories;
+
         $mapPoints = MapPoint::where('published', true)
+            ->whereIn('category_id', $categories->pluck('id'))
             ->with('category')
             ->get()
             ->map(fn (MapPoint $mapPoint): MapPointData => MapPointData::fromModel($mapPoint));
 
-        $pointsByType = $mapPoints->groupBy('userReadablePointableType');
-
         return Inertia::render('MapPoints/PublicMap', [
-            'pointsByType' => $pointsByType,
+            'pointsByCategory' => $mapPoints->groupBy('category_id'),
+            'categories' => $categories->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel($category)),
+            'center' => $mapEmbed->coordinate,
+            'zoom' => $mapEmbed->zoom,
         ]);
     }
 

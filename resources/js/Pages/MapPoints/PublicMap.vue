@@ -1,24 +1,33 @@
 <script setup lang="ts">
-import { isIframe } from '@/helpers';
+import CategorizedPointsMap from '@/components/CategorizedPointsMap.vue';
+import { isIframe, useAutoResizeIframeIfIsIframe } from '@/helpers';
 import NoLayout from '@/layouts/NoLayout.vue';
 import PublicLayout from '@/layouts/PublicLayout.vue';
-import { LControlLayers, LLayerGroup, LMap, LMarker, LPopup, LTileLayer } from '@vue-leaflet/vue-leaflet';
-import { latLng } from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import { reactive, watch } from 'vue';
+import { Checkbox } from '@/shadcn/components/ui/checkbox';
+import { Label } from '@/shadcn/components/ui/label';
+import { computed, reactive, watch } from 'vue';
 
 defineOptions({
     layout: isIframe ? NoLayout : PublicLayout,
 });
 
 const props = defineProps<{
-    pointsByType: Record<string, Array<App.Data.MapPointData>>;
+    pointsByCategory: Record<string, Array<App.Data.MapPointData>>;
+    categories: Array<App.Data.MapPointCategoryData>;
+    center: App.ValueObjects.Coordinate;
+    zoom: number;
 }>();
 
+useAutoResizeIframeIfIsIframe();
+
 const map = reactive({
-    center: latLng(49.8728, 8.6512) as { lat: number; lng: number },
-    zoom: 15,
+    center: { lat: props.center.lat, lng: props.center.lng },
+    zoom: props.zoom,
 });
+
+const categoryVisibility = reactive<Record<string, boolean>>(Object.fromEntries(props.categories.map((category) => [category.id, true])));
+
+const visibleCategories = computed(() => props.categories.filter((category) => categoryVisibility[category.id]));
 
 // Check if hash exists in URL for map position
 const hash = window.location.hash;
@@ -29,23 +38,6 @@ if (hash !== '') {
     map.center.lng = parseFloat(parts[2]);
 }
 
-function zoomChanged(e: number) {
-    map.zoom = e;
-}
-
-function centerChanged(e: { lat?: number; lng?: number }) {
-    if ('lat' in e === false || 'lng' in e === false) {
-        return;
-    }
-
-    if (e.lat === undefined || e.lng === undefined) {
-        return;
-    }
-
-    map.center.lat = e.lat;
-    map.center.lng = e.lng;
-}
-
 // Update URL hash when map changes
 watch(map, () => {
     window.location.hash = '#' + map.zoom + '/' + map.center.lat + '/' + map.center.lng;
@@ -53,32 +45,25 @@ watch(map, () => {
 </script>
 
 <template>
-    <div class="h-screen w-full">
-        <div class="isolate h-full w-full">
-            <LMap
-                ref="map"
-                :zoom="map.zoom"
-                @update:zoom="zoomChanged"
-                :center="[map.center.lat, map.center.lng]"
-                @update:center="centerChanged"
-                :minZoom="3"
-                :maxZoom="18"
-            >
-                <LControlLayers :collapsed="false" :hide-single-base="true" />
-                <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" layer-type="base" name="OpenStreetMap" />
-
-                <LLayerGroup v-for="(points, type) in pointsByType" :key="type" :name="type" layer-type="overlay">
-                    <LMarker v-for="point in points" :key="point.id" :lat-lng="latLng(point.coordinate.lat, point.coordinate.lng)">
-                        <LPopup>
-                            <div class="p-2">
-                                <h3 class="text-lg font-bold">{{ point.title }}</h3>
-                                <p class="text-sm">{{ point.description }}</p>
-                            </div>
-                        </LPopup>
-                    </LMarker>
-                </LLayerGroup>
-            </LMap>
+    <div class="relative w-full" :class="isIframe ? 'h-[520px]' : 'h-[calc(100vh-220px)]'">
+        <div v-if="categories.length > 1" class="absolute top-2 right-2 z-[1000] space-y-2 rounded-lg bg-white/90 p-3 shadow">
+            <div v-for="category in categories" :key="category.id" class="flex items-center gap-2">
+                <Checkbox :id="'category-' + category.id" v-model="categoryVisibility[category.id]" />
+                <Label :for="'category-' + category.id" class="flex items-center gap-2 text-sm font-normal">
+                    <div v-if="category.image_path" class="h-5 w-5 flex-shrink-0 overflow-hidden rounded bg-gray-100">
+                        <img :src="category.image_path" :alt="category.name" class="h-full w-full object-cover" />
+                    </div>
+                    {{ category.name }}
+                </Label>
+            </div>
         </div>
+
+        <CategorizedPointsMap
+            v-model:center="map.center"
+            v-model:zoom="map.zoom"
+            :points-by-category="pointsByCategory"
+            :categories="visibleCategories"
+        />
     </div>
 </template>
 

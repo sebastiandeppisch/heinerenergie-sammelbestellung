@@ -8,7 +8,7 @@ import { computed, ref } from 'vue';
 
 import MapPointCategory from '@/components/MapPointCategory.vue';
 import Card from '@/shadcn/components/ui/card/Card.vue';
-import { Pencil, Plus, Trash } from 'lucide-vue-next';
+import { Map, Pencil, Plus, Trash } from 'lucide-vue-next';
 import { toast } from 'vue-sonner';
 import { route } from 'ziggy-js';
 
@@ -62,6 +62,9 @@ function deleteMapPoint() {
                 <Input v-model="searchQuery" placeholder="Suche..." class="max-w-sm bg-white" />
                 <Link :href="route('mappoint-categories.index')">
                     <Button variant="outline">Kategorien verwalten</Button>
+                </Link>
+                <Link :href="route('map-embeds.index')">
+                    <Button variant="outline"><Map />Einbettungen verwalten</Button>
                 </Link>
                 <Link :href="route('mappoints.create')">
                     <Button><Plus />Neuen Punkt hinzufügen</Button>
