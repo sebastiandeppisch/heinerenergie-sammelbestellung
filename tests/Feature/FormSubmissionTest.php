@@ -328,7 +328,7 @@ test('submitting a checkbox with required options passes validation when all req
     ]);
 
     $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition]), [
-        $formField->id => [$option1->id, $option2->id],
+        $formField->uuid => [$option1->value, $option2->value],
     ]);
 
     $response->assertSessionHasNoErrors();
