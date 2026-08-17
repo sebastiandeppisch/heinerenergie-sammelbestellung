@@ -4,7 +4,6 @@ namespace App\Jobs;
 
 use App\Actions\FetchCoordinateByAddress;
 use App\Models\Advice;
-use App\Models\Group;
 use App\Models\User;
 use App\Notifications\SystemErrorNotification;
 use App\Services\AdviceService;

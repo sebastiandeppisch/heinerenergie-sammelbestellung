@@ -10,13 +10,11 @@ use App\Events\AdviceUpdated;
 use App\Listeners\CalculateCoordinates;
 use App\Listeners\EmptyCoordinates;
 use App\Listeners\HandleAdviceEvents;
-use App\Listeners\InitiateAdviceAssignment;
 use App\Listeners\SaveAdviceEvents;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Mail\Events\MessageSent;
-use Illuminate\Support\Facades\Event;
 use Override;
 use Wnx\Sends\Listeners\StoreOutgoingMailListener;
 
