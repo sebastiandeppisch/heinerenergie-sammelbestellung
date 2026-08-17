@@ -73,7 +73,7 @@
         "@vue-leaflet/vue-leaflet": "^0.10.0",
         "@vue/eslint-config-typescript": "^14.3.0",
         "autoprefixer": "^10.4.20",
-        "devextreme-themebuilder": "^21.2.4",
+        "devextreme-themebuilder": "^26.1.4",
         "eslint": "^9.17.0",
         "eslint-config-prettier": "^10.0.1",
         "eslint-plugin-vue": "^9.32.0",
