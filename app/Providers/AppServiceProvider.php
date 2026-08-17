@@ -84,9 +84,7 @@ class AppServiceProvider extends ServiceProvider
                 return fn (string $text) => $coordinatesOfDarmstadtCenter;
             });
 
-            $this->app->bind(FetchAddressByCoordinate::class, function () {
-                return fn (Coordinate $coordinate) => 'Musterstraße 1, 64283 Darmstadt, Deutschland';
-            });
+            $this->app->bind(FetchAddressByCoordinate::class, fn () => fn (Coordinate $coordinate) => 'Musterstraße 1, 64283 Darmstadt, Deutschland');
         } else {
             $this->app->bind(function (): Nominatim {
                 $url = 'http://nominatim.openstreetmap.org/';
