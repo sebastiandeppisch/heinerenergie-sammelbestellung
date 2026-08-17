@@ -31,7 +31,7 @@ class UpsertMapEmbedRequest extends FormRequest
         return [
             'name' => 'nullable|string|max:255',
             'category_ids' => 'required|array|min:1',
-            'category_ids.*' => 'exists:map_point_categories,uuid',
+            'category_ids.*' => 'bail|uuid|exists:map_point_categories,uuid',
             'coordinate' => new GeographicCoordinate,
             'zoom' => 'required|integer|min:3|max:18',
             'show_table' => 'boolean',
