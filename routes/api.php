@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\GroupAdviceStatusController;
 use App\Http\Controllers\Api\KpiController;
 use App\Http\Controllers\Api\MailController;
 use App\Http\Controllers\Api\NextcloudAdviceController;
+use App\Http\Controllers\Api\ReverseGeoSearchController;
 use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\UserController;
@@ -44,6 +45,7 @@ Route::middleware('auth')->group(function () {
     Route::get('advices/{advice}/advisors', [AdviceController::class, 'sortedAdvisors']);
 
     Route::get('map/search', GeoSearchController::class);
+    Route::get('map/reverse-search', ReverseGeoSearchController::class)->name('api.map.reverse-search');
 
     Route::prefix('advices/{advice}/nextcloud')->group(function () {
         Route::get('search', [NextcloudAdviceController::class, 'search'])->name('api.nextcloud.search');

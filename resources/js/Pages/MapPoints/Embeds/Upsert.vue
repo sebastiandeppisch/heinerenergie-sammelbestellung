@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import CategorizedPointsMap from '@/components/CategorizedPointsMap.vue';
+import CategoryVisibilityFilter from '@/components/CategoryVisibilityFilter.vue';
 import MapEmbedDialog from '@/components/MapEmbedDialog.vue';
 import { Button } from '@/shadcn/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/shadcn/components/ui/card';
-import { Checkbox } from '@/shadcn/components/ui/checkbox';
 import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
+import { Switch } from '@/shadcn/components/ui/switch';
 import { router, useForm } from '@inertiajs/vue3';
 import { ArrowLeft, ExternalLink } from 'lucide-vue-next';
 import { computed, reactive, watch } from 'vue';
@@ -31,6 +32,7 @@ const form = useForm({
     category_ids: props.mapEmbed?.categories.map((category) => category.id) || [],
     coordinate: props.mapEmbed?.coordinate || darmstadt,
     zoom: props.mapEmbed?.zoom ?? 15,
+    show_table: props.mapEmbed?.show_table ?? true,
 });
 
 const previewCategories = computed(() => props.categories.filter((category) => categorySelection[category.id]));
@@ -90,19 +92,20 @@ function submit() {
                             dass sich der Einbettungslink ändert.
                         </p>
                         <div class="space-y-2 rounded-lg border p-3">
-                            <div v-for="category in categories" :key="category.id" class="flex items-center gap-2">
-                                <Checkbox :id="'category-' + category.id" v-model="categorySelection[category.id]" />
-                                <Label :for="'category-' + category.id" class="flex items-center gap-2 font-normal">
-                                    <div v-if="category.image_path" class="h-5 w-5 flex-shrink-0 overflow-hidden rounded bg-gray-100">
-                                        <img :src="category.image_path" :alt="category.name" class="h-full w-full object-cover" />
-                                    </div>
-                                    {{ category.name }}
-                                </Label>
-                            </div>
+                            <CategoryVisibilityFilter v-model:visibility="categorySelection" :categories="categories" id-prefix="embed-category-" />
                             <p v-if="categories.length === 0" class="text-sm text-gray-500 italic">Es wurden noch keine Kategorien angelegt.</p>
                         </div>
                         <p v-if="form.errors.category_ids" class="text-sm text-red-500">{{ form.errors.category_ids }}</p>
                     </div>
+
+                    <div class="flex items-center space-x-2">
+                        <Switch id="show_table" v-model="form.show_table" />
+                        <Label for="show_table">Tabellen-Ansicht anbieten</Label>
+                        <p v-if="form.errors.show_table" class="text-sm text-red-500">{{ form.errors.show_table }}</p>
+                    </div>
+                    <p class="-mt-2 text-xs text-gray-500">
+                        Wenn aktiv, können Besucher:innen der Einbettung über Tabs zwischen Karte und einer durchsuchbaren Tabelle wechseln.
+                    </p>
 
                     <div class="space-y-2">
                         <Label>Vorschau</Label>

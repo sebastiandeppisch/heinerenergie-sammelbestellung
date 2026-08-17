@@ -49,6 +49,7 @@ class MapPointController extends Controller
             'categories' => $categories->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel($category)),
             'center' => $mapEmbed->coordinate,
             'zoom' => $mapEmbed->zoom,
+            'showTable' => $mapEmbed->show_table,
         ]);
     }
 

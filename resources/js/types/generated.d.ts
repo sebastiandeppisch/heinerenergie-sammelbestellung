@@ -214,6 +214,7 @@ name: string | null;
 categories: Array<MapPointCategoryData>;
 coordinate: App.ValueObjects.Coordinate;
 zoom: number;
+show_table: boolean;
 created_at: string | null;
 };
 export type MapPointCategoryData = {
@@ -232,6 +233,7 @@ published: boolean;
 userReadablePointableType: string;
 created_at: any;
 category_id: string | null;
+location: string | null;
 };
 export type NextcloudGroupUserData = {
 nc_id: string | null;

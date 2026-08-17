@@ -34,11 +34,12 @@ class UpsertMapEmbedRequest extends FormRequest
             'category_ids.*' => 'exists:map_point_categories,uuid',
             'coordinate' => new GeographicCoordinate,
             'zoom' => 'required|integer|min:3|max:18',
+            'show_table' => 'boolean',
         ];
     }
 
     public function getData(): array
     {
-        return $this->safe()->only(['name', 'coordinate', 'zoom']);
+        return $this->safe()->only(['name', 'coordinate', 'zoom', 'show_table']);
     }
 }

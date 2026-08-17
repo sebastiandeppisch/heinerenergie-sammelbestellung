@@ -26,6 +26,7 @@ test('public map only shows published points from the embed categories', functio
         'published' => true,
         'category_id' => $includedCategory->id,
         'title' => 'Visible Point',
+        'location' => 'Musterstraße 1, 64283 Darmstadt',
     ]);
 
     MapPoint::factory()->create([
@@ -51,6 +52,7 @@ test('public map only shows published points from the embed categories', functio
         ->has('categories', 1)
         ->has("pointsByCategory.{$includedCategory->uuid}", 1)
         ->where("pointsByCategory.{$includedCategory->uuid}.0.title", $visiblePoint->title)
+        ->where("pointsByCategory.{$includedCategory->uuid}.0.location", $visiblePoint->location)
         ->missing("pointsByCategory.{$otherCategory->uuid}")
     );
 });
@@ -78,5 +80,19 @@ test('public map response contains the embed center and zoom', function () {
         ->where('center.lat', 52.52)
         ->where('center.lng', 13.405)
         ->where('zoom', 12)
+    );
+});
+
+test('public map response reflects whether the table view is enabled', function () {
+    $category = MapPointCategory::factory()->create();
+    $mapEmbed = MapEmbed::factory()->create(['show_table' => false]);
+    $mapEmbed->mapPointCategories()->sync([$category->id]);
+
+    $response = $this->get(route('map.public', $mapEmbed));
+
+    $response->assertStatus(200);
+    $response->assertInertia(fn ($page) => $page
+        ->component('MapPoints/PublicMap')
+        ->where('showTable', false)
     );
 });

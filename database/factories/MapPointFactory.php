@@ -33,6 +33,7 @@ class MapPointFactory extends Factory
             'published' => fake()->boolean(70),
             'description' => fake()->text(256),
             'category_id' => null,
+            'location' => fake()->optional(0.7)->address(),
         ];
     }
 
@@ -67,10 +68,10 @@ class MapPointFactory extends Factory
         return $this;
     }
 
-    public function withCategory($category = null): Factory
+    public function withCategory(?MapPointCategory $category = null): Factory
     {
         return $this->state(fn (array $attributes) => [
-            'category_id' => $category?->id ?? MapPointCategory::factory()->create()->id,
+            'category_id' => $category->id ?? MapPointCategory::factory()->create()->id,
         ]);
     }
 }

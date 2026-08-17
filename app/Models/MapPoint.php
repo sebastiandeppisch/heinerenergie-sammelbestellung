@@ -32,6 +32,7 @@ class MapPoint extends Model
         'coordinate',
         'published',
         'category_id',
+        'location',
     ];
 
     protected $casts = [

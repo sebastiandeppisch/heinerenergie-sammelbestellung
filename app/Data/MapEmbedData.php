@@ -20,6 +20,7 @@ class MapEmbedData extends Data
         public array $categories,
         public Coordinate $coordinate,
         public int $zoom,
+        public bool $show_table,
         public ?string $created_at = null,
     ) {}
 
@@ -31,6 +32,7 @@ class MapEmbedData extends Data
             categories: $model->mapPointCategories->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel($category))->all(),
             coordinate: $model->coordinate,
             zoom: $model->zoom,
+            show_table: $model->show_table,
             created_at: $model->created_at?->toISOString(),
         );
     }

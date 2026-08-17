@@ -98,7 +98,7 @@ function deleteMapPoint() {
                     </TableCell>
                     <TableCell>{{ point.userReadablePointableType }}</TableCell>
                     <TableCell class="max-w-md truncate">{{ point.description }}</TableCell>
-                    <TableCell>{{ point.coordinate.lat.toFixed(6) }}, {{ point.coordinate.lng.toFixed(6) }}</TableCell>
+                    <TableCell>{{ point.location || `${point.coordinate.lat.toFixed(6)}, ${point.coordinate.lng.toFixed(6)}` }}</TableCell>
                     <TableCell>
                         <span
                             :class="{

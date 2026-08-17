@@ -22,6 +22,7 @@ class MapPointData extends Data
         public string $userReadablePointableType,
         public Carbon $created_at,
         public ?string $category_id = null,
+        public ?string $location = null,
     ) {}
 
     public static function fromModel(MapPoint $model)
@@ -34,7 +35,8 @@ class MapPointData extends Data
             published: $model->published,
             userReadablePointableType: self::formatType($model->pointable_type),
             created_at: $model->created_at,
-            category_id: $model->category?->uuid
+            category_id: $model->category?->uuid,
+            location: $model->location,
         );
     }
 

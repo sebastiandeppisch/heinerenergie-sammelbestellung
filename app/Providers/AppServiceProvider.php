@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Actions\FetchAddressByCoordinate;
 use App\Actions\FetchCoordinateByAddress;
 use App\Actions\FetchCoordinateByFreeText;
 use App\Contracts\MailCredentialsRepository;
@@ -81,6 +82,10 @@ class AppServiceProvider extends ServiceProvider
                 );
 
                 return fn (string $text) => $coordinatesOfDarmstadtCenter;
+            });
+
+            $this->app->bind(FetchAddressByCoordinate::class, function () {
+                return fn (Coordinate $coordinate) => 'Musterstraße 1, 64283 Darmstadt, Deutschland';
             });
         } else {
             $this->app->bind(function (): Nominatim {

@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+/**
+ * @property \App\ValueObjects\Coordinate $coordinate
+ */
 class MapEmbed extends Model
 {
     /** @use HasFactory<MapEmbedFactory> */
@@ -22,10 +25,12 @@ class MapEmbed extends Model
         'lng',
         'coordinate',
         'zoom',
+        'show_table',
     ];
 
     protected $casts = [
         'coordinate' => Coordinate::class,
+        'show_table' => 'boolean',
     ];
 
     /**

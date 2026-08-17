@@ -28,6 +28,7 @@ class MapEmbedFactory extends Factory
             'lat' => $lat,
             'lng' => $lng,
             'zoom' => $this->faker->numberBetween(3, 18),
+            'show_table' => true,
         ];
     }
 }

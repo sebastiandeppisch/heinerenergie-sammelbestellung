@@ -19,7 +19,7 @@ beforeEach(function () {
 });
 
 test('the create form preview map renders without javascript errors', function () {
-    $category = MapPointCategory::factory()->create(['name' => 'Ladesäulen']);
+    $category = MapPointCategory::factory()->withoutImage()->create(['name' => 'Ladesäulen']);
     MapPoint::factory()->create(['published' => true, 'category_id' => $category->id]);
 
     visit(route('map-embeds.create'))
@@ -30,7 +30,7 @@ test('the create form preview map renders without javascript errors', function (
 });
 
 test('the edit form preview map renders without javascript errors', function () {
-    $category = MapPointCategory::factory()->create(['name' => 'Ladesäulen']);
+    $category = MapPointCategory::factory()->withoutImage()->create(['name' => 'Ladesäulen']);
     MapPoint::factory()->create(['published' => true, 'category_id' => $category->id]);
 
     $mapEmbed = MapEmbed::factory()->create();

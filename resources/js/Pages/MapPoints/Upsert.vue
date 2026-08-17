@@ -8,7 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/shadcn/components/ui/switch';
 import { Textarea } from '@/shadcn/components/ui/textarea';
 import { router, useForm } from '@inertiajs/vue3';
+import axios from 'axios';
 import { ArrowLeft } from 'lucide-vue-next';
+import { computed, ref, watch } from 'vue';
 import { route } from 'ziggy-js';
 
 const props = defineProps<{
@@ -27,9 +29,41 @@ const defaultMapPoint: App.Data.MapPointData = {
     userReadablePointableType: '',
     created_at: null,
     category_id: null,
+    location: null,
 };
 
 const form = useForm<App.Data.MapPointData>(props.mapPoint || defaultMapPoint);
+
+const isFetchingLocation = ref(false);
+
+const locationInput = computed({
+    get: () => form.location ?? '',
+    set: (value: string) => {
+        form.location = value;
+    },
+});
+
+async function fetchLocation() {
+    isFetchingLocation.value = true;
+    try {
+        const response = await axios.get(route('api.map.reverse-search'), {
+            params: { lat: form.coordinate.lat, lng: form.coordinate.lng },
+        });
+        form.location = response.data.location;
+    } finally {
+        isFetchingLocation.value = false;
+    }
+}
+
+watch(
+    () => form.coordinate,
+    () => {
+        if (!form.location) {
+            fetchLocation();
+        }
+    },
+    { deep: true },
+);
 
 function submit() {
     if (isEditing) {
@@ -70,9 +104,23 @@ const errors: Record<string, string> = form.errors;
                     </div>
 
                     <div class="space-y-2">
-                        <Label for="coordinate">Ort</Label>
+                        <Label for="coordinate">Position auf der Karte</Label>
                         <PinLocationMap v-model="form.coordinate" />
                         <p v-if="errors.coordinate" class="text-sm text-red-500">{{ errors.coordinate }}</p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <Label for="location">Ort</Label>
+                        <div class="flex gap-2">
+                            <Input id="location" v-model="locationInput" placeholder="Adresse" />
+                            <Button type="button" variant="outline" :disabled="isFetchingLocation" @click="fetchLocation">
+                                {{ isFetchingLocation ? 'Lädt...' : 'Adresse laden' }}
+                            </Button>
+                        </div>
+                        <p v-if="errors.location" class="text-sm text-red-500">{{ errors.location }}</p>
+                        <p class="text-xs text-gray-500">
+                            Wird beim Setzen der Position automatisch per Geocoding vorbefüllt, kann aber frei angepasst werden.
+                        </p>
                     </div>
 
                     <div class="space-y-2">
