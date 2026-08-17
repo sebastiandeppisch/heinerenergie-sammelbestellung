@@ -327,7 +327,7 @@ test('submitting a checkbox with required options passes validation when all req
         'is_required' => false,
     ]);
 
-    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition->id]), [
+    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition]), [
         $formField->id => [$option1->id, $option2->id],
     ]);
 
