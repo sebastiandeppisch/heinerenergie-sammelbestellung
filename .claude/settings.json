@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/phpstan-post-edit.sh",
+            "timeout": 60,
+            "statusMessage": "Running PHPStan..."
+          }
+        ]
+      }
+    ]
+  }
+}
