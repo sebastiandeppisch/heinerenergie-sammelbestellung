@@ -40,7 +40,7 @@ function openImportDialog(item: NcUser) {
 }
 
 function submitImport() {
-    if (!importTarget.value) return;
+    if (!importTarget.value || !importTarget.value.nc_id) return;
     importing.value = true;
     importError.value = null;
 
@@ -61,6 +61,7 @@ function submitImport() {
 }
 
 function addToGroup(item: NcUser) {
+    if (!item.nc_id) return;
     addingToGroup.value = item.nc_id;
     router.post(
         route('groups.nextcloud.add-to-group', { group: props.group.id, ncUser: item.nc_id }),
