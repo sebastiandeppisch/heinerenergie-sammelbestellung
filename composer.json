@@ -19,7 +19,7 @@
         "maxh/php-nominatim": "^2.3",
         "opcodesio/log-viewer": "^3.10",
         "plesk/composer-command-info": "~1.1.0",
-        "plesk/ext-laravel-integration": "^7.0",
+        "plesk/ext-laravel-integration": "^8.0",
         "sabre/dav": "^4.7",
         "spatie/laravel-data": "^4.15",
         "spatie/laravel-typescript-transformer": "^2.5",
