@@ -1,2 +1,7 @@
 @import 'tailwindcss';
 @import './shadcn/globals.css';
+
+
+a{
+	color: var(--primary);
+}
