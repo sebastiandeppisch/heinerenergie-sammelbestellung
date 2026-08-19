@@ -7,7 +7,6 @@ use App\Data\AdviceStatusNamesData;
 use App\Data\ChecklistEntryData;
 use App\Data\DataProtectedAdviceData;
 use App\Data\FormDefinitionData;
-use App\Data\FormSubmissionData;
 use App\Data\GroupData;
 use App\Data\GroupMapData;
 use App\Data\UserData;
@@ -23,7 +22,6 @@ use App\Http\Requests\UpdateAdviceRequest;
 use App\Models\Advice;
 use App\Models\AdviceStatus;
 use App\Models\FormDefinition;
-use App\Models\FormSubmission;
 use App\Models\Group;
 use App\Models\User;
 use App\Notifications\AdviceTransferred;
@@ -95,7 +93,7 @@ class AdviceController extends Controller
             ->with('success', 'Beratung erfolgreich angelegt');
     }
 
-    public function show(Advice $advice)
+    public function show(Advice $advice, AdviceService $adviceService)
     {
         $advice->loadMissing('shares', 'group', 'group.parent', 'advisor');
         if (! Auth::user()->can('view', $advice)) {
@@ -132,12 +130,7 @@ class AdviceController extends Controller
             ->map(fn (Group $group) => GroupData::fromModel($group))
             ->values();
 
-        $formSubmission = FormSubmission::where('advice_id', $advice->id)->with('submissionFields', 'submissionFields.options')->first();
-        if ($formSubmission !== null) {
-            $formSubmission = FormSubmissionData::fromModel($formSubmission);
-
-            $formSubmission->fields = $formSubmission->fields->filter(fn ($field) => ! in_array($field->field->label, ['Vorname', 'Nachname', 'Adresse', 'E-Mail Adresse', 'Telefonnummer', 'Möchtest Du virtuell oder bei Dir vor Ort beraten werden?']));
-        }
+        $formSubmission = $adviceService->getFilteredFormSubmission($advice);
 
         $adviceType = $advice->type;
         $canDeleteAdvice = Auth::user()->can('delete', $advice);

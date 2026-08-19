@@ -4,9 +4,12 @@ namespace App\Services;
 
 use App\Context\GroupContextContract;
 use App\Data\DataProtectedAdviceData;
+use App\Data\FormSubmissionData;
 use App\Events\Advice\AdviceSharedAdvisorAdded;
 use App\Events\Advice\AdviceSharedAdvisorRemoved;
 use App\Models\Advice;
+use App\Models\FormDefinitionToAdvice;
+use App\Models\FormSubmission;
 use App\Models\Group;
 use App\Models\User;
 use App\ValueObjects\Meter;
@@ -115,6 +118,39 @@ class AdviceService
     public function canEdit(Advice $advice, User $user): bool
     {
         return $user->can('update', $advice);
+    }
+
+    /**
+     * Fetch the form submission for an advice, with the fields removed that are
+     * mapped to personal data in the form's FormDefinitionToAdvice mapping.
+     */
+    public function getFilteredFormSubmission(Advice $advice): ?FormSubmissionData
+    {
+        $formSubmission = FormSubmission::where('advice_id', $advice->id)->with('submissionFields', 'submissionFields.options')->first();
+
+        if ($formSubmission === null) {
+            return null;
+        }
+
+        $adviceCreator = FormDefinitionToAdvice::where('form_definition_id', $formSubmission->form_definition_id)->first();
+
+        $personalFieldIds = collect([
+            $adviceCreator?->address_field_id,
+            $adviceCreator?->email_field_id,
+            $adviceCreator?->phone_field_id,
+            $adviceCreator?->first_name_field_id,
+            $adviceCreator?->last_name_field_id,
+            $adviceCreator?->advice_type_field_id,
+        ])->filter();
+
+        $formSubmission->setRelation(
+            'submissionFields',
+            $formSubmission->submissionFields
+                ->reject(fn ($submissionField) => $personalFieldIds->contains($submissionField->form_field_id))
+                ->values()
+        );
+
+        return FormSubmissionData::fromModel($formSubmission);
     }
 
     /**

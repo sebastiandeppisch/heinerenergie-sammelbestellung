@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateAdviceRequest;
 use App\Models\Advice;
 use App\Models\User;
 use App\Services\AdviceService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -57,6 +58,15 @@ class AdviceController extends Controller
         if (! Auth::user()->can($ability, $advice)) {
             abort(403, 'Du hast keine Berechtigung, diese Beratung zu sehen');
         }
+    }
+
+    public function formSubmission(Advice $advice, AdviceService $adviceService): JsonResponse
+    {
+        $this->auth($advice, 'viewDataProtected');
+
+        return response()->json([
+            'formSubmission' => $adviceService->getFilteredFormSubmission($advice),
+        ]);
     }
 
     public function assign(Advice $advice)

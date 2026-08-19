@@ -43,6 +43,7 @@ Route::middleware('auth')->group(function () {
     Route::post('profile/address', [UserController::class, 'address']);
     Route::post('advices/{advice}/assign', [AdviceController::class, 'assign']);
     Route::get('advices/{advice}/advisors', [AdviceController::class, 'sortedAdvisors']);
+    Route::get('advices/{advice}/form-submission', [AdviceController::class, 'formSubmission'])->name('api.advices.formSubmission');
 
     Route::get('map/search', GeoSearchController::class);
     Route::get('map/reverse-search', ReverseGeoSearchController::class)->name('api.map.reverse-search');

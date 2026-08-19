@@ -1,7 +1,10 @@
 <?php
 
+use App\Enums\FieldType;
 use App\Models\Advice;
 use App\Models\FormDefinitionToAdvice;
+use App\Models\FormField;
+use App\Models\FormSubmission;
 use App\Models\Group;
 use App\Models\User;
 use App\Services\SessionService;
@@ -77,6 +80,49 @@ test('group column is shown for system admins', function () {
 
     $this->actingAs($this->admin)->get('advices')
         ->assertInertia(fn ($page) => $page->component('Advices')->where('showGroupColumn', true));
+});
+
+test('form submission preview shows only non-personal fields to group members', function () {
+    $adviceCreator = FormDefinitionToAdvice::factory()->withAdvice()->create();
+
+    $advice = Advice::firstOrFail();
+    $formSubmission = FormSubmission::firstOrFail();
+
+    $extraField = FormField::factory()->create([
+        'type' => FieldType::TEXT,
+        'label' => 'Wobei wird Hilfe benötigt?',
+        'required' => false,
+        'min_length' => null,
+    ]);
+    $adviceCreator->formDefinition->fields()->save($extraField);
+    $extraField->createSubmissionField($formSubmission, 'Balkonkraftwerk');
+
+    $advice->group->users()->attach($this->advisor->id, ['is_admin' => false]);
+
+    $response = $this->actingAs($this->advisor)->getJson(route('api.advices.formSubmission', $advice))->assertOk();
+
+    $labels = collect($response->json('formSubmission.fields'))->pluck('field.label');
+    expect($labels->all())->toBe(['Wobei wird Hilfe benötigt?']);
+});
+
+test('form submission preview returns null when the advice has no submission', function () {
+    $this->group->users()->attach($this->advisor->id, ['is_admin' => false]);
+
+    $advice = Advice::factory()->create(['group_id' => $this->group->id]);
+
+    $this->actingAs($this->advisor)->getJson(route('api.advices.formSubmission', $advice))
+        ->assertOk()
+        ->assertExactJson(['formSubmission' => null]);
+});
+
+test('form submission preview is forbidden for users outside the advice group', function () {
+    $advice = Advice::factory()->create(['group_id' => $this->group->id]);
+    FormSubmission::factory()->create([
+        'advice_id' => $advice->id,
+        'group_id' => $this->group->id,
+    ]);
+
+    $this->actingAs($this->advisor)->getJson(route('api.advices.formSubmission', $advice))->assertForbidden();
 });
 
 test('advices map can be indexed by regular advisor', function () {

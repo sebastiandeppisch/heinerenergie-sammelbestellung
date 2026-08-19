@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AdviceFormPreviewDialog from '@/components/Advices/AdviceFormPreviewDialog.vue';
 import CreateAdviceDialog from '@/components/CreateAdviceDialog.vue';
 import { Badge } from '@/shadcn/components/ui/badge';
 import { Button } from '@/shadcn/components/ui/button';
@@ -313,6 +314,7 @@ const totalCount = computed(() => table.getFilteredRowModel().rows.length);
                                     @click="openAdvice(row.original.id)"
                                     >Öffnen</Button
                                 >
+                                <AdviceFormPreviewDialog v-else :advice-id="row.original.id" />
                             </TableCell>
 
                             <!-- Group -->
