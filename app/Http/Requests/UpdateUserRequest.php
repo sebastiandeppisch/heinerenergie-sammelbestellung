@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Unique;
 
 class UpdateUserRequest extends FormRequest
 {
@@ -20,15 +23,15 @@ class UpdateUserRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array
+     * @return array<string, Unique[]|string[]|string>
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            'first_name' => 'string',
-            'last_name' => 'string',
+            'first_name' => ['string'],
+            'last_name' => ['string'],
             'email' => ['email', Rule::unique('users')->ignoreModel($this->user())],
-            'is_active' => 'boolean',
+            'is_active' => ['boolean'],
         ];
     }
 }

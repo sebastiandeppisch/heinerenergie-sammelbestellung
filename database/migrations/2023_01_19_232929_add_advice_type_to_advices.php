@@ -8,24 +8,20 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::table('advices', function (Blueprint $table) {
+        Schema::table('advices', function (Blueprint $table): void {
             $table->unsignedInteger('type')->default(0);
         });
     }
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::table('advices', function (Blueprint $table) {
+        Schema::table('advices', function (Blueprint $table): void {
             $table->dropColumn('type');
         });
     }

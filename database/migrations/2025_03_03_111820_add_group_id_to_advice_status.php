@@ -13,16 +13,16 @@ return new class extends Migration
 
         $defaultGroupId = Group::firstOrFail()->id;
 
-        Schema::table('advice_status', function (Blueprint $table) use ($defaultGroupId) {
+        Schema::table('advice_status', function (Blueprint $table) use ($defaultGroupId): void {
             $table->foreignIdFor(Group::class)->default($defaultGroupId)->constrained();
             $table->softDeletes();
         });
 
-        Schema::table('advice_status', function (Blueprint $table) {
+        Schema::table('advice_status', function (Blueprint $table): void {
             $table->foreignIdFor(Group::class)->default(null)->change();
         });
 
-        Schema::create('advice_status_group', function (Blueprint $table) {
+        Schema::create('advice_status_group', function (Blueprint $table): void {
             $table->foreignIdFor(Group::class)->constrained();
             $table->foreignIdFor(AdviceStatus::class)->constrained();
             $table->boolean('visible_in_group')->default(false);
@@ -34,13 +34,13 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('advice_status', function (Blueprint $table) {
+        Schema::table('advice_status', function (Blueprint $table): void {
             $table->dropForeign(['group_id']);
             $table->dropColumn('group_id');
         });
 
         Schema::dropIfExists('advice_status_group');
-        Schema::table('advice_status', function (Blueprint $table) {
+        Schema::table('advice_status', function (Blueprint $table): void {
             $table->dropSoftDeletes();
         });
     }

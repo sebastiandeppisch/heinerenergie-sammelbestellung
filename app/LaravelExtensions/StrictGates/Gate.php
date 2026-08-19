@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\LaravelExtensions\StrictGates;
 
 use Illuminate\Auth\Access\Gate as BaseGate;
@@ -8,9 +10,9 @@ use Override;
 
 class Gate extends BaseGate
 {
-    public static $shouldBeStrict = false;
+    public static bool $shouldBeStrict = false;
 
-    public static function shouldBeStrict($shouldBeStrict = true)
+    public static function shouldBeStrict(bool $shouldBeStrict = true): void
     {
         self::$shouldBeStrict = $shouldBeStrict;
     }
@@ -18,9 +20,11 @@ class Gate extends BaseGate
     /**
      * the implementation is mostly copied from the original function
      * only the MissingGateException is added
+     *
+     * @param  array<int, mixed>  $arguments
      */
     #[Override]
-    protected function resolveAuthCallback($user, $ability, array $arguments)
+    protected function resolveAuthCallback($user, $ability, array $arguments): mixed
     {
         if (isset($arguments[0]) &&
             ! is_null($policy = $this->getPolicyFor($arguments[0])) &&

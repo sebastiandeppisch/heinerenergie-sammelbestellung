@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Contracts\NextcloudFileClientContract;
@@ -111,7 +113,7 @@ class NextcloudAdviceController extends Controller
 
         $stream = $this->nextcloud->downloadFile($path);
 
-        return response()->stream(function () use ($stream) {
+        return response()->stream(function () use ($stream): void {
             fpassthru($stream);
         });
     }

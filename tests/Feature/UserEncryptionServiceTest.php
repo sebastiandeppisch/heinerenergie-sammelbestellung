@@ -2,7 +2,7 @@
 
 use App\Services\UserEncryptionService;
 
-test('encrypt and decrypt round-trip returns original plaintext', function () {
+test('encrypt and decrypt round-trip returns original plaintext', function (): void {
     $service = new UserEncryptionService;
     $key = $service->deriveKey('mysecretpassword', base64_encode(random_bytes(32)));
 
@@ -13,7 +13,7 @@ test('encrypt and decrypt round-trip returns original plaintext', function () {
     expect($decrypted)->toBe($plaintext);
 });
 
-test('same password and salt always derives the same key', function () {
+test('same password and salt always derives the same key', function (): void {
     $service = new UserEncryptionService;
     $salt = base64_encode(random_bytes(32));
 
@@ -23,7 +23,7 @@ test('same password and salt always derives the same key', function () {
     expect($key1)->toBe($key2);
 });
 
-test('different passwords derive different keys', function () {
+test('different passwords derive different keys', function (): void {
     $service = new UserEncryptionService;
     $salt = base64_encode(random_bytes(32));
 
@@ -33,7 +33,7 @@ test('different passwords derive different keys', function () {
     expect($key1)->not->toBe($key2);
 });
 
-test('encrypt produces different ciphertext each time due to random nonce', function () {
+test('encrypt produces different ciphertext each time due to random nonce', function (): void {
     $service = new UserEncryptionService;
     $key = $service->deriveKey('password', base64_encode(random_bytes(32)));
 
@@ -43,7 +43,7 @@ test('encrypt produces different ciphertext each time due to random nonce', func
     expect($encrypted1)->not->toBe($encrypted2);
 });
 
-test('decrypt throws on tampered ciphertext', function () {
+test('decrypt throws on tampered ciphertext', function (): void {
     $service = new UserEncryptionService;
     $key = $service->deriveKey('password', base64_encode(random_bytes(32)));
     $encrypted = $service->encrypt('secret', $key);
@@ -52,10 +52,10 @@ test('decrypt throws on tampered ciphertext', function () {
     $parts[1] = base64_encode('tampered');
     $tampered = implode(':', $parts);
 
-    expect(fn () => $service->decrypt($tampered, $key))->toThrow(RuntimeException::class);
+    expect(fn (): string => $service->decrypt($tampered, $key))->toThrow(RuntimeException::class);
 });
 
-test('decrypt throws on tampered auth tag', function () {
+test('decrypt throws on tampered auth tag', function (): void {
     $service = new UserEncryptionService;
     $key = $service->deriveKey('password', base64_encode(random_bytes(32)));
     $encrypted = $service->encrypt('secret', $key);
@@ -64,10 +64,10 @@ test('decrypt throws on tampered auth tag', function () {
     $parts[2] = base64_encode(random_bytes(16));
     $tampered = implode(':', $parts);
 
-    expect(fn () => $service->decrypt($tampered, $key))->toThrow(RuntimeException::class);
+    expect(fn (): string => $service->decrypt($tampered, $key))->toThrow(RuntimeException::class);
 });
 
-test('derived key is 32 bytes', function () {
+test('derived key is 32 bytes', function (): void {
     $service = new UserEncryptionService;
     $key = $service->deriveKey('password', base64_encode(random_bytes(32)));
 

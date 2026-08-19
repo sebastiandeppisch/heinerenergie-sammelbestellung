@@ -35,7 +35,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth')->group(function () {
+Route::middleware('auth')->group(function (): void {
     Route::get('/dashboard', [PageController::class, 'dashboard'])->name('dashboard');
     Route::get('/initiatives/select', [PageController::class, 'initiativeSelection'])->name('initiatives.select');
     Route::get('/profile', [PageController::class, 'profile'])->name('profile');
@@ -114,13 +114,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/mail/discover', [MailAccountController::class, 'discover'])->name('mail.discover');
 
     // Mail operations that require the encryption key cookie
-    Route::middleware('enc_key')->group(function () {
+    Route::middleware('enc_key')->group(function (): void {
         Route::post('/mail/account', [MailAccountController::class, 'store'])->name('mail.account.store');
         Route::delete('/mail/account', [MailAccountController::class, 'destroy'])->name('mail.account.destroy');
     });
 
     // System Admin Routes
-    Route::middleware(CheckSysAdmin::class)->group(function () {
+    Route::middleware(CheckSysAdmin::class)->group(function (): void {
         Route::get('/system-admin', [SystemAdminController::class, 'index'])->name('system-admin');
         Route::post('/system-admin/migrate', [SystemAdminController::class, 'migrate'])->name('system-admin.migrate');
         Route::post('/system-admin/seed', [SystemAdminController::class, 'seed'])->name('system-admin.seed');

@@ -1,19 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Casts;
 
 use App\ValueObjects\Polygon;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
+use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 
+/** @implements CastsAttributes<Polygon|null, Polygon|array<string, mixed>|null> */
 class PolygonCast implements CastsAttributes
 {
-    public function get($model, string $key, $value, array $attributes)
+    public function get(Model $model, string $key, mixed $value, array $attributes): ?Polygon
     {
         return $value ? Polygon::fromJson($value) : null;
     }
 
-    public function set($model, string $key, $value, array $attributes)
+    /**
+     * @return array<string, mixed>
+     */
+    public function set(Model $model, string $key, mixed $value, array $attributes)
     {
         if ($value === null) {
             return [

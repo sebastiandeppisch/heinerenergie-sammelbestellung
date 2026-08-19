@@ -14,6 +14,7 @@ VERSION="$1"
 
 # Store project root directory
 PROJECT_ROOT="$(pwd)"
+COMMIT="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
 TEMP_DIR="/tmp/heinerenergie-build-$VERSION"
 ZIP_NAME="shared-hosting-package-v${VERSION}.zip"
 
@@ -95,6 +96,16 @@ rm .prettierrc
 rm .styleci.yml
 rm -rf .vscode
 
+
+# Writing version file (git is not available on the target server)...
+echo "Writing version.json..."
+cat > "$TEMP_DIR/version.json" <<EOF
+{
+    "version": "$VERSION",
+    "commit": "$COMMIT",
+    "built_at": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+}
+EOF
 
 # Setting permissions...
 echo "Setting permissions..."

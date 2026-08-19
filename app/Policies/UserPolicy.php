@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\User;
@@ -12,13 +14,13 @@ class UserPolicy
     use GroupContextHelper;
     use HandlesAuthorization;
 
-    public function viewAny(User $user)
+    public function viewAny(User $user): bool
     {
         // anyone can see their colleagues
         return true;
     }
 
-    public function view(User $user, User $model)
+    public function view(User $user, User $model): bool
     {
         $groupsOfUser = $model->groups()->get();
         foreach ($groupsOfUser as $group) {
@@ -30,7 +32,7 @@ class UserPolicy
         return false;
     }
 
-    public function create(User $user)
+    public function create(User $user): bool
     {
         // TODO this should be handled via group context
         return $user->groups()
@@ -38,7 +40,7 @@ class UserPolicy
             ->exists();
     }
 
-    public function update(User $user, User $model)
+    public function update(User $user, User $model): bool
     {
         if (app(SessionService::class)->actsAsSystemAdmin()) {
             return true;
@@ -47,13 +49,13 @@ class UserPolicy
         return app(SessionService::class)->actsAsGroupAdmin();
     }
 
-    public function delete(User $user, User $model)
+    public function delete(User $user, User $model): bool
     {
         // TODO there is no defined behaviour for the foreign data advices & orders yet
         return false;
     }
 
-    public function canActAsSystemAdmin(User $user)
+    public function canActAsSystemAdmin(User $user): bool
     {
         return $user->is_admin;
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Context;
 
 use App\Models\Group;
@@ -32,7 +34,7 @@ class GroupContext implements GroupContextContract
 
     }
 
-    private function assertUserMatches(User $user)
+    private function assertUserMatches(User $user): void
     {
         if ($this->user === null || $user->id !== $this->user->id) {
             throw new InvalidArgumentException("User does not match, this context is supposed to be for the logged in user, expected user id: {$this->user?->id}, got user id: {$user->id}");
@@ -76,7 +78,7 @@ class GroupContext implements GroupContextContract
         return false;
     }
 
-    public function actAsSystemAdmin()
+    public function actAsSystemAdmin(): void
     {
         $this->isActingAsSystemAdmin = true;
         $this->currentGroup = null;

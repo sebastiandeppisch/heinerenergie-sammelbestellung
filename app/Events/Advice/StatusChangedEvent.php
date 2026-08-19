@@ -1,11 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Events\Advice;
 
 use App\Models\Advice;
 use App\Models\AdviceStatus;
 use App\Models\User;
-use Override;
 
 class StatusChangedEvent extends AdviceEvent
 {
@@ -37,7 +38,9 @@ class StatusChangedEvent extends AdviceEvent
         return "Status wurde von '{$this->fromStatus}' zu '{$this->toStatus}' geändert";
     }
 
-    #[Override]
+    /**
+     * @return array<string, string|null>
+     */
     public function __serialize(): array
     {
         return [
@@ -46,7 +49,9 @@ class StatusChangedEvent extends AdviceEvent
         ];
     }
 
-    #[Override]
+    /**
+     * @param  array<string, string|null>  $data
+     */
     public function __unserialize(array $data): void
     {
         $this->fromStatus = $data['fromStatus'];

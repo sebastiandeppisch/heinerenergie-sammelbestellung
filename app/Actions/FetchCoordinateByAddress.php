@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions;
 
 use App\ValueObjects\Address;
@@ -26,7 +28,7 @@ class FetchCoordinateByAddress
         Log::debug('Fetching coordinates for address', ['address' => $address]);
         $this->address = $address;
 
-        return Cache::rememberForever($this->key(), fn () => $this->handle());
+        return Cache::rememberForever($this->key(), fn (): ?Coordinate => $this->handle());
     }
 
     private function key(): string

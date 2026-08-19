@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\AdviceStatus;
@@ -13,22 +15,22 @@ class AdviceStatusPolicy
     use GroupContextHelper;
     use HandlesAuthorization;
 
-    public function create(User $user, Group $group)
+    public function create(User $user, Group $group): bool
     {
         return $this->isGroupAdmin($user, $group);
     }
 
-    public function update(User $user, AdviceStatus $advicestatus)
+    public function update(User $user, AdviceStatus $advicestatus): bool
     {
         return $this->isGroupAdmin($user, $advicestatus->ownerGroup);
     }
 
-    public function delete(User $user, AdviceStatus $advicestatus)
+    public function delete(User $user, AdviceStatus $advicestatus): bool
     {
         return $this->isGroupAdmin($user, $advicestatus->ownerGroup);
     }
 
-    private function isGroupAdmin(User $user, Group $group)
+    private function isGroupAdmin(User $user, Group $group): bool
     {
         if ($this->groupContext->isActingAsSystemAdmin($user)) {
             return true;
@@ -41,7 +43,7 @@ class AdviceStatusPolicy
         return false;
     }
 
-    public function view(User $user, AdviceStatus $status)
+    public function view(User $user, AdviceStatus $status): bool
     {
         $status->loadMissing('ownerGroup');
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,6 +11,7 @@ class AdviceStatusGroup extends Pivot
 {
     public $casts = [
         'visible' => 'boolean',
+        'visible_in_group' => 'boolean',
     ];
 
     /**

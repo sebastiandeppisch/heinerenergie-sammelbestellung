@@ -10,7 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::factory()->create();
     $this->group = Group::factory()->create(['name' => 'Test Initiative']);
     $this->group->users()->attach($this->user, ['is_admin' => true]);
@@ -18,7 +18,7 @@ beforeEach(function () {
     $this->actingAs($this->user);
 });
 
-test('the create form preview map renders without javascript errors', function () {
+test('the create form preview map renders without javascript errors', function (): void {
     $category = MapPointCategory::factory()->withoutImage()->create(['name' => 'Ladesäulen']);
     MapPoint::factory()->create(['published' => true, 'category_id' => $category->id]);
 
@@ -29,7 +29,7 @@ test('the create form preview map renders without javascript errors', function (
         ->assertNoJavaScriptErrors();
 });
 
-test('the edit form preview map renders without javascript errors', function () {
+test('the edit form preview map renders without javascript errors', function (): void {
     $category = MapPointCategory::factory()->withoutImage()->create(['name' => 'Ladesäulen']);
     MapPoint::factory()->create(['published' => true, 'category_id' => $category->id]);
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Events\MapPointCreatedByFormSubmission;
@@ -69,6 +71,7 @@ class FormDefinitionToMapPoint extends Model
             ]);
 
             // Associate with the form submission as pointable
+            // @phpstan-ignore argument.type (Pointable<FormSubmission> satisfies Pointable<Model> at runtime; PHPStan invariance limitation)
             $mapPoint->pointable()->associate($submission);
             $mapPoint->save();
 

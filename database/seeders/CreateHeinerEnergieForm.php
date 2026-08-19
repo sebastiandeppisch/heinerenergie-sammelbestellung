@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Enums\AdviceType;
@@ -16,7 +18,7 @@ class CreateHeinerEnergieForm extends Seeder
     public function run(): void
     {
 
-        DB::transaction(function () {
+        DB::transaction(function (): void {
 
             $group = Group::firstOrFail();
             $formDefinition = new FormDefinition;

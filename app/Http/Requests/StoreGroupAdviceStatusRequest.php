@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Enums\AdviceStatusResult;
@@ -26,12 +28,12 @@ class StoreGroupAdviceStatusRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            'name' => 'required|string',
+            'name' => ['required', 'string'],
             'result' => ['required', new Enum(AdviceStatusResult::class)],
-            'visible' => 'boolean',
+            'visible' => ['boolean'],
         ];
     }
 }

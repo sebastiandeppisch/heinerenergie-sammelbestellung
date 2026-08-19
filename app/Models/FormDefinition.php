@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Enums\FormType;
 use App\Models\Traits\HasUuid;
+use Database\Factories\FormDefinitionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,7 +17,9 @@ use Override;
 
 class FormDefinition extends Model
 {
+    /** @use HasFactory<FormDefinitionFactory> */
     use HasFactory;
+
     use HasUuid;
 
     protected $fillable = [
@@ -83,19 +88,25 @@ class FormDefinition extends Model
         });
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getValidationRules(): array
     {
         $this->loadMissing(['fields', 'fields.options']);
 
         return $this->fields->reduce(
-            fn (array $carry, FormField $field) => array_merge($carry, $field->getValidationRules()),
+            fn (array $carry, FormField $field): array => array_merge($carry, $field->getValidationRules()),
             []
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getValidationAttributes(): array
     {
-        return $this->fields->mapWithKeys(fn (FormField $field) => [$field->uuid => $field->label])->toArray();
+        return $this->fields->mapWithKeys(fn (FormField $field): array => [$field->uuid => $field->label])->toArray();
     }
 
     public function createSubmission(): FormSubmission

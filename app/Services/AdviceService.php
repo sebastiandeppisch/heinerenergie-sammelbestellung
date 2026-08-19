@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Context\GroupContextContract;
@@ -23,7 +25,7 @@ class AdviceService
     ) {}
 
     /**
-     * @return Collection<DataProtectedAdviceData>
+     * @return Collection<int, DataProtectedAdviceData>
      */
     public function getAdvicesListForUser(User $user): Collection
     {
@@ -39,14 +41,14 @@ class AdviceService
 
         $query = Advice::query()
             ->with('status', 'group', 'group.parent', 'advisor', 'shares')
-            ->where(function ($query) use ($user, $permissions) {
+            ->where(function ($query) use ($user, $permissions): void {
                 $query
                     // User is the advisor
                     ->where('advisor_id', $user->id)
                     // OR user is in shares
                     ->orWhereIn('id', $permissions['sharedAdviceIds'])
                     // OR advice has no advisor AND user is member/admin of group
-                    ->orWhere(function ($subQuery) use ($permissions) {
+                    ->orWhere(function ($subQuery) use ($permissions): void {
                         $subQuery->whereNull('advisor_id')
                             ->whereIn('group_id', $permissions['memberGroupIds']);
                     })
@@ -64,9 +66,12 @@ class AdviceService
 
         return $query
             ->get()
-            ->map(fn ($advice) => DataProtectedAdviceData::fromModel($advice, $user, $isGroupAdmin));
+            ->map(fn (Advice $advice): DataProtectedAdviceData => DataProtectedAdviceData::fromModel($advice, $user, $isGroupAdmin));
     }
 
+    /**
+     * @return array<string, Collection<int, mixed>>
+     */
     private function getUserAdvicePermissions(User $user): array
     {
         $allGroups = Group::with('users')->get();
@@ -154,17 +159,17 @@ class AdviceService
     }
 
     /**
-     * @param  Collection<User>  $newAdvisors
+     * @param  Collection<int, User>|Collection<int, int>  $newAdvisors
      */
     public function syncShares(Advice $advice, Collection $newAdvisors, ?User $user): void
     {
 
-        $newAdvisors = $newAdvisors->map(function (mixed $user): User {
-            if (! $user instanceof User) {
-                return User::findOrFail($user);
+        $newAdvisors = $newAdvisors->map(function (User|int $user): User {
+            if ($user instanceof User) {
+                return $user;
             }
 
-            return $user;
+            return User::findOrFail($user);
         });
 
         // Get current advisors before sync

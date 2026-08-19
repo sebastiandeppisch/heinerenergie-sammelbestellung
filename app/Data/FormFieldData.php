@@ -1,11 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Data;
 
 use App\Enums\FieldType;
 use App\Models\ChecklistEntryField;
+use App\Models\ChecklistEntryFieldOption;
 use App\Models\FormField;
+use App\Models\FormFieldOption;
 use App\Models\SubmissionField;
+use App\Models\SubmissionFieldOption;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Data;
@@ -32,6 +37,7 @@ class FormFieldData extends Data
         public ?int $max_length = null,
         public ?float $min_value = null,
         public ?float $max_value = null,
+        /** @var array<int, string>|null */
         public ?array $accepted_file_types = null,
         public int $max_images = 1,
     ) {}
@@ -55,7 +61,7 @@ class FormFieldData extends Data
             max_value: $model->max_value,
             accepted_file_types: $model->accepted_file_types,
             max_images: $model->max_images ?? 1,
-            options: $model->options->map(fn ($option) => FormFieldOptionData::fromModel($option)),
+            options: $model->options->map(fn (FormFieldOption $option): FormFieldOptionData => FormFieldOptionData::fromModel($option)),
         );
     }
 
@@ -68,7 +74,7 @@ class FormFieldData extends Data
             type: $model->type,
             label: $model->label,
             required: false,
-            options: $model->options->map(fn ($option) => FormFieldOptionData::fromSubmissionFieldOption($option)),
+            options: $model->options->map(fn (SubmissionFieldOption $option): FormFieldOptionData => FormFieldOptionData::fromSubmissionFieldOption($option)),
             placeholder: null
         );
     }
@@ -84,7 +90,7 @@ class FormFieldData extends Data
             required: $model->required,
             help_text: $model->help_text,
             sort_order: $model->sort_order,
-            options: $model->options->map(fn ($option) => FormFieldOptionData::fromChecklistEntryFieldOption($option)),
+            options: $model->options->map(fn (ChecklistEntryFieldOption $option): FormFieldOptionData => FormFieldOptionData::fromChecklistEntryFieldOption($option)),
             placeholder: null,
         );
     }

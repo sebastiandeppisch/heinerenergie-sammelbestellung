@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('form_definition_to_advice', function (Blueprint $table) {
+        Schema::table('form_definition_to_advice', function (Blueprint $table): void {
             $table->string('advice_type_home_option_value')->default(AdviceType::Home->value);
             $table->string('advice_type_virtual_option_value')->default(AdviceType::Virtual->value);
         });
@@ -23,7 +23,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('form_definition_to_advice', function (Blueprint $table) {
+        Schema::table('form_definition_to_advice', function (Blueprint $table): void {
             $table->dropColumn(['advice_type_home_option_value', 'advice_type_virtual_option_value']);
         });
     }

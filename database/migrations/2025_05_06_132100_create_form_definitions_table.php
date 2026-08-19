@@ -18,7 +18,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('form_definitions', function (Blueprint $table) {
+        Schema::create('form_definitions', function (Blueprint $table): void {
             $table->id();
             $table->uuid('uuid')->unique();
 
@@ -29,7 +29,7 @@ return new class extends Migration
             $table->foreignIdFor(Group::class)->constrained();
         });
 
-        Schema::create('form_fields', function (Blueprint $table) {
+        Schema::create('form_fields', function (Blueprint $table): void {
             $table->id();
             $table->uuid('uuid')->unique();
 
@@ -49,7 +49,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('form_field_options', function (Blueprint $table) {
+        Schema::create('form_field_options', function (Blueprint $table): void {
             $table->id();
             $table->uuid('uuid')->unique();
 
@@ -63,7 +63,7 @@ return new class extends Migration
 
         });
 
-        Schema::create('form_submissions', function (Blueprint $table) {
+        Schema::create('form_submissions', function (Blueprint $table): void {
             $table->id();
             $table->uuid('uuid')->unique();
             $table->timestamps();
@@ -78,7 +78,7 @@ return new class extends Migration
             $table->foreignIdFor(Group::class);
         });
 
-        Schema::create('submission_fields', function (Blueprint $table) {
+        Schema::create('submission_fields', function (Blueprint $table): void {
             $table->id();
             $table->uuid('uuid')->unique();
 
@@ -93,7 +93,7 @@ return new class extends Migration
             $table->integer('sort_order');
         });
 
-        Schema::create('submission_field_options', function (Blueprint $table) {
+        Schema::create('submission_field_options', function (Blueprint $table): void {
             $table->id();
             $table->uuid('uuid')->unique();
 

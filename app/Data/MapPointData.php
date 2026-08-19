@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Data;
 
 use App\Models\Advice;
@@ -25,7 +27,7 @@ class MapPointData extends Data
         public ?string $location = null,
     ) {}
 
-    public static function fromModel(MapPoint $model)
+    public static function fromModel(MapPoint $model): self
     {
         return new self(
             id: $model->uuid,
@@ -40,7 +42,7 @@ class MapPointData extends Data
         );
     }
 
-    private static function formatType(?string $type)
+    private static function formatType(?string $type): string
     {
         // TODO load from model itself
         if ($type === FormSubmission::class) {

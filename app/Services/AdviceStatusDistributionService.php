@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Data\StatusDistributionPointData;
@@ -34,7 +36,7 @@ class AdviceStatusDistributionService
 
             $cacheKey = 'kpi.status.'.($group->id ?? 'all').'.'.$cutoffDate->format('Y-m-d');
 
-            return Cache::rememberForever($cacheKey, fn () => $this->computeForDate($group, $cutoffDate));
+            return Cache::rememberForever($cacheKey, fn (): StatusDistributionPointData => $this->computeForDate($group, $cutoffDate));
         }, $cutoffDates));
     }
 
@@ -87,7 +89,7 @@ class AdviceStatusDistributionService
             ->groupBy('advice_id');
 
         $counts = array_fill_keys(
-            array_map(fn ($r) => $r->value, AdviceStatusResult::cases()),
+            array_map(fn (AdviceStatusResult $r) => $r->value, AdviceStatusResult::cases()),
             0
         );
 
@@ -106,6 +108,8 @@ class AdviceStatusDistributionService
     /**
      * Determines the AdviceStatusResult an advice was in at the given cutoff date
      * by walking backwards through events that occurred after the cutoff.
+     *
+     * @param  Collection<int, AdviceEvent>  $events
      */
     public function getResultAtDate(Advice $advice, Collection $events, Carbon $cutoffDate): AdviceStatusResult
     {
@@ -143,7 +147,10 @@ class AdviceStatusDistributionService
         return $this->statusNameMap[$statusName] ?? AdviceStatusResult::New;
     }
 
-    /** @return array<string, int> */
+    /**
+     * @param  array<int, int>  $counts
+     * @return array<string, int>
+     */
     private function mapCountsToLabels(array $counts): array
     {
         return [

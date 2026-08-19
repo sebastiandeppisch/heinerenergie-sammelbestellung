@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Traits\HasUuid;
+use Database\Factories\ChecklistEntryFieldOptionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +13,9 @@ use Override;
 
 class ChecklistEntryFieldOption extends Model
 {
+    /** @use HasFactory<ChecklistEntryFieldOptionFactory> */
     use HasFactory;
+
     use HasUuid;
 
     protected $fillable = [

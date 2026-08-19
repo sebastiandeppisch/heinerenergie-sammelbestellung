@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Data\UserData;
@@ -12,11 +14,13 @@ use App\Models\Group;
 use App\Models\User;
 use App\Notifications\PasswordChangedByAdmin;
 use App\Services\SessionService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class UserController extends Controller
 {
@@ -29,7 +33,7 @@ class UserController extends Controller
         return Auth::user();
     }
 
-    public function index(Request $request)
+    public function index(Request $request): Response
     {
         $canPromoteUsersToSystemAdmin = $this->sessionService->actsAsSystemAdmin();
         $showInactive = $request->boolean('show_inactive');
@@ -42,7 +46,7 @@ class UserController extends Controller
         $users = $query
             ->get()
             ->filter(fn (User $user) => Auth::user()->can('view', $user))
-            ->map(fn (User $user) => UserData::fromModel($user, false, true))
+            ->map(fn (User $user): UserData => UserData::fromModel($user, false, true))
             ->values()
             ->all();
 
@@ -53,7 +57,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function store(StoreUserRequest $request)
+    public function store(StoreUserRequest $request): RedirectResponse
     {
         $user = new User($request->validated());
         $user->password = '';
@@ -72,7 +76,7 @@ class UserController extends Controller
         return redirect()->route('users.index')->with('success', 'Berater*in wurde erfolgreich erstellt');
     }
 
-    public function update(UpdateUserRequest $request, User $user)
+    public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
         $user->fill($request->validated());
 
@@ -85,7 +89,7 @@ class UserController extends Controller
         return redirect()->back()->with('success', 'Berater*in wurde erfolgreich aktualisiert');
     }
 
-    public function actAsGroup(Request $request, Group $group)
+    public function actAsGroup(Request $request, Group $group): RedirectResponse
     {
         $user = $this->user();
 
@@ -121,7 +125,7 @@ class UserController extends Controller
         return redirect()->back()->with('success', 'Du agierst jetzt als Gruppe '.$group->name);
     }
 
-    public function actAsSystemAdmin()
+    public function actAsSystemAdmin(): RedirectResponse
     {
         $user = $this->user();
 
@@ -144,7 +148,7 @@ class UserController extends Controller
         return redirect()->back()->with('success', 'Du agierst jetzt als Systemadministrator');
     }
 
-    public function changePassword(ChangePasswordRequest $request, User $user)
+    public function changePassword(ChangePasswordRequest $request, User $user): RedirectResponse
     {
         $user->password = $request->input('password');
         $user->save();

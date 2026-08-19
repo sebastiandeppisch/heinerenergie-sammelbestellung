@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Nextcloud;
 
 use App\Contracts\NextcloudUserClientContract;
@@ -95,7 +97,7 @@ class NextcloudUserClient implements NextcloudUserClientContract
 
         $baseUrl = $this->baseUrl;
 
-        $responses = Http::pool(fn (Pool $pool) => array_map(
+        $responses = Http::pool(fn (Pool $pool): array => array_map(
             fn (string $userId) => $this->buildRequest($pool)
                 ->get("{$baseUrl}/ocs/v1.php/cloud/users/".rawurlencode($userId)),
             $userIds,

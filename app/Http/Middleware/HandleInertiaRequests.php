@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
 use App\Data\GroupBaseData;
@@ -8,6 +10,7 @@ use App\Data\UserData;
 use App\Models\Group;
 use App\Services\CurrentGroupService;
 use App\Services\SessionService;
+use App\Services\VersionService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Override;
@@ -56,14 +59,15 @@ class HandleInertiaRequests extends Middleware
         }
 
         return array_merge(parent::share($request), [
-            'auth.user' => fn () => $this->getUserData($request),
-            'auth.availableGroups' => fn () => $request->user()?->groups->map(fn (Group $group) => GroupData::fromModel($group)),
-            'auth.currentGroup' => fn () => app(CurrentGroupService::class)->getGroup() ? GroupBaseData::fromModel(app(CurrentGroupService::class)->getGroup()) : null,
+            'auth.user' => fn (): ?UserData => $this->getUserData($request),
+            'auth.availableGroups' => fn () => $request->user()?->groups->map(fn (Group $group): GroupData => GroupData::fromModel($group)),
+            'auth.currentGroup' => fn (): ?GroupBaseData => app(CurrentGroupService::class)->getGroup() ? GroupBaseData::fromModel(app(CurrentGroupService::class)->getGroup()) : null,
             'theme' => $this->getThemeProps(...),
             'flashMessages' => $flashMessages,
             'defaultLogo' => app_logo(),
             'appName' => app_name(...),
             'userRole' => $this->getUserRole(...),
+            'version' => fn (): string => app(VersionService::class)->version(),
         ]);
     }
 

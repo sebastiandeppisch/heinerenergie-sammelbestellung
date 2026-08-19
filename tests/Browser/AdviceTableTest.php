@@ -10,7 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::factory()->admin()->create();
     $this->group = Group::factory()->create(['name' => 'Test Initiative']);
     $this->group->users()->attach($this->user, ['is_admin' => true]);
@@ -18,20 +18,20 @@ beforeEach(function () {
     $this->actingAs($this->user);
 });
 
-test('advices table renders without errors', function () {
+test('advices table renders without errors', function (): void {
     visit(route('advices'))
         ->assertNoSmoke()
         ->assertNoJavaScriptErrors();
 });
 
-test('advices table shows create button', function () {
+test('advices table shows create button', function (): void {
     visit(route('advices'))
         ->assertNoSmoke()
         ->assertVisible('@new-advice-button')
         ->assertNoJavaScriptErrors();
 });
 
-test('advices table search filters rows', function () {
+test('advices table search filters rows', function (): void {
     Advice::factory()->create([
         'group_id' => $this->group->id,
         'advisor_id' => $this->user->id,
@@ -55,7 +55,7 @@ test('advices table search filters rows', function () {
         ->assertNoJavaScriptErrors();
 });
 
-test('advices table inline edit buttons are visible', function () {
+test('advices table inline edit buttons are visible', function (): void {
     $status = AdviceStatus::create([
         'name' => 'Test Status',
         'result' => AdviceStatusResult::New,

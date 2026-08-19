@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Casts;
 
 use App\ValueObjects\Coordinate as ValueObjectsCoordinate;
@@ -26,8 +28,8 @@ class Coordinate implements CastsAttributes
         }
 
         return new ValueObjectsCoordinate(
-            lat: $attributes['lat'],
-            lng: $attributes['lng']
+            lat: (float) $attributes['lat'],
+            lng: (float) $attributes['lng']
         );
     }
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Listeners;
 
 use App\Events\AdviceCreated;
@@ -7,7 +9,7 @@ use App\Events\AdviceUpdated;
 
 class EmptyCoordinates
 {
-    public function handle(AdviceUpdated|AdviceCreated $event)
+    public function handle(AdviceUpdated|AdviceCreated $event): void
     {
         $advice = $event->advice;
         if ($advice->wasChanged(['street', 'city', 'zip', 'street_number'])) {

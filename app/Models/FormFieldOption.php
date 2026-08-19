@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Traits\HasUuid;
+use Database\Factories\FormFieldOptionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +14,9 @@ use Str;
 
 class FormFieldOption extends Model
 {
+    /** @use HasFactory<FormFieldOptionFactory> */
     use HasFactory;
+
     use HasUuid;
 
     protected $fillable = [
@@ -84,7 +89,7 @@ class FormFieldOption extends Model
         }
 
         if ($this->value === null) {
-            $this->value = Str::uuid();
+            $this->value = (string) Str::uuid();
         }
 
         return parent::save($options);

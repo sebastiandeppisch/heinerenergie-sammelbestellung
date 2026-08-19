@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-test('public map route is accessible without authentication', function () {
+test('public map route is accessible without authentication', function (): void {
     $category = MapPointCategory::factory()->create();
     $mapEmbed = MapEmbed::factory()->create();
     $mapEmbed->mapPointCategories()->sync([$category->id]);
@@ -18,7 +18,7 @@ test('public map route is accessible without authentication', function () {
     $response->assertInertia(fn ($page) => $page->component('MapPoints/PublicMap'));
 });
 
-test('public map only shows published points from the embed categories', function () {
+test('public map only shows published points from the embed categories', function (): void {
     $includedCategory = MapPointCategory::factory()->create();
     $otherCategory = MapPointCategory::factory()->create();
 
@@ -57,13 +57,13 @@ test('public map only shows published points from the embed categories', functio
     );
 });
 
-test('public map route returns 404 for unknown embed', function () {
+test('public map route returns 404 for unknown embed', function (): void {
     $response = $this->get('/map/does-not-exist');
 
     $response->assertStatus(404);
 });
 
-test('public map response contains the embed center and zoom', function () {
+test('public map response contains the embed center and zoom', function (): void {
     $category = MapPointCategory::factory()->create();
     $mapEmbed = MapEmbed::factory()->create([
         'lat' => 52.52,
@@ -83,7 +83,7 @@ test('public map response contains the embed center and zoom', function () {
     );
 });
 
-test('public map response reflects whether the table view is enabled', function () {
+test('public map response reflects whether the table view is enabled', function (): void {
     $category = MapPointCategory::factory()->create();
     $mapEmbed = MapEmbed::factory()->create(['show_table' => false]);
     $mapEmbed->mapPointCategories()->sync([$category->id]);

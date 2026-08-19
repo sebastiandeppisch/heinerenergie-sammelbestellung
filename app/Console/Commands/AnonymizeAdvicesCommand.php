@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Models\Advice;
@@ -23,12 +25,10 @@ class AnonymizeAdvicesCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
-    public function handle()
+    public function handle(): int
     {
-        Advice::all()->each(function ($advice) {
+        Advice::all()->each(function ($advice): void {
             $advice->first_name = fake()->firstName();
             $advice->last_name = fake()->lastName();
             $advice->email = fake()->safeEmail();

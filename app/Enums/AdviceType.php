@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Enums;
 
 enum AdviceType: int
@@ -8,10 +10,13 @@ enum AdviceType: int
     case Virtual = 1;
     case DirectOrder = 2;
 
+    /**
+     * @return array<int, array{id: int, name: string}>
+     */
     public static function getSelectableOptions(?self $currentType = null): array
     {
         return collect(self::cases())
-            ->filter(function (self $type) use ($currentType) {
+            ->filter(function (self $type) use ($currentType): bool {
 
                 if ($type !== self::DirectOrder) {
                     return true;
@@ -19,7 +24,7 @@ enum AdviceType: int
 
                 return $currentType === self::DirectOrder;
             })
-            ->map(fn (self $type, int $key) => [
+            ->map(fn (self $type, int $key): array => [
                 'id' => $type->value,
                 'name' => $type->name,
             ])

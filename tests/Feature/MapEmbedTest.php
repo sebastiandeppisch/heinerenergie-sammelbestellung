@@ -9,7 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->admin = User::factory()->create(['is_admin' => true]);
     $this->regularUser = User::factory()->create(['is_admin' => false]);
 
@@ -22,7 +22,7 @@ beforeEach(function () {
     Config::set('app.group_context', 'global');
 });
 
-test('admin can view map embeds index', function () {
+test('admin can view map embeds index', function (): void {
     MapEmbed::factory()->count(2)->create();
 
     $response = $this->actingAs($this->admin)
@@ -35,14 +35,14 @@ test('admin can view map embeds index', function () {
     );
 });
 
-test('regular user cannot access map embeds', function () {
+test('regular user cannot access map embeds', function (): void {
     $response = $this->actingAs($this->regularUser)
         ->get(route('map-embeds.index'));
 
     $response->assertStatus(403);
 });
 
-test('admin can create a map embed with categories', function () {
+test('admin can create a map embed with categories', function (): void {
     $categories = MapPointCategory::factory()->count(2)->create();
 
     $response = $this->actingAs($this->admin)
@@ -62,7 +62,7 @@ test('admin can create a map embed with categories', function () {
     expect($mapEmbed->mapPointCategories)->toHaveCount(2);
 });
 
-test('map embed requires at least one category', function () {
+test('map embed requires at least one category', function (): void {
     $response = $this->actingAs($this->admin)
         ->post(route('map-embeds.store'), [
             'name' => 'Ohne Kategorien',
@@ -72,7 +72,7 @@ test('map embed requires at least one category', function () {
     $response->assertSessionHasErrors(['category_ids']);
 });
 
-test('map embed rejects unknown category ids', function () {
+test('map embed rejects unknown category ids', function (): void {
     $response = $this->actingAs($this->admin)
         ->post(route('map-embeds.store'), [
             'name' => 'Ungueltig',
@@ -82,7 +82,7 @@ test('map embed rejects unknown category ids', function () {
     $response->assertSessionHasErrors(['category_ids.0']);
 });
 
-test('map embed rejects zoom levels outside the allowed range', function () {
+test('map embed rejects zoom levels outside the allowed range', function (): void {
     $category = MapPointCategory::factory()->create();
 
     $response = $this->actingAs($this->admin)
@@ -96,7 +96,7 @@ test('map embed rejects zoom levels outside the allowed range', function () {
     $response->assertSessionHasErrors(['zoom']);
 });
 
-test('map embed rejects invalid coordinates', function () {
+test('map embed rejects invalid coordinates', function (): void {
     $category = MapPointCategory::factory()->create();
 
     $response = $this->actingAs($this->admin)
@@ -110,7 +110,7 @@ test('map embed rejects invalid coordinates', function () {
     $response->assertSessionHasErrors(['coordinate']);
 });
 
-test('admin can set the center and zoom of a map embed', function () {
+test('admin can set the center and zoom of a map embed', function (): void {
     $category = MapPointCategory::factory()->create();
 
     $response = $this->actingAs($this->admin)
@@ -129,7 +129,7 @@ test('admin can set the center and zoom of a map embed', function () {
     expect($mapEmbed->zoom)->toBe(12);
 });
 
-test('admin can change categories of a map embed without changing its link', function () {
+test('admin can change categories of a map embed without changing its link', function (): void {
     $categoryA = MapPointCategory::factory()->create();
     $categoryB = MapPointCategory::factory()->create();
 
@@ -155,7 +155,7 @@ test('admin can change categories of a map embed without changing its link', fun
         ->toContain($categoryA->id, $categoryB->id);
 });
 
-test('group admin can create a map embed for their group', function () {
+test('group admin can create a map embed for their group', function (): void {
     Config::set('app.group_context', 'group');
 
     $groupAdmin = User::factory()->create(['is_admin' => false]);
@@ -177,7 +177,7 @@ test('group admin can create a map embed for their group', function () {
     $this->assertDatabaseHas('map_embeds', ['name' => 'Gruppen-Einbettung']);
 });
 
-test('group member without admin rights cannot create a map embed', function () {
+test('group member without admin rights cannot create a map embed', function (): void {
     Config::set('app.group_context', 'group');
 
     $groupMember = User::factory()->create(['is_admin' => false]);
@@ -195,7 +195,7 @@ test('group member without admin rights cannot create a map embed', function () 
     $response->assertStatus(403);
 });
 
-test('admin can delete a map embed', function () {
+test('admin can delete a map embed', function (): void {
     $mapEmbed = MapEmbed::factory()->create();
 
     $response = $this->actingAs($this->admin)

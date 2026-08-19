@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Advice;
@@ -13,7 +15,7 @@ class GroupService
     /**
      * Find a group whose consulting area contains the specified coordinates
      *
-     * @return Collection<Group>
+     * @return Collection<int, Group>
      */
     public function findGroupsContainingCoordinates(Coordinate $coordinate): ?Collection
     {
@@ -41,7 +43,7 @@ class GroupService
             return null;
         }
 
-        $sortedgroups = $mainGroups->sortBy(function ($group) use ($coordinate) {
+        $sortedgroups = $mainGroups->sortBy(function ($group) use ($coordinate): float {
             $groupCenter = $group->consulting_area?->getCenter();
 
             if (! $groupCenter) {
@@ -74,6 +76,9 @@ class GroupService
     /**
      * Get all main groups
      */
+    /**
+     * @return Collection<int, Group>
+     */
     public function getAllMainGroups(): Collection
     {
         return Group::whereNull('parent_id')->get();
@@ -81,6 +86,9 @@ class GroupService
 
     /**
      * Get all subgroups of a main group
+     */
+    /**
+     * @return Collection<int, Group>
      */
     public function getSubgroups(Group $mainGroup): Collection
     {
@@ -108,6 +116,8 @@ class GroupService
 
     /**
      * Find all groups whose consulting areas overlap
+     *
+     * @return array{}
      */
     public function findOverlappingGroups(): array
     {

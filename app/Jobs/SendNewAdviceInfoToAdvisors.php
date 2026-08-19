@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Jobs;
 
 use App\Models\Advice;
@@ -16,18 +18,21 @@ use Illuminate\Support\Facades\Log;
 
 class SendNewAdviceInfoToAdvisors implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     private AdviceService $adviceService;
 
-    public $tries = 2;
+    public int $tries = 2;
 
     public function __construct(public Advice $advice)
     {
         $this->adviceService = app(AdviceService::class);
     }
 
-    public function handle()
+    public function handle(): void
     {
         Log::info('Sending new advice info to advisors', [
             'advice_id' => $this->advice->id,
@@ -66,7 +71,7 @@ class SendNewAdviceInfoToAdvisors implements ShouldQueue
     }
 
     /**
-     * @return Collection<User>
+     * @return Collection<int, User>
      */
     private function advisors(): Collection
     {

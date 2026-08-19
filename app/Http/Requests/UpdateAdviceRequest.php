@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Enums\AdviceType;
@@ -26,21 +28,21 @@ class UpdateAdviceRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            'first_name' => 'string|max:100',
-            'last_name' => 'string|max:100',
-            'email' => 'email|max:100',
-            'phone' => 'nullable|string|max:100',
-            'street' => 'string|max:100',
-            'street_number' => 'string|max:100',
-            'zip' => 'numeric|digits:5',
-            'city' => 'string|max:100',
-            'advisor_id' => 'nullable|exists:users,id',
-            'commentary' => 'nullable|string|max:65535',
+            'first_name' => ['string', 'max:100'],
+            'last_name' => ['string', 'max:100'],
+            'email' => ['email', 'max:100'],
+            'phone' => ['nullable', 'string', 'max:100'],
+            'street' => ['string', 'max:100'],
+            'street_number' => ['string', 'max:100'],
+            'zip' => ['numeric', 'digits:5'],
+            'city' => ['string', 'max:100'],
+            'advisor_id' => ['nullable', 'exists:users,id'],
+            'commentary' => ['nullable', 'string', 'max:65535'],
             'type' => [new Enum(AdviceType::class)],
-            'advice_status_id' => 'nullable|exists:advice_status,id',
+            'advice_status_id' => ['nullable', 'exists:advice_status,id'],
         ];
     }
 

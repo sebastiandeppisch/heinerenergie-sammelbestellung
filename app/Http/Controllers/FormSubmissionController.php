@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Context\GroupContextContract;
@@ -10,13 +12,15 @@ use App\Enums\FormType;
 use App\Http\Requests\IndexFormSubmissionRequest;
 use App\Models\FormDefinition;
 use App\Models\FormSubmission;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class FormSubmissionController extends Controller
 {
-    public function index(IndexFormSubmissionRequest $request, GroupContextContract $groupContext)
+    public function index(IndexFormSubmissionRequest $request, GroupContextContract $groupContext): Response
     {
         $formsubmissions = FormSubmission::query()
             ->with(['submissionFields', 'submissionFields.formField', 'submissionFields.formField.options', 'submissionFields.options']);
@@ -30,10 +34,10 @@ class FormSubmissionController extends Controller
         }
 
         $formsubmissions = $formsubmissions->orderBy('submitted_at', $request->sorting())
-            ->whereHas('formDefinition', function ($query) {
+            ->whereHas('formDefinition', function ($query): void {
                 $query->where('type', FormType::Form);
             })
-            ->where(function ($query) use ($request) {
+            ->where(function ($query) use ($request): void {
                 if ($request->dateFrom()) {
                     $query->where('submitted_at', '>=', $request->dateFrom());
                 }
@@ -41,7 +45,7 @@ class FormSubmissionController extends Controller
                     $query->where('submitted_at', '<=', $request->dateTo());
                 }
             })
-            ->when($request->selectedFormDefinitions(), function ($query) use ($request) {
+            ->when($request->selectedFormDefinitions(), function ($query) use ($request): void {
                 $query->whereIn('form_definition_id', $request->selectedFormDefinitions());
             })->paginate(10);
 
@@ -52,7 +56,7 @@ class FormSubmissionController extends Controller
             $formDefinitions = $formDefinitions->where('group_id', $groupContext->getCurrentGroup()->id);
         }
 
-        $formDefinitions = $formDefinitions->get()->map(fn (FormDefinition $formDefinition) => FormDefinitionData::fromModel($formDefinition));
+        $formDefinitions = $formDefinitions->get()->map(fn (FormDefinition $formDefinition): FormDefinitionData => FormDefinitionData::fromModel($formDefinition));
 
         $selectedFormDefinitions = FormDefinition::whereIn('id', $request->selectedFormDefinitions())->pluck('uuid')->toArray();
 
@@ -69,9 +73,13 @@ class FormSubmissionController extends Controller
         ]);
     }
 
+    /**
+     * @param  array<int, FormSubmission>  $items
+     * @return Collection<int, FormSubmissionData>
+     */
     private function addPagedIndex(array $items, int $page): Collection
     {
-        return collect($items)->mapWithKeys(function ($item, $key) use ($page) {
+        return collect($items)->mapWithKeys(function ($item, $key) use ($page): array {
             $index = ($key + ($page - 1) * 10);
 
             $item = FormSubmissionData::fromModel($item);
@@ -80,7 +88,7 @@ class FormSubmissionController extends Controller
         });
     }
 
-    public function markSeen(Request $request, FormSubmission $formSubmission)
+    public function markSeen(Request $request, FormSubmission $formSubmission): RedirectResponse
     {
         $formSubmission->seen = true;
         $formSubmission->save();
@@ -88,7 +96,7 @@ class FormSubmissionController extends Controller
         return back()->with('success', 'Der Formulareintrag wurde als gelesen markiert');
     }
 
-    public function markUnseen(Request $request, FormSubmission $formSubmission)
+    public function markUnseen(Request $request, FormSubmission $formSubmission): RedirectResponse
     {
         $formSubmission->seen = false;
         $formSubmission->save();

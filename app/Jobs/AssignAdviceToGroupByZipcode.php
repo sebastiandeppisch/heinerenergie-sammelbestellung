@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Jobs;
 
 use App\Actions\FetchCoordinateByFreeText;
@@ -18,17 +20,22 @@ use Throwable;
 
 class AssignAdviceToGroupByZipcode implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     /**
      * Maximum number of attempts
      */
-    public $tries = 3;
+    public int $tries = 3;
 
     /**
      * Backoff between attempts in seconds (exponential: 10s, 20s, 40s)
+     *
+     * @var array<int, int>
      */
-    public $backoff = [10, 20, 40];
+    public array $backoff = [10, 20, 40];
 
     /**
      * Create a new job instance.
@@ -72,7 +79,7 @@ class AssignAdviceToGroupByZipcode implements ShouldQueue
     /**
      * Notify the administrators of a group
      */
-    private function notifyGroupAdmin(Group $group, Advice $advice)
+    private function notifyGroupAdmin(Group $group, Advice $advice): void
     {
         $group->load('admins');
         foreach ($group->admins as $admin) {
@@ -84,7 +91,7 @@ class AssignAdviceToGroupByZipcode implements ShouldQueue
     /**
      * Notify the system administrators
      */
-    private function notifySystemAdmins(string $message)
+    private function notifySystemAdmins(string $message): void
     {
         // Get system admins (Users with is_admin = true)
         $systemAdmins = User::where('is_admin', true)->get();
@@ -101,7 +108,7 @@ class AssignAdviceToGroupByZipcode implements ShouldQueue
     /**
      * Executed on final failure
      */
-    public function failed(Throwable $exception)
+    public function failed(Throwable $exception): void
     {
         // Notify system admins on final failure
         $systemAdmins = User::where('is_admin', true)->get();

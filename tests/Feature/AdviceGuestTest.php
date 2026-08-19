@@ -8,16 +8,16 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-test('advice can be saved', function () {
+test('advice can be saved', function (): void {
     Mail::fake();
     $data = [
         'help_type_place' => fake()->boolean(),
         'help_type_technical' => fake()->boolean(),
         'help_type_bureaucracy' => fake()->boolean(),
-        'helpType_other' => fake()->boolean(),
+        'help_type_other' => fake()->boolean(),
         'house_type' => fake()->numberBetween(0, 2),
-        'first_name' => fake()->first_name(),
-        'last_name' => fake()->last_name(),
+        'first_name' => fake()->firstName(),
+        'last_name' => fake()->lastName(),
         'email' => fake()->email(),
         'phone' => fake()->phoneNumber(),
         'zip' => (int) fake()->postcode(),
@@ -44,11 +44,11 @@ test('advice can be saved', function () {
     Mail::assertQueued(fn (AdviceCreated $mail) => $mail->hasTo($advice->email));
 })->skip('TODO determine the advices group from the form');
 
-test('direct order advice can be saved', function () {
+test('direct order advice can be saved', function (): void {
     Mail::fake();
     $data = [
-        'first_name' => fake()->first_name(),
-        'last_name' => fake()->last_name(),
+        'first_name' => fake()->firstName(),
+        'last_name' => fake()->lastName(),
         'email' => fake()->email(),
         'phone' => fake()->phoneNumber(),
         'zip' => (int) fake()->postcode(),

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Contracts\Pointable;
@@ -13,6 +15,7 @@ use App\Models\Traits\HasUuid;
 use App\Traits\HasPoints;
 use App\ValueObjects\Address;
 use App\ValueObjects\Coordinate;
+use Database\Factories\AdviceFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -34,13 +37,19 @@ use Wnx\Sends\Support\HasSendsTrait;
  * @property HouseType|null $house_type
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ *
+ * @implements Pointable<self>
  */
 class Advice extends Model implements HasSends, Pointable
 {
     protected $table = 'advices';
 
+    /** @use HasFactory<AdviceFactory> */
     use HasFactory;
+
+    /** @use HasPoints<self> */
     use HasPoints;
+
     use HasSendsTrait;
     use HasUuid;
     use Notifiable;
@@ -64,7 +73,7 @@ class Advice extends Model implements HasSends, Pointable
         'help_type_place',
         'help_type_technical',
         'help_type_bureaucracy',
-        'helpType_other',
+        'help_type_other',
         'house_type',
         'landlord_exists',
         'group_id',
@@ -106,6 +115,9 @@ class Advice extends Model implements HasSends, Pointable
         return $this->morphToMany(User::class, 'sharing', 'sharings', 'sharing_id', 'advisor_id');
     }
 
+    /**
+     * @return Collection<int, int>
+     */
     public function getSharesIdsAttribute(): Collection
     {
         return $this->shares->pluck('id');
@@ -161,6 +173,9 @@ class Advice extends Model implements HasSends, Pointable
     }
 
     #[Override]
+    /**
+     * @return array<string, class-string<AdviceType>|class-string<HouseType>|class-string<Address>|class-string<Coordinate>|string>
+     */
     protected function casts(): array
     {
         return [
@@ -178,7 +193,7 @@ class Advice extends Model implements HasSends, Pointable
             'help_type_place' => 'boolean',
             'help_type_technical' => 'boolean',
             'help_type_bureaucracy' => 'boolean',
-            'helpType_other' => 'boolean',
+            'help_type_other' => 'boolean',
             'house_type' => HouseType::class,
             'landlord_exists' => 'boolean',
             'place_notes' => 'string',

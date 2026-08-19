@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Traits\HasUuid;
 use App\Traits\HasGroups;
 use App\ValueObjects\Address;
 use App\ValueObjects\Coordinate;
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -20,7 +23,14 @@ use Override;
  */
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, HasGroups, HasUuid, Notifiable;
+    use HasApiTokens;
+
+    /** @use HasFactory<UserFactory> */
+    use HasFactory;
+
+    use HasGroups;
+    use HasUuid;
+    use Notifiable;
 
     protected $fillable = [
         'first_name',
@@ -52,7 +62,7 @@ class User extends Authenticatable
         return $this->hasMany(Advice::class);
     }
 
-    public function getNameAttribute()
+    public function getNameAttribute(): string
     {
         return sprintf('%s %s', $this->first_name, $this->last_name);
     }

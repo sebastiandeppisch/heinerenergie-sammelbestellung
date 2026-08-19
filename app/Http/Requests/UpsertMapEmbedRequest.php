@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Models\MapEmbed;
@@ -29,15 +31,18 @@ class UpsertMapEmbedRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'nullable|string|max:255',
-            'category_ids' => 'required|array|min:1',
-            'category_ids.*' => 'bail|uuid|exists:map_point_categories,uuid',
+            'name' => ['nullable', 'string', 'max:255'],
+            'category_ids' => ['required', 'array', 'min:1'],
+            'category_ids.*' => ['bail', 'uuid', 'exists:map_point_categories,uuid'],
             'coordinate' => new GeographicCoordinate,
-            'zoom' => 'required|integer|min:3|max:18',
-            'show_table' => 'boolean',
+            'zoom' => ['required', 'integer', 'min:3', 'max:18'],
+            'show_table' => ['boolean'],
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getData(): array
     {
         return $this->safe()->only(['name', 'coordinate', 'zoom', 'show_table']);

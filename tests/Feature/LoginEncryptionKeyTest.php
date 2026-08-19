@@ -5,7 +5,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-test('login sets enc_key cookie', function () {
+test('login sets enc_key cookie', function (): void {
     $user = User::factory()->create(['password' => bcrypt('password123')]);
 
     $response = $this->post('/login-form', [
@@ -20,7 +20,7 @@ test('login sets enc_key cookie', function () {
     expect($cookieNames)->toContain('enc_key');
 });
 
-test('enc_key cookie is session-based (no expiry)', function () {
+test('enc_key cookie is session-based (no expiry)', function (): void {
     $user = User::factory()->create(['password' => bcrypt('password123')]);
 
     $response = $this->post('/login-form', [
@@ -29,14 +29,14 @@ test('enc_key cookie is session-based (no expiry)', function () {
     ]);
 
     $encKeyCookie = collect($response->headers->getCookies())
-        ->first(fn ($c) => $c->getName() === 'enc_key');
+        ->first(fn ($c): bool => $c->getName() === 'enc_key');
 
     expect($encKeyCookie)->not->toBeNull();
     // Session cookies have expires = 0 (no explicit expiry)
     expect($encKeyCookie->getExpiresTime())->toBe(0);
 });
 
-test('enc_key cookie is HttpOnly', function () {
+test('enc_key cookie is HttpOnly', function (): void {
     $user = User::factory()->create(['password' => bcrypt('password123')]);
 
     $response = $this->post('/login-form', [
@@ -45,12 +45,12 @@ test('enc_key cookie is HttpOnly', function () {
     ]);
 
     $encKeyCookie = collect($response->headers->getCookies())
-        ->first(fn ($c) => $c->getName() === 'enc_key');
+        ->first(fn ($c): bool => $c->getName() === 'enc_key');
 
     expect($encKeyCookie->isHttpOnly())->toBeTrue();
 });
 
-test('login stores enc_salt in session', function () {
+test('login stores enc_salt in session', function (): void {
     $user = User::factory()->create(['password' => bcrypt('password123')]);
 
     $this->post('/login-form', [

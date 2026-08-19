@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Models\FormField;
@@ -13,6 +15,9 @@ class FormFieldOptionFactory extends Factory
 {
     protected $model = FormFieldOption::class;
 
+    /**
+     * @return array<string, Factory|string|int|bool>
+     */
     public function definition()
     {
         static $optionCount = 0;

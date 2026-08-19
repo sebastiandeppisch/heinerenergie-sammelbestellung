@@ -12,7 +12,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->advisor = User::factory()->create();
     $this->admin = User::factory()->create(['is_admin' => true]);
     $this->group = Group::create([
@@ -24,17 +24,17 @@ beforeEach(function () {
     Config::set('app.group_context', 'global');
 });
 
-test('can be created with sharing', function () {
+test('can be created with sharing', function (): void {
     Advice::factory()->withSharing()->create();
     $this->assertTrue(true);
 });
 
-test('can be created with sendable', function () {
+test('can be created with sendable', function (): void {
     Advice::factory()->withSendable()->create();
     $this->assertTrue(true);
 });
 
-test('advices table can be indexed by regular advisor', function () {
+test('advices table can be indexed by regular advisor', function (): void {
     createAdviceWithAndWithoutAdvisor($this->advisor);
     createAdviceWithAndWithoutAdvisor($this->admin);
 
@@ -43,14 +43,14 @@ test('advices table can be indexed by regular advisor', function () {
     $this->actingAs($this->advisor)->get('advices')->assertOk();
 });
 
-test('advices table can be indexed by admin', function () {
+test('advices table can be indexed by admin', function (): void {
     createAdviceWithAndWithoutAdvisor($this->admin);
     createAdviceWithAndWithoutAdvisor($this->advisor);
 
     $this->actingAs($this->admin)->get('advices')->assertOk();
 });
 
-test('group column is hidden for regular advisors', function () {
+test('group column is hidden for regular advisors', function (): void {
     Group::factory()->create(['parent_id' => $this->group->id]);
 
     app(SessionService::class)->actAsGroup($this->group);
@@ -59,7 +59,7 @@ test('group column is hidden for regular advisors', function () {
         ->assertInertia(fn ($page) => $page->component('Advices')->where('showGroupColumn', false));
 });
 
-test('group column is shown for group admins acting in a non-leaf group', function () {
+test('group column is shown for group admins acting in a non-leaf group', function (): void {
     Group::factory()->create(['parent_id' => $this->group->id]);
 
     app(SessionService::class)->actAsGroup($this->group, true);
@@ -68,21 +68,21 @@ test('group column is shown for group admins acting in a non-leaf group', functi
         ->assertInertia(fn ($page) => $page->component('Advices')->where('showGroupColumn', true));
 });
 
-test('group column is hidden for group admins acting in a leaf group', function () {
+test('group column is hidden for group admins acting in a leaf group', function (): void {
     app(SessionService::class)->actAsGroup($this->group, true);
 
     $this->actingAs($this->advisor)->get('advices')
         ->assertInertia(fn ($page) => $page->component('Advices')->where('showGroupColumn', false));
 });
 
-test('group column is shown for system admins', function () {
+test('group column is shown for system admins', function (): void {
     app(SessionService::class)->actAsSystemAdmin();
 
     $this->actingAs($this->admin)->get('advices')
         ->assertInertia(fn ($page) => $page->component('Advices')->where('showGroupColumn', true));
 });
 
-test('form submission preview shows only non-personal fields to group members', function () {
+test('form submission preview shows only non-personal fields to group members', function (): void {
     $adviceCreator = FormDefinitionToAdvice::factory()->withAdvice()->create();
 
     $advice = Advice::firstOrFail();
@@ -101,11 +101,11 @@ test('form submission preview shows only non-personal fields to group members', 
 
     $response = $this->actingAs($this->advisor)->getJson(route('api.advices.formSubmission', $advice))->assertOk();
 
-    $labels = collect($response->json('formSubmission.fields'))->pluck('field.label');
+    $labels = $response->collect('formSubmission.fields')->pluck('field.label');
     expect($labels->all())->toBe(['Wobei wird Hilfe benötigt?']);
 });
 
-test('form submission preview returns null when the advice has no submission', function () {
+test('form submission preview returns null when the advice has no submission', function (): void {
     $this->group->users()->attach($this->advisor->id, ['is_admin' => false]);
 
     $advice = Advice::factory()->create(['group_id' => $this->group->id]);
@@ -115,7 +115,7 @@ test('form submission preview returns null when the advice has no submission', f
         ->assertExactJson(['formSubmission' => null]);
 });
 
-test('form submission preview is forbidden for users outside the advice group', function () {
+test('form submission preview is forbidden for users outside the advice group', function (): void {
     $advice = Advice::factory()->create(['group_id' => $this->group->id]);
     FormSubmission::factory()->create([
         'advice_id' => $advice->id,
@@ -125,21 +125,21 @@ test('form submission preview is forbidden for users outside the advice group', 
     $this->actingAs($this->advisor)->getJson(route('api.advices.formSubmission', $advice))->assertForbidden();
 });
 
-test('advices map can be indexed by regular advisor', function () {
+test('advices map can be indexed by regular advisor', function (): void {
     createAdviceWithAndWithoutAdvisor($this->advisor);
     createAdviceWithAndWithoutAdvisor($this->admin);
 
     $this->actingAs($this->advisor)->get('advicesmap')->assertOk();
 });
 
-test('advices map can be indexed by admin', function () {
+test('advices map can be indexed by admin', function (): void {
     createAdviceWithAndWithoutAdvisor($this->admin);
     createAdviceWithAndWithoutAdvisor($this->advisor);
 
     $this->actingAs($this->admin)->get('advicesmap')->assertOk();
 });
 
-function createAdviceWithAndWithoutAdvisor(User $advisor)
+function createAdviceWithAndWithoutAdvisor(User $advisor): void
 {
 
     FormDefinitionToAdvice::factory()->withAdvice()->create();
@@ -159,7 +159,7 @@ function createAdviceWithAndWithoutAdvisor(User $advisor)
     $adviceWithSendAble[0]->update(['advisor_id' => $advisor->id]);
 }
 
-test('advisor can be updated', function () {
+test('advisor can be updated', function (): void {
 
     $this->actingAs($this->admin);
 
@@ -176,7 +176,7 @@ test('advisor can be updated', function () {
     ]);
 });
 
-test('setAdvisors API sets shared advisors on advice', function () {
+test('setAdvisors API sets shared advisors on advice', function (): void {
     $advice = Advice::factory()->create(['group_id' => $this->group->id]);
     $advisorsToShare = User::factory()->count(2)->create();
 
@@ -203,7 +203,7 @@ $validAdviceData = [
     'type' => 0,
 ];
 
-test('system admin must select a group when creating an advice', function () use (&$validAdviceData) {
+test('system admin must select a group when creating an advice', function () use (&$validAdviceData): void {
     app(SessionService::class)->actAsSystemAdmin();
 
     $this->actingAs($this->admin)
@@ -213,7 +213,7 @@ test('system admin must select a group when creating an advice', function () use
     expect(Advice::count())->toBe(0);
 });
 
-test('system admin can create an advice when group is provided', function () use (&$validAdviceData) {
+test('system admin can create an advice when group is provided', function () use (&$validAdviceData): void {
     app(SessionService::class)->actAsSystemAdmin();
 
     $this->actingAs($this->admin)

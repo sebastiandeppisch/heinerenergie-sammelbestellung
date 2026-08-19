@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -12,6 +14,9 @@ class UpdateGroupConsultingAreaRequest extends FormRequest
         return $this->user()->can('manageArea', $this->route('group'));
     }
 
+    /**
+     * @return array<string, string[]>
+     */
     public function rules(): array
     {
         return [
@@ -21,6 +26,9 @@ class UpdateGroupConsultingAreaRequest extends FormRequest
         ];
     }
 
+    /**
+     * @return array<string, string>
+     */
     #[Override]
     public function messages(): array
     {

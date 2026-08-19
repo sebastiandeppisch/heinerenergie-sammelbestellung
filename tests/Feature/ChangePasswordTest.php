@@ -6,14 +6,14 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::factory()->create();
     $this->group = Group::factory()->create();
     $this->admin = User::factory()->create(['is_admin' => true]);
     $this->group->users()->attach($this->admin, ['is_admin' => true]);
 });
 
-test('system admin can change password of other users', function () {
+test('system admin can change password of other users', function (): void {
     $this->withoutExceptionHandling();
     $this->actingAs($this->admin)
         ->post('/actAsSystemAdmin');
@@ -26,7 +26,7 @@ test('system admin can change password of other users', function () {
     $this->assertTrue(Hash::check('new-password', $user->password));
 });
 
-test('group admins can not change password of other users', function () {
+test('group admins can not change password of other users', function (): void {
     $this->actingAs($this->admin)
         ->post("/actAsGroup/{$this->group->uuid}", ['asAdmin' => true]);
 

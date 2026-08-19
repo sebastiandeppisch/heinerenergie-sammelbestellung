@@ -20,7 +20,7 @@ function bindEncKey(string $key): void
     app()->instance('user.enc_key', base64_decode($key));
 }
 
-test('store saves encrypted credentials in session', function () {
+test('store saves encrypted credentials in session', function (): void {
     bindEncKey(makeEncKey());
     $repo = app(MailCredentialsRepository::class);
 
@@ -42,7 +42,7 @@ test('store saves encrypted credentials in session', function () {
     expect($raw)->not->toContain('user@example.com');
 });
 
-test('get retrieves and decrypts stored credentials', function () {
+test('get retrieves and decrypts stored credentials', function (): void {
     bindEncKey(makeEncKey());
     $repo = app(MailCredentialsRepository::class);
 
@@ -67,14 +67,14 @@ test('get retrieves and decrypts stored credentials', function () {
     expect($retrieved->password)->toBe('secret');
 });
 
-test('get returns null when no credentials stored', function () {
+test('get returns null when no credentials stored', function (): void {
     bindEncKey(makeEncKey());
     $repo = app(MailCredentialsRepository::class);
 
     expect($repo->get())->toBeNull();
 });
 
-test('clear removes credentials from session', function () {
+test('clear removes credentials from session', function (): void {
     bindEncKey(makeEncKey());
     $repo = app(MailCredentialsRepository::class);
 
@@ -93,7 +93,7 @@ test('clear removes credentials from session', function () {
     expect(session()->has('mail_credentials'))->toBeFalse();
 });
 
-test('get returns null and clears session on stale credentials (wrong key)', function () {
+test('get returns null and clears session on stale credentials (wrong key)', function (): void {
     // Store with one key
     $key1 = makeEncKey();
     bindEncKey($key1);

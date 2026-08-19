@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('groups', function (Blueprint $table) {
+        Schema::table('groups', function (Blueprint $table): void {
             $table->float('primary_hue')->nullable();
             $table->float('primary_lightness')->nullable()->after('primary_hue');
             $table->float('primary_chroma')->nullable()->after('primary_lightness');
@@ -23,7 +23,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('groups', function (Blueprint $table) {
+        Schema::table('groups', function (Blueprint $table): void {
             $table->dropColumn(['primary_hue', 'primary_lightness', 'primary_chroma']);
         });
     }

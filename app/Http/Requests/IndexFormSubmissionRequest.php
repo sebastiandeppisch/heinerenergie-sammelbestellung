@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Models\FormDefinition;
@@ -24,16 +26,19 @@ class IndexFormSubmissionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'selectedFormDefinitions' => 'array',
-            'selectedFormDefinitions.*' => 'string|exists:form_definitions,uuid',
-            'sortOrder' => 'string|in:asc,desc',
-            'groupByForm' => 'string|in:true,false',
-            'dateFrom' => 'nullable|date',
-            'dateTo' => 'nullable|date|after_or_equal:dateFrom',
-            'view' => 'string|in:cards,table',
+            'selectedFormDefinitions' => ['array'],
+            'selectedFormDefinitions.*' => ['string', 'exists:form_definitions,uuid'],
+            'sortOrder' => ['string', 'in:asc,desc'],
+            'groupByForm' => ['string', 'in:true,false'],
+            'dateFrom' => ['nullable', 'date'],
+            'dateTo' => ['nullable', 'date', 'after_or_equal:dateFrom'],
+            'view' => ['string', 'in:cards,table'],
         ];
     }
 
+    /**
+     * @return array<int, FormDefinition>
+     */
     public function selectedFormDefinitions(): array
     {
         return FormDefinition::whereIn('uuid', $this->input('selectedFormDefinitions', []))->pluck('id')->toArray();

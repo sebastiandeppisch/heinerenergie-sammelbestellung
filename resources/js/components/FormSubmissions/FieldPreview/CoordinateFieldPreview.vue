@@ -7,9 +7,10 @@ import { computed } from 'vue';
 
 type Coordinate = App.ValueObjects.Coordinate;
 
-const props = defineProps<{ value: Coordinate }>();
+const props = defineProps<{ value: Coordinate; label?: string }>();
 
-const label = computed(() => `${props.value.lat.toFixed(5)}, ${props.value.lng.toFixed(5)}`);
+const coordinateLabel = computed(() => `${props.value.lat.toFixed(5)}, ${props.value.lng.toFixed(5)}`);
+const displayLabel = computed(() => props.label ?? coordinateLabel.value);
 const osmUrl = computed(
     () => `https://www.openstreetmap.org/?mlat=${props.value.lat}&mlon=${props.value.lng}#map=15/${props.value.lat}/${props.value.lng}`,
 );
@@ -23,9 +24,16 @@ const osmEmbedUrl = computed(() => {
 <template>
     <Tooltip :delay-duration="300">
         <TooltipTrigger as-child>
-            <a :href="osmUrl" target="_blank" rel="noopener" class="inline-flex items-center gap-0.5 font-mono text-xs hover:underline" @click.stop>
+            <a
+                :href="osmUrl"
+                target="_blank"
+                rel="noopener"
+                class="inline-flex items-center gap-0.5 hover:underline"
+                :class="{ 'font-mono text-xs': label === undefined }"
+                @click.stop
+            >
                 <MapPin class="h-3 w-3 shrink-0 text-gray-400" />
-                {{ label }}
+                {{ displayLabel }}
             </a>
         </TooltipTrigger>
         <TooltipContent class="overflow-hidden p-0" :side-offset="8">

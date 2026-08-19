@@ -3,6 +3,7 @@ import { Button } from '@/shadcn/components/ui/button';
 import { Textarea } from '@/shadcn/components/ui/textarea';
 import { useForm } from '@inertiajs/vue3';
 import { MessageSquarePlus } from 'lucide-vue-next';
+import { computed } from 'vue';
 import { route } from 'ziggy-js';
 import TimelineItem from './TimelineItem.vue';
 
@@ -17,6 +18,9 @@ const form = useForm({
     comment: '',
 });
 
+/** Neueste Einträge zuerst anzeigen. */
+const eventsNewestFirst = computed((): AdviceEvent[] => [...props.events].reverse());
+
 const submitComment = () => {
     if (!form.comment.trim()) return;
 
@@ -30,10 +34,6 @@ const submitComment = () => {
 
 <template>
     <div class="timeline-card">
-        <div class="timeline-list">
-            <TimelineItem v-for="event in events" :key="event.id" :event="event" />
-        </div>
-
         <div class="new-comment-container">
             <h4>Neue Notiz hinzufügen</h4>
             <form @submit.prevent="submitComment">
@@ -43,6 +43,10 @@ const submitComment = () => {
                     Notiz hinzufügen
                 </Button>
             </form>
+        </div>
+
+        <div class="timeline-list">
+            <TimelineItem v-for="event in eventsNewestFirst" :key="event.id" :event="event" />
         </div>
     </div>
 </template>
@@ -54,16 +58,16 @@ const submitComment = () => {
 }
 
 .timeline-list {
-    margin-top: 15px;
+    margin-top: 20px;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 15px;
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
 .new-comment-container {
-    margin-top: 20px;
-    border-top: 1px solid #e0e0e0;
-    padding-top: 15px;
+    margin-top: 0;
 }
 
 .comment-textarea {

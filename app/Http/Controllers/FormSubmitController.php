@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Data\FormDefinitionData;
@@ -15,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Inertia\Response;
 use Intervention\Image\Encoders\JpegEncoder;
 use Intervention\Image\Laravel\Facades\Image;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -24,7 +27,7 @@ class FormSubmitController extends Controller
 {
     public function __construct(private readonly FormEmbedAccessService $embedAccess) {}
 
-    public function show(FormDefinition $formDefinition, Request $request)
+    public function show(FormDefinition $formDefinition, Request $request): Response
     {
         if (! $this->embedAccess->isEmbedAllowed($formDefinition, $request)) {
             return Inertia::render('Forms/Show', [
@@ -42,7 +45,7 @@ class FormSubmitController extends Controller
         ]);
     }
 
-    public function submit(StoreFormSubmissionRequest $request, FormDefinition $formDefinition)
+    public function submit(StoreFormSubmissionRequest $request, FormDefinition $formDefinition): Response
     {
         if (! $this->embedAccess->verifyToken($formDefinition, $request->input('_form_token'))) {
             throw new HttpException(422, 'Ungültiges oder abgelaufenes Formular, bitte Seite neu laden.');
@@ -53,7 +56,7 @@ class FormSubmitController extends Controller
         $storedImagePaths = [];
 
         try {
-            DB::transaction(function () use ($formDefinition, $request, &$storedImagePaths) {
+            DB::transaction(function () use ($formDefinition, $request, &$storedImagePaths): void {
                 $submission = $formDefinition->createSubmission();
                 foreach ($formDefinition->fields as $field) {
                     $field->createSubmissionField($submission, $this->getValueFromField($field, $request, $submission, $storedImagePaths));
@@ -83,19 +86,27 @@ class FormSubmitController extends Controller
         return $data;
     }
 
-    private function getValueFromField(FormField $field, Request $request, FormSubmission $submission, array &$storedImagePaths)
+    /**
+     * @param  string[]  $storedImagePaths
+     * @return string|int|string[]|null
+     */
+    private function getValueFromField(FormField $field, Request $request, FormSubmission $submission, array &$storedImagePaths): string|int|array|null
     {
         if ($field->type === FieldType::IMAGE) {
             return $this->storeImages($field, $request, $submission, $storedImagePaths);
         }
 
         return match ($field->type) {
-            FieldType::TEXT => $request->string($field->uuid),
+            FieldType::TEXT => (string) $request->string($field->uuid),
             FieldType::NUMBER => $request->integer($field->uuid),
             default => $request->input($field->uuid),
         };
     }
 
+    /**
+     * @param  string[]  $storedImagePaths
+     * @return string[]
+     */
     private function storeImages(FormField $field, Request $request, FormSubmission $submission, array &$storedImagePaths): array
     {
         $paths = [];
@@ -110,7 +121,7 @@ class FormSubmitController extends Controller
             $image->scaleDown(width: 1920, height: 1920);
             $encoded = $image->encode(new JpegEncoder(quality: 80));
 
-            Storage::disk('public')->put($path, $encoded);
+            Storage::disk('public')->put($path, $encoded->toStream());
             $storedImagePaths[] = $path;
             $paths[] = $path;
         }

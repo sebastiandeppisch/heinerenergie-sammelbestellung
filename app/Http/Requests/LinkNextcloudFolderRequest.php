@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -11,11 +13,14 @@ class LinkNextcloudFolderRequest extends FormRequest
         return $this->user()->can('update', $this->route('advice'));
     }
 
+    /**
+     * @return array<string, list<string>>
+     */
     public function rules(): array
     {
         return [
-            'fileId' => 'required|string|max:255',
-            'path' => 'required|string|max:1000',
+            'fileId' => ['required', 'string', 'max:255'],
+            'path' => ['required', 'string', 'max:1000'],
         ];
     }
 }

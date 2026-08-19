@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('advices', function (Blueprint $table) {
+        Schema::table('advices', function (Blueprint $table): void {
             $table->renameColumn('firstName', 'first_name');
             $table->renameColumn('lastName', 'last_name');
             $table->renameColumn('streetNumber', 'street_number');
@@ -24,7 +24,7 @@ return new class extends Migration
             $table->renameColumn('landlordExists', 'landlord_exists');
         });
 
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->renameColumn('streetNumber', 'street_number');
         });
     }
@@ -34,7 +34,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('advices', function (Blueprint $table) {
+        Schema::table('advices', function (Blueprint $table): void {
             $table->renameColumn('first_name', 'firstName');
             $table->renameColumn('last_name', 'lastName');
             $table->renameColumn('street_number', 'streetNumber');
@@ -47,7 +47,7 @@ return new class extends Migration
             $table->renameColumn('landlord_exists', 'landlordExists');
         });
 
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->renameColumn('street_number', 'streetNumber');
         });
     }

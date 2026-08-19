@@ -15,7 +15,7 @@ use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->advisor = User::factory()->create();
     $this->group = Group::factory()->create();
     $this->group->users()->attach($this->advisor, ['is_admin' => true]);
@@ -25,7 +25,7 @@ beforeEach(function () {
     $this->checklist = FormDefinition::factory()->checklist()->create(['group_id' => $this->group->id]);
 });
 
-test('advisor can add a checklist to their advice', function () {
+test('advisor can add a checklist to their advice', function (): void {
     $this->actingAs($this->advisor)
         ->post(route('checklist-entries.store', $this->advice), ['form_definition_id' => $this->checklist->uuid])
         ->assertRedirect();
@@ -35,7 +35,7 @@ test('advisor can add a checklist to their advice', function () {
     expect(ChecklistEntry::first()->advice_id)->toBe($this->advice->id);
 });
 
-test('adding a checklist snapshots fields and options', function () {
+test('adding a checklist snapshots fields and options', function (): void {
     $checklist = FormDefinition::factory()->checklist()->create(['group_id' => $this->group->id]);
     $field = FormField::factory()->create([
         'form_definition_id' => $checklist->id,
@@ -71,7 +71,7 @@ test('adding a checklist snapshots fields and options', function () {
     expect($snapshotField->options->first()->form_field_option_id)->toBe($option->id);
 });
 
-test('cannot add same checklist twice to the same advice', function () {
+test('cannot add same checklist twice to the same advice', function (): void {
     ChecklistEntry::factory()->create([
         'form_definition_id' => $this->checklist->id,
         'advice_id' => $this->advice->id,
@@ -82,7 +82,7 @@ test('cannot add same checklist twice to the same advice', function () {
         ->assertInvalid('form_definition_id');
 });
 
-test('cannot add a form (non-checklist) as checklist', function () {
+test('cannot add a form (non-checklist) as checklist', function (): void {
     $form = FormDefinition::factory()->create(['group_id' => $this->group->id]);
 
     $this->actingAs($this->advisor)
@@ -90,7 +90,7 @@ test('cannot add a form (non-checklist) as checklist', function () {
         ->assertInvalid('form_definition_id');
 });
 
-test('cannot add a checklist from a different initiative', function () {
+test('cannot add a checklist from a different initiative', function (): void {
     $otherGroup = Group::factory()->create();
     $otherChecklist = FormDefinition::factory()->checklist()->create(['group_id' => $otherGroup->id]);
 
@@ -99,7 +99,7 @@ test('cannot add a checklist from a different initiative', function () {
         ->assertInvalid('form_definition_id');
 });
 
-test('unauthorized user cannot add a checklist', function () {
+test('unauthorized user cannot add a checklist', function (): void {
     $other = User::factory()->create();
 
     $this->actingAs($other)
@@ -107,7 +107,7 @@ test('unauthorized user cannot add a checklist', function () {
         ->assertForbidden();
 });
 
-test('advisor can update checklist entry field values', function () {
+test('advisor can update checklist entry field values', function (): void {
     $checklist = FormDefinition::factory()->checklist()->create(['group_id' => $this->group->id]);
     FormField::factory()->create([
         'form_definition_id' => $checklist->id,
@@ -132,7 +132,7 @@ test('advisor can update checklist entry field values', function () {
     expect($snapshotField->fresh()->value)->toBe('Wert A');
 });
 
-test('updating ignores unknown field uuids', function () {
+test('updating ignores unknown field uuids', function (): void {
     $this->actingAs($this->advisor)
         ->post(route('checklist-entries.store', $this->advice), ['form_definition_id' => $this->checklist->uuid])
         ->assertRedirect();
@@ -148,7 +148,7 @@ test('updating ignores unknown field uuids', function () {
     expect(ChecklistEntryField::count())->toBe(0);
 });
 
-test('unauthorized user cannot update checklist entry', function () {
+test('unauthorized user cannot update checklist entry', function (): void {
     $entry = ChecklistEntry::factory()->create([
         'form_definition_id' => $this->checklist->id,
         'advice_id' => $this->advice->id,
@@ -161,7 +161,7 @@ test('unauthorized user cannot update checklist entry', function () {
         ->assertForbidden();
 });
 
-test('snapshot stays stable when form definition fields are renamed', function () {
+test('snapshot stays stable when form definition fields are renamed', function (): void {
     $checklist = FormDefinition::factory()->checklist()->create(['group_id' => $this->group->id]);
     $field = FormField::factory()->create([
         'form_definition_id' => $checklist->id,
@@ -181,7 +181,7 @@ test('snapshot stays stable when form definition fields are renamed', function (
     expect($entry->fresh()->fields->first()->label)->toBe('Originallabel');
 });
 
-test('snapshot stays intact when form field is deleted', function () {
+test('snapshot stays intact when form field is deleted', function (): void {
     $checklist = FormDefinition::factory()->checklist()->create(['group_id' => $this->group->id]);
     $field = FormField::factory()->create([
         'form_definition_id' => $checklist->id,
@@ -205,7 +205,7 @@ test('snapshot stays intact when form field is deleted', function () {
     expect($reloaded->form_field_id)->toBeNull();
 });
 
-test('advice show page contains checklist entries and available checklists', function () {
+test('advice show page contains checklist entries and available checklists', function (): void {
     $entry = ChecklistEntry::factory()->create([
         'form_definition_id' => $this->checklist->id,
         'advice_id' => $this->advice->id,
@@ -215,7 +215,7 @@ test('advice show page contains checklist entries and available checklists', fun
 
     $this->actingAs($this->advisor)
         ->get(route('advices.show', $this->advice))
-        ->assertInertia(fn (Assert $page) => $page
+        ->assertInertia(fn (Assert $page): Assert => $page
             ->component('Advice')
             ->has('checklistEntries', 1)
             ->where('checklistEntries.0.id', $entry->uuid)
@@ -224,12 +224,12 @@ test('advice show page contains checklist entries and available checklists', fun
         );
 });
 
-test('advice show page does not show forms as available checklists', function () {
+test('advice show page does not show forms as available checklists', function (): void {
     FormDefinition::factory()->create(['group_id' => $this->group->id]);
 
     $this->actingAs($this->advisor)
         ->get(route('advices.show', $this->advice))
-        ->assertInertia(fn (Assert $page) => $page
+        ->assertInertia(fn (Assert $page): Assert => $page
             ->component('Advice')
             ->has('availableChecklists', 1) // only the checklist from beforeEach
         );

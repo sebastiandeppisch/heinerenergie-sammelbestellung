@@ -9,12 +9,10 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('product_downloads', function (Blueprint $table) {
+        Schema::create('product_downloads', function (Blueprint $table): void {
             $table->id();
             $table->timestamps();
             $table->string('name');
@@ -31,19 +29,17 @@ return new class extends Migration
                 ]);
             }
         }
-        Schema::table('products', function (Blueprint $table) {
+        Schema::table('products', function (Blueprint $table): void {
             $table->dropColumn('url');
         });
     }
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::table('products', function (Blueprint $table) {
+        Schema::table('products', function (Blueprint $table): void {
             $table->string('url')->nullable();
         });
         Schema::dropIfExists('product_downloads');

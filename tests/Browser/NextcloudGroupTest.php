@@ -17,7 +17,7 @@ const NC_USER_EMAIL = 'nc-user@example.com';
 const NC_DISPLAY_NAME = 'Max Mustermann';
 const NC_GROUP_NAME = 'TestGruppe';
 
-beforeEach(function () {
+beforeEach(function (): void {
     app()->singleton(
         NextcloudUserClientContract::class,
         NextcloudUserClient::class
@@ -53,7 +53,7 @@ beforeEach(function () {
     $this->actingAs($this->admin);
 });
 
-test('nextcloud page loads with user list when group name is configured', function () {
+test('nextcloud page loads with user list when group name is configured', function (): void {
     visit(route('groups.nextcloud', $this->group))
         ->assertNoSmoke()
         ->assertSee('Nextcloud-Abgleich')
@@ -61,7 +61,7 @@ test('nextcloud page loads with user list when group name is configured', functi
         ->assertSee(NC_USER_EMAIL);
 });
 
-test('nextcloud page shows config hint when no group name is set', function () {
+test('nextcloud page shows config hint when no group name is set', function (): void {
     $this->group->update(['nextcloud_group_name' => null]);
 
     visit(route('groups.nextcloud', $this->group))
@@ -70,14 +70,14 @@ test('nextcloud page shows config hint when no group name is set', function () {
         ->assertDontSee(NC_DISPLAY_NAME);
 });
 
-test('unmatched nc user shows import button', function () {
+test('unmatched nc user shows import button', function (): void {
     visit(route('groups.nextcloud', $this->group))
         ->assertNoSmoke()
         ->assertSee('Nicht im CRM')
         ->assertSee('Importieren');
 });
 
-test('matched nc user shows crm badge instead of import button', function () {
+test('matched nc user shows crm badge instead of import button', function (): void {
     User::factory()->create(['email' => NC_USER_EMAIL]);
 
     visit(route('groups.nextcloud', $this->group))
@@ -86,7 +86,7 @@ test('matched nc user shows crm badge instead of import button', function () {
         ->assertDontSee('Importieren');
 });
 
-test('import dialog opens with prefilled name from nc displayname', function () {
+test('import dialog opens with prefilled name from nc displayname', function (): void {
     visit(route('groups.nextcloud', $this->group))
         ->assertNoSmoke()
         ->click('Importieren')
@@ -96,7 +96,7 @@ test('import dialog opens with prefilled name from nc displayname', function () 
         ->assertSee(NC_USER_EMAIL);
 });
 
-test('crm user in different group shows add-to-group button', function () {
+test('crm user in different group shows add-to-group button', function (): void {
     User::factory()->create(['email' => NC_USER_EMAIL]);
 
     visit(route('groups.nextcloud', $this->group))
@@ -105,7 +105,7 @@ test('crm user in different group shows add-to-group button', function () {
         ->assertSee('Zur Gruppe hinzufügen');
 });
 
-test('add-to-group adds existing crm user to the group', function () {
+test('add-to-group adds existing crm user to the group', function (): void {
     $existingUser = User::factory()->create(['email' => NC_USER_EMAIL]);
 
     visit(route('groups.nextcloud', $this->group))
@@ -117,7 +117,7 @@ test('add-to-group adds existing crm user to the group', function () {
     expect($this->group->users()->where('users.id', $existingUser->id)->exists())->toBeTrue();
 });
 
-test('import with send-email checkbox sends password reset notification', function () {
+test('import with send-email checkbox sends password reset notification', function (): void {
     Notification::fake();
 
     visit(route('groups.nextcloud', $this->group))
@@ -130,7 +130,7 @@ test('import with send-email checkbox sends password reset notification', functi
     Notification::assertSentTo($newUser, ResetPassword::class);
 });
 
-test('import without send-email checkbox sends no notification', function () {
+test('import without send-email checkbox sends no notification', function (): void {
     Notification::fake();
 
     visit(route('groups.nextcloud', $this->group))
@@ -142,7 +142,7 @@ test('import without send-email checkbox sends no notification', function () {
     Notification::assertNotSentTo($newUser, ResetPassword::class);
 });
 
-test('import creates crm user and shows in crm badge', function () {
+test('import creates crm user and shows in crm badge', function (): void {
     visit(route('groups.nextcloud', $this->group))
         ->assertNoSmoke()
         ->click('Importieren')

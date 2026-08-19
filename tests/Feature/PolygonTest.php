@@ -4,7 +4,7 @@ use App\ValueObjects\Coordinate;
 use App\ValueObjects\Polygon;
 
 // Test for basic polygon containment
-test('polygon can determine if point is inside', function () {
+test('polygon can determine if point is inside', function (): void {
     // Create a square polygon
     $polygon = new Polygon([
         ['lat' => 0, 'lng' => 0],
@@ -28,7 +28,7 @@ test('polygon can determine if point is inside', function () {
 });
 
 // Test with a simple triangle
-test('polygon handles triangle correctly', function () {
+test('polygon handles triangle correctly', function (): void {
     // Create a simple triangle
     $polygon = new Polygon([
         ['lat' => 0,  'lng' => 0],   // Bottom left
@@ -47,7 +47,7 @@ test('polygon handles triangle correctly', function () {
 });
 
 // Test for invalid polygons
-test('polygon returns false for invalid polygons', function () {
+test('polygon returns false for invalid polygons', function (): void {
     // Invalid polygon (less than 3 points)
     $invalidPolygon = new Polygon([
         ['lat' => 0,  'lng' => 0],
@@ -59,7 +59,7 @@ test('polygon returns false for invalid polygons', function () {
 });
 
 // Test for an extreme example - concave polygon
-test('polygon handles concave shapes correctly', function () {
+test('polygon handles concave shapes correctly', function (): void {
     // Concave polygon (U-shape)
     $polygon = new Polygon([
         ['lat' => 0, 'lng' => 0],
@@ -82,7 +82,7 @@ test('polygon handles concave shapes correctly', function () {
     expect($polygon->containsPoint($solid))->toBeTrue();
 });
 
-test('test getCenter returns average of polygon coordinates', function () {
+test('test getCenter returns average of polygon coordinates', function (): void {
     $polygon = new Polygon([
         ['lat' => 0, 'lng' => 0],
         ['lat' => 4, 'lng' => 0],

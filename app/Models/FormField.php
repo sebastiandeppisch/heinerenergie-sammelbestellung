@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Enums\FieldType;
@@ -8,6 +10,7 @@ use App\Rules\AddressRule;
 use App\Rules\CheckboxRequiredValidator;
 use App\Rules\GeographicCoordinate;
 use App\Rules\MaxImagePixels;
+use Database\Factories\FormFieldFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,7 +20,9 @@ use Override;
 
 class FormField extends Model
 {
+    /** @use HasFactory<FormFieldFactory> */
     use HasFactory;
+
     use HasUuid;
 
     protected $fillable = [
@@ -84,7 +89,7 @@ class FormField extends Model
      * Most fields return a single entry [$uuid => $rules].
      * Fields that validate nested values (e.g. IMAGE) may return additional entries.
      *
-     * @return array<string, array>
+     * @return array<string, array<int, mixed>>
      */
     public function getValidationRules(): array
     {

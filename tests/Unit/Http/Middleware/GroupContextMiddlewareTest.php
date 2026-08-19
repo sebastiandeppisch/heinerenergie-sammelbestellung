@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Http\Middleware;
 
 use App\Context\GroupContextContract;
@@ -14,7 +16,7 @@ use Illuminate\Support\Facades\Auth;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::factory()->create(['is_admin' => false]);
     $this->group = Group::create([
         'name' => 'Test Group',
@@ -25,22 +27,19 @@ beforeEach(function () {
     $this->factory = new SessionGroupContextFactory($this->sessionService);
     $this->middleware = new GroupContextMiddleware(
         $this->factory,
-        $this->sessionService,
-        $this->user
     );
 });
 
-test('middleware binds context to container', function () {
+test('middleware binds context to container', function (): void {
     $this->actingAs($this->user);
 
     // Set up session state
     $this->sessionService->actAsGroup($this->group, true);
 
     // Run middleware
-    $this->middleware->handle(Request::create('/'), function ($request) {
+    $this->middleware->handle(Request::create('/'), function ($request): string {
         $context = app()->make(GroupContextContract::class);
 
-        expect($context)->toBeInstanceOf(GroupContextContract::class);
         expect($context->getCurrentGroup())->not->toBeNull();
         expect($context->getCurrentGroup()->id)->toEqual($this->group->id);
         expect($context->isActingAsDirectAdmin($this->user, $this->group))->toEqual(true);
@@ -49,13 +48,13 @@ test('middleware binds context to container', function () {
     });
 });
 
-test('middleware creates new context for each request', function () {
+test('middleware creates new context for each request', function (): void {
     $this->actingAs($this->user);
 
     // First request with group admin
     $this->sessionService->actAsGroup($this->group, true);
 
-    $this->middleware->handle(Request::create('/'), function ($request) {
+    $this->middleware->handle(Request::create('/'), function ($request): string {
         $context1 = app()->make(GroupContextContract::class);
         expect($context1->isActingAsDirectAdmin($this->user, $this->group))->toEqual(true);
 
@@ -66,7 +65,7 @@ test('middleware creates new context for each request', function () {
     app()->forgetInstance(GroupContextContract::class);
     $this->sessionService->actAsGroup($this->group, false);
 
-    $this->middleware->handle(Request::create('/'), function ($request) {
+    $this->middleware->handle(Request::create('/'), function ($request): string {
         $context2 = app()->make(GroupContextContract::class);
         expect($context2->isActingAsDirectAdmin($this->user, $this->group))->toEqual(false);
 
@@ -74,13 +73,12 @@ test('middleware creates new context for each request', function () {
     });
 });
 
-test('middleware works with unauthenticated users', function () {
+test('middleware works with unauthenticated users', function (): void {
     Auth::logout();
 
-    $this->middleware->handle(Request::create('/'), function ($request) {
+    $this->middleware->handle(Request::create('/'), function ($request): string {
         $context = app()->make(GroupContextContract::class);
 
-        expect($context)->toBeInstanceOf(GroupContextContract::class);
         expect($context->getCurrentGroup())->toBeNull();
         // For unauthenticated users, we can't check actsAsGroupAdmin since it requires a user
 

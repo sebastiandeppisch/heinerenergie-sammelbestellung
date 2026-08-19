@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Create a system admin user
     $this->admin = User::factory()->create(['is_admin' => true]);
     $this->regularUser = User::factory()->create(['is_admin' => false]);
@@ -25,7 +25,7 @@ beforeEach(function () {
     Config::set('app.group_context', 'global');
 });
 
-test('admin can view categories index', function () {
+test('admin can view categories index', function (): void {
     $categories = MapPointCategory::factory()->count(3)->create();
 
     $response = $this->actingAs($this->admin)
@@ -39,7 +39,7 @@ test('admin can view categories index', function () {
     );
 });
 
-test('group admin can create a category for their group', function () {
+test('group admin can create a category for their group', function (): void {
     Config::set('app.group_context', 'group');
 
     $groupAdmin = User::factory()->create(['is_admin' => false]);
@@ -56,7 +56,7 @@ test('group admin can create a category for their group', function () {
     $this->assertDatabaseHas('map_point_categories', ['name' => 'Gruppen-Kategorie']);
 });
 
-test('group member without admin rights cannot access categories', function () {
+test('group member without admin rights cannot access categories', function (): void {
     Config::set('app.group_context', 'group');
 
     $groupMember = User::factory()->create(['is_admin' => false]);
@@ -69,7 +69,7 @@ test('group member without admin rights cannot access categories', function () {
     $response->assertStatus(403);
 });
 
-test('regular user cannot access categories', function () {
+test('regular user cannot access categories', function (): void {
 
     $response = $this->actingAs($this->regularUser)
         ->get(route('mappoint-categories.index'));
@@ -77,7 +77,7 @@ test('regular user cannot access categories', function () {
     $response->assertStatus(403);
 });
 
-test('admin can view create category form', function () {
+test('admin can view create category form', function (): void {
     $response = $this->actingAs($this->admin)
         ->get(route('mappoint-categories.create'));
 
@@ -88,7 +88,7 @@ test('admin can view create category form', function () {
     );
 });
 
-test('admin can create category without image', function () {
+test('admin can create category without image', function (): void {
     $categoryData = [
         'name' => 'Test Category',
     ];
@@ -105,7 +105,7 @@ test('admin can create category without image', function () {
     ]);
 });
 
-test('admin can create category with image', function () {
+test('admin can create category with image', function (): void {
     Storage::fake('public');
 
     $image = UploadedFile::fake()->image('category-icon.jpg', 100, 100);
@@ -128,7 +128,7 @@ test('admin can create category with image', function () {
     Storage::disk('public')->assertExists($category->image_path);
 });
 
-test('admin can view edit category form', function () {
+test('admin can view edit category form', function (): void {
     $category = MapPointCategory::factory()->create();
 
     $response = $this->actingAs($this->admin)
@@ -142,7 +142,7 @@ test('admin can view edit category form', function () {
     );
 });
 
-test('admin can update category', function () {
+test('admin can update category', function (): void {
     $this->actingAs($this->admin);
     $category = MapPointCategory::factory()->create(['name' => 'Old Name']);
 
@@ -157,7 +157,7 @@ test('admin can update category', function () {
     $this->assertEquals('Updated Category Name', $category->name);
 });
 
-test('admin can update category with new image', function () {
+test('admin can update category with new image', function (): void {
     Storage::fake('public');
 
     $oldImage = UploadedFile::fake()->image('old-icon.jpg');
@@ -183,7 +183,7 @@ test('admin can update category with new image', function () {
     Storage::disk('public')->assertExists($category->image_path);
 });
 
-test('admin can delete category', function () {
+test('admin can delete category', function (): void {
     $category = MapPointCategory::factory()->create();
 
     $response = $this->actingAs($this->admin)
@@ -195,7 +195,7 @@ test('admin can delete category', function () {
     $this->assertDatabaseMissing('map_point_categories', ['id' => $category->id]);
 });
 
-test('admin can delete category with image', function () {
+test('admin can delete category with image', function (): void {
     Storage::fake('public');
 
     $image = UploadedFile::fake()->image('category-icon.jpg');
@@ -215,14 +215,14 @@ test('admin can delete category with image', function () {
     Storage::disk('public')->assertMissing($imagePath);
 });
 
-test('category validation works correctly', function () {
+test('category validation works correctly', function (): void {
     $response = $this->actingAs($this->admin)
         ->post(route('mappoint-categories.store'), []);
 
     $response->assertSessionHasErrors(['name']);
 });
 
-test('image validation works correctly', function () {
+test('image validation works correctly', function (): void {
     $response = $this->actingAs($this->admin)
         ->post(route('mappoint-categories.store'), [
             'name' => 'Test Category',
@@ -232,7 +232,7 @@ test('image validation works correctly', function () {
     $response->assertSessionHasErrors(['image']);
 });
 
-test('categories are included in mappoints create form', function () {
+test('categories are included in mappoints create form', function (): void {
     $categories = MapPointCategory::factory()->count(2)->create();
 
     $response = $this->actingAs($this->admin)
@@ -245,7 +245,7 @@ test('categories are included in mappoints create form', function () {
     );
 });
 
-test('categories are included in mappoints edit form', function () {
+test('categories are included in mappoints edit form', function (): void {
     $categories = MapPointCategory::factory()->count(2)->create();
     $mapPoint = MapPoint::factory()->create();
 
@@ -260,7 +260,7 @@ test('categories are included in mappoints edit form', function () {
     );
 });
 
-test('mappoint can be created with category', function () {
+test('mappoint can be created with category', function (): void {
     $category = MapPointCategory::factory()->create();
 
     $mapPointData = [
@@ -283,7 +283,7 @@ test('mappoint can be created with category', function () {
     ]);
 });
 
-test('mappoint can be updated with different category', function () {
+test('mappoint can be updated with different category', function (): void {
     $category1 = MapPointCategory::factory()->create();
     $category2 = MapPointCategory::factory()->create();
 
@@ -308,7 +308,7 @@ test('mappoint can be updated with different category', function () {
     $this->assertEquals($category2->id, $mapPoint->category_id);
 });
 
-test('deleting category sets mappoint category_id to null', function () {
+test('deleting category sets mappoint category_id to null', function (): void {
     $category = MapPointCategory::factory()->create();
     $mapPoint = MapPoint::factory()->create([
         'category_id' => $category->id,

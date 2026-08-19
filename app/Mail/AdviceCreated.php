@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Mail;
 
 use App\Context\FixedGroupContext;
@@ -14,7 +16,9 @@ use Wnx\Sends\Support\StoreMailables;
 
 class AdviceCreated extends Mailable implements ShouldQueue
 {
-    use Queueable, SerializesModels, StoreMailables;
+    use Queueable;
+    use SerializesModels;
+    use StoreMailables;
 
     public string $adviceInfo;
 
@@ -42,7 +46,7 @@ class AdviceCreated extends Mailable implements ShouldQueue
 
         app()->instance(GroupContextContract::class, new FixedGroupContext($this->advice->group));
 
-        $this->withSymfonyMessage(function () use ($previousContext) {
+        $this->withSymfonyMessage(function () use ($previousContext): void {
             if ($previousContext !== null) {
                 app()->instance(GroupContextContract::class, $previousContext);
             } else {

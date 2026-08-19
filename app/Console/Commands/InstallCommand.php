@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Exceptions\UpdateException;
@@ -25,10 +27,8 @@ class InstallCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
-    public function handle()
+    public function handle(): int
     {
         try {
             $this->artisan('migrate --force --seed');
@@ -43,6 +43,9 @@ class InstallCommand extends Command
         return 0;
     }
 
+    /**
+     * @param  string[]  $cmds
+     */
     private function cmd(array $cmds): void
     {
         $process = new Process($cmds);

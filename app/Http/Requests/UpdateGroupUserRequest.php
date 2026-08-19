@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -11,10 +13,13 @@ class UpdateGroupUserRequest extends FormRequest
         return $this->user()->can('manageUsers', $this->route('group'));
     }
 
+    /**
+     * @return array<string, list<string>>
+     */
     public function rules(): array
     {
         return [
-            'is_admin' => 'required|boolean',
+            'is_admin' => ['required', 'boolean'],
         ];
     }
 

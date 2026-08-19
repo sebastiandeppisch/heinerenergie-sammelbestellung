@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Data;
 
 use App\Enums\FormType;
 use App\Models\FormDefinition;
+use App\Models\FormField;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Data;
@@ -13,7 +16,8 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 class FormDefinitionData extends Data
 {
     /**
-     * @param  Collection<FormFieldData>  $fields
+     * @param  Collection<int, FormFieldData>  $fields
+     * @param  list<string>|null  $allowed_embed_domains
      */
     public function __construct(
         public string $id,
@@ -42,7 +46,7 @@ class FormDefinitionData extends Data
             description: $model->description,
             is_active: $model->is_active,
             type: $model->type,
-            fields: $model->fields->map(fn ($field) => FormFieldData::fromModel($field)),
+            fields: $model->fields->map(fn (FormField $field): FormFieldData => FormFieldData::fromModel($field)),
             group_id: $model->group->uuid,
             advice_mapping: FormToAdviceMappingData::fromModel($model->adviceCreator),
             map_point_mapping: FormToMapPointMappingData::fromModel($model->mapPointCreator),

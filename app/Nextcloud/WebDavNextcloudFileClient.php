@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Nextcloud;
 
 use App\Context\GroupContextContract;
@@ -108,6 +110,9 @@ class WebDavNextcloudFileClient implements NextcloudFileClientContract
         return $items;
     }
 
+    /**
+     * @return NextcloudDir[]
+     */
     public function searchDirs(string $rootPath, string $slugSubstring): array
     {
         $absRoot = $this->absolutePath($rootPath);
@@ -274,7 +279,7 @@ class WebDavNextcloudFileClient implements NextcloudFileClientContract
 
     private function toSabrePath(string $path): string
     {
-        $segments = array_filter(explode('/', $path), fn ($s) => $s !== '');
+        $segments = array_filter(explode('/', $path), fn ($s): bool => $s !== '');
 
         return implode('/', array_map(rawurlencode(...), $segments));
     }

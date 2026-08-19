@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
 use App\Models\User;
@@ -16,7 +18,7 @@ class RedirectWhenGroupIsMissing
         #[CurrentUser] private readonly ?User $user
     ) {}
 
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): mixed
     {
         if ($this->user && Auth::check() && $this->sessionService->isGroupMissing()) {
             $groups = $this->user->groups;
@@ -37,7 +39,7 @@ class RedirectWhenGroupIsMissing
                 'logout',
             ];
 
-            if ($groups->count() === 1) {
+            if ($groups->count() === 1 && $groups->first() !== null) {
                 // If user has exactly one group, auto-select it
                 $this->sessionService->actAsGroup($groups->first());
             } elseif (! in_array($request->route()->getName(), $whitelistedRoutes)) {

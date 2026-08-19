@@ -1,13 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Data\GroupData;
 use App\Http\Requests\ImportNextcloudUserRequest;
 use App\Models\Group;
 use App\Services\NextcloudGroupService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 use RuntimeException;
 
 class NextcloudGroupController extends Controller
@@ -16,7 +20,7 @@ class NextcloudGroupController extends Controller
         private readonly NextcloudGroupService $service,
     ) {}
 
-    public function index(Group $group, Request $request)
+    public function index(Group $group, Request $request): Response
     {
         $this->authorize('update', $group);
 
@@ -46,7 +50,7 @@ class NextcloudGroupController extends Controller
         ]);
     }
 
-    public function import(Group $group, string $ncUser, ImportNextcloudUserRequest $request)
+    public function import(Group $group, string $ncUser, ImportNextcloudUserRequest $request): RedirectResponse
     {
         try {
             $ncUserData = $this->service->getNcUser($ncUser);
@@ -74,7 +78,7 @@ class NextcloudGroupController extends Controller
         return redirect()->route('groups.nextcloud', $group)->with('success', $message);
     }
 
-    public function addToGroup(Group $group, string $ncUser, Request $request)
+    public function addToGroup(Group $group, string $ncUser, Request $request): RedirectResponse
     {
         $this->authorize('update', $group);
 

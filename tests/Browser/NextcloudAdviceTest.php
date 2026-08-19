@@ -10,7 +10,7 @@ use Tests\Support\MockNextcloudFileClient;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
 
     app()->bind(NextcloudFileClientContract::class, MockNextcloudFileClient::class);
 
@@ -24,7 +24,7 @@ beforeEach(function () {
     $this->actingAs($this->user);
 });
 
-test('unlinked advice shows nextcloud action buttons', function () {
+test('unlinked advice shows nextcloud action buttons', function (): void {
     $advice = Advice::factory()->create([
         'advisor_id' => $this->user->id,
         'group_id' => $this->group->id,
@@ -37,7 +37,7 @@ test('unlinked advice shows nextcloud action buttons', function () {
         ->assertSee('Ordner verknüpfen');
 });
 
-test('create folder dialog opens and links a folder', function () {
+test('create folder dialog opens and links a folder', function (): void {
     $advice = Advice::factory()->create([
         'advisor_id' => $this->user->id,
         'group_id' => $this->group->id,
@@ -59,7 +59,7 @@ test('create folder dialog opens and links a folder', function () {
     expect($advice->nextcloud_folder_id)->not->toBeNull();
 });
 
-test('link folder dialog opens and shows search results', function () {
+test('link folder dialog opens and shows search results', function (): void {
     $advice = Advice::factory()->create([
         'advisor_id' => $this->user->id,
         'group_id' => $this->group->id,
@@ -74,7 +74,7 @@ test('link folder dialog opens and shows search results', function () {
         ->assertSee('Browser');
 });
 
-test('linked advice shows file list and unlink button', function () {
+test('linked advice shows file list and unlink button', function (): void {
     $advice = Advice::factory()->create([
         'advisor_id' => $this->user->id,
         'group_id' => $this->group->id,
@@ -90,7 +90,7 @@ test('linked advice shows file list and unlink button', function () {
         ->assertSee('Datei hochladen');
 });
 
-test('unlink removes folder association', function () {
+test('unlink removes folder association', function (): void {
     $advice = Advice::factory()->create([
         'advisor_id' => $this->user->id,
         'group_id' => $this->group->id,

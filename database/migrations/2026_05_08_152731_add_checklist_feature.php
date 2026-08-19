@@ -12,11 +12,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('form_definitions', function (Blueprint $table) {
+        Schema::table('form_definitions', function (Blueprint $table): void {
             $table->unsignedTinyInteger('type')->default(0)->after('group_id');
         });
 
-        Schema::create('checklist_entries', function (Blueprint $table) {
+        Schema::create('checklist_entries', function (Blueprint $table): void {
             $table->id();
             $table->uuid('uuid')->unique();
             $table->foreignId('form_definition_id')->constrained();
@@ -26,7 +26,7 @@ return new class extends Migration
             $table->unique(['form_definition_id', 'advice_id']);
         });
 
-        Schema::create('checklist_entry_fields', function (Blueprint $table) {
+        Schema::create('checklist_entry_fields', function (Blueprint $table): void {
             $table->id();
             $table->uuid('uuid')->unique();
             $table->foreignIdFor(ChecklistEntry::class)->constrained();
@@ -40,7 +40,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('checklist_entry_field_options', function (Blueprint $table) {
+        Schema::create('checklist_entry_field_options', function (Blueprint $table): void {
             $table->id();
             $table->uuid('uuid')->unique();
             $table->foreignIdFor(ChecklistEntryField::class)->constrained();
@@ -60,7 +60,7 @@ return new class extends Migration
         Schema::dropIfExists('checklist_entry_fields');
         Schema::dropIfExists('checklist_entries');
 
-        Schema::table('form_definitions', function (Blueprint $table) {
+        Schema::table('form_definitions', function (Blueprint $table): void {
             $table->dropColumn('type');
         });
     }

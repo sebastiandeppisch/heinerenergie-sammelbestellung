@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Enums\AdviceStatusResult;
 use App\Models\Traits\HasUuid;
+use Database\Factories\AdviceStatusFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,7 +19,9 @@ use Override;
  */
 class AdviceStatus extends Model
 {
+    /** @use HasFactory<AdviceStatusFactory> */
     use HasFactory;
+
     use HasUuid;
     use SoftDeletes;
 
@@ -52,6 +57,9 @@ class AdviceStatus extends Model
     }
 
     #[Override]
+    /**
+     * @return array<string, class-string<AdviceStatusResult>|string>
+     */
     protected function casts(): array
     {
         return [

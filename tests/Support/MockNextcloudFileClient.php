@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Support;
 
 use App\Contracts\NextcloudFileClientContract;
@@ -35,7 +37,7 @@ class MockNextcloudFileClient implements NextcloudFileClientContract
 
     public function folderExists(string $path): bool
     {
-        return array_any($this->dirs, fn ($dir) => $dir->path === $path);
+        return array_any($this->dirs, fn (NextcloudDir $dir): bool => $dir->path === $path);
     }
 
     public function dirListing(string $path): array
@@ -59,6 +61,9 @@ class MockNextcloudFileClient implements NextcloudFileClientContract
         return $result;
     }
 
+    /**
+     * @return NextcloudDir[]
+     */
     public function searchDirs(string $rootPath, string $slugSubstring): array
     {
         $rootPath = rtrim($rootPath, '/');

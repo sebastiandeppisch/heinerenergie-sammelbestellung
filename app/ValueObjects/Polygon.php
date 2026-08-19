@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\ValueObjects;
 
 use App\Casts\PolygonCast;
@@ -10,16 +12,20 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 #[TypeScript]
 class Polygon implements Castable, JsonSerializable
 {
-    /** @var array<Coordinate> */
+    /** @var array<int, Coordinate> */
     public readonly array $coordinates;
 
-    public function __construct(
-        /** @var array<Coordinate|array<int>> */
-        array $coordinates = []
-    ) {
-        $this->coordinates = array_map(fn ($coordinate) => $coordinate instanceof Coordinate ? $coordinate : Coordinate::fromArray($coordinate), $coordinates);
+    /**
+     * @param  array<int, Coordinate|array{lat: float, lng: float}>  $coordinates
+     */
+    public function __construct(array $coordinates = [])
+    {
+        $this->coordinates = array_map(fn (Coordinate|array $coordinate): Coordinate => $coordinate instanceof Coordinate ? $coordinate : Coordinate::fromArray($coordinate), $coordinates);
     }
 
+    /**
+     * @return class-string<PolygonCast>
+     */
     public static function castUsing(array $attributes): string
     {
         return PolygonCast::class;
@@ -46,11 +52,17 @@ class Polygon implements Castable, JsonSerializable
         return empty($this->coordinates) ? null : json_encode($this->jsonSerialize());
     }
 
+    /**
+     * @return array<Coordinate>
+     */
     public function getCoordinates(): array
     {
         return $this->coordinates;
     }
 
+    /**
+     * @return array{coordinates: array<int, Coordinate>}|null
+     */
     public function jsonSerialize(): ?array
     {
         if (empty($this->coordinates) || count($this->coordinates) === 0) {

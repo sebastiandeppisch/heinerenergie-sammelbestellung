@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Models\MapPointCategory;
@@ -26,15 +28,18 @@ class UpsertMapPointRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'required',
-            'description' => 'nullable',
+            'title' => ['required'],
+            'description' => ['nullable'],
             'coordinate' => new GeographicCoordinate,
-            'published' => 'boolean',
-            'category_id' => 'nullable|bail|uuid|exists:map_point_categories,uuid',
-            'location' => 'nullable|string|max:500',
+            'published' => ['boolean'],
+            'category_id' => ['nullable', 'bail', 'uuid', 'exists:map_point_categories,uuid'],
+            'location' => ['nullable', 'string', 'max:500'],
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getData(): array
     {
         $validated = $this->validated();

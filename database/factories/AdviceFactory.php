@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Models\Advice;
@@ -46,7 +48,7 @@ class AdviceFactory extends Factory
 
     public function withSharing(): self
     {
-        return $this->afterCreating(function (Advice $advice) {
+        return $this->afterCreating(function (Advice $advice): void {
             $user = User::factory()->create();
             $advisor = User::factory()->create();
             app(AdviceService::class)->syncShares($advice, collect([$advisor]), $user);
@@ -55,7 +57,7 @@ class AdviceFactory extends Factory
 
     public function withSendable(): self
     {
-        return $this->afterCreating(function (Advice $advice) {
+        return $this->afterCreating(function (Advice $advice): void {
             $sendable = Send::factory()->create();
             $advice->sends()->attach($sendable);
         });
@@ -63,7 +65,7 @@ class AdviceFactory extends Factory
 
     public function withoutCoordinates(): self
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'lat' => null,
             'lng' => null,
         ]);

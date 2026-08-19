@@ -8,12 +8,12 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->renameColumn('long', 'lng');
             // $table->renameColumn('lat', 'lat');
         });
 
-        Schema::table('advices', function (Blueprint $table) {
+        Schema::table('advices', function (Blueprint $table): void {
             $table->renameColumn('long', 'lng');
             // $table->renameColumn('lat', 'lat');
         });
@@ -21,12 +21,12 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->renameColumn('lng', 'long');
             // $table->renameColumn('lat', 'lat');
         });
 
-        Schema::table('advices', function (Blueprint $table) {
+        Schema::table('advices', function (Blueprint $table): void {
             $table->renameColumn('lng', 'long');
             // $table->renameColumn('lat', 'lat');
         });

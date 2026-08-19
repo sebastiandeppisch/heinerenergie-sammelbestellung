@@ -11,7 +11,7 @@ use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::factory()->create();
     $this->group = Group::factory()->create(['name' => 'Test Initiative']);
     $this->group->users()->attach($this->user, ['is_admin' => true]);
@@ -19,7 +19,7 @@ beforeEach(function () {
     $this->actingAs($this->user);
 });
 
-test('checklist can be created via form builder', function () {
+test('checklist can be created via form builder', function (): void {
     $this->withoutExceptionHandling();
 
     $formData = [
@@ -51,24 +51,24 @@ test('checklist can be created via form builder', function () {
     expect($fd->name)->toBe('Meine Checkliste');
 });
 
-test('form builder index shows forms and checklists separately', function () {
+test('form builder index shows forms and checklists separately', function (): void {
     FormDefinition::factory()->create(['group_id' => $this->group->id, 'type' => FormType::Form]);
     FormDefinition::factory()->checklist()->create(['group_id' => $this->group->id]);
 
     $this->get(route('form-definitions.index'))
-        ->assertInertia(fn (Assert $page) => $page
+        ->assertInertia(fn (Assert $page): Assert => $page
             ->component('FormBuilder/Index')
             ->has('formDefinitions', 1)
             ->has('checklists', 1)
         );
 });
 
-test('form builder index shows only forms in formDefinitions prop', function () {
+test('form builder index shows only forms in formDefinitions prop', function (): void {
     FormDefinition::factory()->count(2)->create(['group_id' => $this->group->id, 'type' => FormType::Form]);
     FormDefinition::factory()->checklist()->create(['group_id' => $this->group->id]);
 
     $this->get(route('form-definitions.index'))
-        ->assertInertia(fn (Assert $page) => $page
+        ->assertInertia(fn (Assert $page): Assert => $page
             ->component('FormBuilder/Index')
             ->has('formDefinitions', 2)
             ->has('checklists', 1)

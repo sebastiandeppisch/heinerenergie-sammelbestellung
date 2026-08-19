@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Data;
 
+use App\Models\Group;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
@@ -27,15 +30,15 @@ class UserData extends Data
         public ?string $zip,
         public bool $is_admin,
         public bool $is_active,
-        /** @var Collection<GroupBaseData> */
+        /** @var Collection<int, GroupBaseData> */
         public Collection $groups,
     ) {}
 
-    public static function fromModel(User $user, bool $isActingAsAdmin, bool $withGroups = false)
+    public static function fromModel(User $user, bool $isActingAsAdmin, bool $withGroups = false): self
     {
         $groups = collect();
         if ($withGroups && $user->relationLoaded('groups')) {
-            $groups = $user->groups->map(fn ($group) => GroupBaseData::fromModel($group));
+            $groups = $user->groups->map(fn (Group $group): GroupBaseData => GroupBaseData::fromModel($group));
         }
 
         return new self(

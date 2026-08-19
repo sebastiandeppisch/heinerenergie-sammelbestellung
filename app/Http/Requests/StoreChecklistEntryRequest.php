@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Enums\FormType;
@@ -8,6 +10,7 @@ use App\Models\FormDefinition;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Exists;
 
 class StoreChecklistEntryRequest extends FormRequest
 {
@@ -16,6 +19,9 @@ class StoreChecklistEntryRequest extends FormRequest
         return $this->user()->can('update', $this->route('advice'));
     }
 
+    /**
+     * @return array<string, list<Exists|string>>
+     */
     public function rules(): array
     {
         return [
@@ -37,7 +43,7 @@ class StoreChecklistEntryRequest extends FormRequest
     public function after(): array
     {
         return [
-            function (Validator $validator) {
+            function (Validator $validator): void {
                 if ($validator->errors()->has('form_definition_id')) {
                     return;
                 }

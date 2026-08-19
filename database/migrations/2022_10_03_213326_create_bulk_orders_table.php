@@ -9,12 +9,10 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('bulk_orders', function (Blueprint $table) {
+        Schema::create('bulk_orders', function (Blueprint $table): void {
             $table->id();
             $table->timestamps();
             $table->string('name');
@@ -25,7 +23,7 @@ return new class extends Migration
             'name' => 'Standard Sammelbestellung',
         ]);
 
-        Schema::table('orders', function (Blueprint $table) use ($bulkOrderId) {
+        Schema::table('orders', function (Blueprint $table) use ($bulkOrderId): void {
             $table->foreignId('bulk_order_id')
                 ->default($bulkOrderId)
                 ->constrained()
@@ -33,14 +31,14 @@ return new class extends Migration
                 ->cascadeOnDelete();
         });
 
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->foreignId('bulk_order_id')
                 ->nullable(false)
                 ->default(null)
                 ->change();
         });
 
-        Schema::table('products', function (Blueprint $table) use ($bulkOrderId) {
+        Schema::table('products', function (Blueprint $table) use ($bulkOrderId): void {
             $table->foreignId('bulk_order_id')
                 ->default($bulkOrderId)
                 ->constrained()
@@ -48,14 +46,14 @@ return new class extends Migration
                 ->cascadeOnDelete();
         });
 
-        Schema::table('products', function (Blueprint $table) {
+        Schema::table('products', function (Blueprint $table): void {
             $table->foreignId('bulk_order_id')
                 ->nullable(false)
                 ->default(null)
                 ->change();
         });
 
-        Schema::table('product_categories', function (Blueprint $table) use ($bulkOrderId) {
+        Schema::table('product_categories', function (Blueprint $table) use ($bulkOrderId): void {
             $table->foreignId('bulk_order_id')
                 ->default($bulkOrderId)
                 ->constrained()
@@ -63,7 +61,7 @@ return new class extends Migration
                 ->cascadeOnDelete();
         });
 
-        Schema::table('product_categories', function (Blueprint $table) {
+        Schema::table('product_categories', function (Blueprint $table): void {
             $table->foreignId('bulk_order_id')
                 ->nullable(false)
                 ->default(null)
@@ -73,22 +71,20 @@ return new class extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->dropForeign(['bulk_order_id']);
             $table->dropColumn('bulk_order_id');
         });
 
-        Schema::table('products', function (Blueprint $table) {
+        Schema::table('products', function (Blueprint $table): void {
             $table->dropForeign(['bulk_order_id']);
             $table->dropColumn('bulk_order_id');
         });
 
-        Schema::table('product_categories', function (Blueprint $table) {
+        Schema::table('product_categories', function (Blueprint $table): void {
             $table->dropForeign(['bulk_order_id']);
             $table->dropColumn('bulk_order_id');
         });

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Data\AdviceEventData;
@@ -20,7 +22,9 @@ use App\Http\Requests\StoreAdviceRequest;
 use App\Http\Requests\TransferAdviceRequest;
 use App\Http\Requests\UpdateAdviceRequest;
 use App\Models\Advice;
+use App\Models\AdviceEvent;
 use App\Models\AdviceStatus;
+use App\Models\ChecklistEntry;
 use App\Models\FormDefinition;
 use App\Models\Group;
 use App\Models\User;
@@ -33,13 +37,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Inertia\Response;
 use Wnx\Sends\Models\Send;
 
 class AdviceController extends Controller
 {
     use HandlesChecklistEntries;
 
-    public function index(SessionService $sessionService)
+    public function index(SessionService $sessionService): Response
     {
         $currentGroup = $sessionService->getCurrentGroup();
         $showGroupColumn = $sessionService->actsAsSystemAdmin()
@@ -51,11 +56,11 @@ class AdviceController extends Controller
 
         $groups = Group::with('parent')->get()
         // ->filter(fn (Group $group) => Auth::user()->can('view', $group))
-            ->map(fn (Group $group) => GroupData::fromModel($group))->values()->toArray();
+            ->map(fn (Group $group): GroupData => GroupData::fromModel($group))->values()->toArray();
 
-        $adviceStatuses = AdviceStatus::all()->map(fn (AdviceStatus $status) => ['id' => $status->uuid, 'name' => $status->name]);
+        $adviceStatuses = AdviceStatus::all()->map(fn (AdviceStatus $status): array => ['id' => $status->uuid, 'name' => $status->name]);
         $advisors = User::all()
-            ->map(fn (User $u) => ['id' => $u->uuid, 'name' => "{$u->first_name} {$u->last_name}"])
+            ->map(fn (User $u): array => ['id' => $u->uuid, 'name' => "{$u->first_name} {$u->last_name}"])
             ->toArray();
 
         return Inertia::render('Advices', [
@@ -72,7 +77,7 @@ class AdviceController extends Controller
         ]);
     }
 
-    public function store(StoreAdviceRequest $request, SessionService $sessionService)
+    public function store(StoreAdviceRequest $request, SessionService $sessionService): RedirectResponse|Response
     {
         $this->authorize('create', Advice::class);
 
@@ -93,7 +98,7 @@ class AdviceController extends Controller
             ->with('success', 'Beratung erfolgreich angelegt');
     }
 
-    public function show(Advice $advice, AdviceService $adviceService)
+    public function show(Advice $advice, AdviceService $adviceService): RedirectResponse|Response
     {
         $advice->loadMissing('shares', 'group', 'group.parent', 'advisor');
         if (! Auth::user()->can('view', $advice)) {
@@ -105,14 +110,14 @@ class AdviceController extends Controller
         $events = $advice->events()
             ->with('user')
             ->get()
-            ->map(fn ($event) => AdviceEventData::fromModel($event));
+            ->map(fn (AdviceEvent $event): AdviceEventData => AdviceEventData::fromModel($event));
 
         /** @var Collection<int, Send> $mails */
         $mails = $advice->sends()->get();
-        $mails = $mails->map(fn ($mail) => AdviceEventData::fromMail($mail));
+        $mails = $mails->map(fn (Send $mail): AdviceEventData => AdviceEventData::fromMail($mail));
 
         $timeline = $events->concat($mails)
-            ->sortBy(fn ($item) => $item->created_at)
+            ->sortBy(fn ($item): string => $item->created_at)
             ->values();
 
         $coordinateOfAdvice = $advice->coordinate;
@@ -127,7 +132,7 @@ class AdviceController extends Controller
 
                 return $coordinateOfAdvice->distanceTo($center)->getValue();
             })
-            ->map(fn (Group $group) => GroupData::fromModel($group))
+            ->map(fn (Group $group): GroupData => GroupData::fromModel($group))
             ->values();
 
         $formSubmission = $adviceService->getFilteredFormSubmission($advice);
@@ -136,21 +141,21 @@ class AdviceController extends Controller
         $canDeleteAdvice = Auth::user()->can('delete', $advice);
 
         $checklistEntries = $advice->checklistEntries()->with('formDefinition.fields.options')->get()
-            ->map(fn ($entry) => ChecklistEntryData::fromModel($entry));
+            ->map(fn (ChecklistEntry $entry): ChecklistEntryData => ChecklistEntryData::fromModel($entry));
 
         $availableChecklists = FormDefinition::where('group_id', $advice->group_id)
             ->where('type', FormType::Checklist)
             ->whereNotIn('id', $advice->checklistEntries()->pluck('form_definition_id'))
             ->with('fields.options', 'group')
             ->get()
-            ->map(fn ($fd) => FormDefinitionData::fromModel($fd));
+            ->map(fn (FormDefinition $fd): FormDefinitionData => FormDefinitionData::fromModel($fd));
 
         $advice = DataProtectedAdviceData::fromModel($advice, Auth::user());
 
         // Get advice status options (filtered by user permissions)
         $adviceStatusOptions = AdviceStatus::all()
             ->filter(fn (AdviceStatus $status) => Auth::user()->can('view', $status))
-            ->map(fn (AdviceStatus $status) => AdviceStatusNamesData::fromModel($status))
+            ->map(fn (AdviceStatus $status): AdviceStatusNamesData => AdviceStatusNamesData::fromModel($status))
             ->values()
             ->toArray();
 
@@ -170,14 +175,14 @@ class AdviceController extends Controller
         ]);
     }
 
-    public function update(Advice $advice, UpdateAdviceRequest $request)
+    public function update(Advice $advice, UpdateAdviceRequest $request): RedirectResponse
     {
         $advice->update($request->validated());
 
         return redirect()->back()->with('success', 'Beratung gespeichert');
     }
 
-    public function transfer(Advice $advice, TransferAdviceRequest $request)
+    public function transfer(Advice $advice, TransferAdviceRequest $request): RedirectResponse
     {
         $targetGroup = Group::where('uuid', $request->group_id)->firstOrFail();
         $oldGroup = $advice->group;
@@ -198,7 +203,7 @@ class AdviceController extends Controller
             ->with('success', 'Beratung wurde erfolgreich übertragen. Eine Benachrichtigung wurde versendet.');
     }
 
-    public function storeComment(Advice $advice, StoreAdviceCommentRequest $request)
+    public function storeComment(Advice $advice, StoreAdviceCommentRequest $request): RedirectResponse
     {
         $this->authorize('storeComment', $advice);
         event(new CommentAddedEvent(
@@ -210,7 +215,7 @@ class AdviceController extends Controller
         return redirect()->back();
     }
 
-    public function unassign(Advice $advice)
+    public function unassign(Advice $advice): RedirectResponse
     {
         $this->authorize('unassign', $advice);
 
@@ -220,14 +225,14 @@ class AdviceController extends Controller
         return redirect()->route('advices')->with('info', 'Die Beratung wurde wieder freigegeben');
     }
 
-    public function map(CurrentGroupService $currentGroupService)
+    public function map(CurrentGroupService $currentGroupService): Response
     {
         $user = Auth::user();
         $advices = app(AdviceService::class)->getAdvicesListForUser($user);
 
-        $groups = Group::where('accepts_transfers', true)->get()->filter(fn (Group $group) => $group->consulting_area !== null)->map(fn (Group $group) => GroupMapData::fromModel($group))->values();
+        $groups = Group::where('accepts_transfers', true)->get()->filter(fn (Group $group): bool => $group->consulting_area !== null)->map(fn (Group $group): GroupMapData => GroupMapData::fromModel($group))->values();
 
-        $advisors = User::where('is_active', true)->get()->filter(fn (User $advisor) => $user->can('view', $advisor))->map(fn ($user) => UserData::fromModel($user, false))->values();
+        $advisors = User::where('is_active', true)->get()->filter(fn (User $advisor) => $user->can('view', $advisor))->map(fn (User $user): UserData => UserData::fromModel($user, false))->values();
 
         // Get marker from current group, or use default
         $currentGroup = $currentGroupService->getGroup();
@@ -245,7 +250,7 @@ class AdviceController extends Controller
         ]);
     }
 
-    public function delete(Advice $advice)
+    public function delete(Advice $advice): RedirectResponse
     {
         $this->authorize('delete', $advice);
 
@@ -259,7 +264,7 @@ class AdviceController extends Controller
         $this->authorize('update', $advice);
 
         $validated = $request->validate([
-            'advice_status_id' => 'required|uuid|exists:advice_status,uuid',
+            'advice_status_id' => ['required', 'uuid', 'exists:advice_status,uuid'],
         ]);
 
         $status = AdviceStatus::where('uuid', $validated['advice_status_id'])->firstOrFail();
@@ -275,7 +280,7 @@ class AdviceController extends Controller
         $this->authorize('update', $advice);
 
         $validated = $request->validate([
-            'advisor_id' => 'required|integer|nullable|exists:users,uuid',
+            'advisor_id' => ['required', 'integer', 'nullable', 'exists:users,uuid'],
         ]);
 
         $advisor = User::where('uuid', $validated['advisor_id'])->firstOrFail();

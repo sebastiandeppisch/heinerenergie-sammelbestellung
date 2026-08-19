@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\ConsultingArea;
 
 use App\Models\Group;
@@ -14,7 +16,7 @@ use function Pest\Laravel\actingAs;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->group = Group::factory()->create();
     $this->admin = User::factory()->create();
     $this->group->users()->attach($this->admin, ['is_admin' => true]);
@@ -23,7 +25,7 @@ beforeEach(function () {
     Config::set('app.group_context', 'global');
 });
 
-test('unauthorized users cannot update consulting area', function () {
+test('unauthorized users cannot update consulting area', function (): void {
     $user = User::factory()->create();
     $group = Group::factory()->create();
 
@@ -36,7 +38,7 @@ test('unauthorized users cannot update consulting area', function () {
     expect($group->fresh()->consulting_area)->toBeNull();
 });
 
-test('group admin can update consulting area', function () {
+test('group admin can update consulting area', function (): void {
     $coordinates = [
         ['lat' => 49.8807, 'lng' => 8.6572],
         ['lat' => 49.8787, 'lng' => 8.6661],
@@ -56,18 +58,17 @@ test('group admin can update consulting area', function () {
         ->assertRedirect()
         ->assertSessionHas('success', 'Beratungsgebiet wurde erfolgreich gespeichert.');
 
-    $this->group->refresh();
+    $polygon = Group::query()->where('id', $this->group->id)->firstOrFail()->consulting_area;
 
-    expect($this->group->consulting_area)
-        ->toBeInstanceOf(Polygon::class)
-        ->and(collect($this->group->consulting_area->getCoordinates())->map(fn (Coordinate $coordinate) => [
-            'lat' => $coordinate->lat,
-            'lng' => $coordinate->lng,
-        ]))
-        ->toMatchArray($coordinates);
+    expect($polygon)->toBeInstanceOf(Polygon::class);
+
+    expect(collect($polygon?->getCoordinates() ?? [])->map(fn (Coordinate $coordinate): array => [
+        'lat' => $coordinate->lat,
+        'lng' => $coordinate->lng,
+    ]))->toMatchArray($coordinates);
 });
 
-test('it validates polygon format', function () {
+test('it validates polygon format', function (): void {
     // Test invalid coordinate format
     actingAs($this->admin)
         ->post(route('groups.consulting-area.update', $this->group), [
@@ -87,7 +88,7 @@ test('it validates polygon format', function () {
         ->assertSessionHasErrors('polygon.coordinates.*');
 });
 
-test('consulting area can be cleared', function () {
+test('consulting area can be cleared', function (): void {
     // First set a polygon
     $this->group->consulting_area = new Polygon([
         ['lat' => 49.8807, 'lng' => 8.6572],

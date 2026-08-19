@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Rules;
 
 use Closure;
@@ -17,6 +19,9 @@ class CheckboxRequiredValidator implements ValidationRule
         protected array $requiredOptions = []
     ) {}
 
+    /**
+     * @return array<int, string>
+     */
     private function values(): array
     {
         return collect($this->requiredOptions)->keys()->values()->toArray();
@@ -33,7 +38,7 @@ class CheckboxRequiredValidator implements ValidationRule
             $missing = array_diff($this->values(), $value);
 
             $missingNames = collect($this->requiredOptions)
-                ->filter(fn ($option, $key) => in_array($key, $missing))
+                ->filter(fn ($option, $key): bool => in_array($key, $missing))
                 ->values()
                 ->toArray();
 

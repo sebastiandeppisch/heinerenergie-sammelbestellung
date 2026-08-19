@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\Advice;
@@ -14,12 +16,12 @@ class AdvicePolicy
 
     // private int $cacheSeconds = 10 * 60;
 
-    public function viewAny(User $user)
+    public function viewAny(User $user): bool
     {
         return true;
     }
 
-    public function view(User $user, Advice $advice)
+    public function view(User $user, Advice $advice): bool
     {
         if ($advice->advisor_id === $user->id) {
             return true;
@@ -32,7 +34,7 @@ class AdvicePolicy
         return $this->groupContext->isActingAsTransitiveAdmin($user, $advice->group);
     }
 
-    public function viewDataProtected(User $user, Advice $advice)
+    public function viewDataProtected(User $user, Advice $advice): bool
     {
 
         if ($advice->advisor_id !== null) {
@@ -45,13 +47,13 @@ class AdvicePolicy
         return $this->view($user, $advice);
     }
 
-    public function create(User $user)
+    public function create(User $user): bool
     {
         // everyone, even guests can create advices
         return true;
     }
 
-    public function update(User $user, Advice $advice)
+    public function update(User $user, Advice $advice): bool
     {
         if ($advice->advisor_id === $user->id) {
             return true;
@@ -68,27 +70,27 @@ class AdvicePolicy
         return false;
     }
 
-    public function delete(User $user, Advice $advice)
+    public function delete(User $user, Advice $advice): bool
     {
         return $this->groupContext->isActingAsSystemAdmin($user);
     }
 
-    public function addAdvisors(User $user, Advice $advice)
+    public function addAdvisors(User $user, Advice $advice): bool
     {
         return $this->update($user, $advice);
     }
 
-    public function transfer(User $user, Advice $advice)
+    public function transfer(User $user, Advice $advice): bool
     {
         return $this->update($user, $advice);
     }
 
-    public function storeComment(User $user, Advice $advice)
+    public function storeComment(User $user, Advice $advice): bool
     {
         return $this->update($user, $advice);
     }
 
-    public function unassign(User $user, Advice $advice)
+    public function unassign(User $user, Advice $advice): bool
     {
         return $this->update($user, $advice);
     }
