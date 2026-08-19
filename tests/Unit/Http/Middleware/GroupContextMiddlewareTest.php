@@ -25,8 +25,6 @@ beforeEach(function () {
     $this->factory = new SessionGroupContextFactory($this->sessionService);
     $this->middleware = new GroupContextMiddleware(
         $this->factory,
-        $this->sessionService,
-        $this->user
     );
 });
 
@@ -40,7 +38,6 @@ test('middleware binds context to container', function () {
     $this->middleware->handle(Request::create('/'), function ($request) {
         $context = app()->make(GroupContextContract::class);
 
-        expect($context)->toBeInstanceOf(GroupContextContract::class);
         expect($context->getCurrentGroup())->not->toBeNull();
         expect($context->getCurrentGroup()->id)->toEqual($this->group->id);
         expect($context->isActingAsDirectAdmin($this->user, $this->group))->toEqual(true);
@@ -80,7 +77,6 @@ test('middleware works with unauthenticated users', function () {
     $this->middleware->handle(Request::create('/'), function ($request) {
         $context = app()->make(GroupContextContract::class);
 
-        expect($context)->toBeInstanceOf(GroupContextContract::class);
         expect($context->getCurrentGroup())->toBeNull();
         // For unauthenticated users, we can't check actsAsGroupAdmin since it requires a user
 

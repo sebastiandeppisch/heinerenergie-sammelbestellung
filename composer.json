@@ -42,6 +42,7 @@
         "pestphp/pest-plugin-arch": "^5.0",
         "pestphp/pest-plugin-browser": "^5.0",
         "pestphp/pest-plugin-laravel": "^5.0",
+        "pestphp/pest-plugin-phpstan": "^5.0",
         "spatie/laravel-ignition": "^2.0"
     },
     "autoload": {

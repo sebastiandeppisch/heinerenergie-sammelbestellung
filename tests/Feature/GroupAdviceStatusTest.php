@@ -29,7 +29,6 @@ beforeEach(function () {
         'group_id' => $this->mainGroup->id,
     ]);
 
-    /** @var AdviceStatus */
     $this->subGroupStatus = AdviceStatus::create([
         'name' => 'Sub Group Status',
         'result' => AdviceStatusResult::Completed,

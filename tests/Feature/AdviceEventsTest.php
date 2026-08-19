@@ -62,8 +62,9 @@ test('it batches multiple person field changes into one event', function () {
         fn ($e) => $e->event instanceof PersonDataChangedEvent
     );
 
-    expect($personEvents)->toHaveCount(1)
-        ->and($personEvents->first()->event->changes)->toHaveKeys(['first_name', 'last_name']);
+    expect($personEvents)->toHaveCount(1);
+    expect($personEvents->first()->event)->toBeInstanceOf(PersonDataChangedEvent::class)
+        ->changes->toHaveKeys(['first_name', 'last_name']);
 });
 
 test('it records old and new values for each changed person field', function () {
@@ -74,8 +75,7 @@ test('it records old and new values for each changed person field', function () 
     $event = $this->advice->events()->latest()->first()->event;
 
     expect($event)->toBeInstanceOf(PersonDataChangedEvent::class)
-        ->and($event->changes['first_name']['from'])->toBe($oldFirstName)
-        ->and($event->changes['first_name']['to'])->toBe('Geändert');
+        ->changes->toMatchArray(['first_name' => ['from' => $oldFirstName, 'to' => 'Geändert']]);
 });
 
 test('it creates no person data event when only non-person fields change', function () {
@@ -118,7 +118,7 @@ test('person data event description covers all tracked fields', function () {
     $event = $this->advice->events()->latest()->first()->event;
 
     expect($event)->toBeInstanceOf(PersonDataChangedEvent::class)
-        ->and($event->changes)->toHaveKeys(array_keys($fields));
+        ->changes->toHaveKeys(array_keys($fields));
 });
 
 test('it creates an event when status changes', function () {

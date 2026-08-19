@@ -46,8 +46,8 @@ test('editing a user toggles admin via dialog', function () {
         ->click('[data-test="save-edit"]')
         ->assertNoJavaScriptErrors();
 
-    expect($this->group->fresh()->users()->where('users.id', $this->member->id)->first()->pivot->is_admin)
-        ->toBeTruthy();
+    expect($this->group->fresh()->admins()->where('users.id', $this->member->id)->exists())
+        ->toBeTrue();
 });
 
 test('removing a user asks for confirmation and detaches', function () {

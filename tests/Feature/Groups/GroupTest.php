@@ -30,7 +30,6 @@ beforeEach(function () {
 
 it('can create group via factory', function () {
     $group = Group::factory()->create();
-    expect($group)->toBeInstanceOf(Group::class);
     expect($group->name)->not->toBeEmpty();
 });
 

@@ -1,7 +1,14 @@
 includes:
     - vendor/larastan/larastan/extension.neon
+    - vendor/pestphp/pest-plugin-phpstan/extension.neon
 parameters:
     paths:
         - app/
+        - tests/
     level: 5
     treatPhpDocTypesAsCertain: false
+    ignoreErrors:
+        #Traits mixed in via Pest's uses() are invisible to PHPStan's trait-usage detection
+        -
+            identifier: trait.unused
+            path: tests/Concerns/*

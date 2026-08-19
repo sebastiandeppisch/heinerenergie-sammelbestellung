@@ -33,11 +33,11 @@ class AdviceServiceTest extends TestCase
 
     public function test_can_edit_returns_correct_permission(): void
     {
-        $user = User::factory()->create();
-        $advice = Advice::factory()->create();
+        $advisor = User::factory()->create();
+        $unrelatedUser = User::factory()->create();
+        $advice = Advice::factory()->create(['advisor_id' => $advisor->id]);
 
-        $canEdit = $this->adviceService->canEdit($advice, $user);
-
-        $this->assertIsBool($canEdit);
+        $this->assertTrue($this->adviceService->canEdit($advice, $advisor));
+        $this->assertFalse($this->adviceService->canEdit($advice, $unrelatedUser));
     }
 }

@@ -13,7 +13,7 @@ class GroupService
     /**
      * Find a group whose consulting area contains the specified coordinates
      *
-     * @return Collection<Group>
+     * @return Collection<int, Group>
      */
     public function findGroupsContainingCoordinates(Coordinate $coordinate): ?Collection
     {

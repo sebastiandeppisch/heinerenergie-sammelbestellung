@@ -16,10 +16,10 @@ it('can be created with a factory', function () {
 it('can be created with a form submission', function () {
     MapPoint::factory()
         ->withFormSubmission()->create();
-    $this->assertEquals(FormSubmission::firstOrFail()->id, MapPoint::firstOrFail()->pointable()->first()->id);
+    expect(MapPoint::firstOrFail()->pointable->is(FormSubmission::firstOrFail()))->toBeTrue();
 });
 
 it('can be created with a advice', function () {
     MapPoint::factory()->withAdvice()->create();
-    $this->assertEquals(Advice::firstOrFail()->id, MapPoint::firstOrFail()->pointable()->first()->id);
+    expect(MapPoint::firstOrFail()->pointable->is(Advice::firstOrFail()))->toBeTrue();
 });

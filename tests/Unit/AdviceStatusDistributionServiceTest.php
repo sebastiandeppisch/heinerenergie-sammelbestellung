@@ -206,7 +206,7 @@ it('returns one data point per cutoff date', function () {
 });
 
 it('caches past cutoff dates but not the current period', function () {
-    Cache::spy();
+    $cache = Cache::spy();
 
     $group = Group::factory()->create();
     $from = now()->subMonths(2)->startOfMonth();
@@ -214,5 +214,5 @@ it('caches past cutoff dates but not the current period', function () {
 
     kpiService()->getDistribution($group, $from, $to, Aggregation::Month);
 
-    Cache::shouldHaveReceived('rememberForever')->atLeast()->once();
+    $cache->shouldHaveReceived('rememberForever')->atLeast()->once();
 });

@@ -98,9 +98,6 @@ test('system administrators are notified on geocoding failure', function () {
         SystemErrorNotification::class,
         fn ($notification) => $notification->advice->id === $advice->id
     );
-
-    // This line verifies the job completes without exceptions
-    expect(true)->toBeTrue();
 });
 
 // Test for assigning advice to main group even when a closer subgroup exists
