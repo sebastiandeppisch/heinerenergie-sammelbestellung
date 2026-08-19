@@ -15,9 +15,9 @@ test('password reset mail is rendered in german', function () {
 
     expect((string) $mail->render())
         ->toContain('Hallo!')
-        ->toContain('Du erhältst diese E-Mail, weil wir eine Anfrage zum Zurücksetzen des Passworts für dein Konto erhalten haben.')
+        ->toContain('Du erhältst diese E-Mail, weil wir eine Anfrage zum Zurücksetzen des Passworts für Dein Konto erhalten haben.')
         ->toContain('Passwort zurücksetzen')
-        ->toContain('Wenn du kein Zurücksetzen des Passworts angefordert hast, sind keine weiteren Schritte nötig.')
+        ->toContain('Wenn Du kein Zurücksetzen des Passworts angefordert hast, sind keine weiteren Schritte nötig.')
         ->toContain('Viele Grüße')
-        ->toContain('Falls du Probleme hast');
+        ->toContain('Falls Du Probleme hast');
 });
