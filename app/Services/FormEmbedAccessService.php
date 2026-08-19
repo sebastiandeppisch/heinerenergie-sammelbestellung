@@ -33,7 +33,7 @@ class FormEmbedAccessService
         $allowedDomains = $formDefinition->allowed_embed_domains ?? [];
 
         return collect($allowedDomains)
-            ->contains(fn (string $domain) => strcasecmp($domain, $refererHost) === 0);
+            ->contains(fn (string $domain): bool => strcasecmp($domain, $refererHost) === 0);
     }
 
     /**

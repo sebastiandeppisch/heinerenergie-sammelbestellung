@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Concerns;
 
+use Illuminate\Http\RedirectResponse;
 use App\Http\Requests\StoreChecklistEntryRequest;
 use App\Http\Requests\UpdateChecklistEntryRequest;
 use App\Models\Advice;
@@ -10,12 +11,12 @@ use Illuminate\Support\Facades\DB;
 
 trait HandlesChecklistEntries
 {
-    public function storeChecklistEntry(Advice $advice, StoreChecklistEntryRequest $request)
+    public function storeChecklistEntry(Advice $advice, StoreChecklistEntryRequest $request): RedirectResponse
     {
         $checklist = $request->checklist();
         $checklist->loadMissing('fields.options');
 
-        DB::transaction(function () use ($advice, $checklist) {
+        DB::transaction(function () use ($advice, $checklist): void {
             $entry = $advice->checklistEntries()->create([
                 'form_definition_id' => $checklist->id,
             ]);
@@ -28,12 +29,12 @@ trait HandlesChecklistEntries
         return back();
     }
 
-    public function updateChecklistEntry(Advice $advice, ChecklistEntry $checklistEntry, UpdateChecklistEntryRequest $request)
+    public function updateChecklistEntry(Advice $advice, ChecklistEntry $checklistEntry, UpdateChecklistEntryRequest $request): RedirectResponse
     {
         $checklistEntry->loadMissing('fields');
         $fieldsByUuid = $checklistEntry->fields->keyBy('uuid');
 
-        DB::transaction(function () use ($fieldsByUuid, $request) {
+        DB::transaction(function () use ($fieldsByUuid, $request): void {
             foreach ($request->fieldValues() as $uuid => $value) {
                 $field = $fieldsByUuid->get($uuid);
                 if ($field === null) {

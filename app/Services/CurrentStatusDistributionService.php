@@ -26,7 +26,7 @@ class CurrentStatusDistributionService
             ->orderByDesc('count')
             ->get();
 
-        return $rows->map(function ($row) {
+        return $rows->map(function ($row): StatusNameCountData {
             $result = $row->status_result !== null
                 ? AdviceStatusResult::from((int) $row->status_result)
                 : AdviceStatusResult::New;

@@ -39,7 +39,7 @@ class MapPointFactory extends Factory
 
     public function withFormSubmission(): Factory
     {
-        return $this->afterMaking(function (MapPoint $mapPoint) {
+        return $this->afterMaking(function (MapPoint $mapPoint): MapPoint {
             $mapPoint->pointable()->associate(FormSubmission::factory()->create());
 
             return $mapPoint;
@@ -48,7 +48,7 @@ class MapPointFactory extends Factory
 
     public function withAdvice(): Factory
     {
-        return $this->afterMaking(function (MapPoint $mapPoint) {
+        return $this->afterMaking(function (MapPoint $mapPoint): MapPoint {
             $mapPoint->pointable()->associate(Advice::factory()->create());
 
             return $mapPoint;
@@ -70,7 +70,7 @@ class MapPointFactory extends Factory
 
     public function withCategory(?MapPointCategory $category = null): Factory
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'category_id' => $category->id ?? MapPointCategory::factory()->create()->id,
         ]);
     }

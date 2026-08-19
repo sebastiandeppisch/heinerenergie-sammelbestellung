@@ -38,7 +38,7 @@ class GroupFactory extends Factory
      */
     public function child(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'parent_id' => Group::factory(),
         ]);
     }
@@ -57,7 +57,7 @@ class GroupFactory extends Factory
 
         Storage::disk('public')->put('group-logos/'.$randomFilename, file_get_contents($logoPath));
 
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'logo_path' => 'group-logos/'.$randomFilename,
         ]);
     }

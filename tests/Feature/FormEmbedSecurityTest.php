@@ -9,13 +9,13 @@ use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
 
-test('form can be loaded directly without a domain whitelist', function () {
+test('form can be loaded directly without a domain whitelist', function (): void {
     $formDefinition = FormDefinition::factory()->create(['allowed_embed_domains' => null]);
 
     $response = $this->get(route('form.show', $formDefinition));
 
     $response->assertStatus(200);
-    $response->assertInertia(fn (Assert $page) => $page
+    $response->assertInertia(fn (Assert $page): Assert => $page
         ->component('Forms/Show')
         ->where('embedBlocked', false)
         ->has('formToken')
@@ -23,7 +23,7 @@ test('form can be loaded directly without a domain whitelist', function () {
     );
 });
 
-test('the allowed embed domains are not exposed on the public form pages', function () {
+test('the allowed embed domains are not exposed on the public form pages', function (): void {
     $formDefinition = FormDefinition::factory()->create(['allowed_embed_domains' => ['secret-partner.example']]);
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
@@ -31,7 +31,7 @@ test('the allowed embed domains are not exposed on the public form pages', funct
     ]);
 
     $showResponse = $this->get(route('form.show', $formDefinition));
-    $showResponse->assertInertia(fn (Assert $page) => $page
+    $showResponse->assertInertia(fn (Assert $page): Assert => $page
         ->where('formDefinition.allowed_embed_domains', null)
     );
 
@@ -39,7 +39,7 @@ test('the allowed embed domains are not exposed on the public form pages', funct
         $formField->uuid => 'Sample text',
         '_form_token' => app(FormEmbedAccessService::class)->issueToken($formDefinition),
     ]);
-    $submitResponse->assertInertia(fn (Assert $page) => $page
+    $submitResponse->assertInertia(fn (Assert $page): Assert => $page
         ->where('formDefinition.allowed_embed_domains', null)
     );
 
@@ -47,7 +47,7 @@ test('the allowed embed domains are not exposed on the public form pages', funct
     expect($submitResponse->getContent())->not->toContain('secret-partner.example');
 });
 
-test('form is blocked when loaded in an iframe from a non-whitelisted domain', function () {
+test('form is blocked when loaded in an iframe from a non-whitelisted domain', function (): void {
     $formDefinition = FormDefinition::factory()->create(['allowed_embed_domains' => ['allowed.example']]);
 
     $response = $this->get(route('form.show', $formDefinition), [
@@ -56,14 +56,14 @@ test('form is blocked when loaded in an iframe from a non-whitelisted domain', f
     ]);
 
     $response->assertStatus(200);
-    $response->assertInertia(fn (Assert $page) => $page
+    $response->assertInertia(fn (Assert $page): Assert => $page
         ->component('Forms/Show')
         ->where('embedBlocked', true)
         ->where('formDefinition', null)
     );
 });
 
-test('form loads when loaded in an iframe from a whitelisted domain', function () {
+test('form loads when loaded in an iframe from a whitelisted domain', function (): void {
     $formDefinition = FormDefinition::factory()->create(['allowed_embed_domains' => ['allowed.example']]);
 
     $response = $this->get(route('form.show', $formDefinition), [
@@ -72,7 +72,7 @@ test('form loads when loaded in an iframe from a whitelisted domain', function (
     ]);
 
     $response->assertStatus(200);
-    $response->assertInertia(fn (Assert $page) => $page
+    $response->assertInertia(fn (Assert $page): Assert => $page
         ->component('Forms/Show')
         ->where('embedBlocked', false)
         ->has('formToken')
@@ -80,7 +80,7 @@ test('form loads when loaded in an iframe from a whitelisted domain', function (
     );
 });
 
-test('submitting without a form token is rejected', function () {
+test('submitting without a form token is rejected', function (): void {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
@@ -96,7 +96,7 @@ test('submitting without a form token is rejected', function () {
     $this->assertDatabaseCount('form_submissions', 0);
 });
 
-test('submitting with an invalid form token is rejected', function () {
+test('submitting with an invalid form token is rejected', function (): void {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,
@@ -112,7 +112,7 @@ test('submitting with an invalid form token is rejected', function () {
     $this->assertDatabaseCount('form_submissions', 0);
 });
 
-test('submitting with a valid form token from another form is rejected', function () {
+test('submitting with a valid form token from another form is rejected', function (): void {
     $formDefinitionA = FormDefinition::factory()->create();
     $formDefinitionB = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
@@ -131,7 +131,7 @@ test('submitting with a valid form token from another form is rejected', functio
     $this->assertDatabaseCount('form_submissions', 0);
 });
 
-test('submitting with a valid form token succeeds without a session cookie', function () {
+test('submitting with a valid form token succeeds without a session cookie', function (): void {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([
         'form_definition_id' => $formDefinition->id,

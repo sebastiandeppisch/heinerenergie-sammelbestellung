@@ -15,7 +15,7 @@ use function Pest\Laravel\put;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     Storage::fake('public');
 
     $this->admin = User::factory()->create(['is_admin' => true]);
@@ -28,12 +28,12 @@ beforeEach(function () {
     Config::set('app.group_context', 'global');
 });
 
-it('can create group via factory', function () {
+it('can create group via factory', function (): void {
     $group = Group::factory()->create();
     expect($group->name)->not->toBeEmpty();
 });
 
-test('can create group', function () {
+test('can create group', function (): void {
     actingAs($this->admin);
 
     $response = post(route('groups.store'), [
@@ -49,7 +49,7 @@ test('can create group', function () {
         ->description->toBe('New Description');
 });
 
-test('can update group with new logo', function () {
+test('can update group with new logo', function (): void {
     actingAs($this->admin);
 
     $oldLogo = UploadedFile::fake()->image('old-logo.jpg');
@@ -85,7 +85,7 @@ test('can update group with new logo', function () {
     Storage::disk('public')->assertExists($this->group->logo_path);
 });
 
-test('validates logo file size and type', function () {
+test('validates logo file size and type', function (): void {
     actingAs($this->admin);
 
     // Test file too large (over 1MB)
@@ -111,7 +111,7 @@ test('validates logo file size and type', function () {
     $response->assertSessionHasErrors('logo');
 });
 
-test('can update primary hue', function () {
+test('can update primary hue', function (): void {
     actingAs($this->admin);
 
     $response = put(route('groups.update', $this->group), [
@@ -125,7 +125,7 @@ test('can update primary hue', function () {
     expect($this->group->refresh()->primary_hue)->toBe(180.5);
 });
 
-test('can update primary lightness and chroma', function () {
+test('can update primary lightness and chroma', function (): void {
     actingAs($this->admin);
 
     $response = put(route('groups.update', $this->group), [
@@ -144,7 +144,7 @@ test('can update primary lightness and chroma', function () {
         ->and($this->group->primary_chroma)->toBe(0.18);
 });
 
-test('can reset primary color to null', function () {
+test('can reset primary color to null', function (): void {
     $this->group->update(['primary_hue' => 120.0, 'primary_lightness' => 0.7, 'primary_chroma' => 0.2]);
 
     actingAs($this->admin);
@@ -164,7 +164,7 @@ test('can reset primary color to null', function () {
         ->and($this->group->primary_chroma)->toBeNull();
 });
 
-test('rejects primary_hue outside 0-360 range', function (mixed $invalidHue) {
+test('rejects primary_hue outside 0-360 range', function (mixed $invalidHue): void {
     actingAs($this->admin);
 
     $response = put(route('groups.update', $this->group), [
@@ -178,7 +178,7 @@ test('rejects primary_hue outside 0-360 range', function (mixed $invalidHue) {
     'negative' => -1,
 ]);
 
-test('rejects primary_lightness outside 0-1 range', function (mixed $invalidValue) {
+test('rejects primary_lightness outside 0-1 range', function (mixed $invalidValue): void {
     actingAs($this->admin);
 
     $response = put(route('groups.update', $this->group), [
@@ -192,7 +192,7 @@ test('rejects primary_lightness outside 0-1 range', function (mixed $invalidValu
     'negative' => -0.1,
 ]);
 
-test('rejects primary_chroma outside 0-0.4 range', function (mixed $invalidValue) {
+test('rejects primary_chroma outside 0-0.4 range', function (mixed $invalidValue): void {
     actingAs($this->admin);
 
     $response = put(route('groups.update', $this->group), [
@@ -206,7 +206,7 @@ test('rejects primary_chroma outside 0-0.4 range', function (mixed $invalidValue
     'negative' => -0.01,
 ]);
 
-test('theme props contain primary color values when group is selected', function () {
+test('theme props contain primary color values when group is selected', function (): void {
     $this->group->update(['primary_hue' => 120.5, 'primary_lightness' => 0.65, 'primary_chroma' => 0.18]);
 
     $user = User::factory()->create();
@@ -226,7 +226,7 @@ test('theme props contain primary color values when group is selected', function
     );
 });
 
-test('theme props are null when group has no color set', function () {
+test('theme props are null when group has no color set', function (): void {
     $user = User::factory()->create();
     $this->group->users()->attach($user, ['is_admin' => true]);
 
@@ -244,7 +244,7 @@ test('theme props are null when group has no color set', function () {
     );
 });
 
-test('deleting group removes logo', function () {
+test('deleting group removes logo', function (): void {
     actingAs($this->admin);
 
     $logo = UploadedFile::fake()->image('logo.jpg');

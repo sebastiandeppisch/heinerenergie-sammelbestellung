@@ -25,7 +25,7 @@ class FetchAddressByCoordinate
         Log::debug('Fetching address for coordinate', ['coordinate' => $coordinate]);
         $this->coordinate = $coordinate;
 
-        return Cache::rememberForever($this->key(), fn () => $this->handle());
+        return Cache::rememberForever($this->key(), fn (): ?string => $this->handle());
     }
 
     private function key(): string

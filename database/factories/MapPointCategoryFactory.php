@@ -33,7 +33,7 @@ class MapPointCategoryFactory extends Factory
      */
     public function withoutImage(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'image_path' => null,
         ]);
     }
@@ -43,7 +43,7 @@ class MapPointCategoryFactory extends Factory
      */
     public function withImage(string $imagePath): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'image_path' => $imagePath,
         ]);
     }

@@ -111,7 +111,7 @@ class NextcloudAdviceController extends Controller
 
         $stream = $this->nextcloud->downloadFile($path);
 
-        return response()->stream(function () use ($stream) {
+        return response()->stream(function () use ($stream): void {
             fpassthru($stream);
         });
     }

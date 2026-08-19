@@ -30,10 +30,10 @@ class FormSubmissionController extends Controller
         }
 
         $formsubmissions = $formsubmissions->orderBy('submitted_at', $request->sorting())
-            ->whereHas('formDefinition', function ($query) {
+            ->whereHas('formDefinition', function ($query): void {
                 $query->where('type', FormType::Form);
             })
-            ->where(function ($query) use ($request) {
+            ->where(function ($query) use ($request): void {
                 if ($request->dateFrom()) {
                     $query->where('submitted_at', '>=', $request->dateFrom());
                 }
@@ -41,7 +41,7 @@ class FormSubmissionController extends Controller
                     $query->where('submitted_at', '<=', $request->dateTo());
                 }
             })
-            ->when($request->selectedFormDefinitions(), function ($query) use ($request) {
+            ->when($request->selectedFormDefinitions(), function ($query) use ($request): void {
                 $query->whereIn('form_definition_id', $request->selectedFormDefinitions());
             })->paginate(10);
 
@@ -52,7 +52,7 @@ class FormSubmissionController extends Controller
             $formDefinitions = $formDefinitions->where('group_id', $groupContext->getCurrentGroup()->id);
         }
 
-        $formDefinitions = $formDefinitions->get()->map(fn (FormDefinition $formDefinition) => FormDefinitionData::fromModel($formDefinition));
+        $formDefinitions = $formDefinitions->get()->map(fn (FormDefinition $formDefinition): FormDefinitionData => FormDefinitionData::fromModel($formDefinition));
 
         $selectedFormDefinitions = FormDefinition::whereIn('id', $request->selectedFormDefinitions())->pluck('uuid')->toArray();
 
@@ -71,7 +71,7 @@ class FormSubmissionController extends Controller
 
     private function addPagedIndex(array $items, int $page): Collection
     {
-        return collect($items)->mapWithKeys(function ($item, $key) use ($page) {
+        return collect($items)->mapWithKeys(function ($item, $key) use ($page): array {
             $index = ($key + ($page - 1) * 10);
 
             $item = FormSubmissionData::fromModel($item);

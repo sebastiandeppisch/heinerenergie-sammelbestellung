@@ -15,7 +15,7 @@ use function Pest\Laravel\post;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::factory()->create();
 
     // Create required statuses
@@ -38,7 +38,7 @@ beforeEach(function () {
     $this->actingAs($this->user);
 });
 
-test('it creates an event when a single person field changes', function () {
+test('it creates an event when a single person field changes', function (): void {
     $oldEmail = $this->advice->email;
     $this->advice->email = 'new@example.com';
     $this->advice->save();
@@ -53,13 +53,13 @@ test('it creates an event when a single person field changes', function () {
         );
 });
 
-test('it batches multiple person field changes into one event', function () {
+test('it batches multiple person field changes into one event', function (): void {
     $this->advice->first_name = 'Neuer';
     $this->advice->last_name = 'Name';
     $this->advice->save();
 
     $personEvents = $this->advice->events()->get()->filter(
-        fn ($e) => $e->event instanceof PersonDataChangedEvent
+        fn ($e): bool => $e->event instanceof PersonDataChangedEvent
     );
 
     expect($personEvents)->toHaveCount(1);
@@ -67,7 +67,7 @@ test('it batches multiple person field changes into one event', function () {
         ->changes->toHaveKeys(['first_name', 'last_name']);
 });
 
-test('it records old and new values for each changed person field', function () {
+test('it records old and new values for each changed person field', function (): void {
     $oldFirstName = $this->advice->first_name;
     $this->advice->first_name = 'Geändert';
     $this->advice->save();
@@ -78,18 +78,18 @@ test('it records old and new values for each changed person field', function () 
         ->changes->toMatchArray(['first_name' => ['from' => $oldFirstName, 'to' => 'Geändert']]);
 });
 
-test('it creates no person data event when only non-person fields change', function () {
+test('it creates no person data event when only non-person fields change', function (): void {
     $this->advice->commentary = 'Neuer Kommentar';
     $this->advice->save();
 
     $personEvents = $this->advice->events()->get()->filter(
-        fn ($e) => $e->event instanceof PersonDataChangedEvent
+        fn ($e): bool => $e->event instanceof PersonDataChangedEvent
     );
 
     expect($personEvents)->toHaveCount(0);
 });
 
-test('it stores the user who changed person data', function () {
+test('it stores the user who changed person data', function (): void {
     $this->advice->phone = '0123456789';
     $this->advice->save();
 
@@ -98,7 +98,7 @@ test('it stores the user who changed person data', function () {
     expect($event->user_id)->toBe($this->user->id);
 });
 
-test('person data event description covers all tracked fields', function () {
+test('person data event description covers all tracked fields', function (): void {
     $fields = [
         'first_name' => ['old' => $this->advice->first_name, 'new' => 'Max'],
         'last_name' => ['old' => $this->advice->last_name, 'new' => 'Mustermann'],
@@ -121,7 +121,7 @@ test('person data event description covers all tracked fields', function () {
         ->changes->toHaveKeys(array_keys($fields));
 });
 
-test('it creates an event when status changes', function () {
+test('it creates an event when status changes', function (): void {
     $this->advice->advice_status_id = $this->status2->id;
     $this->advice->save();
 
@@ -136,7 +136,7 @@ test('it creates an event when status changes', function () {
         ->and($event->description)->toBe("Status wurde von '{$this->status1->name}' zu '{$this->status2->name}' geändert");
 });
 
-test('it creates an event when group is transferred', function () {
+test('it creates an event when group is transferred', function (): void {
     $this->actingAs($this->user);
 
     $newGroup = Group::factory()->create(['name' => 'New Initiative', 'accepts_transfers' => true]);
@@ -152,7 +152,7 @@ test('it creates an event when group is transferred', function () {
         ->and($event->description)->toBe('Beratung wurde von Test Initiative zu New Initiative übertragen');
 });
 
-test('it includes reason in transfer description when provided', function () {
+test('it includes reason in transfer description when provided', function (): void {
     $this->actingAs($this->user);
 
     $newGroup = Group::factory()->create(['name' => 'New Initiative']);
@@ -173,7 +173,7 @@ test('it includes reason in transfer description when provided', function () {
         ->and($event->description)->toBe("Beratung wurde von Test Initiative zu New Initiative übertragen (Grund: {$reason})");
 });
 
-test('events can be retrieved in chronological order', function () {
+test('events can be retrieved in chronological order', function (): void {
     $this->actingAs($this->user);
 
     // Create multiple events
@@ -193,7 +193,7 @@ test('events can be retrieved in chronological order', function () {
         );
 });
 
-test('events retain user who triggered them', function () {
+test('events retain user who triggered them', function (): void {
     $this->actingAs($this->user);
 
     $this->advice->advice_status_id = $this->status3->id;
@@ -206,7 +206,7 @@ test('events retain user who triggered them', function () {
         ->and($event->user_id)->toBe($this->user->id);
 });
 
-function transferAdvice(Advice $advice, Group $newGroup, ?string $reason = null)
+function transferAdvice(Advice $advice, Group $newGroup, ?string $reason = null): void
 {
     $response = post(route('advices.transfer', $advice), [
         'group_id' => $newGroup->uuid,

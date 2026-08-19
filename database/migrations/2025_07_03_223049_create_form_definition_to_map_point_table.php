@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('form_definition_to_map_points', function (Blueprint $table) {
+        Schema::create('form_definition_to_map_points', function (Blueprint $table): void {
             $table->id();
             $table->uuid('uuid')->unique();
 

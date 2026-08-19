@@ -3,11 +3,11 @@
 use App\Services\MailConfigDiscoveryService;
 use Illuminate\Support\Facades\Http;
 
-beforeEach(function () {
+beforeEach(function (): void {
     Http::preventStrayRequests();
 });
 
-$autoconfigXml = fn (string $imapHost, int $imapPort, string $smtpHost, int $smtpPort) => <<<XML
+$autoconfigXml = fn (string $imapHost, int $imapPort, string $smtpHost, int $smtpPort): string => <<<XML
     <?xml version="1.0"?>
     <clientConfig version="1.1">
         <emailProvider id="example.com">
@@ -23,7 +23,7 @@ $autoconfigXml = fn (string $imapHost, int $imapPort, string $smtpHost, int $smt
     </clientConfig>
     XML;
 
-test('discovers config from ISPDB (XML format)', function () use ($autoconfigXml) {
+test('discovers config from ISPDB (XML format)', function () use ($autoconfigXml): void {
     Http::fake([
         'v1.ispdb.net/*' => Http::response(
             $autoconfigXml('imap.example.com', 993, 'smtp.example.com', 587),
@@ -41,7 +41,7 @@ test('discovers config from ISPDB (XML format)', function () use ($autoconfigXml
     expect($result->smtpPort)->toBe(587);
 });
 
-test('picks imap server when XML lists multiple incomingServer types', function () {
+test('picks imap server when XML lists multiple incomingServer types', function (): void {
     Http::fake([
         'v1.ispdb.net/*' => Http::response(
             '<?xml version="1.0"?>
@@ -59,7 +59,7 @@ test('picks imap server when XML lists multiple incomingServer types', function 
     expect($result->imapHost)->toBe('imap.example.com');
 });
 
-test('falls back to Mozilla autoconfig when ISPDB returns 404', function () use ($autoconfigXml) {
+test('falls back to Mozilla autoconfig when ISPDB returns 404', function () use ($autoconfigXml): void {
     Http::fake([
         'v1.ispdb.net/*' => Http::response('', 404),
         'autoconfig.example.com/*' => Http::response(
@@ -76,7 +76,7 @@ test('falls back to Mozilla autoconfig when ISPDB returns 404', function () use 
     expect($result->smtpPort)->toBe(465);
 });
 
-test('falls back to Microsoft Autodiscover when previous sources fail', function () {
+test('falls back to Microsoft Autodiscover when previous sources fail', function (): void {
     Http::fake([
         'v1.ispdb.net/*' => Http::response('', 404),
         'autoconfig.example.com/*' => Http::response('', 404),
@@ -110,7 +110,7 @@ test('falls back to Microsoft Autodiscover when previous sources fail', function
     expect($result->smtpHost)->toBe('smtp.example.com');
 });
 
-test('returns null when all sources fail', function () {
+test('returns null when all sources fail', function (): void {
     Http::fake([
         'v1.ispdb.net/*' => Http::response('', 404),
         'autoconfig.example.com/*' => Http::response('', 404),

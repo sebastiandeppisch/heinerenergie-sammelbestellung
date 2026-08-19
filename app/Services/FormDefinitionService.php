@@ -41,7 +41,7 @@ class FormDefinitionService
     /**
      * @param  Collection<FormFieldData>  $fields
      */
-    private function updateFields(Collection $fields, FormDefinition $formDefinition)
+    private function updateFields(Collection $fields, FormDefinition $formDefinition): void
     {
         $formFieldIds = [];
         foreach ($fields as $field) {
@@ -211,7 +211,7 @@ class FormDefinitionService
      */
     public function createFromTemplate(string $templateType, string $groupUuid): FormDefinition
     {
-        return DB::transaction(function () use ($templateType, $groupUuid) {
+        return DB::transaction(function () use ($templateType, $groupUuid): FormDefinition {
             $group = Group::where('uuid', $groupUuid)->firstOrFail();
 
             return match ($templateType) {

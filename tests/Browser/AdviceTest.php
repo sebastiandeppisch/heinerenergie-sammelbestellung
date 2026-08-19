@@ -10,7 +10,7 @@ use Tests\Support\MockNextcloudFileClient;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
 
     app()->bind(NextcloudFileClientContract::class, MockNextcloudFileClient::class);
 
@@ -24,7 +24,7 @@ beforeEach(function () {
     $this->actingAs($this->user);
 });
 
-test('advice no smoke & no js errors', function () {
+test('advice no smoke & no js errors', function (): void {
     $advice = Advice::factory()->create([
         'advisor_id' => $this->user->id,
         'group_id' => $this->group->id,
@@ -35,7 +35,7 @@ test('advice no smoke & no js errors', function () {
         ->assertNoJavaScriptErrors();
 });
 
-test('standard advisor can create a new advice', function () {
+test('standard advisor can create a new advice', function (): void {
     $user = User::factory()->create();
     $group = Group::factory()->create(['name' => 'Test Initiative']);
     $group->users()->attach($user, ['is_admin' => false]);
@@ -63,7 +63,7 @@ test('standard advisor can create a new advice', function () {
     expect(Advice::where('first_name', 'Max')->exists())->toBeTrue();
 });
 
-test('admin advisor can create a new advice', function () {
+test('admin advisor can create a new advice', function (): void {
     $user = User::factory()->create();
     $group = Group::factory()->create(['name' => 'Test Initiative']);
     $group->users()->attach($user, ['is_admin' => true]);
@@ -91,7 +91,7 @@ test('admin advisor can create a new advice', function () {
     expect(Advice::where('first_name', 'Erika')->exists())->toBeTrue();
 });
 
-test('system admin sees group select and can create a new advice', function () {
+test('system admin sees group select and can create a new advice', function (): void {
     $user = User::factory()->admin()->create();
     $group = Group::factory()->create(['name' => 'Test Initiative']);
     app(SessionService::class)->actAsSystemAdmin();

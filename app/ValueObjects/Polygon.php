@@ -17,7 +17,7 @@ class Polygon implements Castable, JsonSerializable
         /** @var array<Coordinate|array<int>> */
         array $coordinates = []
     ) {
-        $this->coordinates = array_map(fn ($coordinate) => $coordinate instanceof Coordinate ? $coordinate : Coordinate::fromArray($coordinate), $coordinates);
+        $this->coordinates = array_map(fn ($coordinate): Coordinate => $coordinate instanceof Coordinate ? $coordinate : Coordinate::fromArray($coordinate), $coordinates);
     }
 
     public static function castUsing(array $attributes): string

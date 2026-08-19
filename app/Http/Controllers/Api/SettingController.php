@@ -21,7 +21,7 @@ class SettingController extends Controller
         return $setting->fresh();
     }
 
-    public function advisorInfo()
+    public function advisorInfo(): array
     {
         return [
             'html' => Setting::get('advisorInfo'),

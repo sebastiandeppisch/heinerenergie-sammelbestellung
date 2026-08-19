@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Auth;
 
 uses(RefreshDatabase::class);
 
-test('remember me sets the remember-cookie', function () {
+test('remember me sets the remember-cookie', function (): void {
     $user = User::factory()->create();
 
     $response = $this->post('/login-form', [
@@ -18,7 +18,7 @@ test('remember me sets the remember-cookie', function () {
     $response->assertCookie(Auth::guard()->getRecallerName());
 });
 
-test('without remember me the cookie is not set', function () {
+test('without remember me the cookie is not set', function (): void {
     $user = User::factory()->create();
 
     $response = $this->post('/login-form', [

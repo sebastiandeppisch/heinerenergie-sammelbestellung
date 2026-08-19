@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('form_definition_to_advice', function (Blueprint $table) {
+        Schema::table('form_definition_to_advice', function (Blueprint $table): void {
             // Drop foreign key constraint first
             $table->dropForeign(['advice_type_field_id']);
             // Make column nullable
@@ -32,7 +32,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('form_definition_to_advice', function (Blueprint $table) {
+        Schema::table('form_definition_to_advice', function (Blueprint $table): void {
 
             $table->string('advice_type_home_option_value')->nullable(false)->change();
             $table->string('advice_type_home_option_value')->nullable(false)->default(AdviceType::Home->value)->change();

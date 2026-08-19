@@ -2,6 +2,9 @@
 
 namespace App\Data;
 
+use App\Models\FormFieldOption;
+use App\Models\SubmissionFieldOption;
+use App\Models\ChecklistEntryFieldOption;
 use App\Enums\FieldType;
 use App\Models\ChecklistEntryField;
 use App\Models\FormField;
@@ -55,7 +58,7 @@ class FormFieldData extends Data
             max_value: $model->max_value,
             accepted_file_types: $model->accepted_file_types,
             max_images: $model->max_images ?? 1,
-            options: $model->options->map(fn ($option) => FormFieldOptionData::fromModel($option)),
+            options: $model->options->map(fn (FormFieldOption $option): FormFieldOptionData => FormFieldOptionData::fromModel($option)),
         );
     }
 
@@ -68,7 +71,7 @@ class FormFieldData extends Data
             type: $model->type,
             label: $model->label,
             required: false,
-            options: $model->options->map(fn ($option) => FormFieldOptionData::fromSubmissionFieldOption($option)),
+            options: $model->options->map(fn (SubmissionFieldOption $option): FormFieldOptionData => FormFieldOptionData::fromSubmissionFieldOption($option)),
             placeholder: null
         );
     }
@@ -84,7 +87,7 @@ class FormFieldData extends Data
             required: $model->required,
             help_text: $model->help_text,
             sort_order: $model->sort_order,
-            options: $model->options->map(fn ($option) => FormFieldOptionData::fromChecklistEntryFieldOption($option)),
+            options: $model->options->map(fn (ChecklistEntryFieldOption $option): FormFieldOptionData => FormFieldOptionData::fromChecklistEntryFieldOption($option)),
             placeholder: null,
         );
     }

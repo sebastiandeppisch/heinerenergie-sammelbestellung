@@ -18,10 +18,10 @@ class GroupAdviceStatusController extends Controller
 
         $statuses = AdviceStatus::whereIn('group_id', $group->getHierarchyIds())->get();
 
-        return $statuses->map(fn (AdviceStatus $status) => AdviceStatusData::fromModel($status, $group));
+        return $statuses->map(fn (AdviceStatus $status): AdviceStatusData => AdviceStatusData::fromModel($status, $group));
     }
 
-    public function store(StoreGroupAdviceStatusRequest $request, Group $group)
+    public function store(StoreGroupAdviceStatusRequest $request, Group $group): AdviceStatusData
     {
         $this->authorize('create', [AdviceStatusGroup::class, $group]);
         $advicestatus = $group->ownStatuses()->create($request->validated());
@@ -29,7 +29,7 @@ class GroupAdviceStatusController extends Controller
         return AdviceStatusData::fromModel($advicestatus, $group);
     }
 
-    public function update(UpdateGroupAdviceStatusRequest $request, Group $group, AdviceStatus $advicestatus)
+    public function update(UpdateGroupAdviceStatusRequest $request, Group $group, AdviceStatus $advicestatus): AdviceStatusData
     {
         if ($request->isOnlySettingVisibility()) {
             $advicestatus->usingGroups()->syncWithoutDetaching([

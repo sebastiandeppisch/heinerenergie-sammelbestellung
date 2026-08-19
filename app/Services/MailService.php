@@ -46,9 +46,9 @@ class MailService implements MailServiceContract
             }
 
             return $inboxMessages
-                ->map(fn ($m) => $this->messageToHeader($m, 'INBOX'))
-                ->merge($sentMessages->map(fn ($m) => $this->messageToHeader($m, $sentFolder->path)))
-                ->sortByDesc(fn (MailHeaderData $h) => $h->dateTimestamp)
+                ->map(fn ($m): MailHeaderData => $this->messageToHeader($m, 'INBOX'))
+                ->merge($sentMessages->map(fn ($m): MailHeaderData => $this->messageToHeader($m, $sentFolder->path)))
+                ->sortByDesc(fn (MailHeaderData $h): int => $h->dateTimestamp)
                 ->values();
         } finally {
             $client->disconnect();

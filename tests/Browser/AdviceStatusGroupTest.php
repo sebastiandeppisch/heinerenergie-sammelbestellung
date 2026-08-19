@@ -9,7 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::factory()->admin()->create();
     $this->group = Group::factory()->create(['name' => 'Test Initiative']);
     $this->group->users()->attach($this->user, ['is_admin' => true]);
@@ -17,7 +17,7 @@ beforeEach(function () {
     $this->actingAs($this->user);
 });
 
-test('advice status table renders without errors', function () {
+test('advice status table renders without errors', function (): void {
     visit(route('groups.show', $this->group))
         ->assertNoSmoke()
         ->click('Beratungszustände')
@@ -25,7 +25,7 @@ test('advice status table renders without errors', function () {
         ->assertNoJavaScriptErrors();
 });
 
-test('admin can add new advice status', function () {
+test('admin can add new advice status', function (): void {
     visit(route('groups.show', $this->group))
         ->assertNoSmoke()
         ->click('Beratungszustände')
@@ -44,7 +44,7 @@ test('admin can add new advice status', function () {
     expect(AdviceStatus::where('name', 'Neuer Status')->exists())->toBeTrue();
 });
 
-test('admin can edit advice status name', function () {
+test('admin can edit advice status name', function (): void {
     AdviceStatus::create([
         'name' => 'Alter Status',
         'result' => AdviceStatusResult::New,
@@ -66,7 +66,7 @@ test('admin can edit advice status name', function () {
     expect(AdviceStatus::where('name', 'Geänderter Status')->exists())->toBeTrue();
 });
 
-test('admin can delete advice status', function () {
+test('admin can delete advice status', function (): void {
     AdviceStatus::create([
         'name' => 'Zu löschender Status',
         'result' => AdviceStatusResult::New,
@@ -87,7 +87,7 @@ test('admin can delete advice status', function () {
     expect(AdviceStatus::where('name', 'Zu löschender Status')->exists())->toBeFalse();
 });
 
-test('admin can toggle status visibility and save', function () {
+test('admin can toggle status visibility and save', function (): void {
     $status = AdviceStatus::create([
         'name' => 'Sichtbarer Status',
         'result' => AdviceStatusResult::New,

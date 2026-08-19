@@ -9,7 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::factory()->create();
     $this->group = Group::factory()->create(['name' => 'Test Initiative']);
     $this->group->users()->attach($this->user, ['is_admin' => true]);
@@ -17,7 +17,7 @@ beforeEach(function () {
     $this->actingAs($this->user);
 });
 
-test('group admin can switch from cards to table view and open detail dialog', function () {
+test('group admin can switch from cards to table view and open detail dialog', function (): void {
     $formDefinition = FormDefinition::factory()->create([
         'group_id' => $this->group->id,
     ]);

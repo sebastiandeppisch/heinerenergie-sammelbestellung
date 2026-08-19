@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Create users
     $this->systemAdmin = User::factory()->create(['is_admin' => true]);
     $this->normalUser = User::factory()->create(['is_admin' => false]);
@@ -45,7 +45,7 @@ beforeEach(function () {
     config()->set('app.group_context', 'global');
 });
 
-test('advisor access is group scoped', function () {
+test('advisor access is group scoped', function (): void {
     $mainGroupAdvisor = User::factory()->create();
     $otherGroupAdvisor = User::factory()->create();
 
@@ -62,7 +62,7 @@ test('advisor access is group scoped', function () {
         ->and($mainGroupAdvisor->can('view', $this->otherSubGroup))->toBeFalse();
 });
 
-test('user can access shared advisors across groups', function () {
+test('user can access shared advisors across groups', function (): void {
     $sharedAdvisor = User::factory()->create();
 
     $advice = Advice::factory()->create([
@@ -76,7 +76,7 @@ test('user can access shared advisors across groups', function () {
     expect($this->normalUser->can('view', $sharedAdvisor))->toBeTrue('The user should be able to view the shared advisor after sharing');
 })->todo('sharing between groups is not yet completely defined');
 
-test('user can see colleagues in same group', function () {
+test('user can see colleagues in same group', function (): void {
     $colleague = User::factory()->create();
 
     $group = Group::factory()->create();

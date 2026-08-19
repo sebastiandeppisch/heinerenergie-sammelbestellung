@@ -8,7 +8,7 @@ use function Pest\Laravel\actingAs;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->admin = User::factory()->create();
     $this->group = Group::factory()->create();
     $this->group->users()->attach($this->admin->id, ['is_admin' => true]);
@@ -16,7 +16,7 @@ beforeEach(function () {
     Config::set('app.group_context', 'global');
 });
 
-test('inactive user does not appear in api/users lookup', function () {
+test('inactive user does not appear in api/users lookup', function (): void {
     $active = User::factory()->create(['is_active' => true]);
     $inactive = User::factory()->create(['is_active' => false]);
     $this->group->users()->attach([$active->id => ['is_admin' => false], $inactive->id => ['is_admin' => false]]);
@@ -28,7 +28,7 @@ test('inactive user does not appear in api/users lookup', function () {
         ->assertJsonMissing(['id' => $inactive->uuid]);
 });
 
-test('inactive user does not appear in api/users withoutself lookup', function () {
+test('inactive user does not appear in api/users withoutself lookup', function (): void {
     $active = User::factory()->create(['is_active' => true]);
     $inactive = User::factory()->create(['is_active' => false]);
     $this->group->users()->attach([$active->id => ['is_admin' => false], $inactive->id => ['is_admin' => false]]);

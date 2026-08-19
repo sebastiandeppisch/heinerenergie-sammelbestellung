@@ -70,7 +70,7 @@ class GroupController extends Controller
         }
 
         $groups = $this->listGroups($user)
-            ->map(fn (Group $group) => GroupData::fromModel($group))->values();
+            ->map(fn (Group $group): GroupData => GroupData::fromModel($group))->values();
 
         $groupTreeItems = $groups->map(fn (GroupData $groupData): GroupTreeItem => new GroupTreeItem(
             id: $groupData->id,
@@ -112,7 +112,7 @@ class GroupController extends Controller
         }
 
         $groups = $this->listGroups($request->user())
-            ->map(fn (Group $group) => GroupData::fromModel($group));
+            ->map(fn (Group $group): GroupData => GroupData::fromModel($group));
 
         $groupTreeItems = $groups->map(fn (GroupData $groupData): GroupTreeItem => new GroupTreeItem(
             id: $groupData->id,
@@ -130,9 +130,9 @@ class GroupController extends Controller
         $groupUsers = $group->users()
             ->where('users.is_active', true)
             ->get()
-            ->map(fn (User $user) => $this->userToDTO($user));
+            ->map(fn (User $user): GroupUserData => $this->userToDTO($user));
 
-        $allUsers = User::where('is_active', true)->get()->map(fn (User $user) => [
+        $allUsers = User::where('is_active', true)->get()->map(fn (User $user): array => [
             'id' => $user->uuid,
             'name' => $user->name,
             'email' => $user->email,

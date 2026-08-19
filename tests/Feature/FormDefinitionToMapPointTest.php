@@ -9,12 +9,12 @@ use Tests\Concerns\AutoAttachesFormEmbedToken;
 
 uses(RefreshDatabase::class, AutoAttachesFormEmbedToken::class);
 
-test('can be created by factory', function () {
+test('can be created by factory', function (): void {
     FormDefinitionToMapPoint::factory()->create();
     $this->assertTrue(true);
 });
 
-test('submitting the form produces a map point', function () {
+test('submitting the form produces a map point', function (): void {
 
     $this->withoutExceptionHandling();
 
@@ -39,7 +39,7 @@ test('submitting the form produces a map point', function () {
     $this->assertFalse($mapPoint->published); // should be unpublished initially
 });
 
-test('submitting the form fires map point created event', function () {
+test('submitting the form fires map point created event', function (): void {
     $this->withoutExceptionHandling();
     $config = FormDefinitionToMapPoint::factory()->create();
     Event::fake();
@@ -58,7 +58,7 @@ test('submitting the form fires map point created event', function () {
     Event::assertDispatched(MapPointCreatedByFormSubmission::class);
 });
 
-test('form can be created with seeder', function () {
+test('form can be created with seeder', function (): void {
     $this->artisan('db:seed --class=CreateMapPointForm');
     $this->assertTrue(true);
 });

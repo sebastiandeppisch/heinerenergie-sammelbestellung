@@ -11,9 +11,9 @@ return new class extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::table('advice_status', function (Blueprint $table) {
+        Schema::table('advice_status', function (Blueprint $table): void {
             $table->integer('result')->default(0);
         });
     }
@@ -23,9 +23,9 @@ return new class extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::table('advice_status', function (Blueprint $table) {
+        Schema::table('advice_status', function (Blueprint $table): void {
             $table->dropColumn('result');
         });
     }

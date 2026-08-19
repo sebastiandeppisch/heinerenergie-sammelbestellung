@@ -2,6 +2,7 @@
 
 namespace App\Data;
 
+use App\Models\FormField;
 use App\Enums\FormType;
 use App\Models\FormDefinition;
 use Illuminate\Support\Collection;
@@ -42,7 +43,7 @@ class FormDefinitionData extends Data
             description: $model->description,
             is_active: $model->is_active,
             type: $model->type,
-            fields: $model->fields->map(fn ($field) => FormFieldData::fromModel($field)),
+            fields: $model->fields->map(fn (FormField $field): FormFieldData => FormFieldData::fromModel($field)),
             group_id: $model->group->uuid,
             advice_mapping: FormToAdviceMappingData::fromModel($model->adviceCreator),
             map_point_mapping: FormToMapPointMappingData::fromModel($model->mapPointCreator),

@@ -6,7 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-test('password reset mail is rendered in german', function () {
+test('password reset mail is rendered in german', function (): void {
     $user = User::factory()->create();
 
     $mail = new ResetPassword('reset-token')->toMail($user);

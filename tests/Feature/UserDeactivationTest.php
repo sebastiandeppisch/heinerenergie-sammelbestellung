@@ -7,13 +7,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Reset test client state between tests to avoid session cookie leakage
     $this->defaultCookies = [];
     $this->serverVariables = [];
 });
 
-test('inactive user cannot log in', function () {
+test('inactive user cannot log in', function (): void {
     $user = User::factory()->create([
         'password' => bcrypt('password'),
         'is_active' => false,
@@ -25,7 +25,7 @@ test('inactive user cannot log in', function () {
     $this->assertGuest();
 });
 
-test('active user can log in', function () {
+test('active user can log in', function (): void {
     $user = User::factory()->create([
         'password' => bcrypt('password'),
         'is_active' => true,
@@ -37,7 +37,7 @@ test('active user can log in', function () {
     $this->assertAuthenticatedAs($user);
 });
 
-test('group admin can deactivate a user', function () {
+test('group admin can deactivate a user', function (): void {
     $admin = User::factory()->create();
     $group = Group::factory()->create();
     $group->users()->attach($admin, ['is_admin' => true]);
@@ -52,7 +52,7 @@ test('group admin can deactivate a user', function () {
     $this->assertFalse($user->fresh()->is_active);
 });
 
-test('group admin can reactivate a user', function () {
+test('group admin can reactivate a user', function (): void {
     $admin = User::factory()->create();
     $group = Group::factory()->create();
     $group->users()->attach($admin, ['is_admin' => true]);

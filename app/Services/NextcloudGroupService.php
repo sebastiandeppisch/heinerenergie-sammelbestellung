@@ -46,7 +46,7 @@ class NextcloudGroupService
             ->filter()
             ->values();
 
-        return $allEmails->map(function (string $email) use ($ncUsersByEmail, $crmGroupMembers, $crmMatchedNotInGroup) {
+        return $allEmails->map(function (string $email) use ($ncUsersByEmail, $crmGroupMembers, $crmMatchedNotInGroup): NextcloudGroupUserData {
             $ncUser = $ncUsersByEmail->get($email);
             $crmUser = $crmGroupMembers->get($email) ?? $crmMatchedNotInGroup->get($email);
             $isGroupMember = $crmUser ? $crmGroupMembers->has($email) : null;

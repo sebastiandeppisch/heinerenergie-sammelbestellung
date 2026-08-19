@@ -8,11 +8,11 @@ use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->admin = User::factory()->admin()->create();
 });
 
-test('group users shows the is_admin status of the current group, not the first group', function () {
+test('group users shows the is_admin status of the current group, not the first group', function (): void {
     // A user that belongs to two groups with DIFFERENT admin status
     $group1 = Group::factory()->create(['name' => 'Group 1']);
     $group2 = Group::factory()->create(['name' => 'Group 2']);
@@ -28,9 +28,9 @@ test('group users shows the is_admin status of the current group, not the first 
     app(SessionService::class)->actAsGroup($group1, true);
     $this->actingAs($this->admin)
         ->get(route('groups.show', $group1))
-        ->assertInertia(fn (Assert $page) => $page
+        ->assertInertia(fn (Assert $page): Assert => $page
             ->component('Groups/Index')
-            ->where('groupUsers', fn ($users) => collect($users)
+            ->where('groupUsers', fn ($users): bool => collect($users)
                 ->firstWhere('name', 'John Doe')['is_admin'] === true
             )
         );
@@ -39,15 +39,15 @@ test('group users shows the is_admin status of the current group, not the first 
     app(SessionService::class)->actAsGroup($group2, true);
     $this->actingAs($this->admin)
         ->get(route('groups.show', $group2))
-        ->assertInertia(fn (Assert $page) => $page
+        ->assertInertia(fn (Assert $page): Assert => $page
             ->component('Groups/Index')
-            ->where('groupUsers', fn ($users) => collect($users)
+            ->where('groupUsers', fn ($users): bool => collect($users)
                 ->firstWhere('name', 'John Doe')['is_admin'] === false
             )
         );
 });
 
-test('group users only contains active members of the group', function () {
+test('group users only contains active members of the group', function (): void {
     $group = Group::factory()->create();
     $otherGroup = Group::factory()->create();
 
@@ -64,8 +64,8 @@ test('group users only contains active members of the group', function () {
     app(SessionService::class)->actAsGroup($group, true);
     $this->actingAs($this->admin)
         ->get(route('groups.show', $group))
-        ->assertInertia(fn (Assert $page) => $page
-            ->where('groupUsers', function ($users) use ($activeMember, $inactiveMember, $otherGroupMember) {
+        ->assertInertia(fn (Assert $page): Assert => $page
+            ->where('groupUsers', function ($users) use ($activeMember, $inactiveMember, $otherGroupMember): bool {
                 $names = collect($users)->pluck('name');
 
                 return $names->contains($activeMember->name)
@@ -75,16 +75,16 @@ test('group users only contains active members of the group', function () {
         );
 });
 
-test('group users dto has the expected shape', function () {
+test('group users dto has the expected shape', function (): void {
     $group = Group::factory()->create();
     $group->users()->attach($this->admin->id, ['is_admin' => true]);
 
     app(SessionService::class)->actAsGroup($group, true);
     $this->actingAs($this->admin)
         ->get(route('groups.show', $group))
-        ->assertInertia(fn (Assert $page) => $page
+        ->assertInertia(fn (Assert $page): Assert => $page
             ->has('groupUsers', 1)
-            ->has('groupUsers.0', fn (Assert $user) => $user
+            ->has('groupUsers.0', fn (Assert $user): Assert => $user
                 ->where('id', $this->admin->uuid)
                 ->where('name', $this->admin->name)
                 ->where('is_admin', true)
@@ -94,7 +94,7 @@ test('group users dto has the expected shape', function () {
         );
 });
 
-test('all users only contains active users with id, name and email', function () {
+test('all users only contains active users with id, name and email', function (): void {
     $group = Group::factory()->create();
     $group->users()->attach($this->admin->id, ['is_admin' => true]);
 
@@ -104,20 +104,20 @@ test('all users only contains active users with id, name and email', function ()
     app(SessionService::class)->actAsGroup($group, true);
     $this->actingAs($this->admin)
         ->get(route('groups.show', $group))
-        ->assertInertia(fn (Assert $page) => $page
-            ->where('allUsers', function ($users) use ($active, $inactive) {
+        ->assertInertia(fn (Assert $page): Assert => $page
+            ->where('allUsers', function ($users) use ($active, $inactive): bool {
                 $ids = collect($users)->pluck('id');
 
                 return $ids->contains($active->uuid) && ! $ids->contains($inactive->uuid);
             })
-            ->has('allUsers.0', fn (Assert $user) => $user
+            ->has('allUsers.0', fn (Assert $user): Assert => $user
                 ->hasAll(['id', 'name', 'email'])
                 ->missing('is_admin')
             )
         );
 });
 
-test('non-admin cannot view the group users list', function () {
+test('non-admin cannot view the group users list', function (): void {
     $groupAdmin = User::factory()->create();
     $member = User::factory()->create();
     $group = Group::factory()->create();
@@ -131,7 +131,7 @@ test('non-admin cannot view the group users list', function () {
         ->assertForbidden();
 });
 
-test('admin can add a user to the group as admin', function () {
+test('admin can add a user to the group as admin', function (): void {
     $groupAdmin = User::factory()->create();
     $candidate = User::factory()->create();
     $group = Group::factory()->create();
@@ -153,7 +153,7 @@ test('admin can add a user to the group as admin', function () {
     ]);
 });
 
-test('non-admin cannot add users to the group', function () {
+test('non-admin cannot add users to the group', function (): void {
     $groupAdmin = User::factory()->create();
     $member = User::factory()->create();
     $candidate = User::factory()->create();
@@ -176,7 +176,7 @@ test('non-admin cannot add users to the group', function () {
     ]);
 });
 
-test('non-admin cannot update a user role in the group', function () {
+test('non-admin cannot update a user role in the group', function (): void {
     $groupAdmin = User::factory()->create();
     $member = User::factory()->create();
     $group = Group::factory()->create();
@@ -198,7 +198,7 @@ test('non-admin cannot update a user role in the group', function () {
     ]);
 });
 
-test('non-admin cannot remove a user from the group', function () {
+test('non-admin cannot remove a user from the group', function (): void {
     $groupAdmin = User::factory()->create();
     $member = User::factory()->create();
     $group = Group::factory()->create();
@@ -217,7 +217,7 @@ test('non-admin cannot remove a user from the group', function () {
     ]);
 });
 
-test('cannot add the same user twice to a group', function () {
+test('cannot add the same user twice to a group', function (): void {
     $groupAdmin = User::factory()->create();
     $candidate = User::factory()->create();
     $group = Group::factory()->create();

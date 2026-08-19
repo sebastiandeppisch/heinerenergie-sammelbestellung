@@ -2,6 +2,7 @@
 
 namespace App\Data;
 
+use App\Models\ChecklistEntryField;
 use App\Models\ChecklistEntry;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -30,7 +31,7 @@ class ChecklistEntryData extends Data
         return new self(
             id: $model->uuid,
             form_definition: FormDefinitionData::fromModel($model->formDefinition),
-            fields: $model->fields->map(fn ($field) => ChecklistEntryFieldData::fromModel($field)),
+            fields: $model->fields->map(fn (ChecklistEntryField $field): ChecklistEntryFieldData => ChecklistEntryFieldData::fromModel($field)),
             updated_at: $model->updated_at,
         );
     }

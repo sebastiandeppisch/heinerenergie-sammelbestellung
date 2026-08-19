@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-test('public map page does not overflow the viewport height', function () {
+test('public map page does not overflow the viewport height', function (): void {
     $category = MapPointCategory::factory()->withoutImage()->create();
     MapPoint::factory()->create(['published' => true, 'category_id' => $category->id]);
 
@@ -25,7 +25,7 @@ test('public map page does not overflow the viewport height', function () {
         ->toBeLessThanOrEqual($heights['innerHeight']);
 });
 
-test('toggling a category checkbox on the public map causes no javascript errors', function () {
+test('toggling a category checkbox on the public map causes no javascript errors', function (): void {
     $categoryA = MapPointCategory::factory()->withoutImage()->create(['name' => 'Ladesäulen']);
     $categoryB = MapPointCategory::factory()->withoutImage()->create(['name' => 'Beratungsstellen']);
     MapPoint::factory()->create(['published' => true, 'category_id' => $categoryA->id]);
@@ -42,7 +42,7 @@ test('toggling a category checkbox on the public map causes no javascript errors
         ->assertNoJavaScriptErrors();
 });
 
-test('switching to the table tab and searching causes no javascript errors', function () {
+test('switching to the table tab and searching causes no javascript errors', function (): void {
     $category = MapPointCategory::factory()->withoutImage()->create(['name' => 'Ladesäulen']);
     MapPoint::factory()->create([
         'published' => true,
@@ -65,7 +65,7 @@ test('switching to the table tab and searching causes no javascript errors', fun
         ->assertSee('Solaranlage Nord');
 });
 
-test('the map uses the custom shadcn zoom control instead of the default leaflet one', function () {
+test('the map uses the custom shadcn zoom control instead of the default leaflet one', function (): void {
     $category = MapPointCategory::factory()->withoutImage()->create();
     MapPoint::factory()->create(['published' => true, 'category_id' => $category->id]);
 
@@ -80,7 +80,7 @@ test('the map uses the custom shadcn zoom control instead of the default leaflet
         ->assertNoJavaScriptErrors();
 });
 
-test('the table tab is hidden when disabled for the embed', function () {
+test('the table tab is hidden when disabled for the embed', function (): void {
     $category = MapPointCategory::factory()->withoutImage()->create();
     MapPoint::factory()->create(['published' => true, 'category_id' => $category->id]);
 

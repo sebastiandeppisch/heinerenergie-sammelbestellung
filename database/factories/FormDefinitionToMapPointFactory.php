@@ -56,7 +56,7 @@ class FormDefinitionToMapPointFactory extends Factory
 
     public function withMapPoint()
     {
-        return $this->afterCreating(function (FormDefinitionToMapPoint $creator) {
+        return $this->afterCreating(function (FormDefinitionToMapPoint $creator): array {
             $submission = $creator->formDefinition->createSubmission();
 
             $creator->titleField->createSubmissionField($submission, fake()->sentence(3));

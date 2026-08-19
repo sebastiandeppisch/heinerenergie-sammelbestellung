@@ -26,11 +26,11 @@ class RouteServiceProvider extends ServiceProvider
      * @return void
      */
     #[Override]
-    public function boot()
+    public function boot(): void
     {
         $this->configureRateLimiting();
 
-        $this->routes(function () {
+        $this->routes(function (): void {
             Route::prefix('api')
                 ->middleware('api')
                 ->namespace($this->namespace)

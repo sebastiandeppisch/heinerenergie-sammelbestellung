@@ -29,10 +29,10 @@ class FormDefinitionController extends Controller
 
         $all = $query->get();
 
-        $formDefinitions = $all->where('type', FormType::Form)->map(fn ($fd) => FormDefinitionData::fromModel($fd))->values();
-        $checklists = $all->where('type', FormType::Checklist)->map(fn ($fd) => FormDefinitionData::fromModel($fd))->values();
+        $formDefinitions = $all->where('type', FormType::Form)->map(fn (FormDefinition $fd): FormDefinitionData => FormDefinitionData::fromModel($fd))->values();
+        $checklists = $all->where('type', FormType::Checklist)->map(fn (FormDefinition $fd): FormDefinitionData => FormDefinitionData::fromModel($fd))->values();
 
-        $groups = Group::all()->map(fn (Group $group) => [
+        $groups = Group::all()->map(fn (Group $group): array => [
             'id' => $group->uuid,
             'name' => $group->name,
         ]);
@@ -49,7 +49,7 @@ class FormDefinitionController extends Controller
      */
     public function create(Request $request)
     {
-        $groups = Group::all()->map(fn (Group $group) => [
+        $groups = Group::all()->map(fn (Group $group): array => [
             'id' => $group->uuid,
             'name' => $group->name,
         ]);
@@ -71,7 +71,7 @@ class FormDefinitionController extends Controller
             FieldType::FILE,
         ]);
 
-        return collect(FieldType::cases())->filter(fn ($case) => ! $inactive->contains($case))->values()->toArray();
+        return collect(FieldType::cases())->filter(fn ($case): bool => ! $inactive->contains($case))->values()->toArray();
     }
 
     /**
@@ -82,7 +82,7 @@ class FormDefinitionController extends Controller
         $formDefinition->load('fields.options', 'adviceCreator.firstNameField', 'adviceCreator.lastNameField', 'adviceCreator.addressField', 'adviceCreator.emailField', 'adviceCreator.phoneField', 'adviceCreator.adviceTypeField', 'mapPointCreator.titleField', 'mapPointCreator.descriptionField', 'mapPointCreator.coordinateField');
         $formDefinitionData = FormDefinitionData::fromModel($formDefinition);
 
-        $groups = Group::all()->map(fn (Group $group) => [
+        $groups = Group::all()->map(fn (Group $group): array => [
             'id' => $group->uuid,
             'name' => $group->name,
         ]);

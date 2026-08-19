@@ -274,7 +274,7 @@ class WebDavNextcloudFileClient implements NextcloudFileClientContract
 
     private function toSabrePath(string $path): string
     {
-        $segments = array_filter(explode('/', $path), fn ($s) => $s !== '');
+        $segments = array_filter(explode('/', $path), fn ($s): bool => $s !== '');
 
         return implode('/', array_map(rawurlencode(...), $segments));
     }

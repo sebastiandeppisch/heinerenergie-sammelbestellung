@@ -15,7 +15,7 @@ use function Pest\Laravel\put;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::factory()->create();
     $this->group = Group::factory()->create();
     $this->otherGroup = Group::factory()->create();
@@ -28,7 +28,7 @@ beforeEach(function () {
     $this->systemAdmin = User::factory()->create(['is_admin' => true]);
 });
 
-test('user can access own group resources', function () {
+test('user can access own group resources', function (): void {
 
     $this->withoutExceptionHandling();
 
@@ -47,7 +47,7 @@ test('user can access own group resources', function () {
     $response->assertRedirect('/advices');
 })->todo('this needs to be better defined: The user should only see the advice data protected and when is it not assigned to another advisor');
 
-test('group admin has elevated privileges', function () {
+test('group admin has elevated privileges', function (): void {
     actingAs($this->user);
 
     // should not be able to modify group settings
@@ -68,7 +68,7 @@ test('group admin has elevated privileges', function () {
     expect($response->status())->not()->toBe(403);
 });
 
-test('normal user cannot modify group settings', function () {
+test('normal user cannot modify group settings', function (): void {
     // Switch to group context without admin
     actingAs($this->user)
         ->post("/actAsGroup/{$this->group->uuid}");
@@ -80,7 +80,7 @@ test('normal user cannot modify group settings', function () {
     expect($response->status())->toBe(403);
 });
 
-test('system admin can access and modify any group', function () {
+test('system admin can access and modify any group', function (): void {
     // Become system admin
     actingAs($this->systemAdmin)
         ->post('/actAsSystemAdmin');
@@ -96,7 +96,7 @@ test('system admin can access and modify any group', function () {
     expect($response->status())->not()->toBe(403);
 });
 
-test('context switching changes access rights', function () {
+test('context switching changes access rights', function (): void {
     // First as normal group member
     actingAs($this->user)
         ->post("/actAsGroup/{$this->group->uuid}", ['asAdmin' => false])->assertSessionHasNoErrors();
@@ -142,12 +142,12 @@ test('context switching changes access rights', function () {
     expect($response->status())->toBe(403);
 });
 
-test('unauthenticated user has no access', function () {
+test('unauthenticated user has no access', function (): void {
     $response = get("/advices/{$this->advice->uuid}");
     expect($response->status())->toBe(302); // Redirects to login
 });
 
-test('user can switch to own group', function () {
+test('user can switch to own group', function (): void {
     $response = actingAs($this->user)
         ->post("/actAsGroup/{$this->group->uuid}");
 
@@ -158,7 +158,7 @@ test('user can switch to own group', function () {
         ->and(session('actAsSystemAdmin'))->toBeNull();
 });
 
-test('user can switch to own group as admin when they is an group admin', function () {
+test('user can switch to own group as admin when they is an group admin', function (): void {
     // Make user admin of the group
     $this->group->users()->updateExistingPivot($this->user->id, ['is_admin' => true]);
 
@@ -172,7 +172,7 @@ test('user can switch to own group as admin when they is an group admin', functi
         ->and(session('actAsSystemAdmin'))->toBeNull();
 });
 
-test('non-admin user cannot switch to group as admin', function () {
+test('non-admin user cannot switch to group as admin', function (): void {
     // Ensure user is not admin of the group
     $this->group->users()->updateExistingPivot($this->user->id, ['is_admin' => false]);
 
@@ -185,7 +185,7 @@ test('non-admin user cannot switch to group as admin', function () {
         ->and(session('actAsSystemAdmin'))->toBeNull();
 });
 
-test('user cannot switch to other group', function () {
+test('user cannot switch to other group', function (): void {
     $response = actingAs($this->user)
         ->post("/actAsGroup/{$this->otherGroup->uuid}");
 
@@ -193,7 +193,7 @@ test('user cannot switch to other group', function () {
         ->and(session('actAsGroupId'))->toBeNull();
 });
 
-test('system admin can switch to any group', function () {
+test('system admin can switch to any group', function (): void {
     // First become system admin
     actingAs($this->systemAdmin)
         ->post('/actAsSystemAdmin')->assertSessionHasNoErrors();
@@ -207,7 +207,7 @@ test('system admin can switch to any group', function () {
         ->and(session('actAsSystemAdmin'))->toBeNull();
 });
 
-test('switching context clears previous context', function () {
+test('switching context clears previous context', function (): void {
     // Make user a system admin
     $this->user->is_admin = true;
     $this->user->save();
@@ -239,21 +239,21 @@ test('switching context clears previous context', function () {
         ->and(session('actAsSystemAdmin'))->toBeNull();
 });
 
-test('unauthenticated user cannot switch groups', function () {
+test('unauthenticated user cannot switch groups', function (): void {
     $response = post("/actAsGroup/{$this->group->uuid}");
 
     expect($response->assertRedirect(route('login')))
         ->and(session('actAsGroupId'))->toBeNull();
 });
 
-test('unauthenticated user cannot become system admin', function () {
+test('unauthenticated user cannot become system admin', function (): void {
     $response = post('/actAsSystemAdmin');
 
     expect($response->assertRedirect(route('login')))
         ->and(session('actAsSystemAdmin'))->toBeNull();
 });
 
-test('switching to invalid group returns 404', function () {
+test('switching to invalid group returns 404', function (): void {
     $response = actingAs($this->user)
         ->post('/actAsGroup/99999');
 
@@ -261,7 +261,7 @@ test('switching to invalid group returns 404', function () {
         ->and(session('actAsGroupId'))->toBeNull();
 });
 
-test('clearing session removes all context information', function () {
+test('clearing session removes all context information', function (): void {
     // Set up initial state with group admin privileges
     actingAs($this->user)
         ->post("/actAsGroup/{$this->group->uuid}", ['asAdmin' => true]);

@@ -13,7 +13,7 @@ class BaseNotification extends Notification
 
     //    public ?Advice $advice = null;
 
-    public function via($notifiable)
+    public function via($notifiable): array
     {
         return ['mail'];
     }
@@ -29,7 +29,7 @@ class BaseNotification extends Notification
 
     }
 
-    public function toArray($notifiable)
+    public function toArray($notifiable): array
     {
         return [
             //

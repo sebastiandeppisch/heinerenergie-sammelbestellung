@@ -37,7 +37,7 @@ class StoreChecklistEntryRequest extends FormRequest
     public function after(): array
     {
         return [
-            function (Validator $validator) {
+            function (Validator $validator): void {
                 if ($validator->errors()->has('form_definition_id')) {
                     return;
                 }

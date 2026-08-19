@@ -23,7 +23,7 @@ function loginWithEncKey(User $user, string $password = 'password123'): string
     return $key;
 }
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::factory()->create(['password' => bcrypt('password123')]);
 
     $group = Group::create(['name' => 'Test Group', 'description' => '']);
@@ -31,13 +31,13 @@ beforeEach(function () {
     Config::set('app.group_context', 'global');
 });
 
-test('GET /mail/account is accessible without enc_key cookie', function () {
+test('GET /mail/account is accessible without enc_key cookie', function (): void {
     $this->actingAs($this->user)
         ->get('/mail/account')
         ->assertOk();
 });
 
-test('GET /mail/account renders Inertia page with hasAccount false when no credentials stored', function () {
+test('GET /mail/account renders Inertia page with hasAccount false when no credentials stored', function (): void {
     $key = loginWithEncKey($this->user);
 
     $this->actingAs($this->user)
@@ -50,7 +50,7 @@ test('GET /mail/account renders Inertia page with hasAccount false when no crede
         );
 });
 
-test('GET /mail/account renders Inertia page with hasAccount true when credentials stored', function () {
+test('GET /mail/account renders Inertia page with hasAccount true when credentials stored', function (): void {
     $key = loginWithEncKey($this->user);
 
     app(MailCredentialsRepository::class)->store(new MailCredentialsData(
@@ -72,10 +72,10 @@ test('GET /mail/account renders Inertia page with hasAccount true when credentia
         );
 });
 
-test('POST /mail/account tests connection and stores credentials on success', function () {
+test('POST /mail/account tests connection and stores credentials on success', function (): void {
     $key = loginWithEncKey($this->user);
 
-    $this->mock(MailServiceContract::class, function (MockInterface $mock) {
+    $this->mock(MailServiceContract::class, function (MockInterface $mock): void {
         $mock->shouldReceive('testConnection')->once()->andReturn();
     });
 
@@ -94,10 +94,10 @@ test('POST /mail/account tests connection and stores credentials on success', fu
     expect(app(MailCredentialsRepository::class)->get()?->username)->toBe('user@example.com');
 });
 
-test('POST /mail/account returns connection error when IMAP fails', function () {
+test('POST /mail/account returns connection error when IMAP fails', function (): void {
     $key = loginWithEncKey($this->user);
 
-    $this->mock(MailServiceContract::class, function (MockInterface $mock) {
+    $this->mock(MailServiceContract::class, function (MockInterface $mock): void {
         $mock->shouldReceive('testConnection')->once()->andThrow(new RuntimeException('Connection refused'));
     });
 
@@ -117,7 +117,7 @@ test('POST /mail/account returns connection error when IMAP fails', function () 
     expect(app(MailCredentialsRepository::class)->get())->toBeNull();
 });
 
-test('POST /mail/account validates required fields', function () {
+test('POST /mail/account validates required fields', function (): void {
     $key = loginWithEncKey($this->user);
 
     $this->actingAs($this->user)
@@ -126,7 +126,7 @@ test('POST /mail/account validates required fields', function () {
         ->assertSessionHasErrors(['imap_host', 'smtp_host', 'username', 'password']);
 });
 
-test('DELETE /mail/account clears credentials and redirects', function () {
+test('DELETE /mail/account clears credentials and redirects', function (): void {
     $key = loginWithEncKey($this->user);
 
     $repo = app(MailCredentialsRepository::class);
@@ -147,7 +147,7 @@ test('DELETE /mail/account clears credentials and redirects', function () {
     expect($repo->get())->toBeNull();
 });
 
-test('POST /mail/discover flashes discovered config and redirects', function () {
+test('POST /mail/discover flashes discovered config and redirects', function (): void {
     Http::preventStrayRequests();
     Http::fake([
         'v1.ispdb.net/*' => Http::response([
@@ -162,7 +162,7 @@ test('POST /mail/discover flashes discovered config and redirects', function () 
         ->assertRedirect(route('mail.account.show'));
 });
 
-test('POST /mail/discover flashes discoverFailed when nothing found', function () {
+test('POST /mail/discover flashes discoverFailed when nothing found', function (): void {
     Http::preventStrayRequests();
     Http::fake([
         'v1.ispdb.net/*' => Http::response([], 200),

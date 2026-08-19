@@ -6,20 +6,20 @@ use Illuminate\Support\Facades\Route;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::factory()->create();
 
     Route::middleware(['auth', 'enc_key'])->get('/test-enc-key', fn () => response()->json(['key' => base64_encode((string) app('user.enc_key'))]));
 });
 
-test('request without enc_key cookie returns 403', function () {
+test('request without enc_key cookie returns 403', function (): void {
     $this->actingAs($this->user)
         ->withCredentials()
         ->getJson('/test-enc-key')
         ->assertStatus(403);
 });
 
-test('request with enc_key cookie binds key to container', function () {
+test('request with enc_key cookie binds key to container', function (): void {
     $key = random_bytes(32);
     $cookieValue = base64_encode($key);
 
@@ -31,7 +31,7 @@ test('request with enc_key cookie binds key to container', function () {
         ->assertJson(['key' => $cookieValue]);
 });
 
-test('key in container is raw bytes decoded from base64 cookie', function () {
+test('key in container is raw bytes decoded from base64 cookie', function (): void {
     $key = random_bytes(32);
 
     $this->actingAs($this->user)

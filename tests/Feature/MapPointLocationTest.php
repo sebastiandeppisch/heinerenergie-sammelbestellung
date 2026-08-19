@@ -10,7 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->admin = User::factory()->create(['is_admin' => true]);
 
     $this->group = Group::create([
@@ -22,7 +22,7 @@ beforeEach(function () {
     Config::set('app.group_context', 'global');
 });
 
-test('a map point can be created with a location', function () {
+test('a map point can be created with a location', function (): void {
     $response = $this->actingAs($this->admin)
         ->post(route('mappoints.store'), [
             'title' => 'Test Point',
@@ -42,7 +42,7 @@ test('a map point can be created with a location', function () {
     ]);
 });
 
-test('a map point location can be updated', function () {
+test('a map point location can be updated', function (): void {
     $mapPoint = MapPoint::factory()->create(['location' => 'Alte Adresse']);
 
     $response = $this->actingAs($this->admin)
@@ -61,7 +61,7 @@ test('a map point location can be updated', function () {
     expect($mapPoint->location)->toBe('Neue Adresse');
 });
 
-test('a map point location must not exceed the maximum length', function () {
+test('a map point location must not exceed the maximum length', function (): void {
     $response = $this->actingAs($this->admin)
         ->post(route('mappoints.store'), [
             'title' => 'Test Point',
@@ -73,7 +73,7 @@ test('a map point location must not exceed the maximum length', function () {
     $response->assertSessionHasErrors(['location']);
 });
 
-test('the reverse geocoding api endpoint returns a location for a coordinate', function () {
+test('the reverse geocoding api endpoint returns a location for a coordinate', function (): void {
     $response = $this->actingAs($this->admin)
         ->getJson('/api/map/reverse-search?lat=49.8728&lng=8.6512');
 
@@ -81,7 +81,7 @@ test('the reverse geocoding api endpoint returns a location for a coordinate', f
     $response->assertJson(['location' => app(FetchAddressByCoordinate::class)(new Coordinate(49.8728, 8.6512))]);
 });
 
-test('the reverse geocoding api endpoint requires authentication', function () {
+test('the reverse geocoding api endpoint requires authentication', function (): void {
     $response = $this->getJson('/api/map/reverse-search?lat=49.8728&lng=8.6512');
 
     $response->assertStatus(401);

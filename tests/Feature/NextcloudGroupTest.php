@@ -21,7 +21,7 @@ function makeNcUser(string $id, string $email, string $displayname = 'Test User'
     );
 }
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->admin = User::factory()->create();
     $this->group = Group::factory()->create([
         'name' => 'Test Initiative',
@@ -36,7 +36,7 @@ beforeEach(function () {
 // index: comparison view
 // ──────────────────────────────────────────────
 
-test('index returns nextcloudConfigured=false when group has no nextcloud_group_name', function () {
+test('index returns nextcloudConfigured=false when group has no nextcloud_group_name', function (): void {
     $this->group->update(['nextcloud_group_name' => null]);
 
     $response = $this->get(route('groups.nextcloud', $this->group));
@@ -48,11 +48,11 @@ test('index returns nextcloudConfigured=false when group has no nextcloud_group_
     );
 });
 
-test('index: nc user matched with crm group member shows crm_is_group_member=true', function () {
+test('index: nc user matched with crm group member shows crm_is_group_member=true', function (): void {
     $crmUser = User::factory()->create(['email' => 'user@example.com']);
     $this->group->users()->attach($crmUser, ['is_admin' => false]);
 
-    $this->mock(NextcloudUserClientContract::class, function ($mock) {
+    $this->mock(NextcloudUserClientContract::class, function ($mock): void {
         $mock->shouldReceive('getGroupMembersWithDetails')
             ->with('TestGruppe')
             ->andReturn([makeNcUser('nc1', 'user@example.com', 'Test User')]);
@@ -71,12 +71,12 @@ test('index: nc user matched with crm group member shows crm_is_group_member=tru
     );
 });
 
-test('index: nc user in crm but not in this group shows crm_is_group_member=false', function () {
+test('index: nc user in crm but not in this group shows crm_is_group_member=false', function (): void {
     $otherGroup = Group::factory()->create();
     $crmUser = User::factory()->create(['email' => 'other@example.com']);
     $otherGroup->users()->attach($crmUser, ['is_admin' => false]);
 
-    $this->mock(NextcloudUserClientContract::class, function ($mock) {
+    $this->mock(NextcloudUserClientContract::class, function ($mock): void {
         $mock->shouldReceive('getGroupMembersWithDetails')
             ->with('TestGruppe')
             ->andReturn([makeNcUser('nc2', 'other@example.com')]);
@@ -93,8 +93,8 @@ test('index: nc user in crm but not in this group shows crm_is_group_member=fals
     );
 });
 
-test('index: nc user not in crm shows crm_user=null', function () {
-    $this->mock(NextcloudUserClientContract::class, function ($mock) {
+test('index: nc user not in crm shows crm_user=null', function (): void {
+    $this->mock(NextcloudUserClientContract::class, function ($mock): void {
         $mock->shouldReceive('getGroupMembersWithDetails')
             ->with('TestGruppe')
             ->andReturn([makeNcUser('nc3', 'nobody@example.com')]);
@@ -111,11 +111,11 @@ test('index: nc user not in crm shows crm_user=null', function () {
     );
 });
 
-test('index: crm group member not in nc appears with nc_id=null', function () {
+test('index: crm group member not in nc appears with nc_id=null', function (): void {
     $crmUser = User::factory()->create(['email' => 'crm-only@example.com']);
     $this->group->users()->attach($crmUser, ['is_admin' => false]);
 
-    $this->mock(NextcloudUserClientContract::class, function ($mock) {
+    $this->mock(NextcloudUserClientContract::class, function ($mock): void {
         $mock->shouldReceive('getGroupMembersWithDetails')
             ->with('TestGruppe')
             ->andReturn([]); // no NC users
@@ -132,11 +132,11 @@ test('index: crm group member not in nc appears with nc_id=null', function () {
     );
 });
 
-test('index: combines nc users and crm-only members in one list', function () {
+test('index: combines nc users and crm-only members in one list', function (): void {
     $crmUser = User::factory()->create(['email' => 'crm-only@example.com']);
     $this->group->users()->attach($crmUser, ['is_admin' => false]);
 
-    $this->mock(NextcloudUserClientContract::class, function ($mock) {
+    $this->mock(NextcloudUserClientContract::class, function ($mock): void {
         $mock->shouldReceive('getGroupMembersWithDetails')
             ->with('TestGruppe')
             ->andReturn([makeNcUser('nc4', 'nc-only@example.com')]);
@@ -154,9 +154,9 @@ test('index: combines nc users and crm-only members in one list', function () {
     );
 });
 
-test('index: admin appears as crm-only when not in nc group', function () {
+test('index: admin appears as crm-only when not in nc group', function (): void {
     // Only the admin is in the group, no NC users
-    $this->mock(NextcloudUserClientContract::class, function ($mock) {
+    $this->mock(NextcloudUserClientContract::class, function ($mock): void {
         $mock->shouldReceive('getGroupMembersWithDetails')
             ->with('TestGruppe')
             ->andReturn([]);
@@ -175,10 +175,10 @@ test('index: admin appears as crm-only when not in nc group', function () {
 // import
 // ──────────────────────────────────────────────
 
-test('import creates crm user and attaches to group', function () {
+test('import creates crm user and attaches to group', function (): void {
     Notification::fake();
 
-    $this->mock(NextcloudUserClientContract::class, function ($mock) {
+    $this->mock(NextcloudUserClientContract::class, function ($mock): void {
         $mock->shouldReceive('getUser')
             ->with('nc-new')
             ->andReturn(makeNcUser('nc-new', 'new@example.com', 'Max Mustermann'));
@@ -197,10 +197,10 @@ test('import creates crm user and attaches to group', function () {
     expect($this->group->users()->where('users.id', $user->id)->exists())->toBeTrue();
 });
 
-test('import fails when crm user with that email already exists', function () {
+test('import fails when crm user with that email already exists', function (): void {
     User::factory()->create(['email' => 'existing@example.com']);
 
-    $this->mock(NextcloudUserClientContract::class, function ($mock) {
+    $this->mock(NextcloudUserClientContract::class, function ($mock): void {
         $mock->shouldReceive('getUser')
             ->with('nc-existing')
             ->andReturn(makeNcUser('nc-existing', 'existing@example.com'));
@@ -220,10 +220,10 @@ test('import fails when crm user with that email already exists', function () {
 // addToGroup
 // ──────────────────────────────────────────────
 
-test('addToGroup attaches existing crm user to group', function () {
+test('addToGroup attaches existing crm user to group', function (): void {
     $crmUser = User::factory()->create(['email' => 'existing@example.com']);
 
-    $this->mock(NextcloudUserClientContract::class, function ($mock) {
+    $this->mock(NextcloudUserClientContract::class, function ($mock): void {
         $mock->shouldReceive('getUser')
             ->with('nc-ext')
             ->andReturn(makeNcUser('nc-ext', 'existing@example.com'));
@@ -234,8 +234,8 @@ test('addToGroup attaches existing crm user to group', function () {
     expect($this->group->users()->where('users.id', $crmUser->id)->exists())->toBeTrue();
 });
 
-test('addToGroup fails when no crm user with that email exists', function () {
-    $this->mock(NextcloudUserClientContract::class, function ($mock) {
+test('addToGroup fails when no crm user with that email exists', function (): void {
+    $this->mock(NextcloudUserClientContract::class, function ($mock): void {
         $mock->shouldReceive('getUser')
             ->with('nc-ghost')
             ->andReturn(makeNcUser('nc-ghost', 'ghost@example.com'));
@@ -246,11 +246,11 @@ test('addToGroup fails when no crm user with that email exists', function () {
     $response->assertSessionHasErrors('nc_user');
 });
 
-test('addToGroup fails when crm user is already in group', function () {
+test('addToGroup fails when crm user is already in group', function (): void {
     $crmUser = User::factory()->create(['email' => 'member@example.com']);
     $this->group->users()->attach($crmUser, ['is_admin' => false]);
 
-    $this->mock(NextcloudUserClientContract::class, function ($mock) {
+    $this->mock(NextcloudUserClientContract::class, function ($mock): void {
         $mock->shouldReceive('getUser')
             ->with('nc-member')
             ->andReturn(makeNcUser('nc-member', 'member@example.com'));

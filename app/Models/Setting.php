@@ -14,7 +14,7 @@ class Setting extends Model
 
     protected $appends = ['type', 'name'];
 
-    protected static function defaultConfig()
+    protected static function defaultConfig(): array
     {
 
         return [
@@ -78,7 +78,7 @@ class Setting extends Model
         return $value;
     }
 
-    public function setValueAttribute(mixed $value)
+    public function setValueAttribute(mixed $value): void
     {
         if ($value === null) {
             if (! $this->nullable()) {
@@ -135,12 +135,12 @@ class Setting extends Model
         return false;
     }
 
-    private function hasConfig()
+    private function hasConfig(): bool
     {
         return is_array($this->config());
     }
 
-    public static function exists(string $key)
+    public static function exists(string $key): bool
     {
         return array_key_exists($key, static::defaultConfig());
     }

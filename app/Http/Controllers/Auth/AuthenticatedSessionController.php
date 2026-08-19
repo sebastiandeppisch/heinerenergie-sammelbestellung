@@ -43,7 +43,7 @@ class AuthenticatedSessionController extends Controller
         return redirect('/');
     }
 
-    public function index(Request $request)
+    public function index(Request $request): array
     {
         $user = Auth::user();
         if ($user === null) {

@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('map_embeds', function (Blueprint $table) {
+        Schema::create('map_embeds', function (Blueprint $table): void {
             $table->id();
             $table->uuid('uuid')->unique();
             $table->string('name')->nullable();
@@ -24,7 +24,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('map_embed_map_point_category', function (Blueprint $table) {
+        Schema::create('map_embed_map_point_category', function (Blueprint $table): void {
             $table->id();
             $table->foreignIdFor(MapEmbed::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(MapPointCategory::class)->constrained()->cascadeOnDelete();

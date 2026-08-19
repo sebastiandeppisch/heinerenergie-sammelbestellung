@@ -53,7 +53,7 @@ class FormSubmitController extends Controller
         $storedImagePaths = [];
 
         try {
-            DB::transaction(function () use ($formDefinition, $request, &$storedImagePaths) {
+            DB::transaction(function () use ($formDefinition, $request, &$storedImagePaths): void {
                 $submission = $formDefinition->createSubmission();
                 foreach ($formDefinition->fields as $field) {
                     $field->createSubmissionField($submission, $this->getValueFromField($field, $request, $submission, $storedImagePaths));

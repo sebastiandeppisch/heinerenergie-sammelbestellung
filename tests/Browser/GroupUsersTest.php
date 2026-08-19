@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::factory()->admin()->create(['first_name' => 'Admin', 'last_name' => 'User']);
     $this->group = Group::factory()->create(['name' => 'Test Initiative']);
     $this->group->users()->attach($this->user, ['is_admin' => true]);
@@ -19,7 +19,7 @@ beforeEach(function () {
     $this->actingAs($this->user);
 });
 
-test('group users table renders columns and cell formatting', function () {
+test('group users table renders columns and cell formatting', function (): void {
     visit(route('groups.show', $this->group).'#tab=1')
         ->assertNoSmoke()
         ->assertSee('Vorname')
@@ -37,7 +37,7 @@ test('group users table renders columns and cell formatting', function () {
         ->assertNoJavaScriptErrors();
 });
 
-test('editing a user toggles admin via dialog', function () {
+test('editing a user toggles admin via dialog', function (): void {
     visit(route('groups.show', $this->group).'#tab=1')
         ->assertNoSmoke()
         ->click('[data-test="edit-user-'.$this->member->uuid.'"]')
@@ -50,7 +50,7 @@ test('editing a user toggles admin via dialog', function () {
         ->toBeTrue();
 });
 
-test('removing a user asks for confirmation and detaches', function () {
+test('removing a user asks for confirmation and detaches', function (): void {
     visit(route('groups.show', $this->group).'#tab=1')
         ->assertNoSmoke()
         ->click('[data-test="remove-user-'.$this->member->uuid.'"]')
@@ -62,7 +62,7 @@ test('removing a user asks for confirmation and detaches', function () {
         ->toBeFalse();
 });
 
-test('adding a user via the dialog attaches them to the group', function () {
+test('adding a user via the dialog attaches them to the group', function (): void {
     $candidate = User::factory()->create(['first_name' => 'Jane', 'last_name' => 'Smith', 'is_active' => true]);
 
     visit(route('groups.show', $this->group).'#tab=1')

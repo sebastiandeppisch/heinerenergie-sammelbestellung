@@ -11,9 +11,9 @@ return new class extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::table('advices', function (Blueprint $table) {
+        Schema::table('advices', function (Blueprint $table): void {
             $table->string('placeNotes')->nullable();
             $table->unsignedInteger('houseType')->nullable()->default(null);
             $table->boolean('helpType_place')->default(false);
@@ -30,9 +30,9 @@ return new class extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::table('advices', function (Blueprint $table) {
+        Schema::table('advices', function (Blueprint $table): void {
             $table->dropColumn('placeNotes');
             $table->dropColumn('houseType');
             $table->dropColumn('helpType_place');

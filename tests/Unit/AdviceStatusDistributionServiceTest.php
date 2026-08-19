@@ -39,7 +39,7 @@ function kpiService(): AdviceStatusDistributionService
 
 // ── computeForDate ─────────────────────────────────────────────────────────────
 
-it('counts advice with no events using current status', function () {
+it('counts advice with no events using current status', function (): void {
     $group = Group::factory()->create();
     $status = AdviceStatus::factory()->create([
         'name' => 'In Arbeit',
@@ -55,7 +55,7 @@ it('counts advice with no events using current status', function () {
         ->and($result->statusCounts['Neu'])->toBe(0);
 });
 
-it('returns New result when advice has no status set', function () {
+it('returns New result when advice has no status set', function (): void {
     $group = Group::factory()->create();
     newAdvice($group, null, now()->subMonth());
 
@@ -64,7 +64,7 @@ it('returns New result when advice has no status set', function () {
     expect($result->statusCounts['Neu'])->toBe(1);
 });
 
-it('walks back events after cutoff to find status at cutoff date', function () {
+it('walks back events after cutoff to find status at cutoff date', function (): void {
     $group = Group::factory()->create();
     $initial = AdviceStatus::factory()->create(['name' => 'Offen', 'result' => AdviceStatusResult::New, 'group_id' => $group->id]);
     $later = AdviceStatus::factory()->create(['name' => 'Fertig', 'result' => AdviceStatusResult::Completed, 'group_id' => $group->id]);
@@ -80,7 +80,7 @@ it('walks back events after cutoff to find status at cutoff date', function () {
         ->and($result->statusCounts['Erfolgreich beraten'])->toBe(0);
 });
 
-it('uses toStatus of event before cutoff', function () {
+it('uses toStatus of event before cutoff', function (): void {
     $group = Group::factory()->create();
     $initial = AdviceStatus::factory()->create(['name' => 'Offen', 'result' => AdviceStatusResult::New, 'group_id' => $group->id]);
     $after = AdviceStatus::factory()->create(['name' => 'Fertig', 'result' => AdviceStatusResult::Completed, 'group_id' => $group->id]);
@@ -96,7 +96,7 @@ it('uses toStatus of event before cutoff', function () {
         ->and($result->statusCounts['Neu'])->toBe(0);
 });
 
-it('treats null fromStatus as New when walking back', function () {
+it('treats null fromStatus as New when walking back', function (): void {
     $group = Group::factory()->create();
     $nextStatus = AdviceStatus::factory()->create(['name' => 'Fertig', 'result' => AdviceStatusResult::Completed, 'group_id' => $group->id]);
 
@@ -110,7 +110,7 @@ it('treats null fromStatus as New when walking back', function () {
     expect($result->statusCounts['Neu'])->toBe(1);
 });
 
-it('excludes advices created after the cutoff date', function () {
+it('excludes advices created after the cutoff date', function (): void {
     $group = Group::factory()->create();
     $status = AdviceStatus::factory()->create(['result' => AdviceStatusResult::InProgress, 'group_id' => $group->id]);
 
@@ -121,7 +121,7 @@ it('excludes advices created after the cutoff date', function () {
     expect(array_sum($result->statusCounts))->toBe(0);
 });
 
-it('only counts advices belonging to the given group', function () {
+it('only counts advices belonging to the given group', function (): void {
     $groupA = Group::factory()->create();
     $groupB = Group::factory()->create();
     $status = AdviceStatus::factory()->create(['result' => AdviceStatusResult::Completed, 'group_id' => $groupA->id]);
@@ -134,7 +134,7 @@ it('only counts advices belonging to the given group', function () {
     expect($result->statusCounts['Erfolgreich beraten'])->toBe(1);
 });
 
-it('formats the date as Y-m-d', function () {
+it('formats the date as Y-m-d', function (): void {
     $group = Group::factory()->create();
 
     $result = kpiService()->computeForDate($group, Carbon::parse('2024-03-15'));
@@ -142,7 +142,7 @@ it('formats the date as Y-m-d', function () {
     expect($result->date)->toBe('2024-03-15');
 });
 
-it('returns zero counts for all buckets when no advices exist', function () {
+it('returns zero counts for all buckets when no advices exist', function (): void {
     $group = Group::factory()->create();
 
     $result = kpiService()->computeForDate($group, now());
@@ -157,7 +157,7 @@ it('returns zero counts for all buckets when no advices exist', function () {
 
 // ── generateCutoffDates ────────────────────────────────────────────────────────
 
-it('generates monthly cutoff dates as end-of-month, last clamped to to-date', function () {
+it('generates monthly cutoff dates as end-of-month, last clamped to to-date', function (): void {
     $from = Carbon::parse('2024-01-01');
     $to = Carbon::parse('2024-03-15');
 
@@ -169,7 +169,7 @@ it('generates monthly cutoff dates as end-of-month, last clamped to to-date', fu
         ->and($dates[2]->format('Y-m-d'))->toBe('2024-03-15');
 });
 
-it('generates weekly cutoff dates as end-of-week (Sunday)', function () {
+it('generates weekly cutoff dates as end-of-week (Sunday)', function (): void {
     $from = Carbon::parse('2024-01-01'); // Monday
     $to = Carbon::parse('2024-01-14');
 
@@ -180,7 +180,7 @@ it('generates weekly cutoff dates as end-of-week (Sunday)', function () {
         ->and($dates[1]->format('Y-m-d'))->toBe('2024-01-14');
 });
 
-it('generates daily cutoff dates', function () {
+it('generates daily cutoff dates', function (): void {
     $from = Carbon::parse('2024-01-01');
     $to = Carbon::parse('2024-01-03');
 
@@ -194,7 +194,7 @@ it('generates daily cutoff dates', function () {
 
 // ── getDistribution ────────────────────────────────────────────────────────────
 
-it('returns one data point per cutoff date', function () {
+it('returns one data point per cutoff date', function (): void {
     $group = Group::factory()->create();
     $from = now()->subMonths(2)->startOfMonth();
     $to = now();
@@ -205,7 +205,7 @@ it('returns one data point per cutoff date', function () {
         ->each->toHaveKeys(['date', 'statusCounts']);
 });
 
-it('caches past cutoff dates but not the current period', function () {
+it('caches past cutoff dates but not the current period', function (): void {
     $cache = Cache::spy();
 
     $group = Group::factory()->create();

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Config;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Create users with different roles
     $this->admin = User::factory()->create(['is_admin' => true]);
     $this->groupAdmin = User::factory()->create();
@@ -38,12 +38,12 @@ beforeEach(function () {
     Config::set('app.group_context', 'global');
 });
 
-afterEach(function () {
+afterEach(function (): void {
     // Reset session service
     app(SessionService::class)->clear();
 });
 
-it('lists all available statuses for a group', function () {
+it('lists all available statuses for a group', function (): void {
     $response = $this->actingAs($this->groupAdmin)
         ->getJson("/api/groups/{$this->subGroup->uuid}/advicestatus");
 
@@ -59,7 +59,7 @@ it('lists all available statuses for a group', function () {
     }
 });
 
-it('can create a new status for a group', function () {
+it('can create a new status for a group', function (): void {
     $response = $this->actingAs($this->groupAdmin)
         ->postJson("/api/groups/{$this->subGroup->uuid}/advicestatus", [
             'name' => 'New Status',
@@ -79,7 +79,7 @@ it('can create a new status for a group', function () {
     ]);
 });
 
-it('can update visibility of parent status in own group', function () {
+it('can update visibility of parent status in own group', function (): void {
     $response = $this->actingAs($this->groupAdmin)
         ->putJson("/api/groups/{$this->subGroup->uuid}/advicestatus/{$this->mainGroupStatus->uuid}", [
             'visible_in_group' => false,
@@ -98,7 +98,7 @@ it('can update visibility of parent status in own group', function () {
     ]);
 });
 
-it('cannot update visibility of parent status in parent group', function () {
+it('cannot update visibility of parent status in parent group', function (): void {
     $response = $this->actingAs($this->groupAdmin)
         ->putJson("/api/groups/{$this->mainGroup->uuid}/advicestatus/{$this->mainGroupStatus->uuid}", [
             'visible_in_group' => false,
@@ -107,7 +107,7 @@ it('cannot update visibility of parent status in parent group', function () {
     $response->assertForbidden();
 });
 
-it('can update own group status', function () {
+it('can update own group status', function (): void {
     $response = $this->actingAs($this->groupAdmin)
         ->putJson("/api/groups/{$this->subGroup->uuid}/advicestatus/{$this->subGroupStatus->uuid}", [
             'name' => 'Updated Status',
@@ -127,7 +127,7 @@ it('can update own group status', function () {
     ]);
 });
 
-it('cannot update parent group status fields', function () {
+it('cannot update parent group status fields', function (): void {
     $originalName = $this->mainGroupStatus->name;
 
     $response = $this->actingAs($this->groupAdmin)
@@ -139,7 +139,7 @@ it('cannot update parent group status fields', function () {
     $response->assertForbidden();
 });
 
-it('can delete own group status', function () {
+it('can delete own group status', function (): void {
     $response = $this->actingAs($this->groupAdmin)
         ->deleteJson("/api/groups/{$this->subGroup->uuid}/advicestatus/{$this->subGroupStatus->uuid}");
 
@@ -148,14 +148,14 @@ it('can delete own group status', function () {
     $this->assertNull(AdviceStatus::find($this->subGroupStatus->id));
 });
 
-it('cannot delete parent group status', function () {
+it('cannot delete parent group status', function (): void {
     $response = $this->actingAs($this->groupAdmin)
         ->deleteJson("/api/groups/{$this->subGroup->uuid}/advicestatus/{$this->mainGroupStatus->uuid}");
 
     $response->assertForbidden();
 });
 
-test('regular users cannot access status management', function () {
+test('regular users cannot access status management', function (): void {
     $this->actingAs($this->user)
         ->getJson("/api/groups/{$this->subGroup->uuid}/advicestatus")
         ->assertForbidden();
@@ -168,7 +168,7 @@ test('regular users cannot access status management', function () {
         ->assertForbidden();
 });
 
-test('group admin cannot manage other groups statuses', function () {
+test('group admin cannot manage other groups statuses', function (): void {
     $otherGroup = Group::factory()->create();
 
     $this->actingAs($this->groupAdmin)
@@ -183,7 +183,7 @@ test('group admin cannot manage other groups statuses', function () {
         ->assertForbidden();
 });
 
-test('system admin can manage any group status', function () {
+test('system admin can manage any group status', function (): void {
     $this->actingAs($this->admin)
         ->getJson("/api/groups/{$this->subGroup->uuid}/advicestatus")
         ->assertOk();
@@ -200,7 +200,7 @@ test('system admin can manage any group status', function () {
         ]);
 });
 
-it('can toggle visibility of parent status in child group', function () {
+it('can toggle visibility of parent status in child group', function (): void {
     // We're using the existing group hierarchy (mainGroup is parent of subGroup)
     // The status belongs to the mainGroup (parent)
 
@@ -270,7 +270,7 @@ it('can toggle visibility of parent status in child group', function () {
     expect($finalMainGroupStatus['visible_in_group'])->toBeTrue();
 });
 
-it('can toggle visibility of own status in own group', function () {
+it('can toggle visibility of own status in own group', function (): void {
     // We're using the existing group hierarchy
     // The status belongs to the own subgroup (subGroup)
 
@@ -340,7 +340,7 @@ it('can toggle visibility of own status in own group', function () {
     expect($finalSubGroupStatus['visible_in_group'])->toBeTrue();
 });
 
-test('normal group member cannot use group advice status', function () {
+test('normal group member cannot use group advice status', function (): void {
     $this->actingAs($this->user)
         ->getJson("/api/groups/{$this->subGroup->uuid}/advicestatus")
         ->assertForbidden();

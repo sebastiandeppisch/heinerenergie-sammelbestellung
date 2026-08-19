@@ -34,7 +34,7 @@ class AdviceStatusDistributionService
 
             $cacheKey = 'kpi.status.'.($group->id ?? 'all').'.'.$cutoffDate->format('Y-m-d');
 
-            return Cache::rememberForever($cacheKey, fn () => $this->computeForDate($group, $cutoffDate));
+            return Cache::rememberForever($cacheKey, fn (): StatusDistributionPointData => $this->computeForDate($group, $cutoffDate));
         }, $cutoffDates));
     }
 
@@ -87,7 +87,7 @@ class AdviceStatusDistributionService
             ->groupBy('advice_id');
 
         $counts = array_fill_keys(
-            array_map(fn ($r) => $r->value, AdviceStatusResult::cases()),
+            array_map(fn (AdviceStatusResult $r) => $r->value, AdviceStatusResult::cases()),
             0
         );
 
