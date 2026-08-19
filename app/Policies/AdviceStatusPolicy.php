@@ -13,17 +13,17 @@ class AdviceStatusPolicy
     use GroupContextHelper;
     use HandlesAuthorization;
 
-    public function create(User $user, Group $group)
+    public function create(User $user, Group $group): bool
     {
         return $this->isGroupAdmin($user, $group);
     }
 
-    public function update(User $user, AdviceStatus $advicestatus)
+    public function update(User $user, AdviceStatus $advicestatus): bool
     {
         return $this->isGroupAdmin($user, $advicestatus->ownerGroup);
     }
 
-    public function delete(User $user, AdviceStatus $advicestatus)
+    public function delete(User $user, AdviceStatus $advicestatus): bool
     {
         return $this->isGroupAdmin($user, $advicestatus->ownerGroup);
     }
