@@ -24,9 +24,8 @@ class SubmissionFieldOption extends Model
 
     protected $casts = [
         'is_default' => 'boolean',
-        'is_required' => 'boolean'
+        'is_required' => 'boolean',
     ];
-
 
     /**
      * @return BelongsTo<SubmissionField, $this>
