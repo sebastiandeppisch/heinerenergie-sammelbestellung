@@ -11,6 +11,9 @@ class ImportNextcloudUserRequest extends FormRequest
         return $this->user()->can('update', $this->route('group'));
     }
 
+    /**
+     * @return array<string, list<string>>
+     */
     public function rules(): array
     {
         return [

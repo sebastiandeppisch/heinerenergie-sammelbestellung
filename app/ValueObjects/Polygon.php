@@ -15,13 +15,14 @@ class Polygon implements Castable, JsonSerializable
     /** @var array<int, Coordinate> */
     public readonly array $coordinates;
 
-    public function __construct(
-        /** array<int, Coordinate|array{lat: float, lng: float}> **/
-        array $coordinates = []
-    ) {
+    /**
+     * @param  array<int, Coordinate|array{lat: float, lng: float}>  $coordinates
+     */
+    public function __construct(array $coordinates = [])
+    {
         $this->coordinates = array_map(fn (Coordinate|array $coordinate): Coordinate => $coordinate instanceof Coordinate ? $coordinate : Coordinate::fromArray($coordinate), $coordinates);
     }
-    
+
     /**
      * @return class-string<PolygonCast>
      */

@@ -18,6 +18,8 @@ use Override;
 
 /**
  * @property AdviceStatusGroup $pivot
+ * @property-read Polygon|null $consulting_area
+ * @property-write Polygon|array<mixed>|null $consulting_area
  */
 class Group extends Model
 {

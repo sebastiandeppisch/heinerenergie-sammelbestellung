@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Enums\FormType;
 use App\Models\Advice;
 use App\Models\FormDefinition;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -16,6 +17,9 @@ class StoreChecklistEntryRequest extends FormRequest
         return $this->user()->can('update', $this->route('advice'));
     }
 
+    /**
+     * @return array<string, array<int, ValidationRule|string>>
+     */
     public function rules(): array
     {
         return [

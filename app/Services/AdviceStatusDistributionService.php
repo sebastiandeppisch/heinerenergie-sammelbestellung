@@ -106,6 +106,8 @@ class AdviceStatusDistributionService
     /**
      * Determines the AdviceStatusResult an advice was in at the given cutoff date
      * by walking backwards through events that occurred after the cutoff.
+     *
+     * @param  Collection<int, AdviceEvent>  $events
      */
     public function getResultAtDate(Advice $advice, Collection $events, Carbon $cutoffDate): AdviceStatusResult
     {
@@ -143,7 +145,10 @@ class AdviceStatusDistributionService
         return $this->statusNameMap[$statusName] ?? AdviceStatusResult::New;
     }
 
-    /** @return array<string, int> */
+    /**
+     * @param  array<int, int>  $counts
+     * @return array<string, int>
+     */
     private function mapCountsToLabels(array $counts): array
     {
         return [

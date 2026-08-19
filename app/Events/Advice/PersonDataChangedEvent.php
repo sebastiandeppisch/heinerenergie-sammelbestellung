@@ -51,12 +51,18 @@ class PersonDataChangedEvent extends AdviceEvent
         return 'Persönliche Daten geändert:'."\n".implode("\n", $parts);
     }
 
+    /**
+     * @return array{changes: array<string, array{from: ?string, to: ?string}>}
+     */
     #[Override]
     public function __serialize(): array
     {
         return ['changes' => $this->changes];
     }
 
+    /**
+     * @param  array{changes: array<string, array{from: ?string, to: ?string}>}  $data
+     */
     #[Override]
     public function __unserialize(array $data): void
     {

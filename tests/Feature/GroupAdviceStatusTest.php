@@ -209,7 +209,7 @@ it('can toggle visibility of parent status in child group', function (): void {
         ->getJson("/api/groups/{$this->subGroup->uuid}/advicestatus");
 
     $initialResponse->assertOk();
-    $statusesData = collect($initialResponse->json());
+    $statusesData = $initialResponse->collect();
     $mainGroupStatus = $statusesData->firstWhere('id', $this->mainGroupStatus->uuid);
     expect($mainGroupStatus['visible_in_group'])->toBeTrue();
 
@@ -237,7 +237,7 @@ it('can toggle visibility of parent status in child group', function (): void {
         ->getJson("/api/groups/{$this->subGroup->uuid}/advicestatus");
 
     $getAfterUpdateResponse->assertOk();
-    $updatedStatusesData = collect($getAfterUpdateResponse->json());
+    $updatedStatusesData = $getAfterUpdateResponse->collect();
     $updatedMainGroupStatus = $updatedStatusesData->firstWhere('id', $this->mainGroupStatus->uuid);
     expect($updatedMainGroupStatus['visible_in_group'])->toBeFalse();
 
@@ -265,7 +265,7 @@ it('can toggle visibility of parent status in child group', function (): void {
         ->getJson("/api/groups/{$this->subGroup->uuid}/advicestatus");
 
     $finalResponse->assertOk();
-    $finalStatusesData = collect($finalResponse->json());
+    $finalStatusesData = $finalResponse->collect();
     $finalMainGroupStatus = $finalStatusesData->firstWhere('id', $this->mainGroupStatus->uuid);
     expect($finalMainGroupStatus['visible_in_group'])->toBeTrue();
 });
@@ -279,7 +279,7 @@ it('can toggle visibility of own status in own group', function (): void {
         ->getJson("/api/groups/{$this->subGroup->uuid}/advicestatus");
 
     $initialResponse->assertOk();
-    $statusesData = collect($initialResponse->json());
+    $statusesData = $initialResponse->collect();
     $subGroupStatus = $statusesData->firstWhere('id', $this->subGroupStatus->uuid);
     expect($subGroupStatus['visible_in_group'])->toBeTrue();
 
@@ -307,7 +307,7 @@ it('can toggle visibility of own status in own group', function (): void {
         ->getJson("/api/groups/{$this->subGroup->uuid}/advicestatus");
 
     $getAfterUpdateResponse->assertOk();
-    $updatedStatusesData = collect($getAfterUpdateResponse->json());
+    $updatedStatusesData = $getAfterUpdateResponse->collect();
     $updatedSubGroupStatus = $updatedStatusesData->firstWhere('id', $this->subGroupStatus->uuid);
     expect($updatedSubGroupStatus['visible_in_group'])->toBeFalse();
 
@@ -335,7 +335,7 @@ it('can toggle visibility of own status in own group', function (): void {
         ->getJson("/api/groups/{$this->subGroup->uuid}/advicestatus");
 
     $finalResponse->assertOk();
-    $finalStatusesData = collect($finalResponse->json());
+    $finalStatusesData = $finalResponse->collect();
     $finalSubGroupStatus = $finalStatusesData->firstWhere('id', $this->subGroupStatus->uuid);
     expect($finalSubGroupStatus['visible_in_group'])->toBeTrue();
 });

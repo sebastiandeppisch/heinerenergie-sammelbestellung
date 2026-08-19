@@ -14,6 +14,9 @@ class UpdateChecklistEntryRequest extends FormRequest
             && $this->checklistEntry()->advice_id === $this->advice()->id;
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function rules(): array
     {
         return [

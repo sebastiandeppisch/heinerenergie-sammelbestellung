@@ -17,6 +17,7 @@ class FormDefinitionData extends Data
 {
     /**
      * @param  Collection<int, FormFieldData>  $fields
+     * @param  list<string>|null  $allowed_embed_domains
      */
     public function __construct(
         public string $id,

@@ -101,7 +101,7 @@ test('form submission preview shows only non-personal fields to group members', 
 
     $response = $this->actingAs($this->advisor)->getJson(route('api.advices.formSubmission', $advice))->assertOk();
 
-    $labels = collect($response->json('formSubmission.fields'))->pluck('field.label');
+    $labels = $response->collect('formSubmission.fields')->pluck('field.label');
     expect($labels->all())->toBe(['Wobei wird Hilfe benötigt?']);
 });
 

@@ -4,6 +4,7 @@ use App\Models\Group;
 use App\Models\User;
 use App\Services\SessionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Collection;
 use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
@@ -30,7 +31,7 @@ test('group users shows the is_admin status of the current group, not the first 
         ->get(route('groups.show', $group1))
         ->assertInertia(fn (Assert $page): Assert => $page
             ->component('Groups/Index')
-            ->where('groupUsers', fn ($users): bool => collect($users)
+            ->where('groupUsers', fn (Collection $users): bool => $users
                 ->firstWhere('name', 'John Doe')['is_admin'] === true
             )
         );
@@ -41,7 +42,7 @@ test('group users shows the is_admin status of the current group, not the first 
         ->get(route('groups.show', $group2))
         ->assertInertia(fn (Assert $page): Assert => $page
             ->component('Groups/Index')
-            ->where('groupUsers', fn ($users): bool => collect($users)
+            ->where('groupUsers', fn (Collection $users): bool => $users
                 ->firstWhere('name', 'John Doe')['is_admin'] === false
             )
         );
@@ -65,8 +66,8 @@ test('group users only contains active members of the group', function (): void 
     $this->actingAs($this->admin)
         ->get(route('groups.show', $group))
         ->assertInertia(fn (Assert $page): Assert => $page
-            ->where('groupUsers', function ($users) use ($activeMember, $inactiveMember, $otherGroupMember): bool {
-                $names = collect($users)->pluck('name');
+            ->where('groupUsers', function (Collection $users) use ($activeMember, $inactiveMember, $otherGroupMember): bool {
+                $names = $users->pluck('name');
 
                 return $names->contains($activeMember->name)
                     && ! $names->contains($inactiveMember->name)
@@ -105,8 +106,8 @@ test('all users only contains active users with id, name and email', function ()
     $this->actingAs($this->admin)
         ->get(route('groups.show', $group))
         ->assertInertia(fn (Assert $page): Assert => $page
-            ->where('allUsers', function ($users) use ($active, $inactive): bool {
-                $ids = collect($users)->pluck('id');
+            ->where('allUsers', function (Collection $users) use ($active, $inactive): bool {
+                $ids = $users->pluck('id');
 
                 return $ids->contains($active->uuid) && ! $ids->contains($inactive->uuid);
             })

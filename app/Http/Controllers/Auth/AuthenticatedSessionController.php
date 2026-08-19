@@ -8,8 +8,8 @@ use App\Http\Context\SessionGroupContextFactory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Jobs\CacheUsersAdvicePolicies;
-use App\Services\UserEncryptionService;
 use App\Models\User;
+use App\Services\UserEncryptionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
@@ -20,7 +20,7 @@ class AuthenticatedSessionController extends Controller
 {
     public function __construct(private readonly UserEncryptionService $encryptionService) {}
 
-    public function store(LoginRequest $request)
+    public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
 

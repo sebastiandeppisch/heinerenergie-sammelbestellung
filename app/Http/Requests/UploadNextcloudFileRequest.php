@@ -11,6 +11,9 @@ class UploadNextcloudFileRequest extends FormRequest
         return $this->user()->can('update', $this->route('advice'));
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function rules(): array
     {
         return [

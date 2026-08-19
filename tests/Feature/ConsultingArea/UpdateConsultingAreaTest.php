@@ -58,15 +58,14 @@ test('group admin can update consulting area', function (): void {
         ->assertRedirect()
         ->assertSessionHas('success', 'Beratungsgebiet wurde erfolgreich gespeichert.');
 
-    $this->group->refresh();
+    $polygon = Group::query()->where('id', $this->group->id)->firstOrFail()->consulting_area;
 
-    expect($this->group->consulting_area)
-        ->toBeInstanceOf(Polygon::class)
-        ->and(collect($this->group->consulting_area->getCoordinates())->map(fn (Coordinate $coordinate): array => [
-            'lat' => $coordinate->lat,
-            'lng' => $coordinate->lng,
-        ]))
-        ->toMatchArray($coordinates);
+    expect($polygon)->toBeInstanceOf(Polygon::class);
+
+    expect(collect($polygon?->getCoordinates() ?? [])->map(fn (Coordinate $coordinate): array => [
+        'lat' => $coordinate->lat,
+        'lng' => $coordinate->lng,
+    ]))->toMatchArray($coordinates);
 });
 
 test('it validates polygon format', function (): void {

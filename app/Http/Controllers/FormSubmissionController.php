@@ -12,6 +12,7 @@ use App\Enums\FormType;
 use App\Http\Requests\IndexFormSubmissionRequest;
 use App\Models\FormDefinition;
 use App\Models\FormSubmission;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
@@ -87,7 +88,7 @@ class FormSubmissionController extends Controller
         });
     }
 
-    public function markSeen(Request $request, FormSubmission $formSubmission): Response
+    public function markSeen(Request $request, FormSubmission $formSubmission): RedirectResponse
     {
         $formSubmission->seen = true;
         $formSubmission->save();
@@ -95,7 +96,7 @@ class FormSubmissionController extends Controller
         return back()->with('success', 'Der Formulareintrag wurde als gelesen markiert');
     }
 
-    public function markUnseen(Request $request, FormSubmission $formSubmission): Response
+    public function markUnseen(Request $request, FormSubmission $formSubmission): RedirectResponse
     {
         $formSubmission->seen = false;
         $formSubmission->save();

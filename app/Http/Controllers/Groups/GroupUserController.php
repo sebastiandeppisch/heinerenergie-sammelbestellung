@@ -7,13 +7,14 @@ use App\Http\Requests\StoreGroupUserRequest;
 use App\Http\Requests\UpdateGroupUserRequest;
 use App\Models\Group;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 
 class GroupUserController extends Controller
 {
     /**
      * Add a user to a group
      */
-    public function store(StoreGroupUserRequest $request, Group $group)
+    public function store(StoreGroupUserRequest $request, Group $group): RedirectResponse
     {
         $validated = $request->validated();
 
@@ -27,7 +28,7 @@ class GroupUserController extends Controller
     /**
      * Update a user's role in a group
      */
-    public function update(UpdateGroupUserRequest $request, Group $group, User $user)
+    public function update(UpdateGroupUserRequest $request, Group $group, User $user): RedirectResponse
     {
         $group->users()->updateExistingPivot($user->id, [
             'is_admin' => $request->isAdmin(),
@@ -39,7 +40,7 @@ class GroupUserController extends Controller
     /**
      * Remove a user from a group
      */
-    public function destroy(Group $group, User $user)
+    public function destroy(Group $group, User $user): RedirectResponse
     {
         $this->authorize('manageUsers', $group);
 

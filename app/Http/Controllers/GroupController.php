@@ -44,8 +44,10 @@ class GroupController extends Controller
     /**
      * @param  Collection<int, GroupTreeItem>  $groupTreeItems
      * @param  Collection<int, GroupData>  $groups
+     * @param  Collection<int, GroupUserData>|null  $groupUsers
+     * @param  Collection<int, array{id: string, name: string, email: string}>  $allUsers
      */
-    private function showPage(Collection $groupTreeItems, Collection $groups, bool $canCreateRootGroup, ?Group $selectedGroup, $groupUsers = null, $allUsers = []): Response
+    private function showPage(Collection $groupTreeItems, Collection $groups, bool $canCreateRootGroup, ?Group $selectedGroup, ?Collection $groupUsers = null, Collection $allUsers = new Collection): Response
     {
         $polygon = $selectedGroup?->consulting_area;
 

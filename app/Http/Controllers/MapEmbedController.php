@@ -9,12 +9,14 @@ use App\Http\Requests\UpsertMapEmbedRequest;
 use App\Models\MapEmbed;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class MapEmbedController extends Controller
 {
-    public function index()
+    public function index(): Response
     {
         $this->authorize('viewAny', MapEmbed::class);
 
@@ -26,7 +28,7 @@ class MapEmbedController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(): Response
     {
         $this->authorize('create', MapEmbed::class);
 
@@ -36,7 +38,7 @@ class MapEmbedController extends Controller
         ]);
     }
 
-    public function store(UpsertMapEmbedRequest $request)
+    public function store(UpsertMapEmbedRequest $request): RedirectResponse
     {
         $this->authorize('create', MapEmbed::class);
 
@@ -46,7 +48,7 @@ class MapEmbedController extends Controller
         return redirect()->route('map-embeds.edit', $mapEmbed)->with('success', 'Die Einbettung wurde erstellt');
     }
 
-    public function edit(MapEmbed $mapEmbed)
+    public function edit(MapEmbed $mapEmbed): Response
     {
         $this->authorize('update', $mapEmbed);
 
@@ -57,7 +59,7 @@ class MapEmbedController extends Controller
         ]);
     }
 
-    public function update(UpsertMapEmbedRequest $request, MapEmbed $mapEmbed)
+    public function update(UpsertMapEmbedRequest $request, MapEmbed $mapEmbed): RedirectResponse
     {
         $this->authorize('update', $mapEmbed);
 
@@ -67,7 +69,7 @@ class MapEmbedController extends Controller
         return redirect()->back()->with('success', 'Die Einbettung wurde aktualisiert');
     }
 
-    public function destroy(MapEmbed $mapEmbed)
+    public function destroy(MapEmbed $mapEmbed): RedirectResponse
     {
         $this->authorize('delete', $mapEmbed);
 
@@ -81,7 +83,7 @@ class MapEmbedController extends Controller
     /**
      * @return Collection<int, MapPointCategoryData>
      */
-    private function allCategories()
+    private function allCategories(): Collection
     {
         return MapPointCategory::all()->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel($category));
     }

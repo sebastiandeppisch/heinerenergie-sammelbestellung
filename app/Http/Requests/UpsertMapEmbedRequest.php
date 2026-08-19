@@ -38,6 +38,9 @@ class UpsertMapEmbedRequest extends FormRequest
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getData(): array
     {
         return $this->safe()->only(['name', 'coordinate', 'zoom', 'show_table']);

@@ -91,7 +91,7 @@ class AdviceController extends Controller
 
     public function sortedAdvisors(Advice $advice, AdviceService $adviceService): JsonResponse
     {
-        return User::where('is_active', true)->get()->map(function (User $user) use ($advice, $adviceService): array {
+        $advisors = User::where('is_active', true)->get()->map(function (User $user) use ($advice, $adviceService): array {
             $name = $user->name;
             $distance = $adviceService->getDistance($advice, $user);
             if ($distance !== null) {
@@ -111,5 +111,7 @@ class AdviceController extends Controller
                 'distance' => $distance,
             ];
         })->sortBy('distance')->values();
+
+        return response()->json($advisors);
     }
 }
