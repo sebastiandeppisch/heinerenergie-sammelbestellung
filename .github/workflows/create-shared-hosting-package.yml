@@ -56,7 +56,7 @@ jobs:
           ./ci/build-shared-hosting-package.sh "${{ steps.get-version.outputs.version }}"
 
       - name: Create or update draft release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: latest-build
           name: Latest Build (${{ steps.get-version.outputs.version }})
