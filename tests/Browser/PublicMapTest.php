@@ -91,3 +91,49 @@ test('the table tab is hidden when disabled for the embed', function (): void {
         ->assertNoJavaScriptErrors()
         ->assertDontSee('Tabelle');
 });
+
+test('the location text in the table links to the map and shows a map preview on hover', function (): void {
+    $category = MapPointCategory::factory()->withoutImage()->create();
+    MapPoint::factory()->create([
+        'published' => true,
+        'category_id' => $category->id,
+        'title' => 'Punkt mit Ort',
+        'location' => 'Musterstraße 1, 64283 Darmstadt',
+        'lat' => 49.87285,
+        'lng' => 8.65102,
+    ]);
+
+    $mapEmbed = MapEmbed::factory()->create();
+    $mapEmbed->mapPointCategories()->sync([$category->id]);
+
+    visit(route('map.public', $mapEmbed))
+        ->click('Tabelle')
+        ->assertSee('Musterstraße 1, 64283 Darmstadt')
+        ->assertAttribute('table a[href*="openstreetmap.org"]', 'href', 'https://www.openstreetmap.org/?mlat=49.87285&mlon=8.65102#map=15/49.87285/8.65102')
+        ->hover('table a[href*="openstreetmap.org"]')
+        ->assertPresent('iframe[src*="openstreetmap.org/export/embed.html"]')
+        ->assertNoJavaScriptErrors();
+});
+
+test('the table shows the coordinates instead of a dash when a point has no location', function (): void {
+    $category = MapPointCategory::factory()->withoutImage()->create();
+    MapPoint::factory()->create([
+        'published' => true,
+        'category_id' => $category->id,
+        'title' => 'Punkt ohne Ort',
+        'location' => null,
+        'lat' => 49.87285,
+        'lng' => 8.65102,
+    ]);
+
+    $mapEmbed = MapEmbed::factory()->create();
+    $mapEmbed->mapPointCategories()->sync([$category->id]);
+
+    visit(route('map.public', $mapEmbed))
+        ->assertNoJavaScriptErrors()
+        ->click('Tabelle')
+        ->assertNoJavaScriptErrors()
+        ->assertSee('Punkt ohne Ort')
+        ->assertSee('49.87285, 8.65102')
+        ->assertDontSee('–');
+});
