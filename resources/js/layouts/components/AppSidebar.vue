@@ -17,6 +17,7 @@ import { Link } from '@inertiajs/vue3';
 import { Database, FileText, Github, LayoutGrid, Map, MessageSquare, Settings, Table, User, UserCog, Users } from 'lucide-vue-next';
 import { route } from 'ziggy-js';
 import AppLogo from './AppLogo.vue';
+import AppVersion from './AppVersion.vue';
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
@@ -146,6 +147,7 @@ const footerNavItems: NavItem[] = [
 
         <SidebarFooter>
             <NavFooter :items="footerNavItems" />
+            <AppVersion />
             <NavUser />
         </SidebarFooter>
     </Sidebar>

@@ -17,4 +17,5 @@ export interface CustomPageProps extends PageProps {
     };
     appName?: string;
     defaultLogo?: string;
+    version?: string;
 }

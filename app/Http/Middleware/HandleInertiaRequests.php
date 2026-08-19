@@ -10,6 +10,7 @@ use App\Data\UserData;
 use App\Models\Group;
 use App\Services\CurrentGroupService;
 use App\Services\SessionService;
+use App\Services\VersionService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Override;
@@ -66,6 +67,7 @@ class HandleInertiaRequests extends Middleware
             'defaultLogo' => app_logo(),
             'appName' => app_name(...),
             'userRole' => $this->getUserRole(...),
+            'version' => fn (): string => app(VersionService::class)->version(),
         ]);
     }
 

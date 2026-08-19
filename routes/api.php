@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AdviceController;
 use App\Http\Controllers\Api\AdviceStatusController;
 use App\Http\Controllers\Api\AdviceTypeController;
+use App\Http\Controllers\Api\ChangelogController;
 use App\Http\Controllers\Api\GeoSearchController;
 use App\Http\Controllers\Api\GroupAdviceStatusController;
 use App\Http\Controllers\Api\KpiController;
@@ -44,6 +45,8 @@ Route::middleware('auth')->group(function (): void {
     Route::post('advices/{advice}/assign', [AdviceController::class, 'assign']);
     Route::get('advices/{advice}/advisors', [AdviceController::class, 'sortedAdvisors']);
     Route::get('advices/{advice}/form-submission', [AdviceController::class, 'formSubmission'])->name('api.advices.formSubmission');
+
+    Route::get('changelog', ChangelogController::class)->name('api.changelog');
 
     Route::get('map/search', GeoSearchController::class);
     Route::get('map/reverse-search', ReverseGeoSearchController::class)->name('api.map.reverse-search');
