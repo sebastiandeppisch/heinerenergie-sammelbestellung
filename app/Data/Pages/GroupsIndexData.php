@@ -4,6 +4,7 @@ namespace App\Data\Pages;
 
 use App\Data\GroupData;
 use App\Data\GroupTreeItem;
+use App\Data\GroupUserData;
 use App\ValueObjects\Polygon;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
@@ -22,7 +23,7 @@ class GroupsIndexData extends Data
         public ?Polygon $polygon,
         public bool $canEditGroup,
         public bool $canCreateGroups,
-        /** @var Collection */
+        /** @var Collection<int, GroupUserData>|null */
         public ?Collection $groupUsers = null,
     ) {}
 }

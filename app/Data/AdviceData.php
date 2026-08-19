@@ -12,6 +12,9 @@ use Spatie\LaravelData\Data;
 
 class AdviceData extends Data
 {
+    /**
+     * @param  Collection<int, string>  $shares_ids
+     */
     public function __construct(
         public string $first_name,
         public string $last_name,

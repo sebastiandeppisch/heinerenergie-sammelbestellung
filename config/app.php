@@ -6,6 +6,7 @@ use App\Providers\EventServiceProvider;
 use App\Providers\GroupServiceProvider;
 use App\Providers\InstallServiceProvider;
 use App\Providers\RouteServiceProvider;
+use App\Providers\TypeScriptTransformerServiceProvider;
 use Illuminate\Auth\Passwords\PasswordResetServiceProvider;
 use Illuminate\Broadcasting\BroadcastServiceProvider;
 use Illuminate\Bus\BusServiceProvider;
@@ -245,6 +246,7 @@ return [
         EventServiceProvider::class,
         RouteServiceProvider::class,
         GroupServiceProvider::class,
+        TypeScriptTransformerServiceProvider::class,
 
     ],
 

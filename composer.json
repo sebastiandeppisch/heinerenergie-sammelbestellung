@@ -22,7 +22,7 @@
         "plesk/ext-laravel-integration": "^8.0",
         "sabre/dav": "^4.7",
         "spatie/laravel-data": "^4.15",
-        "spatie/laravel-typescript-transformer": "^2.5",
+        "spatie/laravel-typescript-transformer": "^3.0",
         "tightenco/ziggy": "^2.5",
         "webklex/laravel-imap": "^6.2",
         "wnx/laravel-sends": "^2.4"
@@ -88,7 +88,7 @@
             "plesk/composer-command-info": true
         },
         "platform": {
-            "php": "8.4.0"
+            "php": "8.4.1"
         }
     },
     "minimum-stability": "stable",

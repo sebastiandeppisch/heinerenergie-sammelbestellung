@@ -14,6 +14,9 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 #[TypeScript]
 class FormFieldData extends Data
 {
+    /**
+     * @param  Collection<int, FormFieldOptionData>  $options
+     */
     public function __construct(
         public string $id,
         public FieldType $type,

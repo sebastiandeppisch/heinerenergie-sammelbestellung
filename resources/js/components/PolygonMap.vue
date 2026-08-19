@@ -50,17 +50,17 @@ const centerOfPolygon = computed<Coordinate>(() => {
 
     const coordinates = polygonModel.value.coordinates;
 
-    const center = coordinates.reduce((acc: Coordinate, curr: Coordinate) => {
+    const sum = coordinates.reduce((acc: Coordinate, curr: Coordinate) => {
         return {
             lat: acc.lat + curr.lat,
             lng: acc.lng + curr.lng,
         };
     }, zeroCoordinate);
 
-    center.lat = center.lat / coordinates.length;
-    center.lng = center.lng / coordinates.length;
-
-    return center;
+    return {
+        lat: sum.lat / coordinates.length,
+        lng: sum.lng / coordinates.length,
+    };
 });
 
 async function onLeafletReady() {

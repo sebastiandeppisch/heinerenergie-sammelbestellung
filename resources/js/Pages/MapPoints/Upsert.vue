@@ -27,7 +27,7 @@ const defaultMapPoint: App.Data.MapPointData = {
     coordinate: { lat: 0, lng: 0 },
     published: false,
     userReadablePointableType: '',
-    created_at: null,
+    created_at: '',
     category_id: null,
     location: null,
 };

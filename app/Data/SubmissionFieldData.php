@@ -11,7 +11,7 @@ class SubmissionFieldData extends Data
 {
     public function __construct(
         /**
-         * @var int|float|string|array<string>
+         * @var int|float|string|array<string>|null
          */
         public null|int|float|string|array $value,
         public FormFieldData $field,

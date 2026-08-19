@@ -17,6 +17,9 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 #[TypeScript]
 class DataProtectedAdviceData extends Data
 {
+    /**
+     * @param  Collection<int, string>  $shares_ids
+     */
     public function __construct(
         public string $id,
         public string $first_name,
