@@ -95,6 +95,10 @@ rm .prettierignore
 rm .prettierrc
 rm .styleci.yml
 rm -rf .vscode
+rm -rf .claude
+rm -rf .devcontainer
+rm -f .npmrc
+rm -f boost.json
 
 
 # Writing version file (git is not available on the target server)...
