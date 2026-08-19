@@ -9,7 +9,7 @@ uses(RefreshDatabase::class);
 test('password reset mail is rendered in german', function () {
     $user = User::factory()->create();
 
-    $mail = (new ResetPassword('reset-token'))->toMail($user);
+    $mail = new ResetPassword('reset-token')->toMail($user);
 
     expect($mail->subject)->toBe('Passwort zurücksetzen');
 
