@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import { LIcon, LLayerGroup, LMap, LMarker, LPopup, LTileLayer } from '@vue-leaflet/vue-leaflet';
+import { Button } from '@/shadcn/components/ui/button';
+import { LControl, LIcon, LLayerGroup, LMap, LMarker, LPopup, LTileLayer } from '@vue-leaflet/vue-leaflet';
 import { latLng } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { Minus, Plus } from 'lucide-vue-next';
+import { ref } from 'vue';
 
 const props = withDefaults(
     defineProps<{
@@ -34,19 +37,43 @@ function centerChanged(center: { lat?: number; lng?: number }) {
 
     emit('update:center', { lat: center.lat, lng: center.lng });
 }
+
+const mapRef = ref<typeof LMap | null>(null);
+
+function zoomIn() {
+    mapRef.value?.leafletObject?.zoomIn();
+}
+
+function zoomOut() {
+    mapRef.value?.leafletObject?.zoomOut();
+}
 </script>
 
 <template>
     <div class="isolate h-full w-full">
         <LMap
+            ref="mapRef"
             :zoom="props.zoom"
             @update:zoom="zoomChanged"
             :center="[props.center.lat, props.center.lng]"
             @update:center="centerChanged"
             :minZoom="props.minZoom"
             :maxZoom="props.maxZoom"
+            :options="{ zoomControl: false }"
         >
             <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" layer-type="base" name="OpenStreetMap" />
+
+            <LControl position="topleft">
+                <div class="flex flex-col overflow-hidden rounded-md border bg-background shadow-sm">
+                    <Button type="button" variant="ghost" size="icon" class="h-8 w-8 rounded-none" @click="zoomIn">
+                        <Plus class="h-4 w-4" />
+                    </Button>
+                    <div class="h-px bg-border" />
+                    <Button type="button" variant="ghost" size="icon" class="h-8 w-8 rounded-none" @click="zoomOut">
+                        <Minus class="h-4 w-4" />
+                    </Button>
+                </div>
+            </LControl>
 
             <LLayerGroup v-for="category in categories" :key="category.id" :name="category.name" layer-type="overlay">
                 <LMarker

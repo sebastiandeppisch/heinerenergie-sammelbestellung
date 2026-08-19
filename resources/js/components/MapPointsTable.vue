@@ -15,7 +15,7 @@ import {
     type ColumnFiltersState,
     type SortingState,
 } from '@tanstack/vue-table';
-import { Filter } from 'lucide-vue-next';
+import { ChevronDown, ChevronUp, Filter } from 'lucide-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
 
 type MapPointData = App.Data.MapPointData;
@@ -137,8 +137,10 @@ watch(
         <CardContent class="space-y-4">
             <div class="flex flex-wrap items-center gap-2">
                 <Input v-model="globalFilter" placeholder="Suchen..." class="h-8 w-48" />
-                <Button variant="outline" size="sm" class="h-8" @click="showFilters = !showFilters">
-                    {{ showFilters ? 'Spaltenfilter ausblenden' : 'Spaltenfilter' }}
+                <Button type="button" variant="outline" size="sm" class="h-8" @click="showFilters = !showFilters">
+                    {{ showFilters ? 'Suche pro Spalte ausblenden' : 'Suche pro Spalte' }}
+                    <ChevronUp v-if="showFilters" class="h-4 w-4" />
+                    <ChevronDown v-else class="h-4 w-4" />
                 </Button>
             </div>
 
@@ -159,7 +161,7 @@ watch(
 
                                     <Popover v-if="header.column.id === 'category' && categories.length > 1">
                                         <PopoverTrigger as-child>
-                                            <Button variant="ghost" size="icon" class="h-6 w-6" @click.stop>
+                                            <Button type="button" variant="ghost" size="icon" class="h-6 w-6" @click.stop>
                                                 <Filter class="h-3.5 w-3.5" />
                                             </Button>
                                         </PopoverTrigger>

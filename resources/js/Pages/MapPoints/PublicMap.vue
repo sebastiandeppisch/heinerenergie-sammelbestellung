@@ -71,7 +71,7 @@ watch(map, () => {
             </TabsList>
 
             <TabsContent value="map">
-                <div class="relative w-full" :class="mapHeightClass">
+                <div class="relative w-full overflow-hidden rounded-xl border shadow-sm" :class="mapHeightClass">
                     <div v-if="categories.length > 1" class="absolute top-2 right-2 z-[1000] rounded-lg bg-white/90 p-3 shadow">
                         <CategoryVisibilityFilter v-model:visibility="categoryVisibility" :categories="categories" id-prefix="map-category-" />
                     </div>

@@ -65,6 +65,21 @@ test('switching to the table tab and searching causes no javascript errors', fun
         ->assertSee('Solaranlage Nord');
 });
 
+test('the map uses the custom shadcn zoom control instead of the default leaflet one', function () {
+    $category = MapPointCategory::factory()->withoutImage()->create();
+    MapPoint::factory()->create(['published' => true, 'category_id' => $category->id]);
+
+    $mapEmbed = MapEmbed::factory()->create(['zoom' => 10]);
+    $mapEmbed->mapPointCategories()->sync([$category->id]);
+
+    visit(route('map.public', $mapEmbed))
+        ->assertNoJavaScriptErrors()
+        ->assertNotPresent('.leaflet-control-zoom')
+        ->assertPresent('.leaflet-control')
+        ->click('.leaflet-control button:first-child')
+        ->assertNoJavaScriptErrors();
+});
+
 test('the table tab is hidden when disabled for the embed', function () {
     $category = MapPointCategory::factory()->withoutImage()->create();
     MapPoint::factory()->create(['published' => true, 'category_id' => $category->id]);
