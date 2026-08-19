@@ -21,6 +21,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -57,22 +60,32 @@ jobs:
           chmod +x ci/build-shared-hosting-package.sh
           ./ci/build-shared-hosting-package.sh "${{ steps.get-version.outputs.version }}"
 
+      - name: Attach package to published release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          files: shared-hosting-package-${{ steps.get-version.outputs.version }}.zip
+          fail_on_unmatched_files: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create or update draft release
-        uses: softprops/action-gh-release@v1
+        if: github.event_name != 'release'
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: latest-build
           name: Latest Build (${{ steps.get-version.outputs.version }})
           draft: true
           prerelease: false
-          files: shared-hosting-package-v${{ steps.get-version.outputs.version }}.zip
+          files: shared-hosting-package-${{ steps.get-version.outputs.version }}.zip
+          fail_on_unmatched_files: true
           body: |
             Automatisch aktualisierter Build für Shared Hosting Package
-            
+
             Version: ${{ steps.get-version.outputs.version }}
             Commit: ${{ github.sha }}
             Erstellt: ${{ github.event.head_commit.timestamp }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          overwrite: true
 
       # - name: Create latest tag for push events
       #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'

@@ -16,7 +16,7 @@ VERSION="$1"
 PROJECT_ROOT="$(pwd)"
 COMMIT="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
 TEMP_DIR="/tmp/heinerenergie-build-$VERSION"
-ZIP_NAME="shared-hosting-package-v${VERSION}.zip"
+ZIP_NAME="shared-hosting-package-${VERSION}.zip"
 
 if [ -f "$ZIP_NAME" ]; then
     echo "Removing existing ZIP archive..."
