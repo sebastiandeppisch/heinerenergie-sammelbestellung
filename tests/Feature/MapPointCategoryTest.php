@@ -39,6 +39,36 @@ test('admin can view categories index', function () {
     );
 });
 
+test('group admin can create a category for their group', function () {
+    Config::set('app.group_context', 'group');
+
+    $groupAdmin = User::factory()->create(['is_admin' => false]);
+    $this->group->users()->attach($groupAdmin, ['is_admin' => true]);
+    app(SessionService::class)->actAsGroup($this->group, true);
+
+    $response = $this->actingAs($groupAdmin)
+        ->post(route('mappoint-categories.store'), [
+            'name' => 'Gruppen-Kategorie',
+        ]);
+
+    $response->assertRedirect();
+    $response->assertSessionHas('success');
+    $this->assertDatabaseHas('map_point_categories', ['name' => 'Gruppen-Kategorie']);
+});
+
+test('group member without admin rights cannot access categories', function () {
+    Config::set('app.group_context', 'group');
+
+    $groupMember = User::factory()->create(['is_admin' => false]);
+    $this->group->users()->attach($groupMember, ['is_admin' => false]);
+    app(SessionService::class)->actAsGroup($this->group, false);
+
+    $response = $this->actingAs($groupMember)
+        ->get(route('mappoint-categories.index'));
+
+    $response->assertStatus(403);
+});
+
 test('regular user cannot access categories', function () {
 
     $response = $this->actingAs($this->regularUser)

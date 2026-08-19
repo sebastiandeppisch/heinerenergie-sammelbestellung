@@ -14,26 +14,37 @@ class MapPointCategoryPolicy
 
     public function viewAny(User $user): bool
     {
-        return $this->groupContext->isActingAsSystemAdmin($user);
+        return $this->isGroupAdmin($user);
     }
 
     public function view(User $user, MapPointCategory $category): bool
     {
-        return $this->groupContext->isActingAsSystemAdmin($user);
+        return $this->isGroupAdmin($user);
     }
 
     public function create(User $user): bool
     {
-        return $this->groupContext->isActingAsSystemAdmin($user);
+        return $this->isGroupAdmin($user);
     }
 
     public function update(User $user, MapPointCategory $category): bool
     {
-        return $this->groupContext->isActingAsSystemAdmin($user);
+        return $this->isGroupAdmin($user);
     }
 
     public function delete(User $user, MapPointCategory $category): bool
     {
-        return $this->groupContext->isActingAsSystemAdmin($user);
+        return $this->isGroupAdmin($user);
+    }
+
+    /**
+     * System admins are already granted access via `before()`. This covers admins of the
+     * currently active group (transitively, including admins of ancestor groups).
+     */
+    private function isGroupAdmin(User $user): bool
+    {
+        $currentGroup = $this->groupContext->getCurrentGroup();
+
+        return $currentGroup !== null && $this->groupContext->isActingAsTransitiveAdmin($user, $currentGroup);
     }
 }
