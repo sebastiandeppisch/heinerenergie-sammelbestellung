@@ -6,6 +6,10 @@ jobs:
   laravel-tests:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      checks: write
+
     strategy:
       fail-fast: false
       matrix:
@@ -80,6 +84,15 @@ jobs:
         DB_URL: ${{ matrix.db == 'sqlite' && 'sqlite:///database/database.sqlite' || matrix.db == 'mysql' && 'mysql://root:password@127.0.0.1:3306/laravel_test' || matrix.db == 'mariadb' && 'mysql://root:password@127.0.0.1:3307/laravel_test' || 'pgsql://postgres:password@127.0.0.1:5432/laravel_test' }}
         DB_CONNECTION: ${{ matrix.db == 'sqlite' && 'sqlite' || matrix.db == 'mysql' && 'mysql' || matrix.db == 'mariadb' && 'mysql' || 'pgsql' }}
       run: php artisan test --log-junit test-results.xml
+    - name: Publish test results
+      if: always()
+      uses: mikepenz/action-junit-report@v6
+      with:
+        report_paths: test-results.xml
+        check_name: Test Results (${{ matrix.db }})
+        detailed_summary: true
+        include_passed: false
+        include_time_in_summary: true
     - name: Run ESLint
       run: npx eslint .
     - name: Run TypeScript checks
