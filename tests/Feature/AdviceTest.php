@@ -47,6 +47,38 @@ test('advices table can be indexed by admin', function () {
     $this->actingAs($this->admin)->get('advices')->assertOk();
 });
 
+test('group column is hidden for regular advisors', function () {
+    Group::factory()->create(['parent_id' => $this->group->id]);
+
+    app(SessionService::class)->actAsGroup($this->group);
+
+    $this->actingAs($this->advisor)->get('advices')
+        ->assertInertia(fn ($page) => $page->component('Advices')->where('showGroupColumn', false));
+});
+
+test('group column is shown for group admins acting in a non-leaf group', function () {
+    Group::factory()->create(['parent_id' => $this->group->id]);
+
+    app(SessionService::class)->actAsGroup($this->group, true);
+
+    $this->actingAs($this->advisor)->get('advices')
+        ->assertInertia(fn ($page) => $page->component('Advices')->where('showGroupColumn', true));
+});
+
+test('group column is hidden for group admins acting in a leaf group', function () {
+    app(SessionService::class)->actAsGroup($this->group, true);
+
+    $this->actingAs($this->advisor)->get('advices')
+        ->assertInertia(fn ($page) => $page->component('Advices')->where('showGroupColumn', false));
+});
+
+test('group column is shown for system admins', function () {
+    app(SessionService::class)->actAsSystemAdmin();
+
+    $this->actingAs($this->admin)->get('advices')
+        ->assertInertia(fn ($page) => $page->component('Advices')->where('showGroupColumn', true));
+});
+
 test('advices map can be indexed by regular advisor', function () {
     createAdviceWithAndWithoutAdvisor($this->advisor);
     createAdviceWithAndWithoutAdvisor($this->admin);

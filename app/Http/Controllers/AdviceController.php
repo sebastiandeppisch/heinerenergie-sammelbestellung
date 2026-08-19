@@ -43,7 +43,9 @@ class AdviceController extends Controller
 
     public function index(SessionService $sessionService)
     {
-        $onlyOneGroup = $sessionService->getCurrentGroup() !== null && $sessionService->getCurrentGroup()->isLeaf();
+        $currentGroup = $sessionService->getCurrentGroup();
+        $showGroupColumn = $sessionService->actsAsSystemAdmin()
+            || ($sessionService->actsAsGroupAdmin() && $currentGroup !== null && ! $currentGroup->isLeaf());
 
         $user = Auth::user();
 
@@ -59,7 +61,7 @@ class AdviceController extends Controller
             ->toArray();
 
         return Inertia::render('Advices', [
-            'onlyOneGroup' => $onlyOneGroup,
+            'showGroupColumn' => $showGroupColumn,
             'advices' => $advices,
             'groups' => $groups,
             'adviceStatuses' => $adviceStatuses,

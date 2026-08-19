@@ -26,7 +26,7 @@ import PhysicalValue from '../../views/PhysicalValue.vue';
 const emit = defineEmits(['selectAdviceId']);
 
 const props = defineProps<{
-    onlyOneGroup: boolean;
+    showGroupColumn: boolean;
     advices: App.Data.DataProtectedAdviceData[];
     groups: App.Data.GroupData[];
     adviceStatuses: { id: string; name: string }[];
@@ -139,6 +139,15 @@ const columns = computed(() => {
             enableSorting: false,
             enableColumnFilter: false,
         }),
+        ...(props.showGroupColumn
+            ? [
+                  columnHelper.accessor((row) => groupName(row.group_id), {
+                      id: 'group',
+                      header: 'Gruppe',
+                      enableColumnFilter: true,
+                  }),
+              ]
+            : []),
         columnHelper.accessor((row) => row.created_at, {
             id: 'created_at',
             header: 'Erstellt am',
@@ -307,7 +316,7 @@ const totalCount = computed(() => table.getFilteredRowModel().rows.length);
                             </TableCell>
 
                             <!-- Group -->
-                            <TableCell v-if="!onlyOneGroup">{{ groupName(row.original.group_id) }}</TableCell>
+                            <TableCell v-if="showGroupColumn">{{ groupName(row.original.group_id) }}</TableCell>
 
                             <!-- Created at -->
                             <TableCell class="whitespace-nowrap">{{ formatDate(row.original.created_at) }}</TableCell>

@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui
 import { ref } from 'vue';
 
 defineProps<{
-    onlyOneGroup: boolean;
+    showGroupColumn: boolean;
     advices: App.Data.DataProtectedAdviceData[];
     groups: App.Data.GroupData[];
     adviceStatuses: { id: string; name: string }[];
@@ -25,7 +25,7 @@ const activeTab = ref('new');
 
         <TabsContent value="new">
             <AdvicesTable
-                :only-one-group="onlyOneGroup"
+                :show-group-column="showGroupColumn"
                 :advices="advices"
                 :groups="groups"
                 :advice-statuses="adviceStatuses"
@@ -35,7 +35,7 @@ const activeTab = ref('new');
         </TabsContent>
 
         <TabsContent value="legacy">
-            <LegacyAdvicesTable :only-one-group="onlyOneGroup" :advices="advices" :groups="groups" />
+            <LegacyAdvicesTable :show-group-column="showGroupColumn" :advices="advices" :groups="groups" />
         </TabsContent>
     </Tabs>
 </template>

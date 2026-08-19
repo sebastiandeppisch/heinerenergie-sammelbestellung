@@ -44,7 +44,7 @@ const tableHeight = new AdaptTableHeight(outer);
 const reactiveHeight = tableHeight.getReactive();
 
 const props = defineProps<{
-    onlyOneGroup: boolean;
+    showGroupColumn: boolean;
     advices: App.Data.DataProtectedAdviceData[];
     groups: App.Data.GroupData[];
 }>();
@@ -197,7 +197,7 @@ const adviceStatusResult = new ArrayDataSource([
                 <DxColumn type="buttons" caption="Öffnen">
                     <DxTableButton hint="Beratung öffnen" icon="user" text="Öffnen" @click="openAdvice" :visible="isOpenVisible" />
                 </DxColumn>
-                <DxColumn v-if="!onlyOneGroup" data-field="group_id" caption="Gruppe" :allow-editing="false">
+                <DxColumn v-if="showGroupColumn" data-field="group_id" caption="Gruppe" :allow-editing="false">
                     <DxLookup :data-source="groups" display-expr="name" value-expr="id" />
                 </DxColumn>
                 <DxColumn data-field="created_at" caption="Erstellt am" data-type="date" :allow-editing="false" sort-order="desc" />
