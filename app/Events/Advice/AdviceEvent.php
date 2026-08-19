@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Events\Advice;
 
 use App\Models\Advice;
@@ -10,7 +12,9 @@ use Illuminate\Queue\SerializesModels;
 
 abstract class AdviceEvent implements AdviceEventContract
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
     public function __construct(
         public Advice $advice,

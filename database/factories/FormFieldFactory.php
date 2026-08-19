@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Enums\FieldType;
@@ -15,6 +17,9 @@ class FormFieldFactory extends Factory
 {
     protected $model = FormField::class;
 
+    /**
+     * @return array<string, mixed>
+     */
     public function definition()
     {
         $fieldTypes = [

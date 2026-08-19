@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\ValueObjects;
 
 use App\Casts\Coordinate as CoordinateCast;
@@ -17,6 +19,9 @@ readonly class Coordinate implements Castable
         public float $lng
     ) {}
 
+    /**
+     * @param  array<string, float>  $data
+     */
     public static function fromArray(array $data): self
     {
 
@@ -36,6 +41,9 @@ readonly class Coordinate implements Castable
         return is_numeric($value) && $value >= -180 && $value <= 180;
     }
 
+    /**
+     * @return class-string<CoordinateCast>
+     */
     public static function castUsing(array $attributes): string
     {
         return CoordinateCast::class;

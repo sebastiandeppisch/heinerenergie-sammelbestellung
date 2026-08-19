@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Data\AdviceStatusData;
@@ -9,16 +11,20 @@ use App\Http\Requests\UpdateGroupAdviceStatusRequest;
 use App\Models\AdviceStatus;
 use App\Models\AdviceStatusGroup;
 use App\Models\Group;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 
 class GroupAdviceStatusController extends Controller
 {
-    public function index(Group $group)
+    public function index(Group $group): JsonResponse
     {
         $this->authorize('viewAny', [AdviceStatusGroup::class, $group]);
 
         $statuses = AdviceStatus::whereIn('group_id', $group->getHierarchyIds())->get();
 
-        return $statuses->map(fn (AdviceStatus $status): AdviceStatusData => AdviceStatusData::fromModel($status, $group));
+        return response()->json(
+            $statuses->map(fn (AdviceStatus $status): AdviceStatusData => AdviceStatusData::fromModel($status, $group))
+        );
     }
 
     public function store(StoreGroupAdviceStatusRequest $request, Group $group): AdviceStatusData
@@ -45,7 +51,7 @@ class GroupAdviceStatusController extends Controller
         return AdviceStatusData::fromModel($advicestatus, $group);
     }
 
-    public function destroy(Group $group, AdviceStatus $advicestatus)
+    public function destroy(Group $group, AdviceStatus $advicestatus): Response|JsonResponse
     {
         $this->authorize('delete', $advicestatus);
         // Only allow deleting group-specific statuses

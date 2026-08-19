@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Enums\FormType;
@@ -15,6 +17,9 @@ class FormDefinitionFactory extends Factory
 {
     protected $model = FormDefinition::class;
 
+    /**
+     * @return array<string, mixed>
+     */
     public function definition()
     {
         return [

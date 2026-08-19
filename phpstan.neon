@@ -5,7 +5,7 @@ parameters:
     paths:
         - app/
         - tests/
-    level: 5
+    level: 6
     treatPhpDocTypesAsCertain: false
     ignoreErrors:
         #Traits mixed in via Pest's uses() are invisible to PHPStan's trait-usage detection

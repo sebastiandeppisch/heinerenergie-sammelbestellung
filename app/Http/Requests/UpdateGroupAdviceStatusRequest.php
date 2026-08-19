@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Enums\AdviceStatusResult;
@@ -9,7 +11,7 @@ use Illuminate\Validation\Rules\Enum;
 
 class UpdateGroupAdviceStatusRequest extends FormRequest
 {
-    public function authorize()
+    public function authorize(): bool
     {
         if ($this->isOnlySettingVisibility()) {
 
@@ -36,12 +38,15 @@ class UpdateGroupAdviceStatusRequest extends FormRequest
         return $pivot;
     }
 
+    /**
+     * @return array<string, Enum|list<string>>
+     */
     public function rules(): array
     {
         return [
-            'name' => 'string',
+            'name' => ['string'],
             'result' => new Enum(AdviceStatusResult::class),
-            'visible_in_group' => 'boolean',
+            'visible_in_group' => ['boolean'],
         ];
     }
 

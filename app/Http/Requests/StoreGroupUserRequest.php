@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Models\User;
+use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Override;
 
@@ -13,6 +16,9 @@ class StoreGroupUserRequest extends FormRequest
         return $this->user()->can('manageUsers', $this->route('group'));
     }
 
+    /**
+     * @return array<string, array<string|callable(string, mixed, Closure): void>>
+     */
     public function rules(): array
     {
         $group = $this->route('group');
@@ -27,7 +33,7 @@ class StoreGroupUserRequest extends FormRequest
                     }
                 },
             ],
-            'is_admin' => 'boolean',
+            'is_admin' => ['boolean'],
         ];
     }
 

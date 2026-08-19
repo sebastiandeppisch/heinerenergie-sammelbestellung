@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Models\MapPointCategory;
@@ -24,11 +26,14 @@ class UpsertMapPointsCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'image' => 'nullable|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'name' => ['required', 'string', 'max:255'],
+            'image' => ['nullable', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getData(): array
     {
         return $this->safe()->only(['name']);

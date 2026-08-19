@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Data\Pages;
 
 use App\Data\GroupData;
@@ -14,9 +16,9 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 class GroupsIndexData extends Data
 {
     public function __construct(
-        /** @var Collection<GroupTreeItem> */
+        /** @var Collection<int, GroupTreeItem> */
         public Collection $groupTreeItems,
-        /** @var Collection<GroupData> */
+        /** @var Collection<int, GroupData> */
         public Collection $groups,
         public bool $canCreateRootGroup,
         public ?GroupData $selectedGroup,

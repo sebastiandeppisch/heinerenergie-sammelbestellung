@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Data\GroupData;
@@ -13,10 +15,12 @@ use App\Http\Requests\UpdateGroupNewAdviceMailRequest;
 use App\Models\Group;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class GroupController extends Controller
 {
@@ -38,9 +42,10 @@ class GroupController extends Controller
     }
 
     /**
-     * @param  Collection<GroupData>  $groups
+     * @param  Collection<int, GroupTreeItem>  $groupTreeItems
+     * @param  Collection<int, GroupData>  $groups
      */
-    private function showPage(Collection $groupTreeItems, Collection $groups, bool $canCreateRootGroup, ?Group $selectedGroup, $groupUsers = null, $allUsers = [])
+    private function showPage(Collection $groupTreeItems, Collection $groups, bool $canCreateRootGroup, ?Group $selectedGroup, $groupUsers = null, $allUsers = []): Response
     {
         $polygon = $selectedGroup?->consulting_area;
 
@@ -63,7 +68,7 @@ class GroupController extends Controller
         ]);
     }
 
-    public function index(Request $request, #[CurrentUser] User $user)
+    public function index(Request $request, #[CurrentUser] User $user): RedirectResponse|Response
     {
         if (! $request->user()->can('viewAny', Group::class)) {
             return redirect()->route('groups.index');
@@ -89,6 +94,9 @@ class GroupController extends Controller
         );
     }
 
+    /**
+     * @return Collection<int, Group>
+     */
     private function listGroups(User $user): Collection
     {
         return Group::with(['parent', 'children', 'users'])
@@ -97,7 +105,7 @@ class GroupController extends Controller
             ->filter(fn (Group $group) => $user->can('view', $group));
     }
 
-    public function show(Group $group, Request $request)
+    public function show(Group $group, Request $request): RedirectResponse|Response
     {
         if (! $request->user()->can('view', $group)) {
             return redirect()->route('groups.index');
@@ -148,7 +156,7 @@ class GroupController extends Controller
         );
     }
 
-    public function store(StoreGroupRequest $request)
+    public function store(StoreGroupRequest $request): RedirectResponse
     {
         $validated = $request->validated();
 
@@ -159,7 +167,7 @@ class GroupController extends Controller
         return redirect()->route('groups.show', $group)->with('success', 'Initiative erfolgreich erstellt.');
     }
 
-    public function update(UpdateGroupRequest $request, Group $group)
+    public function update(UpdateGroupRequest $request, Group $group): RedirectResponse
     {
         $validated = $request->safe()->except(['logo', 'remove_logo', 'marker', 'remove_marker']);
 
@@ -196,7 +204,7 @@ class GroupController extends Controller
         return redirect()->back()->with('success', 'Initiative erfolgreich aktualisiert.');
     }
 
-    public function destroy(Group $group)
+    public function destroy(Group $group): RedirectResponse
     {
         $this->authorize('delete', $group);
         $parent = $group->parent;
@@ -212,7 +220,7 @@ class GroupController extends Controller
         return $route->with('success', 'Initiative erfolgreich gelöscht.');
     }
 
-    public function updateConsultingArea(UpdateGroupConsultingAreaRequest $request, Group $group)
+    public function updateConsultingArea(UpdateGroupConsultingAreaRequest $request, Group $group): RedirectResponse
     {
 
         $group->consulting_area = $request->validated('polygon.coordinates');
@@ -221,7 +229,7 @@ class GroupController extends Controller
         return redirect()->back()->with('success', 'Beratungsgebiet wurde erfolgreich gespeichert.');
     }
 
-    public function deleteConsultingArea(Group $group)
+    public function deleteConsultingArea(Group $group): RedirectResponse
     {
         $this->authorize('manageArea', $group);
 
@@ -231,7 +239,7 @@ class GroupController extends Controller
         return redirect()->back()->with('warning', 'Beratungsgebiet wurde erfolgreich gelöscht.');
     }
 
-    public function updateDashboardInfo(UpdateGroupDashboardInfoRequest $request, Group $group)
+    public function updateDashboardInfo(UpdateGroupDashboardInfoRequest $request, Group $group): RedirectResponse
     {
         $group->dashboard_info = $request->validated('dashboard_info');
         $group->save();
@@ -239,7 +247,7 @@ class GroupController extends Controller
         return redirect()->back()->with('success', 'Dashboard-Info wurde erfolgreich aktualisiert.');
     }
 
-    public function updateNewAdviceMail(UpdateGroupNewAdviceMailRequest $request, Group $group)
+    public function updateNewAdviceMail(UpdateGroupNewAdviceMailRequest $request, Group $group): RedirectResponse
     {
         $group->new_advice_mail = $request->validated('new_advice_mail');
         $group->save();

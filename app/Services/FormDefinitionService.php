@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Data\FormDefinitionData;
@@ -39,7 +41,7 @@ class FormDefinitionService
     }
 
     /**
-     * @param  Collection<FormFieldData>  $fields
+     * @param  Collection<int, FormFieldData>  $fields
      */
     private function updateFields(Collection $fields, FormDefinition $formDefinition): void
     {
@@ -66,7 +68,7 @@ class FormDefinitionService
     }
 
     /**
-     * @param  Collection<FormFieldOptionData>  $options
+     * @param  Collection<int, FormFieldOptionData>  $options
      */
     private function updateFieldOptions(Collection $options, FormField $formField): void
     {

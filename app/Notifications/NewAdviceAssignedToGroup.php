@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Notifications;
 
 use App\Models\Advice;
@@ -30,7 +32,7 @@ class NewAdviceAssignedToGroup extends BaseNotification implements ShouldQueue
      * Get the mail representation of the notification.
      */
     #[Override]
-    public function toMail($notifiable): MailMessage
+    public function toMail(mixed $notifiable): MailMessage
     {
         $mail = parent::toMail($notifiable);
 

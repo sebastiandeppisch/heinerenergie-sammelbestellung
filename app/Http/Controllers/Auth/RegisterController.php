@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -9,13 +11,15 @@ use App\Services\UserEncryptionService;
 use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class RegisterController extends Controller
 {
     public function __construct(private readonly UserEncryptionService $encryptionService) {}
 
-    public function show()
+    public function show(): RedirectResponse|Response
     {
         if (User::count() > 0) {
             return redirect()->route('dashboard');
@@ -24,7 +28,7 @@ class RegisterController extends Controller
         return Inertia::render('RegisterForm');
     }
 
-    public function store(RegisterRequest $request)
+    public function store(RegisterRequest $request): RedirectResponse
     {
         $user = User::create($request->validated());
 

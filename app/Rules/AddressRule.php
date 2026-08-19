@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Rules;
 
 use Closure;
@@ -34,7 +36,7 @@ class AddressRule implements ValidationRule
                 'city' => 'Stadt',
             ];
 
-            $missingKeys = array_map(fn ($key): string => $keyTranslations[$key], $missingKeys);
+            $missingKeys = array_map(fn (string $key): string => $keyTranslations[$key], $missingKeys);
 
             if (! empty($missingKeys)) {
                 $fail('Bitte die Felder '.implode(', ', $missingKeys).' ausfüllen.');

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\User;
@@ -30,7 +32,7 @@ class UserPolicy
         return false;
     }
 
-    public function create(User $user)
+    public function create(User $user): bool
     {
         // TODO this should be handled via group context
         return $user->groups()
@@ -38,7 +40,7 @@ class UserPolicy
             ->exists();
     }
 
-    public function update(User $user, User $model)
+    public function update(User $user, User $model): bool
     {
         if (app(SessionService::class)->actsAsSystemAdmin()) {
             return true;
@@ -53,7 +55,7 @@ class UserPolicy
         return false;
     }
 
-    public function canActAsSystemAdmin(User $user)
+    public function canActAsSystemAdmin(User $user): bool
     {
         return $user->is_admin;
     }

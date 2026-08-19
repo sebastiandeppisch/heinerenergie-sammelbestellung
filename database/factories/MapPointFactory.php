@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Models\Advice;
@@ -71,7 +73,7 @@ class MapPointFactory extends Factory
     public function withCategory(?MapPointCategory $category = null): Factory
     {
         return $this->state(fn (array $attributes): array => [
-            'category_id' => $category->id ?? MapPointCategory::factory()->create()->id,
+            'category_id' => $category?->id ?? MapPointCategory::factory()->create()->id,
         ]);
     }
 }

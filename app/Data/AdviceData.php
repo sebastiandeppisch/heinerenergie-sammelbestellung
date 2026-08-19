@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Data;
 
 use App\Enums\AdviceType;
@@ -37,6 +39,7 @@ class AdviceData extends Data
         public ?HouseType $house_type,
         public ?bool $landlord_exists,
         public ?string $place_notes,
+        /** @var Collection<int, string> */
         public Collection $shares_ids,
         public ?float $distance = null,
         public bool $can_edit = false,

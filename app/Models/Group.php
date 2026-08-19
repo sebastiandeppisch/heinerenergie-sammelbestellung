@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Traits\HasUuid;
@@ -11,10 +13,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Facades\Storage;
 use Override;
 
+/**
+ * @property AdviceStatusGroup $pivot
+ */
 class Group extends Model
 {
     /** @use HasFactory<GroupFactory> */
@@ -47,25 +51,27 @@ class Group extends Model
     /**
      * Get the users that belong to this group
      *
-     * @return BelongsToMany<User, $this, Pivot>
+     * @return BelongsToMany<User, $this, GroupUser>
      */
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class)
             ->withPivot('is_admin')
-            ->withTimestamps();
+            ->withTimestamps()
+            ->using(GroupUser::class);
     }
 
     /**
      * Get the admins of this group
      *
-     * @return BelongsToMany<User, $this, Pivot>
+     * @return BelongsToMany<User, $this, GroupUser>
      */
     public function admins(): BelongsToMany
     {
         return $this->belongsToMany(User::class)
             ->wherePivot('is_admin', true)
-            ->withTimestamps();
+            ->withTimestamps()
+            ->using(GroupUser::class);
     }
 
     /**
@@ -109,7 +115,7 @@ class Group extends Model
     /**
      * Get all ancestor groups
      *
-     * @return Collection<Group>
+     * @return Collection<int, Group>
      */
     public function ancestors(): Collection
     {
@@ -129,7 +135,7 @@ class Group extends Model
     /**
      * Get all descendant groups
      *
-     * @return Collection<Group>
+     * @return Collection<int, Group>
      */
     public function descendants(): Collection
     {
@@ -145,16 +151,16 @@ class Group extends Model
         return $descendants;
     }
 
-    public function getFullLogoPathAttribute()
+    public function getFullLogoPathAttribute(): ?string
     {
-        if (str_starts_with($this->logo_path, 'http')) {
+        if ($this->logo_path && str_starts_with($this->logo_path, 'http')) {
             return $this->logo_path;
         }
 
         return $this->logo_path ? Storage::url($this->logo_path) : null;
     }
 
-    public function getFullMarkerPathAttribute()
+    public function getFullMarkerPathAttribute(): ?string
     {
         if ($this->marker_path && str_starts_with($this->marker_path, 'http')) {
             return $this->marker_path;
@@ -178,6 +184,9 @@ class Group extends Model
     }
 
     #[Override]
+    /**
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [
@@ -188,6 +197,9 @@ class Group extends Model
         ];
     }
 
+    /**
+     * @return array<int, int>
+     */
     public function getHierarchyIds(): array
     {
         $ids = [$this->id];

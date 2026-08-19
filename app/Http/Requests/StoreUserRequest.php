@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Services\SessionService;
@@ -24,13 +26,15 @@ class StoreUserRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
+     *
+     * @return array<string, array<string>>
      */
     public function rules(): array
     {
         return [
-            'first_name' => 'string|required',
-            'last_name' => 'string|required',
-            'email' => 'email|required|unique:users,email',
+            'first_name' => ['string', 'required'],
+            'last_name' => ['string', 'required'],
+            'email' => ['email', 'required', 'unique:users,email'],
         ];
     }
 }

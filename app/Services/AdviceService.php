@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Context\GroupContextContract;
@@ -23,7 +25,7 @@ class AdviceService
     ) {}
 
     /**
-     * @return Collection<DataProtectedAdviceData>
+     * @return Collection<int, DataProtectedAdviceData>
      */
     public function getAdvicesListForUser(User $user): Collection
     {
@@ -67,6 +69,9 @@ class AdviceService
             ->map(fn (Advice $advice): DataProtectedAdviceData => DataProtectedAdviceData::fromModel($advice, $user, $isGroupAdmin));
     }
 
+    /**
+     * @return array<string, Collection<int, mixed>>
+     */
     private function getUserAdvicePermissions(User $user): array
     {
         $allGroups = Group::with('users')->get();
@@ -154,17 +159,17 @@ class AdviceService
     }
 
     /**
-     * @param  Collection<User>  $newAdvisors
+     * @param  Collection<int, User>|Collection<int, int>  $newAdvisors
      */
     public function syncShares(Advice $advice, Collection $newAdvisors, ?User $user): void
     {
 
-        $newAdvisors = $newAdvisors->map(function (mixed $user): User {
-            if (! $user instanceof User) {
-                return User::findOrFail($user);
+        $newAdvisors = $newAdvisors->map(function (User|int $user): User {
+            if ($user instanceof User) {
+                return $user;
             }
 
-            return $user;
+            return User::findOrFail($user);
         });
 
         // Get current advisors before sync

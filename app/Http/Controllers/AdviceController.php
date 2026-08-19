@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Data\AdviceEventData;
@@ -35,13 +37,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Inertia\Response;
 use Wnx\Sends\Models\Send;
 
 class AdviceController extends Controller
 {
     use HandlesChecklistEntries;
 
-    public function index(SessionService $sessionService)
+    public function index(SessionService $sessionService): Response
     {
         $currentGroup = $sessionService->getCurrentGroup();
         $showGroupColumn = $sessionService->actsAsSystemAdmin()
@@ -74,7 +77,7 @@ class AdviceController extends Controller
         ]);
     }
 
-    public function store(StoreAdviceRequest $request, SessionService $sessionService)
+    public function store(StoreAdviceRequest $request, SessionService $sessionService): RedirectResponse|Response
     {
         $this->authorize('create', Advice::class);
 
@@ -95,7 +98,7 @@ class AdviceController extends Controller
             ->with('success', 'Beratung erfolgreich angelegt');
     }
 
-    public function show(Advice $advice, AdviceService $adviceService)
+    public function show(Advice $advice, AdviceService $adviceService): RedirectResponse|Response
     {
         $advice->loadMissing('shares', 'group', 'group.parent', 'advisor');
         if (! Auth::user()->can('view', $advice)) {
@@ -114,7 +117,7 @@ class AdviceController extends Controller
         $mails = $mails->map(fn (Send $mail): AdviceEventData => AdviceEventData::fromMail($mail));
 
         $timeline = $events->concat($mails)
-            ->sortBy(fn ($item) => $item->created_at)
+            ->sortBy(fn ($item): string => $item->created_at)
             ->values();
 
         $coordinateOfAdvice = $advice->coordinate;
@@ -172,14 +175,14 @@ class AdviceController extends Controller
         ]);
     }
 
-    public function update(Advice $advice, UpdateAdviceRequest $request)
+    public function update(Advice $advice, UpdateAdviceRequest $request): RedirectResponse
     {
         $advice->update($request->validated());
 
         return redirect()->back()->with('success', 'Beratung gespeichert');
     }
 
-    public function transfer(Advice $advice, TransferAdviceRequest $request)
+    public function transfer(Advice $advice, TransferAdviceRequest $request): RedirectResponse
     {
         $targetGroup = Group::where('uuid', $request->group_id)->firstOrFail();
         $oldGroup = $advice->group;
@@ -200,7 +203,7 @@ class AdviceController extends Controller
             ->with('success', 'Beratung wurde erfolgreich übertragen. Eine Benachrichtigung wurde versendet.');
     }
 
-    public function storeComment(Advice $advice, StoreAdviceCommentRequest $request)
+    public function storeComment(Advice $advice, StoreAdviceCommentRequest $request): RedirectResponse
     {
         $this->authorize('storeComment', $advice);
         event(new CommentAddedEvent(
@@ -212,7 +215,7 @@ class AdviceController extends Controller
         return redirect()->back();
     }
 
-    public function unassign(Advice $advice)
+    public function unassign(Advice $advice): RedirectResponse
     {
         $this->authorize('unassign', $advice);
 
@@ -222,7 +225,7 @@ class AdviceController extends Controller
         return redirect()->route('advices')->with('info', 'Die Beratung wurde wieder freigegeben');
     }
 
-    public function map(CurrentGroupService $currentGroupService)
+    public function map(CurrentGroupService $currentGroupService): Response
     {
         $user = Auth::user();
         $advices = app(AdviceService::class)->getAdvicesListForUser($user);
@@ -247,7 +250,7 @@ class AdviceController extends Controller
         ]);
     }
 
-    public function delete(Advice $advice)
+    public function delete(Advice $advice): RedirectResponse
     {
         $this->authorize('delete', $advice);
 

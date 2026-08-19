@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Contracts\Pointable;
@@ -41,7 +43,7 @@ class MapPoint extends Model
     ];
 
     /**
-     * @return MorphTo<Pointable&Model, $this>
+     * @return MorphTo<Pointable<Model>&Model, $this>
      */
     public function pointable(): MorphTo
     {

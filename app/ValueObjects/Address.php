@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\ValueObjects;
 
 use App\Casts\Address as AddressCast;
@@ -22,6 +24,9 @@ class Address implements Castable, Stringable
         return $this->street.' '.$this->street_number;
     }
 
+    /**
+     * @return class-string<AddressCast>
+     */
     public static function castUsing(array $attributes): string
     {
         return AddressCast::class;

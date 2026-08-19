@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\Advice;
@@ -19,7 +21,7 @@ class AdvicePolicy
         return true;
     }
 
-    public function view(User $user, Advice $advice)
+    public function view(User $user, Advice $advice): bool
     {
         if ($advice->advisor_id === $user->id) {
             return true;
@@ -32,7 +34,7 @@ class AdvicePolicy
         return $this->groupContext->isActingAsTransitiveAdmin($user, $advice->group);
     }
 
-    public function viewDataProtected(User $user, Advice $advice)
+    public function viewDataProtected(User $user, Advice $advice): bool
     {
 
         if ($advice->advisor_id !== null) {

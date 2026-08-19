@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -22,11 +24,11 @@ class SetAddressRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'street' => 'nullable|string',
-            'street_number' => 'nullable|string',
-            'zip' => 'nullable|integer',
-            'city' => 'nullable|string',
-            'advice_radius' => 'nullable|integer',
+            'street' => ['nullable', 'string'],
+            'street_number' => ['nullable', 'string'],
+            'zip' => ['nullable', 'integer'],
+            'city' => ['nullable', 'string'],
+            'advice_radius' => ['nullable', 'integer'],
         ];
     }
 }

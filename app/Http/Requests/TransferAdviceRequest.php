@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Models\Group;
@@ -20,11 +22,14 @@ class TransferAdviceRequest extends FormRequest
         return $this->user()->can('transfer', $advice);
     }
 
+    /**
+     * @return array<string, array<string>>
+     */
     public function rules(): array
     {
         return [
-            'group_id' => 'required|uuid|exists:groups,uuid',
-            'reason' => 'nullable|string|max:1000',
+            'group_id' => ['required', 'uuid', 'exists:groups,uuid'],
+            'reason' => ['nullable', 'string', 'max:1000'],
         ];
     }
 }

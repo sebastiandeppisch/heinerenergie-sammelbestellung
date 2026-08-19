@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Contracts\Pointable;
@@ -15,13 +17,17 @@ use Override;
 
 /**
  * @property Carbon $submitted_at
+ *
+ * @implements Pointable<self>
  */
 class FormSubmission extends Model implements Pointable
 {
     /** @use HasFactory<FormSubmissionFactory> */
     use HasFactory;
 
+    /** @use HasPoints<self> */
     use HasPoints;
+
     use HasUuid;
 
     protected $fillable = [
@@ -34,10 +40,14 @@ class FormSubmission extends Model implements Pointable
     ];
 
     #[Override]
+    /**
+     * @return array<string, string>
+     */
     public function casts()
     {
         return [
             'submitted_at' => 'datetime',
+            'seen' => 'boolean',
         ];
     }
 

@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Traits;
 
 use App\Models\Group;
+use App\Models\GroupUser;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
@@ -13,12 +16,13 @@ trait HasGroups
     /**
      * Get all groups this user belongs to
      *
-     * @return BelongsToMany<Group, $this, Pivot>
+     * @return BelongsToMany<Group, $this, GroupUser>
      */
     public function groups(): BelongsToMany
     {
         return $this->belongsToMany(Group::class)
             ->withPivot('is_admin')
+            ->using(GroupUser::class)
             ->withTimestamps();
     }
 
@@ -56,6 +60,9 @@ trait HasGroups
     /**
      * Get all groups this user can administer (including child groups)
      * Note: Admin rights ARE inherited downwards
+     */
+    /**
+     * @return Collection<int, Group>
      */
     public function getAllAdministrableGroups(): Collection
     {

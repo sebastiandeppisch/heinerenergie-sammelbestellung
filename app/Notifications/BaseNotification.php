@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
@@ -12,13 +14,15 @@ class BaseNotification extends Notification
     use Queueable;
 
     //    public ?Advice $advice = null;
-
-    public function via($notifiable): array
+    /**
+     * @return array<int, string>
+     */
+    public function via(mixed $notifiable): array
     {
         return ['mail'];
     }
 
-    public function toMail($notifiable)
+    public function toMail(mixed $notifiable): MailMessage
     {
         Log::info('Base Notification toMail');
         Log::info('notifiable', ['notifiable' => $notifiable]);
@@ -29,7 +33,10 @@ class BaseNotification extends Notification
 
     }
 
-    public function toArray($notifiable): array
+    /**
+     * @return array{}
+     */
+    public function toArray(mixed $notifiable): array
     {
         return [
             //

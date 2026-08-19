@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Context\GroupContextContract;
@@ -13,10 +15,11 @@ use App\Models\FormSubmission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class FormSubmissionController extends Controller
 {
-    public function index(IndexFormSubmissionRequest $request, GroupContextContract $groupContext)
+    public function index(IndexFormSubmissionRequest $request, GroupContextContract $groupContext): Response
     {
         $formsubmissions = FormSubmission::query()
             ->with(['submissionFields', 'submissionFields.formField', 'submissionFields.formField.options', 'submissionFields.options']);
@@ -69,6 +72,10 @@ class FormSubmissionController extends Controller
         ]);
     }
 
+    /**
+     * @param  array<int, FormSubmission>  $items
+     * @return Collection<int, FormSubmissionData>
+     */
     private function addPagedIndex(array $items, int $page): Collection
     {
         return collect($items)->mapWithKeys(function ($item, $key) use ($page): array {
@@ -80,7 +87,7 @@ class FormSubmissionController extends Controller
         });
     }
 
-    public function markSeen(Request $request, FormSubmission $formSubmission)
+    public function markSeen(Request $request, FormSubmission $formSubmission): Response
     {
         $formSubmission->seen = true;
         $formSubmission->save();
@@ -88,7 +95,7 @@ class FormSubmissionController extends Controller
         return back()->with('success', 'Der Formulareintrag wurde als gelesen markiert');
     }
 
-    public function markUnseen(Request $request, FormSubmission $formSubmission)
+    public function markUnseen(Request $request, FormSubmission $formSubmission): Response
     {
         $formSubmission->seen = false;
         $formSubmission->save();

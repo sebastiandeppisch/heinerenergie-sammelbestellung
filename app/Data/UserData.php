@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Data;
 
 use App\Models\Group;
@@ -28,7 +30,7 @@ class UserData extends Data
         public ?string $zip,
         public bool $is_admin,
         public bool $is_active,
-        /** @var Collection<GroupBaseData> */
+        /** @var Collection<int, GroupBaseData> */
         public Collection $groups,
     ) {}
 

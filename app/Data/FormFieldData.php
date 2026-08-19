@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Data;
 
 use App\Enums\FieldType;
@@ -35,6 +37,7 @@ class FormFieldData extends Data
         public ?int $max_length = null,
         public ?float $min_value = null,
         public ?float $max_value = null,
+        /** @var array<int, string>|null */
         public ?array $accepted_file_types = null,
         public int $max_images = 1,
     ) {}

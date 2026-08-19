@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Data\AdviceStatusNamesData;
@@ -9,7 +11,10 @@ use Illuminate\Support\Facades\Auth;
 
 class AdviceStatusController extends Controller
 {
-    public function index()
+    /**
+     * @return array<int, AdviceStatusNamesData>
+     */
+    public function index(): array
     {
         $user = Auth::user();
 

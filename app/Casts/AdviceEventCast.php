@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Casts;
 
 use App\Events\Advice\AdviceEventContract;
@@ -8,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 use Throwable;
 
+/** @implements CastsAttributes<AdviceEventContract, AdviceEventContract> */
 class AdviceEventCast implements CastsAttributes
 {
     /**

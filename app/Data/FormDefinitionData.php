@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Data;
 
 use App\Enums\FormType;
@@ -14,7 +16,7 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 class FormDefinitionData extends Data
 {
     /**
-     * @param  Collection<FormFieldData>  $fields
+     * @param  Collection<int, FormFieldData>  $fields
      */
     public function __construct(
         public string $id,

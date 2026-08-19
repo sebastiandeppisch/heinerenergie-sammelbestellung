@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
 use App\Context\GroupContextContract;
@@ -14,7 +16,7 @@ class GroupContextMiddleware
         private readonly SessionGroupContextFactory $factory,
     ) {}
 
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): mixed
     {
         $contextConfig = Config::get('app.group_context');
         if ($contextConfig === 'group') {

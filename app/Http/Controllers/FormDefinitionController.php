@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Context\GroupContextContract;
@@ -11,15 +13,17 @@ use App\Http\Requests\UpsertFormDefinitionRequest;
 use App\Models\FormDefinition;
 use App\Models\Group;
 use App\Services\FormDefinitionService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class FormDefinitionController extends Controller
 {
     /**
      * Display a listing of the form definitions.
      */
-    public function index(GroupContextContract $groupContext)
+    public function index(GroupContextContract $groupContext): Response
     {
         $query = FormDefinition::with(['fields', 'fields.options', 'group', 'adviceCreator', 'mapPointCreator']);
 
@@ -47,7 +51,7 @@ class FormDefinitionController extends Controller
     /**
      * Show the form for creating a new form definition.
      */
-    public function create(Request $request)
+    public function create(Request $request): Response
     {
         $groups = Group::all()->map(fn (Group $group): array => [
             'id' => $group->uuid,
@@ -65,6 +69,9 @@ class FormDefinitionController extends Controller
         ]);
     }
 
+    /**
+     * @return array<int, FieldType>
+     */
     private function activeFieldTypes(): array
     {
         $inactive = collect([
@@ -77,7 +84,7 @@ class FormDefinitionController extends Controller
     /**
      * Show the form for editing the specified form definition.
      */
-    public function edit(FormDefinition $formDefinition)
+    public function edit(FormDefinition $formDefinition): Response
     {
         $formDefinition->load('fields.options', 'adviceCreator.firstNameField', 'adviceCreator.lastNameField', 'adviceCreator.addressField', 'adviceCreator.emailField', 'adviceCreator.phoneField', 'adviceCreator.adviceTypeField', 'mapPointCreator.titleField', 'mapPointCreator.descriptionField', 'mapPointCreator.coordinateField');
         $formDefinitionData = FormDefinitionData::fromModel($formDefinition);
@@ -98,7 +105,7 @@ class FormDefinitionController extends Controller
     /**
      * Store a newly created form definition.
      */
-    public function store(UpsertFormDefinitionRequest $request, FormDefinitionData $formDefinitionData)
+    public function store(UpsertFormDefinitionRequest $request, FormDefinitionData $formDefinitionData): RedirectResponse
     {
         $formDefinition = app(FormDefinitionService::class)->storeFormDefinitionData($formDefinitionData);
 
@@ -109,7 +116,7 @@ class FormDefinitionController extends Controller
     /**
      * Update the specified form definition.
      */
-    public function update(UpsertFormDefinitionRequest $request, FormDefinition $formDefinition, FormDefinitionData $formDefinitionData)
+    public function update(UpsertFormDefinitionRequest $request, FormDefinition $formDefinition, FormDefinitionData $formDefinitionData): RedirectResponse
     {
         app(FormDefinitionService::class)->updateFormDefinitionData($formDefinitionData);
 
@@ -119,7 +126,7 @@ class FormDefinitionController extends Controller
     /**
      * Store a form definition from a template.
      */
-    public function storeFromTemplate(StoreFormDefinitionFromTemplateRequest $request)
+    public function storeFromTemplate(StoreFormDefinitionFromTemplateRequest $request): RedirectResponse
     {
         $formDefinition = app(FormDefinitionService::class)->createFromTemplate(
             $request->input('template_type'),
@@ -133,7 +140,7 @@ class FormDefinitionController extends Controller
     /**
      * Remove the specified form definition.
      */
-    public function destroy(FormDefinition $formDefinition)
+    public function destroy(FormDefinition $formDefinition): RedirectResponse
     {
         $formDefinition->delete();
 

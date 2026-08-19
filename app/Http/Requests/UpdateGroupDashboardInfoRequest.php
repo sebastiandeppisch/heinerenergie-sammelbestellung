@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -23,7 +25,7 @@ class UpdateGroupDashboardInfoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'dashboard_info' => 'nullable|string',
+            'dashboard_info' => ['nullable', 'string'],
         ];
     }
 }
