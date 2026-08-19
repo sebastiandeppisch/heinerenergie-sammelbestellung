@@ -28,8 +28,8 @@ class Coordinate implements CastsAttributes
         }
 
         return new ValueObjectsCoordinate(
-            lat: $attributes['lat'],
-            lng: $attributes['lng']
+            lat: (float) $attributes['lat'],
+            lng: (float) $attributes['lng']
         );
     }
 
