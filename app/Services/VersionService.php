@@ -15,11 +15,11 @@ use Illuminate\Support\Str;
  */
 class VersionService
 {
-    private const DEVELOPMENT_VERSION = 'dev';
+    private const string DEVELOPMENT_VERSION = 'dev';
 
     public function __construct(
-        private ?string $versionFile = null,
-        private ?string $changelogFile = null,
+        private readonly ?string $versionFile = null,
+        private readonly ?string $changelogFile = null,
     ) {}
 
     public function version(): string
