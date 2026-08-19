@@ -264,7 +264,7 @@ class AdviceController extends Controller
         $this->authorize('update', $advice);
 
         $validated = $request->validate([
-            'advice_status_id' => 'required|uuid|exists:advice_status,uuid',
+            'advice_status_id' => ['required', 'uuid', 'exists:advice_status,uuid'],
         ]);
 
         $status = AdviceStatus::where('uuid', $validated['advice_status_id'])->firstOrFail();
@@ -280,7 +280,7 @@ class AdviceController extends Controller
         $this->authorize('update', $advice);
 
         $validated = $request->validate([
-            'advisor_id' => 'required|integer|nullable|exists:users,uuid',
+            'advisor_id' => ['required', 'integer', 'nullable', 'exists:users,uuid'],
         ]);
 
         $advisor = User::where('uuid', $validated['advisor_id'])->firstOrFail();

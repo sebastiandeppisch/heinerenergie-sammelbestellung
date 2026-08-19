@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Support;
 
 use App\Contracts\NextcloudFileClientContract;
@@ -59,6 +61,9 @@ class MockNextcloudFileClient implements NextcloudFileClientContract
         return $result;
     }
 
+    /**
+     * @return NextcloudDir[]
+     */
     public function searchDirs(string $rootPath, string $slugSubstring): array
     {
         $rootPath = rtrim($rootPath, '/');

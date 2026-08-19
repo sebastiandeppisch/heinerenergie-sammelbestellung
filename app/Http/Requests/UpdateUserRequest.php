@@ -31,7 +31,7 @@ class UpdateUserRequest extends FormRequest
             'first_name' => ['string'],
             'last_name' => ['string'],
             'email' => ['email', Rule::unique('users')->ignoreModel($this->user())],
-            'is_active' => 'boolean',
+            'is_active' => ['boolean'],
         ];
     }
 }

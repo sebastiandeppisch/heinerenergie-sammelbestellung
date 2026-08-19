@@ -7,7 +7,6 @@ namespace App\Events\Advice;
 use App\Models\Advice;
 use App\Models\AdviceStatus;
 use App\Models\User;
-use Override;
 
 class StatusChangedEvent extends AdviceEvent
 {

@@ -31,9 +31,9 @@ class UpsertMapPointRequest extends FormRequest
             'title' => ['required'],
             'description' => ['nullable'],
             'coordinate' => new GeographicCoordinate,
-            'published' => 'boolean',
-            'category_id' => 'nullable|bail|uuid|exists:map_point_categories,uuid',
-            'location' => 'nullable|string|max:500',
+            'published' => ['boolean'],
+            'category_id' => ['nullable', 'bail', 'uuid', 'exists:map_point_categories,uuid'],
+            'location' => ['nullable', 'string', 'max:500'],
         ];
     }
 

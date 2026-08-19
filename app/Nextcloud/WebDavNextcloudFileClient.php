@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Nextcloud;
 
 use App\Context\GroupContextContract;
@@ -108,6 +110,9 @@ class WebDavNextcloudFileClient implements NextcloudFileClientContract
         return $items;
     }
 
+    /**
+     * @return NextcloudDir[]
+     */
     public function searchDirs(string $rootPath, string $slugSubstring): array
     {
         $absRoot = $this->absolutePath($rootPath);

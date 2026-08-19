@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Concerns;
 
 use App\Models\FormDefinition;
@@ -18,6 +20,9 @@ use App\Services\FormEmbedAccessService;
  */
 trait AutoAttachesFormEmbedToken
 {
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function post($uri, array $data = [], array $headers = [])
     {
         if (! array_key_exists('_form_token', $data) && preg_match('#/forms/([^/?]+)#', (string) $uri, $matches)) {

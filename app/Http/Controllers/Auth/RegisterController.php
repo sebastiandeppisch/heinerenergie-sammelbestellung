@@ -9,9 +9,9 @@ use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
 use App\Services\UserEncryptionService;
 use Auth;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
-use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 

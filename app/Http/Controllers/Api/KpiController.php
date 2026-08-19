@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Data\StatusDistributionPointData;
@@ -26,8 +28,8 @@ class KpiController extends Controller
         CurrentGroupService $currentGroupService,
     ): array {
         $validated = $request->validate([
-            'from' => 'required|date',
-            'to' => 'nullable|date|after_or_equal:from',
+            'from' => ['required', 'date'],
+            'to' => ['nullable', 'date', 'after_or_equal:from'],
             'aggregation' => ['required', new Enum(Aggregation::class)],
         ]);
 
@@ -48,7 +50,7 @@ class KpiController extends Controller
         CurrentGroupService $currentGroupService,
     ): array {
         $validated = $request->validate([
-            'years' => 'required|integer|min:1|max:5',
+            'years' => ['required', 'integer', 'min:1', 'max:5'],
         ]);
 
         return [
