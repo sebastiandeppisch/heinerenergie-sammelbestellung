@@ -44,9 +44,9 @@ jobs:
     - uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
       with:
         php-version: '8.4'
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v7
       with:
         node-version: '22'
     - name: Copy .env
@@ -88,7 +88,7 @@ jobs:
       run: vendor/bin/phpstan analyze
     - name: Upload test logs if tests fail
       if: failure()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: test-logs-${{ matrix.db }}
         path: |
