@@ -96,11 +96,6 @@ const advisor = user.value;
 
             <!-- Right Column - Timeline and Details -->
             <div class="content-sidebar">
-                <div class="content-card">
-                    <h3 class="card-title card-header">Verlauf</h3>
-                    <AdviceTimeline :events="events" :advice-id="advice.id" />
-                </div>
-
                 <div class="content-card" v-if="props.formSubmission === null">
                     <h3 class="card-title card-header">Zusätzliche Informationen</h3>
                     <AdviceDetails :advice="advice" />
@@ -110,6 +105,11 @@ const advisor = user.value;
                     <div style="padding: 1.5rem">
                         <FormSubmissionRenderer :form-submission="props.formSubmission" />
                     </div>
+                </div>
+
+                <div class="content-card">
+                    <h3 class="card-title card-header">Verlauf</h3>
+                    <AdviceTimeline :events="events" :advice-id="advice.id" />
                 </div>
             </div>
         </div>
