@@ -2,9 +2,9 @@
 
 namespace App\Data;
 
-use App\Models\FormField;
 use App\Enums\FormType;
 use App\Models\FormDefinition;
+use App\Models\FormField;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Data;

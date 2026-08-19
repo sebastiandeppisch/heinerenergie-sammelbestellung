@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use Closure;
 use App\Actions\FetchAddressByCoordinate;
 use App\Actions\FetchCoordinateByAddress;
 use App\Actions\FetchCoordinateByFreeText;
@@ -17,6 +16,7 @@ use App\Services\CurrentGroupService;
 use App\Services\MailService;
 use App\ValueObjects\Address;
 use App\ValueObjects\Coordinate;
+use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 use maxh\Nominatim\Nominatim;
@@ -29,8 +29,6 @@ class AppServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
-     *
-     * @return void
      */
     #[Override]
     public function register(): void
@@ -58,8 +56,6 @@ class AppServiceProvider extends ServiceProvider
 
     /**
      * Bootstrap any application services.
-     *
-     * @return void
      */
     public function boot(): void
     {

@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Concerns;
 
-use Illuminate\Http\RedirectResponse;
 use App\Http\Requests\StoreChecklistEntryRequest;
 use App\Http\Requests\UpdateChecklistEntryRequest;
 use App\Models\Advice;
 use App\Models\ChecklistEntry;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 
 trait HandlesChecklistEntries

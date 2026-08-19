@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AdviceEvent;
-use App\Models\ChecklistEntry;
 use App\Data\AdviceEventData;
 use App\Data\AdviceStatusNamesData;
 use App\Data\ChecklistEntryData;
@@ -22,7 +20,9 @@ use App\Http\Requests\StoreAdviceRequest;
 use App\Http\Requests\TransferAdviceRequest;
 use App\Http\Requests\UpdateAdviceRequest;
 use App\Models\Advice;
+use App\Models\AdviceEvent;
 use App\Models\AdviceStatus;
+use App\Models\ChecklistEntry;
 use App\Models\FormDefinition;
 use App\Models\Group;
 use App\Models\User;

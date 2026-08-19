@@ -2,8 +2,8 @@
 
 namespace App\Data;
 
-use App\Models\ChecklistEntryField;
 use App\Models\ChecklistEntry;
+use App\Models\ChecklistEntryField;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
