@@ -1,5 +1,7 @@
 <?php
 
+use App\Data\StatusDistributionPointData;
+use App\ValueObjects\Coordinate;
 use Illuminate\Support\Str;
 
 return [
@@ -107,6 +109,21 @@ return [
 
     'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_cache'),
 
-    'serializable_classes' => false,
+    /*
+    |--------------------------------------------------------------------------
+    | Serializable Classes
+    |--------------------------------------------------------------------------
+    |
+    | Cached payloads are unserialized with this allow list, which guards against
+    | object injection through a poisoned cache. Every class that gets cached as
+    | an object has to be listed here, otherwise it comes back as an instance of
+    | __PHP_Incomplete_Class.
+    |
+    */
+
+    'serializable_classes' => [
+        Coordinate::class,
+        StatusDistributionPointData::class,
+    ],
 
 ];

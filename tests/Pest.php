@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /*
@@ -44,4 +46,28 @@ expect()->extend('toBeOne', fn () => $this->toBe(1));
 function something(): void
 {
     // ..
+}
+
+/**
+ * Switch the cache over to the file store the application actually runs on.
+ *
+ * The array store configured in phpunit.xml keeps its payloads as live objects and
+ * never serializes them, so it cannot surface serialization problems. Tests that
+ * care about what comes back out of the cache need a store that round trips
+ * through serialize()/unserialize().
+ *
+ * @return string the throwaway cache directory
+ */
+function useFileCacheStore(): string
+{
+    $path = storage_path('framework/testing/cache-'.Str::random(8));
+
+    config([
+        'cache.default' => 'file',
+        'cache.stores.file.path' => $path,
+    ]);
+
+    Cache::purge('file');
+
+    return $path;
 }
