@@ -41,11 +41,39 @@ const adviceRadius = computed({
     set: (value) => (user.value.advice_radius = typeof value === 'string' ? Number(value) || null : value || null),
 });
 
+type Address = {
+    street: string | null;
+    street_number: string | null;
+    zip: string | null;
+    city: string | null;
+};
+
+function currentAddress(): Address {
+    return {
+        street: user.value.street,
+        street_number: user.value.street_number,
+        zip: user.value.zip,
+        city: user.value.city,
+    };
+}
+
+const savedAddress = ref<Address>(currentAddress());
+
+/**
+ * The coordinates are only calculated on the server, so they are outdated as soon as the address inputs are changed.
+ */
+const areCoordinatesDirty = computed<boolean>(() => {
+    const address = currentAddress();
+
+    return (Object.keys(address) as (keyof Address)[]).some((field) => address[field] !== savedAddress.value[field]);
+});
+
 function saveAddress() {
     axios.post('/api/profile/address', user.value).then((response) => {
         console.log(response.data);
 
         user.value = response.data;
+        savedAddress.value = currentAddress();
         toast.success('Adresse gespeichert');
     });
 }
@@ -96,7 +124,10 @@ function saveAddress() {
                                 Beratungsgebiet speichern
                             </Button>
 
-                            <AdvisorMap :advisor="user" style="padding-top: 30px" :advisor-marker="props.advisorMarker" />
+                            <AdvisorMap v-if="!areCoordinatesDirty" :advisor="user" style="padding-top: 30px" :advisor-marker="props.advisorMarker" />
+                            <div v-else style="padding-top: 30px">
+                                <i>Speichere Dein Beratungsgebiet, damit die Karte aktualisiert wird.</i>
+                            </div>
                         </div>
                         <div class="flex-cell" style="display: none"></div>
                     </div>
