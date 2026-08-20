@@ -11,6 +11,10 @@ import { user as userData } from '../authHelper';
 
 const user = ref(userData.value);
 
+const props = defineProps<{
+    advisorMarker?: string;
+}>();
+
 // Computed properties to convert null to undefined for Input components
 const street = computed({
     get: () => user.value.street ?? undefined,
@@ -92,7 +96,7 @@ function saveAddress() {
                                 Beratungsgebiet speichern
                             </Button>
 
-                            <AdvisorMap :advisor="user" style="padding-top: 30px" />
+                            <AdvisorMap :advisor="user" style="padding-top: 30px" :advisor-marker="props.advisorMarker" />
                         </div>
                         <div class="flex-cell" style="display: none"></div>
                     </div>

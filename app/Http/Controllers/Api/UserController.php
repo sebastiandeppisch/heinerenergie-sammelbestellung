@@ -77,6 +77,8 @@ class UserController extends Controller
         $user->save();
         $this->fetchCoordinates($user);
 
+        $user = UserData::fromModel($user, false);
+
         return response()->json($user);
     }
 

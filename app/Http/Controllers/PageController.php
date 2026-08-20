@@ -58,9 +58,20 @@ class PageController extends Controller
         ]);
     }
 
-    public function profile(): Response
+    public function profile(CurrentGroupService $currentGroupService): Response
     {
-        return Inertia::render('Profile');
+
+        $currentGroup = $currentGroupService->getGroup();
+
+        $advisorMarker = '/images/markers/he_yellow.svg'; // Default marker
+
+        if ($currentGroup && $currentGroup->full_marker_path) {
+            $advisorMarker = url($currentGroup->full_marker_path);
+        }
+
+        return Inertia::render('Profile', [
+            'advisorMarker' => $advisorMarker,
+        ]);
     }
 
     public function settings(): Response
