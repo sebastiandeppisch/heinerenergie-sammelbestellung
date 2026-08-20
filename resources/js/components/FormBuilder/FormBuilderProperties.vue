@@ -30,6 +30,16 @@ const FIELD_TYPES = {
     DATE: 'date' as FieldType,
 };
 
+const props = withDefaults(
+    defineProps<{
+        /** The field feeds a model attribute that can never be empty, so "Pflichtfeld" must stay on. */
+        requiredLocked?: boolean;
+    }>(),
+    {
+        requiredLocked: false,
+    },
+);
+
 const model = defineModel<FormFieldData>({
     required: true,
 });
@@ -112,12 +122,25 @@ const maxValue = computed({
     },
 });
 
+/** Field types whose input actually renders a placeholder. Address, map point, image and file inputs ignore it. */
+const PLACEHOLDER_FIELD_TYPES = [FIELD_TYPES.TEXT, FIELD_TYPES.TEXTAREA, FIELD_TYPES.NUMBER, FIELD_TYPES.EMAIL, FIELD_TYPES.PHONE, FIELD_TYPES.DATE];
+
+/** Field types that can be pre-filled with a plain string. Fields with options use their default option instead. */
+const DEFAULT_VALUE_FIELD_TYPES = [
+    FIELD_TYPES.TEXT,
+    FIELD_TYPES.TEXTAREA,
+    FIELD_TYPES.NUMBER,
+    FIELD_TYPES.EMAIL,
+    FIELD_TYPES.PHONE,
+    FIELD_TYPES.DATE,
+];
+
 const supportsPlaceholder = computed(() => {
-    return !supportsOptions.value;
+    return PLACEHOLDER_FIELD_TYPES.includes(model.value.type);
 });
 
 const supportsDefaultValue = computed(() => {
-    return !supportsOptions.value;
+    return DEFAULT_VALUE_FIELD_TYPES.includes(model.value.type);
 });
 
 function addOption() {
@@ -175,9 +198,13 @@ function onValueChanged(e: any) {
 
                     <div class="mt-4 grid gap-2" v-if="model.type !== FIELD_TYPES.CHECKBOX">
                         <div class="flex items-center space-x-2">
-                            <Checkbox id="field_required" v-model="model.required" />
-                            <Label for="field_required">Pflichtfeld</Label>
+                            <Checkbox id="field_required" v-model="model.required" :disabled="props.requiredLocked" />
+                            <Label for="field_required" :class="props.requiredLocked ? 'text-muted-foreground' : ''">Pflichtfeld</Label>
                         </div>
+                        <p class="text-xs text-muted-foreground" v-if="props.requiredLocked">
+                            Dieses Feld ist unter „Ziele" als Adresse der Beratung hinterlegt. Da jede Beratung eine Adresse braucht, kannst du es
+                            nicht optional machen. Weitere Adressfelder im Formular darfst du optional lassen.
+                        </p>
                     </div>
                 </div>
 

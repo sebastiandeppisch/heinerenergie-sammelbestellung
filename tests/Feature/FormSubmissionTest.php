@@ -333,3 +333,148 @@ test('submitting a checkbox with required options passes validation when all req
 
     $response->assertSessionHasNoErrors();
 });
+
+test('form with optional text field can be submitted without filling it', function (): void {
+    $formDefinition = FormDefinition::factory()->create();
+    $formField = FormField::factory()->create([
+        'form_definition_id' => $formDefinition->id,
+        'type' => FieldType::TEXT,
+        'label' => 'Optional Text Field',
+        'required' => false,
+        'min_length' => null,
+        'max_length' => null,
+    ]);
+
+    $this->withoutExceptionHandling();
+
+    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition]), []);
+
+    $response->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('form_submissions', [
+        'form_definition_id' => $formDefinition->id,
+    ]);
+
+    $field = SubmissionField::firstOrFail();
+    $this->assertSame($formField->id, $field->form_field_id);
+    $this->assertSame('', $field->value);
+});
+
+test('form with optional text field can be submitted with an empty value', function (): void {
+    $formDefinition = FormDefinition::factory()->create();
+    $formField = FormField::factory()->create([
+        'form_definition_id' => $formDefinition->id,
+        'type' => FieldType::TEXT,
+        'label' => 'Optional Text Field',
+        'required' => false,
+        'min_length' => null,
+        'max_length' => null,
+    ]);
+
+    $this->withoutExceptionHandling();
+
+    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition]), [
+        $formField->uuid => '',
+    ]);
+
+    $response->assertSessionHasNoErrors();
+
+    $field = SubmissionField::firstOrFail();
+    $this->assertSame($formField->id, $field->form_field_id);
+    $this->assertSame('', $field->value);
+});
+
+test('form with optional address field can be submitted without filling it', function (): void {
+    $formDefinition = FormDefinition::factory()->create();
+    $formField = FormField::factory()->create([
+        'form_definition_id' => $formDefinition->id,
+        'type' => FieldType::ADDRESS,
+        'label' => 'Optional Address Field',
+        'required' => false,
+    ]);
+
+    $this->withoutExceptionHandling();
+
+    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition]), []);
+
+    $response->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('form_submissions', [
+        'form_definition_id' => $formDefinition->id,
+    ]);
+
+    $field = SubmissionField::firstOrFail();
+    $this->assertSame($formField->id, $field->form_field_id);
+    $this->assertNull($field->value);
+});
+
+test('form with optional address field can be submitted with an empty address', function (): void {
+    $formDefinition = FormDefinition::factory()->create();
+    $formField = FormField::factory()->create([
+        'form_definition_id' => $formDefinition->id,
+        'type' => FieldType::ADDRESS,
+        'label' => 'Optional Address Field',
+        'required' => false,
+    ]);
+
+    $this->withoutExceptionHandling();
+
+    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition]), [
+        $formField->uuid => [
+            'street' => '',
+            'street_number' => '',
+            'zip' => '',
+            'city' => '',
+        ],
+    ]);
+
+    $response->assertSessionHasNoErrors();
+
+    $field = SubmissionField::firstOrFail();
+    $this->assertSame($formField->id, $field->form_field_id);
+    $this->assertNull($field->value);
+});
+
+test('form with optional address field rejects a partially filled address', function (): void {
+    $formDefinition = FormDefinition::factory()->create();
+    $formField = FormField::factory()->create([
+        'form_definition_id' => $formDefinition->id,
+        'type' => FieldType::ADDRESS,
+        'label' => 'Optional Address Field',
+        'required' => false,
+    ]);
+
+    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition]), [
+        $formField->uuid => [
+            'street' => 'Musterstraße',
+            'street_number' => '',
+            'zip' => '',
+            'city' => '',
+        ],
+    ]);
+
+    $response->assertSessionHasErrors($formField->uuid);
+    $this->assertDatabaseCount('form_submissions', 0);
+});
+
+test('form with required address field rejects an empty address', function (): void {
+    $formDefinition = FormDefinition::factory()->create();
+    $formField = FormField::factory()->create([
+        'form_definition_id' => $formDefinition->id,
+        'type' => FieldType::ADDRESS,
+        'label' => 'Required Address Field',
+        'required' => true,
+    ]);
+
+    $response = $this->post(route('form.submit', ['formDefinition' => $formDefinition]), [
+        $formField->uuid => [
+            'street' => '',
+            'street_number' => '',
+            'zip' => '',
+            'city' => '',
+        ],
+    ]);
+
+    $response->assertSessionHasErrors($formField->uuid);
+    $this->assertDatabaseCount('form_submissions', 0);
+});

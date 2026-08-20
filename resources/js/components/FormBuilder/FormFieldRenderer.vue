@@ -63,6 +63,9 @@ function handleInput() {
 const hasError = computed(() => props.errors.length > 0);
 const fieldDisabled = computed(() => props.disabled || !props.isPreview);
 
+/** Only a stored submission is rendered read-only; the form builder canvas shows disabled inputs instead. */
+const fieldReadonly = computed(() => props.disabled);
+
 const fieldId = computed<string>(() => `field_${props.field.id}`);
 </script>
 
@@ -80,6 +83,7 @@ const fieldId = computed<string>(() => `field_${props.field.id}`);
         <FormFieldInputRenderer
             :field="field"
             :disabled="fieldDisabled"
+            :readonly="fieldReadonly"
             :has-error="hasError"
             :has-had-error="hasHadError"
             v-model="modelValue"

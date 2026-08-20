@@ -33,10 +33,12 @@ const props = withDefaults(
     defineProps<{
         field: FormFieldData;
         disabled?: boolean;
+        readonly?: boolean;
         hasError?: boolean;
     }>(),
     {
         disabled: false,
+        readonly: false,
         hasError: false,
     },
 );
@@ -234,7 +236,7 @@ const inputClasses = computed(() => ({
     />
     <PinLocationMap v-else-if="field.type == FIELD_TYPES.GEO_COORDINATE" :id="fieldId" v-model="modelValue" :readonly="disabled" />
 
-    <AddressInput v-else-if="field.type == FIELD_TYPES.ADDRESS" :id="fieldId" v-model="modelValue" :readonly="disabled" />
+    <AddressInput v-else-if="field.type == FIELD_TYPES.ADDRESS" :id="fieldId" v-model="modelValue" :readonly="readonly" :disabled="disabled" />
 
     <div v-else class="rounded-md border border-destructive p-2 text-sm text-destructive">Feldtyp "{{ field.type }}" wird nicht unterstützt</div>
 </template>

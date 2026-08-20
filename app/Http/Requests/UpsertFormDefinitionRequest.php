@@ -8,6 +8,7 @@ use App\Enums\FieldType;
 use App\Enums\FormType;
 use App\Rules\FormFieldExistsInRequest;
 use App\Rules\Hostname;
+use App\Rules\MappedFormFieldMustBeRequired;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -80,7 +81,15 @@ class UpsertFormDefinitionRequest extends FormRequest
         if ($this->has('advice_mapping') && ! is_null($this->input('advice_mapping')) && $this->input('advice_mapping.enabled') === true) {
             $rules['advice_mapping.first_name_field_id'] = ['nullable', 'string', new FormFieldExistsInRequest];
             $rules['advice_mapping.last_name_field_id'] = ['nullable', 'string', new FormFieldExistsInRequest];
-            $rules['advice_mapping.address_field_id'] = ['nullable', 'string', new FormFieldExistsInRequest];
+            $rules['advice_mapping.address_field_id'] = [
+                'nullable',
+                'string',
+                new FormFieldExistsInRequest,
+                new MappedFormFieldMustBeRequired(
+                    readableName: 'Adresse Feld',
+                    reason: 'da jede Beratung eine Adresse braucht. Weitere Adressfelder im Formular kannst du optional lassen.',
+                ),
+            ];
             $rules['advice_mapping.email_field_id'] = ['nullable', 'string', new FormFieldExistsInRequest];
             $rules['advice_mapping.phone_field_id'] = ['nullable', 'string', new FormFieldExistsInRequest];
             $rules['advice_mapping.advice_type_field_id'] = ['nullable', 'string', 'required_without:advice_mapping.advice_type_direct', new FormFieldExistsInRequest];

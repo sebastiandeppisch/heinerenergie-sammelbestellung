@@ -10,6 +10,8 @@ use Illuminate\Translation\PotentiallyTranslatedString;
 
 class AddressRule implements ValidationRule
 {
+    public function __construct(private readonly bool $required = true) {}
+
     /**
      * Run the validation rule.
      *
@@ -26,6 +28,11 @@ class AddressRule implements ValidationRule
                 if (! array_key_exists($key, $value) || $value[$key] === null || $value[$key] === '') {
                     $missingKeys[] = $key;
                 }
+            }
+
+            /** An untouched optional address arrives with all parts empty and counts as not filled in. */
+            if (! $this->required && count($missingKeys) === count($requiredKeys)) {
+                return;
             }
 
             // EN => DE

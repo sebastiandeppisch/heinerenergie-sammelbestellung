@@ -99,8 +99,29 @@ class FormSubmitController extends Controller
         return match ($field->type) {
             FieldType::TEXT => (string) $request->string($field->uuid),
             FieldType::NUMBER => $request->integer($field->uuid),
+            FieldType::ADDRESS => $this->normalizeAddress($request->input($field->uuid)),
             default => $request->input($field->uuid),
         };
+    }
+
+    /**
+     * An optional address that was left untouched arrives as an array of empty parts.
+     * It is stored as null so that consumers get "no address" instead of an empty shell.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function normalizeAddress(mixed $value): ?array
+    {
+        if (! is_array($value)) {
+            return null;
+        }
+
+        $filledParts = array_filter(
+            $value,
+            fn (mixed $part): bool => $part !== null && $part !== '',
+        );
+
+        return $filledParts === [] ? null : $value;
     }
 
     /**

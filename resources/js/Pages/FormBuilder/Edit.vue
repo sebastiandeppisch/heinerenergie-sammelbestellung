@@ -20,7 +20,7 @@ import { Textarea } from '@/shadcn/components/ui/textarea';
 import { router } from '@inertiajs/vue3';
 import { ArrowUpRightFromSquare } from 'lucide-vue-next';
 import { v4 as uuidv4 } from 'uuid';
-import { computed, reactive, ref } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 import { route } from 'ziggy-js';
 type FormDefinitionData = App.Data.FormDefinitionData;
@@ -57,6 +57,27 @@ const formDefinition = reactive<FormDefinitionData>(
 const isChecklist = computed(() => formDefinition.type === (1 as FormType));
 
 const selectedField = ref<FormFieldData | null>(null);
+
+/** The field mapped as the advice address, which can never be optional because an advice always needs an address. */
+const adviceAddressFieldId = computed(() => (formDefinition.advice_mapping?.enabled ? formDefinition.advice_mapping.address_field_id : null));
+
+const isAdviceAddressFieldSelected = computed(() => selectedField.value !== null && selectedField.value.id === adviceAddressFieldId.value);
+
+watch(
+    adviceAddressFieldId,
+    (fieldId) => {
+        if (!fieldId) {
+            return;
+        }
+
+        const field = formDefinition.fields.find((f) => f.id === fieldId);
+
+        if (field) {
+            field.required = true;
+        }
+    },
+    { immediate: true },
+);
 
 const selectedTab = ref('canvas');
 
@@ -365,7 +386,12 @@ const allowedEmbedDomainsText = computed<string>({
                             class="form-builder__canvas"
                         />
 
-                        <FormBuilderProperties v-model="selectedField" v-if="selectedField" class="form-builder__properties" />
+                        <FormBuilderProperties
+                            v-model="selectedField"
+                            v-if="selectedField"
+                            :required-locked="isAdviceAddressFieldSelected"
+                            class="form-builder__properties"
+                        />
                     </div>
                 </div>
             </TabsContent>

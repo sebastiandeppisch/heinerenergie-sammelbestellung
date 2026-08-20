@@ -1,8 +1,10 @@
 <?php
 
 use App\Data\FormDefinitionData;
+use App\Enums\AdviceType;
 use App\Enums\FieldType;
 use App\Models\FormDefinition;
+use App\Models\FormDefinitionToAdvice;
 use App\Models\FormField;
 use App\Models\FormFieldOption;
 use App\Models\Group;
@@ -398,4 +400,54 @@ test('form field options can be deleted', function (): void {
     $this->assertEquals(1, FormField::first()->options()->count());
 
     $this->assertEquals($optionsId, FormField::first()->options->first()->uuid);
+});
+
+test('the address field mapped to an advice must be a required field', function (): void {
+    $adviceMapping = FormDefinitionToAdvice::factory()->create();
+    $formDefinition = $adviceMapping->formDefinition;
+    $addressField = $adviceMapping->addressField;
+
+    $payload = FormDefinitionData::fromModel($formDefinition)->toArray();
+    $payload['advice_mapping']['advice_type_home_option_value'] = (string) AdviceType::Home->value;
+    $payload['advice_mapping']['advice_type_virtual_option_value'] = (string) AdviceType::Virtual->value;
+    $payload['fields'] = array_map(function (array $field) use ($addressField): array {
+        if ($field['id'] === $addressField->uuid) {
+            $field['required'] = false;
+        }
+
+        return $field;
+    }, $payload['fields']);
+
+    $response = $this->put(route('form-definitions.update', $formDefinition), $payload);
+
+    $response->assertSessionHasErrors('advice_mapping.address_field_id');
+    $this->assertTrue($addressField->fresh()->required);
+});
+
+test('a form can contain a second optional address field next to the advice address', function (): void {
+    $adviceMapping = FormDefinitionToAdvice::factory()->create();
+    $formDefinition = $adviceMapping->formDefinition;
+
+    $payload = FormDefinitionData::fromModel($formDefinition)->toArray();
+    $payload['advice_mapping']['advice_type_home_option_value'] = (string) AdviceType::Home->value;
+    $payload['advice_mapping']['advice_type_virtual_option_value'] = (string) AdviceType::Virtual->value;
+    $payload['fields'][] = [
+        'id' => 'temp',
+        'type' => FieldType::ADDRESS->value,
+        'label' => 'Abweichende Lieferadresse',
+        'required' => false,
+        'sort_order' => 99,
+        'options' => [],
+    ];
+
+    $response = $this->put(route('form-definitions.update', $formDefinition), $payload);
+
+    $response->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('form_fields', [
+        'form_definition_id' => $formDefinition->id,
+        'label' => 'Abweichende Lieferadresse',
+        'required' => false,
+    ]);
+    $this->assertTrue($adviceMapping->addressField->fresh()->required);
 });

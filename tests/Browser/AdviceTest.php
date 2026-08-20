@@ -1,7 +1,11 @@
 <?php
 
 use App\Contracts\NextcloudFileClientContract;
+use App\Enums\FieldType;
 use App\Models\Advice;
+use App\Models\FormDefinitionToAdvice;
+use App\Models\FormField;
+use App\Models\FormSubmission;
 use App\Models\Group;
 use App\Models\User;
 use App\Services\SessionService;
@@ -118,4 +122,29 @@ test('system admin sees group select and can create a new advice', function (): 
         ->assertSee('Beratung erfolgreich angelegt');
 
     expect(Advice::where('first_name', 'Hans')->exists())->toBeTrue();
+});
+
+test('an empty optional address is rendered as a hint instead of a blank line', function (): void {
+    $creator = FormDefinitionToAdvice::factory()->withAdvice()->create();
+    $formDefinition = $creator->formDefinition;
+    $formDefinition->update(['group_id' => $this->group->id]);
+
+    $submission = FormSubmission::where('form_definition_id', $formDefinition->id)->firstOrFail();
+    $submission->update(['group_id' => $this->group->id]);
+
+    $advice = Advice::findOrFail($submission->advice_id);
+    $advice->update(['group_id' => $this->group->id, 'advisor_id' => $this->user->id]);
+
+    $secondAddress = FormField::factory()->create([
+        'form_definition_id' => $formDefinition->id,
+        'type' => FieldType::ADDRESS,
+        'label' => 'Zweite Adresse',
+        'required' => false,
+    ]);
+    $secondAddress->createSubmissionField($submission, null);
+
+    visit(route('advices.show', $advice))
+        ->assertSee('Zweite Adresse')
+        ->assertSee('Keine Adresse angegeben')
+        ->assertNoJavaScriptErrors();
 });

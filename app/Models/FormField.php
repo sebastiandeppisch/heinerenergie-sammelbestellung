@@ -108,7 +108,7 @@ class FormField extends Model
             FieldType::IMAGE => ['array', 'max:'.($this->max_images ?? 1)],
             FieldType::DATE => ['date'],
             FieldType::GEO_COORDINATE => [new GeographicCoordinate],
-            FieldType::ADDRESS => [new AddressRule],
+            FieldType::ADDRESS => [new AddressRule(required: (bool) $this->required)],
             default => [],
         };
 
@@ -140,6 +140,9 @@ class FormField extends Model
 
         if ($this->required) {
             $fieldRules[] = 'required';
+        } elseif (! in_array($this->type, [FieldType::CHECKBOX, FieldType::IMAGE], true) && ! in_array('nullable', $fieldRules, true)) {
+            /** Empty inputs arrive as null (ConvertEmptyStringsToNull), which must not trip the type rules. */
+            array_unshift($fieldRules, 'nullable');
         }
 
         $rules = [$this->uuid => $fieldRules];
