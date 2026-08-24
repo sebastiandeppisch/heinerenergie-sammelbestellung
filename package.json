@@ -40,7 +40,7 @@
         "devextreme": "^21.2.12",
         "devextreme-vue": "^21.2.12",
         "laravel-precognition-vue": "^0.7.2",
-        "laravel-precognition-vue-inertia": "^0.7.2",
+        "laravel-precognition-vue-inertia": "^0.8.0",
         "leaflet": "^1.7.1",
         "leaflet-draw": "^0.4.0",
         "leaflet-draw-toolbar": "^0.3.0-alpha.1",
