@@ -15,7 +15,7 @@
         "@inertiajs/vue3": "^2.0.0",
         "@tanstack/vue-table": "^8.21.3",
         "@tiptap/extension-color": "^3.23.6",
-        "@tiptap/extension-highlight": "^3.23.6",
+        "@tiptap/extension-highlight": "^3.30.3",
         "@tiptap/extension-image": "^3.23.6",
         "@tiptap/extension-link": "^3.23.6",
         "@tiptap/extension-table": "^3.23.6",
