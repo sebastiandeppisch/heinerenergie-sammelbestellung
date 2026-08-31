@@ -20,7 +20,7 @@ class RedirectWhenGroupIsMissing
 
     public function handle(Request $request, Closure $next): mixed
     {
-        if ($this->user && Auth::check() && $this->sessionService->isGroupMissing()) {
+        if ($this->user instanceof User && Auth::check() && $this->sessionService->isGroupMissing()) {
             $groups = $this->user->groups;
 
             $whitelistedRoutes = [

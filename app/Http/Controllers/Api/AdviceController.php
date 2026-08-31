@@ -100,10 +100,7 @@ class AdviceController extends Controller
 
             $distance = $distance?->getValue();
 
-            if ($distance === null) {
-                // max float value
-                $distance = 1e6;
-            }
+            $distance ??= 1e6;
 
             return [
                 'id' => $user->uuid,

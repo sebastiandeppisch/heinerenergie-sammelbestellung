@@ -82,8 +82,8 @@ class PageController extends Controller
     public function changePassword(Request $request): Response
     {
         return Inertia::render('ChangePasswordForm', [
-            'token' => $request->get('token'),
-            'email' => $request->get('email'),
+            'token' => $request->input('token'),
+            'email' => $request->input('email'),
         ]);
     }
 
