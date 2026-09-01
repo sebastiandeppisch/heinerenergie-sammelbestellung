@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Button } from '@/shadcn/components/ui/button';
+import { useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import FormFieldRenderer from './FormFieldRenderer.vue';
-import { useForm } from '@inertiajs/vue3';
 
 type FormDefinitionData = App.Data.FormDefinitionData;
 
