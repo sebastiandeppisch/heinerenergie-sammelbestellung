@@ -139,8 +139,8 @@ watch(
 
 <template>
     <TooltipProvider>
-        <Card>
-            <CardContent class="space-y-4">
+        <Card class="flex h-full flex-col">
+            <CardContent class="flex h-full min-h-0 flex-col space-y-4">
                 <div class="flex flex-wrap items-center gap-2">
                     <Input v-model="globalFilter" placeholder="Suchen..." class="h-8 w-48" />
                     <Button type="button" variant="outline" size="sm" class="h-8" @click="showFilters = !showFilters">
@@ -150,7 +150,7 @@ watch(
                     </Button>
                 </div>
 
-                <div class="overflow-x-auto rounded-lg border">
+                <div class="min-h-0 flex-1 overflow-auto rounded-lg border">
                     <Table class="w-full">
                         <TableHeader>
                             <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">

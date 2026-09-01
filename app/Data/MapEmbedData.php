@@ -23,6 +23,8 @@ class MapEmbedData extends Data
         public Coordinate $coordinate,
         public int $zoom,
         public bool $show_table,
+        public int $aspect_ratio_width,
+        public int $aspect_ratio_height,
         public ?string $created_at = null,
     ) {}
 
@@ -35,6 +37,8 @@ class MapEmbedData extends Data
             coordinate: $model->coordinate,
             zoom: $model->zoom,
             show_table: $model->show_table,
+            aspect_ratio_width: $model->aspect_ratio_width,
+            aspect_ratio_height: $model->aspect_ratio_height,
             created_at: $model->created_at?->toISOString(),
         );
     }

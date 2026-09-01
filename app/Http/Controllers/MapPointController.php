@@ -54,6 +54,8 @@ class MapPointController extends Controller
             'center' => $mapEmbed->coordinate,
             'zoom' => $mapEmbed->zoom,
             'showTable' => $mapEmbed->show_table,
+            'aspectRatioWidth' => $mapEmbed->aspect_ratio_width,
+            'aspectRatioHeight' => $mapEmbed->aspect_ratio_height,
         ]);
     }
 

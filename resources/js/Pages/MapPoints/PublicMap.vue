@@ -19,6 +19,8 @@ const props = defineProps<{
     center: App.ValueObjects.Coordinate;
     zoom: number;
     showTable: boolean;
+    aspectRatioWidth: number;
+    aspectRatioHeight: number;
 }>();
 
 useAutoResizeIframeIfIsIframe();
@@ -32,12 +34,13 @@ const map = reactive({
 
 const categoryVisibility = reactive<Record<string, boolean>>(Object.fromEntries(props.categories.map((category) => [category.id, true])));
 
-const mapHeightClass = computed(() => {
-    if (isIframe) {
-        return 'h-[520px]';
-    }
-    return props.showTable ? 'h-[calc(100vh-250px)]' : 'h-[calc(100vh-220px)]';
-});
+// Karte und Tabelle bekommen exakt dasselbe Seitenverhältnis, min- und max-height,
+// damit der Inhaltsbereich beim Wechseln zwischen den Tabs gleich hoch bleibt.
+const contentBoxStyle = computed(() => ({
+    aspectRatio: `${props.aspectRatioWidth} / ${props.aspectRatioHeight}`,
+    minHeight: '280px',
+    maxHeight: isIframe ? '520px' : 'calc(100vh - 220px)',
+}));
 
 const visibleCategories = computed(() => props.categories.filter((category) => categoryVisibility[category.id]));
 
@@ -71,7 +74,7 @@ watch(map, () => {
             </TabsList>
 
             <TabsContent value="map">
-                <div class="relative w-full overflow-hidden rounded-xl border shadow-sm" :class="mapHeightClass">
+                <div class="relative w-full overflow-hidden rounded-xl border shadow-sm" :style="contentBoxStyle">
                     <div v-if="categories.length > 1" class="absolute top-2 right-2 z-[1000] rounded-lg bg-white/90 p-3 shadow">
                         <CategoryVisibilityFilter v-model:visibility="categoryVisibility" :categories="categories" id-prefix="map-category-" />
                     </div>
@@ -86,7 +89,9 @@ watch(map, () => {
             </TabsContent>
 
             <TabsContent v-if="showTable" value="table">
-                <MapPointsTable :points-by-category="pointsByCategory" :categories="categories" />
+                <div class="w-full overflow-hidden" :style="contentBoxStyle">
+                    <MapPointsTable :points-by-category="pointsByCategory" :categories="categories" />
+                </div>
             </TabsContent>
         </Tabs>
     </div>

@@ -51,6 +51,8 @@ test('admin can create a map embed with categories', function (): void {
             'category_ids' => $categories->pluck('uuid')->all(),
             'coordinate' => ['lat' => 49.8728, 'lng' => 8.6512],
             'zoom' => 15,
+            'aspect_ratio_width' => 16,
+            'aspect_ratio_height' => 9,
         ]);
 
     $response->assertRedirect();
@@ -119,6 +121,8 @@ test('admin can set the center and zoom of a map embed', function (): void {
             'category_ids' => [$category->uuid],
             'coordinate' => ['lat' => 52.52, 'lng' => 13.405],
             'zoom' => 12,
+            'aspect_ratio_width' => 16,
+            'aspect_ratio_height' => 9,
         ]);
 
     $response->assertRedirect();
@@ -144,6 +148,8 @@ test('admin can change categories of a map embed without changing its link', fun
             'category_ids' => [$categoryA->uuid, $categoryB->uuid],
             'coordinate' => ['lat' => $mapEmbed->lat, 'lng' => $mapEmbed->lng],
             'zoom' => $mapEmbed->zoom,
+            'aspect_ratio_width' => $mapEmbed->aspect_ratio_width,
+            'aspect_ratio_height' => $mapEmbed->aspect_ratio_height,
         ]);
 
     $response->assertRedirect();
@@ -170,6 +176,8 @@ test('group admin can create a map embed for their group', function (): void {
             'category_ids' => [$category->uuid],
             'coordinate' => ['lat' => 49.8728, 'lng' => 8.6512],
             'zoom' => 15,
+            'aspect_ratio_width' => 16,
+            'aspect_ratio_height' => 9,
         ]);
 
     $response->assertRedirect();

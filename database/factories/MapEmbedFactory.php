@@ -31,6 +31,8 @@ class MapEmbedFactory extends Factory
             'lng' => $lng,
             'zoom' => $this->faker->numberBetween(3, 18),
             'show_table' => true,
+            'aspect_ratio_width' => 16,
+            'aspect_ratio_height' => 9,
         ];
     }
 }

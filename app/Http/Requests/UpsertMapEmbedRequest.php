@@ -37,6 +37,8 @@ class UpsertMapEmbedRequest extends FormRequest
             'coordinate' => new GeographicCoordinate,
             'zoom' => ['required', 'integer', 'min:3', 'max:18'],
             'show_table' => ['boolean'],
+            'aspect_ratio_width' => ['required', 'integer', 'min:1', 'max:21'],
+            'aspect_ratio_height' => ['required', 'integer', 'min:1', 'max:21'],
         ];
     }
 
@@ -45,6 +47,6 @@ class UpsertMapEmbedRequest extends FormRequest
      */
     public function getData(): array
     {
-        return $this->safe()->only(['name', 'coordinate', 'zoom', 'show_table']);
+        return $this->safe()->only(['name', 'coordinate', 'zoom', 'show_table', 'aspect_ratio_width', 'aspect_ratio_height']);
     }
 }
