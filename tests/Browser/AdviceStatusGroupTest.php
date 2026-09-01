@@ -37,7 +37,6 @@ test('admin can add new advice status', function (): void {
         ->waitForText('Neu')
         ->click('Neu')
         ->click('[data-test="save-status"]')
-        ->waitForEvent('networkidle')
         ->assertSee('Neuer Status')
         ->assertNoJavaScriptErrors();
 
@@ -59,7 +58,6 @@ test('admin can edit advice status name', function (): void {
         ->waitForText('Beratungszustand bearbeiten')
         ->fill('input[placeholder="z.B. Ausstehend"]', 'Geänderter Status')
         ->click('[data-test="save-status"]')
-        ->waitForEvent('networkidle')
         ->assertSee('Geänderter Status')
         ->assertNoJavaScriptErrors();
 
@@ -80,7 +78,6 @@ test('admin can delete advice status', function (): void {
         ->click('[data-test="delete-status"] button')
         ->waitForText('Beratungszustand löschen?')
         ->click('[data-test="confirm-delete"]')
-        ->waitForEvent('networkidle')
         ->assertDontSee('Zu löschender Status')
         ->assertNoJavaScriptErrors();
 
@@ -103,7 +100,9 @@ test('admin can toggle status visibility and save', function (): void {
         ->waitForText('Verwendete Beratungszustände')
         ->click('[data-slot="switch"]')
         ->click('[data-test="save-visibility"]')
-        ->waitForEvent('networkidle')
+        // The success toast is only shown once every PUT has come back, which
+        // is what makes the assertion on the database below deterministic.
+        ->assertSee('Sichtbarkeit gespeichert')
         ->assertNoJavaScriptErrors();
 
     expect($status->fresh()->isVisibleInGroup($this->group))->toBeFalse();

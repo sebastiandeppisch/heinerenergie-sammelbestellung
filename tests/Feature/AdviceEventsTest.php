@@ -101,16 +101,27 @@ test('it stores the user who changed person data', function (): void {
 });
 
 test('person data event description covers all tracked fields', function (): void {
+    // Only fields that are actually dirty end up in the event's changes, so the
+    // advice needs a known starting value for every tracked field. With the
+    // factory's random values a field could be generated with exactly the value
+    // set below and would then be missing: fake()->buildingNumber() returns "1"
+    // in roughly 2% of all runs, which made this test fail intermittently.
     $fields = [
-        'first_name' => ['old' => $this->advice->first_name, 'new' => 'Max'],
-        'last_name' => ['old' => $this->advice->last_name, 'new' => 'Mustermann'],
-        'email' => ['old' => $this->advice->email, 'new' => 'max@example.com'],
-        'phone' => ['old' => $this->advice->phone, 'new' => '0300000000'],
-        'street' => ['old' => $this->advice->street, 'new' => 'Hauptstraße'],
-        'street_number' => ['old' => $this->advice->street_number, 'new' => '1'],
-        'zip' => ['old' => $this->advice->zip, 'new' => '12345'],
-        'city' => ['old' => $this->advice->city, 'new' => 'Berlin'],
+        'first_name' => ['old' => 'Vorher-Vorname', 'new' => 'Max'],
+        'last_name' => ['old' => 'Vorher-Nachname', 'new' => 'Mustermann'],
+        'email' => ['old' => 'vorher@example.com', 'new' => 'max@example.com'],
+        'phone' => ['old' => '0300000001', 'new' => '0300000000'],
+        'street' => ['old' => 'Vorherstraße', 'new' => 'Hauptstraße'],
+        'street_number' => ['old' => '99', 'new' => '1'],
+        'zip' => ['old' => '54321', 'new' => '12345'],
+        'city' => ['old' => 'Vorherstadt', 'new' => 'Berlin'],
     ];
+
+    $this->advice = Advice::factory()->create([
+        'advice_status_id' => $this->status1->id,
+        'group_id' => $this->group->id,
+        ...array_map(fn (array $values): string => $values['old'], $fields),
+    ]);
 
     foreach ($fields as $field => $values) {
         $this->advice->$field = $values['new'];

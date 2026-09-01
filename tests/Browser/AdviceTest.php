@@ -56,7 +56,6 @@ test('standard advisor can create a new advice', function (): void {
         ->fill('zip', '12345')
         ->fill('city', 'Musterstadt')
         ->click('Speichern')
-        ->waitForEvent('networkidle')
         ->assertPathBeginsWith('/advices/')
         ->assertSee('Beratung erfolgreich angelegt');
 
@@ -84,7 +83,6 @@ test('admin advisor can create a new advice', function (): void {
         ->fill('zip', '54321')
         ->fill('city', 'Beispielstadt')
         ->click('Speichern')
-        ->waitForEvent('networkidle')
         ->assertPathBeginsWith('/advices/')
         ->assertSee('Beratung erfolgreich angelegt');
 
@@ -113,7 +111,6 @@ test('system admin sees group select and can create a new advice', function (): 
         ->fill('zip', '99999')
         ->fill('city', 'Testort')
         ->click('Speichern')
-        ->waitForEvent('networkidle')
         ->assertPathBeginsWith('/advices/')
         ->assertSee('Beratung erfolgreich angelegt');
 
