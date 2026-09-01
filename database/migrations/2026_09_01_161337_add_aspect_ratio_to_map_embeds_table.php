@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('map_embeds', function (Blueprint $table) {
+        Schema::table('map_embeds', function (Blueprint $table): void {
             $table->unsignedTinyInteger('aspect_ratio_width')->default(16);
             $table->unsignedTinyInteger('aspect_ratio_height')->default(9);
         });
@@ -22,7 +22,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('map_embeds', function (Blueprint $table) {
+        Schema::table('map_embeds', function (Blueprint $table): void {
             $table->dropColumn(['aspect_ratio_width', 'aspect_ratio_height']);
         });
     }

@@ -157,8 +157,8 @@ function submit() {
                     <div class="space-y-2">
                         <Label>Vorschau</Label>
                         <p class="text-xs text-gray-500">
-                            Ziehe und zoome die Karte, um den Kartenausschnitt festzulegen, der beim Einbetten angezeigt wird. Die Vorschau zeigt
-                            das oben gewählte Seitenverhältnis.
+                            Ziehe und zoome die Karte, um den Kartenausschnitt festzulegen, der beim Einbetten angezeigt wird. Die Vorschau zeigt das
+                            oben gewählte Seitenverhältnis.
                         </p>
                         <div class="w-full overflow-hidden rounded-lg border" :style="previewBoxStyle">
                             <CategorizedPointsMap
