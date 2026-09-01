@@ -28,6 +28,7 @@ use App\Models\ChecklistEntry;
 use App\Models\FormDefinition;
 use App\Models\Group;
 use App\Models\User;
+use App\Nextcloud\NextcloudConfig;
 use App\Notifications\AdviceTransferred;
 use App\Services\AdviceService;
 use App\Services\CurrentGroupService;
@@ -98,7 +99,7 @@ class AdviceController extends Controller
             ->with('success', 'Beratung erfolgreich angelegt');
     }
 
-    public function show(Advice $advice, AdviceService $adviceService): RedirectResponse|Response
+    public function show(Advice $advice, AdviceService $adviceService, NextcloudConfig $nextcloudConfig): RedirectResponse|Response
     {
         $advice->loadMissing('shares', 'group', 'group.parent', 'advisor');
         if (! Auth::user()->can('view', $advice)) {
@@ -172,6 +173,7 @@ class AdviceController extends Controller
             'canDeleteAdvice' => $canDeleteAdvice,
             'checklistEntries' => $checklistEntries,
             'availableChecklists' => $availableChecklists,
+            'nextcloudConfigured' => $nextcloudConfig->isConfigured(),
         ]);
     }
 

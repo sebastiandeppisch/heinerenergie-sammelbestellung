@@ -11,6 +11,7 @@ use App\Contracts\MailCredentialsRepository;
 use App\Contracts\MailServiceContract;
 use App\Contracts\NextcloudFileClientContract;
 use App\Contracts\NextcloudUserClientContract;
+use App\Nextcloud\NextcloudConfig;
 use App\Nextcloud\NextcloudUserClient;
 use App\Nextcloud\WebDavNextcloudFileClient;
 use App\Repositories\SessionMailCredentialsRepository;
@@ -45,14 +46,16 @@ class AppServiceProvider extends ServiceProvider
             MailService::class,
         );
 
+        $nextcloudConfigured = (new NextcloudConfig)->isConfigured();
+
         $this->app->singleton(
             NextcloudFileClientContract::class,
-            config('nextcloud.base_url') ? WebDavNextcloudFileClient::class : MockNextcloudFileClient::class
+            $nextcloudConfigured ? WebDavNextcloudFileClient::class : MockNextcloudFileClient::class
         );
 
         $this->app->singleton(
             NextcloudUserClientContract::class,
-            config('nextcloud.base_url') ? NextcloudUserClient::class : MockNextcloudUserClient::class
+            $nextcloudConfigured ? NextcloudUserClient::class : MockNextcloudUserClient::class
         );
     }
 

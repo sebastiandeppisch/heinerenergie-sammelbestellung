@@ -27,6 +27,7 @@ const props = defineProps<{
     canDeleteAdvice: boolean;
     checklistEntries: App.Data.ChecklistEntryData[];
     availableChecklists: App.Data.FormDefinitionData[];
+    nextcloudConfigured: boolean;
 }>();
 
 const sharedIds = ref(props.advice.shares_ids || []);
@@ -83,7 +84,7 @@ const advisor = user.value;
                     </div>
                 </div>
 
-                <div class="content-card">
+                <div class="content-card" v-if="props.nextcloudConfigured">
                     <h3 class="card-title card-header">Dateien (Nextcloud)</h3>
                     <AdviceNextcloud :advice="advice" />
                 </div>
