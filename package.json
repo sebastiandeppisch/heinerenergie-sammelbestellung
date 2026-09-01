@@ -43,7 +43,7 @@
         "leaflet": "^1.7.1",
         "leaflet-draw": "^0.4.0",
         "leaflet-draw-toolbar": "^0.3.0-alpha.1",
-        "leaflet-toolbar": "^0.3.0-alpha.2",
+        "leaflet-toolbar": "^0.4.0-alpha.2",
         "lodash": "^4.17.19",
         "lucide-vue-next": "^0.507.0",
         "moment": "^2.29.3",
