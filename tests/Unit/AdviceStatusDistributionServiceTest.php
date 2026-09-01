@@ -196,7 +196,7 @@ it('generates daily cutoff dates', function (): void {
 
 it('returns one data point per cutoff date', function (): void {
     $group = Group::factory()->create();
-    $from = now()->subMonthWithoutOverflow(2)->startOfMonth();
+    $from = now()->subMonthsWithoutOverflow(2)->startOfMonth();
     $to = now();
 
     $results = kpiService()->getDistribution($group, $from, $to, Aggregation::Month);

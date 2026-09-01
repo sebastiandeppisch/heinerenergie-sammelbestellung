@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8c1941b4604dd716f7a9cc8b24914c19",
+    "content-hash": "f13f4aa6d61772a3c9805e98f784ea4f",
     "packages": [
         {
             "name": "brick/math",
@@ -11867,16 +11867,16 @@
         },
         {
             "name": "pestphp/pest-plugin-phpstan",
-            "version": "v5.0.2",
+            "version": "v5.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/pestphp/pest-plugin-phpstan.git",
-                "reference": "6a84a5ea7b7f464d56dac5c11e8f470d3f3d768c"
+                "reference": "2ae56517be5acd06757fdb6f024ed99ca1a14617"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pestphp/pest-plugin-phpstan/zipball/6a84a5ea7b7f464d56dac5c11e8f470d3f3d768c",
-                "reference": "6a84a5ea7b7f464d56dac5c11e8f470d3f3d768c",
+                "url": "https://api.github.com/repos/pestphp/pest-plugin-phpstan/zipball/2ae56517be5acd06757fdb6f024ed99ca1a14617",
+                "reference": "2ae56517be5acd06757fdb6f024ed99ca1a14617",
                 "shasum": ""
             },
             "require": {
@@ -11934,7 +11934,7 @@
                 "unit"
             ],
             "support": {
-                "source": "https://github.com/pestphp/pest-plugin-phpstan/tree/v5.0.2"
+                "source": "https://github.com/pestphp/pest-plugin-phpstan/tree/v5.2.0"
             },
             "funding": [
                 {
@@ -11954,7 +11954,7 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2026-08-08T08:25:25+00:00"
+            "time": "2026-08-23T17:26:23+00:00"
         },
         {
             "name": "pestphp/pest-plugin-profanity",
