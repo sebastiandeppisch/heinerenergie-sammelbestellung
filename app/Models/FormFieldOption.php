@@ -84,13 +84,9 @@ class FormFieldOption extends Model
     #[Override]
     public function save(array $options = []): bool
     {
-        if ($this->sort_order === null) {
-            $this->sort_order = FormFieldOption::where('form_field_id', $this->form_field_id)->max('sort_order') + 1;
-        }
+        $this->sort_order ??= FormFieldOption::where('form_field_id', $this->form_field_id)->max('sort_order') + 1;
 
-        if ($this->value === null) {
-            $this->value = (string) Str::uuid();
-        }
+        $this->value ??= (string) Str::uuid();
 
         return parent::save($options);
     }

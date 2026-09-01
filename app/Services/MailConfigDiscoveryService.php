@@ -102,7 +102,7 @@ class MailConfigDiscoveryService
         $imap = $this->findServer($xml->emailProvider->incomingServer ?? [], 'imap');
         $smtp = $this->findServer($xml->emailProvider->outgoingServer ?? [], 'smtp');
 
-        if (! $imap || ! $smtp) {
+        if (! $imap instanceof SimpleXMLElement || ! $smtp instanceof SimpleXMLElement) {
             return null;
         }
 

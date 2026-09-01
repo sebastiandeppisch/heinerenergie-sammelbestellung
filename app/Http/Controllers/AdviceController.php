@@ -238,7 +238,7 @@ class AdviceController extends Controller
         $currentGroup = $currentGroupService->getGroup();
         $advisorMarker = '/images/markers/he_yellow.svg'; // Default marker
 
-        if ($currentGroup && $currentGroup->full_marker_path) {
+        if ($currentGroup instanceof Group && $currentGroup->full_marker_path) {
             $advisorMarker = url($currentGroup->full_marker_path);
         }
 
