@@ -39,7 +39,7 @@ import TabsContent from '@/shadcn/components/ui/tabs/TabsContent.vue';
 import TabsList from '@/shadcn/components/ui/tabs/TabsList.vue';
 import TabsTrigger from '@/shadcn/components/ui/tabs/TabsTrigger.vue';
 import { router } from '@inertiajs/vue3';
-import { computed, ComputedRef } from 'vue';
+import { computed, type WritableComputedRef } from 'vue';
 
 const props = defineProps<{
     formDefinitions: Array<App.Data.FormDefinitionData>;
@@ -50,7 +50,7 @@ const props = defineProps<{
     groupByForm: boolean;
     view: 'cards' | 'table';
     formSubmissions: App.Data.FormSubmissionData[] | any;
-    pagination: App.Data.PaginationData;
+    pagination: App.Data.PaginationData<App.Data.FormSubmissionData>;
 }>();
 
 const filter = computed(() => {
@@ -113,9 +113,9 @@ function filterQuery(query: any) {
     return result;
 }
 
-function computedTriggerReload<T>(key: keyof typeof props): ComputedRef<T> {
-    return computed({
-        get: () => props[key],
+function computedTriggerReload<T>(key: keyof typeof props): WritableComputedRef<T> {
+    return computed<T>({
+        get: () => props[key] as T,
         set: (value: T) => {
             const data = filterQuery({
                 ...filter.value,

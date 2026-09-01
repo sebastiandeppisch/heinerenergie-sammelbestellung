@@ -102,7 +102,7 @@ const props = defineProps<{
     formSubmissions: App.Data.FormSubmissionData[] | Record<number, App.Data.FormSubmissionData>;
     formDefinitions: App.Data.FormDefinitionData[];
     selectedFormDefinitions: string[];
-    pagination: App.Data.PaginationData;
+    pagination: App.Data.PaginationData<App.Data.FormSubmissionData>;
 }>();
 
 const dialogOpen = ref(false);

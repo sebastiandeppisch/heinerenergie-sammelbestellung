@@ -24,7 +24,7 @@ import Badge from '@/shadcn/components/ui/badge/Badge.vue';
 
 const props = defineProps<{
     formSubmissions: App.Data.FormSubmissionData[] | Record<number, App.Data.FormSubmissionData>;
-    pagination: App.Data.PaginationData;
+    pagination: App.Data.PaginationData<App.Data.FormSubmissionData>;
     groupByForm: boolean;
 }>();
 
