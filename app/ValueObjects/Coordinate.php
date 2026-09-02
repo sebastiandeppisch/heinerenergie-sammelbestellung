@@ -28,7 +28,7 @@ readonly class Coordinate implements Castable
         $lat = $data['lat'] ?? $data['latitude'] ?? throw new InvalidArgumentException('Latitude is required');
         $lng = $data['lon'] ?? $data['long'] ?? $data['lng'] ?? $data['longitude'] ?? throw new InvalidArgumentException('Longitude is required');
 
-        return new self($lat, $lng);
+        return new self((float)$lat,  (float) $lng);
     }
 
     public static function isValidLatitude(mixed $value): bool

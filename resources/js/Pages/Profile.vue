@@ -9,6 +9,10 @@ import { computed, ref } from 'vue';
 import { toast } from 'vue-sonner';
 import { user as userData } from '../authHelper';
 
+const props = defineProps<{
+    advisorMarker: string;
+}>();
+
 const user = ref(userData.value);
 
 // Computed properties to convert null to undefined for Input components
@@ -92,7 +96,7 @@ function saveAddress() {
                                 Beratungsgebiet speichern
                             </Button>
 
-                            <AdvisorMap :advisor="user" style="padding-top: 30px" />
+                            <AdvisorMap :advisor="user" :advisor-marker="props.advisorMarker" style="padding-top: 30px" />
                         </div>
                         <div class="flex-cell" style="display: none"></div>
                     </div>
