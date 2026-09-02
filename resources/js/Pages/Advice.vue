@@ -40,7 +40,7 @@ const advisor = user.value;
         <div class="advice-header">
             <div class="header-content">
                 <div class="header-title-section">
-                    <h2 class="advice-title">
+                    <h2 class="advice-title" :title="`Beratung für ${advice.first_name} ${advice.last_name}`">
                         Beratung für<br class="mobile-break" />
                         {{ advice.first_name }} {{ advice.last_name }}
                     </h2>
@@ -144,6 +144,7 @@ const advisor = user.value;
 .header-title-section {
     flex: 1;
     min-width: 0; /* Verhindert Überlauf bei langen Namen */
+    max-width: 100%;
 }
 
 .advice-title {
@@ -152,6 +153,8 @@ const advisor = user.value;
     font-weight: 600;
     margin: 0;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .mobile-break {
