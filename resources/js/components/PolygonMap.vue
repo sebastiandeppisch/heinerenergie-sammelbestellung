@@ -73,6 +73,7 @@ const featureGroupRef = ref<typeof LFeatureGroup | null>(null);
 // own component, because leaflet-draw can only edit layers of a feature group.
 let polygonLayer: L.Polygon | null = null;
 let drawHandler: L.Draw.Polygon | null = null;
+let drawingRequested = false;
 
 // The saved area takes its color from the class below. The shape being drawn
 // cannot, because leaflet-draw recolors it through setStyle() while the lines
@@ -248,13 +249,27 @@ async function onFeatureGroupReady() {
 
     // Kept around so that drawing can also be started from outside the map.
     drawHandler = new L.Draw.Polygon(map, polygonDrawOptions());
+
+    if (drawingRequested) {
+        drawingRequested = false;
+        drawHandler.enable();
+    }
 }
 
 /**
  * Starts drawing a new area, just like the polygon button on the map does.
+ *
+ * The map needs a moment to set itself up, so a request that arrives before
+ * that is remembered instead of being dropped.
  */
 function startDrawing() {
-    drawHandler?.enable();
+    if (!drawHandler) {
+        drawingRequested = true;
+
+        return;
+    }
+
+    drawHandler.enable();
 }
 
 defineExpose({ centerAndZoomToContent, startDrawing });
