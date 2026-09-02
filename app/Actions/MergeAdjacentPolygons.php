@@ -22,7 +22,7 @@ class MergeAdjacentPolygons
      * Number of decimals used to compare coordinates. OpenStreetMap delivers
      * seven decimals, which is roughly one centimeter.
      */
-    private const PRECISION = 7;
+    private const int PRECISION = 7;
 
     /**
      * @param  array<int, Polygon>  $polygons
@@ -68,9 +68,7 @@ class MergeAdjacentPolygons
 
                 $edgeKey = $fromKey < $toKey ? $fromKey.'|'.$toKey : $toKey.'|'.$fromKey;
 
-                if (! isset($edges[$edgeKey])) {
-                    $edges[$edgeKey] = ['count' => 0, 'from' => $from, 'to' => $to];
-                }
+                $edges[$edgeKey] ??= ['count' => 0, 'from' => $from, 'to' => $to];
 
                 $edges[$edgeKey]['count']++;
             }

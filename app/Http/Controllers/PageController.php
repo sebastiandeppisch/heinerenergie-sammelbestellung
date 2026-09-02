@@ -68,7 +68,7 @@ class PageController extends Controller
         }
 
         return Inertia::render('Profile', [
-            'advisorMarker' => $advisorMarker
+            'advisorMarker' => $advisorMarker,
         ]);
     }
 
