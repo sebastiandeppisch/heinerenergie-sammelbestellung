@@ -356,7 +356,7 @@ const adviceTypeSelectValue = computed({
 
                                 <FormField v-slot="{ componentField }" name="advice_type_home_option_value">
                                     <FormItem>
-                                        <FormLabel class="text-xs">Option für Vor Ort" *</FormLabel>
+                                        <FormLabel class="text-xs">Option für "Vor Ort" *</FormLabel>
                                         <Select v-model="formDefinition.advice_mapping.advice_type_home_option_value">
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Option auswählen" />
