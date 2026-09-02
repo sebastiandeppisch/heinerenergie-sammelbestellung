@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import 'leaflet/dist/leaflet.css';
-import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 
 import { LControl, LControlLayers, LIcon, LLayerGroup, LMap, LMarker, LPopup, LTileLayer } from '@vue-leaflet/vue-leaflet';
 
@@ -15,7 +15,7 @@ import { ExternalLink, Search, UserCheck } from 'lucide-vue-next';
 import { toast } from 'vue-sonner';
 import AdviceTypes from '../AdviceTypes';
 import { isActingAsAdmin, user as userRef } from '../authHelper';
-import { AdaptTableHeight } from '../helpers';
+import { useFillViewportHeight } from '../composables/useFillViewportHeight';
 
 const user = userRef.value;
 const userId = user.id;
@@ -106,14 +106,27 @@ function centerChanged(e: { lat?: number; lng?: number }) {
     map.center.lng = e.lng;
 }
 
-const outer = ref(null);
-const tableHeight = new AdaptTableHeight(outer);
-const reactiveHeight = tableHeight.getReactive();
+const outer = ref<HTMLElement | null>(null);
+// Fill the remaining viewport height so the page itself never scrolls
+const { height: mapHeight } = useFillViewportHeight(outer, 400);
+
+// Leaflet caches its container size, so it has to be told whenever the container
+// changes - on a window resize, but also when the sidebar collapses or expands
+const mapRef = ref<{ leafletObject?: { invalidateSize: () => void } } | null>(null);
+let containerObserver: ResizeObserver | null = null;
+
+onMounted(() => {
+    if (!outer.value) return;
+    containerObserver = new ResizeObserver(() => mapRef.value?.leafletObject?.invalidateSize());
+    containerObserver.observe(outer.value);
+});
+
+onBeforeUnmount(() => {
+    containerObserver?.disconnect();
+    containerObserver = null;
+});
 
 const search = ref('');
-onMounted(() => {
-    tableHeight.calcHeight();
-});
 
 watch(map, () => {
     window.location.hash = '#' + map.zoom + '/' + map.center.lat + '/' + map.center.lng;
@@ -139,9 +152,10 @@ function getAdvisorMarker(): string {
 </script>
 
 <template>
-    <div ref="outer">
-        <div :style="{ height: reactiveHeight.height + 170 + 'px', width: '100%' }" class="isolate">
+    <div ref="outer" data-test="advices-map-root" :style="{ height: mapHeight }">
+        <div style="height: 100%; width: 100%" class="isolate">
             <LMap
+                ref="mapRef"
                 :zoom="map.zoom"
                 @update:zoom="zoomChanged"
                 :center="[map.center.lat, map.center.lng]"
