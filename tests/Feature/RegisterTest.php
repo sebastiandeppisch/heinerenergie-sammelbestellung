@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Group;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -39,3 +40,26 @@ test('a user can login', function (): void {
         'password' => 'password',
     ])->assertStatus(200);
 })->skip();
+
+test('the first registered user becomes admin of the default group', function (): void {
+    $group = Group::first() ?? Group::factory()->create();
+
+    $this->post('/register', [
+        'first_name' => 'Max',
+        'last_name' => 'Mustermann',
+        'email' => 'max.mustermann@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+    ])->assertRedirect('/dashboard');
+
+    $user = User::firstOrFail();
+
+    expect($user->belongsToGroup($group))->toBeTrue();
+    expect($user->isGroupAdmin($group))->toBeTrue();
+
+    $this->assertDatabaseHas('group_user', [
+        'group_id' => $group->id,
+        'user_id' => $user->id,
+        'is_admin' => true,
+    ]);
+});
