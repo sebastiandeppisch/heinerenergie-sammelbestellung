@@ -3,6 +3,23 @@ name: Laravel
 on: [push]
 
 jobs:
+  # Frontend unit tests depend on neither the database nor PHP, so they stay out of
+  # the matrix below instead of running once per database engine.
+  vitest:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v7
+    - name: Setup Node.js
+      uses: actions/setup-node@v7
+      with:
+        node-version: '22'
+        cache: 'npm'
+    - name: Install NPM dependencies
+      run: npm ci
+    - name: Execute frontend unit tests via Vitest
+      run: npm test
+
   laravel-tests:
     runs-on: ubuntu-latest
 

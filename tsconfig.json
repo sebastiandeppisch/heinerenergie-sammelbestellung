@@ -18,5 +18,12 @@
 		},
 		"types": ["vite/client"]
 	},
-	"include": ["resources/js/**/*.ts", "resources/js/**/*.d.ts", "resources/js/**/*.tsx", "resources/js/**/*.vue"],
+	"include": [
+		"resources/js/**/*.ts",
+		"resources/js/**/*.d.ts",
+		"resources/js/**/*.tsx",
+		"resources/js/**/*.vue",
+		"tests/js/**/*.ts",
+		"vitest.config.ts"
+	],
 }

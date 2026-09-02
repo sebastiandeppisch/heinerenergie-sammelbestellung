@@ -173,6 +173,7 @@ const adviceTypeSelectValue = computed({
                         <div class="flex items-center gap-2">
                             <h3 class="font-semibold">Beratung erstellen</h3>
                             <Badge
+                                data-test="advice-status"
                                 :variant="
                                     adviceValidation.status === 'complete'
                                         ? 'default'
@@ -197,7 +198,11 @@ const adviceTypeSelectValue = computed({
 
                     <div v-if="formDefinition.advice_mapping.enabled" class="space-y-4">
                         <!-- Warnings -->
-                        <div v-if="adviceValidation.warnings.length > 0" class="rounded-md border border-red-200 bg-red-50 p-4">
+                        <div
+                            v-if="adviceValidation.warnings.length > 0"
+                            data-test="advice-warnings"
+                            class="rounded-md border border-red-200 bg-red-50 p-4"
+                        >
                             <div class="flex">
                                 <AlertTriangle class="h-4 w-4 text-red-600" />
                                 <div class="ml-3">
@@ -366,6 +371,7 @@ const adviceTypeSelectValue = computed({
                         <div class="flex items-center gap-2">
                             <h3 class="font-semibold">Kartenpunkt erstellen</h3>
                             <Badge
+                                data-test="map-point-status"
                                 :variant="
                                     mapPointValidation.status === 'complete'
                                         ? 'default'
@@ -390,7 +396,11 @@ const adviceTypeSelectValue = computed({
 
                     <div v-if="formDefinition.map_point_mapping.enabled" class="space-y-4">
                         <!-- Warnings -->
-                        <div v-if="mapPointValidation.warnings.length > 0" class="rounded-md border border-red-200 bg-red-50 p-4">
+                        <div
+                            v-if="mapPointValidation.warnings.length > 0"
+                            data-test="map-point-warnings"
+                            class="rounded-md border border-red-200 bg-red-50 p-4"
+                        >
                             <div class="flex">
                                 <AlertTriangle class="h-4 w-4 text-red-600" />
                                 <div class="ml-3">
