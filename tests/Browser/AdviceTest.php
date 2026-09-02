@@ -2,6 +2,7 @@
 
 use App\Contracts\NextcloudFileClientContract;
 use App\Models\Advice;
+use App\Models\AdviceStatus;
 use App\Models\Group;
 use App\Models\User;
 use App\Services\SessionService;
@@ -115,4 +116,31 @@ test('system admin sees group select and can create a new advice', function (): 
         ->assertSee('Beratung erfolgreich angelegt');
 
     expect(Advice::where('first_name', 'Hans')->exists())->toBeTrue();
+});
+
+test('selected advice status is shown and stored', function (): void {
+    AdviceStatus::factory()->create([
+        'name' => 'Statustest',
+        'group_id' => $this->group->id,
+    ]);
+
+    $page = visit(route('advices'));
+    $page->click('@new-advice-button')
+        ->click('Status wählen')
+        ->click('Statustest');
+
+    expect($page->text('[data-slot="select-trigger"]'))->toContain('Statustest');
+
+    $page->fill('first_name', 'Steffi')
+        ->fill('last_name', 'Status')
+        ->fill('phone', '01234567890')
+        ->fill('email', 'steffi@status.de')
+        ->fill('street', 'Statusweg')
+        ->fill('street_number', '3')
+        ->fill('zip', '12345')
+        ->fill('city', 'Statusstadt')
+        ->click('Speichern')
+        ->assertPathBeginsWith('/advices/');
+
+    expect(Advice::where('first_name', 'Steffi')->first()->status->name)->toBe('Statustest');
 });

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Models\AdviceStatus;
 use App\Models\Group;
 use App\Services\SessionService;
 use Illuminate\Foundation\Http\FormRequest;
@@ -48,6 +49,7 @@ class StoreAdviceRequest extends FormRequest
             'place_notes' => ['nullable', 'string', 'max:65535'],
             'type' => ['integer', 'between:0,2'],
             'group_id' => $groupIdRule,
+            'advice_status_id' => ['nullable', 'uuid', 'exists:advice_status,uuid'],
         ];
     }
 
@@ -57,7 +59,14 @@ class StoreAdviceRequest extends FormRequest
     public function getData(): array
     {
         $validated = $this->validated();
-        $validated['group_id'] = Group::where('uuid', $validated['group_id'])->first()->id;
+
+        if (($validated['group_id'] ?? null) !== null) {
+            $validated['group_id'] = Group::where('uuid', $validated['group_id'])->firstOrFail()->id;
+        }
+
+        if (($validated['advice_status_id'] ?? null) !== null) {
+            $validated['advice_status_id'] = AdviceStatus::where('uuid', $validated['advice_status_id'])->firstOrFail()->id;
+        }
 
         return $validated;
     }

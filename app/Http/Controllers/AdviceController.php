@@ -84,14 +84,15 @@ class AdviceController extends Controller
 
         $currentGroup = $sessionService->getCurrentGroup();
 
+        $data = $request->getData();
+
         $advice = new Advice;
-        $advice->fill($request->validated());
+        $advice->fill($data);
         $advice->advisor_id = Auth::id();
         if ($currentGroup !== null) {
             $advice->group_id = $currentGroup->id;
         } else {
-            $groupUuid = $request->validated()['group_id'];
-            $advice->group_id = Group::where('uuid', $groupUuid)->firstOrFail()->id;
+            $advice->group_id = $data['group_id'];
         }
         $advice->save();
 
