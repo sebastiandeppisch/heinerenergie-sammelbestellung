@@ -14,6 +14,28 @@ type FormDefinitionData = App.Data.FormDefinitionData;
 
 const formDefinition = defineModel<FormDefinitionData>('formDefinition', { required: true });
 
+/**
+ * Mirrors the FormLabel of each mapping select below, so a field named as missing is
+ * the one the user then goes looking for.
+ */
+const mappingLabels: Record<string, string> = {
+    first_name_field_id: 'Vorname',
+    last_name_field_id: 'Nachname',
+    address_field_id: 'Adresse',
+    email_field_id: 'E-Mail',
+    phone_field_id: 'Telefon',
+    advice_type_field_id: 'Beratungstyp',
+    advice_type_home_option_value: 'Option für „Vor Ort“',
+    advice_type_virtual_option_value: 'Option für „Virtuell“',
+    title_field_id: 'Titel',
+    description_field_id: 'Beschreibung',
+    coordinate_field_id: 'Koordinaten',
+};
+
+function labelFor(field: string): string {
+    return mappingLabels[field] ?? field;
+}
+
 // Validation helpers for targets
 const adviceValidation = computed(() => {
     const mapping = formDefinition.value.advice_mapping;
@@ -25,29 +47,17 @@ const adviceValidation = computed(() => {
     const hasAdviceType = mapping.advice_type_direct !== null && mapping.advice_type_direct !== undefined;
     const hasAdviceTypeField = mapping.advice_type_field_id !== null && mapping.advice_type_field_id !== undefined;
 
-    if (!hasAdviceType && !hasAdviceTypeField) {
-        // If no direct type and no field, advice type is missing
-        // We'll add it to missing array manually
-    }
-
-    // If field is used, check for option values
-    if (hasAdviceTypeField && !hasAdviceType) {
-        if (!mapping.advice_type_home_option_value || !mapping.advice_type_virtual_option_value) {
-            // Options are missing
-        }
-    }
-
-    const missing = required.filter((field) => !mapping[field]);
+    const missing: string[] = required.filter((field) => !mapping[field]);
 
     // Add advice type validation
     if (!hasAdviceType && !hasAdviceTypeField) {
-        missing.push('advice_type_field_id' as any);
+        missing.push('advice_type_field_id');
     } else if (hasAdviceTypeField && !hasAdviceType) {
         if (!mapping.advice_type_home_option_value) {
-            missing.push('advice_type_home_option_value' as any);
+            missing.push('advice_type_home_option_value');
         }
         if (!mapping.advice_type_virtual_option_value) {
-            missing.push('advice_type_virtual_option_value' as any);
+            missing.push('advice_type_virtual_option_value');
         }
     }
 
@@ -81,7 +91,7 @@ const mapPointValidation = computed(() => {
     if (!mapping?.enabled) return { status: 'disabled', missing: [], warnings: [] };
 
     const required = ['title_field_id', 'description_field_id', 'coordinate_field_id'] as const;
-    const missing = required.filter((field) => !mapping[field]);
+    const missing: string[] = required.filter((field) => !mapping[field]);
 
     const warnings: string[] = [];
 
@@ -197,6 +207,23 @@ const adviceTypeSelectValue = computed({
                     </div>
 
                     <div v-if="formDefinition.advice_mapping.enabled" class="space-y-4">
+                        <!-- Missing mappings -->
+                        <div
+                            v-if="adviceValidation.missing.length > 0"
+                            data-test="advice-missing"
+                            class="rounded-md border border-yellow-200 bg-yellow-50 p-4"
+                        >
+                            <div class="flex">
+                                <AlertTriangle class="h-4 w-4 text-yellow-600" />
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-yellow-800">Diese Zuordnungen fehlen noch:</p>
+                                    <ul class="mt-1 list-inside list-disc space-y-1 text-sm text-yellow-800">
+                                        <li v-for="field in adviceValidation.missing" :key="field">{{ labelFor(field) }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Warnings -->
                         <div
                             v-if="adviceValidation.warnings.length > 0"
@@ -395,6 +422,23 @@ const adviceTypeSelectValue = computed({
                     </div>
 
                     <div v-if="formDefinition.map_point_mapping.enabled" class="space-y-4">
+                        <!-- Missing mappings -->
+                        <div
+                            v-if="mapPointValidation.missing.length > 0"
+                            data-test="map-point-missing"
+                            class="rounded-md border border-yellow-200 bg-yellow-50 p-4"
+                        >
+                            <div class="flex">
+                                <AlertTriangle class="h-4 w-4 text-yellow-600" />
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-yellow-800">Diese Zuordnungen fehlen noch:</p>
+                                    <ul class="mt-1 list-inside list-disc space-y-1 text-sm text-yellow-800">
+                                        <li v-for="field in mapPointValidation.missing" :key="field">{{ labelFor(field) }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Warnings -->
                         <div
                             v-if="mapPointValidation.warnings.length > 0"

@@ -35,6 +35,10 @@ function warningsOf(wrapper: ReturnType<typeof mountWith>, target: Target) {
     return listItemsIn(wrapper, `[data-test="${target}-warnings"]`);
 }
 
+function missingOf(wrapper: ReturnType<typeof mountWith>, target: Target) {
+    return listItemsIn(wrapper, `[data-test="${target}-missing"]`);
+}
+
 describe('FormTargets advice mapping status', () => {
     it('is disabled when there is no mapping at all', () => {
         const wrapper = mountWith(makeFormDefinition());
@@ -304,5 +308,112 @@ describe('FormTargets banner', () => {
         );
 
         expect(wrapper.text()).not.toContain(incompleteBanner);
+    });
+});
+
+describe('FormTargets missing mapping list', () => {
+    it('stays hidden while the target is complete', () => {
+        const wrapper = mountWith(
+            makeFormDefinition({
+                fields: wellTypedAdviceFields,
+                advice_mapping: completeAdviceMapping,
+            }),
+        );
+
+        expect(wrapper.find('[data-test="advice-missing"]').exists()).toBe(false);
+    });
+
+    it.each([
+        ['first_name_field_id', 'Vorname'],
+        ['last_name_field_id', 'Nachname'],
+        ['address_field_id', 'Adresse'],
+        ['email_field_id', 'E-Mail'],
+        ['phone_field_id', 'Telefon'],
+    ] as const)('names %s as "%s"', (field, label) => {
+        const wrapper = mountWith(
+            makeFormDefinition({
+                fields: wellTypedAdviceFields,
+                advice_mapping: { ...completeAdviceMapping, [field]: null },
+            }),
+        );
+
+        expect(missingOf(wrapper, 'advice')).toEqual([label]);
+    });
+
+    it('names the advice type when neither a field nor a direct type is set', () => {
+        const wrapper = mountWith(
+            makeFormDefinition({
+                fields: wellTypedAdviceFields,
+                advice_mapping: { ...completeAdviceMapping, advice_type_direct: null },
+            }),
+        );
+
+        expect(missingOf(wrapper, 'advice')).toEqual(['Beratungstyp']);
+    });
+
+    it('names both option values when the advice type comes from a field', () => {
+        const typeField = makeField({
+            id: 'f-type',
+            type: 'radio',
+            options: [{ id: 'o-home', label: 'Vor Ort', value: 'home', sort_order: 0, is_default: false, is_required: false }],
+        });
+
+        const wrapper = mountWith(
+            makeFormDefinition({
+                fields: [...wellTypedAdviceFields, typeField],
+                advice_mapping: {
+                    ...completeAdviceMapping,
+                    advice_type_direct: null,
+                    advice_type_field_id: 'f-type',
+                },
+            }),
+        );
+
+        expect(missingOf(wrapper, 'advice')).toEqual(['Option für „Vor Ort“', 'Option für „Virtuell“']);
+    });
+
+    it('lists every missing field at once', () => {
+        const wrapper = mountWith(
+            makeFormDefinition({
+                fields: wellTypedAdviceFields,
+                advice_mapping: makeAdviceMapping({ advice_type_direct: '0' }),
+            }),
+        );
+
+        expect(missingOf(wrapper, 'advice')).toEqual(['Vorname', 'Nachname', 'Adresse', 'E-Mail', 'Telefon']);
+    });
+
+    it.each([
+        ['title_field_id', 'Titel'],
+        ['description_field_id', 'Beschreibung'],
+        ['coordinate_field_id', 'Koordinaten'],
+    ] as const)('names the map point field %s as "%s"', (field, label) => {
+        const wrapper = mountWith(
+            makeFormDefinition({
+                fields: [makeField({ id: 'f-title', type: 'text' }), makeField({ id: 'f-desc', type: 'textarea' })],
+                map_point_mapping: makeMapPointMapping({
+                    title_field_id: 'f-title',
+                    description_field_id: 'f-desc',
+                    coordinate_field_id: 'f-coord',
+                    [field]: null,
+                }),
+            }),
+        );
+
+        expect(missingOf(wrapper, 'map-point')).toEqual([label]);
+    });
+
+    /** The two cards each get their own list, rather than one shared summary. */
+    it('keeps the advice and map point lists apart', () => {
+        const wrapper = mountWith(
+            makeFormDefinition({
+                fields: wellTypedAdviceFields,
+                advice_mapping: { ...completeAdviceMapping, email_field_id: null },
+                map_point_mapping: makeMapPointMapping({ title_field_id: 'f-title', description_field_id: 'f-desc' }),
+            }),
+        );
+
+        expect(missingOf(wrapper, 'advice')).toEqual(['E-Mail']);
+        expect(missingOf(wrapper, 'map-point')).toEqual(['Koordinaten']);
     });
 });
