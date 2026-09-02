@@ -23,6 +23,9 @@ class UpdateGroupConsultingAreaRequest extends FormRequest
             'polygon.coordinates' => ['required', 'array'],
             'polygon.coordinates.*.lng' => ['required', 'numeric', 'between:-180,180'],
             'polygon.coordinates.*.lat' => ['required',  'numeric', 'between:-90,90'],
+            // The postal codes the area was built from, if any.
+            'postal_codes' => ['sometimes', 'array'],
+            'postal_codes.*' => ['required', 'string', 'regex:/^\d{5}$/'],
         ];
     }
 
@@ -39,6 +42,7 @@ class UpdateGroupConsultingAreaRequest extends FormRequest
             'polygon.*.lat.numeric' => 'Koordinaten müssen numerisch sein.',
             'polygon.*.lng.between' => 'Geographische Längenangaben müssen zwischen -180 und 180 liegen.',
             'polygon.*.lat.between' => 'Geographische Breitenangaben müssen zwischen -90 und 90 liegen.',
+            'postal_codes.*.regex' => 'Postleitzahlen müssen aus fünf Ziffern bestehen.',
         ];
     }
 }

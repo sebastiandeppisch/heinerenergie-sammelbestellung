@@ -21,6 +21,7 @@ use Override;
  * @property AdviceStatusGroup $pivot
  * @property-read Polygon|null $consulting_area
  * @property-write Polygon|array<mixed>|null $consulting_area
+ * @property array<int, string>|null $consulting_area_postal_codes
  */
 class Group extends Model
 {
@@ -48,6 +49,7 @@ class Group extends Model
 
     protected $casts = [
         'consulting_area' => Polygon::class,
+        'consulting_area_postal_codes' => 'array',
         'accepts_transfers' => 'boolean',
     ];
 

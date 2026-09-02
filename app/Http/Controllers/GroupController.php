@@ -50,6 +50,7 @@ class GroupController extends Controller
     private function showPage(Collection $groupTreeItems, Collection $groups, bool $canCreateRootGroup, ?Group $selectedGroup, ?Collection $groupUsers = null, Collection $allUsers = new Collection): Response
     {
         $polygon = $selectedGroup?->consulting_area;
+        $postalCodes = $selectedGroup?->consulting_area_postal_codes;
 
         $user = request()->user();
 
@@ -63,6 +64,7 @@ class GroupController extends Controller
             'canCreateRootGroup' => $canCreateRootGroup,
             'selectedGroup' => $selectedGroup,
             'polygon' => $polygon,
+            'consultingAreaPostalCodes' => $postalCodes ?? [],
             'canEditGroup' => $canEditGroup,
             'canCreateGroups' => $user->can('createAny', Group::class),
             'groupUsers' => $groupUsers,
@@ -227,7 +229,11 @@ class GroupController extends Controller
     public function updateConsultingArea(UpdateGroupConsultingAreaRequest $request, Group $group): RedirectResponse
     {
 
+        /** @var array<int, string> $postalCodes */
+        $postalCodes = $request->validated('postal_codes', []);
+
         $group->consulting_area = $request->validated('polygon.coordinates');
+        $group->consulting_area_postal_codes = $postalCodes === [] ? null : array_values($postalCodes);
         $group->save();
 
         return redirect()->back()->with('success', 'Beratungsgebiet wurde erfolgreich gespeichert.');
@@ -238,6 +244,7 @@ class GroupController extends Controller
         $this->authorize('manageArea', $group);
 
         $group->consulting_area = null;
+        $group->consulting_area_postal_codes = null;
         $group->save();
 
         return redirect()->back()->with('warning', 'Beratungsgebiet wurde erfolgreich gelöscht.');
