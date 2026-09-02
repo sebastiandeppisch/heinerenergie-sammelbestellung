@@ -31,3 +31,4 @@ AGENTS.md
 CLAUDE.md
 .cursor/**
 /version.json
+.claude/**

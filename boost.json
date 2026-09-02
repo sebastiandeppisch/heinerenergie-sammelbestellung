@@ -1,16 +1,22 @@
 {
     "agents": [
-        "cursor",
         "claude_code"
     ],
+    "cloud": false,
     "guidelines": true,
     "mcp": true,
-    "nightwatch_mcp": false,
-    "sail": false,
+    "nightwatch": false,
+    "packages": [
+        "barryvdh/laravel-debugbar"
+    ],
+    "sail": true,
     "skills": [
+        "infer-conventions",
         "laravel-best-practices",
+        "testing-best-practices",
         "pest-testing",
         "inertia-vue-development",
-        "tailwindcss-development"
+        "tailwindcss-development",
+        "debug-using-debugbar"
     ]
 }
