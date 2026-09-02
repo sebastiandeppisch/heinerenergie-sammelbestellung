@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\AdviceStatusResult;
 use App\Models\Traits\HasUuid;
 use App\ValueObjects\Polygon;
 use Database\Factories\GroupFactory;
@@ -229,6 +230,20 @@ class Group extends Model
     public function ownStatuses(): HasMany
     {
         return $this->hasMany(AdviceStatus::class);
+    }
+
+    /**
+     * Creates one status per result, so a new group can be used right away.
+     * Finer grained statuses can be defined by the group later on.
+     */
+    public function createDefaultStatuses(): void
+    {
+        foreach (AdviceStatusResult::cases() as $result) {
+            $this->ownStatuses()->create([
+                'name' => $result->defaultStatusName(),
+                'result' => $result,
+            ]);
+        }
     }
 
     public function isLeaf(): bool

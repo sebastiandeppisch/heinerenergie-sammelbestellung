@@ -1,10 +1,13 @@
 <?php
 
+use App\Enums\AdviceStatusResult;
 use App\Models\Group;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 return new class extends Migration
 {
@@ -38,6 +41,30 @@ return new class extends Migration
 
             $table->unique(['group_id', 'user_id']);
         });
+
+        $this->createDefaultAdviceStatuses();
+    }
+
+    /**
+     * A fresh installation needs one status per result. Finer grained statuses
+     * can be defined later on, so the default statuses are simply named after
+     * their result.
+     */
+    private function createDefaultAdviceStatuses(): void
+    {
+        if (DB::table('advice_status')->exists()) {
+            return;
+        }
+
+        DB::table('advice_status')->insert(
+            array_map(fn (AdviceStatusResult $result): array => [
+                'uuid' => (string) Str::uuid(),
+                'name' => $result->defaultStatusName(),
+                'result' => $result->value,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ], AdviceStatusResult::cases())
+        );
     }
 
     /**

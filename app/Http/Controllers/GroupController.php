@@ -166,6 +166,8 @@ class GroupController extends Controller
 
         $group = Group::create($validated);
 
+        $group->createDefaultStatuses();
+
         return redirect()->route('groups.show', $group)->with('success', 'Initiative erfolgreich erstellt.');
     }
 
