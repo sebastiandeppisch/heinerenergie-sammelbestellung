@@ -54,7 +54,15 @@ watch(circleBounds, fitToCircle);
 
 <template>
     <div style="height: 300px; width: 100%" class="isolate" v-if="props.advisor.lat !== null && props.advisor.long !== null">
-        <LMap :key="mapKey" ref="mapRef" :zoom="zoom" :center="[props.advisor.lat, props.advisor.long]" :minZoom="3" :maxZoom="18" @ready="onLeafletReady">
+        <LMap
+            :key="mapKey"
+            ref="mapRef"
+            :zoom="zoom"
+            :center="[props.advisor.lat, props.advisor.long]"
+            :minZoom="3"
+            :maxZoom="18"
+            @ready="onLeafletReady"
+        >
             <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" layer-type="base" name="OpenStreetMap" />
             <LMarker :lat-lng="latLng(props.advisor.lat, props.advisor.long)">
                 <LIcon :icon-url="props.advisorMarker" :icon-size="[50, 50]" />
