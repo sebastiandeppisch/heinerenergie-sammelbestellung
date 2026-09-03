@@ -206,3 +206,85 @@ test('admin can delete a map embed', function (): void {
 
     $this->assertDatabaseMissing('map_embeds', ['id' => $mapEmbed->id]);
 });
+
+test('admin can assign an initiative to a map embed', function (): void {
+    $categories = MapPointCategory::factory()->count(1)->create();
+    $initiative = Group::factory()->create(['primary_hue' => 210.5]);
+
+    $response = $this->actingAs($this->admin)
+        ->post(route('map-embeds.store'), [
+            'name' => 'Mit Initiative',
+            'category_ids' => $categories->pluck('uuid')->all(),
+            'coordinate' => ['lat' => 49.8728, 'lng' => 8.6512],
+            'zoom' => 15,
+            'group_id' => $initiative->uuid,
+        ]);
+
+    $response->assertRedirect();
+
+    $this->assertDatabaseHas('map_embeds', [
+        'name' => 'Mit Initiative',
+        'group_id' => $initiative->id,
+    ]);
+});
+
+test('the initiative of a map embed is optional', function (): void {
+    $categories = MapPointCategory::factory()->count(1)->create();
+
+    $response = $this->actingAs($this->admin)
+        ->post(route('map-embeds.store'), [
+            'name' => 'Ohne Initiative',
+            'category_ids' => $categories->pluck('uuid')->all(),
+            'coordinate' => ['lat' => 49.8728, 'lng' => 8.6512],
+            'zoom' => 15,
+            'group_id' => null,
+        ]);
+
+    $response->assertRedirect();
+    $response->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('map_embeds', [
+        'name' => 'Ohne Initiative',
+        'group_id' => null,
+    ]);
+});
+
+test('the initiative of a map embed can be changed and removed', function (): void {
+    $initiative = Group::factory()->create();
+    $mapEmbed = MapEmbed::factory()->create(['group_id' => null]);
+    $categories = MapPointCategory::factory()->count(1)->create();
+
+    $payload = [
+        'name' => $mapEmbed->name,
+        'category_ids' => $categories->pluck('uuid')->all(),
+        'coordinate' => ['lat' => 49.8728, 'lng' => 8.6512],
+        'zoom' => 15,
+    ];
+
+    $this->actingAs($this->admin)
+        ->put(route('map-embeds.update', $mapEmbed), [...$payload, 'group_id' => $initiative->uuid])
+        ->assertRedirect();
+
+    expect($mapEmbed->refresh()->group_id)->toBe($initiative->id);
+
+    $this->actingAs($this->admin)
+        ->put(route('map-embeds.update', $mapEmbed), [...$payload, 'group_id' => null])
+        ->assertRedirect();
+
+    expect($mapEmbed->refresh()->group_id)->toBeNull();
+});
+
+test('the upsert form offers the selectable initiatives', function (): void {
+    $mapEmbed = MapEmbed::factory()->create();
+
+    $this->actingAs($this->admin)
+        ->get(route('map-embeds.create'))
+        ->assertInertia(fn ($page) => $page->has('groups'));
+
+    $this->actingAs($this->admin)
+        ->get(route('map-embeds.edit', $mapEmbed))
+        ->assertInertia(fn ($page) => $page
+            ->has('groups')
+            ->where('mapEmbed.group_id', $mapEmbed->group->uuid)
+        );
+});

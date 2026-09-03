@@ -8,6 +8,9 @@ import './themes/generated/theme.base.css';
 
 import { createInertiaApp } from '@inertiajs/vue3';
 
+import { initTheme } from './composables/useTheme';
+import type { CustomPageProps } from './types/pageProps';
+
 import library from './fontawesome';
 library.add();
 
@@ -28,6 +31,8 @@ createInertiaApp({
         return page;
     },
     setup({ el, App, props, plugin }) {
+        initTheme((props.initialPage.props as unknown as CustomPageProps).theme);
+
         const app = createApp({ render: () => h(App, props) });
         app.use(plugin);
         app.use(ZiggyVue);

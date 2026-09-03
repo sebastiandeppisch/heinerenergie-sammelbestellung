@@ -242,6 +242,8 @@ categories: App.Data.MapPointCategoryData[],
 coordinate: App.ValueObjects.Coordinate,
 zoom: number,
 show_table: boolean,
+group_id: string | null,
+group_name: string | null,
 created_at: string | null,
 };
 export type MapPointCategoryData = {

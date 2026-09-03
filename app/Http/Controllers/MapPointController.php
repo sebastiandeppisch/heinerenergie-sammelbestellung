@@ -10,6 +10,7 @@ use App\Http\Requests\UpsertMapPointRequest;
 use App\Models\MapEmbed;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
+use App\Services\CurrentGroupService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -40,6 +41,10 @@ class MapPointController extends Controller
 
     public function publicMap(MapEmbed $mapEmbed): Response
     {
+        if ($mapEmbed->group !== null) {
+            app(CurrentGroupService::class)->setGroup($mapEmbed->group);
+        }
+
         $categories = $mapEmbed->mapPointCategories;
 
         $mapPoints = MapPoint::where('published', true)

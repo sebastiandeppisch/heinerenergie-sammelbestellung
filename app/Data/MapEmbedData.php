@@ -23,6 +23,8 @@ class MapEmbedData extends Data
         public Coordinate $coordinate,
         public int $zoom,
         public bool $show_table,
+        public ?string $group_id = null,
+        public ?string $group_name = null,
         public ?string $created_at = null,
     ) {}
 
@@ -35,6 +37,8 @@ class MapEmbedData extends Data
             coordinate: $model->coordinate,
             zoom: $model->zoom,
             show_table: $model->show_table,
+            group_id: $model->group?->uuid,
+            group_name: $model->group?->name,
             created_at: $model->created_at?->toISOString(),
         );
     }

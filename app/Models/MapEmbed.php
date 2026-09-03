@@ -9,6 +9,7 @@ use App\Models\Traits\HasUuid;
 use Database\Factories\MapEmbedFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
@@ -23,6 +24,7 @@ class MapEmbed extends Model
 
     protected $fillable = [
         'name',
+        'group_id',
         'lat',
         'lng',
         'coordinate',
@@ -34,6 +36,14 @@ class MapEmbed extends Model
         'coordinate' => Coordinate::class,
         'show_table' => 'boolean',
     ];
+
+    /**
+     * @return BelongsTo<Group, $this>
+     */
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(Group::class);
+    }
 
     /**
      * @return BelongsToMany<MapPointCategory, $this>

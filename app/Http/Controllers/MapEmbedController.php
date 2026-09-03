@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Data\GroupBaseData;
 use App\Data\MapEmbedData;
 use App\Data\MapPointCategoryData;
 use App\Data\MapPointData;
 use App\Http\Requests\UpsertMapEmbedRequest;
+use App\Models\Group;
 use App\Models\MapEmbed;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
@@ -22,7 +24,7 @@ class MapEmbedController extends Controller
     {
         $this->authorize('viewAny', MapEmbed::class);
 
-        $mapEmbeds = MapEmbed::with('mapPointCategories')->latest()->get()
+        $mapEmbeds = MapEmbed::with('mapPointCategories', 'group')->latest()->get()
             ->map(fn (MapEmbed $mapEmbed): MapEmbedData => MapEmbedData::fromModel($mapEmbed));
 
         return Inertia::render('MapPoints/Embeds/Index', [
@@ -37,6 +39,7 @@ class MapEmbedController extends Controller
         return Inertia::render('MapPoints/Embeds/Upsert', [
             'categories' => $this->allCategories(),
             'pointsByCategory' => $this->publishedPointsByCategory(),
+            'groups' => $this->selectableGroups(),
         ]);
     }
 
@@ -55,9 +58,10 @@ class MapEmbedController extends Controller
         $this->authorize('update', $mapEmbed);
 
         return Inertia::render('MapPoints/Embeds/Upsert', [
-            'mapEmbed' => MapEmbedData::fromModel($mapEmbed->load('mapPointCategories')),
+            'mapEmbed' => MapEmbedData::fromModel($mapEmbed->load('mapPointCategories', 'group')),
             'categories' => $this->allCategories(),
             'pointsByCategory' => $this->publishedPointsByCategory(),
+            'groups' => $this->selectableGroups(),
         ]);
     }
 
@@ -88,6 +92,16 @@ class MapEmbedController extends Controller
     private function allCategories(): Collection
     {
         return MapPointCategory::all()->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel($category));
+    }
+
+    /**
+     * The initiatives an embed can be assigned to. Its primary color themes the public map.
+     *
+     * @return Collection<int, GroupBaseData>
+     */
+    private function selectableGroups(): Collection
+    {
+        return Group::all()->map(fn (Group $group): GroupBaseData => GroupBaseData::fromModel($group));
     }
 
     /**

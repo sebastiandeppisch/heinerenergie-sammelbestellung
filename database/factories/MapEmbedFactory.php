@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\Group;
 use App\Models\MapEmbed;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -27,6 +28,7 @@ class MapEmbedFactory extends Factory
 
         return [
             'name' => $this->faker->words(3, true),
+            'group_id' => Group::factory(),
             'lat' => $lat,
             'lng' => $lng,
             'zoom' => $this->faker->numberBetween(3, 18),

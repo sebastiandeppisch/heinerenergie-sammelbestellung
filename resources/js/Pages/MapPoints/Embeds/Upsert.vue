@@ -6,8 +6,11 @@ import { Button } from '@/shadcn/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/shadcn/components/ui/card';
 import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { Switch } from '@/shadcn/components/ui/switch';
-import { router, useForm } from '@inertiajs/vue3';
+import type { CustomPageProps } from '@/types/pageProps';
+import { router, useForm, usePage } from '@inertiajs/vue3';
+import { propsToLeafletOptions } from '@vue-leaflet/vue-leaflet/dist/src/utils';
 import { ArrowLeft, ExternalLink } from 'lucide-vue-next';
 import { computed, reactive, watch } from 'vue';
 import { route } from 'ziggy-js';
@@ -16,9 +19,25 @@ const props = defineProps<{
     mapEmbed?: App.Data.MapEmbedData;
     categories: Array<App.Data.MapPointCategoryData>;
     pointsByCategory: Record<string, Array<App.Data.MapPointData>>;
+    groups: Array<App.Data.GroupBaseData>;
 }>();
 
 const isEditing = computed(() => !!props.mapEmbed);
+
+const page = usePage<CustomPageProps>();
+
+
+/** New embeds default to the initiative the admin is currently acting for. */
+
+function initialGroupId(){
+    if(!props.mapEmbed){
+        if(! page.props.auth.currentGroup){
+            return null;
+        }
+        return page.props.auth.currentGroup.id;
+    }
+    return props.mapEmbed.group_id;
+}
 
 const darmstadt = { lat: 49.8728, lng: 8.6512 };
 
@@ -33,6 +52,7 @@ const form = useForm({
     coordinate: props.mapEmbed?.coordinate || darmstadt,
     zoom: props.mapEmbed?.zoom ?? 15,
     show_table: props.mapEmbed?.show_table ?? true,
+    group_id: initialGroupId(),
 });
 
 const previewCategories = computed(() => props.categories.filter((category) => categorySelection[category.id]));
@@ -48,6 +68,10 @@ watch(
 );
 
 function submit() {
+    form.transform((data) => ({
+        ...data
+    }));
+
     if (isEditing.value && props.mapEmbed) {
         form.put(route('map-embeds.update', props.mapEmbed.id));
     } else {
@@ -83,6 +107,26 @@ function submit() {
                         <Input id="name" v-model="form.name" placeholder="z. B. Startseite Sidebar" />
                         <p v-if="form.errors.name" class="text-sm text-red-500">{{ form.errors.name }}</p>
                         <p class="text-xs text-gray-500">Dient nur zur Wiedererkennung im Backend, wird nicht auf der Karte angezeigt.</p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <Label for="group_id">Initiative</Label>
+                        <Select id="group_id" v-model="form.group_id">
+                            <SelectTrigger>
+                                <SelectValue placeholder="Wähle eine Initiative aus" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem :value="null">Keine Initiative</SelectItem>
+                                <SelectItem v-for="group in groups" :key="group.id" :value="group.id">
+                                    {{ group.name }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <p v-if="form.errors.group_id" class="text-sm text-red-500">{{ form.errors.group_id }}</p>
+                        <p class="text-xs text-gray-500">
+                            Die Primärfarbe dieser Initiative wird auf der eingebetteten Karte verwendet. Ohne Initiative bleibt es bei der
+                            Standardfarbe.
+                        </p>
                     </div>
 
                     <div class="space-y-2">
