@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/shadcn/components/ui/switch';
 import type { CustomPageProps } from '@/types/pageProps';
 import { router, useForm, usePage } from '@inertiajs/vue3';
-import { propsToLeafletOptions } from '@vue-leaflet/vue-leaflet/dist/src/utils';
 import { ArrowLeft, ExternalLink } from 'lucide-vue-next';
 import { computed, reactive, watch } from 'vue';
 import { route } from 'ziggy-js';
@@ -26,12 +25,11 @@ const isEditing = computed(() => !!props.mapEmbed);
 
 const page = usePage<CustomPageProps>();
 
-
 /** New embeds default to the initiative the admin is currently acting for. */
 
-function initialGroupId(){
-    if(!props.mapEmbed){
-        if(! page.props.auth.currentGroup){
+function initialGroupId() {
+    if (!props.mapEmbed) {
+        if (!page.props.auth.currentGroup) {
             return null;
         }
         return page.props.auth.currentGroup.id;
@@ -94,7 +92,7 @@ watch(
 
 function submit() {
     form.transform((data) => ({
-        ...data
+        ...data,
     }));
 
     if (isEditing.value && props.mapEmbed) {

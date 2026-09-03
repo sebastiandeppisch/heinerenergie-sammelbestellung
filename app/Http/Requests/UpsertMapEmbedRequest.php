@@ -51,7 +51,7 @@ class UpsertMapEmbedRequest extends FormRequest
     {
         return [
             'group_id' => 'Initiative',
-            'category_ids' => 'Kategorien'
+            'category_ids' => 'Kategorien',
         ];
     }
 
