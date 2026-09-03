@@ -28,11 +28,11 @@ class CheckSysAdmin
         $user = $request->user();
 
         if (! $user) {
-            throw new AuthorizationException('You are not a sysadmin.');
+            throw new AuthorizationException('Du bist kein Systemadministrator.');
         }
 
         if (! $this->groupContext->isActingAsSystemAdmin($user)) {
-            throw new AuthorizationException('You are not a sysadmin.');
+            throw new AuthorizationException('Du bist kein Systemadministrator.');
         }
 
         return $next($request);

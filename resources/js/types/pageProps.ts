@@ -15,6 +15,10 @@ export interface CustomPageProps extends PageProps {
     flashMessages?: {
         [key: string]: string;
     };
+    authorizationError?: {
+        message: string;
+        intendedUrl: string | null;
+    } | null;
     appName?: string;
     defaultLogo?: string;
     version?: string;

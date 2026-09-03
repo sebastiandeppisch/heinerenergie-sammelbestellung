@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Override;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -40,6 +44,16 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e): void {
             //
         });
+
+        $this->renderable(fn (AuthorizationException $e, Request $request) => $this->renderForbidden($request, $e->getMessage()));
+
+        $this->renderable(function (HttpExceptionInterface $e, Request $request) {
+            if ($e->getStatusCode() !== 403) {
+                return null;
+            }
+
+            return $this->renderForbidden($request, $e->getMessage());
+        });
     }
 
     #[Override]
@@ -50,5 +64,72 @@ class Handler extends ExceptionHandler
         }
 
         return redirect()->route('login');
+    }
+
+    /**
+     * Present a 403 the way the user expects it: as a modal on top of the current page
+     * when the request came from the SPA, and as a full error page on a direct visit.
+     *
+     * Returns null to fall back to the default handling (API clients, guests).
+     */
+    private function renderForbidden(Request $request, string $message): mixed
+    {
+        if ($request->is('api/*') || ($request->expectsJson() && ! $request->inertia())) {
+            return null;
+        }
+
+        if (! $request->user()) {
+            return null;
+        }
+
+        $intendedUrl = $request->isMethod('GET') ? $request->fullUrl() : null;
+        $message = $this->forbiddenMessage($message);
+
+        if ($request->inertia()) {
+            session()->flash('authorizationError', [
+                'message' => $message,
+                'intendedUrl' => $intendedUrl,
+            ]);
+
+            return redirect()->to(
+                $this->backUrl($request),
+                $request->isMethodSafe() ? 302 : 303
+            );
+        }
+
+        return Inertia::render('Error', [
+            'status' => 403,
+            'message' => $message,
+            'intendedUrl' => $intendedUrl,
+        ])->toResponse($request)->setStatusCode(403);
+    }
+
+    /**
+     * The page to return to, guarding against redirecting back onto the forbidden URL itself.
+     */
+    private function backUrl(Request $request): string
+    {
+        $previous = url()->previous(route('dashboard'));
+
+        if ($previous === $request->fullUrl() || $previous === $request->url()) {
+            return route('dashboard');
+        }
+
+        return $previous;
+    }
+
+    private function forbiddenMessage(string $message): string
+    {
+        $frameworkDefaults = [
+            '',
+            'This action is unauthorized.',
+            'Forbidden',
+        ];
+
+        if (in_array($message, $frameworkDefaults, true)) {
+            return 'Du darfst diese Aktion nicht ausführen.';
+        }
+
+        return $message;
     }
 }

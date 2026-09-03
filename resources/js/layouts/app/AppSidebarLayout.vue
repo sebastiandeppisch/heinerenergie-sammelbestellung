@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AccessDeniedDialog from '@/components/AccessDeniedDialog.vue';
 import AppContent from '@/layouts/components/AppContent.vue';
 import AppShell from '@/layouts/components/AppShell.vue';
 import AppSidebar from '@/layouts/components/AppSidebar.vue';
@@ -49,6 +50,7 @@ watch(
         <AppContent variant="sidebar" class="overflow-x-hidden bg-slate-50">
             <AppSidebarHeader :breadcrumbs="breadcrumbs" />
             <Toaster class="pointer-events-auto" style="z-index: 9999" :richColors="true" position="top-center" />
+            <AccessDeniedDialog />
             <slot />
         </AppContent>
     </AppShell>
