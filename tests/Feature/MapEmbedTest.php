@@ -225,6 +225,8 @@ test('admin can assign an initiative to a map embed', function (): void {
             'category_ids' => $categories->pluck('uuid')->all(),
             'coordinate' => ['lat' => 49.8728, 'lng' => 8.6512],
             'zoom' => 15,
+            'aspect_ratio_width' => 16,
+            'aspect_ratio_height' => 9,
             'group_id' => $initiative->uuid,
         ]);
 
@@ -245,6 +247,8 @@ test('the initiative of a map embed is optional', function (): void {
             'category_ids' => $categories->pluck('uuid')->all(),
             'coordinate' => ['lat' => 49.8728, 'lng' => 8.6512],
             'zoom' => 15,
+            'aspect_ratio_width' => 16,
+            'aspect_ratio_height' => 9,
             'group_id' => null,
         ]);
 
@@ -267,6 +271,8 @@ test('the initiative of a map embed can be changed and removed', function (): vo
         'category_ids' => $categories->pluck('uuid')->all(),
         'coordinate' => ['lat' => 49.8728, 'lng' => 8.6512],
         'zoom' => 15,
+        'aspect_ratio_width' => 16,
+        'aspect_ratio_height' => 9,
     ];
 
     $this->actingAs($this->admin)
