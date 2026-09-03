@@ -11,6 +11,7 @@ use App\Models\Group;
 use App\Models\User;
 use App\Services\SessionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
@@ -450,4 +451,7 @@ test('a form can contain a second optional address field next to the advice addr
         'required' => false,
     ]);
     $this->assertTrue($adviceMapping->addressField->fresh()->required);
+
+    $newField = FormField::where('label', 'Abweichende Lieferadresse')->firstOrFail();
+    $this->assertTrue(Str::isUuid($newField->uuid), 'Placeholder ids must not be stored as uuid, postgres rejects them.');
 });

@@ -18,6 +18,7 @@ use App\Models\FormFieldOption;
 use App\Models\Group;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 
 class FormDefinitionService
@@ -49,11 +50,13 @@ class FormDefinitionService
         foreach ($fields as $field) {
             $data = collect($field->toArray())->forget(['id', 'options', 'form_definition_id'])->toArray();
 
-            $formField = FormField::where('uuid', $field->id)->first();
+            $uuid = $this->toUuidOrNull($field->id);
+
+            $formField = $uuid === null ? null : FormField::where('uuid', $uuid)->first();
 
             if ($formField === null) {
                 $formField = $formDefinition->fields()->make($data);
-                $formField->uuid = $field->id;
+                $formField->uuid = $uuid;
                 $formField->save();
             } else {
                 $formField->update($data);
@@ -77,7 +80,9 @@ class FormDefinitionService
 
             $data = collect($option)->forget(['id'])->toArray();
 
-            $option = FormFieldOption::where('uuid', $option->id)->first();
+            $uuid = $this->toUuidOrNull($option->id);
+
+            $option = $uuid === null ? null : FormFieldOption::where('uuid', $uuid)->first();
             if ($option === null) {
                 $option = $formField->options()->create($data);
             } else {
@@ -87,6 +92,19 @@ class FormDefinitionService
             $formOptionIds[] = $option->id;
         }
         FormFieldOption::where('form_field_id', $formField->id)->whereNotIn('id', $formOptionIds)->get()->each->delete();
+    }
+
+    /**
+     * The client sends placeholder ids for records that do not exist yet. Querying or storing them
+     * would blow up on postgres uuid columns, so anything that is not a uuid is treated as "new".
+     */
+    private function toUuidOrNull(?string $id): ?string
+    {
+        if ($id === null || ! Str::isUuid($id)) {
+            return null;
+        }
+
+        return $id;
     }
 
     public function storeFormDefinitionData(FormDefinitionData $formDefinitionData): FormDefinition
