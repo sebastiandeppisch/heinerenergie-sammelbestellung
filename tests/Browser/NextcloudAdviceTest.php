@@ -6,11 +6,16 @@ use App\Models\Group;
 use App\Models\User;
 use App\Services\SessionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Config;
 use Tests\Support\MockNextcloudFileClient;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
+
+    Config::set('nextcloud.base_url', 'https://cloud.example.com');
+    Config::set('nextcloud.username', 'nc-user');
+    Config::set('nextcloud.password', 'secret');
 
     app()->bind(NextcloudFileClientContract::class, MockNextcloudFileClient::class);
 

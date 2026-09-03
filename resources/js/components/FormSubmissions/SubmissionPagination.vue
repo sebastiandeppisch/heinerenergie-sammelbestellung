@@ -34,7 +34,7 @@ import PaginationPrevious from '@/shadcn/components/ui/pagination/PaginationPrev
 import { router } from '@inertiajs/vue3';
 
 const props = defineProps<{
-    pagination: App.Data.PaginationData;
+    pagination: App.Data.PaginationData<App.Data.FormSubmissionData>;
 }>();
 
 function navigateToPage(page: number) {

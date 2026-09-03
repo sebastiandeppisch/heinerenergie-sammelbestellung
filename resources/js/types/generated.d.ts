@@ -112,7 +112,7 @@ success_message: string | null,
 show_next_form_button: boolean,
 next_form_button_text: string | null,
 type: App.Enums.FormType,
-allowed_embed_domains: Array<any> | null,
+allowed_embed_domains: string[] | null,
 };
 export type FormFieldData = {
 id: string,
@@ -128,7 +128,7 @@ min_length: number | null,
 max_length: number | null,
 min_value: number | null,
 max_value: number | null,
-accepted_file_types: Array<any> | null,
+accepted_file_types: string[] | null,
 max_images: number,
 };
 export type FormFieldOptionData = {
@@ -244,6 +244,8 @@ zoom: number,
 show_table: boolean,
 group_id: string | null,
 group_name: string | null,
+aspect_ratio_width: number,
+aspect_ratio_height: number,
 created_at: string | null,
 };
 export type MapPointCategoryData = {
@@ -272,7 +274,7 @@ nc_enabled: boolean | null,
 crm_user: App.Data.CrmUserData | null,
 crm_is_group_member: boolean | null,
 };
-export type PaginationData = {
+export type PaginationData<TValue> = {
 total: number,
 perPage: number,
 currentPage: number,
@@ -371,7 +373,10 @@ readonly lat: number,
 readonly lng: number,
 };
 export type Polygon = {
-readonly coordinates: App.ValueObjects.Coordinate[],
+readonly coordinates: (App.ValueObjects.Coordinate | {
+lat: number,
+lng: number,
+})[],
 };
 }
 }

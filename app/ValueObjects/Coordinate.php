@@ -20,7 +20,7 @@ readonly class Coordinate implements Castable
     ) {}
 
     /**
-     * @param  array<string, float>  $data
+     * @param  array<string, float|string>  $data
      */
     public static function fromArray(array $data): self
     {

@@ -19,6 +19,8 @@ uses(TestCase::class)->in('Feature');
 uses(TestCase::class)->in('Unit');
 uses(TestCase::class)->in('Browser');
 
+pest()->browser()->timeout(15_000);
+
 /*
 |--------------------------------------------------------------------------
 | Expectations

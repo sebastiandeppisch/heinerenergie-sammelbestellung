@@ -44,6 +44,9 @@ test('editing a user toggles admin via dialog', function (): void {
         ->assertSee('Admin-Rechte')
         ->click('#admin-checkbox')
         ->click('[data-test="save-edit"]')
+        // The dialog is only closed in the Inertia onFinish callback, so this
+        // is what tells us the request has actually been handled.
+        ->assertDontSee('Admin-Rechte')
         ->assertNoJavaScriptErrors();
 
     expect($this->group->fresh()->admins()->where('users.id', $this->member->id)->exists())
@@ -56,6 +59,8 @@ test('removing a user asks for confirmation and detaches', function (): void {
         ->click('[data-test="remove-user-'.$this->member->uuid.'"]')
         ->assertSee('Berater:in entfernen?')
         ->click('[data-test="confirm-remove"]')
+        ->assertDontSee('Berater:in entfernen?')
+        ->assertDontSee('John')
         ->assertNoJavaScriptErrors();
 
     expect($this->group->fresh()->users()->where('users.id', $this->member->id)->exists())
@@ -72,6 +77,8 @@ test('adding a user via the dialog attaches them to the group', function (): voi
         ->click('Person auswählen...')
         ->click('Jane Smith')
         ->click('[data-test="confirm-add"]')
+        ->assertDontSee('Person auswählen')
+        ->assertSee('Smith')
         ->assertNoJavaScriptErrors();
 
     expect($this->group->fresh()->users()->where('users.id', $candidate->id)->exists())

@@ -39,7 +39,9 @@ test('admin can edit and save dashboard info', function (): void {
         ->click('.ProseMirror')
         ->type('.ProseMirror', 'Willkommen beim Dashboard')
         ->click('Speichern')
-        ->waitForEvent('networkidle')
+        // Edit mode is only left after the request succeeded; asserting on the
+        // text alone would pass while it is still sitting in the open editor.
+        ->assertDontSee('Abbrechen')
         ->assertSee('Willkommen beim Dashboard')
         ->assertNoJavaScriptErrors();
 
@@ -70,7 +72,9 @@ test('group admin can save email template', function (): void {
         ->type('.ProseMirror', 'Neue Beratung wurde erstellt')
         ->waitForText('Speichern')
         ->click('Speichern')
-        ->waitForEvent('networkidle')
+        // The button label is dropped once the form is no longer dirty, i.e.
+        // once the save request has come back successfully.
+        ->assertDontSee('Speichern')
         ->assertNoJavaScriptErrors();
 
     expect($this->group->fresh()->new_advice_mail)->toContain('Neue Beratung wurde erstellt');

@@ -30,6 +30,8 @@ class MapEmbed extends Model
         'coordinate',
         'zoom',
         'show_table',
+        'aspect_ratio_width',
+        'aspect_ratio_height',
     ];
 
     protected $casts = [

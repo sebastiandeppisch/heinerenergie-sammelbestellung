@@ -24,7 +24,7 @@ class WebDavNextcloudFileClient implements NextcloudFileClientContract
     public function __construct()
     {
         $baseUrl = config('nextcloud.base_url');
-        $this->username = config('nextcloud.username');
+        $this->username = (string) config('nextcloud.username');
         $password = config('nextcloud.password');
 
         $this->client = new Client([

@@ -34,14 +34,14 @@ const form = useForm({
     street_number: '',
     zip: '',
     city: '',
-    advice_status_id: 1,
+    advice_status_id: null as string | null,
     type: 0,
     commentary: '',
     advisor_id: user.value.id,
     group_id: null as string | null,
 });
 
-const adviceStatusItems = ref<{ id: number; name: string }[]>([]);
+const adviceStatusItems = ref<App.Data.AdviceStatusNamesData[]>([]);
 const adviceTypeItems = ref<{ id: number; name: string }[]>([]);
 
 onMounted(() => {
@@ -51,13 +51,6 @@ onMounted(() => {
     axios.get('api/advicetypes').then((r) => {
         adviceTypeItems.value = r.data;
     });
-});
-
-const adviceStatusValue = computed({
-    get: () => String(form.advice_status_id),
-    set: (v: string) => {
-        form.advice_status_id = Number(v);
-    },
 });
 
 const adviceTypeValue = computed({
@@ -145,12 +138,12 @@ function save() {
 
                 <div class="space-y-2">
                     <Label>Status</Label>
-                    <Select v-model="adviceStatusValue">
+                    <Select v-model="form.advice_status_id">
                         <SelectTrigger>
                             <SelectValue placeholder="Status wählen" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem v-for="status in adviceStatusItems" :key="status.id" :value="String(status.id)">
+                            <SelectItem v-for="status in adviceStatusItems" :key="status.id" :value="status.id">
                                 {{ status.name }}
                             </SelectItem>
                         </SelectContent>

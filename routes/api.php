@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\GroupAdviceStatusController;
 use App\Http\Controllers\Api\KpiController;
 use App\Http\Controllers\Api\MailController;
 use App\Http\Controllers\Api\NextcloudAdviceController;
+use App\Http\Controllers\Api\PostalCodeAreaController;
 use App\Http\Controllers\Api\ReverseGeoSearchController;
 use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\UploadController;
@@ -49,6 +50,7 @@ Route::middleware('auth')->group(function (): void {
     Route::get('changelog', ChangelogController::class)->name('api.changelog');
 
     Route::get('map/search', GeoSearchController::class);
+    Route::post('groups/{group}/postal-code-area', PostalCodeAreaController::class)->name('api.groups.postal-code-area');
     Route::get('map/reverse-search', ReverseGeoSearchController::class)->name('api.map.reverse-search');
 
     Route::prefix('advices/{advice}/nextcloud')->group(function (): void {

@@ -24,7 +24,7 @@ class Address implements CastsAttributes
         return new AddressValueObject(
             street: $attributes['street'],
             street_number: $attributes['street_number'],
-            zip: $attributes['zip'],
+            zip: (string) $attributes['zip'],
             city: $attributes['city']
         );
     }

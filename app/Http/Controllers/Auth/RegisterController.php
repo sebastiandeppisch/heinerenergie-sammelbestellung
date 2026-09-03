@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Models\Group;
 use App\Models\User;
 use App\Services\UserEncryptionService;
 use Auth;
@@ -34,11 +35,30 @@ class RegisterController extends Controller
 
         $user->is_admin = true;
         $user->save();
+
+        $this->addToDefaultGroup($user);
+
         Auth::login($user);
 
         $this->issueEncryptionKey($request->input('password'), $request);
 
         return redirect()->route('dashboard');
+    }
+
+    /**
+     * Make the newly registered user an admin of the default group.
+     */
+    private function addToDefaultGroup(User $user): void
+    {
+        $group = Group::first();
+
+        if (! $group instanceof Group) {
+            return;
+        }
+
+        $user->groups()->syncWithoutDetaching([
+            $group->id => ['is_admin' => true],
+        ]);
     }
 
     private function issueEncryptionKey(string $password, Request $request): void

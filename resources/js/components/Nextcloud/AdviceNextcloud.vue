@@ -17,6 +17,7 @@ const props = defineProps<{
 const showCreateDialog = ref(false);
 const showLinkDialog = ref(false);
 const unlinking = ref(false);
+const unlinkError = ref<string | null>(null);
 
 const files = ref<Item[] | null>(null);
 const loadingFiles = ref(false);
@@ -63,9 +64,14 @@ const defaultFolderName = computed(() => {
 
 async function unlink() {
     unlinking.value = true;
+    unlinkError.value = null;
     try {
         await axios.delete(`/api/advices/${props.advice.id}/nextcloud/link`);
         router.reload({ only: ['advice'] });
+    } catch (e: any) {
+        // Without this the card simply stays as it is and the click looks like
+        // it did nothing at all.
+        unlinkError.value = e.response?.data?.message ?? `Die Verknüpfung konnte nicht aufgehoben werden. (${e.response?.status ?? 'keine Antwort'})`;
     } finally {
         unlinking.value = false;
     }
@@ -127,6 +133,11 @@ function refresh() {
                 </Button>
             </div>
         </div>
+
+        <p v-if="unlinkError" class="flex items-start gap-2 px-4 pb-3 text-sm text-destructive">
+            <AlertTriangle class="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{{ unlinkError }}</span>
+        </p>
 
         <!-- Dialogs -->
         <NextcloudCreateFolderDialog v-model:open="showCreateDialog" :advice-id="advice.id" :default-name="defaultFolderName" />

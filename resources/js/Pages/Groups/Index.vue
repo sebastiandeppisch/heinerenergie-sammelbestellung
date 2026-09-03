@@ -73,7 +73,11 @@
                                 <GroupUsers :group="selectedGroup" :group-users="groupUsers" :all-users="allUsers" />
                             </TabsContent>
                             <TabsContent value="beratungsgebiet">
-                                <ConsultingAreaForm :group="selectedGroup" :polygon="polygon" />
+                                <ConsultingAreaForm
+                                    :group="selectedGroup"
+                                    :polygon="polygon"
+                                    :consulting-area-postal-codes="consultingAreaPostalCodes"
+                                />
                             </TabsContent>
                             <TabsContent value="beratungszustaende" v-if="canEditGroup">
                                 <AdviceStatusGroup :group="selectedGroup" :groups="groups" />
@@ -121,6 +125,7 @@ type GroupsIndexData = {
     canCreateRootGroup: boolean;
     selectedGroup: App.Data.GroupData;
     polygon: App.ValueObjects.Polygon;
+    consultingAreaPostalCodes: string[];
     canEditGroup: boolean;
     canCreateGroups: boolean;
     groupUsers?: any;

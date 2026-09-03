@@ -60,12 +60,10 @@ class PageController extends Controller
 
     public function profile(CurrentGroupService $currentGroupService): Response
     {
-
         $currentGroup = $currentGroupService->getGroup();
-
         $advisorMarker = '/images/markers/he_yellow.svg'; // Default marker
 
-        if ($currentGroup && $currentGroup->full_marker_path) {
+        if ($currentGroup instanceof Group && $currentGroup->full_marker_path) {
             $advisorMarker = url($currentGroup->full_marker_path);
         }
 
@@ -93,8 +91,8 @@ class PageController extends Controller
     public function changePassword(Request $request): Response
     {
         return Inertia::render('ChangePasswordForm', [
-            'token' => $request->get('token'),
-            'email' => $request->get('email'),
+            'token' => $request->input('token'),
+            'email' => $request->input('email'),
         ]);
     }
 

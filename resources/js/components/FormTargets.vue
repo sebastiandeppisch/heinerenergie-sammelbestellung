@@ -2,7 +2,8 @@
 import { Badge } from '@/shadcn/components/ui/badge';
 import { Card, CardContent } from '@/shadcn/components/ui/card';
 import { Checkbox } from '@/shadcn/components/ui/checkbox';
-import { FormField, FormItem, FormLabel } from '@/shadcn/components/ui/form';
+import { FormItem } from '@/shadcn/components/ui/form';
+import { Label } from '@/shadcn/components/ui/label';
 import { Select } from '@/shadcn/components/ui/select';
 import SelectContent from '@/shadcn/components/ui/select/SelectContent.vue';
 import SelectItem from '@/shadcn/components/ui/select/SelectItem.vue';
@@ -13,6 +14,28 @@ import { computed } from 'vue';
 type FormDefinitionData = App.Data.FormDefinitionData;
 
 const formDefinition = defineModel<FormDefinitionData>('formDefinition', { required: true });
+
+/**
+ * Mirrors the label of each mapping select below, so a field named as missing is
+ * the one the user then goes looking for.
+ */
+const mappingLabels: Record<string, string> = {
+    first_name_field_id: 'Vorname',
+    last_name_field_id: 'Nachname',
+    address_field_id: 'Adresse',
+    email_field_id: 'E-Mail',
+    phone_field_id: 'Telefon',
+    advice_type_field_id: 'Beratungstyp',
+    advice_type_home_option_value: 'Option für „Vor Ort“',
+    advice_type_virtual_option_value: 'Option für „Virtuell“',
+    title_field_id: 'Titel',
+    description_field_id: 'Beschreibung',
+    coordinate_field_id: 'Koordinaten',
+};
+
+function labelFor(field: string): string {
+    return mappingLabels[field] ?? field;
+}
 
 // Validation helpers for targets
 const adviceValidation = computed(() => {
@@ -25,29 +48,17 @@ const adviceValidation = computed(() => {
     const hasAdviceType = mapping.advice_type_direct !== null && mapping.advice_type_direct !== undefined;
     const hasAdviceTypeField = mapping.advice_type_field_id !== null && mapping.advice_type_field_id !== undefined;
 
-    if (!hasAdviceType && !hasAdviceTypeField) {
-        // If no direct type and no field, advice type is missing
-        // We'll add it to missing array manually
-    }
-
-    // If field is used, check for option values
-    if (hasAdviceTypeField && !hasAdviceType) {
-        if (!mapping.advice_type_home_option_value || !mapping.advice_type_virtual_option_value) {
-            // Options are missing
-        }
-    }
-
-    const missing = required.filter((field) => !mapping[field]);
+    const missing: string[] = required.filter((field) => !mapping[field]);
 
     // Add advice type validation
     if (!hasAdviceType && !hasAdviceTypeField) {
-        missing.push('advice_type_field_id' as any);
+        missing.push('advice_type_field_id');
     } else if (hasAdviceTypeField && !hasAdviceType) {
         if (!mapping.advice_type_home_option_value) {
-            missing.push('advice_type_home_option_value' as any);
+            missing.push('advice_type_home_option_value');
         }
         if (!mapping.advice_type_virtual_option_value) {
-            missing.push('advice_type_virtual_option_value' as any);
+            missing.push('advice_type_virtual_option_value');
         }
     }
 
@@ -81,7 +92,7 @@ const mapPointValidation = computed(() => {
     if (!mapping?.enabled) return { status: 'disabled', missing: [], warnings: [] };
 
     const required = ['title_field_id', 'description_field_id', 'coordinate_field_id'] as const;
-    const missing = required.filter((field) => !mapping[field]);
+    const missing: string[] = required.filter((field) => !mapping[field]);
 
     const warnings: string[] = [];
 
@@ -173,6 +184,7 @@ const adviceTypeSelectValue = computed({
                         <div class="flex items-center gap-2">
                             <h3 class="font-semibold">Beratung erstellen</h3>
                             <Badge
+                                data-test="advice-status"
                                 :variant="
                                     adviceValidation.status === 'complete'
                                         ? 'default'
@@ -196,8 +208,29 @@ const adviceTypeSelectValue = computed({
                     </div>
 
                     <div v-if="formDefinition.advice_mapping.enabled" class="space-y-4">
+                        <!-- Missing mappings -->
+                        <div
+                            v-if="adviceValidation.missing.length > 0"
+                            data-test="advice-missing"
+                            class="rounded-md border border-yellow-200 bg-yellow-50 p-4"
+                        >
+                            <div class="flex">
+                                <AlertTriangle class="h-4 w-4 text-yellow-600" />
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-yellow-800">Diese Zuordnungen fehlen noch:</p>
+                                    <ul class="mt-1 list-inside list-disc space-y-1 text-sm text-yellow-800">
+                                        <li v-for="field in adviceValidation.missing" :key="field">{{ labelFor(field) }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Warnings -->
-                        <div v-if="adviceValidation.warnings.length > 0" class="rounded-md border border-red-200 bg-red-50 p-4">
+                        <div
+                            v-if="adviceValidation.warnings.length > 0"
+                            data-test="advice-warnings"
+                            class="rounded-md border border-red-200 bg-red-50 p-4"
+                        >
                             <div class="flex">
                                 <AlertTriangle class="h-4 w-4 text-red-600" />
                                 <div class="ml-3">
@@ -209,106 +242,94 @@ const adviceTypeSelectValue = computed({
                         </div>
 
                         <div class="grid gap-3">
-                            <FormField v-slot="{ componentField }" name="first_name_field_id">
-                                <FormItem>
-                                    <FormLabel>Vorname *</FormLabel>
-                                    <Select v-model="formDefinition.advice_mapping.first_name_field_id">
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Feld auswählen" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem v-for="field in textFields" :key="field.id" :value="field.id">
-                                                {{ field.label }}
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </FormItem>
-                            </FormField>
+                            <FormItem>
+                                <Label>Vorname *</Label>
+                                <Select v-model="formDefinition.advice_mapping.first_name_field_id">
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Feld auswählen" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem v-for="field in textFields" :key="field.id" :value="field.id">
+                                            {{ field.label }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </FormItem>
 
-                            <FormField v-slot="{ componentField }" name="last_name_field_id">
-                                <FormItem>
-                                    <FormLabel>Nachname *</FormLabel>
-                                    <Select v-model="formDefinition.advice_mapping.last_name_field_id">
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Feld auswählen" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem v-for="field in textFields" :key="field.id" :value="field.id">
-                                                {{ field.label }}
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </FormItem>
-                            </FormField>
+                            <FormItem>
+                                <Label>Nachname *</Label>
+                                <Select v-model="formDefinition.advice_mapping.last_name_field_id">
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Feld auswählen" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem v-for="field in textFields" :key="field.id" :value="field.id">
+                                            {{ field.label }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </FormItem>
 
-                            <FormField v-slot="{ componentField }" name="address_field_id">
-                                <FormItem>
-                                    <FormLabel>Adresse *</FormLabel>
-                                    <Select v-model="formDefinition.advice_mapping.address_field_id">
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Feld auswählen" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem v-for="field in addressFields" :key="field.id" :value="field.id">
-                                                {{ field.label }}
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </FormItem>
-                            </FormField>
+                            <FormItem>
+                                <Label>Adresse *</Label>
+                                <Select v-model="formDefinition.advice_mapping.address_field_id">
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Feld auswählen" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem v-for="field in addressFields" :key="field.id" :value="field.id">
+                                            {{ field.label }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </FormItem>
 
-                            <FormField v-slot="{ componentField }" name="email_field_id">
-                                <FormItem>
-                                    <FormLabel>E-Mail *</FormLabel>
-                                    <Select v-model="formDefinition.advice_mapping.email_field_id">
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Feld auswählen" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem v-for="field in emailFields" :key="field.id" :value="field.id">
-                                                {{ field.label }}
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </FormItem>
-                            </FormField>
+                            <FormItem>
+                                <Label>E-Mail *</Label>
+                                <Select v-model="formDefinition.advice_mapping.email_field_id">
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Feld auswählen" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem v-for="field in emailFields" :key="field.id" :value="field.id">
+                                            {{ field.label }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </FormItem>
 
-                            <FormField v-slot="{ componentField }" name="phone_field_id">
-                                <FormItem>
-                                    <FormLabel>Telefon *</FormLabel>
-                                    <Select v-model="formDefinition.advice_mapping.phone_field_id">
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Feld auswählen" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem v-for="field in phoneFields" :key="field.id" :value="field.id">
-                                                {{ field.label }}
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </FormItem>
-                            </FormField>
+                            <FormItem>
+                                <Label>Telefon *</Label>
+                                <Select v-model="formDefinition.advice_mapping.phone_field_id">
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Feld auswählen" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem v-for="field in phoneFields" :key="field.id" :value="field.id">
+                                            {{ field.label }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </FormItem>
 
-                            <FormField v-slot="{ componentField }" name="advice_type_field_id">
-                                <FormItem>
-                                    <FormLabel>Beratungstyp *</FormLabel>
-                                    <Select v-model="adviceTypeSelectValue">
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Feld oder Typ auswählen" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="direct:0">Vor Ort</SelectItem>
-                                            <SelectItem value="direct:1">Virtuell</SelectItem>
-                                            <template v-if="selectFields.length > 0">
-                                                <div class="my-1 border-t border-gray-200"></div>
-                                            </template>
-                                            <SelectItem v-for="field in selectFields" :key="field.id" :value="field.id">
-                                                {{ field.label }}
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </FormItem>
-                            </FormField>
+                            <FormItem>
+                                <Label>Beratungstyp *</Label>
+                                <Select v-model="adviceTypeSelectValue">
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Feld oder Typ auswählen" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="direct:0">Vor Ort</SelectItem>
+                                        <SelectItem value="direct:1">Virtuell</SelectItem>
+                                        <template v-if="selectFields.length > 0">
+                                            <div class="my-1 border-t border-gray-200"></div>
+                                        </template>
+                                        <SelectItem v-for="field in selectFields" :key="field.id" :value="field.id">
+                                            {{ field.label }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </FormItem>
 
                             <!-- Enum Mapping: Show when advice type field is selected (not direct) -->
                             <div
@@ -322,37 +343,33 @@ const adviceTypeSelectValue = computed({
                                 <h4 class="text-sm font-medium text-gray-900">Beratungstyp-Zuordnung</h4>
                                 <p class="mb-3 text-xs text-gray-600">Ordne die Formular-Optionen den Beratungstypen zu:</p>
 
-                                <FormField v-slot="{ componentField }" name="advice_type_home_option_value">
-                                    <FormItem>
-                                        <FormLabel class="text-xs">Option für Vor Ort" *</FormLabel>
-                                        <Select v-model="formDefinition.advice_mapping.advice_type_home_option_value">
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Option auswählen" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem v-for="option in adviceTypeFieldOptions" :key="option.id" :value="option.value">
-                                                    {{ option.label }}
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </FormItem>
-                                </FormField>
+                                <FormItem>
+                                    <Label class="text-xs">Option für "Vor Ort" *</Label>
+                                    <Select v-model="formDefinition.advice_mapping.advice_type_home_option_value">
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Option auswählen" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem v-for="option in adviceTypeFieldOptions" :key="option.id" :value="option.value">
+                                                {{ option.label }}
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </FormItem>
 
-                                <FormField v-slot="{ componentField }" name="advice_type_virtual_option_value">
-                                    <FormItem>
-                                        <FormLabel class="text-xs">Option für "Virtuell" *</FormLabel>
-                                        <Select v-model="formDefinition.advice_mapping.advice_type_virtual_option_value">
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Option auswählen" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem v-for="option in adviceTypeFieldOptions" :key="option.id" :value="option.value">
-                                                    {{ option.label }}
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </FormItem>
-                                </FormField>
+                                <FormItem>
+                                    <Label class="text-xs">Option für "Virtuell" *</Label>
+                                    <Select v-model="formDefinition.advice_mapping.advice_type_virtual_option_value">
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Option auswählen" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem v-for="option in adviceTypeFieldOptions" :key="option.id" :value="option.value">
+                                                {{ option.label }}
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </FormItem>
                             </div>
                         </div>
                     </div>
@@ -366,6 +383,7 @@ const adviceTypeSelectValue = computed({
                         <div class="flex items-center gap-2">
                             <h3 class="font-semibold">Kartenpunkt erstellen</h3>
                             <Badge
+                                data-test="map-point-status"
                                 :variant="
                                     mapPointValidation.status === 'complete'
                                         ? 'default'
@@ -389,8 +407,29 @@ const adviceTypeSelectValue = computed({
                     </div>
 
                     <div v-if="formDefinition.map_point_mapping.enabled" class="space-y-4">
+                        <!-- Missing mappings -->
+                        <div
+                            v-if="mapPointValidation.missing.length > 0"
+                            data-test="map-point-missing"
+                            class="rounded-md border border-yellow-200 bg-yellow-50 p-4"
+                        >
+                            <div class="flex">
+                                <AlertTriangle class="h-4 w-4 text-yellow-600" />
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-yellow-800">Diese Zuordnungen fehlen noch:</p>
+                                    <ul class="mt-1 list-inside list-disc space-y-1 text-sm text-yellow-800">
+                                        <li v-for="field in mapPointValidation.missing" :key="field">{{ labelFor(field) }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Warnings -->
-                        <div v-if="mapPointValidation.warnings.length > 0" class="rounded-md border border-red-200 bg-red-50 p-4">
+                        <div
+                            v-if="mapPointValidation.warnings.length > 0"
+                            data-test="map-point-warnings"
+                            class="rounded-md border border-red-200 bg-red-50 p-4"
+                        >
                             <div class="flex">
                                 <AlertTriangle class="h-4 w-4 text-red-600" />
                                 <div class="ml-3">
@@ -402,53 +441,47 @@ const adviceTypeSelectValue = computed({
                         </div>
 
                         <div class="grid gap-3">
-                            <FormField v-slot="{ componentField }" name="title_field_id">
-                                <FormItem>
-                                    <FormLabel>Titel *</FormLabel>
-                                    <Select v-model="formDefinition.map_point_mapping.title_field_id">
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Feld auswählen" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem v-for="field in textFields" :key="field.id" :value="field.id">
-                                                {{ field.label }}
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </FormItem>
-                            </FormField>
+                            <FormItem>
+                                <Label>Titel *</Label>
+                                <Select v-model="formDefinition.map_point_mapping.title_field_id">
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Feld auswählen" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem v-for="field in textFields" :key="field.id" :value="field.id">
+                                            {{ field.label }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </FormItem>
 
-                            <FormField v-slot="{ componentField }" name="description_field_id">
-                                <FormItem>
-                                    <FormLabel>Beschreibung *</FormLabel>
-                                    <Select v-model="formDefinition.map_point_mapping.description_field_id">
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Feld auswählen" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem v-for="field in textareaFields" :key="field.id" :value="field.id">
-                                                {{ field.label }}
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </FormItem>
-                            </FormField>
+                            <FormItem>
+                                <Label>Beschreibung *</Label>
+                                <Select v-model="formDefinition.map_point_mapping.description_field_id">
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Feld auswählen" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem v-for="field in textareaFields" :key="field.id" :value="field.id">
+                                            {{ field.label }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </FormItem>
 
-                            <FormField v-slot="{ componentField }" name="coordinate_field_id">
-                                <FormItem>
-                                    <FormLabel>Koordinaten *</FormLabel>
-                                    <Select v-model="formDefinition.map_point_mapping.coordinate_field_id">
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Feld auswählen" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem v-for="field in geoCoordinateFields" :key="field.id" :value="field.id">
-                                                {{ field.label }}
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </FormItem>
-                            </FormField>
+                            <FormItem>
+                                <Label>Koordinaten *</Label>
+                                <Select v-model="formDefinition.map_point_mapping.coordinate_field_id">
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Feld auswählen" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem v-for="field in geoCoordinateFields" :key="field.id" :value="field.id">
+                                            {{ field.label }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </FormItem>
                         </div>
                     </div>
                 </CardContent>

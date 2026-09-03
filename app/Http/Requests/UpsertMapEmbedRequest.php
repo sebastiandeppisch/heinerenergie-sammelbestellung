@@ -39,6 +39,8 @@ class UpsertMapEmbedRequest extends FormRequest
             'zoom' => ['required', 'integer', 'min:3', 'max:18'],
             'show_table' => ['boolean'],
             'group_id' => ['nullable', 'uuid', 'exists:groups,uuid'],
+            'aspect_ratio_width' => ['required', 'integer', 'min:1', 'max:21'],
+            'aspect_ratio_height' => ['required', 'integer', 'min:1', 'max:21'],
         ];
     }
 
@@ -63,7 +65,7 @@ class UpsertMapEmbedRequest extends FormRequest
         $groupUuid = $this->safe()->string('group_id')->toString();
 
         return [
-            ...$this->safe()->only(['name', 'coordinate', 'zoom', 'show_table']),
+            ...$this->safe()->only(['name', 'coordinate', 'zoom', 'show_table', 'aspect_ratio_width', 'aspect_ratio_height']),
             'group_id' => $groupUuid === '' ? null : Group::where('uuid', $groupUuid)->value('id'),
         ];
     }

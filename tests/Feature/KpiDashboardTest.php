@@ -45,7 +45,7 @@ it('validates to must be after or equal to from', function (): void {
 it('returns json array of data points', function (): void {
     $this->actingAs($this->user)
         ->getJson(route('api.kpi.status-distribution', [
-            'from' => now()->subMonths(2)->startOfMonth()->format('Y-m-d'),
+            'from' => now()->subMonthsWithoutOverflow(2)->startOfMonth()->format('Y-m-d'),
             'to' => now()->format('Y-m-d'),
             'aggregation' => 'month',
         ]))

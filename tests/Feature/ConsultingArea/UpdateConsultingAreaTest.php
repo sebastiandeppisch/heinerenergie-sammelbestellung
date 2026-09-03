@@ -88,6 +88,63 @@ test('it validates polygon format', function (): void {
         ->assertSessionHasErrors('polygon.coordinates.*');
 });
 
+test('the postal codes an area was built from are stored with it', function (): void {
+    actingAs($this->admin)
+        ->post(route('groups.consulting-area.update', $this->group), [
+            'polygon' => ['coordinates' => [
+                ['lat' => 49.8807, 'lng' => 8.6572],
+                ['lat' => 49.8787, 'lng' => 8.6661],
+                ['lat' => 49.8746, 'lng' => 8.6630],
+            ]],
+            'postal_codes' => ['64283', '64285'],
+        ])
+        ->assertRedirect();
+
+    expect($this->group->fresh()->consulting_area_postal_codes)->toBe(['64283', '64285']);
+});
+
+test('an area saved without postal codes stores none', function (): void {
+    $this->group->consulting_area_postal_codes = ['64283'];
+    $this->group->save();
+
+    actingAs($this->admin)
+        ->post(route('groups.consulting-area.update', $this->group), [
+            'polygon' => ['coordinates' => [
+                ['lat' => 49.8807, 'lng' => 8.6572],
+                ['lat' => 49.8787, 'lng' => 8.6661],
+                ['lat' => 49.8746, 'lng' => 8.6630],
+            ]],
+            'postal_codes' => [],
+        ])
+        ->assertRedirect();
+
+    expect($this->group->fresh()->consulting_area_postal_codes)->toBeNull();
+});
+
+test('it validates the postal codes stored with the area', function (): void {
+    actingAs($this->admin)
+        ->post(route('groups.consulting-area.update', $this->group), [
+            'polygon' => ['coordinates' => [['lat' => 49.8807, 'lng' => 8.6572]]],
+            'postal_codes' => ['Darmstadt'],
+        ])
+        ->assertSessionHasErrors('postal_codes.0');
+});
+
+test('deleting the consulting area also removes its postal codes', function (): void {
+    $this->group->consulting_area = new Polygon([
+        ['lat' => 49.8807, 'lng' => 8.6572],
+        ['lat' => 49.8787, 'lng' => 8.6661],
+    ]);
+    $this->group->consulting_area_postal_codes = ['64283'];
+    $this->group->save();
+
+    actingAs($this->admin)
+        ->delete(route('groups.consulting-area.delete', $this->group))
+        ->assertRedirect();
+
+    expect($this->group->fresh()->consulting_area_postal_codes)->toBeNull();
+});
+
 test('consulting area can be cleared', function (): void {
     // First set a polygon
     $this->group->consulting_area = new Polygon([

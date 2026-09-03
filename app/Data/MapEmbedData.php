@@ -23,9 +23,11 @@ class MapEmbedData extends Data
         public Coordinate $coordinate,
         public int $zoom,
         public bool $show_table,
-        public ?string $group_id = null,
-        public ?string $group_name = null,
-        public ?string $created_at = null,
+        public ?string $group_id,
+        public ?string $group_name,
+        public int $aspect_ratio_width,
+        public int $aspect_ratio_height,
+        public ?string $created_at,
     ) {}
 
     public static function fromModel(MapEmbed $model): self
@@ -39,6 +41,8 @@ class MapEmbedData extends Data
             show_table: $model->show_table,
             group_id: $model->group?->uuid,
             group_name: $model->group?->name,
+            aspect_ratio_width: $model->aspect_ratio_width,
+            aspect_ratio_height: $model->aspect_ratio_height,
             created_at: $model->created_at?->toISOString(),
         );
     }

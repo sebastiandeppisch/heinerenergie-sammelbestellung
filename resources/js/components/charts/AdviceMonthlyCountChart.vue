@@ -48,37 +48,35 @@ const series = computed(() =>
     })),
 );
 
-const chartOptions = computed(
-    (): ApexOptions => ({
-        chart: {
-            type: 'line',
-            zoom: { enabled: false },
-            toolbar: { show: false },
-            fontFamily: 'Arial, sans-serif',
-            background: 'transparent',
+const chartOptions = computed((): ApexOptions => ({
+    chart: {
+        type: 'line',
+        zoom: { enabled: false },
+        toolbar: { show: false },
+        fontFamily: 'Arial, sans-serif',
+        background: 'transparent',
+    },
+    stroke: { curve: 'smooth', width: 3 },
+    colors: COLORS,
+    dataLabels: { enabled: false },
+    grid: { borderColor: '#e0e0e0' },
+    xaxis: {
+        categories: monthLabels.value,
+        labels: { style: { colors: '#616161', fontSize: '12px' } },
+    },
+    yaxis: {
+        title: {
+            text: 'Anzahl Beratungen',
+            style: { fontSize: '14px', fontWeight: 'normal', color: '#616161' },
         },
-        stroke: { curve: 'smooth', width: 3 },
-        colors: COLORS,
-        dataLabels: { enabled: false },
-        grid: { borderColor: '#e0e0e0' },
-        xaxis: {
-            categories: monthLabels.value,
-            labels: { style: { colors: '#616161', fontSize: '12px' } },
+        labels: {
+            style: { colors: '#616161', fontSize: '12px' },
+            formatter: (v: number) => String(Math.round(v)),
         },
-        yaxis: {
-            title: {
-                text: 'Anzahl Beratungen',
-                style: { fontSize: '14px', fontWeight: 'normal', color: '#616161' },
-            },
-            labels: {
-                style: { colors: '#616161', fontSize: '12px' },
-                formatter: (v: number) => String(Math.round(v)),
-            },
-        },
-        tooltip: { shared: true, intersect: false },
-        legend: { position: 'top', horizontalAlign: 'right', fontSize: '13px' },
-    }),
-);
+    },
+    tooltip: { shared: true, intersect: false },
+    legend: { position: 'top', horizontalAlign: 'right', fontSize: '13px' },
+}));
 
 async function loadData() {
     isLoading.value = true;

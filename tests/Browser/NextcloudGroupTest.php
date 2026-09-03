@@ -124,7 +124,11 @@ test('import with send-email checkbox sends password reset notification', functi
         ->assertNoSmoke()
         ->click('Importieren')
         ->check('import-send-email')
-        ->click('@import-confirm');
+        ->click('@import-confirm')
+        // The import runs asynchronously - wait for the row to flip to the
+        // "Im CRM" badge, otherwise we look for the user before it exists.
+        ->assertSee('Im CRM')
+        ->assertDontSee('Importieren');
 
     $newUser = User::where('email', NC_USER_EMAIL)->firstOrFail();
     Notification::assertSentTo($newUser, ResetPassword::class);
@@ -136,7 +140,9 @@ test('import without send-email checkbox sends no notification', function (): vo
     visit(route('groups.nextcloud', $this->group))
         ->assertNoSmoke()
         ->click('Importieren')
-        ->click('@import-confirm');
+        ->click('@import-confirm')
+        ->assertSee('Im CRM')
+        ->assertDontSee('Importieren');
 
     $newUser = User::where('email', NC_USER_EMAIL)->firstOrFail();
     Notification::assertNotSentTo($newUser, ResetPassword::class);

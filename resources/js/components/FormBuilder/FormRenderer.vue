@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button } from '@/shadcn/components/ui/button';
-import { useForm } from 'laravel-precognition-vue-inertia';
+import { useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import FormFieldRenderer from './FormFieldRenderer.vue';
 
@@ -55,14 +55,12 @@ function validateField(fieldName: string) {
     form.validate(fieldName);
 }
 
-async function submitForm() {
-    try {
-        emit('submit', form.data());
-        const response = await form.submit();
-        emit('success', response);
-    } catch (error) {
-        emit('error', error);
-    }
+function submitForm() {
+    emit('submit', form.data());
+    form.submit({
+        onSuccess: (page) => emit('success', page),
+        onError: (errors) => emit('error', errors),
+    });
 }
 
 const visibleFields = computed(() => props.formDefinition.fields);

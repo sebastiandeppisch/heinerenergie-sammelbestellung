@@ -53,9 +53,34 @@ const form = useForm({
     zoom: props.mapEmbed?.zoom ?? 15,
     show_table: props.mapEmbed?.show_table ?? true,
     group_id: initialGroupId(),
+    aspect_ratio_width: props.mapEmbed?.aspect_ratio_width ?? 16,
+    aspect_ratio_height: props.mapEmbed?.aspect_ratio_height ?? 9,
+});
+
+const aspectRatioPresets = [
+    { label: 'Breit (16:9)', width: 16, height: 9 },
+    { label: 'Klassisch (4:3)', width: 4, height: 3 },
+    { label: 'Quadratisch (1:1)', width: 1, height: 1 },
+    { label: 'Hochformat (3:4)', width: 3, height: 4 },
+    { label: 'Sehr breit (21:9)', width: 21, height: 9 },
+];
+
+const aspectRatioPreset = computed({
+    get: () => `${form.aspect_ratio_width}:${form.aspect_ratio_height}`,
+    set: (value: string) => {
+        const [width, height] = value.split(':').map(Number);
+        form.aspect_ratio_width = width;
+        form.aspect_ratio_height = height;
+    },
 });
 
 const previewCategories = computed(() => props.categories.filter((category) => categorySelection[category.id]));
+
+const previewBoxStyle = computed(() => ({
+    aspectRatio: `${form.aspect_ratio_width} / ${form.aspect_ratio_height}`,
+    minHeight: '280px',
+    maxHeight: '520px',
+}));
 
 watch(
     categorySelection,
@@ -152,12 +177,35 @@ function submit() {
                     </p>
 
                     <div class="space-y-2">
+                        <Label for="aspect_ratio">Seitenverhältnis</Label>
+                        <Select v-model="aspectRatioPreset">
+                            <SelectTrigger id="aspect_ratio">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem v-for="preset in aspectRatioPresets" :key="preset.label" :value="`${preset.width}:${preset.height}`">
+                                    {{ preset.label }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <p v-if="form.errors.aspect_ratio_width || form.errors.aspect_ratio_height" class="text-sm text-red-500">
+                            {{ form.errors.aspect_ratio_width || form.errors.aspect_ratio_height }}
+                        </p>
+                        <p class="text-xs text-gray-500">
+                            Legt fest, wie hoch Karte und Tabelle im Verhältnis zu ihrer Breite dargestellt werden. Beide Ansichten nutzen dasselbe
+                            Verhältnis, damit der Inhalt beim Wechseln zwischen den Tabs gleich hoch bleibt.
+                        </p>
+                    </div>
+
+                    <div class="space-y-2">
                         <Label>Vorschau</Label>
                         <p class="text-xs text-gray-500">
-                            Ziehe und zoome die Karte, um den Kartenausschnitt festzulegen, der beim Einbetten angezeigt wird.
+                            Ziehe und zoome die Karte, um den Kartenausschnitt festzulegen, der beim Einbetten angezeigt wird. Die Vorschau zeigt das
+                            oben gewählte Seitenverhältnis.
                         </p>
-                        <div class="h-[400px] w-full overflow-hidden rounded-lg border">
+                        <div class="w-full overflow-hidden rounded-lg border" :style="previewBoxStyle">
                             <CategorizedPointsMap
+                                :key="aspectRatioPreset"
                                 v-model:center="form.coordinate"
                                 v-model:zoom="form.zoom"
                                 :points-by-category="pointsByCategory"

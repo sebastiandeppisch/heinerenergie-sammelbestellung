@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\AdviceStatusResult;
 use App\Models\Group;
 use App\Models\User;
 use App\Services\SessionService;
@@ -47,6 +48,25 @@ test('can create group', function (): void {
     expect(Group::where('name', 'New Group')->first())
         ->name->toBe('New Group')
         ->description->toBe('New Description');
+});
+
+test('a created group gets one status per result', function (): void {
+    actingAs($this->admin);
+
+    post(route('groups.store'), [
+        'name' => 'New Group',
+        'description' => 'New Description',
+    ])->assertRedirect();
+
+    $statuses = Group::where('name', 'New Group')->firstOrFail()->ownStatuses;
+
+    expect($statuses->pluck('result')->all())->toEqualCanonicalizing(AdviceStatusResult::cases())
+        ->and($statuses->pluck('name')->all())->toEqualCanonicalizing([
+            'Offen',
+            'In Bearbeitung',
+            'Fertig - erfolgreich',
+            'Fertig - nicht erfolgreich',
+        ]);
 });
 
 test('can update group with new logo', function (): void {

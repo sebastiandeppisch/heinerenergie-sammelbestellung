@@ -9,11 +9,11 @@ import { computed, ref } from 'vue';
 import { toast } from 'vue-sonner';
 import { user as userData } from '../authHelper';
 
-const user = ref(userData.value);
-
 const props = defineProps<{
-    advisorMarker?: string;
+    advisorMarker: string;
 }>();
+
+const user = ref(userData.value);
 
 // Computed properties to convert null to undefined for Input components
 const street = computed({

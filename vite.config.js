@@ -24,6 +24,9 @@ export default defineConfig({
             '@': '/resources/js'
         }
     },
+    build: {
+        sourcemap: true,
+    },
     define: {
         "process.env": {},
     },

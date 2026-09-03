@@ -6,6 +6,7 @@ use App\Models\Advice;
 use App\Models\FormDefinitionToAdvice;
 use App\Models\FormField;
 use App\Models\FormSubmission;
+use App\Models\AdviceStatus;
 use App\Models\Group;
 use App\Models\User;
 use App\Services\SessionService;
@@ -60,7 +61,6 @@ test('standard advisor can create a new advice', function (): void {
         ->fill('zip', '12345')
         ->fill('city', 'Musterstadt')
         ->click('Speichern')
-        ->waitForEvent('networkidle')
         ->assertPathBeginsWith('/advices/')
         ->assertSee('Beratung erfolgreich angelegt');
 
@@ -88,7 +88,6 @@ test('admin advisor can create a new advice', function (): void {
         ->fill('zip', '54321')
         ->fill('city', 'Beispielstadt')
         ->click('Speichern')
-        ->waitForEvent('networkidle')
         ->assertPathBeginsWith('/advices/')
         ->assertSee('Beratung erfolgreich angelegt');
 
@@ -117,7 +116,6 @@ test('system admin sees group select and can create a new advice', function (): 
         ->fill('zip', '99999')
         ->fill('city', 'Testort')
         ->click('Speichern')
-        ->waitForEvent('networkidle')
         ->assertPathBeginsWith('/advices/')
         ->assertSee('Beratung erfolgreich angelegt');
 
@@ -147,4 +145,31 @@ test('an empty optional address is rendered as a hint instead of a blank line', 
         ->assertSee('Zweite Adresse')
         ->assertSee('Keine Adresse angegeben')
         ->assertNoJavaScriptErrors();
+});
+
+test('selected advice status is shown and stored', function (): void {
+    AdviceStatus::factory()->create([
+        'name' => 'Statustest',
+        'group_id' => $this->group->id,
+    ]);
+
+    $page = visit(route('advices'));
+    $page->click('@new-advice-button')
+        ->click('Status wählen')
+        ->click('Statustest');
+
+    expect($page->text('[data-slot="select-trigger"]'))->toContain('Statustest');
+
+    $page->fill('first_name', 'Steffi')
+        ->fill('last_name', 'Status')
+        ->fill('phone', '01234567890')
+        ->fill('email', 'steffi@status.de')
+        ->fill('street', 'Statusweg')
+        ->fill('street_number', '3')
+        ->fill('zip', '12345')
+        ->fill('city', 'Statusstadt')
+        ->click('Speichern')
+        ->assertPathBeginsWith('/advices/');
+
+    expect(Advice::where('first_name', 'Steffi')->first()->status->name)->toBe('Statustest');
 });

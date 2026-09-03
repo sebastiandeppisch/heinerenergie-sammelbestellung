@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AdviceFormPreviewDialog from '@/components/Advices/AdviceFormPreviewDialog.vue';
 import CreateAdviceDialog from '@/components/CreateAdviceDialog.vue';
+import { useFillViewportHeight } from '@/composables/useFillViewportHeight';
 import { Badge } from '@/shadcn/components/ui/badge';
 import { Button } from '@/shadcn/components/ui/button';
 import Card from '@/shadcn/components/ui/card/Card.vue';
@@ -247,10 +248,14 @@ const table = useVueTable({
 });
 
 const totalCount = computed(() => table.getFilteredRowModel().rows.length);
+
+// Fill the remaining viewport height so the page itself never scrolls
+const rootEl = ref<HTMLElement | null>(null);
+const { height: rootHeight } = useFillViewportHeight(rootEl);
 </script>
 
 <template>
-    <div class="flex h-screen flex-col">
+    <div ref="rootEl" data-test="advices-root" class="flex flex-col" :style="{ height: rootHeight }">
         <h2 class="mb-4 ml-2 text-2xl font-semibold">Beratungen</h2>
 
         <!-- Toolbar -->
