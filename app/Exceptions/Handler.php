@@ -45,7 +45,7 @@ class Handler extends ExceptionHandler
             //
         });
 
-        $this->renderable(fn (AuthorizationException $e, Request $request) => $this->renderForbidden($request, $e->getMessage()));
+        $this->renderable(fn (AuthorizationException $e, Request $request): mixed => $this->renderForbidden($request, $e->getMessage()));
 
         $this->renderable(function (HttpExceptionInterface $e, Request $request) {
             if ($e->getStatusCode() !== 403) {
