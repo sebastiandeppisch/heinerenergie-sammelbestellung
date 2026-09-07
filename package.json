@@ -20,7 +20,7 @@
         "@tiptap/extension-color": "^3.30.4",
         "@tiptap/extension-highlight": "^3.30.4",
         "@tiptap/extension-image": "^3.30.4",
-        "@tiptap/extension-link": "^3.30.4",
+        "@tiptap/extension-link": "^3.30.6",
         "@tiptap/extension-table": "^3.30.4",
         "@tiptap/extension-table-cell": "^3.30.4",
         "@tiptap/extension-table-header": "^3.30.4",
