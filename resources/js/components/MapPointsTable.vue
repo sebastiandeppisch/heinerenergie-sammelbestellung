@@ -186,8 +186,9 @@ watch(
                                 <TableHead v-for="header in table.getHeaderGroups()[0].headers" :key="`f-${header.id}`" class="py-1">
                                     <Input
                                         v-if="header.column.getCanFilter() && header.column.id !== 'category'"
-                                        :value="(header.column.getFilterValue() as string) ?? ''"
-                                        @input="(e: Event) => header.column.setFilterValue((e.target as HTMLInputElement).value)"
+                                        :model-value="(header.column.getFilterValue() as string) ?? ''"
+                                        @update:model-value="(v) => header.column.setFilterValue(String(v))"
+                                        :data-test="`filter-${header.column.id}`"
                                         class="h-6 text-xs"
                                         placeholder="Filter..."
                                     />

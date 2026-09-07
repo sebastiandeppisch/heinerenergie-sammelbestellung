@@ -55,6 +55,31 @@ test('advices table search filters rows', function (): void {
         ->assertNoJavaScriptErrors();
 });
 
+test('advices table column filter keeps typed characters and filters rows', function (): void {
+    Advice::factory()->create([
+        'group_id' => $this->group->id,
+        'advisor_id' => $this->user->id,
+        'first_name' => 'Max',
+        'last_name' => 'Mustermann',
+    ]);
+    Advice::factory()->create([
+        'group_id' => $this->group->id,
+        'advisor_id' => $this->user->id,
+        'first_name' => 'Erika',
+        'last_name' => 'Musterfrau',
+    ]);
+
+    visit(route('advices'))
+        ->assertNoSmoke()
+        ->click('Spaltenfilter')
+        ->assertVisible('[data-test="filter-first_name"]')
+        ->typeSlowly('[data-test="filter-first_name"]', 'Erika')
+        ->assertValue('[data-test="filter-first_name"]', 'Erika')
+        ->assertSee('Erika')
+        ->assertDontSee('Max')
+        ->assertNoJavaScriptErrors();
+});
+
 test('advices table inline edit buttons are visible', function (): void {
     $status = AdviceStatus::create([
         'name' => 'Test Status',
