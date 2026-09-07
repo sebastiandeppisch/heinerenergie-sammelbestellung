@@ -45,7 +45,7 @@
         "leaflet-draw": "^0.4.0",
         "leaflet-draw-toolbar": "^0.3.0-alpha.1",
         "lodash": "^4.17.19",
-        "lucide-vue-next": "^0.507.0",
+        "lucide-vue-next": "^1.0.0",
         "moment": "^2.29.3",
         "playwright": "^1.62.1",
         "reka-ui": "^2.9.8",
