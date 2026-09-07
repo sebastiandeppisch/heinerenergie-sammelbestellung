@@ -34,6 +34,15 @@ return [
             'driver' => 'sync',
         ],
 
+        /*
+         * Runs the job after the response has been sent, in the same process
+         * and without a worker. Requires the InvokeDeferredCallbacks middleware
+         * in App\Http\Kernel, otherwise the job is silently dropped.
+         */
+        'deferred' => [
+            'driver' => 'deferred',
+        ],
+
         'database' => [
             'driver' => 'database',
             'table' => 'jobs',
