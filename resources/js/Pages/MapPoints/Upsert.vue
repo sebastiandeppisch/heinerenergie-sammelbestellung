@@ -43,13 +43,26 @@ const locationInput = computed({
     },
 });
 
+const locationError = ref<string | null>(null);
+
 async function fetchLocation() {
     isFetchingLocation.value = true;
+    locationError.value = null;
+
     try {
         const response = await axios.get(route('api.map.reverse-search'), {
             params: { lat: form.coordinate.lat, lng: form.coordinate.lng },
         });
-        form.location = response.data.location;
+
+        if (response.data.location) {
+            form.location = response.data.location;
+        } else {
+            locationError.value = 'Zu dieser Position ist keine Adresse bekannt. Bitte beschreibe den Ort selbst.';
+        }
+    } catch {
+        // The pin is already set, so the point stays usable. Only the
+        // convenience of a prefilled address is lost.
+        locationError.value = 'Die Adresse konnte nicht geladen werden. Bitte beschreibe den Ort selbst.';
     } finally {
         isFetchingLocation.value = false;
     }
@@ -118,6 +131,7 @@ const errors: Record<string, string> = form.errors;
                             </Button>
                         </div>
                         <p v-if="errors.location" class="text-sm text-red-500">{{ errors.location }}</p>
+                        <p v-if="locationError" class="text-sm text-amber-600">{{ locationError }}</p>
                         <p class="text-xs text-gray-500">
                             Wird beim Setzen der Position automatisch per Geocoding vorbefüllt, kann aber frei angepasst werden.
                         </p>

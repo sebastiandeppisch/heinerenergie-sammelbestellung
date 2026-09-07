@@ -6,10 +6,11 @@ namespace App\Events;
 
 use App\Models\Advice;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class AdviceUpdated
+class AdviceUpdated implements ShouldDispatchAfterCommit
 {
     use Dispatchable;
     use InteractsWithSockets;

@@ -6,6 +6,7 @@ namespace App\Data;
 
 use App\Enums\AdviceStatusResult;
 use App\Enums\AdviceType;
+use App\Enums\GeocodingStatus;
 use App\Enums\HouseType;
 use App\Models\Advice;
 use App\Models\User;
@@ -37,6 +38,7 @@ class DataProtectedAdviceData extends Data
         public ?string $advice_status_id,
         public ?float $lng,
         public ?float $lat,
+        public ?GeocodingStatus $geocoding_status,
         public ?AdviceType $type,
         public Carbon $created_at,
         public Carbon $updated_at,
@@ -83,6 +85,7 @@ class DataProtectedAdviceData extends Data
             advice_status_id: $advice->status?->uuid,
             lng: $advice->lng,
             lat: $advice->lat,
+            geocoding_status: $advice->geocoding_status,
             type: $advice->type,
             created_at: $advice->created_at,
             updated_at: $advice->updated_at,

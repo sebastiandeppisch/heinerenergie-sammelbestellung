@@ -1,13 +1,18 @@
 <script setup lang="ts">
+import PinLocationMap from '@/components/PinLocationMap.vue';
+import { LaravelValidationError, notifyError } from '@/helpers';
 import { Button } from '@/shadcn/components/ui/button';
 import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
 import AdvisorMap from '@/views/AdvisorMap.vue';
-import axios from 'axios';
-import { Save } from 'lucide-vue-next';
+import axios, { AxiosError } from 'axios';
+import { MapPin, Save } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import { toast } from 'vue-sonner';
+import { route } from 'ziggy-js';
 import { user as userData } from '../authHelper';
+
+type Coordinate = App.ValueObjects.Coordinate;
 
 const props = defineProps<{
     advisorMarker: string;
@@ -60,7 +65,8 @@ function currentAddress(): Address {
 const savedAddress = ref<Address>(currentAddress());
 
 /**
- * The coordinates are only calculated on the server, so they are outdated as soon as the address inputs are changed.
+ * The coordinates belong to the address they were resolved from, so they go
+ * stale the moment somebody edits one of the address inputs.
  */
 const areCoordinatesDirty = computed<boolean>(() => {
     const address = currentAddress();
@@ -68,14 +74,60 @@ const areCoordinatesDirty = computed<boolean>(() => {
     return (Object.keys(address) as (keyof Address)[]).some((field) => address[field] !== savedAddress.value[field]);
 });
 
-function saveAddress() {
-    axios.post('/api/profile/address', user.value).then((response) => {
-        console.log(response.data);
+/**
+ * The pin, either resolved through the geocoding endpoint or dropped by hand.
+ * Saving no longer geocodes on the server, so an outage of OpenStreetMap can
+ * never stop somebody from saving their address.
+ */
+const coordinate = computed<Coordinate | null>({
+    get: () => (user.value.lat !== null && user.value.long !== null ? { lat: user.value.lat, lng: user.value.long } : null),
+    set: (value) => {
+        user.value.lat = value?.lat ?? null;
+        user.value.long = value?.lng ?? null;
+    },
+});
 
-        user.value = response.data;
-        savedAddress.value = currentAddress();
-        toast.success('Adresse gespeichert');
-    });
+const isGeocoding = ref(false);
+const geocodingMessage = ref<string | null>(null);
+
+const hasAddress = computed<boolean>(() => Boolean(user.value.street && user.value.zip && user.value.city));
+
+async function locateAddress() {
+    isGeocoding.value = true;
+    geocodingMessage.value = null;
+
+    try {
+        const { data } = await axios.post<{ coordinate: Coordinate | null }>(route('api.geocode.address'), currentAddress());
+
+        if (data.coordinate) {
+            coordinate.value = data.coordinate;
+            geocodingMessage.value = null;
+        } else {
+            geocodingMessage.value = 'Zu dieser Adresse ist keine Position bekannt. Setze den Punkt bitte selbst auf der Karte.';
+        }
+    } catch (error) {
+        notifyError(error as AxiosError<LaravelValidationError>);
+        geocodingMessage.value = 'Die Position konnte nicht ermittelt werden. Du kannst sie selbst auf der Karte setzen.';
+    } finally {
+        isGeocoding.value = false;
+    }
+}
+
+function saveAddress() {
+    axios
+        .post('/api/profile/address', {
+            ...currentAddress(),
+            advice_radius: user.value.advice_radius,
+            // The API stores lng, the user payload calls the same value long.
+            lat: user.value.lat,
+            lng: user.value.long,
+        })
+        .then((response) => {
+            user.value = response.data;
+            savedAddress.value = currentAddress();
+            toast.success('Adresse gespeichert');
+        })
+        .catch(notifyError);
 }
 </script>
 
@@ -117,6 +169,26 @@ function saveAddress() {
                                     <Label for="advice_radius">Beratungsgebiet (m)</Label>
                                     <Input id="advice_radius" type="number" v-model="adviceRadius" />
                                 </div>
+                            </div>
+
+                            <div style="margin: 10px">
+                                <span class="label" style="font-size: 16px">Position</span>
+                                <p class="text-sm text-gray-600" style="margin-bottom: 8px">
+                                    Ermittle die Position aus Deiner Adresse oder setze sie selbst auf der Karte. Erst danach speichern.
+                                </p>
+
+                                <Button variant="outline" class="w-full" :disabled="!hasAddress || isGeocoding" @click="locateAddress">
+                                    <MapPin class="h-4 w-4" />
+                                    {{ isGeocoding ? 'Ermittle Position...' : 'Position aus Adresse ermitteln' }}
+                                </Button>
+
+                                <p v-if="geocodingMessage" class="text-sm text-amber-600" style="margin-top: 8px">{{ geocodingMessage }}</p>
+
+                                <PinLocationMap v-model="coordinate" style="margin-top: 12px" />
+
+                                <p v-if="!coordinate" class="text-sm text-amber-600" style="margin-top: 8px">
+                                    Ohne Position kann Dir keine Beratung in Deiner Nähe zugeordnet werden.
+                                </p>
                             </div>
 
                             <Button variant="default" @click="saveAddress" class="w-full">

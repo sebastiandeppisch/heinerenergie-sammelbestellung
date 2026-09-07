@@ -16,6 +16,7 @@ import { toast } from 'vue-sonner';
 import AdviceTypes from '../AdviceTypes';
 import { isActingAsAdmin, user as userRef } from '../authHelper';
 import { useFillViewportHeight } from '../composables/useFillViewportHeight';
+import { notifyError } from '../helpers';
 
 const user = userRef.value;
 const userId = user.id;
@@ -136,14 +137,15 @@ function runSearch() {
     axios
         .get('api/map/search', { params: { query: search.value } })
         .then((response) => response.data)
-        .then((data: App.ValueObjects.Coordinate) => {
-            if (data['lat'] === undefined || data['lng'] === undefined) {
+        .then((data: App.ValueObjects.Coordinate | null) => {
+            if (!data || data['lat'] === undefined || data['lng'] === undefined) {
                 toast.error('Adresse nicht gefunden');
                 return;
             }
             map.center = latLng(data.lat, data.lng);
             map.zoom = 18; //a better approach would be to set the bounding box
-        });
+        })
+        .catch(notifyError);
 }
 
 function getAdvisorMarker(): string {

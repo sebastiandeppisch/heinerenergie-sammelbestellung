@@ -29,6 +29,10 @@ class SetAddressRequest extends FormRequest
             'zip' => ['nullable', 'integer'],
             'city' => ['nullable', 'string'],
             'advice_radius' => ['nullable', 'integer'],
+            // Resolved by the client, either through the geocoding endpoint or
+            // by placing the pin by hand.
+            'lat' => ['nullable', 'numeric', 'between:-90,90'],
+            'lng' => ['nullable', 'numeric', 'between:-180,180'],
         ];
     }
 }

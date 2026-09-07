@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AdviceMails from '@/components/AdviceMails.vue';
+import AdviceGeocodingStatus from '@/components/Advices/AdviceGeocodingStatus.vue';
 import ChecklistPanel from '@/components/ChecklistPanel.vue';
 import FormSubmissionRenderer from '@/components/FormBuilder/FormSubmissionRenderer.vue';
 import AdviceNextcloud from '@/components/Nextcloud/AdviceNextcloud.vue';
@@ -69,6 +70,7 @@ const advisor = user.value;
                             </Button>
                         </Link>
                     </div>
+                    <AdviceGeocodingStatus v-if="!advice.lat || !advice.lng" :advice="advice" style="padding: 0 16px 16px" />
                     <AdviceForm :advice="advice" :advice-status-options="adviceStatusOptions" :advice-types-options="adviceTypesOptions" />
                 </div>
 

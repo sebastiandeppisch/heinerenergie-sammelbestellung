@@ -18,7 +18,10 @@ class Kernel extends ConsoleKernel
     #[Override]
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        // Catches up on advices whose coordinate lookup never completed.
+        $schedule->command('advices:geocode-pending')
+            ->hourly()
+            ->withoutOverlapping();
     }
 
     /**

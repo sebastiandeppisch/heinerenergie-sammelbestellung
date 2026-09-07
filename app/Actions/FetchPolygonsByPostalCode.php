@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Exceptions\NominatimUnavailableException;
 use App\Exceptions\PostalCodeAreaException;
 use App\ValueObjects\Polygon;
-use GuzzleHttp\Exception\ClientException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use maxh\Nominatim\Nominatim;
+use Throwable;
 
 /**
  * Loads the boundary of a german postal code area from OpenStreetMap.
@@ -30,6 +31,7 @@ class FetchPolygonsByPostalCode
      * @return array<int, Polygon>
      *
      * @throws PostalCodeAreaException if the postal code is unknown to OpenStreetMap
+     * @throws NominatimUnavailableException if OpenStreetMap could not be reached
      */
     public function __invoke(string $postalCode): array
     {
@@ -65,9 +67,10 @@ class FetchPolygonsByPostalCode
 
         try {
             $results = $this->nominatim->find($search);
-        } catch (ClientException $e) {
-            Log::error($e->getResponse()->getBody()->getContents());
-            throw $e;
+        } catch (Throwable $e) {
+            Log::error('Nominatim postal code search failed', ['postalCode' => $postalCode, 'exception' => $e]);
+
+            throw NominatimUnavailableException::requestFailed($e);
         }
 
         foreach ($results as $result) {

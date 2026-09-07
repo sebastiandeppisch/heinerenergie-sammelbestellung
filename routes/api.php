@@ -4,13 +4,16 @@ use App\Http\Controllers\Api\AdviceController;
 use App\Http\Controllers\Api\AdviceStatusController;
 use App\Http\Controllers\Api\AdviceTypeController;
 use App\Http\Controllers\Api\ChangelogController;
+use App\Http\Controllers\Api\GeocodeAddressController;
 use App\Http\Controllers\Api\GeoSearchController;
 use App\Http\Controllers\Api\GroupAdviceStatusController;
 use App\Http\Controllers\Api\KpiController;
 use App\Http\Controllers\Api\MailController;
 use App\Http\Controllers\Api\NextcloudAdviceController;
 use App\Http\Controllers\Api\PostalCodeAreaController;
+use App\Http\Controllers\Api\PrefetchPostalCodeAreaController;
 use App\Http\Controllers\Api\ReverseGeoSearchController;
+use App\Http\Controllers\Api\SetAdviceCoordinateController;
 use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\UserController;
@@ -44,13 +47,16 @@ Route::middleware('auth')->group(function (): void {
 
     Route::post('profile/address', [UserController::class, 'address']);
     Route::post('advices/{advice}/assign', [AdviceController::class, 'assign']);
+    Route::put('advices/{advice}/coordinate', SetAdviceCoordinateController::class)->name('api.advices.coordinate');
     Route::get('advices/{advice}/advisors', [AdviceController::class, 'sortedAdvisors']);
     Route::get('advices/{advice}/form-submission', [AdviceController::class, 'formSubmission'])->name('api.advices.formSubmission');
 
     Route::get('changelog', ChangelogController::class)->name('api.changelog');
 
-    Route::get('map/search', GeoSearchController::class);
+    Route::get('map/search', GeoSearchController::class)->name('api.map.search');
+    Route::post('geocode/address', GeocodeAddressController::class)->name('api.geocode.address');
     Route::post('groups/{group}/postal-code-area', PostalCodeAreaController::class)->name('api.groups.postal-code-area');
+    Route::post('postal-code-area/prefetch', PrefetchPostalCodeAreaController::class)->name('api.postal-code-area.prefetch');
     Route::get('map/reverse-search', ReverseGeoSearchController::class)->name('api.map.reverse-search');
 
     Route::prefix('advices/{advice}/nextcloud')->group(function (): void {

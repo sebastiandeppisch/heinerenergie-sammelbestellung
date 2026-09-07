@@ -24,9 +24,14 @@ function notifyError(error: AxiosError<LaravelValidationError>): void {
             validationErrors = validationErrors.concat(error.response.data.errors[prop] as Array<string>);
         }
         toast.error(validationErrors.join(','));
-    } else {
-        toast.error(error.message);
+        return;
     }
+
+    // Prefer the message the server sent, so a readable German text wins over
+    // "Request failed with status code 503".
+    const message = (error.response?.data as { message?: string } | undefined)?.message;
+
+    toast.error(message ?? error.message);
 }
 
 function formatDateCell(row: { value: Date }): string {

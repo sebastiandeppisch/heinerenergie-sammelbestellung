@@ -30,4 +30,18 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    /*
+     * The OpenStreetMap usage policy caps automated clients at one request per
+     * second and requires a real contact address in the user agent. We stay at
+     * one request every two seconds and refuse to queue up beyond max_wait.
+     */
+    'nominatim' => [
+        'url' => env('NOMINATIM_URL', 'https://nominatim.openstreetmap.org/'),
+        'contact' => env('NOMINATIM_CONTACT', env('ADMIN_EMAIL')),
+        'interval' => (float) env('NOMINATIM_INTERVAL', 2.0),
+        'max_wait' => (float) env('NOMINATIM_MAX_WAIT', 10.0),
+        'connect_timeout' => (float) env('NOMINATIM_CONNECT_TIMEOUT', 2.0),
+        'timeout' => (float) env('NOMINATIM_TIMEOUT', 5.0),
+    ],
+
 ];

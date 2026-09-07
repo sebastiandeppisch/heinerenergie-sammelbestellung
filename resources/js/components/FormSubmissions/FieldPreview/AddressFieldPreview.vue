@@ -2,8 +2,10 @@
 import Tooltip from '@/shadcn/components/ui/tooltip/Tooltip.vue';
 import TooltipContent from '@/shadcn/components/ui/tooltip/TooltipContent.vue';
 import TooltipTrigger from '@/shadcn/components/ui/tooltip/TooltipTrigger.vue';
+import axios from 'axios';
 import { MapPin } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
+import { route } from 'ziggy-js';
 
 type Address = App.ValueObjects.Address;
 
@@ -23,17 +25,24 @@ const osmEmbedUrl = computed(() => {
     return `https://www.openstreetmap.org/export/embed.html?bbox=${lng - bbox},${lat - bbox},${lng + bbox},${lat + bbox}&layer=mapnik&marker=${lat},${lng}`;
 });
 
+/**
+ * Goes through our own backend rather than calling Nominatim from the browser.
+ * That keeps the shared cache and the rate limit towards OpenStreetMap in one
+ * place, instead of every viewer querying it with their own IP address.
+ */
 async function geocode() {
     if (geocodingDone.value) return;
     geocodingDone.value = true;
     try {
-        const query = encodeURIComponent(formatted.value);
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1&countrycodes=de`, {
-            headers: { 'Accept-Language': 'de' },
+        const { data } = await axios.post<{ coordinate: App.ValueObjects.Coordinate | null }>(route('api.geocode.address'), {
+            street: props.value.street,
+            street_number: props.value.street_number,
+            zip: props.value.zip,
+            city: props.value.city,
         });
-        const results = await response.json();
-        if (results.length > 0) {
-            geocoded.value = { lat: parseFloat(results[0].lat), lng: parseFloat(results[0].lon) };
+
+        if (data.coordinate) {
+            geocoded.value = { lat: data.coordinate.lat, lng: data.coordinate.lng };
         } else {
             geocodingFailed.value = true;
         }

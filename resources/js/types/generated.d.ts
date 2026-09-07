@@ -16,6 +16,7 @@ advisor_id: string | null,
 advice_status_id: string | null,
 lng: number | null,
 lat: number | null,
+geocoding_status: App.Enums.GeocodingStatus | null,
 type: App.Enums.AdviceType,
 help_type_place: boolean,
 help_type_technical: boolean,
@@ -81,6 +82,7 @@ advisor_id: string | null,
 advice_status_id: string | null,
 lng: number | null,
 lat: number | null,
+geocoding_status: App.Enums.GeocodingStatus | null,
 type: App.Enums.AdviceType | null,
 created_at: string,
 updated_at: string,
@@ -335,6 +337,7 @@ export type AdviceType = 0 | 1 | 2;
 export type Aggregation = 'day' | 'week' | 'month' | 'quarter';
 export type FieldType = 'text' | 'textarea' | 'number' | 'email' | 'phone' | 'select' | 'radio' | 'checkbox' | 'file' | 'image' | 'date' | 'geo_coordinate' | 'address';
 export type FormType = 0 | 1;
+export type GeocodingStatus = 'pending' | 'success' | 'not_found' | 'failed' | 'manual';
 export type HouseType = 0 | 1 | 2;
 }
 namespace Nextcloud {

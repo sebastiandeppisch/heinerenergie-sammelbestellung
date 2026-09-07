@@ -3,7 +3,7 @@ import { Button } from '@/shadcn/components/ui/button';
 import { TagsInput, TagsInputInput, TagsInputItem, TagsInputItemDelete, TagsInputItemText } from '@/shadcn/components/ui/tags-input';
 import axios, { AxiosError } from 'axios';
 import { Download, TriangleAlert } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { route } from 'ziggy-js';
 
 const props = defineProps<{
@@ -24,6 +24,20 @@ const canLoad = computed(() => postalCodes.value.length > 0 && !loading.value);
 // The area was built from these postal codes and may have been reshaped by hand
 // since, so reloading it is a deliberate step.
 const builtFromPostalCodes = computed(() => props.hasArea && postalCodes.value.length > 0);
+
+/**
+ * Warms the cache for every newly added postal code. OpenStreetMap is only
+ * asked once every two seconds, so fetching each code while the user is still
+ * typing keeps the actual "load area" click short.
+ */
+watch(postalCodes, (current, previous) => {
+    current
+        .filter((postalCode) => !(previous ?? []).includes(postalCode) && /^\d{5}$/.test(postalCode))
+        .forEach((postalCode) => {
+            // Best effort, the real error surfaces when the area is built.
+            axios.post(route('api.postal-code-area.prefetch'), { postal_code: postalCode }).catch(() => undefined);
+        });
+});
 
 async function loadArea() {
     loading.value = true;

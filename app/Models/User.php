@@ -43,6 +43,8 @@ class User extends Authenticatable
         'city',
         'advice_radius',
         'is_active',
+        'lat',
+        'lng',
     ];
 
     protected $hidden = [

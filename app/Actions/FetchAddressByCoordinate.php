@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Exceptions\NominatimUnavailableException;
+use App\Services\GeocodeCache;
 use App\ValueObjects\Coordinate;
-use GuzzleHttp\Exception\ClientException;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use maxh\Nominatim\Nominatim;
+use Throwable;
 
 class FetchAddressByCoordinate
 {
@@ -22,12 +23,17 @@ class FetchAddressByCoordinate
         $this->nominatim = app(Nominatim::class);
     }
 
+    /**
+     * Returns null when OpenStreetMap knows no address at the coordinate.
+     *
+     * @throws NominatimUnavailableException if OpenStreetMap could not be reached
+     */
     public function __invoke(Coordinate $coordinate): ?string
     {
         Log::debug('Fetching address for coordinate', ['coordinate' => $coordinate]);
         $this->coordinate = $coordinate;
 
-        return Cache::rememberForever($this->key(), fn (): ?string => $this->handle());
+        return app(GeocodeCache::class)->remember($this->key(), fn (): ?string => $this->handle());
     }
 
     private function key(): string
@@ -42,12 +48,14 @@ class FetchAddressByCoordinate
 
         try {
             $result = $this->nominatim->find($reverse);
-            Log::debug('Nominatim reverse geocoding result', ['result' => $result, 'coordinate' => $coordinate]);
+        } catch (Throwable $e) {
+            Log::error('Nominatim reverse geocoding failed', ['coordinate' => $coordinate, 'exception' => $e]);
 
-            return $result['display_name'] ?? null;
-        } catch (ClientException $e) {
-            Log::error($e->getResponse()->getBody()->getContents());
-            throw $e;
+            throw NominatimUnavailableException::requestFailed($e);
         }
+
+        Log::debug('Nominatim reverse geocoding result', ['result' => $result, 'coordinate' => $coordinate]);
+
+        return $result['display_name'] ?? null;
     }
 }

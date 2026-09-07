@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
-use App\Actions\FetchCoordinateByAddress;
 use App\Data\UserData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SetAddressRequest;
@@ -70,28 +69,18 @@ class UserController extends Controller
         return response()->json($user);
     }
 
+    /**
+     * Stores the address together with the coordinates the client already
+     * resolved, either through the geocoding endpoint or by placing the pin by
+     * hand. Geocoding no longer happens here, so an outage of OpenStreetMap can
+     * never keep somebody from saving their address.
+     */
     public function address(SetAddressRequest $request): JsonResponse
     {
         $user = $this->user();
         $user->fill($request->validated());
         $user->save();
-        $this->fetchCoordinates($user);
 
-        $user = UserData::fromModel($user, false);
-
-        return response()->json($user);
-    }
-
-    private function fetchCoordinates(User $user): void
-    {
-        if ($user->address === null) {
-            $user->coordinate = null;
-            $user->save();
-
-            return;
-        }
-
-        $user->coordinate = app(FetchCoordinateByAddress::class)($user->address);
-        $user->save();
+        return response()->json(UserData::fromModel($user, false));
     }
 }
