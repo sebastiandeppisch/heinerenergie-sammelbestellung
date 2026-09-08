@@ -26,7 +26,9 @@ class SetAddressRequest extends FormRequest
         return [
             'street' => ['nullable', 'string'],
             'street_number' => ['nullable', 'string'],
-            'zip' => ['nullable', 'integer'],
+            // Same rule as the advice forms. Not "integer", which would strip
+            // the leading zero of a postal code like 01067.
+            'zip' => ['nullable', 'numeric', 'digits:5'],
             'city' => ['nullable', 'string'],
             'advice_radius' => ['nullable', 'integer'],
             // Resolved by the client, either through the geocoding endpoint or

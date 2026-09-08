@@ -140,8 +140,8 @@ function saveAddress() {
                     <div class="flex-row">
                         <div class="flex-cell">
                             <span class="label">Beratungsgebiet</span>
-                            <br />Trage hier die Adresse ein, von der Du Beratungen aus durchführen möchtest. Wenn Du Deine Adresse nicht mit anderen
-                            Berater*innen teilen möchtest, kannst Du auch eine Adresse in Deiner Nähe angeben.
+                            <br />Trage die Adresse ein, von der aus Du Beraten möchtest, und wie weit Du dafür fahren würdest. Wenn Du Deine genaue
+                            Adresse nicht angeben möchtest, kannst Du die Position unten auch von Hand auf der Karte setzen.
                             <div class="flex-row">
                                 <div class="flex-cell" style="margin: 10px">
                                     <Label for="street">Straße</Label>
@@ -156,7 +156,7 @@ function saveAddress() {
                             <div class="flex-row">
                                 <div style="margin: 10px">
                                     <Label for="zip">PLZ</Label>
-                                    <Input id="zip" type="number" style="width: 100px" v-model="zip" />
+                                    <Input id="zip" inputmode="numeric" style="width: 100px" v-model="zip" />
                                 </div>
                                 <div class="flex-cell" style="margin: 10px">
                                     <Label for="city">Stadt</Label>
@@ -187,7 +187,8 @@ function saveAddress() {
                                 <PinLocationMap v-model="coordinate" style="margin-top: 12px" />
 
                                 <p v-if="!coordinate" class="text-sm text-amber-600" style="margin-top: 8px">
-                                    Ohne Position kann Dir keine Beratung in Deiner Nähe zugeordnet werden.
+                                    Ohne Position wirst Du nicht über neue Beratungen in Deiner Nähe benachrichtigt, und die Koordination sieht nicht,
+                                    wie weit Du fahren würdest.
                                 </p>
                             </div>
 
