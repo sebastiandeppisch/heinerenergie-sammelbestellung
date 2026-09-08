@@ -29,13 +29,17 @@ class CalculateCoordinatesForAdvice implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    public function __construct(public Advice $advice)
-    {
-        // The deferred connection runs a job exactly once, right after the
-        // response has been sent. Retrying is the job of the
-        // advices:geocode-pending command.
-        $this->onConnection('deferred');
-    }
+    /**
+     * Retried by the queue where a worker runs, and by the
+     * advices:geocode-pending command everywhere else. The deferred connection
+     * has no persistence, so it never retries on its own.
+     */
+    public int $tries = 3;
+
+    /** @var array<int, int> */
+    public array $backoff = [30, 120, 600];
+
+    public function __construct(public Advice $advice) {}
 
     public function handle(): void
     {

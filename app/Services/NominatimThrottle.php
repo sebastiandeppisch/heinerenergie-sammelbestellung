@@ -39,6 +39,28 @@ class NominatimThrottle
         private readonly float $maxWait,
     ) {}
 
+    public function interval(): float
+    {
+        return $this->interval;
+    }
+
+    public function maxWait(): float
+    {
+        return $this->maxWait;
+    }
+
+    /**
+     * How long a request would have to wait for a free slot right now. Zero
+     * means nothing is queued up. Anything approaching maxWait() means requests
+     * are backing up and will soon be refused.
+     */
+    public function currentWait(): float
+    {
+        $slot = (float) Cache::get(self::NEXT_SLOT_KEY, 0.0);
+
+        return max(0.0, $slot - $this->now());
+    }
+
     /**
      * Blocks until this caller may send its request.
      *

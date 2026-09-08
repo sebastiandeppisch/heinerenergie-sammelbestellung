@@ -15,11 +15,6 @@ beforeEach(function (): void {
     Carbon::setTestNow('2026-09-07 12:00:00');
 });
 
-afterEach(function (): void {
-    Sleep::fake(false);
-    Carbon::setTestNow();
-});
-
 it('lets the first request through without waiting', function (): void {
     new NominatimThrottle(interval: 2.0, maxWait: 10.0)->await();
 

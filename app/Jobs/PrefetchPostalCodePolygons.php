@@ -28,10 +28,7 @@ class PrefetchPostalCodePolygons implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    public function __construct(public string $postalCode)
-    {
-        $this->onConnection('deferred');
-    }
+    public function __construct(public string $postalCode) {}
 
     public function handle(): void
     {

@@ -10,12 +10,20 @@ use App\Exceptions\NominatimUnavailableException;
 use App\Jobs\CalculateCoordinatesForAdvice;
 use App\Models\Advice;
 use App\Models\FormDefinitionToAdvice;
+use App\Models\User;
+use App\Notifications\NewAdviceNearby;
 use App\ValueObjects\Coordinate;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Testing\TestResponse;
+use Symfony\Component\Mailer\Envelope;
+use Symfony\Component\Mailer\SentMessage;
+use Symfony\Component\Mailer\Transport\TransportInterface;
+use Symfony\Component\Mime\RawMessage;
 use Tests\Concerns\AutoAttachesFormEmbedToken;
 
 uses(RefreshDatabase::class, AutoAttachesFormEmbedToken::class);
@@ -83,17 +91,72 @@ it('marks an advice as not found when the geocoder knows no such address', funct
     expect(Advice::first()->geocoding_status)->toBe(GeocodingStatus::NOT_FOUND);
 });
 
-it('queues the geocoding on the deferred connection so it runs after the response', function (): void {
+it('queues the geocoding instead of running it inside the request', function (): void {
     Queue::fake();
 
     submitAdviceForm(FormDefinitionToAdvice::factory()->create())->assertSuccessful();
 
-    // assertPushedOn checks the queue name, the connection has to be asserted
-    // on the job itself.
-    Queue::assertPushed(
-        CalculateCoordinatesForAdvice::class,
-        fn (CalculateCoordinatesForAdvice $job): bool => $job->connection === 'deferred'
-    );
+    Queue::assertPushed(CalculateCoordinatesForAdvice::class);
+});
+
+it('still notifies nearby advisors even though the lookup moved behind the response', function (): void {
+    $this->withDefer();
+
+    $advisor = User::factory()->create([
+        'lat' => 49.8728475,
+        'lng' => 8.6510204,
+        'advice_radius' => 50_000,
+    ]);
+
+    Notification::fake();
+
+    submitAdviceForm(FormDefinitionToAdvice::factory()->create())->assertSuccessful();
+
+    // The notification job runs before the geocoding job, so it has to resolve
+    // the position itself. Releasing would be dropped without a worker.
+    Notification::assertSentTo($advisor, NewAdviceNearby::class);
+});
+
+it('keeps the form submission when the mail server is down', function (): void {
+    $this->withDefer();
+
+    // A real SMTP failure happens in the transport, which the queued mailable
+    // only reaches after the response. On the old sync connection that was
+    // still inside the request and took the whole submission down with it.
+    Mail::extend('failing', fn (): TransportInterface => new class implements TransportInterface
+    {
+        public function send(RawMessage $message, ?Envelope $envelope = null): ?SentMessage
+        {
+            throw new RuntimeException('SMTP connect() failed');
+        }
+
+        public function __toString(): string
+        {
+            return 'failing';
+        }
+    });
+
+    config(['mail.default' => 'failing', 'mail.mailers.failing' => ['transport' => 'failing']]);
+
+    $response = submitAdviceForm(FormDefinitionToAdvice::factory()->create());
+
+    $response->assertSuccessful();
+    $response->assertSessionHasNoErrors();
+
+    expect(Advice::count())->toBe(1);
+});
+
+it('defaults to the deferred connection, so an instance without a worker still works', function (): void {
+    // phpunit.xml deliberately does not set QUEUE_CONNECTION, so this really is
+    // the fallback in config/queue.php that a shared hosting install gets.
+    // Falling back to sync would put the geocoder and the mail server back into
+    // the request.
+    expect($_SERVER['QUEUE_CONNECTION'] ?? null)->toBeNull()
+        ->and(config('queue.default'))->toBe('deferred');
+
+    // The job must not pin a connection, otherwise an instance that does run a
+    // worker could not opt into the durable queue via QUEUE_CONNECTION.
+    expect(new CalculateCoordinatesForAdvice(Advice::factory()->create())->connection)->toBeNull();
 });
 
 it('does not dispatch itself again after a not found result', function (): void {

@@ -85,7 +85,7 @@ it('queues a postal code prefetch without waiting for it', function (): void {
 
     Queue::assertPushed(
         PrefetchPostalCodePolygons::class,
-        fn (PrefetchPostalCodePolygons $job): bool => $job->postalCode === '64283' && $job->connection === 'deferred'
+        fn (PrefetchPostalCodePolygons $job): bool => $job->postalCode === '64283'
     );
 });
 

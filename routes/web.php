@@ -124,6 +124,7 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/system-admin', [SystemAdminController::class, 'index'])->name('system-admin');
         Route::post('/system-admin/migrate', [SystemAdminController::class, 'migrate'])->name('system-admin.migrate');
         Route::post('/system-admin/seed', [SystemAdminController::class, 'seed'])->name('system-admin.seed');
+        Route::post('/system-admin/geocode-pending', [SystemAdminController::class, 'geocodePending'])->name('system-admin.geocode-pending');
     });
 });
 

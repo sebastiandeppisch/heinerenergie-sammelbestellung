@@ -9,11 +9,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class GeocodeAddressRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return $this->user() !== null;
-    }
-
     /**
      * @return array<string, array<int, string>>
      */
