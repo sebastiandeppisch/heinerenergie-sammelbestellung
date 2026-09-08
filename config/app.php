@@ -3,6 +3,7 @@
 use App\Providers\AppServiceProvider;
 use App\Providers\AuthServiceProvider;
 use App\Providers\EventServiceProvider;
+use App\Providers\GeocodingServiceProvider;
 use App\Providers\GroupServiceProvider;
 use App\Providers\InstallServiceProvider;
 use App\Providers\RouteServiceProvider;
@@ -246,6 +247,7 @@ return [
         EventServiceProvider::class,
         RouteServiceProvider::class,
         GroupServiceProvider::class,
+        GeocodingServiceProvider::class,
         TypeScriptTransformerServiceProvider::class,
 
     ],
