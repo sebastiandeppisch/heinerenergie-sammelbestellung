@@ -81,7 +81,7 @@
         "postcss": "^8.5.2",
         "prettier": "^3.4.2",
         "prettier-plugin-organize-imports": "^4.1.0",
-        "prettier-plugin-tailwindcss": "^0.6.11",
+        "prettier-plugin-tailwindcss": "^0.8.1",
         "tailwindcss": "^4.0.6",
         "typescript": "^5.5.4",
         "typescript-eslint": "^8.69.0",
