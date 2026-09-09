@@ -3,8 +3,8 @@ import { Button } from '@/shadcn/components/ui/button';
 import { Combobox, ComboboxAnchor, ComboboxEmpty, ComboboxGroup, ComboboxInput, ComboboxItem, ComboboxList } from '@/shadcn/components/ui/combobox';
 import { Label } from '@/shadcn/components/ui/label';
 import { TagsInput, TagsInputInput, TagsInputItem, TagsInputItemDelete, TagsInputItemText } from '@/shadcn/components/ui/tags-input';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import axios from 'axios';
+import { Info } from 'lucide-vue-next';
 import { useFilter } from 'reka-ui';
 import { computed, onMounted, ref } from 'vue';
 import { toast } from 'vue-sonner';
@@ -119,7 +119,7 @@ async function saveAdvisors() {
 
         <div class="sharing-info">
             <div class="info-icon">
-                <font-awesome-icon icon="fa fa-info-circle" />
+                <Info :size="16" />
             </div>
             <p class="info-text">Du kannst diese Beratung mit anderen Berater*innen teilen, um die Beratung gemeinsam durchzuführen</p>
         </div>

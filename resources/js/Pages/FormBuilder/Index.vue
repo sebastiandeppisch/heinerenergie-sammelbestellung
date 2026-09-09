@@ -7,10 +7,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from '@/shadcn/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { router } from '@inertiajs/vue3';
-import { ChevronDown, Edit, Trash2 } from 'lucide-vue-next';
+import { ChevronDown, Edit, Plus, Trash2 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import { route } from 'ziggy-js';
 
@@ -83,7 +81,7 @@ function openAdviceTemplate() {
                 <DropdownMenu v-if="activeTab === 'forms'">
                     <DropdownMenuTrigger as-child>
                         <Button>
-                            <FontAwesomeIcon :icon="faPlus" />
+                            <Plus class="h-4 w-4" />
                             Neues Formular
                             <ChevronDown class="ml-2 h-4 w-4" />
                         </Button>
@@ -94,7 +92,7 @@ function openAdviceTemplate() {
                     </DropdownMenuContent>
                 </DropdownMenu>
                 <Button v-else @click="createNewChecklist">
-                    <FontAwesomeIcon :icon="faPlus" />
+                    <Plus class="h-4 w-4" />
                     Neue Checkliste
                 </Button>
             </div>
