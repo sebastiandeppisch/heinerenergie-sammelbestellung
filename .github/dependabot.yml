@@ -11,6 +11,10 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
+    groups:
+      tiptap:
+        patterns:
+          - "@tiptap/*"
 
   - package-ecosystem: "github-actions"
     directory: "/"
