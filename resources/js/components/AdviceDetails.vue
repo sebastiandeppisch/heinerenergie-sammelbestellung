@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import otherHelpTypeImage from '@/../img/heinerenergie-hochzeitsturm.svg';
-import { Building2, FileSignature, Home, House, Wrench } from 'lucide-vue-next';
+import { Building2, FileSignature, Home, House, Wrench } from '@lucide/vue';
 
 const props = defineProps<{
     advice: App.Data.DataProtectedAdviceData;

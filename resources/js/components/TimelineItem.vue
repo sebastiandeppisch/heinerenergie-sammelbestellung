@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ChevronDown, ChevronUp, Mail } from 'lucide-vue-next';
+import { ChevronDown, ChevronUp, Mail } from '@lucide/vue';
 import { ref } from 'vue';
 
 const props = defineProps<{

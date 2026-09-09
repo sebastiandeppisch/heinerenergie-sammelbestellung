@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/shadcn/c
 import Input from '@/shadcn/components/ui/input/Input.vue';
 import Label from '@/shadcn/components/ui/label/Label.vue';
 import { useForm } from '@inertiajs/vue3';
-import { AlertTriangle, CheckCircle, Loader2, Mail, Search, Trash2 } from 'lucide-vue-next';
+import { AlertTriangle, CheckCircle, Loader2, Mail, Search, Trash2 } from '@lucide/vue';
 import { ref, watch } from 'vue';
 import { route } from 'ziggy-js';
 

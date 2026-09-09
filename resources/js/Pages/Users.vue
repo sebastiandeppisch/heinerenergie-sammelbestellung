@@ -9,7 +9,7 @@ import { Switch } from '@/shadcn/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import type { CustomPageProps } from '@/types/pageProps';
 import { router, usePage } from '@inertiajs/vue3';
-import { Edit, Key, Plus, UserCheck, UserX } from 'lucide-vue-next';
+import { Edit, Key, Plus, UserCheck, UserX } from '@lucide/vue';
 import { computed, ref, toRef, watch } from 'vue';
 import { toast } from 'vue-sonner';
 import { route } from 'ziggy-js';

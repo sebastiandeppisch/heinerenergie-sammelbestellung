@@ -8,10 +8,10 @@ import { LControl, LControlLayers, LIcon, LLayerGroup, LMap, LMarker, LPopup, LT
 import { Button } from '@/shadcn/components/ui/button';
 import { Input } from '@/shadcn/components/ui/input';
 import { router, usePage } from '@inertiajs/vue3';
+import { ExternalLink, Search, UserCheck } from '@lucide/vue';
 import { LPolygon } from '@vue-leaflet/vue-leaflet';
 import axios from 'axios';
 import { latLng } from 'leaflet';
-import { ExternalLink, Search, UserCheck } from 'lucide-vue-next';
 import { toast } from 'vue-sonner';
 import AdviceTypes from '../AdviceTypes';
 import { isActingAsAdmin, user as userRef } from '../authHelper';

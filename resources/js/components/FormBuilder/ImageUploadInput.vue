@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Button } from '@/shadcn/components/ui/button';
 import { Dialog, DialogContent } from '@/shadcn/components/ui/dialog';
-import { ImageIcon, XIcon } from 'lucide-vue-next';
+import { ImageIcon, XIcon } from '@lucide/vue';
 import { computed, ref } from 'vue';
 
 const props = withDefaults(

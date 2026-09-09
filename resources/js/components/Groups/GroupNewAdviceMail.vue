@@ -29,7 +29,7 @@ import RichTextEditor from '@/components/RichTextEditor.vue';
 import { Button } from '@/shadcn/components/ui/button';
 import { Label } from '@/shadcn/components/ui/label';
 import { useForm } from '@inertiajs/vue3';
-import { Save } from 'lucide-vue-next';
+import { Save } from '@lucide/vue';
 import { reactive, watch } from 'vue';
 import { route } from 'ziggy-js';
 

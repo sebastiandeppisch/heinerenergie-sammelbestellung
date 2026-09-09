@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import { Copy, GripVertical, Trash2 } from '@lucide/vue';
 import { useSortable } from '@vueuse/integrations/useSortable';
-import { Copy, GripVertical, Trash2 } from 'lucide-vue-next';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, ref, useTemplateRef, watch } from 'vue';
 import FormFieldRenderer from './FormFieldRenderer.vue';

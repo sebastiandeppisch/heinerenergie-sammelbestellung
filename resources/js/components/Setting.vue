@@ -5,8 +5,8 @@ import { computed, reactive, ref } from 'vue';
 
 import { Button } from '@/shadcn/components/ui/button';
 import { Input } from '@/shadcn/components/ui/input';
+import { Save, Upload } from '@lucide/vue';
 import axios from 'axios';
-import { Save, Upload } from 'lucide-vue-next';
 import { toast } from 'vue-sonner';
 
 interface Props {

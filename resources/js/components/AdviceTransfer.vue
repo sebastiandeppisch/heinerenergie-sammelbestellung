@@ -5,7 +5,7 @@ import { Label } from '@/shadcn/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { Textarea } from '@/shadcn/components/ui/textarea';
 import { router } from '@inertiajs/vue3';
-import { ArrowRight, Send, TriangleAlert } from 'lucide-vue-next';
+import { ArrowRight, Send, TriangleAlert } from '@lucide/vue';
 import { ref } from 'vue';
 import { toast } from 'vue-sonner';
 

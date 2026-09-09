@@ -8,7 +8,7 @@ import { Input } from '@/shadcn/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';
 import { router } from '@inertiajs/vue3';
-import { ChevronDown, Edit, Plus, Trash2 } from 'lucide-vue-next';
+import { ChevronDown, Edit, Plus, Trash2 } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import { route } from 'ziggy-js';
 

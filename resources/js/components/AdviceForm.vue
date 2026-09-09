@@ -6,7 +6,7 @@ import { RadioGroup, RadioGroupItem } from '@/shadcn/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { Textarea } from '@/shadcn/components/ui/textarea';
 import { useForm } from '@inertiajs/vue3';
-import { Home, Phone, Save, ShoppingCart } from 'lucide-vue-next';
+import { Home, Phone, Save, ShoppingCart } from '@lucide/vue';
 import { toast } from 'vue-sonner';
 import { route } from 'ziggy-js';
 

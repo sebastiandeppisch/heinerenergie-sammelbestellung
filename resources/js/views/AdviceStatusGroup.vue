@@ -5,9 +5,9 @@ import { Input } from '@/shadcn/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { Switch } from '@/shadcn/components/ui/switch';
 import { Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
+import { Pencil, Plus, Trash2 } from '@lucide/vue';
 import { FlexRender, createColumnHelper, getCoreRowModel, getSortedRowModel, useVueTable, type SortingState } from '@tanstack/vue-table';
 import axios from 'axios';
-import { Pencil, Plus, Trash2 } from 'lucide-vue-next';
 import { computed, onMounted, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 

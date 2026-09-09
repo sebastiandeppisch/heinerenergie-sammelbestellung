@@ -18,7 +18,7 @@ import SelectValue from '@/shadcn/components/ui/select/SelectValue.vue';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';
 import { Textarea } from '@/shadcn/components/ui/textarea';
 import { router } from '@inertiajs/vue3';
-import { ArrowUpRightFromSquare } from 'lucide-vue-next';
+import { ArrowUpRightFromSquare } from '@lucide/vue';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, reactive, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';

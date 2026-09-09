@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Badge } from '@/shadcn/components/ui/badge';
 import { router } from '@inertiajs/vue3';
-import { KeyRound } from 'lucide-vue-next';
+import { KeyRound } from '@lucide/vue';
 import { route } from 'ziggy-js';
 import MainPublic from '../layouts/MainPublic.vue';
 import SingleCard from '../layouts/SingleCard.vue';
