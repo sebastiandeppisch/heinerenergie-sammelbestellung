@@ -8,7 +8,7 @@ import { computed, ref } from 'vue';
 
 import MapPointCategory from '@/components/MapPointCategory.vue';
 import Card from '@/shadcn/components/ui/card/Card.vue';
-import { Map, Pencil, Plus, Trash } from 'lucide-vue-next';
+import { Map, Pencil, Plus, Trash } from '@lucide/vue';
 import { toast } from 'vue-sonner';
 import { route } from 'ziggy-js';
 

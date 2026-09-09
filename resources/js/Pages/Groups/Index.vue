@@ -115,7 +115,7 @@ import { Button } from '@/shadcn/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shadcn/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';
 import AdviceStatusGroup from '@/views/AdviceStatusGroup.vue';
-import { Cloud, Info, Mail, Map, Plus, Table, Users } from 'lucide-vue-next';
+import { Cloud, Info, Mail, Map, Plus, Table, Users } from '@lucide/vue';
 import { computed, onMounted, ref, watch } from 'vue';
 import { route } from 'ziggy-js';
 

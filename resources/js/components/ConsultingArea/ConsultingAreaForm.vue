@@ -3,7 +3,7 @@ import PolygonMap from '@/components/PolygonMap.vue';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/shadcn/components/ui/accordion';
 import { Button } from '@/shadcn/components/ui/button';
 import { useForm } from '@inertiajs/vue3';
-import { ArrowLeft, MapPinned, PencilRuler, Save, Trash2 } from 'lucide-vue-next';
+import { ArrowLeft, MapPinned, PencilRuler, Save, Trash2 } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 import { route } from 'ziggy-js';
 import PostalCodeAreaPanel from './PostalCodeAreaPanel.vue';

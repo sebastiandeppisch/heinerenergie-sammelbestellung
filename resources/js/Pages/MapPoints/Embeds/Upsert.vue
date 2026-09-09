@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/shadcn/components/ui/switch';
 import type { CustomPageProps } from '@/types/pageProps';
 import { router, useForm, usePage } from '@inertiajs/vue3';
-import { ArrowLeft, ExternalLink } from 'lucide-vue-next';
+import { ArrowLeft, ExternalLink } from '@lucide/vue';
 import { computed, reactive, watch } from 'vue';
 import { route } from 'ziggy-js';
 

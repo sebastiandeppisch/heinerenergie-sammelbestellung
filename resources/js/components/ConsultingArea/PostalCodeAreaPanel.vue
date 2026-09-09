@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Button } from '@/shadcn/components/ui/button';
 import { TagsInput, TagsInputInput, TagsInputItem, TagsInputItemDelete, TagsInputItemText } from '@/shadcn/components/ui/tags-input';
+import { Download, TriangleAlert } from '@lucide/vue';
 import axios, { AxiosError } from 'axios';
-import { Download, TriangleAlert } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import { route } from 'ziggy-js';
 

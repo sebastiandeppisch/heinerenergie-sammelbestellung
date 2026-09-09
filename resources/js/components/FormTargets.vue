@@ -9,7 +9,7 @@ import SelectContent from '@/shadcn/components/ui/select/SelectContent.vue';
 import SelectItem from '@/shadcn/components/ui/select/SelectItem.vue';
 import SelectTrigger from '@/shadcn/components/ui/select/SelectTrigger.vue';
 import SelectValue from '@/shadcn/components/ui/select/SelectValue.vue';
-import { AlertTriangle, CheckCircle, XCircle } from 'lucide-vue-next';
+import { AlertTriangle, CheckCircle, XCircle } from '@lucide/vue';
 import { computed } from 'vue';
 type FormDefinitionData = App.Data.FormDefinitionData;
 

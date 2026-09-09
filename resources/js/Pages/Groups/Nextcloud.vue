@@ -7,7 +7,7 @@ import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { router } from '@inertiajs/vue3';
-import { ArrowLeft, UserCheck, UserPlus } from 'lucide-vue-next';
+import { ArrowLeft, UserCheck, UserPlus } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import { route } from 'ziggy-js';
 

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ChevronDown, ChevronUp, Mail } from '@lucide/vue';
 import { ref } from 'vue';
 
 const props = defineProps<{
@@ -30,7 +31,7 @@ function parseEmail(emailString: string[] | null): string {
             {{ props.event.initials }}
         </div>
         <div v-else-if="isMail" class="timeline-avatar timeline-avatar-mail">
-            <i class="dx-icon-email"></i>
+            <Mail :size="18" />
         </div>
         <div class="timeline-content" :class="{ 'timeline-content-system': isSystem, 'timeline-content-mail': isMail }">
             <div class="timeline-header">
@@ -43,7 +44,8 @@ function parseEmail(emailString: string[] | null): string {
                     <div><strong>Betreff:</strong> {{ props.event.subject }}</div>
                 </div>
                 <div v-else style="white-space: pre-line">{{ props.event.description }}</div>
-                <i v-if="isMail" :class="isExpanded ? 'dx-icon-chevronup' : 'dx-icon-chevrondown'" class="expand-icon"></i>
+                <ChevronUp v-if="isMail && isExpanded" :size="12" class="expand-icon" />
+                <ChevronDown v-if="isMail && !isExpanded" :size="12" class="expand-icon" />
             </div>
             <!-- E-Mail Content -->
             <div v-if="isMail && isExpanded" class="timeline-mail-content">
