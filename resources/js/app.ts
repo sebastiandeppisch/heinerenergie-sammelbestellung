@@ -1,10 +1,7 @@
-import '../css/app.css';
-import './bootstrap';
-//import 'devextreme/dist/css/dx.common.css';
 import { createApp, DefineComponent, h } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
-import './themes/generated/theme.additional.css';
-import './themes/generated/theme.base.css';
+import '../css/app.css';
+import './bootstrap';
 
 import { createInertiaApp } from '@inertiajs/vue3';
 

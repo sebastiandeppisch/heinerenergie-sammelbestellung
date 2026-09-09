@@ -39,8 +39,6 @@
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "core-js": "^3.8.3",
-        "devextreme": "^21.2.12",
-        "devextreme-vue": "^21.2.12",
         "leaflet": "^1.7.1",
         "leaflet-draw": "^0.4.0",
         "leaflet-draw-toolbar": "^0.3.0-alpha.1",

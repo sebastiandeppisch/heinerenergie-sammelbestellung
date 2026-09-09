@@ -166,7 +166,7 @@ function getAdvisorMarker(): string {
                 <LControlLayers :collapsed="false" :hide-single-base="true" />
                 <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" layer-type="base" name="OpenStreetMap" />
                 <LControl position="topleft">
-                    <div class="dx-card">
+                    <div class="rounded-xl border bg-card p-3 text-card-foreground shadow-sm">
                         <div style="display: flex; gap: 4px">
                             <Input placeholder="Springe zu Adresse" v-model="search" @keyup.enter="runSearch" />
                             <Button variant="outline" @click="runSearch" size="icon">
@@ -176,7 +176,7 @@ function getAdvisorMarker(): string {
                     </div>
                 </LControl>
                 <LControl position="bottomleft">
-                    <div class="dx-card" style="width: fit-content">
+                    <div class="rounded-xl border bg-card text-card-foreground shadow-sm" style="width: fit-content">
                         <div style="display: flex; flex-direction: row">
                             <div style="display: flex; flex-direction: column; margin: 10px">
                                 <div><b>Freie Beratungen</b></div>

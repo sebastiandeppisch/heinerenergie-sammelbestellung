@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useSortable } from '@vueuse/integrations/useSortable';
+import { Copy, GripVertical, Trash2 } from 'lucide-vue-next';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, ref, useTemplateRef, watch } from 'vue';
 import FormFieldRenderer from './FormFieldRenderer.vue';
@@ -87,15 +88,15 @@ const { option } = useSortable(fieldsContainer, fields, {
             >
                 <div class="field-header">
                     <div class="field-drag-handle">
-                        <i class="dx-icon-menu"></i>
+                        <GripVertical :size="16" />
                     </div>
                     <div class="field-title">{{ field.label || 'Unnamed Field' }}</div>
                     <div class="field-actions">
                         <button @click.stop="deleteField(field)" title="Delete field" class="field-action-button">
-                            <i class="dx-icon-trash"></i>
+                            <Trash2 :size="16" />
                         </button>
                         <button @click.stop="duplicateField(field)" title="Duplicate field" class="field-action-button">
-                            <i class="dx-icon-copy"></i>
+                            <Copy :size="16" />
                         </button>
                     </div>
                 </div>
