@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Enums\GeocodingStatus;
+use App\Exceptions\DatabaseBackupException;
 use App\Models\Advice;
+use App\Services\DatabaseBackupService;
 use App\Services\NominatimThrottle;
 use Exception;
 use Illuminate\Http\RedirectResponse;
@@ -14,9 +16,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class SystemAdminController extends Controller
 {
+    public function __construct(private readonly DatabaseBackupService $backups) {}
+
     /**
      * Show the system admin page
      */
@@ -31,6 +36,8 @@ class SystemAdminController extends Controller
             'seedResult' => $seedResult,
             'geocodingResult' => $geocodingResult,
             'geocoding' => $this->geocodingStatus(),
+            'backups' => $this->backups->all(),
+            'backupsSupported' => $this->backups->isSupported(),
         ]);
     }
 
@@ -159,5 +166,66 @@ class SystemAdminController extends Controller
 
             return redirect()->route('system-admin')->with('error', 'Fehler beim Ausführen des Seedings: '.$e->getMessage());
         }
+    }
+
+    /**
+     * Creates a full database dump. Downloading it is a separate, deliberate
+     * step, because the file contains every password hash and all personal
+     * data in the application.
+     */
+    public function createBackup(): RedirectResponse
+    {
+        try {
+            Log::info('System admin creating a database backup', [
+                'user' => Auth::user()?->email,
+            ]);
+
+            $backup = $this->backups->create();
+
+            return redirect()->route('system-admin')
+                ->with('success', 'Backup erstellt: '.$backup['name']);
+        } catch (Exception $e) {
+            Log::error('Error creating a database backup', [
+                'error' => $e->getMessage(),
+                'user' => Auth::user()?->email,
+            ]);
+
+            return redirect()->route('system-admin')
+                ->with('error', 'Fehler beim Erstellen des Backups: '.$e->getMessage());
+        }
+    }
+
+    public function downloadBackup(string $backup): BinaryFileResponse
+    {
+        try {
+            $path = $this->backups->path($backup);
+        } catch (DatabaseBackupException) {
+            // A name this service never generated, or a backup that is already
+            // gone. Either way there is nothing to hand out.
+            abort(404);
+        }
+
+        Log::info('System admin downloading a database backup', [
+            'user' => Auth::user()?->email,
+            'backup' => $backup,
+        ]);
+
+        return response()->download($path, $backup);
+    }
+
+    public function deleteBackup(string $backup): RedirectResponse
+    {
+        Log::info('System admin deleting a database backup', [
+            'user' => Auth::user()?->email,
+            'backup' => $backup,
+        ]);
+
+        try {
+            $this->backups->delete($backup);
+        } catch (DatabaseBackupException) {
+            abort(404);
+        }
+
+        return redirect()->route('system-admin')->with('success', 'Backup gelöscht');
     }
 }

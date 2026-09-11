@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Contracts\DatabaseDumperContract;
 use App\Contracts\MailCredentialsRepository;
 use App\Contracts\MailServiceContract;
 use App\Contracts\NextcloudFileClientContract;
@@ -14,7 +15,9 @@ use App\Nextcloud\WebDavNextcloudFileClient;
 use App\Repositories\SessionMailCredentialsRepository;
 use App\Services\CurrentGroupService;
 use App\Services\MailService;
+use App\Services\MysqlDumper;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Opcodes\LogViewer\Facades\LogViewer;
 use Override;
@@ -29,6 +32,12 @@ class AppServiceProvider extends ServiceProvider
     #[Override]
     public function register(): void
     {
+        $this->app->bind(
+            DatabaseDumperContract::class,
+            // The default connection is not autowirable, so it is resolved here.
+            fn (): MysqlDumper => new MysqlDumper(DB::connection()),
+        );
+
         $this->app->bind(
             MailCredentialsRepository::class,
             SessionMailCredentialsRepository::class,

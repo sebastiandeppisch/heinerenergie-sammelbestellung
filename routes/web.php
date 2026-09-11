@@ -125,6 +125,9 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/system-admin/migrate', [SystemAdminController::class, 'migrate'])->name('system-admin.migrate');
         Route::post('/system-admin/seed', [SystemAdminController::class, 'seed'])->name('system-admin.seed');
         Route::post('/system-admin/geocode-pending', [SystemAdminController::class, 'geocodePending'])->name('system-admin.geocode-pending');
+        Route::post('/system-admin/backups', [SystemAdminController::class, 'createBackup'])->name('system-admin.backups.create');
+        Route::get('/system-admin/backups/{backup}', [SystemAdminController::class, 'downloadBackup'])->name('system-admin.backups.download');
+        Route::delete('/system-admin/backups/{backup}', [SystemAdminController::class, 'deleteBackup'])->name('system-admin.backups.destroy');
     });
 });
 
