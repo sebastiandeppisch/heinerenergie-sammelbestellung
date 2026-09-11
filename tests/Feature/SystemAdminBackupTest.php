@@ -205,12 +205,12 @@ it('does not offer a backup while its dump is still being written', function ():
     $listedDuringDump = null;
     $filesDuringDump = null;
 
-    app()->instance(DatabaseDumperContract::class, new class(function () use (&$listedDuringDump, &$filesDuringDump): void {
+    app()->instance(DatabaseDumperContract::class, new readonly class(function () use (&$listedDuringDump, &$filesDuringDump): void {
         $listedDuringDump = app(DatabaseBackupService::class)->all();
         $filesDuringDump = storedBackups();
     }) implements DatabaseDumperContract
     {
-        public function __construct(private readonly Closure $duringDump) {}
+        public function __construct(private Closure $duringDump) {}
 
         public function supportsCurrentConnection(): bool
         {

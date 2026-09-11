@@ -75,7 +75,7 @@ function dumpScratch(Connection $connection): string
 {
     $sql = '';
 
-    (new MysqlDumper($connection))->dump(function (string $chunk) use (&$sql): void {
+    new MysqlDumper($connection)->dump(function (string $chunk) use (&$sql): void {
         $sql .= $chunk;
     });
 
@@ -395,7 +395,7 @@ it('reads every table from the same snapshot', function (): void {
     $writer = scratchConnection('dumper_writer');
     $sql = '';
 
-    (new MysqlDumper($connection))->dump(function (string $chunk) use (&$sql, $writer): void {
+    new MysqlDumper($connection)->dump(function (string $chunk) use (&$sql, $writer): void {
         $sql .= $chunk;
 
         if (str_contains($chunk, 'INSERT INTO `order_lines`')) {
@@ -416,7 +416,7 @@ it('refuses a connection it cannot dump', function (): void {
     config(['database.connections.dumper_sqlite' => ['driver' => 'sqlite', 'database' => ':memory:']]);
     $sqlite = DB::connection('dumper_sqlite');
 
-    expect((new MysqlDumper($sqlite))->supportsCurrentConnection())->toBeFalse();
+    expect(new MysqlDumper($sqlite)->supportsCurrentConnection())->toBeFalse();
 
-    (new MysqlDumper($sqlite))->dump(fn (string $chunk) => null);
+    new MysqlDumper($sqlite)->dump(fn (string $chunk): null => null);
 })->throws(DatabaseBackupException::class);

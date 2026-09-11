@@ -2,8 +2,8 @@
 import { Button } from '@/shadcn/components/ui/button';
 import Card from '@/shadcn/components/ui/card/Card.vue';
 import { router } from '@inertiajs/vue3';
+import { Database, Download, HardDrive, MapPin, Terminal, Trash2 } from '@lucide/vue';
 import { computed, ref } from 'vue';
-import {Database, Download, HardDrive, MapPin, Terminal, Trash2 } from '@lucide/vue';
 import { route } from 'ziggy-js';
 
 interface CommandResult {

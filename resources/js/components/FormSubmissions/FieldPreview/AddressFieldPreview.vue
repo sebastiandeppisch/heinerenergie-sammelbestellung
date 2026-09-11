@@ -2,8 +2,8 @@
 import Tooltip from '@/shadcn/components/ui/tooltip/Tooltip.vue';
 import TooltipContent from '@/shadcn/components/ui/tooltip/TooltipContent.vue';
 import TooltipTrigger from '@/shadcn/components/ui/tooltip/TooltipTrigger.vue';
-import axios from 'axios';
 import { MapPin } from '@lucide/vue';
+import axios from 'axios';
 import { computed, ref } from 'vue';
 import { route } from 'ziggy-js';
 

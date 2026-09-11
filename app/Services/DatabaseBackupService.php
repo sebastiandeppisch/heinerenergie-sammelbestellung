@@ -19,7 +19,7 @@ use Throwable;
  */
 class DatabaseBackupService
 {
-    private const DIRECTORY = 'backups';
+    private const string DIRECTORY = 'backups';
 
     /**
      * Only names this service generated itself are ever opened again. Without
@@ -30,7 +30,7 @@ class DatabaseBackupService
      * ever serve the storage directory directly, knowing roughly when a backup
      * was made must not be enough to download it.
      */
-    private const NAME_PATTERN = '/^backup-\d{4}-\d{2}-\d{2}_\d{6}-[0-9a-f]{16}\.sql\.gz$/';
+    private const string NAME_PATTERN = '/^backup-\d{4}-\d{2}-\d{2}_\d{6}-[0-9a-f]{16}\.sql\.gz$/';
 
     /**
      * A dump is written under this suffix and only renamed once it is
@@ -38,13 +38,13 @@ class DatabaseBackupService
      * cleanup in create(), and what it leaves behind must not look like a
      * usable backup.
      */
-    private const PARTIAL_SUFFIX = '.part';
+    private const string PARTIAL_SUFFIX = '.part';
 
     /**
      * Remains of dumps that died this long ago are removed on the next run. No
      * request on shared hosting lives anywhere near that long.
      */
-    private const STALE_PARTIAL_SECONDS = 3600;
+    private const int STALE_PARTIAL_SECONDS = 3600;
 
     public function __construct(private readonly DatabaseDumperContract $dumper) {}
 
