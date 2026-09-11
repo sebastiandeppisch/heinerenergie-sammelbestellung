@@ -254,8 +254,11 @@ export type MapPointCategoryData = {
 id: string,
 name: string,
 image_path: string | null,
+group_id: string,
+group_name: string,
 map_points_count: number,
 created_at: string | null,
+can_edit: boolean,
 };
 export type MapPointData = {
 id: string,
@@ -265,6 +268,7 @@ description: string,
 published: boolean,
 userReadablePointableType: string,
 created_at: string,
+group_id: string,
 category_id: string | null,
 location: string | null,
 };

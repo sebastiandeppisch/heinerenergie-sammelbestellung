@@ -110,6 +110,30 @@ class Group extends Model
     }
 
     /**
+     * @return HasMany<MapPoint, $this>
+     */
+    public function mapPoints(): HasMany
+    {
+        return $this->hasMany(MapPoint::class);
+    }
+
+    /**
+     * @return HasMany<MapPointCategory, $this>
+     */
+    public function mapPointCategories(): HasMany
+    {
+        return $this->hasMany(MapPointCategory::class);
+    }
+
+    /**
+     * @return HasMany<MapEmbed, $this>
+     */
+    public function mapEmbeds(): HasMany
+    {
+        return $this->hasMany(MapEmbed::class);
+    }
+
+    /**
      * Check if this group is a main group (no parent)
      */
     public function isMainGroup(): bool
@@ -203,6 +227,18 @@ class Group extends Model
     }
 
     /**
+     * The ids of this group and all of its descendants.
+     *
+     * @return array<int, int>
+     */
+    public function getSubtreeIds(): array
+    {
+        return [$this->id, ...$this->descendants()->pluck('id')->all()];
+    }
+
+    /**
+     * The ids of this group and all of its ancestors.
+     *
      * @return array<int, int>
      */
     public function getHierarchyIds(): array

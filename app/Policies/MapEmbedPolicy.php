@@ -31,12 +31,12 @@ class MapEmbedPolicy
 
     public function update(User $user, MapEmbed $mapEmbed): bool
     {
-        return $this->isGroupAdmin($user);
+        return $this->groupContext->isActingAsTransitiveAdmin($user, $mapEmbed->group);
     }
 
     public function delete(User $user, MapEmbed $mapEmbed): bool
     {
-        return $this->isGroupAdmin($user);
+        return $this->groupContext->isActingAsTransitiveAdmin($user, $mapEmbed->group);
     }
 
     /**

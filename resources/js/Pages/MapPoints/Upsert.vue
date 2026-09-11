@@ -7,7 +7,8 @@ import { Label } from '@/shadcn/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { Switch } from '@/shadcn/components/ui/switch';
 import { Textarea } from '@/shadcn/components/ui/textarea';
-import { router, useForm } from '@inertiajs/vue3';
+import type { CustomPageProps } from '@/types/pageProps';
+import { router, useForm, usePage } from '@inertiajs/vue3';
 import { ArrowLeft } from '@lucide/vue';
 import axios from 'axios';
 import { computed, ref, watch } from 'vue';
@@ -16,9 +17,13 @@ import { route } from 'ziggy-js';
 const props = defineProps<{
     mapPoint?: App.Data.MapPointData;
     categories?: Array<App.Data.MapPointCategoryData>;
+    groups: Array<App.Data.GroupBaseData>;
+    usableCategoryIdsByGroup: Record<string, Array<string>>;
 }>();
 
 const isEditing = !!props.mapPoint;
+
+const page = usePage<CustomPageProps>();
 
 const defaultMapPoint: App.Data.MapPointData = {
     id: '',
@@ -28,11 +33,29 @@ const defaultMapPoint: App.Data.MapPointData = {
     published: false,
     userReadablePointableType: '',
     created_at: '',
+    /** New points default to the initiative the admin is currently acting for. */
+    group_id: page.props.auth.currentGroup?.id ?? props.groups[0]?.id ?? '',
     category_id: null,
     location: null,
 };
 
 const form = useForm<App.Data.MapPointData>(props.mapPoint || defaultMapPoint);
+
+/** Only categories of the selected initiative and its parent initiatives can be assigned. */
+const availableCategories = computed(() => {
+    const usableCategoryIds = props.usableCategoryIdsByGroup[form.group_id] ?? [];
+
+    return (props.categories ?? []).filter((category) => usableCategoryIds.includes(category.id));
+});
+
+watch(
+    () => form.group_id,
+    () => {
+        if (form.category_id !== null && !availableCategories.value.some((category) => category.id === form.category_id)) {
+            form.category_id = null;
+        }
+    },
+);
 
 const isFetchingLocation = ref(false);
 
@@ -138,13 +161,29 @@ const errors: Record<string, string> = form.errors;
                     </div>
 
                     <div class="space-y-2">
+                        <Label for="group_id">Initiative</Label>
+                        <Select id="group_id" v-model="form.group_id">
+                            <SelectTrigger>
+                                <SelectValue placeholder="Wähle eine Initiative aus" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem v-for="group in groups" :key="group.id" :value="group.id">
+                                    {{ group.name }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <p v-if="errors.group_id" class="text-sm text-red-500">{{ errors.group_id }}</p>
+                        <p class="text-xs text-gray-500">Der Punkt ist für diese Initiative und alle übergeordneten Initiativen sichtbar.</p>
+                    </div>
+
+                    <div class="space-y-2">
                         <Label for="category">Kategorie</Label>
                         <Select v-model="form.category_id">
                             <SelectTrigger>
                                 <SelectValue placeholder="Kategorie wählen (optional)" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem v-for="category in props.categories" :key="category.id" :value="category.id">
+                                <SelectItem v-for="category in availableCategories" :key="category.id" :value="category.id">
                                     <div class="flex items-center gap-2">
                                         <div v-if="category.image_path" class="h-4 w-4 flex-shrink-0 overflow-hidden rounded bg-gray-100">
                                             <img :src="category.image_path" :alt="category.name" class="h-full w-full object-cover" />
@@ -154,6 +193,7 @@ const errors: Record<string, string> = form.errors;
                                 </SelectItem>
                             </SelectContent>
                         </Select>
+                        <p v-if="errors.category_id" class="text-sm text-red-500">{{ errors.category_id }}</p>
                     </div>
 
                     <div class="flex items-center space-x-2">

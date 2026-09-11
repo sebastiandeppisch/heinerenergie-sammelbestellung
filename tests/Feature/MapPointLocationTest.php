@@ -27,6 +27,7 @@ test('a map point can be created with a location', function (): void {
         ->post(route('mappoints.store'), [
             'title' => 'Test Point',
             'description' => 'Test description',
+            'group_id' => $this->group->uuid,
             'coordinate' => ['lat' => 52.5, 'lng' => 13.4],
             'published' => true,
             'category_id' => null,
@@ -48,6 +49,7 @@ test('a map point location can be updated', function (): void {
     $response = $this->actingAs($this->admin)
         ->put(route('mappoints.update', $mapPoint), [
             'title' => $mapPoint->title,
+            'group_id' => $mapPoint->group->uuid,
             'description' => $mapPoint->description,
             'coordinate' => ['lat' => 52.5, 'lng' => 13.4],
             'published' => $mapPoint->published,

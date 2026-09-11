@@ -12,7 +12,11 @@ const props = defineProps<{
 }>();
 
 function deleteCategory(categoryId: string) {
-    if (confirm('Sind Sie sicher, dass Sie diese Kategorie löschen möchten?')) {
+    if (
+        confirm(
+            'Sind Sie sicher, dass Sie diese Kategorie löschen möchten? Kartenpunkte aller Initiativen, die diese Kategorie nutzen, verlieren sie dabei.',
+        )
+    ) {
         router.delete(route('mappoint-categories.destroy', categoryId));
     }
 }
@@ -47,6 +51,7 @@ function deleteCategory(categoryId: string) {
                             <TableRow>
                                 <TableHead>Bild</TableHead>
                                 <TableHead>Name</TableHead>
+                                <TableHead>Initiative</TableHead>
                                 <TableHead>Kartenpunkte</TableHead>
                                 <TableHead>Erstellt</TableHead>
                                 <TableHead class="text-right">Aktionen</TableHead>
@@ -68,6 +73,9 @@ function deleteCategory(categoryId: string) {
                                 <TableCell class="font-medium">
                                     {{ category.name }}
                                 </TableCell>
+                                <TableCell class="text-gray-600">
+                                    {{ category.group_name }}
+                                </TableCell>
                                 <TableCell>
                                     <Badge variant="secondary"> {{ category.map_points_count }} Punkte </Badge>
                                 </TableCell>
@@ -75,7 +83,7 @@ function deleteCategory(categoryId: string) {
                                     {{ category.created_at ? new Date(category.created_at).toLocaleDateString('de-DE') : '-' }}
                                 </TableCell>
                                 <TableCell class="text-right">
-                                    <div class="flex justify-end gap-2">
+                                    <div v-if="category.can_edit" class="flex justify-end gap-2">
                                         <Button variant="outline" size="sm" @click="router.visit(route('mappoint-categories.edit', category.id))">
                                             <Edit class="h-4 w-4" />
                                         </Button>
@@ -83,11 +91,18 @@ function deleteCategory(categoryId: string) {
                                             <Trash2 class="h-4 w-4" />
                                         </Button>
                                     </div>
+                                    <Badge
+                                        v-else
+                                        variant="outline"
+                                        title="Diese Kategorie gehört einer übergeordneten Initiative und kann hier nur genutzt werden."
+                                    >
+                                        Geerbt
+                                    </Badge>
                                 </TableCell>
                             </TableRow>
 
                             <TableRow v-if="categories.length === 0">
-                                <TableCell colspan="5" class="py-8 text-center text-gray-500"> Noch keine Kategorien erstellt </TableCell>
+                                <TableCell colspan="6" class="py-8 text-center text-gray-500"> Noch keine Kategorien erstellt </TableCell>
                             </TableRow>
                         </TableBody>
                     </Table>

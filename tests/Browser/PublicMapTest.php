@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Group;
 use App\Models\MapEmbed;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
@@ -7,11 +8,15 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-test('public map page does not overflow the viewport height', function (): void {
-    $category = MapPointCategory::factory()->withoutImage()->create();
-    MapPoint::factory()->create(['published' => true, 'category_id' => $category->id]);
+beforeEach(function (): void {
+    $this->group = Group::factory()->create();
+});
 
-    $mapEmbed = MapEmbed::factory()->create();
+test('public map page does not overflow the viewport height', function (): void {
+    $category = MapPointCategory::factory()->for($this->group)->withoutImage()->create();
+    MapPoint::factory()->for($this->group)->create(['published' => true, 'category_id' => $category->id]);
+
+    $mapEmbed = MapEmbed::factory()->for($this->group)->create();
     $mapEmbed->mapPointCategories()->sync([$category->id]);
 
     $page = visit(route('map.public', $mapEmbed))
@@ -26,12 +31,12 @@ test('public map page does not overflow the viewport height', function (): void 
 });
 
 test('toggling a category checkbox on the public map causes no javascript errors', function (): void {
-    $categoryA = MapPointCategory::factory()->withoutImage()->create(['name' => 'Ladesäulen']);
-    $categoryB = MapPointCategory::factory()->withoutImage()->create(['name' => 'Beratungsstellen']);
-    MapPoint::factory()->create(['published' => true, 'category_id' => $categoryA->id]);
-    MapPoint::factory()->create(['published' => true, 'category_id' => $categoryB->id]);
+    $categoryA = MapPointCategory::factory()->for($this->group)->withoutImage()->create(['name' => 'Ladesäulen']);
+    $categoryB = MapPointCategory::factory()->for($this->group)->withoutImage()->create(['name' => 'Beratungsstellen']);
+    MapPoint::factory()->for($this->group)->create(['published' => true, 'category_id' => $categoryA->id]);
+    MapPoint::factory()->for($this->group)->create(['published' => true, 'category_id' => $categoryB->id]);
 
-    $mapEmbed = MapEmbed::factory()->create();
+    $mapEmbed = MapEmbed::factory()->for($this->group)->create();
     $mapEmbed->mapPointCategories()->sync([$categoryA->id, $categoryB->id]);
 
     visit(route('map.public', $mapEmbed))
@@ -43,15 +48,15 @@ test('toggling a category checkbox on the public map causes no javascript errors
 });
 
 test('switching to the table tab and searching causes no javascript errors', function (): void {
-    $category = MapPointCategory::factory()->withoutImage()->create(['name' => 'Ladesäulen']);
-    MapPoint::factory()->create([
+    $category = MapPointCategory::factory()->for($this->group)->withoutImage()->create(['name' => 'Ladesäulen']);
+    MapPoint::factory()->for($this->group)->create([
         'published' => true,
         'category_id' => $category->id,
         'title' => 'Solaranlage Nord',
         'location' => 'Musterstraße 1, 64283 Darmstadt',
     ]);
 
-    $mapEmbed = MapEmbed::factory()->create();
+    $mapEmbed = MapEmbed::factory()->for($this->group)->create();
     $mapEmbed->mapPointCategories()->sync([$category->id]);
 
     visit(route('map.public', $mapEmbed))
@@ -66,10 +71,10 @@ test('switching to the table tab and searching causes no javascript errors', fun
 });
 
 test('the map uses the custom shadcn zoom control instead of the default leaflet one', function (): void {
-    $category = MapPointCategory::factory()->withoutImage()->create();
-    MapPoint::factory()->create(['published' => true, 'category_id' => $category->id]);
+    $category = MapPointCategory::factory()->for($this->group)->withoutImage()->create();
+    MapPoint::factory()->for($this->group)->create(['published' => true, 'category_id' => $category->id]);
 
-    $mapEmbed = MapEmbed::factory()->create(['zoom' => 10]);
+    $mapEmbed = MapEmbed::factory()->for($this->group)->create(['zoom' => 10]);
     $mapEmbed->mapPointCategories()->sync([$category->id]);
 
     visit(route('map.public', $mapEmbed))
@@ -81,10 +86,10 @@ test('the map uses the custom shadcn zoom control instead of the default leaflet
 });
 
 test('the table tab is hidden when disabled for the embed', function (): void {
-    $category = MapPointCategory::factory()->withoutImage()->create();
-    MapPoint::factory()->create(['published' => true, 'category_id' => $category->id]);
+    $category = MapPointCategory::factory()->for($this->group)->withoutImage()->create();
+    MapPoint::factory()->for($this->group)->create(['published' => true, 'category_id' => $category->id]);
 
-    $mapEmbed = MapEmbed::factory()->create(['show_table' => false]);
+    $mapEmbed = MapEmbed::factory()->for($this->group)->create(['show_table' => false]);
     $mapEmbed->mapPointCategories()->sync([$category->id]);
 
     visit(route('map.public', $mapEmbed))
@@ -93,8 +98,8 @@ test('the table tab is hidden when disabled for the embed', function (): void {
 });
 
 test('the location text in the table links to the map and shows a map preview on hover', function (): void {
-    $category = MapPointCategory::factory()->withoutImage()->create();
-    MapPoint::factory()->create([
+    $category = MapPointCategory::factory()->for($this->group)->withoutImage()->create();
+    MapPoint::factory()->for($this->group)->create([
         'published' => true,
         'category_id' => $category->id,
         'title' => 'Punkt mit Ort',
@@ -103,7 +108,7 @@ test('the location text in the table links to the map and shows a map preview on
         'lng' => 8.65102,
     ]);
 
-    $mapEmbed = MapEmbed::factory()->create();
+    $mapEmbed = MapEmbed::factory()->for($this->group)->create();
     $mapEmbed->mapPointCategories()->sync([$category->id]);
 
     visit(route('map.public', $mapEmbed))
@@ -116,8 +121,8 @@ test('the location text in the table links to the map and shows a map preview on
 });
 
 test('the table shows the coordinates instead of a dash when a point has no location', function (): void {
-    $category = MapPointCategory::factory()->withoutImage()->create();
-    MapPoint::factory()->create([
+    $category = MapPointCategory::factory()->for($this->group)->withoutImage()->create();
+    MapPoint::factory()->for($this->group)->create([
         'published' => true,
         'category_id' => $category->id,
         'title' => 'Punkt ohne Ort',
@@ -126,7 +131,7 @@ test('the table shows the coordinates instead of a dash when a point has no loca
         'lng' => 8.65102,
     ]);
 
-    $mapEmbed = MapEmbed::factory()->create();
+    $mapEmbed = MapEmbed::factory()->for($this->group)->create();
     $mapEmbed->mapPointCategories()->sync([$category->id]);
 
     visit(route('map.public', $mapEmbed))

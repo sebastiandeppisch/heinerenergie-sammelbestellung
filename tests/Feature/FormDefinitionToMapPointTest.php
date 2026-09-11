@@ -37,6 +37,7 @@ test('submitting the form produces a map point', function (): void {
 
     $mapPoint = MapPoint::first();
     $this->assertFalse($mapPoint->published); // should be unpublished initially
+    expect($mapPoint->group_id)->toBe($form->group_id);
 });
 
 test('submitting the form fires map point created event', function (): void {

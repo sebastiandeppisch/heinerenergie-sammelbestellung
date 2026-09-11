@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Models\MapPointCategory;
+use App\Models\MapPoint;
 use App\Models\User;
 use App\Policies\Concerns\GroupContextHelper;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class MapPointCategoryPolicy
+class MapPointPolicy
 {
     use GroupContextHelper;
     use HandlesAuthorization;
@@ -19,28 +19,19 @@ class MapPointCategoryPolicy
         return $this->isGroupAdmin($user);
     }
 
-    public function view(User $user, MapPointCategory $category): bool
-    {
-        return $this->isGroupAdmin($user);
-    }
-
     public function create(User $user): bool
     {
         return $this->isGroupAdmin($user);
     }
 
-    /**
-     * Categories inherited from an ancestor group can be used, but only admins of the
-     * owning group (or its ancestors) may change them.
-     */
-    public function update(User $user, MapPointCategory $category): bool
+    public function update(User $user, MapPoint $mapPoint): bool
     {
-        return $this->groupContext->isActingAsTransitiveAdmin($user, $category->group);
+        return $this->groupContext->isActingAsTransitiveAdmin($user, $mapPoint->group);
     }
 
-    public function delete(User $user, MapPointCategory $category): bool
+    public function delete(User $user, MapPoint $mapPoint): bool
     {
-        return $this->groupContext->isActingAsTransitiveAdmin($user, $category->group);
+        return $this->groupContext->isActingAsTransitiveAdmin($user, $mapPoint->group);
     }
 
     /**
