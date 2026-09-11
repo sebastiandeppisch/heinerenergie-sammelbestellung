@@ -4,7 +4,7 @@ import { Badge } from '@/shadcn/components/ui/badge';
 import { DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/shadcn/components/ui/dropdown-menu';
 import type { CustomPageProps } from '@/types/pageProps';
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { Key, LogOut, User, Users } from 'lucide-vue-next';
+import { Key, LogOut, User, Users } from '@lucide/vue';
 import { computed } from 'vue';
 import { route } from 'ziggy-js';
 

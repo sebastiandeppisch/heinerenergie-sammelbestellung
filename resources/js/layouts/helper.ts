@@ -1,4 +1,4 @@
-import type { LucideIcon } from 'lucide-vue-next';
+import type { Component } from 'vue';
 
 export interface BreadcrumbItem {
     title: string;
@@ -10,7 +10,7 @@ export type BreadcrumbItemType = BreadcrumbItem;
 export interface NavItem {
     title: string;
     href?: string;
-    icon?: LucideIcon;
+    icon?: Component;
     isActive?: boolean;
     role?: 'group-admin' | 'system-admin';
     children?: NavItem[];

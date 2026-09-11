@@ -4,7 +4,7 @@ import { Button } from '@/shadcn/components/ui/button';
 import { Card, CardContent } from '@/shadcn/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { router } from '@inertiajs/vue3';
-import { ArrowLeft, Edit, Plus, Trash2 } from 'lucide-vue-next';
+import { ArrowLeft, Edit, Plus, Trash2 } from '@lucide/vue';
 import { route } from 'ziggy-js';
 
 const props = defineProps<{

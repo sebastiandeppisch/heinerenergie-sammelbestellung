@@ -6,7 +6,7 @@ import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
 import AdvisorMap from '@/views/AdvisorMap.vue';
 import axios, { AxiosError } from 'axios';
-import { MapPin, Save } from 'lucide-vue-next';
+import { MapPin, Save } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import { toast } from 'vue-sonner';
 import { route } from 'ziggy-js';
@@ -136,7 +136,7 @@ function saveAddress() {
         <h2 class="content-block">Profil {{ user.name }}</h2>
         <div style="margin: 30px 40px 30px 40px">
             <div class="flex-row">
-                <div class="dx-card flex-cell" style="padding: 30px; max-width: 400px">
+                <div class="flex-cell rounded-xl border bg-card text-card-foreground shadow-sm" style="padding: 30px; max-width: 400px">
                     <div class="flex-row">
                         <div class="flex-cell">
                             <span class="label">Beratungsgebiet</span>
@@ -205,8 +205,8 @@ function saveAddress() {
                         <div class="flex-cell" style="display: none"></div>
                     </div>
                 </div>
-                <div class="dx-card flex-cell" style="padding: 30px; display: none"></div>
-                <!--  <div class="dx-card flex-cell" style="padding:30px;">
+                <div class="flex-cell rounded-xl border bg-card text-card-foreground shadow-sm" style="padding: 30px; display: none"></div>
+                <!--  <div class="bg-card text-card-foreground flex-cell rounded-xl border shadow-sm" style="padding:30px;">
           Test
         </div>-->
             </div>

@@ -6,7 +6,7 @@ import FormSubmissionRenderer from '@/components/FormBuilder/FormSubmissionRende
 import AdviceNextcloud from '@/components/Nextcloud/AdviceNextcloud.vue';
 import Button from '@/shadcn/components/ui/button/Button.vue';
 import { Link } from '@inertiajs/vue3';
-import { Map } from 'lucide-vue-next';
+import { Map } from '@lucide/vue';
 import { ref } from 'vue';
 import { route } from 'ziggy-js';
 import { user } from '../authHelper';

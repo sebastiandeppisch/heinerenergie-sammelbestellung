@@ -3,8 +3,8 @@ import Button from '@/shadcn/components/ui/button/Button.vue';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shadcn/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';
 import { router } from '@inertiajs/vue3';
+import { ChevronRight, Folder, Search } from '@lucide/vue';
 import axios from 'axios';
-import { ChevronRight, Folder, Search } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 
 const props = defineProps<{

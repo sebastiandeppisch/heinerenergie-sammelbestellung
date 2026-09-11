@@ -4,7 +4,7 @@ import { LaravelValidationError, notifyError } from '@/helpers';
 import { Button } from '@/shadcn/components/ui/button';
 import { router } from '@inertiajs/vue3';
 import axios, { AxiosError } from 'axios';
-import { Loader2, MapPin, TriangleAlert } from 'lucide-vue-next';
+import { Loader2, MapPin, TriangleAlert } from '@lucide/vue';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { toast } from 'vue-sonner';
 import { route } from 'ziggy-js';

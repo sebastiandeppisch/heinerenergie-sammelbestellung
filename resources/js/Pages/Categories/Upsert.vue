@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/shadcn/c
 import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
 import { router, useForm } from '@inertiajs/vue3';
-import { ArrowLeft, Upload } from 'lucide-vue-next';
+import { ArrowLeft, Upload } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import { route } from 'ziggy-js';
 

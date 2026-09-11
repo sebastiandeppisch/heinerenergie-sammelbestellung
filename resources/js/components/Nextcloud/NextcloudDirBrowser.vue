@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Button from '@/shadcn/components/ui/button/Button.vue';
+import { ChevronRight, Folder } from '@lucide/vue';
 import axios from 'axios';
-import { ChevronRight, Folder } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
 
 const props = defineProps<{

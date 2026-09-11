@@ -7,6 +7,7 @@ import { Input } from '@/shadcn/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shadcn/components/ui/popover';
 import { Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { TooltipProvider } from '@/shadcn/components/ui/tooltip';
+import { ChevronDown, ChevronUp, Filter } from '@lucide/vue';
 import {
     createColumnHelper,
     FlexRender,
@@ -17,7 +18,6 @@ import {
     type ColumnFiltersState,
     type SortingState,
 } from '@tanstack/vue-table';
-import { ChevronDown, ChevronUp, Filter } from 'lucide-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
 
 type MapPointData = App.Data.MapPointData;

@@ -6,6 +6,7 @@ import { Button } from '@/shadcn/components/ui/button';
 import Card from '@/shadcn/components/ui/card/Card.vue';
 import CardContent from '@/shadcn/components/ui/card/CardContent.vue';
 import { router } from '@inertiajs/vue3';
+import { CircleCheck } from '@lucide/vue';
 import { computed } from 'vue';
 import { route } from 'ziggy-js';
 
@@ -42,7 +43,7 @@ function handleNextFormButton() {
                         {{ successMessage }}
                     </div>
                     <div style="margin-top: 32px">
-                        <font-awesome-icon icon="circle-check" size="6x" style="color: #00a651" />
+                        <CircleCheck :size="96" style="color: #00a651" />
                     </div>
                     <div v-if="formDefinition.show_next_form_button" style="margin-top: 32px">
                         <Button @click="handleNextFormButton" variant="default">

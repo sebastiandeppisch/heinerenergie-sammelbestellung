@@ -6,7 +6,7 @@ import { isIframe, useAutoResizeIframeIfIsIframe } from '@/helpers';
 import NoLayout from '@/layouts/NoLayout.vue';
 import PublicLayout from '@/layouts/PublicLayout.vue';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';
-import { Map as MapIcon, Table as TableIcon } from 'lucide-vue-next';
+import { Map as MapIcon, Table as TableIcon } from '@lucide/vue';
 import { computed, reactive, ref, watch } from 'vue';
 
 defineOptions({

@@ -3,8 +3,8 @@ import FormSubmissionRenderer from '@/components/FormBuilder/FormSubmissionRende
 import { Button } from '@/shadcn/components/ui/button';
 import { Dialog, DialogHeader, DialogTitle } from '@/shadcn/components/ui/dialog';
 import DialogScrollContent from '@/shadcn/components/ui/dialog/DialogScrollContent.vue';
+import { Eye, Loader2 } from '@lucide/vue';
 import axios from 'axios';
-import { Eye, Loader2 } from 'lucide-vue-next';
 import { ref } from 'vue';
 import { route } from 'ziggy-js';
 

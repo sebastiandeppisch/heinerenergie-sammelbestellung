@@ -9,6 +9,7 @@ import { Input } from '@/shadcn/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { router } from '@inertiajs/vue3';
+import { AlertCircle, CheckCircle2, Clock, Home, Loader2, Phone, ShoppingCart } from '@lucide/vue';
 import {
     createColumnHelper,
     FlexRender,
@@ -19,7 +20,6 @@ import {
     type ColumnFiltersState,
     type SortingState,
 } from '@tanstack/vue-table';
-import { AlertCircle, CheckCircle2, Clock, Home, Loader2, Phone, ShoppingCart } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 import { route } from 'ziggy-js';
 import { isActingAsAdmin } from '../../authHelper';

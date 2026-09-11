@@ -8,10 +8,10 @@ import { LControl, LControlLayers, LIcon, LLayerGroup, LMap, LMarker, LPopup, LT
 import { Button } from '@/shadcn/components/ui/button';
 import { Input } from '@/shadcn/components/ui/input';
 import { router, usePage } from '@inertiajs/vue3';
+import { ExternalLink, Search, UserCheck } from '@lucide/vue';
 import { LPolygon } from '@vue-leaflet/vue-leaflet';
 import axios from 'axios';
 import { latLng } from 'leaflet';
-import { ExternalLink, Search, UserCheck } from 'lucide-vue-next';
 import { toast } from 'vue-sonner';
 import AdviceTypes from '../AdviceTypes';
 import { isActingAsAdmin, user as userRef } from '../authHelper';
@@ -168,7 +168,7 @@ function getAdvisorMarker(): string {
                 <LControlLayers :collapsed="false" :hide-single-base="true" />
                 <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" layer-type="base" name="OpenStreetMap" />
                 <LControl position="topleft">
-                    <div class="dx-card">
+                    <div class="rounded-xl border bg-card p-3 text-card-foreground shadow-sm">
                         <div style="display: flex; gap: 4px">
                             <Input placeholder="Springe zu Adresse" v-model="search" @keyup.enter="runSearch" />
                             <Button variant="outline" @click="runSearch" size="icon">
@@ -178,7 +178,7 @@ function getAdvisorMarker(): string {
                     </div>
                 </LControl>
                 <LControl position="bottomleft">
-                    <div class="dx-card" style="width: fit-content">
+                    <div class="rounded-xl border bg-card text-card-foreground shadow-sm" style="width: fit-content">
                         <div style="display: flex; flex-direction: row">
                             <div style="display: flex; flex-direction: column; margin: 10px">
                                 <div><b>Freie Beratungen</b></div>
