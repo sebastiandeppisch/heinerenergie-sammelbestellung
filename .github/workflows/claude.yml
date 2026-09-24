@@ -18,33 +18,55 @@ jobs:
       (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
       (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     permissions:
       contents: read
       pull-requests: read
       issues: read
       id-token: write
-      actions: read # Required for Claude to read CI results on PRs
+      actions: read
+    env:
+      DB_CONNECTION: sqlite
+      DB_URL: sqlite:///database/database.sqlite
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
-          fetch-depth: 1
+          fetch-depth: 0
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Prepare Laravel
+        run: |
+          php -r "file_exists('.env') || copy('.env.example', '.env');"
+          composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+          php artisan key:generate
+          chmod -R 777 storage bootstrap/cache
+          mkdir -p database
+          touch database/database.sqlite
+
+      - name: Prepare frontend
+        run: |
+          npm ci
+          npx playwright install
+          npm run build
 
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-
-          # This is an optional setting that allows Claude to read CI results on PRs
+          bot_id: "209825114"
+          bot_name: "claude[bot]"
+          use_commit_signing: true
           additional_permissions: |
             actions: read
-
-          # Optional: Give a custom prompt to Claude. If this is not specified, Claude will perform the instructions specified in the comment that tagged it.
-          # prompt: 'Update the pull request description to include a summary of changes.'
-
-          # Optional: Add claude_args to customize behavior and configuration
-          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://code.claude.com/docs/en/cli-reference for available options
-          # claude_args: '--allowed-tools Bash(gh pr *)'
-
+          claude_args: >-
+            --allowedTools
+            "Bash(npm ci),Bash(npm install:*),Bash(npm update:*),Bash(npm outdated:*),Bash(npm view:*),Bash(npm run build),Bash(npm test:*),Bash(npx vitest:*),Bash(npx vue-tsc:*),Bash(npx eslint:*),Bash(npx prettier:*),Bash(npx playwright install:*),Bash(composer install:*),Bash(composer update:*),Bash(composer require:*),Bash(composer outdated:*),Bash(composer show:*),Bash(php artisan test:*),Bash(php artisan migrate:*),Bash(php artisan route:list:*),Bash(vendor/bin/pest:*),Bash(./vendor/bin/pest:*),Bash(vendor/bin/phpunit:*),Bash(./vendor/bin/phpunit:*),Bash(vendor/bin/phpstan:*),Bash(./vendor/bin/phpstan:*),Bash(vendor/bin/pint:*),Bash(./vendor/bin/pint:*),Bash(vendor/bin/rector:*),Bash(./vendor/bin/rector:*)"
