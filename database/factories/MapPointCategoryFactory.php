@@ -33,6 +33,17 @@ class MapPointCategoryFactory extends Factory
     }
 
     /**
+     * Sub category of the given category, in the same group.
+     */
+    public function childOf(MapPointCategory $parent): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'group_id' => $parent->group_id,
+            'parent_id' => $parent->id,
+        ]);
+    }
+
+    /**
      * Category without image
      */
     public function withoutImage(): static

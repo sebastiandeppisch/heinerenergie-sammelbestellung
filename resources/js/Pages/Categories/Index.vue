@@ -4,8 +4,10 @@ import { Badge } from '@/shadcn/components/ui/badge';
 import { Button } from '@/shadcn/components/ui/button';
 import { Card, CardContent } from '@/shadcn/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
+import { flattenCategoryTree } from '@/utils/categoryTree';
 import { router, setLayoutProps } from '@inertiajs/vue3';
 import { Edit, Plus, Trash2 } from '@lucide/vue';
+import { computed } from 'vue';
 import { route } from 'ziggy-js';
 
 const props = defineProps<{
@@ -16,13 +18,15 @@ setLayoutProps({
     breadcrumbs: [{ title: 'Kartenpunkte', href: route('mappoints.index') }, { title: 'Kategorien' }],
 });
 
-function deleteCategory(categoryId: string) {
-    if (
-        confirm(
-            'Sind Sie sicher, dass Sie diese Kategorie löschen möchten? Kartenpunkte aller Initiativen, die diese Kategorie nutzen, verlieren sie dabei.',
-        )
-    ) {
-        router.delete(route('mappoint-categories.destroy', categoryId));
+const entries = computed(() => flattenCategoryTree(props.categories));
+
+function deleteCategory(category: App.Data.MapPointCategoryData) {
+    const consequence = category.parent_id
+        ? 'Die Unterkategorien und Kartenpunkte werden der Oberkategorie zugeordnet.'
+        : 'Die Unterkategorien werden zu Hauptkategorien, Kartenpunkte aller Initiativen verlieren die Kategorie.';
+
+    if (confirm(`Bist du sicher, dass du diese Kategorie löschen möchtest? ${consequence}`)) {
+        router.delete(route('mappoint-categories.destroy', category.id));
     }
 }
 </script>
@@ -52,20 +56,24 @@ function deleteCategory(categoryId: string) {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow v-for="category in categories" :key="category.id">
+                        <TableRow v-for="{ category, depth } in entries" :key="category.id">
                             <TableCell>
                                 <div class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg bg-gray-100">
                                     <img
-                                        v-if="category.image_path"
-                                        :src="category.image_path"
+                                        v-if="category.marker_image_path"
+                                        :src="category.marker_image_path"
                                         :alt="category.name"
                                         class="h-full w-full object-cover"
+                                        :class="{ 'opacity-50': !category.image_path }"
+                                        :title="category.image_path ? undefined : 'Bild der Oberkategorie'"
                                     />
                                     <span v-else class="text-xs text-gray-400">Kein Bild</span>
                                 </div>
                             </TableCell>
                             <TableCell class="font-medium">
-                                {{ category.name }}
+                                <span :style="{ paddingLeft: `${depth * 1.5}rem` }">
+                                    <span v-if="depth > 0" class="mr-1 text-gray-400">↳</span>{{ category.name }}
+                                </span>
                             </TableCell>
                             <TableCell class="text-gray-600">
                                 {{ category.group_name }}
@@ -81,7 +89,7 @@ function deleteCategory(categoryId: string) {
                                     <Button variant="outline" size="sm" @click="router.visit(route('mappoint-categories.edit', category.id))">
                                         <Edit class="h-4 w-4" />
                                     </Button>
-                                    <Button variant="destructive" size="sm" @click="deleteCategory(category.id)">
+                                    <Button variant="destructive" size="sm" @click="deleteCategory(category)">
                                         <Trash2 class="h-4 w-4" />
                                     </Button>
                                 </div>

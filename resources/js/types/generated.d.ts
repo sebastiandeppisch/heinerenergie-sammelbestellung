@@ -254,6 +254,8 @@ export type MapPointCategoryData = {
 id: string,
 name: string,
 image_path: string | null,
+marker_image_path: string | null,
+parent_id: string | null,
 group_id: string,
 group_name: string,
 map_points_count: number,

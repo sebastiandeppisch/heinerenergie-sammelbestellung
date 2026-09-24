@@ -7,6 +7,7 @@ namespace App\Data;
 use App\Models\MapEmbed;
 use App\Models\MapPointCategory;
 use App\ValueObjects\Coordinate;
+use App\ValueObjects\MapPointCategoryTree;
 use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
@@ -30,12 +31,14 @@ class MapEmbedData extends Data
         public ?string $created_at,
     ) {}
 
-    public static function fromModel(MapEmbed $model): self
+    public static function fromModel(MapEmbed $model, ?MapPointCategoryTree $tree = null): self
     {
+        $tree ??= MapPointCategory::tree();
+
         return new self(
             id: $model->uuid,
             name: $model->name,
-            categories: $model->mapPointCategories->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel($category))->all(),
+            categories: $model->mapPointCategories->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel($category, tree: $tree))->all(),
             coordinate: $model->coordinate,
             zoom: $model->zoom,
             show_table: $model->show_table,

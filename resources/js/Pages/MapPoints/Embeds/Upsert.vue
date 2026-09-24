@@ -10,6 +10,7 @@ import { Label } from '@/shadcn/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { Switch } from '@/shadcn/components/ui/switch';
 import type { CustomPageProps } from '@/types/pageProps';
+import { isIncludedByAncestor } from '@/utils/categoryTree';
 import { setLayoutProps, useForm, usePage } from '@inertiajs/vue3';
 import { ExternalLink } from '@lucide/vue';
 import { computed, reactive, watch } from 'vue';
@@ -99,7 +100,12 @@ watch(
     },
 );
 
-const previewCategories = computed(() => availableCategories.value.filter((category) => categorySelection[category.id]));
+/** A selected category includes its sub categories, also those created later. */
+const previewCategories = computed(() =>
+    availableCategories.value.filter(
+        (category) => categorySelection[category.id] || isIncludedByAncestor(availableCategories.value, categorySelection, category.id),
+    ),
+);
 
 const previewBoxStyle = computed(() => ({
     aspectRatio: `${form.aspect_ratio_width} / ${form.aspect_ratio_height}`,
@@ -111,7 +117,7 @@ watch(
     categorySelection,
     () => {
         form.category_ids = Object.entries(categorySelection)
-            .filter(([, checked]) => checked)
+            .filter(([categoryId, checked]) => checked && !isIncludedByAncestor(availableCategories.value, categorySelection, categoryId))
             .map(([categoryId]) => categoryId);
     },
     { deep: true },
@@ -181,6 +187,7 @@ function submit() {
                                 v-model:visibility="categorySelection"
                                 :categories="availableCategories"
                                 id-prefix="embed-category-"
+                                include-descendants
                             />
                             <p v-if="availableCategories.length === 0" class="text-sm text-gray-500 italic">
                                 Für diese Initiative gibt es noch keine Kategorien.

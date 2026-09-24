@@ -7,6 +7,7 @@ import { Input } from '@/shadcn/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shadcn/components/ui/popover';
 import { Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { TooltipProvider } from '@/shadcn/components/ui/tooltip';
+import { categoryPath, isShownWithAncestors } from '@/utils/categoryTree';
 import { ChevronDown, ChevronUp, Filter } from '@lucide/vue';
 import {
     createColumnHelper,
@@ -56,8 +57,8 @@ const rows = computed<Array<MapPointRow>>(() =>
                 location: point.location ?? '',
                 coordinate: point.coordinate,
                 categoryId: point.category_id,
-                categoryName: category?.name ?? '',
-                categoryImagePath: category?.image_path ?? null,
+                categoryName: point.category_id ? categoryPath(props.categories, point.category_id) : '',
+                categoryImagePath: category?.marker_image_path ?? null,
             };
         }),
 );
@@ -127,11 +128,13 @@ const table = useVueTable({
 watch(
     categoryVisibility,
     () => {
-        table.getColumn('category')?.setFilterValue(
-            Object.entries(categoryVisibility)
-                .filter(([, visible]) => visible)
-                .map(([categoryId]) => categoryId),
-        );
+        table
+            .getColumn('category')
+            ?.setFilterValue(
+                props.categories
+                    .filter((category) => isShownWithAncestors(props.categories, categoryVisibility, category.id))
+                    .map((category) => category.id),
+            );
     },
     { deep: true, immediate: true },
 );

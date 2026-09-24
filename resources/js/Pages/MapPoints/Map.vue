@@ -76,7 +76,7 @@ function categoryIdToName(category_id: string): string {
 
 function categoryIdToImagePath(category_id: string): string | undefined {
     const category = props.categories.find((cat) => cat.id === category_id);
-    return category && category.image_path ? category.image_path : undefined;
+    return category?.marker_image_path ?? undefined;
 }
 </script>
 

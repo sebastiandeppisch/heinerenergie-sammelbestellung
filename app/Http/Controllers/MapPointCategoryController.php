@@ -27,10 +27,12 @@ class MapPointCategoryController extends Controller
     {
         $this->authorize('viewAny', MapPointCategory::class);
 
+        $tree = MapPointCategory::tree();
         $categories = $visibility->usableCategories()->with('group')->withCount('mapPoints')->get()
             ->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel(
                 $category,
                 canEdit: $request->user()->can('update', $category),
+                tree: $tree,
             ));
 
         return Inertia::render('Categories/Index', [
@@ -42,9 +44,7 @@ class MapPointCategoryController extends Controller
     {
         $this->authorize('create', MapPointCategory::class);
 
-        return Inertia::render('Categories/Upsert', [
-            'groups' => $this->selectableGroups($visibility),
-        ]);
+        return Inertia::render('Categories/Upsert', $this->formProps($visibility));
     }
 
     public function store(UpsertMapPointsCategoryRequest $request): RedirectResponse
@@ -67,7 +67,7 @@ class MapPointCategoryController extends Controller
 
         return Inertia::render('Categories/Upsert', [
             'category' => MapPointCategoryData::fromModel($mappointCategory->load('group'), canEdit: true),
-            'groups' => $this->selectableGroups($visibility),
+            ...$this->formProps($visibility),
         ]);
     }
 
@@ -100,12 +100,22 @@ class MapPointCategoryController extends Controller
     }
 
     /**
-     * @return Collection<int, GroupBaseData>
+     * The parent candidates are filtered per group in the form, because a parent must be usable in the category's group.
+     *
+     * @return array{groups: Collection<int, GroupBaseData>, categories: Collection<int, MapPointCategoryData>, usableCategoryIdsByGroup: array<string, array<int, string>>}
      */
-    private function selectableGroups(MapPointVisibilityService $visibility): Collection
+    private function formProps(MapPointVisibilityService $visibility): array
     {
-        return $visibility->selectableGroups()
-            ->map(fn (Group $group): GroupBaseData => GroupBaseData::fromModel($group))
-            ->toBase();
+        $groups = $visibility->selectableGroups();
+        $categories = $visibility->relevantCategories()->with('group')->get();
+        $tree = MapPointCategory::tree();
+
+        return [
+            'groups' => $groups->map(fn (Group $group): GroupBaseData => GroupBaseData::fromModel($group))->toBase(),
+            'categories' => $categories
+                ->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel($category, tree: $tree))
+                ->toBase(),
+            'usableCategoryIdsByGroup' => $visibility->usableCategoryIdsByGroup($groups, $categories),
+        ];
     }
 }

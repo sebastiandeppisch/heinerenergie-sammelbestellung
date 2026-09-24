@@ -133,3 +133,40 @@ test('public map of a group hides the points of its ancestor groups', function (
             ->where("pointsByCategory.{$category->uuid}.0.title", 'Child Point')
         );
 });
+
+test('public map shows the points of sub categories created after the embed', function (): void {
+    $group = Group::factory()->create();
+    $category = MapPointCategory::factory()->for($group)->create();
+    $mapEmbed = MapEmbed::factory()->for($group)->create();
+    $mapEmbed->mapPointCategories()->sync([$category->id]);
+
+    $subCategory = MapPointCategory::factory()->childOf($category)->create();
+    MapPoint::factory()->for($group)->create(['published' => true, 'category_id' => $subCategory->id, 'title' => 'Balkonkraftwerk Musterstraße']);
+
+    $this->get(route('map.public', $mapEmbed))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('categories', 2)
+            ->where('categories.1.id', $subCategory->uuid)
+            ->where('categories.1.parent_id', $category->uuid)
+            ->where("pointsByCategory.{$subCategory->uuid}.0.title", 'Balkonkraftwerk Musterstraße')
+        );
+});
+
+test('public map leaves out sub categories of initiatives outside the embed', function (): void {
+    $parentGroup = Group::factory()->create();
+    $embedGroup = Group::factory()->create(['parent_id' => $parentGroup->id]);
+    $siblingGroup = Group::factory()->create(['parent_id' => $parentGroup->id]);
+    $category = MapPointCategory::factory()->for($parentGroup)->create();
+    $siblingSubCategory = MapPointCategory::factory()->for($siblingGroup)->create(['parent_id' => $category->id]);
+    $mapEmbed = MapEmbed::factory()->for($embedGroup)->create();
+    $mapEmbed->mapPointCategories()->sync([$category->id]);
+
+    $this->get(route('map.public', $mapEmbed))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('categories', 1)
+            ->where('categories.0.id', $category->uuid)
+            ->missing("pointsByCategory.{$siblingSubCategory->uuid}")
+        );
+});

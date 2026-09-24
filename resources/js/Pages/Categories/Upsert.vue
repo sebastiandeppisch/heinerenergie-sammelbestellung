@@ -6,14 +6,17 @@ import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import type { CustomPageProps } from '@/types/pageProps';
+import { descendantIds, flattenCategoryTree } from '@/utils/categoryTree';
 import { setLayoutProps, useForm, usePage } from '@inertiajs/vue3';
 import { Upload } from '@lucide/vue';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { route } from 'ziggy-js';
 
 const props = defineProps<{
     category?: App.Data.MapPointCategoryData;
     groups: Array<App.Data.GroupBaseData>;
+    categories: Array<App.Data.MapPointCategoryData>;
+    usableCategoryIdsByGroup: Record<string, Array<string>>;
 }>();
 
 const page = usePage<CustomPageProps>();
@@ -33,9 +36,37 @@ const form = useForm({
     name: props.category?.name || '',
     /** The initiative is only chosen on creation, new categories default to the current initiative. */
     group_id: props.category?.group_id ?? page.props.auth.currentGroup?.id ?? props.groups[0]?.id ?? null,
+    parent_id: props.category?.parent_id ?? (null as string | null),
     image: null as File | null,
     _method: isEditing.value ? 'put' : 'post',
 });
+
+/** Reka's select cannot hold null, so „no parent“ gets its own value. */
+const NO_PARENT = 'none';
+
+const parentSelection = computed({
+    get: () => form.parent_id ?? NO_PARENT,
+    set: (value: string) => {
+        form.parent_id = value === NO_PARENT ? null : value;
+    },
+});
+
+/** The parent must belong to the category's initiative or a parent initiative, and must not be the category itself or one of its sub categories. */
+const parentCandidates = computed(() => {
+    const usableCategoryIds = form.group_id ? (props.usableCategoryIdsByGroup[form.group_id] ?? []) : [];
+    const excludedIds = props.category ? [props.category.id, ...descendantIds(props.categories, props.category.id)] : [];
+
+    return flattenCategoryTree(props.categories.filter((category) => usableCategoryIds.includes(category.id) && !excludedIds.includes(category.id)));
+});
+
+watch(
+    () => form.group_id,
+    () => {
+        if (form.parent_id !== null && !parentCandidates.value.some(({ category }) => category.id === form.parent_id)) {
+            form.parent_id = null;
+        }
+    },
+);
 
 const imagePreviewUrl = computed(() => {
     if (form.image) {
@@ -98,6 +129,31 @@ function triggerFileInput() {
                         <p class="text-xs text-gray-500">
                             Untergeordnete Initiativen können die Kategorie ebenfalls nutzen. Die Initiative kann nach dem Anlegen nicht mehr geändert
                             werden.
+                        </p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <Label for="parent_id">Oberkategorie</Label>
+                        <Select id="parent_id" v-model="parentSelection">
+                            <SelectTrigger>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem :value="NO_PARENT">Keine (Hauptkategorie)</SelectItem>
+                                <SelectItem
+                                    v-for="{ category: candidate, depth } in parentCandidates"
+                                    :key="candidate.id"
+                                    :value="candidate.id"
+                                    :style="{ paddingLeft: `${0.5 + depth * 1.25}rem` }"
+                                >
+                                    {{ candidate.name }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <p v-if="form.errors.parent_id" class="text-sm text-red-500">{{ form.errors.parent_id }}</p>
+                        <p class="text-xs text-gray-500">
+                            Auf der Karte lassen sich Unterkategorien gemeinsam mit ihrer Oberkategorie ein- und ausblenden. Ohne eigenes Bild
+                            übernimmt eine Unterkategorie das Bild ihrer Oberkategorie.
                         </p>
                     </div>
 

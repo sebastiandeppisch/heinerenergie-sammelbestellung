@@ -18,6 +18,7 @@ use App\Models\MapPoint;
 use App\Models\MapPointCategory;
 use App\Services\CurrentGroupService;
 use App\Services\MapPointVisibilityService;
+use App\ValueObjects\MapPointCategoryTree;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\RedirectResponse;
@@ -60,12 +61,19 @@ class MapPointController extends Controller
 
     /**
      * Shows the published points of the embed's group and its descendants in the embed's categories.
+     * A category includes its sub categories, also those created after the embed. Sub categories of
+     * groups outside the embed's map are left out.
      */
     public function publicMap(MapEmbed $mapEmbed): Response
     {
         app(CurrentGroupService::class)->setGroup($mapEmbed->group);
 
-        $categories = $mapEmbed->mapPointCategories()->with('group')->get();
+        $tree = MapPointCategory::tree();
+        $categories = MapPointCategory::query()
+            ->whereIn('id', $tree->subtreeIds($mapEmbed->mapPointCategories()->pluck('map_point_categories.id')->all()))
+            ->whereIn('group_id', [...$mapEmbed->group->getHierarchyIds(), ...$mapEmbed->group->getSubtreeIds()])
+            ->with('group')
+            ->get();
 
         $mapPoints = MapPoint::query()
             ->visibleFromGroup($mapEmbed->group)
@@ -74,7 +82,7 @@ class MapPointController extends Controller
 
         return Inertia::render('MapPoints/PublicMap', [
             'pointsByCategory' => $this->pointData($mapPoints)->groupBy('category_id'),
-            'categories' => $this->categoryData($categories),
+            'categories' => $this->categoryData($categories, $tree),
             'center' => $mapEmbed->coordinate,
             'zoom' => $mapEmbed->zoom,
             'showTable' => $mapEmbed->show_table,
@@ -159,10 +167,12 @@ class MapPointController extends Controller
      * @param  EloquentCollection<int, MapPointCategory>  $categories
      * @return Collection<int, MapPointCategoryData>
      */
-    private function categoryData(EloquentCollection $categories): Collection
+    private function categoryData(EloquentCollection $categories, ?MapPointCategoryTree $tree = null): Collection
     {
+        $tree ??= MapPointCategory::tree();
+
         return $categories
-            ->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel($category))
+            ->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel($category, tree: $tree))
             ->toBase();
     }
 }

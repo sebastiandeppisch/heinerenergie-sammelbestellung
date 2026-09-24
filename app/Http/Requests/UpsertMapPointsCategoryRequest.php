@@ -25,7 +25,7 @@ class UpsertMapPointsCategoryRequest extends FormRequest
      * Get the validation rules that apply to the request.
      *
      * The owning group is only set on creation. Moving a category to another group would
-     * detach it from points of groups that can no longer use it.
+     * detach it from points of groups that can no longer use it. The parent can be changed.
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
@@ -34,6 +34,7 @@ class UpsertMapPointsCategoryRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'image' => ['nullable', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+            'parent_id' => ['nullable', 'bail', 'uuid', 'exists:map_point_categories,uuid'],
             'group_id' => $this->isCreating()
                 ? ['required', 'bail', 'uuid', 'exists:groups,uuid']
                 : ['exclude'],
@@ -47,10 +48,14 @@ class UpsertMapPointsCategoryRequest extends FormRequest
     {
         return [
             'group_id' => 'Initiative',
+            'parent_id' => 'Oberkategorie',
         ];
     }
 
     /**
+     * The parent must be usable in the category's group, so it belongs to the same group or an ancestor.
+     * This keeps every branch visible to each group that sees its leaves.
+     *
      * @return array<int, callable(Validator): void>
      */
     public function after(): array
@@ -67,6 +72,28 @@ class UpsertMapPointsCategoryRequest extends FormRequest
                     $validator->errors()->add('group_id', 'Du darfst für diese Initiative keine Kategorien anlegen.');
                 }
             },
+            function (Validator $validator): void {
+                if ($this->input('parent_id') === null || $validator->errors()->hasAny(['group_id', 'parent_id'])) {
+                    return;
+                }
+
+                $parent = MapPointCategory::where('uuid', $this->input('parent_id'))->firstOrFail();
+                $category = $this->route('mappoint_category');
+
+                if ($category instanceof MapPointCategory && in_array($parent->id, [$category->id, ...MapPointCategory::tree()->descendantIds($category->id)], true)) {
+                    $validator->errors()->add('parent_id', 'Eine Kategorie kann nicht sich selbst oder einer ihrer Unterkategorien untergeordnet werden.');
+
+                    return;
+                }
+
+                $group = $category instanceof MapPointCategory
+                    ? $category->group
+                    : Group::where('uuid', $this->input('group_id'))->firstOrFail();
+
+                if (! $parent->isUsableInGroup($group)) {
+                    $validator->errors()->add('parent_id', 'Die Oberkategorie muss zur selben oder einer übergeordneten Initiative gehören.');
+                }
+            },
         ];
     }
 
@@ -76,6 +103,11 @@ class UpsertMapPointsCategoryRequest extends FormRequest
     public function getData(): array
     {
         $data = $this->safe()->only(['name']);
+
+        if ($this->has('parent_id')) {
+            $parentUuid = $this->validated('parent_id');
+            $data['parent_id'] = $parentUuid === null ? null : MapPointCategory::where('uuid', $parentUuid)->value('id');
+        }
 
         if ($this->isCreating()) {
             $data['group_id'] = Group::where('uuid', $this->validated('group_id'))->value('id');

@@ -29,12 +29,13 @@ class MapEmbedController extends Controller
         $this->authorize('viewAny', MapEmbed::class);
 
         $groupIds = $visibility->selectableGroups()->modelKeys();
+        $tree = MapPointCategory::tree();
 
         $mapEmbeds = MapEmbed::with('mapPointCategories.group', 'group')
             ->whereIn('group_id', $groupIds)
             ->latest()
             ->get()
-            ->map(fn (MapEmbed $mapEmbed): MapEmbedData => MapEmbedData::fromModel($mapEmbed));
+            ->map(fn (MapEmbed $mapEmbed): MapEmbedData => MapEmbedData::fromModel($mapEmbed, $tree));
 
         return Inertia::render('MapPoints/Embeds/Index', [
             'mapEmbeds' => $mapEmbeds,
@@ -96,10 +97,11 @@ class MapEmbedController extends Controller
     {
         $categories = $visibility->relevantCategories()->with('group')->get();
         $groups = $visibility->selectableGroups();
+        $tree = MapPointCategory::tree();
 
         return [
             'categories' => $categories
-                ->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel($category))
+                ->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel($category, tree: $tree))
                 ->toBase(),
             'pointsByCategory' => $this->publishedPointsByCategory($visibility),
             'groups' => $groups->map(fn (Group $group): GroupBaseData => GroupBaseData::fromModel($group))->toBase(),

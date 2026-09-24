@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/shadcn/components/ui/switch';
 import { Textarea } from '@/shadcn/components/ui/textarea';
 import type { CustomPageProps } from '@/types/pageProps';
+import { flattenCategoryTree } from '@/utils/categoryTree';
 import { setLayoutProps, useForm, usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 import { computed, ref, watch } from 'vue';
@@ -51,6 +52,8 @@ const availableCategories = computed(() => {
 
     return (props.categories ?? []).filter((category) => usableCategoryIds.includes(category.id));
 });
+
+const availableCategoryEntries = computed(() => flattenCategoryTree(availableCategories.value));
 
 watch(
     () => form.group_id,
@@ -179,10 +182,15 @@ const errors: Record<string, string> = form.errors;
                                 <SelectValue placeholder="Kategorie wählen (optional)" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem v-for="category in availableCategories" :key="category.id" :value="category.id">
+                                <SelectItem
+                                    v-for="{ category, depth } in availableCategoryEntries"
+                                    :key="category.id"
+                                    :value="category.id"
+                                    :style="{ paddingLeft: `${0.5 + depth * 1.25}rem` }"
+                                >
                                     <div class="flex items-center gap-2">
-                                        <div v-if="category.image_path" class="h-4 w-4 flex-shrink-0 overflow-hidden rounded bg-gray-100">
-                                            <img :src="category.image_path" :alt="category.name" class="h-full w-full object-cover" />
+                                        <div v-if="category.marker_image_path" class="h-4 w-4 flex-shrink-0 overflow-hidden rounded bg-gray-100">
+                                            <img :src="category.marker_image_path" :alt="category.name" class="h-full w-full object-cover" />
                                         </div>
                                         <span>{{ category.name }}</span>
                                     </div>

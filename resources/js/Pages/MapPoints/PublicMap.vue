@@ -6,6 +6,7 @@ import { isIframe, useAutoResizeIframeIfIsIframe } from '@/helpers';
 import NoLayout from '@/layouts/NoLayout.vue';
 import PublicLayout from '@/layouts/PublicLayout.vue';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';
+import { isShownWithAncestors } from '@/utils/categoryTree';
 import { Map as MapIcon, Table as TableIcon } from '@lucide/vue';
 import { computed, reactive, ref, watch } from 'vue';
 
@@ -42,7 +43,9 @@ const contentBoxStyle = computed(() => ({
     maxHeight: isIframe ? '520px' : 'calc(100vh - 220px)',
 }));
 
-const visibleCategories = computed(() => props.categories.filter((category) => categoryVisibility[category.id]));
+const visibleCategories = computed(() =>
+    props.categories.filter((category) => isShownWithAncestors(props.categories, categoryVisibility, category.id)),
+);
 
 // Check if hash exists in URL for map position
 const hash = window.location.hash;

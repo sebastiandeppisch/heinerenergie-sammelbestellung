@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Group;
+use App\Models\MapEmbed;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
 use App\Models\User;
@@ -360,4 +361,104 @@ test('deleting category sets mappoint category_id to null', function (): void {
 
     $mapPoint->refresh();
     $this->assertNull($mapPoint->category_id);
+});
+
+test('deleting a sub category moves its points and sub categories up to its parent', function (): void {
+    $parent = MapPointCategory::factory()->create();
+    $category = MapPointCategory::factory()->childOf($parent)->create();
+    $subCategory = MapPointCategory::factory()->childOf($category)->create();
+    $mapPoint = MapPoint::factory()->create(['category_id' => $category->id]);
+
+    $this->actingAs($this->admin)
+        ->delete(route('mappoint-categories.destroy', $category))
+        ->assertRedirect(route('mappoint-categories.index'));
+
+    $this->assertModelMissing($category);
+    expect($mapPoint->refresh()->category_id)->toBe($parent->id);
+    expect($subCategory->refresh()->parent_id)->toBe($parent->id);
+});
+
+test('an embed showing a deleted category keeps showing its sub categories', function (): void {
+    $category = MapPointCategory::factory()->create();
+    $subCategory = MapPointCategory::factory()->childOf($category)->create();
+    $mapEmbed = MapEmbed::factory()->for($category->group)->create();
+    $mapEmbed->mapPointCategories()->sync([$category->id]);
+
+    $this->actingAs($this->admin)->delete(route('mappoint-categories.destroy', $category));
+
+    expect($mapEmbed->mapPointCategories()->pluck('map_point_categories.id')->all())->toBe([$subCategory->id]);
+});
+
+test('a sub initiative can add a sub category below a category inherited from its parent initiative', function (): void {
+    $childGroup = Group::factory()->create(['parent_id' => $this->group->id]);
+    $parent = MapPointCategory::factory()->for($this->group)->create();
+
+    $this->actingAs($this->admin)
+        ->post(route('mappoint-categories.store'), [
+            'name' => 'Balkonkraftwerke',
+            'group_id' => $childGroup->uuid,
+            'parent_id' => $parent->uuid,
+        ])
+        ->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('map_point_categories', ['name' => 'Balkonkraftwerke', 'group_id' => $childGroup->id, 'parent_id' => $parent->id]);
+});
+
+test('a category cannot be placed below a category of a sub initiative', function (): void {
+    $childGroup = Group::factory()->create(['parent_id' => $this->group->id]);
+    $parent = MapPointCategory::factory()->for($childGroup)->create();
+
+    $this->actingAs($this->admin)
+        ->post(route('mappoint-categories.store'), [
+            'name' => 'Photovoltaik',
+            'group_id' => $this->group->uuid,
+            'parent_id' => $parent->uuid,
+        ])
+        ->assertSessionHasErrors(['parent_id' => 'Die Oberkategorie muss zur selben oder einer übergeordneten Initiative gehören.']);
+
+    $this->assertDatabaseMissing('map_point_categories', ['name' => 'Photovoltaik']);
+});
+
+test('a category cannot be placed below one of its own sub categories', function (): void {
+    $category = MapPointCategory::factory()->create();
+    $subCategory = MapPointCategory::factory()->childOf($category)->create();
+
+    $this->actingAs($this->admin)
+        ->put(route('mappoint-categories.update', $category), [
+            'name' => $category->name,
+            'parent_id' => $subCategory->uuid,
+        ])
+        ->assertSessionHasErrors(['parent_id' => 'Eine Kategorie kann nicht sich selbst oder einer ihrer Unterkategorien untergeordnet werden.']);
+
+    expect($category->refresh()->parent_id)->toBeNull();
+});
+
+test('a category can be moved below another category and back to the top level', function (): void {
+    $category = MapPointCategory::factory()->create();
+    $newParent = MapPointCategory::factory()->for($category->group)->create();
+
+    $this->actingAs($this->admin)
+        ->put(route('mappoint-categories.update', $category), ['name' => $category->name, 'parent_id' => $newParent->uuid])
+        ->assertSessionHasNoErrors();
+    expect($category->refresh()->parent_id)->toBe($newParent->id);
+
+    $this->actingAs($this->admin)
+        ->put(route('mappoint-categories.update', $category), ['name' => $category->name, 'parent_id' => null])
+        ->assertSessionHasNoErrors();
+    expect($category->refresh()->parent_id)->toBeNull();
+});
+
+test('a sub category without an image uses the image of its nearest ancestor as marker', function (): void {
+    $root = MapPointCategory::factory()->withImage('categories/pin-red.png')->create();
+    $parent = MapPointCategory::factory()->childOf($root)->withImage('categories/pin-blue.png')->create();
+    MapPointCategory::factory()->childOf($parent)->withoutImage()->create(['name' => 'Balkonkraftwerke']);
+
+    $this->actingAs($this->admin)
+        ->get(route('mappoint-categories.index'))
+        ->assertInertia(fn ($page) => $page
+            ->where('categories.2.name', 'Balkonkraftwerke')
+            ->where('categories.2.image_path', null)
+            ->where('categories.2.marker_image_path', asset('storage/categories/pin-blue.png'))
+            ->where('categories.2.parent_id', $parent->uuid)
+        );
 });

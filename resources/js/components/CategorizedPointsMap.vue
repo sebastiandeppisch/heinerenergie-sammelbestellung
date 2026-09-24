@@ -82,7 +82,7 @@ function zoomOut() {
                     :key="point.id"
                     :lat-lng="latLng(point.coordinate.lat, point.coordinate.lng)"
                 >
-                    <LIcon v-bind="categoryMarkerIcon(category.image_path)" />
+                    <LIcon v-bind="categoryMarkerIcon(category.marker_image_path)" />
                     <LPopup>
                         <div class="p-2">
                             <h3 class="text-lg font-bold">{{ point.title }}</h3>
