@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import PageHeader from '@/components/PageHeader.vue';
 import { Button } from '@/shadcn/components/ui/button';
 import Card from '@/shadcn/components/ui/card/Card.vue';
-import { router } from '@inertiajs/vue3';
+import { router, setLayoutProps } from '@inertiajs/vue3';
+import { Database, Download, HardDrive, MapPin, Terminal, Trash2 } from '@lucide/vue';
 import { computed, ref } from 'vue';
-import {Database, Download, HardDrive, MapPin, Terminal, Trash2 } from '@lucide/vue';
 import { route } from 'ziggy-js';
 
 interface CommandResult {
@@ -32,6 +33,10 @@ const props = defineProps<{
     backups: Backup[];
     backupsSupported: boolean;
 }>();
+
+setLayoutProps({
+    breadcrumbs: [{ title: 'System-Admin' }],
+});
 
 const migrateOutput = computed(() => props.migrateResult?.output || null);
 const seedOutput = computed(() => props.seedResult?.output || null);
@@ -108,8 +113,8 @@ function executeGeocoding() {
 
 <template>
     <div>
-        <h2 class="content-block">System-Administration</h2>
-        <div style="margin: 30px 40px 30px 40px">
+        <PageHeader title="System-Administration" />
+        <div>
             <div class="space-y-6">
                 <!-- Migration Card -->
                 <Card>

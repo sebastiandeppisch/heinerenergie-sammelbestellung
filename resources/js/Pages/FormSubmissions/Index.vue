@@ -1,6 +1,6 @@
 <template>
-    <div class="m-6">
-        <h2>Formulareinträge</h2>
+    <div>
+        <PageHeader title="Formulareinträge" />
 
         <Filter
             :form-definitions="formDefinitions"
@@ -34,11 +34,12 @@
 import Filter from '@/components/FormSubmissions/Filter.vue';
 import Grid from '@/components/FormSubmissions/Grid.vue';
 import SubmissionsTable from '@/components/FormSubmissions/SubmissionsTable.vue';
+import PageHeader from '@/components/PageHeader.vue';
 import Tabs from '@/shadcn/components/ui/tabs/Tabs.vue';
 import TabsContent from '@/shadcn/components/ui/tabs/TabsContent.vue';
 import TabsList from '@/shadcn/components/ui/tabs/TabsList.vue';
 import TabsTrigger from '@/shadcn/components/ui/tabs/TabsTrigger.vue';
-import { router } from '@inertiajs/vue3';
+import { router, setLayoutProps } from '@inertiajs/vue3';
 import { computed, type WritableComputedRef } from 'vue';
 
 const props = defineProps<{
@@ -52,6 +53,10 @@ const props = defineProps<{
     formSubmissions: App.Data.FormSubmissionData[] | any;
     pagination: App.Data.PaginationData<App.Data.FormSubmissionData>;
 }>();
+
+setLayoutProps({
+    breadcrumbs: [{ title: 'Formulare' }, { title: 'Formulareinträge' }],
+});
 
 const filter = computed(() => {
     const result = {} as any;

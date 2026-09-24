@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PageHeader from '@/components/PageHeader.vue';
 import { Button } from '@/shadcn/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/shadcn/components/ui/dialog';
 import { Input } from '@/shadcn/components/ui/input';
@@ -6,7 +7,7 @@ import { Label } from '@/shadcn/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shadcn/components/ui/tooltip';
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, setLayoutProps } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 import { useFillViewportHeight } from '@/composables/useFillViewportHeight';
@@ -25,6 +26,10 @@ const props = defineProps<{
     spreadsheetMappings: Array<App.Data.MapPointSpreadsheetMappingData>;
     spreadsheetFormats: Array<App.Data.SpreadsheetFormatData>;
 }>();
+
+setLayoutProps({
+    breadcrumbs: [{ title: 'Kartenpunkte' }, { title: 'Tabelle' }],
+});
 
 const rootEl = ref<HTMLElement | null>(null);
 const { height: rootHeight } = useFillViewportHeight(rootEl);
@@ -78,15 +83,14 @@ function deleteMapPoint() {
 
 <template>
     <div ref="rootEl" data-test="mappoints-root" class="flex flex-col" :style="{ height: rootHeight }">
-        <div class="mx-2 mt-4 mb-4 flex items-center justify-between">
-            <h1 class="text-2xl font-bold">Karten Punkte</h1>
-            <div class="flex gap-4">
-                <Input v-model="searchQuery" placeholder="Suche..." class="max-w-sm bg-white" />
+        <PageHeader title="Kartenpunkte">
+            <template #actions>
+                <Input v-model="searchQuery" placeholder="Suche..." class="w-56 bg-white" />
                 <TooltipProvider v-if="canImportAndExport && importAndExportNeedGroup">
                     <Tooltip>
                         <!-- Disabled buttons fire no pointer events, so the wrapper opens the tooltip. -->
                         <TooltipTrigger as-child>
-                            <span class="flex gap-4" tabindex="0">
+                            <span class="flex gap-2" tabindex="0">
                                 <Button variant="outline" disabled><FileUp />Importieren</Button>
                                 <Button variant="outline" disabled><Download />Exportieren</Button>
                             </span>
@@ -112,9 +116,9 @@ function deleteMapPoint() {
                 <Link :href="route('mappoints.create')">
                     <Button><Plus />Neuen Punkt hinzufügen</Button>
                 </Link>
-            </div>
-        </div>
-        <Card class="mx-2 min-h-0 flex-1 p-4">
+            </template>
+        </PageHeader>
+        <Card class="min-h-0 flex-1 p-4">
             <Table>
                 <TableCaption>Liste aller Kartenpunkte</TableCaption>
                 <TableHeader>

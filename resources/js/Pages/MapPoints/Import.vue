@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import ImportSession from '@/components/MapPointImport/ImportSession.vue';
 import UploadCard from '@/components/MapPointImport/UploadCard.vue';
-import { Button } from '@/shadcn/components/ui/button';
-import { Link } from '@inertiajs/vue3';
-import { ArrowLeft } from '@lucide/vue';
+import PageHeader from '@/components/PageHeader.vue';
+import { setLayoutProps } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
 
 defineProps<{
@@ -11,18 +10,17 @@ defineProps<{
     fields: Array<App.Data.MapPointSpreadsheetFieldData>;
     upload: App.Data.SpreadsheetUploadData | null;
 }>();
+
+setLayoutProps({
+    breadcrumbs: [{ title: 'Kartenpunkte', href: route('mappoints.index') }, { title: 'Importieren' }],
+});
 </script>
 
 <template>
-    <div class="container mx-auto py-8">
-        <div class="mx-auto max-w-5xl space-y-6">
-            <div class="flex items-center justify-between">
-                <Link :href="route('mappoints.index')">
-                    <Button variant="outline"><ArrowLeft />Zurück</Button>
-                </Link>
-                <h1 class="text-2xl font-bold">Kartenpunkte importieren</h1>
-            </div>
+    <div class="mx-auto w-full max-w-5xl">
+        <PageHeader title="Kartenpunkte importieren" />
 
+        <div class="space-y-6">
             <UploadCard :upload="upload" />
 
             <!-- Keyed by the upload: a new file starts a new session, so mapping and preview never outlive their file. -->

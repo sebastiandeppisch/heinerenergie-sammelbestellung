@@ -2,15 +2,16 @@
 import CategorizedPointsMap from '@/components/CategorizedPointsMap.vue';
 import CategoryVisibilityFilter from '@/components/CategoryVisibilityFilter.vue';
 import MapEmbedDialog from '@/components/MapEmbedDialog.vue';
+import PageHeader from '@/components/PageHeader.vue';
 import { Button } from '@/shadcn/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/shadcn/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/shadcn/components/ui/card';
 import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { Switch } from '@/shadcn/components/ui/switch';
 import type { CustomPageProps } from '@/types/pageProps';
-import { router, useForm, usePage } from '@inertiajs/vue3';
-import { ArrowLeft, ExternalLink } from '@lucide/vue';
+import { setLayoutProps, useForm, usePage } from '@inertiajs/vue3';
+import { ExternalLink } from '@lucide/vue';
 import { computed, reactive, watch } from 'vue';
 import { route } from 'ziggy-js';
 
@@ -23,6 +24,14 @@ const props = defineProps<{
 }>();
 
 const isEditing = computed(() => !!props.mapEmbed);
+
+setLayoutProps({
+    breadcrumbs: [
+        { title: 'Kartenpunkte', href: route('mappoints.index') },
+        { title: 'Einbettungen', href: route('map-embeds.index') },
+        { title: isEditing.value ? 'Bearbeiten' : 'Neu' },
+    ],
+});
 
 const page = usePage<CustomPageProps>();
 
@@ -122,25 +131,18 @@ function submit() {
 </script>
 
 <template>
-    <div class="container mx-auto py-8">
-        <div class="mx-auto mb-4 max-w-2xl">
-            <Button variant="outline" @click="router.visit(route('map-embeds.index'))">
-                <ArrowLeft />
-                Zurück
-            </Button>
-        </div>
+    <div class="mx-auto w-full max-w-3xl">
+        <PageHeader :title="isEditing ? 'Einbettung bearbeiten' : 'Neue Einbettung erstellen'">
+            <template v-if="isEditing && mapEmbed" #actions>
+                <Button as="a" :href="route('map.public', mapEmbed.id)" target="_blank" rel="noopener noreferrer" variant="outline">
+                    Link öffnen
+                    <ExternalLink />
+                </Button>
+                <MapEmbedDialog :map-embed="mapEmbed" />
+            </template>
+        </PageHeader>
 
-        <Card class="mx-auto max-w-2xl">
-            <CardHeader class="flex flex-row items-center justify-between">
-                <CardTitle>{{ isEditing ? 'Einbettung bearbeiten' : 'Neue Einbettung erstellen' }}</CardTitle>
-                <div v-if="isEditing && mapEmbed" class="flex gap-2">
-                    <Button as="a" :href="route('map.public', mapEmbed.id)" target="_blank" rel="noopener noreferrer" variant="outline">
-                        Link öffnen
-                        <ExternalLink />
-                    </Button>
-                    <MapEmbedDialog :map-embed="mapEmbed" />
-                </div>
-            </CardHeader>
+        <Card>
             <form @submit.prevent="submit">
                 <CardContent class="space-y-4">
                     <div class="space-y-2">

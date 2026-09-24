@@ -1,12 +1,13 @@
 <script setup lang="ts">
+import PageHeader from '@/components/PageHeader.vue';
 import { Button } from '@/shadcn/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/shadcn/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/shadcn/components/ui/card';
 import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import type { CustomPageProps } from '@/types/pageProps';
-import { router, useForm, usePage } from '@inertiajs/vue3';
-import { ArrowLeft, Upload } from '@lucide/vue';
+import { setLayoutProps, useForm, usePage } from '@inertiajs/vue3';
+import { Upload } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import { route } from 'ziggy-js';
 
@@ -18,6 +19,14 @@ const props = defineProps<{
 const page = usePage<CustomPageProps>();
 
 const isEditing = computed(() => !!props.category);
+
+setLayoutProps({
+    breadcrumbs: [
+        { title: 'Kartenpunkte', href: route('mappoints.index') },
+        { title: 'Kategorien', href: route('mappoint-categories.index') },
+        { title: isEditing.value ? 'Bearbeiten' : 'Neu' },
+    ],
+});
 const fileInput = ref<HTMLInputElement>();
 
 const form = useForm({
@@ -60,18 +69,10 @@ function triggerFileInput() {
 </script>
 
 <template>
-    <div class="container mx-auto py-8">
-        <div class="mx-auto mb-4 max-w-2xl">
-            <Button variant="outline" @click="router.visit(route('mappoint-categories.index'))">
-                <ArrowLeft />
-                Zurück
-            </Button>
-        </div>
+    <div class="mx-auto w-full max-w-3xl">
+        <PageHeader :title="isEditing ? 'Kategorie bearbeiten' : 'Neue Kategorie erstellen'" />
 
-        <Card class="mx-auto max-w-2xl">
-            <CardHeader>
-                <CardTitle>{{ isEditing ? 'Kategorie bearbeiten' : 'Neue Kategorie erstellen' }}</CardTitle>
-            </CardHeader>
+        <Card>
             <form @submit.prevent="submit">
                 <CardContent class="space-y-4">
                     <div class="space-y-2">

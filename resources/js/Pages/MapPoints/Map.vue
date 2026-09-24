@@ -1,18 +1,27 @@
 <script setup lang="ts">
+import { useFillViewportHeight } from '@/composables/useFillViewportHeight';
 import Button from '@/shadcn/components/ui/button/Button.vue';
 import { categoryMarkerIcon } from '@/utils/categoryMarkerIcon';
-import { router } from '@inertiajs/vue3';
+import { router, setLayoutProps } from '@inertiajs/vue3';
 import { Link } from '@lucide/vue';
 import { LControlLayers, LIcon, LLayerGroup, LMap, LMarker, LPopup, LTileLayer } from '@vue-leaflet/vue-leaflet';
 import { latLng } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { reactive, watch } from 'vue';
+import { reactive, ref, watch } from 'vue';
 import { route } from 'ziggy-js';
 // Define props
 const props = defineProps<{
     pointsByCategory: Record<string, Array<App.Data.MapPointData>>;
     categories: Array<App.Data.MapPointCategoryData>;
 }>();
+
+setLayoutProps({
+    breadcrumbs: [{ title: 'Kartenpunkte' }, { title: 'Karte' }],
+    fullBleed: true,
+});
+
+const outer = ref<HTMLElement | null>(null);
+const { height: mapHeight } = useFillViewportHeight(outer, 400);
 
 // Map configuration
 const map = reactive({
@@ -72,7 +81,7 @@ function categoryIdToImagePath(category_id: string): string | undefined {
 </script>
 
 <template>
-    <div class="h-screen w-full">
+    <div ref="outer" data-test="mappoints-map-root" class="w-full" :style="{ height: mapHeight }">
         <div class="isolate h-full w-full">
             <LMap
                 ref="map"

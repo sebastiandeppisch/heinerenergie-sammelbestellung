@@ -1,15 +1,15 @@
 <script setup lang="ts">
+import PageHeader from '@/components/PageHeader.vue';
 import PinLocationMap from '@/components/PinLocationMap.vue';
 import { Button } from '@/shadcn/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/shadcn/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/shadcn/components/ui/card';
 import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { Switch } from '@/shadcn/components/ui/switch';
 import { Textarea } from '@/shadcn/components/ui/textarea';
 import type { CustomPageProps } from '@/types/pageProps';
-import { router, useForm, usePage } from '@inertiajs/vue3';
-import { ArrowLeft } from '@lucide/vue';
+import { setLayoutProps, useForm, usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 import { computed, ref, watch } from 'vue';
 import { route } from 'ziggy-js';
@@ -22,6 +22,10 @@ const props = defineProps<{
 }>();
 
 const isEditing = !!props.mapPoint;
+
+setLayoutProps({
+    breadcrumbs: [{ title: 'Kartenpunkte', href: route('mappoints.index') }, { title: isEditing ? 'Bearbeiten' : 'Neu' }],
+});
 
 const page = usePage<CustomPageProps>();
 
@@ -113,18 +117,10 @@ const errors: Record<string, string> = form.errors;
 </script>
 
 <template>
-    <div class="container mx-auto py-8">
-        <div class="mx-auto mb-4 max-w-2xl">
-            <Button variant="outline" @click="router.visit(route('mappoints.index'))">
-                <ArrowLeft />
-                Zurück
-            </Button>
-        </div>
+    <div class="mx-auto w-full max-w-3xl">
+        <PageHeader :title="isEditing ? 'Kartenpunkt bearbeiten' : 'Neuen Kartenpunkt erstellen'" />
 
-        <Card class="mx-auto max-w-2xl">
-            <CardHeader>
-                <CardTitle>{{ isEditing ? 'Kartenpunkt bearbeiten' : 'Neuen Kartenpunkt erstellen' }}</CardTitle>
-            </CardHeader>
+        <Card>
             <form @submit.prevent="submit">
                 <CardContent class="space-y-4">
                     <div class="space-y-2">

@@ -92,5 +92,6 @@ function assertFillsViewport(object $page, string $selector): void
     );
 
     expect($measured['scrollHeight'])->toBeLessThanOrEqual($measured['innerHeight']);
-    expect($measured['bottom'])->toBeGreaterThan($measured['innerHeight'] - 24);
+    // Below the element only the layout's content padding (24px) and the sidebar inset margin (8px) may remain
+    expect($measured['bottom'])->toBeGreaterThanOrEqual($measured['innerHeight'] - 32);
 }

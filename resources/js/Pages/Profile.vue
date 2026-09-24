@@ -1,12 +1,14 @@
 <script setup lang="ts">
+import PageHeader from '@/components/PageHeader.vue';
 import PinLocationMap from '@/components/PinLocationMap.vue';
 import { LaravelValidationError, notifyError } from '@/helpers';
 import { Button } from '@/shadcn/components/ui/button';
 import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
 import AdvisorMap from '@/views/AdvisorMap.vue';
-import axios, { AxiosError } from 'axios';
+import { setLayoutProps } from '@inertiajs/vue3';
 import { MapPin, Save } from '@lucide/vue';
+import axios, { AxiosError } from 'axios';
 import { computed, ref } from 'vue';
 import { toast } from 'vue-sonner';
 import { route } from 'ziggy-js';
@@ -17,6 +19,10 @@ type Coordinate = App.ValueObjects.Coordinate;
 const props = defineProps<{
     advisorMarker: string;
 }>();
+
+setLayoutProps({
+    breadcrumbs: [{ title: 'Profil' }],
+});
 
 const user = ref(userData.value);
 
@@ -132,11 +138,11 @@ function saveAddress() {
 </script>
 
 <template>
-    <div ref="outer">
-        <h2 class="content-block">Profil {{ user.name }}</h2>
-        <div style="margin: 30px 40px 30px 40px">
+    <div ref="outer" class="mx-auto w-full max-w-3xl">
+        <PageHeader :title="`Profil ${user.name}`" />
+        <div>
             <div class="flex-row">
-                <div class="flex-cell rounded-xl border bg-card text-card-foreground shadow-sm" style="padding: 30px; max-width: 400px">
+                <div class="flex-cell rounded-xl border bg-card text-card-foreground shadow-sm" style="padding: 30px">
                     <div class="flex-row">
                         <div class="flex-cell">
                             <span class="label">Beratungsgebiet</span>
@@ -202,13 +208,8 @@ function saveAddress() {
                                 <i>Speichere Dein Beratungsgebiet, damit die Karte aktualisiert wird.</i>
                             </div>
                         </div>
-                        <div class="flex-cell" style="display: none"></div>
                     </div>
                 </div>
-                <div class="flex-cell rounded-xl border bg-card text-card-foreground shadow-sm" style="padding: 30px; display: none"></div>
-                <!--  <div class="bg-card text-card-foreground flex-cell rounded-xl border shadow-sm" style="padding:30px;">
-          Test
-        </div>-->
             </div>
         </div>
     </div>

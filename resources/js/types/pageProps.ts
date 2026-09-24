@@ -1,3 +1,4 @@
+import type { BreadcrumbItemType } from '@/layouts/helper';
 import { PageProps } from '@inertiajs/core';
 
 export interface CustomPageProps extends PageProps {
@@ -22,4 +23,13 @@ export interface CustomPageProps extends PageProps {
     appName?: string;
     defaultLogo?: string;
     version?: string;
+}
+
+declare module '@inertiajs/core' {
+    export interface InertiaConfig {
+        layoutProps: {
+            breadcrumbs: BreadcrumbItemType[];
+            fullBleed: boolean;
+        };
+    }
 }

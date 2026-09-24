@@ -7,7 +7,7 @@ import { LControl, LControlLayers, LIcon, LLayerGroup, LMap, LMarker, LPopup, LT
 //import 'leaflet/dist/leaflet.css';
 import { Button } from '@/shadcn/components/ui/button';
 import { Input } from '@/shadcn/components/ui/input';
-import { router, usePage } from '@inertiajs/vue3';
+import { router, setLayoutProps, usePage } from '@inertiajs/vue3';
 import { ExternalLink, Search, UserCheck } from '@lucide/vue';
 import { LPolygon } from '@vue-leaflet/vue-leaflet';
 import axios from 'axios';
@@ -29,6 +29,11 @@ const props = defineProps<{
     groups: App.Data.GroupMapData[];
     advisorMarker?: string;
 }>();
+
+setLayoutProps({
+    breadcrumbs: [{ title: 'Beratungen' }, { title: 'Karte' }],
+    fullBleed: true,
+});
 const advisors = props.advisors;
 
 const advices = computed(() => {

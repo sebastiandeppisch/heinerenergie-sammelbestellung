@@ -2,7 +2,7 @@ import type { Component } from 'vue';
 
 export interface BreadcrumbItem {
     title: string;
-    href: string;
+    href?: string;
 }
 
 export type BreadcrumbItemType = BreadcrumbItem;

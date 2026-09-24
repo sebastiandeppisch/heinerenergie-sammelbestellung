@@ -4,8 +4,9 @@ import AdviceGeocodingStatus from '@/components/Advices/AdviceGeocodingStatus.vu
 import ChecklistPanel from '@/components/ChecklistPanel.vue';
 import FormSubmissionRenderer from '@/components/FormBuilder/FormSubmissionRenderer.vue';
 import AdviceNextcloud from '@/components/Nextcloud/AdviceNextcloud.vue';
+import PageHeader from '@/components/PageHeader.vue';
 import Button from '@/shadcn/components/ui/button/Button.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, setLayoutProps } from '@inertiajs/vue3';
 import { Map } from '@lucide/vue';
 import { ref } from 'vue';
 import { route } from 'ziggy-js';
@@ -31,31 +32,30 @@ const props = defineProps<{
     nextcloudConfigured: boolean;
 }>();
 
+setLayoutProps({
+    breadcrumbs: [
+        { title: 'Beratungen' },
+        { title: 'Tabelle', href: route('advices') },
+        { title: `${props.advice.first_name} ${props.advice.last_name}` },
+    ],
+});
+
 const sharedIds = ref(props.advice.shares_ids || []);
 const advisor = user.value;
 </script>
 
 <template>
-    <div class="advice-container">
-        <!-- Header Section -->
-        <div class="advice-header">
-            <div class="header-content">
-                <div class="header-title-section">
-                    <h2 class="advice-title" :title="`Beratung für ${advice.first_name} ${advice.last_name}`">
-                        Beratung für<br class="mobile-break" />
-                        {{ advice.first_name }} {{ advice.last_name }}
-                    </h2>
-                </div>
-                <div class="header-actions">
-                    <AdviceActions
-                        :advice="advice"
-                        :advisor="advisor"
-                        :transferable-groups="transferableGroups"
-                        :can-delete-advice="props.canDeleteAdvice"
-                    />
-                </div>
-            </div>
-        </div>
+    <div>
+        <PageHeader :title="`Beratung für ${advice.first_name} ${advice.last_name}`">
+            <template #actions>
+                <AdviceActions
+                    :advice="advice"
+                    :advisor="advisor"
+                    :transferable-groups="transferableGroups"
+                    :can-delete-advice="props.canDeleteAdvice"
+                />
+            </template>
+        </PageHeader>
 
         <!-- Main Content -->
         <div class="advice-content">
@@ -120,69 +120,17 @@ const advisor = user.value;
 </template>
 
 <style scoped>
-.advice-container {
-    min-height: 100vh;
-    background-color: #f2f2f2;
-}
-
-.advice-header {
-    background-color: #f2f2f2;
-    border-bottom: 2px solid #e9ecef;
-    padding: 16px 24px;
-    position: sticky;
-    top: 0;
-    /* z-index: 100;*/
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.header-content {
-    max-width: 1400px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.header-title-section {
-    flex: 1;
-    min-width: 0; /* Verhindert Überlauf bei langen Namen */
-    max-width: 100%;
-}
-
-.advice-title {
-    font-size: 24px;
-    color: #2c3e50;
-    font-weight: 600;
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.mobile-break {
-    display: none;
-}
-
-.header-actions {
-    display: flex;
-    gap: 16px;
-    flex-shrink: 0;
-}
-
 .advice-content {
-    max-width: 1400px;
-    margin: 32px auto;
-    padding: 0 24px;
     display: grid;
     grid-template-columns: 2fr 1fr;
-    gap: 32px;
+    gap: 24px;
 }
 
 .content-main,
 .content-sidebar {
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 24px;
 }
 
 .content-card {
@@ -208,39 +156,10 @@ const advisor = user.value;
     .advice-content {
         grid-template-columns: 1fr;
     }
-
-    .header-content {
-        flex-direction: column;
-        gap: 16px;
-        align-items: flex-start;
-    }
-
-    .header-actions {
-        width: 100%;
-        flex-wrap: wrap;
-    }
 }
 
 @media (max-width: 768px) {
-    .advice-header {
-        padding: 12px 16px;
-    }
-
-    .advice-title {
-        font-size: 20px;
-        white-space: normal;
-    }
-
-    .mobile-break {
-        display: inline;
-    }
-
-    .advice-content {
-        margin: 16px auto;
-        padding: 0 16px;
-        gap: 16px;
-    }
-
+    .advice-content,
     .content-main,
     .content-sidebar {
         gap: 16px;

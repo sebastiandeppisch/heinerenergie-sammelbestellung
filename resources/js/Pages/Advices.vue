@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import AdvicesTable from '@/components/Advices/AdvicesTable.vue';
+import PageHeader from '@/components/PageHeader.vue';
+import { setLayoutProps } from '@inertiajs/vue3';
 
 defineProps<{
     showGroupColumn: boolean;
@@ -9,9 +11,14 @@ defineProps<{
     adviceTypes: { id: number; name: string }[];
     advisors: { id: string; name: string }[];
 }>();
+
+setLayoutProps({
+    breadcrumbs: [{ title: 'Beratungen' }, { title: 'Tabelle' }],
+});
 </script>
 
 <template>
+    <PageHeader title="Beratungen" />
     <AdvicesTable
         :show-group-column="showGroupColumn"
         :advices="advices"
