@@ -10,15 +10,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { router } from '@inertiajs/vue3';
 import { AlertCircle, CheckCircle2, Clock, Home, Loader2, Phone, ShoppingCart } from '@lucide/vue';
+import { filterFns, sortFns } from '@/lib/tableFns';
 import {
+    columnFilteringFeature,
     createColumnHelper,
+    createFilteredRowModel,
+    createSortedRowModel,
     FlexRender,
-    getCoreRowModel,
-    getFilteredRowModel,
-    getSortedRowModel,
-    useVueTable,
+    globalFilteringFeature,
+    rowSortingFeature,
+    tableFeatures,
+    useTable,
     type ColumnFiltersState,
     type SortingState,
+    type Updater,
 } from '@tanstack/vue-table';
 import { computed, ref, watch } from 'vue';
 import { route } from 'ziggy-js';
@@ -131,7 +136,17 @@ const columnFilters = ref<ColumnFiltersState>([]);
 const globalFilter = ref('');
 const showFilters = ref(false);
 
-const columnHelper = createColumnHelper<App.Data.DataProtectedAdviceData>();
+const features = tableFeatures({
+    rowSortingFeature,
+    columnFilteringFeature,
+    globalFilteringFeature,
+    sortedRowModel: createSortedRowModel(),
+    sortFns,
+    filteredRowModel: createFilteredRowModel(),
+    filterFns,
+});
+
+const columnHelper = createColumnHelper<typeof features, App.Data.DataProtectedAdviceData>();
 
 const columns = computed(() => {
     const cols = [
@@ -212,10 +227,11 @@ const columns = computed(() => {
             enableColumnFilter: true,
         }),
     ];
-    return cols;
+    return columnHelper.columns(cols);
 });
 
-const table = useVueTable({
+const table = useTable({
+    features,
     get data() {
         return localAdvices.value;
     },
@@ -233,18 +249,15 @@ const table = useVueTable({
             return globalFilter.value;
         },
     },
-    onSortingChange: (u) => {
+    onSortingChange: (u: Updater<SortingState>) => {
         sorting.value = typeof u === 'function' ? u(sorting.value) : u;
     },
-    onColumnFiltersChange: (u) => {
+    onColumnFiltersChange: (u: Updater<ColumnFiltersState>) => {
         columnFilters.value = typeof u === 'function' ? u(columnFilters.value) : u;
     },
-    onGlobalFilterChange: (u) => {
+    onGlobalFilterChange: (u: string) => {
         globalFilter.value = u;
     },
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
 });
 
 const totalCount = computed(() => table.getFilteredRowModel().rows.length);
@@ -297,8 +310,9 @@ const { height: rootHeight } = useFillViewportHeight(rootEl);
                         <TableHead v-for="header in table.getHeaderGroups()[0].headers" :key="`f-${header.id}`" class="py-1">
                             <Input
                                 v-if="header.column.getCanFilter()"
-                                :value="(header.column.getFilterValue() as string) ?? ''"
-                                @input="(e: Event) => header.column.setFilterValue((e.target as HTMLInputElement).value)"
+                                :data-test="`filter-${header.column.id}`"
+                                :model-value="(header.column.getFilterValue() as string) ?? ''"
+                                @update:model-value="(value) => header.column.setFilterValue(value)"
                                 class="h-6 text-xs"
                                 placeholder="Filter..."
                             />
