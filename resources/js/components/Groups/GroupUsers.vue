@@ -7,14 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { router } from '@inertiajs/vue3';
 import { Edit2, Plus, Trash2 } from '@lucide/vue';
-import {
-    createColumnHelper,
-    createCoreRowModel,
-    createSortedRowModel,
-    VueTable,
-    type SortingState,
-    type Updater,
-} from '@tanstack/vue-table';
+import { createColumnHelper, createCoreRowModel, createSortedRowModel, VueTable, type SortingState, type Updater } from '@tanstack/vue-table';
 import { computed, ref } from 'vue';
 import { route } from 'ziggy-js';
 
