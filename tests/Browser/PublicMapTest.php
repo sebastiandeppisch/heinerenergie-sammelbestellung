@@ -142,3 +142,19 @@ test('the table shows the coordinates instead of a dash when a point has no loca
         ->assertSee('49.87285, 8.65102')
         ->assertDontSee('–');
 });
+
+test('points of a category without an image are shown with the default marker', function (): void {
+    $category = MapPointCategory::factory()->for($this->group)->withoutImage()->create();
+    $mapEmbed = MapEmbed::factory()->for($this->group)->create(['zoom' => 12]);
+    MapPoint::factory()->for($this->group)->create([
+        'published' => true,
+        'category_id' => $category->id,
+        'lat' => $mapEmbed->lat,
+        'lng' => $mapEmbed->lng,
+    ]);
+    $mapEmbed->mapPointCategories()->sync([$category->id]);
+
+    visit(route('map.public', $mapEmbed))
+        ->assertNoJavaScriptErrors()
+        ->assertPresent('img.leaflet-marker-icon');
+});

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Button from '@/shadcn/components/ui/button/Button.vue';
+import { categoryMarkerIcon } from '@/utils/categoryMarkerIcon';
 import { router } from '@inertiajs/vue3';
 import { Link } from '@lucide/vue';
 import { LControlLayers, LIcon, LLayerGroup, LMap, LMarker, LPopup, LTileLayer } from '@vue-leaflet/vue-leaflet';
@@ -92,11 +93,7 @@ function categoryIdToImagePath(category_id: string): string | undefined {
                     layer-type="overlay"
                 >
                     <LMarker v-for="point in points" :key="point.id" :lat-lng="latLng(point.coordinate.lat, point.coordinate.lng)">
-                        <LIcon
-                            v-if="categoryIdToImagePath(category_id) !== undefined"
-                            :icon-url="categoryIdToImagePath(category_id)"
-                            :icon-size="[50, 50]"
-                        />
+                        <LIcon v-bind="categoryMarkerIcon(categoryIdToImagePath(category_id))" />
                         <LPopup>
                             <div class="p-2">
                                 <h3 class="text-lg font-bold">{{ point.title }}</h3>

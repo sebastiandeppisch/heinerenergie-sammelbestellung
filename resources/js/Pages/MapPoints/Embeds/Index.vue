@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/shadcn/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/shadcn/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { router } from '@inertiajs/vue3';
-import { AlertTriangle, ArrowLeft, Edit, Plus, Trash2 } from '@lucide/vue';
+import { AlertTriangle, ArrowLeft, Edit, ExternalLink, Plus, Trash2 } from '@lucide/vue';
 import { ref } from 'vue';
 import { route } from 'ziggy-js';
 
@@ -87,6 +87,18 @@ function deleteMapEmbed() {
                                 </TableCell>
                                 <TableCell class="text-right">
                                     <div class="flex justify-end gap-2">
+                                        <Button
+                                            as="a"
+                                            :href="route('map.public', mapEmbed.id)"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            variant="outline"
+                                            size="sm"
+                                            title="Link öffnen"
+                                            aria-label="Link öffnen"
+                                        >
+                                            <ExternalLink class="h-4 w-4" />
+                                        </Button>
                                         <Button variant="outline" size="sm" @click="router.visit(route('map-embeds.edit', mapEmbed.id))">
                                             <Edit class="h-4 w-4" />
                                         </Button>

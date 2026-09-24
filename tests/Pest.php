@@ -73,3 +73,24 @@ function useFileCacheStore(): string
 
     return $path;
 }
+
+/**
+ * The page must fill the viewport without overflowing it: a stale, JS-computed pixel
+ * height used to freeze after the window was made smaller and never grew back.
+ */
+function assertFillsViewport(object $page, string $selector): void
+{
+    $measured = $page->script(
+        '(() => {
+            const rect = document.querySelector('.$selector.').getBoundingClientRect();
+            return {
+                scrollHeight: document.documentElement.scrollHeight,
+                innerHeight: window.innerHeight,
+                bottom: Math.round(rect.bottom),
+            };
+        })()'
+    );
+
+    expect($measured['scrollHeight'])->toBeLessThanOrEqual($measured['innerHeight']);
+    expect($measured['bottom'])->toBeGreaterThan($measured['innerHeight'] - 24);
+}
