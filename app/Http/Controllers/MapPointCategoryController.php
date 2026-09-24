@@ -4,56 +4,70 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Data\GroupBaseData;
 use App\Data\MapPointCategoryData;
 use App\Http\Requests\UpsertMapPointsCategoryRequest;
+use App\Models\Group;
 use App\Models\MapPointCategory;
+use App\Services\MapPointVisibilityService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class MapPointCategoryController extends Controller
 {
-    public function index(): Response
+    /**
+     * Lists the categories usable in the current group, including the read-only ones
+     * inherited from ancestor groups.
+     */
+    public function index(Request $request, MapPointVisibilityService $visibility): Response
     {
         $this->authorize('viewAny', MapPointCategory::class);
-        $categories = MapPointCategory::withCount('mapPoints')->get()
-            ->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel($category));
+
+        $categories = $visibility->usableCategories()->with('group')->withCount('mapPoints')->get()
+            ->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel(
+                $category,
+                canEdit: $request->user()->can('update', $category),
+            ));
 
         return Inertia::render('Categories/Index', [
             'categories' => $categories,
         ]);
     }
 
-    public function create(): Response
+    public function create(MapPointVisibilityService $visibility): Response
     {
         $this->authorize('create', MapPointCategory::class);
 
-        return Inertia::render('Categories/Upsert');
+        return Inertia::render('Categories/Upsert', [
+            'groups' => $this->selectableGroups($visibility),
+        ]);
     }
 
     public function store(UpsertMapPointsCategoryRequest $request): RedirectResponse
     {
         $this->authorize('create', MapPointCategory::class);
-        $data = $request->validated();
+        $data = $request->getData();
 
         if ($request->hasFile('image')) {
             $data['image_path'] = $request->file('image')->store('categories', 'public');
         }
-
-        unset($data['image']);
 
         $category = MapPointCategory::create($data);
 
         return redirect()->route('mappoint-categories.edit', $category)->with('success', 'Die Kategorie wurde erstellt');
     }
 
-    public function edit(MapPointCategory $mappointCategory): Response
+    public function edit(MapPointCategory $mappointCategory, MapPointVisibilityService $visibility): Response
     {
         $this->authorize('update', $mappointCategory);
 
         return Inertia::render('Categories/Upsert', [
-            'category' => MapPointCategoryData::fromModel($mappointCategory),
+            'category' => MapPointCategoryData::fromModel($mappointCategory->load('group'), canEdit: true),
+            'groups' => $this->selectableGroups($visibility),
         ]);
     }
 
@@ -83,5 +97,15 @@ class MapPointCategoryController extends Controller
         $mappointCategory->delete();
 
         return redirect()->route('mappoint-categories.index')->with('info', 'Die Kategorie '.e($name).' wurde gelöscht');
+    }
+
+    /**
+     * @return Collection<int, GroupBaseData>
+     */
+    private function selectableGroups(MapPointVisibilityService $visibility): Collection
+    {
+        return $visibility->selectableGroups()
+            ->map(fn (Group $group): GroupBaseData => GroupBaseData::fromModel($group))
+            ->toBase();
     }
 }

@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Actions\FetchAddressByCoordinate;
-use App\Actions\FetchCoordinateByAddress;
-use App\Actions\FetchCoordinateByFreeText;
+use App\Contracts\DatabaseDumperContract;
 use App\Contracts\MailCredentialsRepository;
 use App\Contracts\MailServiceContract;
 use App\Contracts\NextcloudFileClientContract;
@@ -17,12 +15,10 @@ use App\Nextcloud\WebDavNextcloudFileClient;
 use App\Repositories\SessionMailCredentialsRepository;
 use App\Services\CurrentGroupService;
 use App\Services\MailService;
-use App\ValueObjects\Address;
-use App\ValueObjects\Coordinate;
-use Closure;
+use App\Services\MysqlDumper;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
-use maxh\Nominatim\Nominatim;
 use Opcodes\LogViewer\Facades\LogViewer;
 use Override;
 use Tests\Support\MockNextcloudFileClient;
@@ -36,6 +32,12 @@ class AppServiceProvider extends ServiceProvider
     #[Override]
     public function register(): void
     {
+        $this->app->bind(
+            DatabaseDumperContract::class,
+            // The default connection is not autowirable, so it is resolved here.
+            fn (): MysqlDumper => new MysqlDumper(DB::connection()),
+        );
+
         $this->app->bind(
             MailCredentialsRepository::class,
             SessionMailCredentialsRepository::class,
@@ -65,38 +67,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         LogViewer::auth(fn ($request): bool => $request->user()?->email === config('app.admin_email'));
-
-        if (config('app.env') === 'testing') {
-            $this->app->bind(FetchCoordinateByAddress::class, function (): Closure {
-
-                $coordinatesOfDarmstadtCenter = new Coordinate(
-                    lat: 49.8728475,
-                    lng: 8.6510204
-                );
-
-                return fn (Address $address): Coordinate => $coordinatesOfDarmstadtCenter;
-            });
-
-            $this->app->bind(FetchCoordinateByFreeText::class, function (): Closure {
-                $coordinatesOfDarmstadtCenter = new Coordinate(
-                    lat: 49.8728475,
-                    lng: 8.6510204
-                );
-
-                return fn (string $text): Coordinate => $coordinatesOfDarmstadtCenter;
-            });
-
-            $this->app->bind(FetchAddressByCoordinate::class, fn (): Closure => fn (Coordinate $coordinate): string => 'Musterstraße 1, 64283 Darmstadt, Deutschland');
-        } else {
-            $this->app->bind(function (): Nominatim {
-                $url = 'http://nominatim.openstreetmap.org/';
-                $defaultHeader = [
-                    'User-Agent' => app_name().' CMS',
-                ];
-
-                return new Nominatim($url, $defaultHeader);
-            });
-        }
 
         $this->app->singleton(fn (): CurrentGroupService => new CurrentGroupService);
 

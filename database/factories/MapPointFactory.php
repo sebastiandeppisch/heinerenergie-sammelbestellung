@@ -6,6 +6,7 @@ namespace Database\Factories;
 
 use App\Models\Advice;
 use App\Models\FormSubmission;
+use App\Models\Group;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -29,6 +30,7 @@ class MapPointFactory extends Factory
         $lat += fake()->randomFloat(null, -1, 1) * 0.04;
 
         return [
+            'group_id' => Group::factory(),
             'lng' => $lng,
             'lat' => $lat,
             'title' => fake()->name(),
@@ -70,10 +72,23 @@ class MapPointFactory extends Factory
         return $this;
     }
 
-    public function withCategory(?MapPointCategory $category = null): Factory
+    /**
+     * Without an explicit category, a new one is created in the point's group,
+     * so the point uses a category that is available to its group.
+     */
+    public function withCategory(?MapPointCategory $category = null): static
     {
-        return $this->state(fn (array $attributes): array => [
-            'category_id' => $category?->id ?? MapPointCategory::factory()->create()->id,
-        ]);
+        return $this->state(function (array $attributes) use ($category): array {
+            if ($category !== null) {
+                return ['category_id' => $category->id];
+            }
+
+            $category = MapPointCategory::factory()->create(['group_id' => $attributes['group_id']]);
+
+            return [
+                'category_id' => $category->id,
+                'group_id' => $category->group_id,
+            ];
+        });
     }
 }

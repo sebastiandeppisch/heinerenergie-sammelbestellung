@@ -5,6 +5,7 @@ import FormBuilderProperties from '@/components/FormBuilder/FormBuilderPropertie
 import FormBuilderToolbox from '@/components/FormBuilder/FormBuilderToolbox.vue';
 import FormEmbedDialog from '@/components/FormBuilder/FormEmbedDialog.vue';
 import FormTargets from '@/components/FormTargets.vue';
+import PageHeader from '@/components/PageHeader.vue';
 import Button from '@/shadcn/components/ui/button/Button.vue';
 import { Card, CardContent } from '@/shadcn/components/ui/card';
 import { Checkbox } from '@/shadcn/components/ui/checkbox';
@@ -17,7 +18,7 @@ import SelectTrigger from '@/shadcn/components/ui/select/SelectTrigger.vue';
 import SelectValue from '@/shadcn/components/ui/select/SelectValue.vue';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';
 import { Textarea } from '@/shadcn/components/ui/textarea';
-import { router } from '@inertiajs/vue3';
+import { router, setLayoutProps } from '@inertiajs/vue3';
 import { ArrowUpRightFromSquare } from '@lucide/vue';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, reactive, ref, watch } from 'vue';
@@ -55,6 +56,17 @@ const formDefinition = reactive<FormDefinitionData>(
 );
 
 const isChecklist = computed(() => formDefinition.type === (1 as FormType));
+
+const pageTitle = computed(() => {
+    if (isChecklist.value) {
+        return props.isEdit ? 'Checkliste bearbeiten' : 'Neue Checkliste';
+    }
+    return props.isEdit ? 'Formular bearbeiten' : 'Neues Formular';
+});
+
+setLayoutProps({
+    breadcrumbs: [{ title: 'Formulare' }, { title: 'Formular-Verwaltung', href: route('form-definitions.index') }, { title: pageTitle.value }],
+});
 
 const selectedField = ref<FormFieldData | null>(null);
 
@@ -112,10 +124,6 @@ function saveForm() {
             },
         });
     }
-}
-
-function goBack() {
-    router.visit(route('form-definitions.index'));
 }
 
 function createField(type: FieldType): FormFieldData {
@@ -234,176 +242,176 @@ const allowedEmbedDomainsText = computed<string>({
 </script>
 
 <template>
-    <div class="form-builder">
-        <div class="form-builder__toolbar">
-            <Button @click="goBack" variant="outline">Zurück zur Übersicht</Button>
-
-            <div class="form-builder__toolbar">
+    <div>
+        <PageHeader :title="pageTitle">
+            <template #actions>
                 <FormEmbedDialog :form-definition="props.formDefinition" v-if="props.isEdit && props.formDefinition !== null && !isChecklist" />
                 <Button @click="openFormular" variant="outline" v-if="props.isEdit && !isChecklist">
                     Formular öffnen
                     <ArrowUpRightFromSquare />
                 </Button>
                 <Button @click="saveForm" variant="default">Speichern</Button>
-            </div>
-        </div>
+            </template>
+        </PageHeader>
 
-        <Card class="form-builder__header">
-            <CardContent>
-                <Form class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <FormField v-slot="{ componentField }" name="name">
-                        <FormItem>
-                            <FormLabel>Name</FormLabel>
-                            <FormControl>
-                                <Input v-model="formDefinition.name" />
-                            </FormControl>
-                        </FormItem>
-                    </FormField>
-                    <FormField v-slot="{ componentField }" name="description">
-                        <FormItem>
-                            <FormLabel>Beschreibung</FormLabel>
-                            <FormControl>
-                                <Textarea v-model="nullsafeDescription" />
-                            </FormControl>
-                        </FormItem>
-                    </FormField>
-                    <FormField v-slot="{ componentField }" name="is_active">
-                        <FormItem class="flex flex-row items-center space-y-0 space-x-2">
-                            <FormControl>
-                                <Checkbox v-model="formDefinition.is_active" />
-                            </FormControl>
-                            <FormLabel>Aktiv</FormLabel>
-                        </FormItem>
-                    </FormField>
-                    <FormField v-slot="{ componentField }" name="type">
-                        <FormItem class="flex flex-row items-center space-y-0 space-x-2">
-                            <FormLabel>Typ</FormLabel>
-                            <FormControl>
-                                <Select
-                                    v-bind="componentField"
-                                    :model-value="String(formDefinition.type)"
-                                    @update:model-value="(v) => (formDefinition.type = Number(v) as FormType)"
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Typ wählen" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="0">Formular</SelectItem>
-                                        <SelectItem value="1">Checkliste</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </FormControl>
-                        </FormItem>
-                    </FormField>
-                    <FormField v-slot="{ componentField }" name="group_id">
-                        <FormItem class="flex flex-row items-center space-y-0 space-x-2">
-                            <FormLabel>Initiative</FormLabel>
-                            <FormControl>
-                                <Select v-bind="componentField" v-model="formDefinition.group_id">
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Wähle ein Initiative aus" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem v-for="group in props.groups" :value="group.id" :key="group.id">
-                                            {{ group.name }}
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </FormControl>
-                        </FormItem>
-                    </FormField>
-                </Form>
-            </CardContent>
-        </Card>
+        <div class="form-builder">
+            <Card class="form-builder__header">
+                <CardContent>
+                    <Form class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <FormField v-slot="{ componentField }" name="name">
+                            <FormItem>
+                                <FormLabel>Name</FormLabel>
+                                <FormControl>
+                                    <Input v-model="formDefinition.name" />
+                                </FormControl>
+                            </FormItem>
+                        </FormField>
+                        <FormField v-slot="{ componentField }" name="description">
+                            <FormItem>
+                                <FormLabel>Beschreibung</FormLabel>
+                                <FormControl>
+                                    <Textarea v-model="nullsafeDescription" />
+                                </FormControl>
+                            </FormItem>
+                        </FormField>
+                        <FormField v-slot="{ componentField }" name="is_active">
+                            <FormItem class="flex flex-row items-center space-y-0 space-x-2">
+                                <FormControl>
+                                    <Checkbox v-model="formDefinition.is_active" />
+                                </FormControl>
+                                <FormLabel>Aktiv</FormLabel>
+                            </FormItem>
+                        </FormField>
+                        <FormField v-slot="{ componentField }" name="type">
+                            <FormItem class="flex flex-row items-center space-y-0 space-x-2">
+                                <FormLabel>Typ</FormLabel>
+                                <FormControl>
+                                    <Select
+                                        v-bind="componentField"
+                                        :model-value="String(formDefinition.type)"
+                                        @update:model-value="(v) => (formDefinition.type = Number(v) as FormType)"
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Typ wählen" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="0">Formular</SelectItem>
+                                            <SelectItem value="1">Checkliste</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </FormControl>
+                            </FormItem>
+                        </FormField>
+                        <FormField v-slot="{ componentField }" name="group_id">
+                            <FormItem class="flex flex-row items-center space-y-0 space-x-2">
+                                <FormLabel>Initiative</FormLabel>
+                                <FormControl>
+                                    <Select v-bind="componentField" v-model="formDefinition.group_id">
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Wähle ein Initiative aus" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem v-for="group in props.groups" :value="group.id" :key="group.id">
+                                                {{ group.name }}
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </FormControl>
+                            </FormItem>
+                        </FormField>
+                    </Form>
+                </CardContent>
+            </Card>
 
-        <Card class="form-builder__header" v-if="!isChecklist">
-            <CardContent>
-                <h3 class="mb-4 text-lg font-semibold">Erfolgsmeldung</h3>
-                <Form class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <FormField v-slot="{ componentField }" name="success_message" class="md:col-span-2">
-                        <FormItem>
-                            <FormLabel>Erfolgsmeldung</FormLabel>
-                            <FormControl>
-                                <Textarea v-model="nullsafeSuccessMessage" placeholder="Vielen Dank für Deine Anfrage" />
-                            </FormControl>
-                        </FormItem>
-                    </FormField>
-                    <FormField v-slot="{ componentField }" name="show_next_form_button">
-                        <FormItem class="flex flex-row items-center space-y-0 space-x-2">
-                            <FormControl>
-                                <Checkbox v-model="formDefinition.show_next_form_button" />
-                            </FormControl>
-                            <FormLabel>Button nach Absenden anzeigen</FormLabel>
-                        </FormItem>
-                    </FormField>
-                    <FormField v-slot="{ componentField }" name="next_form_button_text" v-if="formDefinition.show_next_form_button">
-                        <FormItem>
-                            <FormLabel>Button-Text</FormLabel>
-                            <FormControl>
-                                <Input v-model="nullsafeNextFormButtonText" placeholder="Nächstes Formular" />
-                            </FormControl>
-                        </FormItem>
-                    </FormField>
-                </Form>
-            </CardContent>
-        </Card>
+            <Card class="form-builder__header" v-if="!isChecklist">
+                <CardContent>
+                    <h3 class="mb-4 text-lg font-semibold">Erfolgsmeldung</h3>
+                    <Form class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <FormField v-slot="{ componentField }" name="success_message" class="md:col-span-2">
+                            <FormItem>
+                                <FormLabel>Erfolgsmeldung</FormLabel>
+                                <FormControl>
+                                    <Textarea v-model="nullsafeSuccessMessage" placeholder="Vielen Dank für Deine Anfrage" />
+                                </FormControl>
+                            </FormItem>
+                        </FormField>
+                        <FormField v-slot="{ componentField }" name="show_next_form_button">
+                            <FormItem class="flex flex-row items-center space-y-0 space-x-2">
+                                <FormControl>
+                                    <Checkbox v-model="formDefinition.show_next_form_button" />
+                                </FormControl>
+                                <FormLabel>Button nach Absenden anzeigen</FormLabel>
+                            </FormItem>
+                        </FormField>
+                        <FormField v-slot="{ componentField }" name="next_form_button_text" v-if="formDefinition.show_next_form_button">
+                            <FormItem>
+                                <FormLabel>Button-Text</FormLabel>
+                                <FormControl>
+                                    <Input v-model="nullsafeNextFormButtonText" placeholder="Nächstes Formular" />
+                                </FormControl>
+                            </FormItem>
+                        </FormField>
+                    </Form>
+                </CardContent>
+            </Card>
 
-        <Card class="form-builder__header" v-if="!isChecklist">
-            <CardContent>
-                <h3 class="mb-4 text-lg font-semibold">Einbettung (iframe)</h3>
-                <Form class="grid grid-cols-1 gap-4">
-                    <FormField v-slot="{ componentField }" name="allowed_embed_domains">
-                        <FormItem>
-                            <FormLabel>Erlaubte Domains für Einbettung</FormLabel>
-                            <FormControl>
-                                <Textarea v-model="allowedEmbedDomainsText" placeholder="beispiel.de&#10;www.andere-domain.de" />
-                            </FormControl>
-                            <p class="text-sm text-muted-foreground">
-                                Eine Domain pro Zeile. Nur Seiten dieser Domains dürfen das Formular per iframe einbetten. Ist die Liste leer, ist die
-                                Einbettung per iframe auf fremden Domains gesperrt.
-                            </p>
-                        </FormItem>
-                    </FormField>
-                </Form>
-            </CardContent>
-        </Card>
+            <Card class="form-builder__header" v-if="!isChecklist">
+                <CardContent>
+                    <h3 class="mb-4 text-lg font-semibold">Einbettung (iframe)</h3>
+                    <Form class="grid grid-cols-1 gap-4">
+                        <FormField v-slot="{ componentField }" name="allowed_embed_domains">
+                            <FormItem>
+                                <FormLabel>Erlaubte Domains für Einbettung</FormLabel>
+                                <FormControl>
+                                    <Textarea v-model="allowedEmbedDomainsText" placeholder="beispiel.de&#10;www.andere-domain.de" />
+                                </FormControl>
+                                <p class="text-sm text-muted-foreground">
+                                    Eine Domain pro Zeile. Nur Seiten dieser Domains dürfen das Formular per iframe einbetten. Ist die Liste leer, ist
+                                    die Einbettung per iframe auf fremden Domains gesperrt.
+                                </p>
+                            </FormItem>
+                        </FormField>
+                    </Form>
+                </CardContent>
+            </Card>
 
-        <Tabs v-model="selectedTab" class="form-builder__content">
-            <TabsList>
-                <TabsTrigger value="canvas">Canvas</TabsTrigger>
-                <TabsTrigger value="preview">Vorschau</TabsTrigger>
-                <TabsTrigger value="targets" v-if="!isChecklist">Ziele</TabsTrigger>
-            </TabsList>
+            <Tabs v-model="selectedTab" class="form-builder__content">
+                <TabsList>
+                    <TabsTrigger value="canvas">Canvas</TabsTrigger>
+                    <TabsTrigger value="preview">Vorschau</TabsTrigger>
+                    <TabsTrigger value="targets" v-if="!isChecklist">Ziele</TabsTrigger>
+                </TabsList>
 
-            <TabsContent value="canvas">
-                <div class="flex flex-col items-center">
-                    <div class="form-builder__canvas-container">
-                        <FormBuilderToolbox :field-types="fieldTypes" @add-field="addField" class="form-builder__toolbox" />
-                        <FormBuilderCanvas
-                            :modelValue="formDefinition.fields"
-                            @update:model-value="handleFieldsUpdate"
-                            @field-selected="handleFieldSelect"
-                            class="form-builder__canvas"
-                        />
+                <TabsContent value="canvas">
+                    <div class="flex flex-col items-center">
+                        <div class="form-builder__canvas-container">
+                            <FormBuilderToolbox :field-types="fieldTypes" @add-field="addField" class="form-builder__toolbox" />
+                            <FormBuilderCanvas
+                                :modelValue="formDefinition.fields"
+                                @update:model-value="handleFieldsUpdate"
+                                @field-selected="handleFieldSelect"
+                                class="form-builder__canvas"
+                            />
 
-                        <FormBuilderProperties
-                            v-model="selectedField"
-                            v-if="selectedField"
-                            :required-locked="isAdviceAddressFieldSelected"
-                            class="form-builder__properties"
-                        />
+                            <FormBuilderProperties
+                                v-model="selectedField"
+                                v-if="selectedField"
+                                :required-locked="isAdviceAddressFieldSelected"
+                                class="form-builder__properties"
+                            />
+                        </div>
                     </div>
-                </div>
-            </TabsContent>
+                </TabsContent>
 
-            <TabsContent value="preview">
-                <FormBuilderPreview v-if="props.formDefinition !== null" :form-definition="props.formDefinition" class="form-builder__preview" />
-            </TabsContent>
+                <TabsContent value="preview">
+                    <FormBuilderPreview v-if="props.formDefinition !== null" :form-definition="props.formDefinition" class="form-builder__preview" />
+                </TabsContent>
 
-            <TabsContent value="targets">
-                <FormTargets v-model:form-definition="formDefinition" />
-            </TabsContent>
-        </Tabs>
+                <TabsContent value="targets">
+                    <FormTargets v-model:form-definition="formDefinition" />
+                </TabsContent>
+            </Tabs>
+        </div>
     </div>
 </template>
 
@@ -412,14 +420,7 @@ const allowedEmbedDomainsText = computed<string>({
     display: flex;
     flex-direction: column;
     height: 100%;
-    padding: 20px;
-    gap: 20px;
-}
-
-.form-builder__toolbar {
-    display: flex;
-    gap: 10px;
-    justify-content: space-between;
+    gap: 24px;
 }
 
 .form-builder__header {

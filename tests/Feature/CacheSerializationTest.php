@@ -13,7 +13,11 @@ use Illuminate\Support\Facades\File;
 uses(RefreshDatabase::class);
 
 afterEach(function (): void {
-    File::deleteDirectory(storage_path('framework/testing'));
+    // Only the throwaway stores this file created. Deleting the whole testing
+    // directory would take the tracked .gitignore with it.
+    foreach (File::glob(storage_path('framework/testing/cache-*')) as $directory) {
+        File::deleteDirectory($directory);
+    }
 });
 
 it('reads a cached StatusDistributionPointData back as a StatusDistributionPointData', function (): void {

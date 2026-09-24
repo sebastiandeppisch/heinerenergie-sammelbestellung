@@ -1,11 +1,13 @@
 <script setup lang="ts">
+import PageHeader from '@/components/PageHeader.vue';
 import RichTextEditor from '@/components/RichTextEditor.vue';
 import { Button } from '@/shadcn/components/ui/button';
 import Card from '@/shadcn/components/ui/card/Card.vue';
 import CardContent from '@/shadcn/components/ui/card/CardContent.vue';
 import CardHeader from '@/shadcn/components/ui/card/CardHeader.vue';
+import CardTitle from '@/shadcn/components/ui/card/CardTitle.vue';
 import type { CustomPageProps } from '@/types/pageProps';
-import { router, usePage } from '@inertiajs/vue3';
+import { router, setLayoutProps, usePage } from '@inertiajs/vue3';
 import { Edit, Save, X } from '@lucide/vue';
 import { computed, reactive, ref } from 'vue';
 import { route } from 'ziggy-js';
@@ -17,6 +19,10 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+setLayoutProps({
+    breadcrumbs: [{ title: 'Dashboard' }],
+});
 const page = usePage<CustomPageProps>();
 
 const currentGroup = computed(() => page.props.auth.currentGroup);
@@ -72,10 +78,10 @@ const cancelEdit = () => {
 
 <template>
     <div ref="outer">
-        <h2 class="content-block m-6">Dashboard</h2>
-        <Card class="mx-6">
+        <PageHeader title="Dashboard" />
+        <Card>
             <CardHeader class="flex flex-row items-center justify-between">
-                <h2>Berater*innen-Infos</h2>
+                <CardTitle>Berater*innen-Infos</CardTitle>
                 <Button v-if="canEdit && !isEditMode" variant="outline" size="icon" @click="startEdit" data-test="edit-dashboard-text">
                     <Edit class="h-4 w-4" />
                 </Button>
@@ -98,7 +104,7 @@ const cancelEdit = () => {
             </CardContent>
         </Card>
 
-        <div class="m-6">
+        <div class="mt-6">
             <KpiDashboard />
         </div>
     </div>

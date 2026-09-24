@@ -64,6 +64,7 @@ class FormDefinitionToMapPoint extends Model
             $coordinateValue = $coordinateField->value;
 
             $mapPoint = MapPoint::create([
+                'group_id' => $this->formDefinition->group_id,
                 'title' => $titleField->value,
                 'description' => $descriptionField->value,
                 'coordinate' => $coordinateValue,

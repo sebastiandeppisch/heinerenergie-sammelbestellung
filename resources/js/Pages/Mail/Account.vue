@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import PageHeader from '@/components/PageHeader.vue';
 import { Button } from '@/shadcn/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/shadcn/components/ui/card';
 import Input from '@/shadcn/components/ui/input/Input.vue';
 import Label from '@/shadcn/components/ui/label/Label.vue';
-import { useForm } from '@inertiajs/vue3';
-import { AlertTriangle, CheckCircle, Loader2, Mail, Search, Trash2 } from '@lucide/vue';
+import { setLayoutProps, useForm } from '@inertiajs/vue3';
+import { AlertTriangle, CheckCircle, Loader2, Search, Trash2 } from '@lucide/vue';
 import { ref, watch } from 'vue';
 import { route } from 'ziggy-js';
 
@@ -14,6 +15,10 @@ const props = defineProps<{
     discoveredConfig: App.Data.MailConfigData | null;
     discoverFailed: boolean;
 }>();
+
+setLayoutProps({
+    breadcrumbs: [{ title: 'Persönliches Mail-Konto' }],
+});
 
 const hasAccount = ref(props.hasAccount);
 
@@ -69,11 +74,8 @@ function removeAccount() {
 </script>
 
 <template>
-    <div class="mx-auto max-w-2xl px-6 py-12">
-        <div class="mb-8 flex items-center gap-3">
-            <Mail class="h-6 w-6 text-primary" />
-            <h1 class="text-2xl font-semibold text-foreground">Persönliches Mail-Konto</h1>
-        </div>
+    <div class="mx-auto w-full max-w-3xl">
+        <PageHeader title="Persönliches Mail-Konto" />
 
         <!-- Re-login notice -->
         <div v-if="!hasEncKey" class="mb-6 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">

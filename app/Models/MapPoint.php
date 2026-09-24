@@ -8,6 +8,8 @@ use App\Contracts\Pointable;
 use App\Models\Traits\HasUuid;
 use App\ValueObjects\Coordinate;
 use Database\Factories\MapPointFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
 
 /**
+ * @property int $group_id
  * @property Coordinate $coordinate
  * @property Carbon $created_at
  */
@@ -26,7 +29,7 @@ class MapPoint extends Model
     use HasUuid;
 
     protected $fillable = [
-        'name',
+        'group_id',
         'title',
         'description',
         'lng',
@@ -57,5 +60,24 @@ class MapPoint extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(MapPointCategory::class, 'category_id');
+    }
+
+    /**
+     * @return BelongsTo<Group, $this>
+     */
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(Group::class);
+    }
+
+    /**
+     * A group sees the points of its own and of all descendant groups.
+     *
+     * @param  Builder<MapPoint>  $query
+     */
+    #[Scope]
+    protected function visibleFromGroup(Builder $query, Group $group): void
+    {
+        $query->whereIn('group_id', $group->getSubtreeIds());
     }
 }

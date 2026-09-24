@@ -29,14 +29,18 @@ class MapPointCategoryPolicy
         return $this->isGroupAdmin($user);
     }
 
+    /**
+     * Categories inherited from an ancestor group can be used, but only admins of the
+     * owning group (or its ancestors) may change them.
+     */
     public function update(User $user, MapPointCategory $category): bool
     {
-        return $this->isGroupAdmin($user);
+        return $this->groupContext->isActingAsTransitiveAdmin($user, $category->group);
     }
 
     public function delete(User $user, MapPointCategory $category): bool
     {
-        return $this->isGroupAdmin($user);
+        return $this->groupContext->isActingAsTransitiveAdmin($user, $category->group);
     }
 
     /**

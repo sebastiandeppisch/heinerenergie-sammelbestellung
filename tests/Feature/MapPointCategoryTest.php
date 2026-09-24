@@ -49,11 +49,30 @@ test('group admin can create a category for their group', function (): void {
     $response = $this->actingAs($groupAdmin)
         ->post(route('mappoint-categories.store'), [
             'name' => 'Gruppen-Kategorie',
+            'group_id' => $this->group->uuid,
         ]);
 
     $response->assertRedirect();
     $response->assertSessionHas('success');
-    $this->assertDatabaseHas('map_point_categories', ['name' => 'Gruppen-Kategorie']);
+    $this->assertDatabaseHas('map_point_categories', ['name' => 'Gruppen-Kategorie', 'group_id' => $this->group->id]);
+});
+
+test('group admin cannot create a category for a group they do not administer', function (): void {
+    Config::set('app.group_context', 'group');
+
+    $groupAdmin = User::factory()->create(['is_admin' => false]);
+    $this->group->users()->attach($groupAdmin, ['is_admin' => true]);
+    app(SessionService::class)->actAsGroup($this->group, true);
+    $otherGroup = Group::factory()->create();
+
+    $response = $this->actingAs($groupAdmin)
+        ->post(route('mappoint-categories.store'), [
+            'name' => 'Fremde Kategorie',
+            'group_id' => $otherGroup->uuid,
+        ]);
+
+    $response->assertSessionHasErrors(['group_id' => 'Du darfst für diese Initiative keine Kategorien anlegen.']);
+    $this->assertDatabaseMissing('map_point_categories', ['name' => 'Fremde Kategorie']);
 });
 
 test('group member without admin rights cannot access categories', function (): void {
@@ -85,12 +104,14 @@ test('admin can view create category form', function (): void {
     $response->assertInertia(fn ($page) => $page
         ->component('Categories/Upsert')
         ->missing('category')
+        ->has('groups')
     );
 });
 
 test('admin can create category without image', function (): void {
     $categoryData = [
         'name' => 'Test Category',
+        'group_id' => $this->group->uuid,
     ];
 
     $response = $this->actingAs($this->admin)
@@ -102,6 +123,7 @@ test('admin can create category without image', function (): void {
     $this->assertDatabaseHas('map_point_categories', [
         'name' => 'Test Category',
         'image_path' => null,
+        'group_id' => $this->group->id,
     ]);
 });
 
@@ -113,6 +135,7 @@ test('admin can create category with image', function (): void {
     $categoryData = [
         'name' => 'Test Category with Image',
         'image' => $image,
+        'group_id' => $this->group->uuid,
     ];
 
     $response = $this->actingAs($this->admin)
@@ -155,6 +178,20 @@ test('admin can update category', function (): void {
 
     $category = $category->refresh();
     $this->assertEquals('Updated Category Name', $category->name);
+});
+
+test('the group of a category cannot be changed', function (): void {
+    $category = MapPointCategory::factory()->for($this->group)->create();
+    $otherGroup = Group::factory()->create();
+
+    $this->actingAs($this->admin)
+        ->put(route('mappoint-categories.update', $category), [
+            'name' => $category->name,
+            'group_id' => $otherGroup->uuid,
+        ])
+        ->assertRedirect();
+
+    expect($category->refresh()->group_id)->toBe($this->group->id);
 });
 
 test('admin can update category with new image', function (): void {
@@ -219,7 +256,7 @@ test('category validation works correctly', function (): void {
     $response = $this->actingAs($this->admin)
         ->post(route('mappoint-categories.store'), []);
 
-    $response->assertSessionHasErrors(['name']);
+    $response->assertSessionHasErrors(['name', 'group_id']);
 });
 
 test('image validation works correctly', function (): void {
@@ -261,13 +298,14 @@ test('categories are included in mappoints edit form', function (): void {
 });
 
 test('mappoint can be created with category', function (): void {
-    $category = MapPointCategory::factory()->create();
+    $category = MapPointCategory::factory()->for($this->group)->create();
 
     $mapPointData = [
         'title' => 'Test MapPoint',
         'description' => 'Test description',
         'coordinate' => ['lat' => 52.5, 'lng' => 13.4],
         'published' => true,
+        'group_id' => $this->group->uuid,
         'category_id' => $category->uuid,
     ];
 
@@ -279,15 +317,16 @@ test('mappoint can be created with category', function (): void {
 
     $this->assertDatabaseHas('map_points', [
         'title' => 'Test MapPoint',
+        'group_id' => $this->group->id,
         'category_id' => $category->id,
     ]);
 });
 
 test('mappoint can be updated with different category', function (): void {
-    $category1 = MapPointCategory::factory()->create();
-    $category2 = MapPointCategory::factory()->create();
+    $category1 = MapPointCategory::factory()->for($this->group)->create();
+    $category2 = MapPointCategory::factory()->for($this->group)->create();
 
-    $mapPoint = MapPoint::factory()->create([
+    $mapPoint = MapPoint::factory()->for($this->group)->create([
         'category_id' => $category1->id,
     ]);
 
@@ -296,6 +335,7 @@ test('mappoint can be updated with different category', function (): void {
         'description' => $mapPoint->description,
         'coordinate' => ['lat' => 52.5, 'lng' => 13.4],
         'published' => $mapPoint->published,
+        'group_id' => $this->group->uuid,
         'category_id' => $category2->uuid,
     ];
 

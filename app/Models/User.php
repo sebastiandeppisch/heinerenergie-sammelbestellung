@@ -43,6 +43,8 @@ class User extends Authenticatable
         'city',
         'advice_radius',
         'is_active',
+        'lat',
+        'lng',
     ];
 
     protected $hidden = [
@@ -94,6 +96,9 @@ class User extends Authenticatable
             'is_active' => 'bool',
             'address' => Address::class,
             'coordinate' => Coordinate::class,
+            // A postal code is text, not a number: leading zeros matter and
+            // UserData expects a string.
+            'zip' => 'string',
             'advice_radius' => 'int',
             'password' => 'hashed',
         ];

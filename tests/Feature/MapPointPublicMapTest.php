@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Group;
 use App\Models\MapEmbed;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
@@ -19,29 +20,30 @@ test('public map route is accessible without authentication', function (): void 
 });
 
 test('public map only shows published points from the embed categories', function (): void {
-    $includedCategory = MapPointCategory::factory()->create();
-    $otherCategory = MapPointCategory::factory()->create();
+    $group = Group::factory()->create();
+    $includedCategory = MapPointCategory::factory()->for($group)->create();
+    $otherCategory = MapPointCategory::factory()->for($group)->create();
 
-    $visiblePoint = MapPoint::factory()->create([
+    $visiblePoint = MapPoint::factory()->for($group)->create([
         'published' => true,
         'category_id' => $includedCategory->id,
         'title' => 'Visible Point',
         'location' => 'Musterstraße 1, 64283 Darmstadt',
     ]);
 
-    MapPoint::factory()->create([
+    MapPoint::factory()->for($group)->create([
         'published' => false,
         'category_id' => $includedCategory->id,
         'title' => 'Unpublished Point',
     ]);
 
-    MapPoint::factory()->create([
+    MapPoint::factory()->for($group)->create([
         'published' => true,
         'category_id' => $otherCategory->id,
         'title' => 'Other Category Point',
     ]);
 
-    $mapEmbed = MapEmbed::factory()->create();
+    $mapEmbed = MapEmbed::factory()->for($group)->create();
     $mapEmbed->mapPointCategories()->sync([$includedCategory->id]);
 
     $response = $this->get(route('map.public', $mapEmbed));
@@ -95,4 +97,39 @@ test('public map response reflects whether the table view is enabled', function 
         ->component('MapPoints/PublicMap')
         ->where('showTable', false)
     );
+});
+
+test('public map of a group shows the published points of its descendant groups', function (): void {
+    $group = Group::factory()->create();
+    $childGroup = Group::factory()->create(['parent_id' => $group->id]);
+    $category = MapPointCategory::factory()->for($group)->create();
+    MapPoint::factory()->for($childGroup)->create(['published' => true, 'category_id' => $category->id, 'title' => 'Child Point']);
+
+    $mapEmbed = MapEmbed::factory()->for($group)->create();
+    $mapEmbed->mapPointCategories()->sync([$category->id]);
+
+    $this->get(route('map.public', $mapEmbed))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has("pointsByCategory.{$category->uuid}", 1)
+            ->where("pointsByCategory.{$category->uuid}.0.title", 'Child Point')
+        );
+});
+
+test('public map of a group hides the points of its ancestor groups', function (): void {
+    $group = Group::factory()->create();
+    $childGroup = Group::factory()->create(['parent_id' => $group->id]);
+    $category = MapPointCategory::factory()->for($group)->create();
+    MapPoint::factory()->for($group)->create(['published' => true, 'category_id' => $category->id, 'title' => 'Parent Point']);
+    MapPoint::factory()->for($childGroup)->create(['published' => true, 'category_id' => $category->id, 'title' => 'Child Point']);
+
+    $mapEmbed = MapEmbed::factory()->for($childGroup)->create();
+    $mapEmbed->mapPointCategories()->sync([$category->id]);
+
+    $this->get(route('map.public', $mapEmbed))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has("pointsByCategory.{$category->uuid}", 1)
+            ->where("pointsByCategory.{$category->uuid}.0.title", 'Child Point')
+        );
 });

@@ -19,8 +19,8 @@ beforeEach(function (): void {
 });
 
 test('the create form preview map renders without javascript errors', function (): void {
-    $category = MapPointCategory::factory()->withoutImage()->create(['name' => 'Ladesäulen']);
-    MapPoint::factory()->create(['published' => true, 'category_id' => $category->id]);
+    $category = MapPointCategory::factory()->for($this->group)->withoutImage()->create(['name' => 'Ladesäulen']);
+    MapPoint::factory()->for($this->group)->create(['published' => true, 'category_id' => $category->id]);
 
     visit(route('map-embeds.create'))
         ->assertNoJavaScriptErrors()
@@ -30,10 +30,10 @@ test('the create form preview map renders without javascript errors', function (
 });
 
 test('the edit form preview map renders without javascript errors', function (): void {
-    $category = MapPointCategory::factory()->withoutImage()->create(['name' => 'Ladesäulen']);
-    MapPoint::factory()->create(['published' => true, 'category_id' => $category->id]);
+    $category = MapPointCategory::factory()->for($this->group)->withoutImage()->create(['name' => 'Ladesäulen']);
+    MapPoint::factory()->for($this->group)->create(['published' => true, 'category_id' => $category->id]);
 
-    $mapEmbed = MapEmbed::factory()->create();
+    $mapEmbed = MapEmbed::factory()->for($this->group)->create();
     $mapEmbed->mapPointCategories()->sync([$category->id]);
 
     visit(route('map-embeds.edit', $mapEmbed))

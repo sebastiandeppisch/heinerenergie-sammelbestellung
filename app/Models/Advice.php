@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Contracts\Pointable;
 use App\Enums\AdviceStatusResult;
 use App\Enums\AdviceType;
+use App\Enums\GeocodingStatus;
 use App\Enums\HouseType;
 use App\Events\AdviceCreated;
 use App\Events\AdviceSaving;
@@ -35,6 +36,7 @@ use Wnx\Sends\Support\HasSendsTrait;
  * @property ?Address $address
  * @property AdviceType $type
  * @property HouseType|null $house_type
+ * @property GeocodingStatus|null $geocoding_status
  * @property Carbon $created_at
  * @property Carbon $updated_at
  *
@@ -69,6 +71,7 @@ class Advice extends Model implements HasSends, Pointable
         'advice_status_id',
         'lng',
         'lat',
+        'geocoding_status',
         'type',
         'help_type_place',
         'help_type_technical',
@@ -174,7 +177,7 @@ class Advice extends Model implements HasSends, Pointable
 
     #[Override]
     /**
-     * @return array<string, class-string<AdviceType>|class-string<HouseType>|class-string<Address>|class-string<Coordinate>|string>
+     * @return array<string, class-string<AdviceType>|class-string<HouseType>|class-string<GeocodingStatus>|class-string<Address>|class-string<Coordinate>|string>
      */
     protected function casts(): array
     {
@@ -201,6 +204,7 @@ class Advice extends Model implements HasSends, Pointable
             'coordinate' => Coordinate::class,
             'lng' => 'float',
             'lat' => 'float',
+            'geocoding_status' => GeocodingStatus::class,
             'advisor_id' => 'int',
         ];
     }

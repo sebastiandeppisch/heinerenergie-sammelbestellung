@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Data;
 
 use App\Enums\AdviceType;
+use App\Enums\GeocodingStatus;
 use App\Enums\HouseType;
 use App\Models\Advice;
 use App\Models\User;
@@ -31,6 +32,7 @@ class AdviceData extends Data
         public ?string $advice_status_id,
         public ?float $lng,
         public ?float $lat,
+        public ?GeocodingStatus $geocoding_status,
         public AdviceType $type,
         public bool $help_type_place,
         public bool $help_type_technical,
@@ -63,6 +65,7 @@ class AdviceData extends Data
             advice_status_id: $advice->status?->uuid,
             lng: $advice->lng,
             lat: $advice->lat,
+            geocoding_status: $advice->geocoding_status,
             type: $advice->type,
             help_type_place: $advice->help_type_place,
             help_type_technical: $advice->help_type_technical,

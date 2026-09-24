@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Button } from '@/shadcn/components/ui/button';
+import { categoryMarkerIcon } from '@/utils/categoryMarkerIcon';
 import { Minus, Plus } from '@lucide/vue';
 import { LControl, LIcon, LLayerGroup, LMap, LMarker, LPopup, LTileLayer } from '@vue-leaflet/vue-leaflet';
 import { latLng } from 'leaflet';
@@ -81,7 +82,7 @@ function zoomOut() {
                     :key="point.id"
                     :lat-lng="latLng(point.coordinate.lat, point.coordinate.lng)"
                 >
-                    <LIcon v-if="category.image_path" :icon-url="category.image_path" :icon-size="[50, 50]" />
+                    <LIcon v-bind="categoryMarkerIcon(category.image_path)" />
                     <LPopup>
                         <div class="p-2">
                             <h3 class="text-lg font-bold">{{ point.title }}</h3>

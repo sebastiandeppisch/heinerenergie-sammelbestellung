@@ -2,15 +2,16 @@
 import CategorizedPointsMap from '@/components/CategorizedPointsMap.vue';
 import CategoryVisibilityFilter from '@/components/CategoryVisibilityFilter.vue';
 import MapEmbedDialog from '@/components/MapEmbedDialog.vue';
+import PageHeader from '@/components/PageHeader.vue';
 import { Button } from '@/shadcn/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/shadcn/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/shadcn/components/ui/card';
 import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { Switch } from '@/shadcn/components/ui/switch';
 import type { CustomPageProps } from '@/types/pageProps';
-import { router, useForm, usePage } from '@inertiajs/vue3';
-import { ArrowLeft, ExternalLink } from '@lucide/vue';
+import { setLayoutProps, useForm, usePage } from '@inertiajs/vue3';
+import { ExternalLink } from '@lucide/vue';
 import { computed, reactive, watch } from 'vue';
 import { route } from 'ziggy-js';
 
@@ -19,9 +20,18 @@ const props = defineProps<{
     categories: Array<App.Data.MapPointCategoryData>;
     pointsByCategory: Record<string, Array<App.Data.MapPointData>>;
     groups: Array<App.Data.GroupBaseData>;
+    mapCategoryIdsByGroup: Record<string, Array<string>>;
 }>();
 
 const isEditing = computed(() => !!props.mapEmbed);
+
+setLayoutProps({
+    breadcrumbs: [
+        { title: 'Kartenpunkte', href: route('mappoints.index') },
+        { title: 'Einbettungen', href: route('map-embeds.index') },
+        { title: isEditing.value ? 'Bearbeiten' : 'Neu' },
+    ],
+});
 
 const page = usePage<CustomPageProps>();
 
@@ -29,10 +39,7 @@ const page = usePage<CustomPageProps>();
 
 function initialGroupId() {
     if (!props.mapEmbed) {
-        if (!page.props.auth.currentGroup) {
-            return null;
-        }
-        return page.props.auth.currentGroup.id;
+        return page.props.auth.currentGroup?.id ?? props.groups[0]?.id ?? null;
     }
     return props.mapEmbed.group_id;
 }
@@ -72,7 +79,27 @@ const aspectRatioPreset = computed({
     },
 });
 
-const previewCategories = computed(() => props.categories.filter((category) => categorySelection[category.id]));
+/** The embed shows points of the selected initiative and its sub initiatives, so categories of parent and sub initiatives are available. */
+const availableCategories = computed(() => {
+    const usableCategoryIds = form.group_id ? (props.mapCategoryIdsByGroup[form.group_id] ?? []) : [];
+
+    return props.categories.filter((category) => usableCategoryIds.includes(category.id));
+});
+
+watch(
+    () => form.group_id,
+    () => {
+        const availableCategoryIds = new Set(availableCategories.value.map((category) => category.id));
+
+        for (const categoryId of Object.keys(categorySelection)) {
+            if (!availableCategoryIds.has(categoryId)) {
+                categorySelection[categoryId] = false;
+            }
+        }
+    },
+);
+
+const previewCategories = computed(() => availableCategories.value.filter((category) => categorySelection[category.id]));
 
 const previewBoxStyle = computed(() => ({
     aspectRatio: `${form.aspect_ratio_width} / ${form.aspect_ratio_height}`,
@@ -104,25 +131,18 @@ function submit() {
 </script>
 
 <template>
-    <div class="container mx-auto py-8">
-        <div class="mx-auto mb-4 max-w-2xl">
-            <Button variant="outline" @click="router.visit(route('map-embeds.index'))">
-                <ArrowLeft />
-                Zurück
-            </Button>
-        </div>
+    <div class="mx-auto w-full max-w-3xl">
+        <PageHeader :title="isEditing ? 'Einbettung bearbeiten' : 'Neue Einbettung erstellen'">
+            <template v-if="isEditing && mapEmbed" #actions>
+                <Button as="a" :href="route('map.public', mapEmbed.id)" target="_blank" rel="noopener noreferrer" variant="outline">
+                    Link öffnen
+                    <ExternalLink />
+                </Button>
+                <MapEmbedDialog :map-embed="mapEmbed" />
+            </template>
+        </PageHeader>
 
-        <Card class="mx-auto max-w-2xl">
-            <CardHeader class="flex flex-row items-center justify-between">
-                <CardTitle>{{ isEditing ? 'Einbettung bearbeiten' : 'Neue Einbettung erstellen' }}</CardTitle>
-                <div v-if="isEditing && mapEmbed" class="flex gap-2">
-                    <Button as="a" :href="route('map.public', mapEmbed.id)" target="_blank" rel="noopener noreferrer" variant="outline">
-                        Link öffnen
-                        <ExternalLink />
-                    </Button>
-                    <MapEmbedDialog :map-embed="mapEmbed" />
-                </div>
-            </CardHeader>
+        <Card>
             <form @submit.prevent="submit">
                 <CardContent class="space-y-4">
                     <div class="space-y-2">
@@ -139,7 +159,6 @@ function submit() {
                                 <SelectValue placeholder="Wähle eine Initiative aus" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem :value="null">Keine Initiative</SelectItem>
                                 <SelectItem v-for="group in groups" :key="group.id" :value="group.id">
                                     {{ group.name }}
                                 </SelectItem>
@@ -147,8 +166,7 @@ function submit() {
                         </Select>
                         <p v-if="form.errors.group_id" class="text-sm text-red-500">{{ form.errors.group_id }}</p>
                         <p class="text-xs text-gray-500">
-                            Die Primärfarbe dieser Initiative wird auf der eingebetteten Karte verwendet. Ohne Initiative bleibt es bei der
-                            Standardfarbe.
+                            Die eingebettete Karte zeigt die Punkte dieser Initiative und ihrer Unterinitiativen und verwendet ihre Primärfarbe.
                         </p>
                     </div>
 
@@ -159,8 +177,14 @@ function submit() {
                             dass sich der Einbettungslink ändert.
                         </p>
                         <div class="space-y-2 rounded-lg border p-3">
-                            <CategoryVisibilityFilter v-model:visibility="categorySelection" :categories="categories" id-prefix="embed-category-" />
-                            <p v-if="categories.length === 0" class="text-sm text-gray-500 italic">Es wurden noch keine Kategorien angelegt.</p>
+                            <CategoryVisibilityFilter
+                                v-model:visibility="categorySelection"
+                                :categories="availableCategories"
+                                id-prefix="embed-category-"
+                            />
+                            <p v-if="availableCategories.length === 0" class="text-sm text-gray-500 italic">
+                                Für diese Initiative gibt es noch keine Kategorien.
+                            </p>
                         </div>
                         <p v-if="form.errors.category_ids" class="text-sm text-red-500">{{ form.errors.category_ids }}</p>
                     </div>

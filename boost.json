@@ -7,7 +7,8 @@
     "mcp": true,
     "nightwatch": false,
     "packages": [
-        "barryvdh/laravel-debugbar"
+        "barryvdh/laravel-debugbar",
+        "maatwebsite/excel"
     ],
     "sail": true,
     "skills": [
@@ -17,6 +18,7 @@
         "pest-testing",
         "inertia-vue-development",
         "tailwindcss-development",
+        "laravel-excel",
         "debug-using-debugbar"
     ]
 }

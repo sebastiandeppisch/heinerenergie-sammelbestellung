@@ -269,10 +269,8 @@ const { height: rootHeight } = useFillViewportHeight(rootEl);
 
 <template>
     <div ref="rootEl" data-test="advices-root" class="flex flex-col" :style="{ height: rootHeight }">
-        <h2 class="mb-4 ml-2 text-2xl font-semibold">Beratungen</h2>
-
         <!-- Toolbar -->
-        <Card class="mx-2 mb-2 p-2">
+        <Card class="mb-2 p-2">
             <div class="flex flex-wrap items-center gap-2">
                 <!-- Global search -->
                 <Input v-model="globalFilter" placeholder="Suchen..." class="h-8 w-48" />
@@ -290,7 +288,7 @@ const { height: rootHeight } = useFillViewportHeight(rootEl);
         </Card>
 
         <!-- Table with scrollable container -->
-        <div class="mx-2 mb-0 min-h-0 flex-1 overflow-x-auto overflow-y-auto rounded-lg border border-slate-200 shadow-sm">
+        <div class="mb-0 min-h-0 flex-1 overflow-x-auto overflow-y-auto rounded-lg border border-slate-200 shadow-sm">
             <Table class="w-full">
                 <TableHeader class="bg-background">
                     <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">

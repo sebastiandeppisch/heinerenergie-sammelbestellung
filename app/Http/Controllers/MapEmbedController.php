@@ -13,6 +13,7 @@ use App\Models\Group;
 use App\Models\MapEmbed;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
+use App\Services\MapPointVisibilityService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
@@ -20,11 +21,19 @@ use Inertia\Response;
 
 class MapEmbedController extends Controller
 {
-    public function index(): Response
+    /**
+     * Lists the embeds of the current group and its descendants.
+     */
+    public function index(MapPointVisibilityService $visibility): Response
     {
         $this->authorize('viewAny', MapEmbed::class);
 
-        $mapEmbeds = MapEmbed::with('mapPointCategories', 'group')->latest()->get()
+        $groupIds = $visibility->selectableGroups()->modelKeys();
+
+        $mapEmbeds = MapEmbed::with('mapPointCategories.group', 'group')
+            ->whereIn('group_id', $groupIds)
+            ->latest()
+            ->get()
             ->map(fn (MapEmbed $mapEmbed): MapEmbedData => MapEmbedData::fromModel($mapEmbed));
 
         return Inertia::render('MapPoints/Embeds/Index', [
@@ -32,15 +41,11 @@ class MapEmbedController extends Controller
         ]);
     }
 
-    public function create(): Response
+    public function create(MapPointVisibilityService $visibility): Response
     {
         $this->authorize('create', MapEmbed::class);
 
-        return Inertia::render('MapPoints/Embeds/Upsert', [
-            'categories' => $this->allCategories(),
-            'pointsByCategory' => $this->publishedPointsByCategory(),
-            'groups' => $this->selectableGroups(),
-        ]);
+        return Inertia::render('MapPoints/Embeds/Upsert', $this->formProps($visibility));
     }
 
     public function store(UpsertMapEmbedRequest $request): RedirectResponse
@@ -53,15 +58,13 @@ class MapEmbedController extends Controller
         return redirect()->route('map-embeds.edit', $mapEmbed)->with('success', 'Die Einbettung wurde erstellt');
     }
 
-    public function edit(MapEmbed $mapEmbed): Response
+    public function edit(MapEmbed $mapEmbed, MapPointVisibilityService $visibility): Response
     {
         $this->authorize('update', $mapEmbed);
 
         return Inertia::render('MapPoints/Embeds/Upsert', [
-            'mapEmbed' => MapEmbedData::fromModel($mapEmbed->load('mapPointCategories', 'group')),
-            'categories' => $this->allCategories(),
-            'pointsByCategory' => $this->publishedPointsByCategory(),
-            'groups' => $this->selectableGroups(),
+            'mapEmbed' => MapEmbedData::fromModel($mapEmbed->load('mapPointCategories.group', 'group')),
+            ...$this->formProps($visibility),
         ]);
     }
 
@@ -87,21 +90,21 @@ class MapEmbedController extends Controller
     }
 
     /**
-     * @return Collection<int, MapPointCategoryData>
+     * @return array{categories: Collection<int, MapPointCategoryData>, pointsByCategory: Collection<string, Collection<int, MapPointData>>, groups: Collection<int, GroupBaseData>, mapCategoryIdsByGroup: array<string, array<int, string>>}
      */
-    private function allCategories(): Collection
+    private function formProps(MapPointVisibilityService $visibility): array
     {
-        return MapPointCategory::all()->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel($category));
-    }
+        $categories = $visibility->relevantCategories()->with('group')->get();
+        $groups = $visibility->selectableGroups();
 
-    /**
-     * The initiatives an embed can be assigned to. Its primary color themes the public map.
-     *
-     * @return Collection<int, GroupBaseData>
-     */
-    private function selectableGroups(): Collection
-    {
-        return Group::all()->map(fn (Group $group): GroupBaseData => GroupBaseData::fromModel($group));
+        return [
+            'categories' => $categories
+                ->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel($category))
+                ->toBase(),
+            'pointsByCategory' => $this->publishedPointsByCategory($visibility),
+            'groups' => $groups->map(fn (Group $group): GroupBaseData => GroupBaseData::fromModel($group))->toBase(),
+            'mapCategoryIdsByGroup' => $visibility->mapCategoryIdsByGroup($groups, $categories),
+        ];
     }
 
     /**
@@ -115,10 +118,11 @@ class MapEmbedController extends Controller
     /**
      * @return Collection<string, Collection<int, MapPointData>>
      */
-    private function publishedPointsByCategory(): Collection
+    private function publishedPointsByCategory(MapPointVisibilityService $visibility): Collection
     {
-        return MapPoint::where('published', true)
-            ->with('category')
+        return $visibility->visiblePoints()
+            ->where('published', true)
+            ->with(['category', 'group'])
             ->get()
             ->map(fn (MapPoint $mapPoint): MapPointData => MapPointData::fromModel($mapPoint))
             ->groupBy('category_id');

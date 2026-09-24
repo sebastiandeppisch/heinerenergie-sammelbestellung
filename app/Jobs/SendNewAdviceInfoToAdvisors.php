@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
+use App\Exceptions\NominatimUnavailableException;
 use App\Models\Advice;
 use App\Models\User;
 use App\Notifications\NewAdviceNearby;
@@ -39,8 +40,26 @@ class SendNewAdviceInfoToAdvisors implements ShouldQueue
             'advisors_count' => $this->advisors()->count(),
         ]);
         if ($this->advice->coordinate === null) {
-            $this->release(60);
-            Log::info('Advice coordinate is null, releasing job', [
+            // The lookup runs in its own job and may not have finished yet.
+            // Releasing would be silently dropped on a connection without a
+            // worker, so resolve the position here instead. The lookup is
+            // cached and guards itself against running twice.
+            try {
+                CalculateCoordinatesForAdvice::dispatchSync($this->advice);
+            } catch (NominatimUnavailableException $e) {
+                Log::warning('Cannot notify advisors, the geocoder is unavailable', [
+                    'advice_id' => $this->advice->id,
+                    'exception' => $e,
+                ]);
+
+                return;
+            }
+
+            $this->advice = $this->advice->fresh() ?? $this->advice;
+        }
+
+        if ($this->advice->coordinate === null) {
+            Log::info('Advice has no position, advisors cannot be selected by distance', [
                 'advice_id' => $this->advice->id,
             ]);
 

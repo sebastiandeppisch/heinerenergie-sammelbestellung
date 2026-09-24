@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\Group;
 use App\Models\MapPointCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -20,6 +21,7 @@ class MapPointCategoryFactory extends Factory
     public function definition(): array
     {
         return [
+            'group_id' => Group::factory(),
             'name' => $this->faker->words(2, true),
             'image_path' => $this->faker->optional(0.7)->randomElement([
                 'categories/pin-red.png',

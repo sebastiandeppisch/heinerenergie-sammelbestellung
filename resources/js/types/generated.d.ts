@@ -16,6 +16,7 @@ advisor_id: string | null,
 advice_status_id: string | null,
 lng: number | null,
 lat: number | null,
+geocoding_status: App.Enums.GeocodingStatus | null,
 type: App.Enums.AdviceType,
 help_type_place: boolean,
 help_type_technical: boolean,
@@ -81,6 +82,7 @@ advisor_id: string | null,
 advice_status_id: string | null,
 lng: number | null,
 lat: number | null,
+geocoding_status: App.Enums.GeocodingStatus | null,
 type: App.Enums.AdviceType | null,
 created_at: string,
 updated_at: string,
@@ -252,8 +254,11 @@ export type MapPointCategoryData = {
 id: string,
 name: string,
 image_path: string | null,
+group_id: string,
+group_name: string,
 map_points_count: number,
 created_at: string | null,
+can_edit: boolean,
 };
 export type MapPointData = {
 id: string,
@@ -263,8 +268,42 @@ description: string,
 published: boolean,
 userReadablePointableType: string,
 created_at: string,
+group_id: string,
 category_id: string | null,
 location: string | null,
+};
+export type MapPointImportResultData = {
+created_count: number,
+updated_count: number,
+rows: App.Data.MapPointImportRowData[],
+created_categories: string[],
+errors: App.Data.SpreadsheetRowErrorData[],
+};
+export type MapPointImportRowData = {
+row: number,
+is_update: boolean,
+title: string,
+lat: number,
+lng: number,
+location: string | null,
+category: string | null,
+published: boolean,
+group_name: string,
+};
+export type MapPointSpreadsheetColumnData = {
+header: string,
+field: App.Enums.MapPointSpreadsheetField,
+};
+export type MapPointSpreadsheetFieldData = {
+value: App.Enums.MapPointSpreadsheetField,
+label: string,
+is_key: boolean,
+};
+export type MapPointSpreadsheetMappingData = {
+id: string,
+name: string,
+columns: App.Data.MapPointSpreadsheetColumnData[],
+key_field: App.Enums.MapPointSpreadsheetField,
 };
 export type NextcloudGroupUserData = {
 nc_id: string | null,
@@ -279,6 +318,22 @@ total: number,
 perPage: number,
 currentPage: number,
 lastPage: number,
+};
+export type SpreadsheetFormatData = {
+value: App.Enums.SpreadsheetFormat,
+label: string,
+};
+export type SpreadsheetRowErrorData = {
+row: number,
+column: string | null,
+message: string,
+};
+export type SpreadsheetUploadData = {
+token: string,
+filename: string,
+headers: string[],
+preview_rows: (string | null)[][],
+row_count: number,
 };
 export type StatusDistributionPointData = {
 date: string,
@@ -335,7 +390,10 @@ export type AdviceType = 0 | 1 | 2;
 export type Aggregation = 'day' | 'week' | 'month' | 'quarter';
 export type FieldType = 'text' | 'textarea' | 'number' | 'email' | 'phone' | 'select' | 'radio' | 'checkbox' | 'file' | 'image' | 'date' | 'geo_coordinate' | 'address';
 export type FormType = 0 | 1;
+export type GeocodingStatus = 'pending' | 'success' | 'not_found' | 'failed' | 'manual';
 export type HouseType = 0 | 1 | 2;
+export type MapPointSpreadsheetField = 'ignore' | 'id' | 'title' | 'description' | 'lat' | 'lng' | 'location' | 'category' | 'published';
+export type SpreadsheetFormat = 'xlsx' | 'ods' | 'xls' | 'csv';
 }
 namespace Nextcloud {
 namespace Data {

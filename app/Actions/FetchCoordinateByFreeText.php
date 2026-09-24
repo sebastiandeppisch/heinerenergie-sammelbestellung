@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Exceptions\NominatimUnavailableException;
+use App\Services\GeocodeCache;
 use App\ValueObjects\Coordinate;
-use GuzzleHttp\Exception\ClientException;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use maxh\Nominatim\Nominatim;
+use Throwable;
 
 class FetchCoordinateByFreeText
 {
@@ -22,17 +23,22 @@ class FetchCoordinateByFreeText
         $this->nominatim = app(Nominatim::class);
     }
 
+    /**
+     * Returns null when OpenStreetMap does not know the location.
+     *
+     * @throws NominatimUnavailableException if OpenStreetMap could not be reached
+     */
     public function __invoke(string $text): ?Coordinate
     {
         Log::debug('Fetching coordinates for text', ['text' => $text]);
         $this->text = $text;
 
-        return Cache::rememberForever($this->key(), fn (): ?Coordinate => $this->handle());
+        return app(GeocodeCache::class)->remember($this->key(), fn (): ?Coordinate => $this->handle());
     }
 
     private function key(): string
     {
-        return 'coordinates.'.md5($this->text);
+        return 'coordinates.text.'.md5($this->text);
     }
 
     private function handle(): ?Coordinate
@@ -40,20 +46,21 @@ class FetchCoordinateByFreeText
         $text = $this->text;
         $search = $this->nominatim->newSearch()
             ->query($text);
+
         try {
             $result = $this->nominatim->find($search);
-            Log::debug('Nominatim free text search result', ['result' => $result, 'address' => $text]);
-            if (count($result) > 0) {
-                $result = $result[0];
+        } catch (Throwable $e) {
+            Log::error('Nominatim free text search failed', ['text' => $text, 'exception' => $e]);
 
-                return Coordinate::fromArray($result);
-            }
-        } catch (ClientException $e) {
-            Log::error($e->getResponse()->getBody()->getContents());
-            throw $e;
+            throw NominatimUnavailableException::requestFailed($e);
+        }
+
+        Log::debug('Nominatim free text search result', ['result' => $result, 'address' => $text]);
+
+        if (count($result) > 0) {
+            return Coordinate::fromArray($result[0]);
         }
 
         return null;
-
     }
 }

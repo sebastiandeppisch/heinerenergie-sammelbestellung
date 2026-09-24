@@ -62,8 +62,14 @@ test('the public map shares the primary color of its initiative', function (): v
     );
 });
 
-test('the public map falls back to the default color when the embed has no initiative', function (): void {
-    $mapEmbed = MapEmbed::factory()->create(['group_id' => null]);
+test('the public map falls back to the default color when the initiative has none', function (): void {
+    $group = Group::factory()->create([
+        'primary_hue' => null,
+        'primary_lightness' => null,
+        'primary_chroma' => null,
+    ]);
+
+    $mapEmbed = MapEmbed::factory()->create(['group_id' => $group->id]);
 
     $response = $this->get(route('map.public', $mapEmbed));
 

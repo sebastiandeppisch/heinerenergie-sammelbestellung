@@ -7,7 +7,7 @@ import { LControl, LControlLayers, LIcon, LLayerGroup, LMap, LMarker, LPopup, LT
 //import 'leaflet/dist/leaflet.css';
 import { Button } from '@/shadcn/components/ui/button';
 import { Input } from '@/shadcn/components/ui/input';
-import { router, usePage } from '@inertiajs/vue3';
+import { router, setLayoutProps, usePage } from '@inertiajs/vue3';
 import { ExternalLink, Search, UserCheck } from '@lucide/vue';
 import { LPolygon } from '@vue-leaflet/vue-leaflet';
 import axios from 'axios';
@@ -16,6 +16,7 @@ import { toast } from 'vue-sonner';
 import AdviceTypes from '../AdviceTypes';
 import { isActingAsAdmin, user as userRef } from '../authHelper';
 import { useFillViewportHeight } from '../composables/useFillViewportHeight';
+import { notifyError } from '../helpers';
 
 const user = userRef.value;
 const userId = user.id;
@@ -28,6 +29,11 @@ const props = defineProps<{
     groups: App.Data.GroupMapData[];
     advisorMarker?: string;
 }>();
+
+setLayoutProps({
+    breadcrumbs: [{ title: 'Beratungen' }, { title: 'Karte' }],
+    fullBleed: true,
+});
 const advisors = props.advisors;
 
 const advices = computed(() => {
@@ -136,14 +142,15 @@ function runSearch() {
     axios
         .get('api/map/search', { params: { query: search.value } })
         .then((response) => response.data)
-        .then((data: App.ValueObjects.Coordinate) => {
-            if (data['lat'] === undefined || data['lng'] === undefined) {
+        .then((data: App.ValueObjects.Coordinate | null) => {
+            if (!data || data['lat'] === undefined || data['lng'] === undefined) {
                 toast.error('Adresse nicht gefunden');
                 return;
             }
             map.center = latLng(data.lat, data.lng);
             map.zoom = 18; //a better approach would be to set the bounding box
-        });
+        })
+        .catch(notifyError);
 }
 
 function getAdvisorMarker(): string {

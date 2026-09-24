@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import CreateFromTemplateModal from '@/components/CreateFromTemplateModal.vue';
+import PageHeader from '@/components/PageHeader.vue';
 import { Badge } from '@/shadcn/components/ui/badge';
 import Button from '@/shadcn/components/ui/button/Button.vue';
 import { Card, CardContent } from '@/shadcn/components/ui/card';
@@ -7,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from '@/shadcn/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';
-import { router } from '@inertiajs/vue3';
+import { router, setLayoutProps } from '@inertiajs/vue3';
 import { ChevronDown, Edit, Plus, Trash2 } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import { route } from 'ziggy-js';
@@ -19,6 +20,10 @@ const props = defineProps<{
     checklists: FormDefinitionData[];
     groups: App.Data.GroupData[];
 }>();
+
+setLayoutProps({
+    breadcrumbs: [{ title: 'Formulare' }, { title: 'Formular-Verwaltung' }],
+});
 
 const showAdviceModal = ref(false);
 const showMapPointModal = ref(false);
@@ -74,10 +79,9 @@ function openAdviceTemplate() {
 </script>
 
 <template>
-    <div class="m-4">
-        <div class="page-header">
-            <h2 class="page-title">Formular-Verwaltung</h2>
-            <div class="page-actions">
+    <div class="mx-auto w-full max-w-6xl">
+        <PageHeader title="Formular-Verwaltung">
+            <template #actions>
                 <DropdownMenu v-if="activeTab === 'forms'">
                     <DropdownMenuTrigger as-child>
                         <Button>
@@ -95,8 +99,8 @@ function openAdviceTemplate() {
                     <Plus class="h-4 w-4" />
                     Neue Checkliste
                 </Button>
-            </div>
-        </div>
+            </template>
+        </PageHeader>
 
         <CreateFromTemplateModal v-model:open="showAdviceModal" template-type="advice" :groups="props.groups" />
         <CreateFromTemplateModal v-model:open="showMapPointModal" template-type="map_point" :groups="props.groups" />
@@ -205,17 +209,3 @@ function openAdviceTemplate() {
         </Tabs>
     </div>
 </template>
-
-<style scoped>
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.page-title {
-    font-size: 24px;
-    font-weight: bold;
-}
-</style>

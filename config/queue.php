@@ -13,7 +13,15 @@ return [
     |
     */
 
-    'default' => env('QUEUE_CONNECTION', 'sync'),
+    /*
+     * Deferred is the safe default: it runs jobs after the response has been
+     * sent, so a slow mail server or geocoder never blocks or breaks a request,
+     * and it needs no worker. That matters for the shared hosting instances.
+     *
+     * An instance that does run a worker should set QUEUE_CONNECTION=database.
+     * Only there do jobs survive the request, honour delays and get retried.
+     */
+    'default' => env('QUEUE_CONNECTION', 'deferred'),
 
     /*
     |--------------------------------------------------------------------------
@@ -32,6 +40,15 @@ return [
 
         'sync' => [
             'driver' => 'sync',
+        ],
+
+        /*
+         * Runs the job after the response has been sent, in the same process
+         * and without a worker. Requires the InvokeDeferredCallbacks middleware
+         * in App\Http\Kernel, otherwise the job is silently dropped.
+         */
+        'deferred' => [
+            'driver' => 'deferred',
         ],
 
         'database' => [

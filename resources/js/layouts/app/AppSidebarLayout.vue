@@ -14,10 +14,12 @@ import 'vue-sonner/style.css';
 
 interface Props {
     breadcrumbs?: BreadcrumbItemType[];
+    fullBleed?: boolean;
 }
 
 withDefaults(defineProps<Props>(), {
     breadcrumbs: () => [],
+    fullBleed: false,
 });
 const page = usePage<CustomPageProps>();
 
@@ -51,7 +53,9 @@ watch(
             <AppSidebarHeader :breadcrumbs="breadcrumbs" />
             <Toaster class="pointer-events-auto" style="z-index: 9999" :richColors="true" position="top-center" />
             <AccessDeniedDialog />
-            <slot />
+            <div class="flex flex-1 flex-col" :class="{ 'p-4 md:p-6': !fullBleed }">
+                <slot />
+            </div>
         </AppContent>
     </AppShell>
 </template>

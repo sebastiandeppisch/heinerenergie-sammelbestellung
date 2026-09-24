@@ -210,7 +210,7 @@ watch(
                         </TableHeader>
                         <TableBody>
                             <TableRow v-for="row in table.getRowModel().rows" :key="row.id">
-                                <TableCell>
+                                <TableCell class="whitespace-normal">
                                     <div class="flex items-center gap-2">
                                         <div v-if="row.original.categoryImagePath" class="h-6 w-6 flex-shrink-0 overflow-hidden rounded bg-gray-100">
                                             <img
@@ -222,8 +222,8 @@ watch(
                                         <span>{{ row.original.categoryName }}</span>
                                     </div>
                                 </TableCell>
-                                <TableCell class="font-medium">{{ row.original.title }}</TableCell>
-                                <TableCell class="max-w-md truncate">{{ row.original.description }}</TableCell>
+                                <TableCell class="min-w-48 font-medium whitespace-normal">{{ row.original.title }}</TableCell>
+                                <TableCell class="max-w-xs truncate">{{ row.original.description }}</TableCell>
                                 <TableCell>
                                     <CoordinateFieldPreview :value="row.original.coordinate" :label="row.original.location || undefined" />
                                 </TableCell>
