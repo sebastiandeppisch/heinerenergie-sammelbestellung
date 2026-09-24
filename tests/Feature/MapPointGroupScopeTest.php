@@ -289,7 +289,7 @@ test('the map embed form offers each initiative the categories of its ancestors 
         ->get(route('map-embeds.create'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->where("mapCategoryIdsByGroup.{$this->root->uuid}", fn ($uuids) => $sortedUuids($uuids) === $sortedUuids([$rootCategory->uuid, $childCategory->uuid, $siblingCategory->uuid]))
-            ->where("mapCategoryIdsByGroup.{$this->child->uuid}", fn ($uuids) => $sortedUuids($uuids) === $sortedUuids([$rootCategory->uuid, $childCategory->uuid]))
+            ->where("mapCategoryIdsByGroup.{$this->root->uuid}", fn ($uuids): bool => $sortedUuids($uuids) === $sortedUuids([$rootCategory->uuid, $childCategory->uuid, $siblingCategory->uuid]))
+            ->where("mapCategoryIdsByGroup.{$this->child->uuid}", fn ($uuids): bool => $sortedUuids($uuids) === $sortedUuids([$rootCategory->uuid, $childCategory->uuid]))
         );
 });

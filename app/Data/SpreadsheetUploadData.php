@@ -35,7 +35,7 @@ class SpreadsheetUploadData extends Data
             filename: $upload->filename,
             headers: $content->headers,
             preview_rows: array_map(
-                fn (array $cells): array => array_map(fn (mixed $cell): ?string => SpreadsheetCell::text($cell), $cells),
+                fn (array $cells): array => array_map(SpreadsheetCell::text(...), $cells),
                 array_values(array_slice($content->rows, 0, $previewRowCount)),
             ),
             row_count: count($content->rows),

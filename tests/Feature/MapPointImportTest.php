@@ -1,5 +1,6 @@
 <?php
 
+use App\Data\MapPointSpreadsheetColumnData;
 use App\Enums\SpreadsheetFormat;
 use App\Exports\MapPointsExport;
 use App\Models\Group;
@@ -433,7 +434,7 @@ test('an exported csv file can be imported again to update the points', function
 
     $token = uploadMapPointFile($this, $csv, 'kartenpunkte.csv');
     $columns = array_map(
-        fn ($column): array => ['header' => $column->header, 'field' => $column->field->value],
+        fn (MapPointSpreadsheetColumnData $column): array => ['header' => $column->header, 'field' => $column->field->value],
         MapPointsExport::defaultColumns(),
     );
 
@@ -599,7 +600,7 @@ test('text that looks like a formula is exported as text and imported unchanged'
 
     $token = uploadMapPointFile($this, $file, "kartenpunkte.{$format->value}");
     $columns = array_map(
-        fn ($column): array => ['header' => $column->header, 'field' => $column->field->value],
+        fn (MapPointSpreadsheetColumnData $column): array => ['header' => $column->header, 'field' => $column->field->value],
         MapPointsExport::defaultColumns(),
     );
 

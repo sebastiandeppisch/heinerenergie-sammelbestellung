@@ -51,10 +51,8 @@ test('the export uses the columns of a saved mapping with the id column first', 
 
     $this->get(route('mappoints.export', ['mapping' => $mapping->uuid, 'format' => 'csv']))->assertOk();
 
-    Excel::assertDownloaded(exportFilename(SpreadsheetFormat::CSV), function (MapPointsExport $export) use ($mapPoint): bool {
-        return $export->headings() === ['Nummer', 'Bezeichnung', 'Art der Anlage', 'Öffentlich']
-            && $export->map($export->collection()->sole()) === [$mapPoint->uuid, 'Balkonkraftwerk Musterweg 5', 'Photovoltaik', 'ja'];
-    });
+    Excel::assertDownloaded(exportFilename(SpreadsheetFormat::CSV), fn (MapPointsExport $export): bool => $export->headings() === ['Nummer', 'Bezeichnung', 'Art der Anlage', 'Öffentlich']
+        && $export->map($export->collection()->sole()) === [$mapPoint->uuid, 'Balkonkraftwerk Musterweg 5', 'Photovoltaik', 'ja']);
 });
 
 test('without a mapping all fields are exported', function (): void {

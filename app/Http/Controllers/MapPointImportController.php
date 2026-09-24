@@ -37,7 +37,7 @@ class MapPointImportController extends Controller
         return Inertia::render('MapPoints/Import', [
             'mappings' => MapPointSpreadsheetMappingData::forGroup($group),
             'fields' => array_map(
-                fn (MapPointSpreadsheetField $field): MapPointSpreadsheetFieldData => MapPointSpreadsheetFieldData::fromEnum($field),
+                MapPointSpreadsheetFieldData::fromEnum(...),
                 MapPointSpreadsheetField::cases(),
             ),
             'upload' => is_string($token) ? $imports->upload($token, $group) : null,

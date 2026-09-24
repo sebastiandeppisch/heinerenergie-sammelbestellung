@@ -52,7 +52,7 @@ class MapPointController extends Controller
             'importAndExportNeedGroup' => $currentGroup === null,
             'spreadsheetMappings' => $currentGroup === null ? [] : MapPointSpreadsheetMappingData::forGroup($currentGroup),
             'spreadsheetFormats' => array_map(
-                fn (SpreadsheetFormat $format): SpreadsheetFormatData => SpreadsheetFormatData::fromEnum($format),
+                SpreadsheetFormatData::fromEnum(...),
                 SpreadsheetFormat::cases(),
             ),
         ]);
