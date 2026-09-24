@@ -137,3 +137,22 @@ test('the table shows the coordinates instead of a dash when a point has no loca
         ->assertSee('49.87285, 8.65102')
         ->assertDontSee('–');
 });
+
+test('column filter on the public map table filters rows', function (): void {
+    $category = MapPointCategory::factory()->withoutImage()->create();
+    MapPoint::factory()->create(['published' => true, 'category_id' => $category->id, 'title' => 'Solaranlage Nord']);
+    MapPoint::factory()->create(['published' => true, 'category_id' => $category->id, 'title' => 'Windrad Süd']);
+
+    $mapEmbed = MapEmbed::factory()->create();
+    $mapEmbed->mapPointCategories()->sync([$category->id]);
+
+    visit(route('map.public', $mapEmbed))
+        ->click('Tabelle')
+        ->assertSee('Solaranlage Nord')
+        ->assertSee('Windrad Süd')
+        ->click('Suche pro Spalte')
+        ->fill('[data-test="filter-title"]', 'Solar')
+        ->assertSee('Solaranlage Nord')
+        ->assertDontSee('Windrad Süd')
+        ->assertNoJavaScriptErrors();
+});

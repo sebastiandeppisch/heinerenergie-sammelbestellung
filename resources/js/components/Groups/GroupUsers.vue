@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { router } from '@inertiajs/vue3';
 import { Edit2, Plus, Trash2 } from '@lucide/vue';
+import { sortFns } from '@/lib/tableFns';
 import {
     createColumnHelper,
     createSortedRowModel,
@@ -129,6 +130,7 @@ function confirmRemove() {
 const features = tableFeatures({
     rowSortingFeature,
     sortedRowModel: createSortedRowModel(),
+    sortFns,
 });
 
 const columnHelper = createColumnHelper<typeof features, App.Data.GroupUserData>();

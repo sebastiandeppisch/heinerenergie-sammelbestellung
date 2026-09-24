@@ -55,6 +55,53 @@ test('advices table search filters rows', function (): void {
         ->assertNoJavaScriptErrors();
 });
 
+test('advices table column filter filters rows', function (): void {
+    Advice::factory()->create([
+        'group_id' => $this->group->id,
+        'advisor_id' => $this->user->id,
+        'first_name' => 'Max',
+        'last_name' => 'Mustermann',
+    ]);
+    Advice::factory()->create([
+        'group_id' => $this->group->id,
+        'advisor_id' => $this->user->id,
+        'first_name' => 'Erika',
+        'last_name' => 'Musterfrau',
+    ]);
+
+    visit(route('advices'))
+        ->assertNoSmoke()
+        ->assertSee('Max')
+        ->assertSee('Erika')
+        ->click('Spaltenfilter')
+        ->fill('[data-test="filter-first_name"]', 'Max')
+        ->assertSee('Max')
+        ->assertDontSee('Erika')
+        ->assertNoJavaScriptErrors();
+});
+
+test('advices table sorts text columns case-insensitively', function (): void {
+    foreach (['Bert', 'anna', 'Carla'] as $lastName) {
+        Advice::factory()->create([
+            'group_id' => $this->group->id,
+            'advisor_id' => $this->user->id,
+            'last_name' => $lastName,
+        ]);
+    }
+
+    $page = visit(route('advices'))
+        ->assertNoSmoke()
+        ->click('Nachname')
+        ->assertSee('Nachname ↑');
+
+    $lastNames = $page->script(
+        'Array.from(document.querySelectorAll("tbody tr")).map((row) => row.innerText).join("|")'
+    );
+
+    expect(strpos($lastNames, 'anna'))->toBeLessThan(strpos($lastNames, 'Bert'))
+        ->and(strpos($lastNames, 'Bert'))->toBeLessThan(strpos($lastNames, 'Carla'));
+});
+
 test('advices table inline edit buttons are visible', function (): void {
     $status = AdviceStatus::create([
         'name' => 'Test Status',

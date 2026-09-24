@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { router } from '@inertiajs/vue3';
 import { AlertCircle, CheckCircle2, Clock, Home, Loader2, Phone, ShoppingCart } from '@lucide/vue';
+import { filterFns, sortFns } from '@/lib/tableFns';
 import {
     columnFilteringFeature,
     createColumnHelper,
@@ -140,7 +141,9 @@ const features = tableFeatures({
     columnFilteringFeature,
     globalFilteringFeature,
     sortedRowModel: createSortedRowModel(),
+    sortFns,
     filteredRowModel: createFilteredRowModel(),
+    filterFns,
 });
 
 const columnHelper = createColumnHelper<typeof features, App.Data.DataProtectedAdviceData>();
@@ -307,8 +310,9 @@ const { height: rootHeight } = useFillViewportHeight(rootEl);
                         <TableHead v-for="header in table.getHeaderGroups()[0].headers" :key="`f-${header.id}`" class="py-1">
                             <Input
                                 v-if="header.column.getCanFilter()"
-                                :value="(header.column.getFilterValue() as string) ?? ''"
-                                @input="(e: Event) => header.column.setFilterValue((e.target as HTMLInputElement).value)"
+                                :data-test="`filter-${header.column.id}`"
+                                :model-value="(header.column.getFilterValue() as string) ?? ''"
+                                @update:model-value="(value) => header.column.setFilterValue(value)"
                                 class="h-6 text-xs"
                                 placeholder="Filter..."
                             />

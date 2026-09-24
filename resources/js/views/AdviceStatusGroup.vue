@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/shadcn/components/ui/switch';
 import { Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { Pencil, Plus, Trash2 } from '@lucide/vue';
+import { sortFns } from '@/lib/tableFns';
 import {
     createColumnHelper,
     createSortedRowModel,
@@ -177,6 +178,7 @@ const groupName = (id: string | null) => props.groups.find((g) => g.id === id)?.
 const features = tableFeatures({
     rowSortingFeature,
     sortedRowModel: createSortedRowModel(),
+    sortFns,
 });
 
 // TanStack table for own statuses

@@ -8,6 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/shadcn/components/ui/
 import { Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { TooltipProvider } from '@/shadcn/components/ui/tooltip';
 import { ChevronDown, ChevronUp, Filter } from '@lucide/vue';
+import { filterFns, sortFns } from '@/lib/tableFns';
 import {
     columnFilteringFeature,
     createColumnHelper,
@@ -78,7 +79,9 @@ const features = tableFeatures({
     columnFilteringFeature,
     globalFilteringFeature,
     sortedRowModel: createSortedRowModel(),
+    sortFns,
     filteredRowModel: createFilteredRowModel(),
+    filterFns,
 });
 
 const columnHelper = createColumnHelper<typeof features, MapPointRow>();
@@ -196,8 +199,9 @@ watch(
                                 <TableHead v-for="header in table.getHeaderGroups()[0].headers" :key="`f-${header.id}`" class="py-1">
                                     <Input
                                         v-if="header.column.getCanFilter() && header.column.id !== 'category'"
-                                        :value="(header.column.getFilterValue() as string) ?? ''"
-                                        @input="(e: Event) => header.column.setFilterValue((e.target as HTMLInputElement).value)"
+                                        :data-test="`filter-${header.column.id}`"
+                                        :model-value="(header.column.getFilterValue() as string) ?? ''"
+                                        @update:model-value="(value) => header.column.setFilterValue(value)"
                                         class="h-6 text-xs"
                                         placeholder="Filter..."
                                     />
