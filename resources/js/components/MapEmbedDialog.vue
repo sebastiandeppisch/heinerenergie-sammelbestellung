@@ -2,7 +2,7 @@
 import Button from '@/shadcn/components/ui/button/Button.vue';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/shadcn/components/ui/dialog';
 import { Textarea } from '@/shadcn/components/ui/textarea';
-import { Code2, Copy } from 'lucide-vue-next';
+import { Code2, Copy } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import { toast } from 'vue-sonner';
 import { route } from 'ziggy-js';

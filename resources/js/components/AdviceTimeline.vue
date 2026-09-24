@@ -2,7 +2,7 @@
 import { Button } from '@/shadcn/components/ui/button';
 import { Textarea } from '@/shadcn/components/ui/textarea';
 import { useForm } from '@inertiajs/vue3';
-import { MessageSquarePlus } from 'lucide-vue-next';
+import { MessageSquarePlus } from '@lucide/vue';
 import { computed } from 'vue';
 import { route } from 'ziggy-js';
 import TimelineItem from './TimelineItem.vue';

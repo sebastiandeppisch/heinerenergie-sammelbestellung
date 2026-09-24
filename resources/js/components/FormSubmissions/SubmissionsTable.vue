@@ -94,7 +94,7 @@ import TableHead from '@/shadcn/components/ui/table/TableHead.vue';
 import TableHeader from '@/shadcn/components/ui/table/TableHeader.vue';
 import TableRow from '@/shadcn/components/ui/table/TableRow.vue';
 import { router } from '@inertiajs/vue3';
-import { Eye, MailCheck, MailOpen } from 'lucide-vue-next';
+import { Eye, MailCheck, MailOpen } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import { route } from 'ziggy-js';
 

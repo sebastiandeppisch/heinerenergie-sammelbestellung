@@ -21,7 +21,7 @@ const cssClasses = computed(() => {
 
 <template>
     <div id="root">
-        <div :class="cssClasses">
+        <div :class="cssClasses" class="flex h-full w-full bg-muted">
             <div class="layout">
                 <div class="content">
                     <slot></slot>
@@ -47,14 +47,6 @@ body {
 
 * {
     box-sizing: border-box;
-}
-
-.app {
-    @import '../themes/generated/variables.base.scss';
-    background-color: darken($base-bg, 5);
-    display: flex;
-    height: 100%;
-    width: 100%;
 }
 
 .layout {

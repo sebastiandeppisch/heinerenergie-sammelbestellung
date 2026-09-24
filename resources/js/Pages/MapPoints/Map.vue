@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import Button from '@/shadcn/components/ui/button/Button.vue';
 import { router } from '@inertiajs/vue3';
+import { Link } from '@lucide/vue';
 import { LControlLayers, LIcon, LLayerGroup, LMap, LMarker, LPopup, LTileLayer } from '@vue-leaflet/vue-leaflet';
 import { latLng } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Link } from 'lucide-vue-next';
 import { reactive, watch } from 'vue';
 import { route } from 'ziggy-js';
 // Define props

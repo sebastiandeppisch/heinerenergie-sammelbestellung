@@ -5,9 +5,19 @@ import { Input } from '@/shadcn/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { Switch } from '@/shadcn/components/ui/switch';
 import { Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
-import { FlexRender, createColumnHelper, getCoreRowModel, getSortedRowModel, useVueTable, type SortingState } from '@tanstack/vue-table';
+import { Pencil, Plus, Trash2 } from '@lucide/vue';
+import { sortFns } from '@/lib/tableFns';
+import {
+    createColumnHelper,
+    createSortedRowModel,
+    FlexRender,
+    rowSortingFeature,
+    tableFeatures,
+    useTable,
+    type SortingState,
+    type Updater,
+} from '@tanstack/vue-table';
 import axios from 'axios';
-import { Pencil, Plus, Trash2 } from 'lucide-vue-next';
 import { computed, onMounted, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 
@@ -165,15 +175,22 @@ async function saveVisibility() {
 const resultName = (id: number | null) => adviceStatusResult.find((r) => r.id === id)?.name ?? '-';
 const groupName = (id: string | null) => props.groups.find((g) => g.id === id)?.name ?? '-';
 
+const features = tableFeatures({
+    rowSortingFeature,
+    sortedRowModel: createSortedRowModel(),
+    sortFns,
+});
+
 // TanStack table for own statuses
 const ownSorting = ref<SortingState>([{ id: 'name', desc: false }]);
-const ownColumnHelper = createColumnHelper<AdviceStatus>();
-const ownColumns = [
+const ownColumnHelper = createColumnHelper<typeof features, AdviceStatus>();
+const ownColumns = ownColumnHelper.columns([
     ownColumnHelper.accessor('name', { header: 'Name' }),
     ownColumnHelper.accessor('result', { header: 'Ergebnis' }),
     ownColumnHelper.display({ id: 'actions', header: '' }),
-];
-const ownTable = useVueTable({
+]);
+const ownTable = useTable({
+    features,
     get data(): AdviceStatus[] {
         return ownItems.value;
     },
@@ -183,22 +200,21 @@ const ownTable = useVueTable({
             return ownSorting.value;
         },
     },
-    onSortingChange: (u) => {
+    onSortingChange: (u: Updater<SortingState>) => {
         ownSorting.value = typeof u === 'function' ? u(ownSorting.value) : u;
     },
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
 });
 
 // TanStack table for all statuses (visibility toggle)
 const allSorting = ref<SortingState>([{ id: 'name', desc: false }]);
-const allColumnHelper = createColumnHelper<AdviceStatus>();
-const allColumns = [
+const allColumnHelper = createColumnHelper<typeof features, AdviceStatus>();
+const allColumns = allColumnHelper.columns([
     allColumnHelper.accessor('name', { header: 'Name' }),
     allColumnHelper.accessor('group_id', { header: 'Initiative' }),
     allColumnHelper.accessor('visible_in_group', { header: 'Sichtbar' }),
-];
-const allTable = useVueTable({
+]);
+const allTable = useTable({
+    features,
     get data(): AdviceStatus[] {
         return allItems.value;
     },
@@ -208,11 +224,9 @@ const allTable = useVueTable({
             return allSorting.value;
         },
     },
-    onSortingChange: (u) => {
+    onSortingChange: (u: Updater<SortingState>) => {
         allSorting.value = typeof u === 'function' ? u(allSorting.value) : u;
     },
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
 });
 </script>
 

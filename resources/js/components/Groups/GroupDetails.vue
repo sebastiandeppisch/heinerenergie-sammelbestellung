@@ -288,7 +288,7 @@ import { Label } from '@/shadcn/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';
 import { Textarea } from '@/shadcn/components/ui/textarea';
 import { useForm } from '@inertiajs/vue3';
-import { Save, Trash2, Upload, X } from 'lucide-vue-next';
+import { Save, Trash2, Upload, X } from '@lucide/vue';
 import { computed, onUnmounted, ref, watchEffect } from 'vue';
 import { route } from 'ziggy-js';
 

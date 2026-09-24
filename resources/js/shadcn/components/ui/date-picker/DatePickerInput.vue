@@ -29,7 +29,7 @@
 <script setup lang="ts">
 import { CalendarDate, parseDate, today, getLocalTimeZone } from '@internationalized/date';
 import type { DateValue } from 'reka-ui';
-import { CalendarIcon } from 'lucide-vue-next';
+import { CalendarIcon } from '@lucide/vue';
 import { computed } from 'vue';
 import { cn } from '@/shadcn/utils';
 import { Button } from '@/shadcn/components/ui/button';

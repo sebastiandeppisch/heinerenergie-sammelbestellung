@@ -7,8 +7,8 @@ import TooltipContent from '@/shadcn/components/ui/tooltip/TooltipContent.vue';
 import TooltipTrigger from '@/shadcn/components/ui/tooltip/TooltipTrigger.vue';
 import type { CustomPageProps } from '@/types/pageProps';
 import { usePage } from '@inertiajs/vue3';
+import { Loader2, Megaphone } from '@lucide/vue';
 import axios from 'axios';
-import { Loader2, Megaphone } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import { route } from 'ziggy-js';
 

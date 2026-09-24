@@ -2,7 +2,7 @@
 import Tooltip from '@/shadcn/components/ui/tooltip/Tooltip.vue';
 import TooltipContent from '@/shadcn/components/ui/tooltip/TooltipContent.vue';
 import TooltipTrigger from '@/shadcn/components/ui/tooltip/TooltipTrigger.vue';
-import { MapPin } from 'lucide-vue-next';
+import { MapPin } from '@lucide/vue';
 import { computed } from 'vue';
 
 type Coordinate = App.ValueObjects.Coordinate;

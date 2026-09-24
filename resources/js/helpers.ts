@@ -1,6 +1,6 @@
 import { AxiosError } from 'axios';
 import moment from 'moment';
-import { onMounted, onUnmounted, reactive, Ref } from 'vue';
+import { onMounted, onUnmounted } from 'vue';
 import { toast } from 'vue-sonner';
 
 function formatPriceCell(cell: { value: number | string }): string {
@@ -45,37 +45,6 @@ function useOnResize(callback: () => void) {
     };
 }
 
-class AdaptTableHeight {
-    private ref: Ref;
-    private r;
-    constructor(ref: Ref) {
-        this.ref = ref;
-        this.r = reactive({
-            height: 450,
-        });
-        window.addEventListener('resize', () => {
-            this.calcHeight();
-        });
-    }
-
-    calcHeight() {
-        if (this.ref.value) {
-            const vh = window.innerHeight;
-            const dom: HTMLElement = this.ref.value;
-            const footerHeight = 250;
-            let height = vh - dom.offsetTop - footerHeight;
-            if (height < 450) {
-                height = 450;
-            }
-            this.r.height = height;
-        }
-    }
-
-    getReactive() {
-        return this.r;
-    }
-}
-
 const isIframe = window.self !== window.top;
 
 function useAutoResizeIframeIfIsIframe() {
@@ -95,4 +64,4 @@ function useAutoResizeIframeIfIsIframe() {
     document.body.style.backgroundColor = 'inherit';
 }
 
-export { AdaptTableHeight, formatDateCell, formatPrice, formatPriceCell, isIframe, notifyError, useAutoResizeIframeIfIsIframe, useOnResize };
+export { formatDateCell, formatPrice, formatPriceCell, isIframe, notifyError, useAutoResizeIframeIfIsIframe, useOnResize };

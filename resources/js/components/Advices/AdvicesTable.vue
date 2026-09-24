@@ -9,17 +9,22 @@ import { Input } from '@/shadcn/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { router } from '@inertiajs/vue3';
+import { AlertCircle, CheckCircle2, Clock, Home, Loader2, Phone, ShoppingCart } from '@lucide/vue';
+import { filterFns, sortFns } from '@/lib/tableFns';
 import {
+    columnFilteringFeature,
     createColumnHelper,
+    createFilteredRowModel,
+    createSortedRowModel,
     FlexRender,
-    getCoreRowModel,
-    getFilteredRowModel,
-    getSortedRowModel,
-    useVueTable,
+    globalFilteringFeature,
+    rowSortingFeature,
+    tableFeatures,
+    useTable,
     type ColumnFiltersState,
     type SortingState,
+    type Updater,
 } from '@tanstack/vue-table';
-import { AlertCircle, CheckCircle2, Clock, Home, Loader2, Phone, ShoppingCart } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 import { route } from 'ziggy-js';
 import { isActingAsAdmin } from '../../authHelper';
@@ -131,7 +136,17 @@ const columnFilters = ref<ColumnFiltersState>([]);
 const globalFilter = ref('');
 const showFilters = ref(false);
 
-const columnHelper = createColumnHelper<App.Data.DataProtectedAdviceData>();
+const features = tableFeatures({
+    rowSortingFeature,
+    columnFilteringFeature,
+    globalFilteringFeature,
+    sortedRowModel: createSortedRowModel(),
+    sortFns,
+    filteredRowModel: createFilteredRowModel(),
+    filterFns,
+});
+
+const columnHelper = createColumnHelper<typeof features, App.Data.DataProtectedAdviceData>();
 
 const columns = computed(() => {
     const cols = [
@@ -212,10 +227,11 @@ const columns = computed(() => {
             enableColumnFilter: true,
         }),
     ];
-    return cols;
+    return columnHelper.columns(cols);
 });
 
-const table = useVueTable({
+const table = useTable({
+    features,
     get data() {
         return localAdvices.value;
     },
@@ -233,18 +249,15 @@ const table = useVueTable({
             return globalFilter.value;
         },
     },
-    onSortingChange: (u) => {
+    onSortingChange: (u: Updater<SortingState>) => {
         sorting.value = typeof u === 'function' ? u(sorting.value) : u;
     },
-    onColumnFiltersChange: (u) => {
+    onColumnFiltersChange: (u: Updater<ColumnFiltersState>) => {
         columnFilters.value = typeof u === 'function' ? u(columnFilters.value) : u;
     },
-    onGlobalFilterChange: (u) => {
+    onGlobalFilterChange: (u: string) => {
         globalFilter.value = u;
     },
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
 });
 
 const totalCount = computed(() => table.getFilteredRowModel().rows.length);

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import otherHelpTypeImage from '@/../img/heinerenergie-hochzeitsturm.svg';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { Building2, FileSignature, Home, House, Wrench } from '@lucide/vue';
 
 const props = defineProps<{
     advice: App.Data.DataProtectedAdviceData;
@@ -13,15 +13,15 @@ const props = defineProps<{
             <h3 class="section-title">Benötigt Hilfe bei:</h3>
             <div class="help-types">
                 <div v-if="advice.help_type_place" class="help-type">
-                    <font-awesome-icon icon="fa fa-house" class="icon" />
+                    <House :size="16" class="icon" />
                     <span>Ort (Balkon, Garten, Terrasse, etc.)</span>
                 </div>
                 <div v-if="advice.help_type_bureaucracy" class="help-type">
-                    <font-awesome-icon icon="fa fa-file-signature" class="icon" />
+                    <FileSignature :size="16" class="icon" />
                     <span>Bürokratie (Anmeldung, Förderung, etc.)</span>
                 </div>
                 <div v-if="advice.help_type_technical" class="help-type">
-                    <font-awesome-icon icon="fa fa-wrench" class="icon" />
+                    <Wrench :size="16" class="icon" />
                     <span>Technisches (Anschluss, Befestigung, etc.)</span>
                 </div>
                 <div v-if="advice.help_type_other" class="help-type">
@@ -41,11 +41,11 @@ const props = defineProps<{
             <h3 class="section-title">Gebäudeart:</h3>
             <div class="building-info">
                 <div v-if="advice.house_type === 0" class="info-item">
-                    <font-awesome-icon icon="fa fa-home" class="icon" />
+                    <Home :size="16" class="icon" />
                     <span>Einfamilienhaus</span>
                 </div>
                 <div v-if="advice.house_type === 1" class="info-item">
-                    <font-awesome-icon icon="fa fa-building" class="icon" />
+                    <Building2 :size="16" class="icon" />
                     <span>Mehrfamilienhaus</span>
                 </div>
                 <div v-else class="no-data">

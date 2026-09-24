@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button } from '@/shadcn/components/ui/button';
-import { RotateCcw, Send } from 'lucide-vue-next';
+import { RotateCcw, Send } from '@lucide/vue';
 import { ref } from 'vue';
 import { toast } from 'vue-sonner';
 import FormFieldRenderer from './FormFieldRenderer.vue';

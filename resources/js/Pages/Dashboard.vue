@@ -6,7 +6,7 @@ import CardContent from '@/shadcn/components/ui/card/CardContent.vue';
 import CardHeader from '@/shadcn/components/ui/card/CardHeader.vue';
 import type { CustomPageProps } from '@/types/pageProps';
 import { router, usePage } from '@inertiajs/vue3';
-import { Edit, Save, X } from 'lucide-vue-next';
+import { Edit, Save, X } from '@lucide/vue';
 import { computed, reactive, ref } from 'vue';
 import { route } from 'ziggy-js';
 

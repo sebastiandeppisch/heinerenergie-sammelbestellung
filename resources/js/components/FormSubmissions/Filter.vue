@@ -49,7 +49,7 @@
 <script lang="ts" setup>
 import CheckBoxGroup from '@/shadcn/components/CheckboxGroup.vue';
 import Button from '@/shadcn/components/ui/button/Button.vue';
-import { ArrowDown, ArrowUp, Group, List } from 'lucide-vue-next';
+import { ArrowDown, ArrowUp, Group, List } from '@lucide/vue';
 import { computed } from 'vue';
 const selectedFormTypes = defineModel<string[]>('selectedFormTypes', {
     default: () => [],

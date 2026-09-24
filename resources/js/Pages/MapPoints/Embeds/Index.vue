@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/shadcn/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/shadcn/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { router } from '@inertiajs/vue3';
-import { AlertTriangle, ArrowLeft, Edit, Plus, Trash2 } from 'lucide-vue-next';
+import { AlertTriangle, ArrowLeft, Edit, Plus, Trash2 } from '@lucide/vue';
 import { ref } from 'vue';
 import { route } from 'ziggy-js';
 

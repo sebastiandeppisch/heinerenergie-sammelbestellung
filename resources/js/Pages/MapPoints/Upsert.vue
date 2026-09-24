@@ -8,8 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/shadcn/components/ui/switch';
 import { Textarea } from '@/shadcn/components/ui/textarea';
 import { router, useForm } from '@inertiajs/vue3';
+import { ArrowLeft } from '@lucide/vue';
 import axios from 'axios';
-import { ArrowLeft } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 import { route } from 'ziggy-js';
 

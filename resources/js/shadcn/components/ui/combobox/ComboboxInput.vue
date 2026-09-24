@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { HTMLAttributes } from 'vue'
 import { reactiveOmit } from '@vueuse/core'
-import { SearchIcon } from 'lucide-vue-next'
+import { SearchIcon } from '@lucide/vue'
 import { ComboboxInput, type ComboboxInputEmits, type ComboboxInputProps, useForwardPropsEmits } from 'reka-ui'
 import { cn } from '@/shadcn/utils'
 

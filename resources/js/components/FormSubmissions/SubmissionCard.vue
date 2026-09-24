@@ -44,7 +44,7 @@ import CardContent from '@/shadcn/components/ui/card/CardContent.vue';
 import CardFooter from '@/shadcn/components/ui/card/CardFooter.vue';
 import CardHeader from '@/shadcn/components/ui/card/CardHeader.vue';
 import { router } from '@inertiajs/vue3';
-import { MailCheck, MailOpen } from 'lucide-vue-next';
+import { MailCheck, MailOpen } from '@lucide/vue';
 import { route } from 'ziggy-js';
 import FormSubmissionRenderer from '../FormBuilder/FormSubmissionRenderer.vue';
 const props = withDefaults(

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { Button } from '@/shadcn/components/ui/button';
+import { Minus, Plus } from '@lucide/vue';
 import { LControl, LIcon, LLayerGroup, LMap, LMarker, LPopup, LTileLayer } from '@vue-leaflet/vue-leaflet';
 import { latLng } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Minus, Plus } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 const props = withDefaults(

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Button from '@/shadcn/components/ui/button/Button.vue';
+import { Download, File, Folder, Upload } from '@lucide/vue';
 import axios from 'axios';
-import { Download, File, Folder, Upload } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 type Item = App.Nextcloud.Data.NextcloudFile | App.Nextcloud.Data.NextcloudDir;

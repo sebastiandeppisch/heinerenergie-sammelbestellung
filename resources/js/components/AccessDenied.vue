@@ -3,7 +3,7 @@ import { Badge } from '@/shadcn/components/ui/badge';
 import { Button } from '@/shadcn/components/ui/button';
 import type { CustomPageProps } from '@/types/pageProps';
 import { router, usePage } from '@inertiajs/vue3';
-import { ArrowLeft, Key, ShieldAlert, Users } from 'lucide-vue-next';
+import { ArrowLeft, Key, ShieldAlert, Users } from '@lucide/vue';
 import { computed } from 'vue';
 import { route } from 'ziggy-js';
 

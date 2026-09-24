@@ -78,7 +78,6 @@ rm -rf storage/app/public
 rm -rf storage/app/uploads
 rm components.json
 rm -rf ci/
-rm devextreme.json
 rm eslint.config.js
 rm package.json
 rm package-lock.json

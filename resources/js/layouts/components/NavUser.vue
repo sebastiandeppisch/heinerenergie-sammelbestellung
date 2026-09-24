@@ -3,7 +3,7 @@ import { user } from '@/authHelper';
 import UserInfo from '@/layouts/components/UserInfo.vue';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/shadcn/components/ui/dropdown-menu';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/shadcn/components/ui/sidebar';
-import { ChevronsUpDown } from 'lucide-vue-next';
+import { ChevronsUpDown } from '@lucide/vue';
 import UserMenuContent from './UserMenuContent.vue';
 
 const { isMobile, state } = useSidebar();

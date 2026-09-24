@@ -10,8 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/shadcn/components/ui/textarea';
 import type { CustomPageProps } from '@/types/pageProps';
 import { useForm, usePage } from '@inertiajs/vue3';
+import { Home, Phone, Plus, ShoppingCart } from '@lucide/vue';
 import axios from 'axios';
-import { Home, Phone, Plus, ShoppingCart } from 'lucide-vue-next';
 import { computed, onMounted, ref } from 'vue';
 import { toast } from 'vue-sonner';
 import { route } from 'ziggy-js';

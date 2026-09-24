@@ -10,7 +10,7 @@
     @routes
     @inertiaHead
   </head>
-  <body class="dx-viewport">
+  <body>
     @inertia
   </body>
 </html>

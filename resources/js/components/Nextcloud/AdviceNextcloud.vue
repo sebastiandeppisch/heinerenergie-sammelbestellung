@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import Button from '@/shadcn/components/ui/button/Button.vue';
 import { router } from '@inertiajs/vue3';
+import { AlertTriangle, FolderOpen, FolderPlus, Link2, Link2Off } from '@lucide/vue';
 import axios from 'axios';
-import { AlertTriangle, FolderOpen, FolderPlus, Link2, Link2Off } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 import NextcloudCreateFolderDialog from './NextcloudCreateFolderDialog.vue';
 import NextcloudFileList from './NextcloudFileList.vue';

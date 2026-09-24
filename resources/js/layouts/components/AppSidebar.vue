@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import GithubIcon from '@/components/icons/GithubIcon.vue';
 import NavFooter from '@/layouts/components/NavFooter.vue';
 import NavMain from '@/layouts/components/NavMain.vue';
 import NavUser from '@/layouts/components/NavUser.vue';
@@ -14,7 +15,7 @@ import {
     SidebarMenuItem,
 } from '@/shadcn/components/ui/sidebar';
 import { Link } from '@inertiajs/vue3';
-import { Database, FileText, Github, LayoutGrid, Map, MessageSquare, Settings, Table, User, UserCog, Users } from 'lucide-vue-next';
+import { Database, FileText, LayoutGrid, Map, MessageSquare, Settings, Table, User, UserCog, Users } from '@lucide/vue';
 import { route } from 'ziggy-js';
 import AppLogo from './AppLogo.vue';
 import AppVersion from './AppVersion.vue';
@@ -110,7 +111,7 @@ const footerNavItems: NavItem[] = [
     {
         title: 'Github',
         href: 'https://github.com/sebastiandeppisch/heinerenergie-sammelbestellung',
-        icon: Github,
+        icon: GithubIcon,
     },
     {
         title: 'Impressum',

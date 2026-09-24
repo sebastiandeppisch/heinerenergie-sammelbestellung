@@ -80,6 +80,28 @@ test('advices table column filter keeps typed characters and filters rows', func
         ->assertNoJavaScriptErrors();
 });
 
+test('advices table sorts text columns case-insensitively', function (): void {
+    foreach (['Bert', 'anna', 'Carla'] as $lastName) {
+        Advice::factory()->create([
+            'group_id' => $this->group->id,
+            'advisor_id' => $this->user->id,
+            'last_name' => $lastName,
+        ]);
+    }
+
+    $page = visit(route('advices'))
+        ->assertNoSmoke()
+        ->click('Nachname')
+        ->assertSee('Nachname ↑');
+
+    $lastNames = $page->script(
+        'Array.from(document.querySelectorAll("tbody tr")).map((row) => row.innerText).join("|")'
+    );
+
+    expect(strpos($lastNames, 'anna'))->toBeLessThan(strpos($lastNames, 'Bert'))
+        ->and(strpos($lastNames, 'Bert'))->toBeLessThan(strpos($lastNames, 'Carla'));
+});
+
 test('advices table inline edit buttons are visible', function (): void {
     $status = AdviceStatus::create([
         'name' => 'Test Status',

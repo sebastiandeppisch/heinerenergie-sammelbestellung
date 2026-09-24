@@ -4,10 +4,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shadcn/compo
 import { Label } from '@/shadcn/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { Textarea } from '@/shadcn/components/ui/textarea';
-import { faWarning } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { router } from '@inertiajs/vue3';
-import { ArrowRight, Send } from 'lucide-vue-next';
+import { ArrowRight, Send, TriangleAlert } from '@lucide/vue';
 import { ref } from 'vue';
 import { toast } from 'vue-sonner';
 
@@ -85,7 +83,7 @@ function transferAdvice() {
                             Die Beratung wird an die ausgewählte Initiative übertragen. Der/Die Klient:in wird per E-Mail benachrichtigt.
                         </p>
                         <p class="warning-text">
-                            <FontAwesomeIcon :icon="faWarning" /> Du hast danach evtl. keine Berechtigung mehr, die Beratung zu sehen.
+                            <TriangleAlert :size="16" class="inline" /> Du hast danach evtl. keine Berechtigung mehr, die Beratung zu sehen.
                         </p>
                     </div>
                     <Button variant="default" @click="transferAdvice" class="w-full">

@@ -7,7 +7,7 @@ import { Checkbox } from '@/shadcn/components/ui/checkbox';
 import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
 import { Textarea } from '@/shadcn/components/ui/textarea';
-import { PlusIcon, TrashIcon } from 'lucide-vue-next';
+import { PlusIcon, TrashIcon } from '@lucide/vue';
 import { nanoid } from 'nanoid';
 import { v4 as uuidv4 } from 'uuid';
 import { computed } from 'vue';

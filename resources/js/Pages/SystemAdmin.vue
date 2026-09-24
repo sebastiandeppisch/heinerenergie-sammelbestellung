@@ -2,7 +2,7 @@
 import { Button } from '@/shadcn/components/ui/button';
 import Card from '@/shadcn/components/ui/card/Card.vue';
 import { router } from '@inertiajs/vue3';
-import { Database, Terminal } from 'lucide-vue-next';
+import { Database, Terminal } from '@lucide/vue';
 import { computed } from 'vue';
 import { route } from 'ziggy-js';
 

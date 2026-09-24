@@ -5,9 +5,9 @@ import { computed, nextTick, onMounted, ref } from 'vue';
 import DummyPixel from '@/../img/dummy_pixel.png';
 import { useOnResize } from '@/helpers';
 import Button from '@/shadcn/components/ui/button/Button.vue';
+import { Loader2, Locate } from '@lucide/vue';
 import L, { PointExpression } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Loader2, Locate } from 'lucide-vue-next';
 
 type Coordinate = App.ValueObjects.Coordinate;
 

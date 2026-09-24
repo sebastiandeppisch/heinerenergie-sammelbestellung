@@ -9,7 +9,7 @@ defineOptions({
 </script>
 <template>
     <div class="mt-8">
-        <div class="dx-card content p-4">
+        <div class="content rounded-xl border bg-card p-4 text-card-foreground shadow-sm">
             <div v-html="props.content"></div>
         </div>
     </div>
