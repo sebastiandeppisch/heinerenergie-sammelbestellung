@@ -11,12 +11,15 @@ import { Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableR
 import { router } from '@inertiajs/vue3';
 import { AlertCircle, CheckCircle2, Clock, Home, Loader2, Phone, ShoppingCart } from '@lucide/vue';
 import {
+    columnFilteringFeature,
     createColumnHelper,
-    createCoreRowModel,
     createFilteredRowModel,
     createSortedRowModel,
     FlexRender,
-    VueTable,
+    globalFilteringFeature,
+    rowSortingFeature,
+    tableFeatures,
+    useTable,
     type ColumnFiltersState,
     type SortingState,
     type Updater,
@@ -132,7 +135,15 @@ const columnFilters = ref<ColumnFiltersState>([]);
 const globalFilter = ref('');
 const showFilters = ref(false);
 
-const columnHelper = createColumnHelper<App.Data.DataProtectedAdviceData, unknown>();
+const features = tableFeatures({
+    rowSortingFeature,
+    columnFilteringFeature,
+    globalFilteringFeature,
+    sortedRowModel: createSortedRowModel(),
+    filteredRowModel: createFilteredRowModel(),
+});
+
+const columnHelper = createColumnHelper<typeof features, App.Data.DataProtectedAdviceData>();
 
 const columns = computed(() => {
     const cols = [
@@ -213,10 +224,11 @@ const columns = computed(() => {
             enableColumnFilter: true,
         }),
     ];
-    return cols;
+    return columnHelper.columns(cols);
 });
 
-const table = VueTable({
+const table = useTable({
+    features,
     get data() {
         return localAdvices.value;
     },
@@ -243,9 +255,6 @@ const table = VueTable({
     onGlobalFilterChange: (u: string) => {
         globalFilter.value = u;
     },
-    createCoreRowModel: createCoreRowModel(),
-    createSortedRowModel: createSortedRowModel(),
-    createFilteredRowModel: createFilteredRowModel(),
 });
 
 const totalCount = computed(() => table.getFilteredRowModel().rows.length);

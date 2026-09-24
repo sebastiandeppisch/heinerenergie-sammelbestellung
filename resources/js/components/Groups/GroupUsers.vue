@@ -7,7 +7,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { router } from '@inertiajs/vue3';
 import { Edit2, Plus, Trash2 } from '@lucide/vue';
-import { createColumnHelper, createCoreRowModel, createSortedRowModel, VueTable, type SortingState, type Updater } from '@tanstack/vue-table';
+import {
+    createColumnHelper,
+    createSortedRowModel,
+    rowSortingFeature,
+    tableFeatures,
+    useTable,
+    type SortingState,
+    type Updater,
+} from '@tanstack/vue-table';
 import { computed, ref } from 'vue';
 import { route } from 'ziggy-js';
 
@@ -118,9 +126,14 @@ function confirmRemove() {
     });
 }
 
-const columnHelper = createColumnHelper<App.Data.GroupUserData, unknown>();
+const features = tableFeatures({
+    rowSortingFeature,
+    sortedRowModel: createSortedRowModel(),
+});
 
-const columns = [
+const columnHelper = createColumnHelper<typeof features, App.Data.GroupUserData>();
+
+const columns = columnHelper.columns([
     columnHelper.accessor('name', {
         id: 'firstName',
         header: 'Vorname',
@@ -139,9 +152,10 @@ const columns = [
         id: 'actions',
         header: 'Bearbeiten',
     }),
-];
+]);
 
-const table = VueTable({
+const table = useTable({
+    features,
     get data() {
         return props.groupUsers;
     },
@@ -154,8 +168,6 @@ const table = VueTable({
     onSortingChange: (updater: Updater<SortingState>) => {
         sorting.value = typeof updater === 'function' ? updater(sorting.value) : updater;
     },
-    createCoreRowModel: createCoreRowModel(),
-    createSortedRowModel: createSortedRowModel(),
 });
 
 const availableUsers = computed(() => props.allUsers.filter((u) => !props.groupUsers.some((gu) => gu.id === u.id)));
@@ -192,7 +204,7 @@ const availableUsers = computed(() => props.allUsers.filter((u) => !props.groupU
                 </TableHeader>
                 <TableBody>
                     <TableRow v-for="row in table.getRowModel().rows" :key="row.id">
-                        <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
+                        <TableCell v-for="cell in row.getAllCells()" :key="cell.id">
                             <template v-if="cell.column.id === 'firstName'">
                                 {{ getFirstName(row.original.name) }}
                             </template>

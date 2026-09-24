@@ -9,12 +9,15 @@ import { Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableR
 import { TooltipProvider } from '@/shadcn/components/ui/tooltip';
 import { ChevronDown, ChevronUp, Filter } from '@lucide/vue';
 import {
+    columnFilteringFeature,
     createColumnHelper,
-    createCoreRowModel,
     createFilteredRowModel,
     createSortedRowModel,
     FlexRender,
-    VueTable,
+    globalFilteringFeature,
+    rowSortingFeature,
+    tableFeatures,
+    useTable,
     type ColumnFiltersState,
     type SortingState,
     type Updater,
@@ -70,9 +73,17 @@ const columnFilters = ref<ColumnFiltersState>([]);
 const sorting = ref<SortingState>([]);
 const showFilters = ref(false);
 
-const columnHelper = createColumnHelper<MapPointRow, unknown>();
+const features = tableFeatures({
+    rowSortingFeature,
+    columnFilteringFeature,
+    globalFilteringFeature,
+    sortedRowModel: createSortedRowModel(),
+    filteredRowModel: createFilteredRowModel(),
+});
 
-const columns = [
+const columnHelper = createColumnHelper<typeof features, MapPointRow>();
+
+const columns = columnHelper.columns([
     columnHelper.accessor((row) => row.categoryName, {
         id: 'category',
         header: 'Kategorie',
@@ -93,9 +104,10 @@ const columns = [
         header: 'Ort',
         enableColumnFilter: true,
     }),
-];
+]);
 
-const table = VueTable({
+const table = useTable({
+    features,
     get data() {
         return rows.value;
     },
@@ -120,9 +132,6 @@ const table = VueTable({
     onGlobalFilterChange: (value: string) => {
         globalFilter.value = value;
     },
-    createCoreRowModel: createCoreRowModel(),
-    createSortedRowModel: createSortedRowModel(),
-    createFilteredRowModel: createFilteredRowModel(),
 });
 
 watch(

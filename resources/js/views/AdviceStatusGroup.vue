@@ -8,10 +8,11 @@ import { Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableR
 import { Pencil, Plus, Trash2 } from '@lucide/vue';
 import {
     createColumnHelper,
-    createCoreRowModel,
     createSortedRowModel,
     FlexRender,
-    VueTable,
+    rowSortingFeature,
+    tableFeatures,
+    useTable,
     type SortingState,
     type Updater,
 } from '@tanstack/vue-table';
@@ -173,15 +174,21 @@ async function saveVisibility() {
 const resultName = (id: number | null) => adviceStatusResult.find((r) => r.id === id)?.name ?? '-';
 const groupName = (id: string | null) => props.groups.find((g) => g.id === id)?.name ?? '-';
 
+const features = tableFeatures({
+    rowSortingFeature,
+    sortedRowModel: createSortedRowModel(),
+});
+
 // TanStack table for own statuses
 const ownSorting = ref<SortingState>([{ id: 'name', desc: false }]);
-const ownColumnHelper = createColumnHelper<AdviceStatus, unknown>();
-const ownColumns = [
+const ownColumnHelper = createColumnHelper<typeof features, AdviceStatus>();
+const ownColumns = ownColumnHelper.columns([
     ownColumnHelper.accessor('name', { header: 'Name' }),
     ownColumnHelper.accessor('result', { header: 'Ergebnis' }),
     ownColumnHelper.display({ id: 'actions', header: '' }),
-];
-const ownTable = VueTable({
+]);
+const ownTable = useTable({
+    features,
     get data(): AdviceStatus[] {
         return ownItems.value;
     },
@@ -194,19 +201,18 @@ const ownTable = VueTable({
     onSortingChange: (u: Updater<SortingState>) => {
         ownSorting.value = typeof u === 'function' ? u(ownSorting.value) : u;
     },
-    createCoreRowModel: createCoreRowModel(),
-    createSortedRowModel: createSortedRowModel(),
 });
 
 // TanStack table for all statuses (visibility toggle)
 const allSorting = ref<SortingState>([{ id: 'name', desc: false }]);
-const allColumnHelper = createColumnHelper<AdviceStatus, unknown>();
-const allColumns = [
+const allColumnHelper = createColumnHelper<typeof features, AdviceStatus>();
+const allColumns = allColumnHelper.columns([
     allColumnHelper.accessor('name', { header: 'Name' }),
     allColumnHelper.accessor('group_id', { header: 'Initiative' }),
     allColumnHelper.accessor('visible_in_group', { header: 'Sichtbar' }),
-];
-const allTable = VueTable({
+]);
+const allTable = useTable({
+    features,
     get data(): AdviceStatus[] {
         return allItems.value;
     },
@@ -219,8 +225,6 @@ const allTable = VueTable({
     onSortingChange: (u: Updater<SortingState>) => {
         allSorting.value = typeof u === 'function' ? u(allSorting.value) : u;
     },
-    createCoreRowModel: createCoreRowModel(),
-    createSortedRowModel: createSortedRowModel(),
 });
 </script>
 
