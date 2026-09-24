@@ -21,7 +21,7 @@ class GeocodeCache
      * A hit does not change, so it is kept indefinitely. A miss may well be
      * added to OpenStreetMap later, so it is only trusted for a week.
      */
-    private const NOT_FOUND_DAYS = 7;
+    private const int NOT_FOUND_DAYS = 7;
 
     /**
      * @template TValue

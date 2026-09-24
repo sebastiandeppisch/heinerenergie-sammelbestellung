@@ -26,19 +26,19 @@ use Pdo\Mysql;
  */
 class MysqlDumper implements DatabaseDumperContract
 {
-    private const SUPPORTED_DRIVERS = ['mysql', 'mariadb'];
+    private const array SUPPORTED_DRIVERS = ['mysql', 'mariadb'];
 
     /**
      * How many rows share one INSERT statement. Fewer, larger statements
      * restore considerably faster than one statement per row.
      */
-    private const ROWS_PER_INSERT = 200;
+    private const int ROWS_PER_INSERT = 200;
 
     /**
      * A statement is closed early once its values grow past this, so that no
      * INSERT can run into the max_allowed_packet of the restoring server.
      */
-    private const BUFFER_BYTES = 262144;
+    private const int BUFFER_BYTES = 262144;
 
     public function __construct(private readonly Connection $connection) {}
 

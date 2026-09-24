@@ -20,19 +20,19 @@ use Illuminate\Support\Sleep;
  */
 class NominatimThrottle
 {
-    private const LOCK_KEY = 'nominatim:throttle:lock';
+    private const string LOCK_KEY = 'nominatim:throttle:lock';
 
-    private const NEXT_SLOT_KEY = 'nominatim:throttle:next-slot';
+    private const string NEXT_SLOT_KEY = 'nominatim:throttle:next-slot';
 
     /**
      * How long a reservation may keep the lock before it is considered stale.
      */
-    private const LOCK_TTL_SECONDS = 10;
+    private const int LOCK_TTL_SECONDS = 10;
 
     /**
      * How long a caller waits for its turn to reserve a slot.
      */
-    private const LOCK_WAIT_SECONDS = 5;
+    private const int LOCK_WAIT_SECONDS = 5;
 
     public function __construct(
         private readonly float $interval,
