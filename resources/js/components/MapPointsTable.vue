@@ -10,13 +10,14 @@ import { TooltipProvider } from '@/shadcn/components/ui/tooltip';
 import { ChevronDown, ChevronUp, Filter } from '@lucide/vue';
 import {
     createColumnHelper,
+    createCoreRowModel,
+    createFilteredRowModel,
+    createSortedRowModel,
     FlexRender,
-    getCoreRowModel,
-    getFilteredRowModel,
-    getSortedRowModel,
-    useVueTable,
+    VueTable,
     type ColumnFiltersState,
     type SortingState,
+    type Updater,
 } from '@tanstack/vue-table';
 import { computed, reactive, ref, watch } from 'vue';
 
@@ -69,7 +70,7 @@ const columnFilters = ref<ColumnFiltersState>([]);
 const sorting = ref<SortingState>([]);
 const showFilters = ref(false);
 
-const columnHelper = createColumnHelper<MapPointRow>();
+const columnHelper = createColumnHelper<MapPointRow, unknown>();
 
 const columns = [
     columnHelper.accessor((row) => row.categoryName, {
@@ -94,7 +95,7 @@ const columns = [
     }),
 ];
 
-const table = useVueTable({
+const table = VueTable({
     get data() {
         return rows.value;
     },
@@ -110,18 +111,18 @@ const table = useVueTable({
             return globalFilter.value;
         },
     },
-    onSortingChange: (updater) => {
+    onSortingChange: (updater: Updater<SortingState>) => {
         sorting.value = typeof updater === 'function' ? updater(sorting.value) : updater;
     },
-    onColumnFiltersChange: (updater) => {
+    onColumnFiltersChange: (updater: Updater<ColumnFiltersState>) => {
         columnFilters.value = typeof updater === 'function' ? updater(columnFilters.value) : updater;
     },
-    onGlobalFilterChange: (value) => {
+    onGlobalFilterChange: (value: string) => {
         globalFilter.value = value;
     },
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
+    createCoreRowModel: createCoreRowModel(),
+    createSortedRowModel: createSortedRowModel(),
+    createFilteredRowModel: createFilteredRowModel(),
 });
 
 watch(

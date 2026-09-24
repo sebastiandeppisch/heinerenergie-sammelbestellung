@@ -12,13 +12,14 @@ import { router } from '@inertiajs/vue3';
 import { AlertCircle, CheckCircle2, Clock, Home, Loader2, Phone, ShoppingCart } from '@lucide/vue';
 import {
     createColumnHelper,
+    createCoreRowModel,
+    createFilteredRowModel,
+    createSortedRowModel,
     FlexRender,
-    getCoreRowModel,
-    getFilteredRowModel,
-    getSortedRowModel,
-    useVueTable,
+    VueTable,
     type ColumnFiltersState,
     type SortingState,
+    type Updater,
 } from '@tanstack/vue-table';
 import { computed, ref, watch } from 'vue';
 import { route } from 'ziggy-js';
@@ -131,7 +132,7 @@ const columnFilters = ref<ColumnFiltersState>([]);
 const globalFilter = ref('');
 const showFilters = ref(false);
 
-const columnHelper = createColumnHelper<App.Data.DataProtectedAdviceData>();
+const columnHelper = createColumnHelper<App.Data.DataProtectedAdviceData, unknown>();
 
 const columns = computed(() => {
     const cols = [
@@ -215,7 +216,7 @@ const columns = computed(() => {
     return cols;
 });
 
-const table = useVueTable({
+const table = VueTable({
     get data() {
         return localAdvices.value;
     },
@@ -233,18 +234,18 @@ const table = useVueTable({
             return globalFilter.value;
         },
     },
-    onSortingChange: (u) => {
+    onSortingChange: (u: Updater<SortingState>) => {
         sorting.value = typeof u === 'function' ? u(sorting.value) : u;
     },
-    onColumnFiltersChange: (u) => {
+    onColumnFiltersChange: (u: Updater<ColumnFiltersState>) => {
         columnFilters.value = typeof u === 'function' ? u(columnFilters.value) : u;
     },
-    onGlobalFilterChange: (u) => {
+    onGlobalFilterChange: (u: string) => {
         globalFilter.value = u;
     },
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
+    createCoreRowModel: createCoreRowModel(),
+    createSortedRowModel: createSortedRowModel(),
+    createFilteredRowModel: createFilteredRowModel(),
 });
 
 const totalCount = computed(() => table.getFilteredRowModel().rows.length);

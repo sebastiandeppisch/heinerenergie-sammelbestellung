@@ -7,7 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { router } from '@inertiajs/vue3';
 import { Edit2, Plus, Trash2 } from '@lucide/vue';
-import { createColumnHelper, getCoreRowModel, getSortedRowModel, useVueTable, type SortingState } from '@tanstack/vue-table';
+import {
+    createColumnHelper,
+    createCoreRowModel,
+    createSortedRowModel,
+    VueTable,
+    type SortingState,
+    type Updater,
+} from '@tanstack/vue-table';
 import { computed, ref } from 'vue';
 import { route } from 'ziggy-js';
 
@@ -118,7 +125,7 @@ function confirmRemove() {
     });
 }
 
-const columnHelper = createColumnHelper<App.Data.GroupUserData>();
+const columnHelper = createColumnHelper<App.Data.GroupUserData, unknown>();
 
 const columns = [
     columnHelper.accessor('name', {
@@ -141,7 +148,7 @@ const columns = [
     }),
 ];
 
-const table = useVueTable({
+const table = VueTable({
     get data() {
         return props.groupUsers;
     },
@@ -151,11 +158,11 @@ const table = useVueTable({
             return sorting.value;
         },
     },
-    onSortingChange: (updater) => {
+    onSortingChange: (updater: Updater<SortingState>) => {
         sorting.value = typeof updater === 'function' ? updater(sorting.value) : updater;
     },
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
+    createCoreRowModel: createCoreRowModel(),
+    createSortedRowModel: createSortedRowModel(),
 });
 
 const availableUsers = computed(() => props.allUsers.filter((u) => !props.groupUsers.some((gu) => gu.id === u.id)));
