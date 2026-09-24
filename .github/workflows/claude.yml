@@ -33,6 +33,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Checkout PR branch
+        if: github.event.issue.pull_request || github.event.pull_request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr checkout ${{ github.event.issue.number || github.event.pull_request.number }}
+          git config core.fileMode false
+
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
@@ -68,5 +76,5 @@ jobs:
           additional_permissions: |
             actions: read
           claude_args: >-
-            --allowedTools
-            "Bash(npm ci),Bash(npm install:*),Bash(npm update:*),Bash(npm outdated:*),Bash(npm view:*),Bash(npm run build),Bash(npm test:*),Bash(npx vitest:*),Bash(npx vue-tsc:*),Bash(npx eslint:*),Bash(npx prettier:*),Bash(npx playwright install:*),Bash(composer install:*),Bash(composer update:*),Bash(composer require:*),Bash(composer outdated:*),Bash(composer show:*),Bash(php artisan test:*),Bash(php artisan migrate:*),Bash(php artisan route:list:*),Bash(vendor/bin/pest:*),Bash(./vendor/bin/pest:*),Bash(vendor/bin/phpunit:*),Bash(./vendor/bin/phpunit:*),Bash(vendor/bin/phpstan:*),Bash(./vendor/bin/phpstan:*),Bash(vendor/bin/pint:*),Bash(./vendor/bin/pint:*),Bash(vendor/bin/rector:*),Bash(./vendor/bin/rector:*)"
+            claude_args: >-
+              --allowedTools "Bash"
