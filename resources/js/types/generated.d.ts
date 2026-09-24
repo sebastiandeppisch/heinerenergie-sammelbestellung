@@ -272,6 +272,39 @@ group_id: string,
 category_id: string | null,
 location: string | null,
 };
+export type MapPointImportResultData = {
+created_count: number,
+updated_count: number,
+rows: App.Data.MapPointImportRowData[],
+created_categories: string[],
+errors: App.Data.SpreadsheetRowErrorData[],
+};
+export type MapPointImportRowData = {
+row: number,
+is_update: boolean,
+title: string,
+lat: number,
+lng: number,
+location: string | null,
+category: string | null,
+published: boolean,
+group_name: string,
+};
+export type MapPointSpreadsheetColumnData = {
+header: string,
+field: App.Enums.MapPointSpreadsheetField,
+};
+export type MapPointSpreadsheetFieldData = {
+value: App.Enums.MapPointSpreadsheetField,
+label: string,
+is_key: boolean,
+};
+export type MapPointSpreadsheetMappingData = {
+id: string,
+name: string,
+columns: App.Data.MapPointSpreadsheetColumnData[],
+key_field: App.Enums.MapPointSpreadsheetField,
+};
 export type NextcloudGroupUserData = {
 nc_id: string | null,
 nc_email: string | null,
@@ -285,6 +318,22 @@ total: number,
 perPage: number,
 currentPage: number,
 lastPage: number,
+};
+export type SpreadsheetFormatData = {
+value: App.Enums.SpreadsheetFormat,
+label: string,
+};
+export type SpreadsheetRowErrorData = {
+row: number,
+column: string | null,
+message: string,
+};
+export type SpreadsheetUploadData = {
+token: string,
+filename: string,
+headers: string[],
+preview_rows: (string | null)[][],
+row_count: number,
 };
 export type StatusDistributionPointData = {
 date: string,
@@ -343,6 +392,8 @@ export type FieldType = 'text' | 'textarea' | 'number' | 'email' | 'phone' | 'se
 export type FormType = 0 | 1;
 export type GeocodingStatus = 'pending' | 'success' | 'not_found' | 'failed' | 'manual';
 export type HouseType = 0 | 1 | 2;
+export type MapPointSpreadsheetField = 'ignore' | 'id' | 'title' | 'description' | 'lat' | 'lng' | 'location' | 'category' | 'published';
+export type SpreadsheetFormat = 'xlsx' | 'ods' | 'xls' | 'csv';
 }
 namespace Nextcloud {
 namespace Data {

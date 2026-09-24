@@ -15,6 +15,9 @@ use App\Http\Controllers\MailAccountController;
 use App\Http\Controllers\MapEmbedController;
 use App\Http\Controllers\MapPointCategoryController;
 use App\Http\Controllers\MapPointController;
+use App\Http\Controllers\MapPointExportController;
+use App\Http\Controllers\MapPointImportController;
+use App\Http\Controllers\MapPointSpreadsheetMappingController;
 use App\Http\Controllers\NextcloudGroupController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\SystemAdminController;
@@ -103,6 +106,16 @@ Route::middleware('auth')->group(function (): void {
         ->name('form-submissions.mark-unseen');
 
     Route::get('mappoints-map', [MapPointController::class, 'map'])->name('map-points-map');
+
+    // Registered before the resource, otherwise "mappoints/{mappoint}" would catch these paths.
+    Route::get('mappoints/import', [MapPointImportController::class, 'create'])->name('mappoints.import.create');
+    Route::post('mappoints/import/upload', [MapPointImportController::class, 'upload'])->name('mappoints.import.upload');
+    Route::post('mappoints/import/preview', [MapPointImportController::class, 'preview'])->name('mappoints.import.preview');
+    Route::post('mappoints/import', [MapPointImportController::class, 'store'])->name('mappoints.import.store');
+    Route::post('mappoints/spreadsheet-mappings', [MapPointSpreadsheetMappingController::class, 'store'])->name('mappoints.spreadsheet-mappings.store');
+    Route::put('mappoints/spreadsheet-mappings/{mapping}', [MapPointSpreadsheetMappingController::class, 'update'])->name('mappoints.spreadsheet-mappings.update');
+    Route::delete('mappoints/spreadsheet-mappings/{mapping}', [MapPointSpreadsheetMappingController::class, 'destroy'])->name('mappoints.spreadsheet-mappings.destroy');
+    Route::get('mappoints/export', MapPointExportController::class)->name('mappoints.export');
 
     Route::resource('mappoints', MapPointController::class);
     Route::resource('mappoint-categories', MapPointCategoryController::class);

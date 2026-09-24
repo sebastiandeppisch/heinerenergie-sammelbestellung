@@ -13,7 +13,7 @@ uses(RefreshDatabase::class);
  */
 function rollBackMapPointGroupMigration(): void
 {
-    Artisan::call('migrate:rollback', ['--step' => 1]);
+    Artisan::call('migrate:rollback', ['--path' => 'database/migrations/2026_09_11_121547_add_group_id_to_map_points_and_map_point_categories.php']);
 
     DB::table('advice_status')->delete();
     DB::table('group_user')->delete();

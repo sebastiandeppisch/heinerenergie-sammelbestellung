@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Context\GroupContextContract;
 use App\Data\GroupBaseData;
 use App\Data\MapPointCategoryData;
 use App\Data\MapPointData;
+use App\Data\MapPointSpreadsheetMappingData;
+use App\Data\SpreadsheetFormatData;
+use App\Enums\SpreadsheetFormat;
 use App\Http\Requests\UpsertMapPointRequest;
 use App\Models\Group;
 use App\Models\MapEmbed;
@@ -17,6 +21,7 @@ use App\Services\MapPointVisibilityService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -33,13 +38,23 @@ class MapPointController extends Controller
         ]);
     }
 
-    public function index(MapPointVisibilityService $visibility): Response
+    public function index(Request $request, MapPointVisibilityService $visibility, GroupContextContract $groupContext): Response
     {
         $this->authorize('viewAny', MapPoint::class);
+
+        $currentGroup = $groupContext->getCurrentGroup();
 
         return Inertia::render('MapPoints/Index', [
             'mapPoints' => $this->pointData($visibility->visiblePoints()),
             'categories' => $this->categoryData($visibility->relevantCategories()->with('group')->get()),
+            'canImportAndExport' => $request->user()?->can('import', MapPoint::class) === true,
+            // System admins may import without a selected group, but imported points need one to belong to.
+            'importAndExportNeedGroup' => $currentGroup === null,
+            'spreadsheetMappings' => $currentGroup === null ? [] : MapPointSpreadsheetMappingData::forGroup($currentGroup),
+            'spreadsheetFormats' => array_map(
+                fn (SpreadsheetFormat $format): SpreadsheetFormatData => SpreadsheetFormatData::fromEnum($format),
+                SpreadsheetFormat::cases(),
+            ),
         ]);
     }
 

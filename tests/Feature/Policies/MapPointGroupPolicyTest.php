@@ -6,6 +6,7 @@ use App\Models\Group;
 use App\Models\MapEmbed;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
+use App\Models\MapPointSpreadsheetMapping;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -32,13 +33,16 @@ test('group admins may only change map data owned by their group or its descenda
     $mapPoint = MapPoint::factory()->for($owner)->create();
     $category = MapPointCategory::factory()->for($owner)->create();
     $mapEmbed = MapEmbed::factory()->for($owner)->create();
+    $importMapping = MapPointSpreadsheetMapping::factory()->for($owner)->create();
 
     expect($admin->can('update', $mapPoint))->toBe($expected)
         ->and($admin->can('delete', $mapPoint))->toBe($expected)
         ->and($admin->can('update', $category))->toBe($expected)
         ->and($admin->can('delete', $category))->toBe($expected)
         ->and($admin->can('update', $mapEmbed))->toBe($expected)
-        ->and($admin->can('delete', $mapEmbed))->toBe($expected);
+        ->and($admin->can('delete', $mapEmbed))->toBe($expected)
+        ->and($admin->can('update', $importMapping))->toBe($expected)
+        ->and($admin->can('delete', $importMapping))->toBe($expected);
 })->with([
     'own group' => ['child', 'child', true],
     'descendant group' => ['root', 'child', true],
@@ -46,11 +50,14 @@ test('group admins may only change map data owned by their group or its descenda
     'sibling group' => ['child', 'sibling', false],
 ]);
 
-test('only group admins may list and create map points', function (bool $asGroupAdmin): void {
+test('only group admins may list, create, import and export map points', function (bool $asGroupAdmin): void {
     $user = userActingInGroup($this->child, $asGroupAdmin);
 
     expect($user->can('viewAny', MapPoint::class))->toBe($asGroupAdmin)
-        ->and($user->can('create', MapPoint::class))->toBe($asGroupAdmin);
+        ->and($user->can('create', MapPoint::class))->toBe($asGroupAdmin)
+        ->and($user->can('import', MapPoint::class))->toBe($asGroupAdmin)
+        ->and($user->can('export', MapPoint::class))->toBe($asGroupAdmin)
+        ->and($user->can('create', MapPointSpreadsheetMapping::class))->toBe($asGroupAdmin);
 })->with([
     'group admin' => true,
     'group member' => false,

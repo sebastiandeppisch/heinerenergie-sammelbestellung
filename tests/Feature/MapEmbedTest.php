@@ -6,6 +6,7 @@ use App\Models\MapPointCategory;
 use App\Models\User;
 use App\Services\SessionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Collection;
 
 uses(RefreshDatabase::class);
 
@@ -52,7 +53,7 @@ test('group admin only sees map embeds of their group and its descendants', func
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('MapPoints/Embeds/Index')
-            ->where('mapEmbeds', fn ($mapEmbeds) => collect($mapEmbeds)->pluck('name')->sort()->values()->all() === ['Eigene Einbettung', 'Einbettung der Untergruppe'])
+            ->where('mapEmbeds', fn (Collection $mapEmbeds): bool => $mapEmbeds->pluck('name')->sort()->values()->all() === ['Eigene Einbettung', 'Einbettung der Untergruppe'])
         );
 });
 

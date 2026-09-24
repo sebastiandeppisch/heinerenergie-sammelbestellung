@@ -7,6 +7,7 @@ use App\Models\MapPointCategory;
 use App\Models\User;
 use App\Services\SessionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Collection;
 
 uses(RefreshDatabase::class);
 
@@ -29,6 +30,7 @@ function mapPointGroupAdmin(Group $group): User
 }
 
 /**
+ * @param  array<string, mixed>  $overrides
  * @return array<string, mixed>
  */
 function validMapPointPayload(Group $group, array $overrides = []): array
@@ -52,7 +54,7 @@ test('a group admin sees the map points of the group and its descendants', funct
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('MapPoints/Index')
-            ->where('mapPoints', fn ($mapPoints) => collect($mapPoints)->pluck('title')->sort()->values()->all() === $expectedTitles)
+            ->where('mapPoints', fn (Collection $mapPoints): bool => $mapPoints->pluck('title')->sort()->values()->all() === $expectedTitles)
         );
 })->with([
     'main group' => ['root', ['child', 'grandchild', 'root', 'sibling']],
