@@ -42,7 +42,7 @@
         "lodash": "^4.17.19",
         "moment": "^2.29.3",
         "playwright": "^1.63.0",
-        "reka-ui": "^2.9.8",
+        "reka-ui": "^2.10.5",
         "sass": "^1.102.0",
         "sortablejs": "^1.15.6",
         "tailwind-merge": "^3.7.0",
