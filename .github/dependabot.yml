@@ -5,6 +5,17 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
+    groups:
+      composer-prod:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+      composer-dev:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
 
   - package-ecosystem: "npm"
     directory: "/"
@@ -15,8 +26,25 @@ updates:
       tiptap:
         patterns:
           - "@tiptap/*"
+        update-types:
+          - "major"
+      npm-prod:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+      npm-dev:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      github-actions:
+        update-types:
+          - "minor"
+          - "patch"
