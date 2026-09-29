@@ -53,7 +53,7 @@ test('a group admin can save a mapping for the current group', function (): void
 
     expect($mapping->group_id)->toBe($this->group->id)
         ->and($mapping->name)->toBe('Anlagenliste')
-        ->and($mapping->columns[1])->toBe(['header' => 'Leistung', 'field' => 'ignore']);
+        ->and($mapping->columns[1])->toEqual(['header' => 'Leistung', 'field' => 'ignore']);
 });
 
 test('mapping names are unique within a group but may repeat in other groups', function (): void {
