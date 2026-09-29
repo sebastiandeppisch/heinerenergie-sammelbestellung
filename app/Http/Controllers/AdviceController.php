@@ -152,6 +152,8 @@ class AdviceController extends Controller
             ->get()
             ->map(fn (FormDefinition $fd): FormDefinitionData => FormDefinitionData::fromModel($fd));
 
+        $relatedAdvices = $adviceService->getRelatedAdvicesByEmail($advice, Auth::user());
+
         $advice = DataProtectedAdviceData::fromModel($advice, Auth::user());
 
         // Get advice status options (filtered by user permissions)
@@ -175,6 +177,7 @@ class AdviceController extends Controller
             'checklistEntries' => $checklistEntries,
             'availableChecklists' => $availableChecklists,
             'nextcloudConfigured' => $nextcloudConfig->isConfigured(),
+            'relatedAdvices' => $relatedAdvices,
         ]);
     }
 

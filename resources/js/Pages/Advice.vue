@@ -30,7 +30,13 @@ const props = defineProps<{
     checklistEntries: App.Data.ChecklistEntryData[];
     availableChecklists: App.Data.FormDefinitionData[];
     nextcloudConfigured: boolean;
+    relatedAdvices: {
+        visible: Array<{ id: string; created_at: string }>;
+        hidden_count: number;
+    };
 }>();
+
+const formatDate = (iso: string) => (iso ? new Date(iso).toLocaleDateString('de-DE') : '');
 
 setLayoutProps({
     breadcrumbs: [
@@ -72,6 +78,24 @@ const advisor = user.value;
                     </div>
                     <AdviceGeocodingStatus v-if="!advice.lat || !advice.lng" :advice="advice" style="padding: 0 16px 16px" />
                     <AdviceForm :advice="advice" :advice-status-options="adviceStatusOptions" :advice-types-options="adviceTypesOptions" />
+                </div>
+
+                <div class="content-card" v-if="relatedAdvices.visible.length > 0 || relatedAdvices.hidden_count > 0">
+                    <h3 class="card-title card-header">Weitere Beratungen mit dieser E-Mail-Adresse</h3>
+                    <ul style="padding: 16px 24px; display: flex; flex-direction: column; gap: 8px">
+                        <li v-for="related in relatedAdvices.visible" :key="related.id">
+                            <Link :href="route('advices.show', related.id)" class="underline">
+                                Beratung vom {{ formatDate(related.created_at) }}
+                            </Link>
+                        </li>
+                        <li v-if="relatedAdvices.hidden_count > 0">
+                            {{
+                                relatedAdvices.hidden_count === 1
+                                    ? 'Eine weitere Beratung existiert bei einer anderen Gruppe.'
+                                    : `${relatedAdvices.hidden_count} weitere Beratungen existieren bei anderen Gruppen.`
+                            }}
+                        </li>
+                    </ul>
                 </div>
 
                 <div class="content-card">

@@ -102,6 +102,40 @@ class AdviceService
         ];
     }
 
+    /**
+     * Other advices with the same email address. Advices the user may not view
+     * (e.g. of another group) are only reported as existing, without an id.
+     *
+     * @return array{visible: list<array{id: string, created_at: string}>, hidden_count: int}
+     */
+    public function getRelatedAdvicesByEmail(Advice $advice, User $user): array
+    {
+        if (trim($advice->email) === '') {
+            return ['visible' => [], 'hidden_count' => 0];
+        }
+
+        $related = Advice::query()
+            ->where('id', '!=', $advice->id)
+            ->whereRaw('LOWER(email) = ?', [mb_strtolower(trim($advice->email))])
+            ->with(['group', 'shares'])
+            ->orderBy('created_at')
+            ->get();
+
+        $visible = $related
+            ->filter(fn (Advice $other): bool => $user->can('view', $other))
+            ->map(fn (Advice $other): array => [
+                'id' => $other->uuid,
+                'created_at' => $other->created_at?->toIso8601String() ?? '',
+            ])
+            ->values()
+            ->all();
+
+        return [
+            'visible' => $visible,
+            'hidden_count' => $related->count() - count($visible),
+        ];
+    }
+
     public function getDistance(Advice $advice, ?User $user = null): ?Meter
     {
         if ($user === null) {
