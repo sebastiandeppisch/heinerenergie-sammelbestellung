@@ -12,9 +12,8 @@
 		"lib": ["ESNext", "DOM"],
 		"skipLibCheck": true,
 		"noEmit": true,
-		"baseUrl": "./resources/js",
 		"paths": {
-			"@/*": ["./*"],
+			"@/*": ["./resources/js/*"],
 		},
 		"types": ["vite/client"]
 	},
