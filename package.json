@@ -80,7 +80,7 @@
         "typescript": "^5.5.4",
         "typescript-eslint": "^8.69.0",
         "vite": "^8.2.2",
-        "vitest": "^5.0.0",
+        "vitest": "^5.0.1",
         "vue-tsc": "^3.3.11"
     },
     "browserslist": [
