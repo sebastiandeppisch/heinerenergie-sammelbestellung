@@ -144,11 +144,11 @@ test('the table shows the coordinates instead of a dash when a point has no loca
 });
 
 test('column filter on the public map table filters rows', function (): void {
-    $category = MapPointCategory::factory()->withoutImage()->create();
-    MapPoint::factory()->create(['published' => true, 'category_id' => $category->id, 'title' => 'Solaranlage Nord']);
-    MapPoint::factory()->create(['published' => true, 'category_id' => $category->id, 'title' => 'Windrad Süd']);
+    $category = MapPointCategory::factory()->for($this->group)->withoutImage()->create();
+    MapPoint::factory()->for($this->group)->create(['published' => true, 'category_id' => $category->id, 'title' => 'Solaranlage Nord']);
+    MapPoint::factory()->for($this->group)->create(['published' => true, 'category_id' => $category->id, 'title' => 'Windrad Süd']);
 
-    $mapEmbed = MapEmbed::factory()->create();
+    $mapEmbed = MapEmbed::factory()->for($this->group)->create();
     $mapEmbed->mapPointCategories()->sync([$category->id]);
 
     visit(route('map.public', $mapEmbed))
