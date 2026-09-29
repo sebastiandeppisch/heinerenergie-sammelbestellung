@@ -65,7 +65,7 @@
         "@vitejs/plugin-vue": "^6.0.9",
         "@vue-leaflet/vue-leaflet": "^0.10.0",
         "@vue/eslint-config-typescript": "^14.3.0",
-        "@vue/test-utils": "^2.5.0",
+        "@vue/test-utils": "^2.5.1",
         "autoprefixer": "^10.5.5",
         "eslint": "^10.10.0",
         "eslint-config-prettier": "^10.0.1",
