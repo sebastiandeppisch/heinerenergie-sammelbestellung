@@ -1,10 +1,14 @@
 import {
+    columnFor,
     defaultKeyField,
     fieldsFromTemplate,
+    guessCategoryFields,
     guessFields,
     keyOptionsFor,
+    newFieldTarget,
     samePayload,
     sampleValues,
+    templateColumn,
     unassignedIdHeader,
     useMapPointColumnMapping,
 } from '@/composables/useMapPointColumnMapping';
@@ -82,7 +86,7 @@ describe('sampleValues', () => {
 
 describe('fieldsFromTemplate', () => {
     it('matches the headers of a template regardless of case and surrounding spaces', () => {
-        const template = makeTemplate({ columns: [{ header: 'Bezeichnung', field: 'title' }] });
+        const template = makeTemplate({ columns: [{ header: 'Bezeichnung', field: 'title', category_field_id: null, new_field_type: null }] });
 
         expect(fieldsFromTemplate([' bezeichnung ', 'Leistung'], template)).toEqual(['title', 'ignore']);
     });
@@ -95,6 +99,8 @@ describe('samePayload', () => {
             columns: payload.columns.map((column) => ({ ...column })),
             default_published: false,
             key_field: payload.key_field,
+            main_category_id: null,
+            new_main_category_name: null,
             token: payload.token,
         };
 
@@ -169,9 +175,113 @@ describe('useMapPointColumnMapping', () => {
     it('does not keep a key field from a template whose column this file lacks', async () => {
         const mapping = startMapping();
 
-        mapping.applyTemplate(makeTemplate({ columns: [{ header: 'Bezeichnung', field: 'title' }], key_field: 'location' }));
+        mapping.applyTemplate(
+            makeTemplate({
+                columns: [{ header: 'Bezeichnung', field: 'title', category_field_id: null, new_field_type: null }],
+                key_field: 'location',
+            }),
+        );
         await nextTick();
 
         expect(mapping.keyField.value).toBe('ignore');
+    });
+});
+
+describe('category field columns', () => {
+    const powerId = '9a1b2c3d-4e5f-4a6b-8c7d-0e1f2a3b4c5d';
+    const categoryFields: Array<App.Data.MapPointSpreadsheetFieldData> = [
+        { value: 'category_field', label: 'Photovoltaik › PV-Leistung (kWp)', is_key: false, category_field_id: powerId, category_id: 'pv' },
+    ];
+
+    it('suggests a category field for a column named like the field, with or without its category', () => {
+        const fields = [...mapPointFields, ...categoryFields];
+
+        expect(guessCategoryFields(['Bezeichnung', 'PV-Leistung (kWp)'], ['title', 'ignore'], fields)).toEqual([
+            'title',
+            `category_field:${powerId}`,
+        ]);
+        expect(guessCategoryFields(['Photovoltaik › PV-Leistung (kWp)'], ['ignore'], fields)).toEqual([`category_field:${powerId}`]);
+    });
+
+    it('sends a category field column with the id of its field', () => {
+        expect(columnFor('Leistung', `category_field:${powerId}`)).toEqual({
+            header: 'Leistung',
+            field: 'category_field',
+            category_field_id: powerId,
+        });
+        expect(columnFor('Bezeichnung', 'title')).toEqual({ header: 'Bezeichnung', field: 'title' });
+    });
+
+    it('ignores a template column whose category field no longer exists', () => {
+        const template = makeTemplate({
+            columns: [
+                { header: 'Leistung', field: 'category_field', category_field_id: powerId, new_field_type: null },
+                { header: 'Alt', field: 'category_field', category_field_id: 'deleted-field', new_field_type: null },
+            ],
+        });
+
+        expect(fieldsFromTemplate(['Leistung', 'Alt'], template, [...mapPointFields, ...categoryFields])).toEqual([
+            `category_field:${powerId}`,
+            'ignore',
+        ]);
+    });
+});
+
+describe('main category', () => {
+    const powerId = '9a1b2c3d-4e5f-4a6b-8c7d-0e1f2a3b4c5d';
+    const power: App.Data.MapPointSpreadsheetFieldData = {
+        value: 'category_field',
+        label: 'Photovoltaik › Leistung',
+        is_key: false,
+        category_field_id: powerId,
+        category_id: 'pv',
+    };
+    const upload = makeUpload({ headers: ['Bezeichnung', 'Leistung', 'Hersteller'], preview_rows: [['Schule', '9,9', 'Muster AG']] });
+
+    function startMainCategoryMapping() {
+        const mapping = effectScope().run(() => useMapPointColumnMapping(upload, [...mapPointFields, power], { pv: [powerId], balcony: [powerId] }));
+
+        if (!mapping) {
+            throw new Error('The column mapping could not be started.');
+        }
+
+        return mapping;
+    }
+
+    it('assigns the fields of the chosen main category to columns named like them', () => {
+        const mapping = startMainCategoryMapping();
+
+        mapping.mainCategory.value = 'balcony';
+
+        expect(mapping.columnFields.value[1]).toBe(`category_field:${powerId}`);
+        expect(mapping.payload.value.main_category_id).toBe('balcony');
+    });
+
+    it('suggests the category of an assigned field as main category until one is chosen', async () => {
+        const mapping = startMainCategoryMapping();
+
+        expect(mapping.mainCategory.value).toBe('pv');
+
+        mapping.mainCategory.value = 'none';
+        mapping.columnFields.value = ['title', `category_field:${powerId}`, 'ignore'];
+        await nextTick();
+
+        expect(mapping.mainCategory.value).toBe('none');
+    });
+
+    it('sends the name of a new main category instead of an id', () => {
+        const mapping = startMainCategoryMapping();
+
+        mapping.mainCategory.value = 'new';
+        mapping.newMainCategoryName.value = '  Photovoltaik ';
+
+        expect(mapping.payload.value).toMatchObject({ main_category_id: null, new_main_category_name: 'Photovoltaik' });
+    });
+
+    it('sends a new field with its type and leaves it out of templates', () => {
+        const column = columnFor('Hersteller', newFieldTarget('text'));
+
+        expect(column).toEqual({ header: 'Hersteller', field: 'new_category_field', new_field_type: 'text' });
+        expect(templateColumn(column)).toEqual({ header: 'Hersteller', field: 'ignore' });
     });
 });

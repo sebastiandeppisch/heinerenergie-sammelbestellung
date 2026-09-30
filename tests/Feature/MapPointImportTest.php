@@ -1,15 +1,19 @@
 <?php
 
 use App\Data\MapPointSpreadsheetColumnData;
+use App\Enums\FieldType;
 use App\Enums\SpreadsheetFormat;
 use App\Exports\MapPointsExport;
+use App\Models\FormField;
 use App\Models\Group;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
 use App\Models\User;
+use App\Services\MapPointFieldService;
 use App\Services\SessionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Facades\Excel;
@@ -680,3 +684,305 @@ test('the visibility of new points must be sent', function (): void {
         ->assertUnprocessable()
         ->assertJsonValidationErrors(['default_published']);
 });
+
+/**
+ * A category with fields of every kind a spreadsheet can hold.
+ *
+ * @return array{category: MapPointCategory, power: FormField, kind: FormField, since: FormField, equipment: FormField}
+ */
+function photovoltaicsWithFields(Group $group): array
+{
+    $category = MapPointCategory::factory()->for($group)->create(['name' => 'Photovoltaik']);
+    $fields = $category->findOrCreateFormDefinition()->fields();
+
+    $kind = $fields->create(['type' => FieldType::SELECT, 'label' => 'Anlagenart', 'sort_order' => 1]);
+    $kind->options()->createMany([['value' => 'dach', 'label' => 'Dachanlage', 'sort_order' => 0], ['value' => 'frei', 'label' => 'Freifläche', 'sort_order' => 1]]);
+    $equipment = $fields->create(['type' => FieldType::CHECKBOX, 'label' => 'Ausstattung', 'sort_order' => 3]);
+    $equipment->options()->createMany([['value' => 'bat', 'label' => 'Speicher', 'sort_order' => 0], ['value' => 'wb', 'label' => 'Wallbox', 'sort_order' => 1]]);
+
+    return [
+        'category' => $category,
+        'power' => $fields->create(['type' => FieldType::NUMBER, 'label' => 'PV-Leistung (kWp)', 'sort_order' => 0]),
+        'kind' => $kind,
+        'since' => $fields->create(['type' => FieldType::DATE, 'label' => 'In Betrieb seit', 'sort_order' => 2]),
+        'equipment' => $equipment,
+    ];
+}
+
+/**
+ * @param  array<string, FormField>  $fields  keyed by the header of their column
+ * @return array<int, array<string, string>>
+ */
+function columnsWithCategoryFields(array $fields): array
+{
+    return [
+        ['header' => 'Bezeichnung', 'field' => 'title'],
+        ['header' => 'Art', 'field' => 'category'],
+        ['header' => 'Breite', 'field' => 'lat'],
+        ['header' => 'Länge', 'field' => 'lng'],
+        ...array_map(
+            fn (string $header, FormField $field): array => ['header' => $header, 'field' => 'category_field', 'category_field_id' => $field->uuid],
+            array_keys($fields),
+            $fields,
+        ),
+    ];
+}
+
+test('the import page offers the fields of the categories of the initiative, named after their category', function (): void {
+    actingAsImportAdmin($this, $this->group);
+    ['power' => $power] = photovoltaicsWithFields($this->group);
+    MapPointCategory::factory()->create()->findOrCreateFormDefinition()->fields()->create(['type' => FieldType::TEXT, 'label' => 'Fremdes Feld', 'sort_order' => 0]);
+
+    $this->get(route('mappoints.import.create'))
+        ->assertInertia(fn ($page) => $page
+            ->where('fields', fn (Collection $fields): bool => $fields->where('value', 'category_field')->pluck('label')->all() === [
+                'Photovoltaik › PV-Leistung (kWp)', 'Photovoltaik › Anlagenart', 'Photovoltaik › In Betrieb seit', 'Photovoltaik › Ausstattung',
+            ])
+            ->where('fields', fn (Collection $fields): bool => $fields->firstWhere('label', 'Photovoltaik › PV-Leistung (kWp)')['category_field_id'] === $power->uuid)
+        );
+});
+
+test('category field values are read by the type of their field', function (): void {
+    actingAsImportAdmin($this, $this->group);
+    ['power' => $power, 'kind' => $kind, 'since' => $since, 'equipment' => $equipment] = photovoltaicsWithFields($this->group);
+    $token = uploadMapPointFile($this, implode("\r\n", [
+        'Bezeichnung;Art;Breite;Länge;Leistung;Anlage;Seit;Ausstattung',
+        'Schule;Photovoltaik;49,87;8,65;9,9;dachanlage;15.03.2024;Wallbox, Speicher',
+    ]));
+
+    $this->post(route('mappoints.import.store'), importPayload($token, columnsWithCategoryFields([
+        'Leistung' => $power, 'Anlage' => $kind, 'Seit' => $since, 'Ausstattung' => $equipment,
+    ])))->assertRedirect(route('mappoints.index'));
+
+    expect(MapPoint::sole()->fields()->orderBy('sort_order')->pluck('value', 'label')->all())->toBe([
+        'PV-Leistung (kWp)' => 9.9,
+        'Anlagenart' => 'dach',
+        'In Betrieb seit' => '2024-03-15',
+        'Ausstattung' => ['wb', 'bat'],
+    ]);
+});
+
+test('a category field value that does not fit its field is a row error', function (string $cell, string $message): void {
+    actingAsImportAdmin($this, $this->group);
+    ['kind' => $kind] = photovoltaicsWithFields($this->group);
+    $token = uploadMapPointFile($this, "Bezeichnung;Art;Breite;Länge;Anlage\r\nSchule;Photovoltaik;49,87;8,65;{$cell}");
+
+    $this->postJson(route('mappoints.import.preview'), importPayload($token, columnsWithCategoryFields(['Anlage' => $kind])))
+        ->assertOk()
+        ->assertJsonPath('errors', [['row' => 2, 'column' => 'Anlage', 'message' => $message]]);
+})->with([
+    'unknown option' => ['Balkon', '„Balkon“ ist keine der Optionen: Dachanlage, Freifläche.'],
+]);
+
+test('a value for a field the category of the point lacks is left out with a warning', function (): void {
+    actingAsImportAdmin($this, $this->group);
+    ['power' => $power] = photovoltaicsWithFields($this->group);
+    MapPointCategory::factory()->for($this->group)->create(['name' => 'Wärmepumpe']);
+    $token = uploadMapPointFile($this, "Bezeichnung;Art;Breite;Länge;Leistung\r\nBeispielhof;Wärmepumpe;49,87;8,65;9");
+
+    $this->postJson(route('mappoints.import.preview'), importPayload($token, columnsWithCategoryFields(['Leistung' => $power])))
+        ->assertOk()
+        ->assertJsonPath('errors', [])
+        ->assertJsonPath('warnings', [['row' => 2, 'column' => 'Leistung', 'message' => 'Die Kategorie des Punkts hat dieses Feld nicht, der Wert wird nicht übernommen.']])
+        ->assertJsonPath('created_count', 1);
+});
+
+test('an empty cell removes the value of an existing point', function (): void {
+    actingAsImportAdmin($this, $this->group);
+    ['category' => $category, 'power' => $power] = photovoltaicsWithFields($this->group);
+    $mapPoint = MapPoint::factory()->for($this->group)->create(['title' => 'Schule', 'category_id' => $category->id]);
+    $power->createMapPointField($mapPoint, 10);
+    $token = uploadMapPointFile($this, "Bezeichnung;Art;Breite;Länge;Leistung\r\nSchule;Photovoltaik;49,87;8,65;");
+
+    $this->post(route('mappoints.import.store'), importPayload($token, columnsWithCategoryFields(['Leistung' => $power])))
+        ->assertRedirect(route('mappoints.index'));
+
+    expect($mapPoint->fields()->count())->toBe(0);
+});
+
+test('columns can only hold fields of the categories of the initiative', function (): void {
+    actingAsImportAdmin($this, $this->group);
+    $foreignField = MapPointCategory::factory()->create()->findOrCreateFormDefinition()->fields()->create(['type' => FieldType::TEXT, 'label' => 'Fremdes Feld', 'sort_order' => 0]);
+    $token = uploadMapPointFile($this, "Bezeichnung;Art;Breite;Länge;Fremd\r\nSchule;Photovoltaik;49,87;8,65;x");
+
+    $this->post(route('mappoints.import.store'), importPayload($token, columnsWithCategoryFields(['Fremd' => $foreignField])))
+        ->assertSessionHasErrors(['columns' => 'Ein zugeordnetes Zusatzfeld gibt es in den Kategorien dieser Initiative nicht. Bitte ordne die Spalte neu zu.']);
+
+    $this->assertDatabaseCount('map_points', 0);
+});
+
+test('an exported file with category fields can be imported again unchanged', function (SpreadsheetFormat $format): void {
+    actingAsImportAdmin($this, $this->group);
+    ['category' => $category, 'power' => $power, 'kind' => $kind, 'since' => $since, 'equipment' => $equipment] = photovoltaicsWithFields($this->group);
+    $mapPoint = MapPoint::factory()->for($this->group)->create(['category_id' => $category->id]);
+    $power->createMapPointField($mapPoint, 9.9);
+    $kind->createMapPointField($mapPoint, 'frei');
+    $since->createMapPointField($mapPoint, '2024-03-15');
+    $equipment->createMapPointField($mapPoint, ['bat', 'wb']);
+    $categoryFields = app(MapPointFieldService::class)->fieldsUsableInGroup($this->group);
+    $columns = MapPointsExport::defaultColumns($categoryFields);
+
+    $file = Excel::raw(new MapPointsExport(MapPoint::with(['category', 'fields.formField', 'fields.options'])->get(), $columns, $format, $categoryFields), $format->excelType());
+    $snapshotIds = $mapPoint->fields()->pluck('id')->all();
+
+    $token = uploadMapPointFile($this, $file, "kartenpunkte.{$format->value}");
+    $this->post(route('mappoints.import.store'), importPayload($token, array_map(fn (MapPointSpreadsheetColumnData $column): array => $column->toArray(), $columns), keyField: 'id'))
+        ->assertRedirect(route('mappoints.index'));
+
+    expect($mapPoint->fields()->pluck('id')->all())->toBe($snapshotIds);
+})->with([
+    'csv' => SpreadsheetFormat::CSV,
+    'xlsx' => SpreadsheetFormat::XLSX,
+]);
+
+/**
+ * @param  array<int, array<string, string>>  $columns
+ * @param  array<string, mixed>  $extra
+ * @return array<string, mixed>
+ */
+function mainCategoryPayload(string $token, array $columns, array $extra): array
+{
+    return [...importPayload($token, $columns), ...$extra];
+}
+
+test('with a main category the category column holds its sub categories', function (): void {
+    actingAsImportAdmin($this, $this->group);
+    $solar = MapPointCategory::factory()->for($this->group)->create(['name' => 'Photovoltaik']);
+    $balcony = MapPointCategory::factory()->childOf($solar)->create(['name' => 'Sonstiges']);
+    MapPointCategory::factory()->for($this->group)->create(['name' => 'Sonstiges']);
+    $token = uploadMapPointFile($this, implode("\r\n", [
+        'Bezeichnung;Art;Breite;Länge',
+        'Balkon;sonstiges;49,87;8,65',
+        'Scheune;Freifläche;49,88;8,66',
+        'Schule;;49,89;8,67',
+    ]));
+
+    $this->post(route('mappoints.import.store'), mainCategoryPayload($token, columnsWithCategoryFields([]), ['main_category_id' => $solar->uuid]))
+        ->assertRedirect(route('mappoints.index'));
+
+    $created = MapPointCategory::where('name', 'Freifläche')->sole();
+    expect(MapPoint::where('title', 'Balkon')->sole()->category_id)->toBe($balcony->id)
+        ->and(MapPoint::where('title', 'Scheune')->sole()->category_id)->toBe($created->id)
+        ->and($created->parent_id)->toBe($solar->id)
+        ->and(MapPoint::where('title', 'Schule')->sole()->category_id)->toBe($solar->id);
+});
+
+test('without a category name points move into the main category unless they already are in it or below', function (): void {
+    actingAsImportAdmin($this, $this->group);
+    $solar = MapPointCategory::factory()->for($this->group)->create();
+    $balcony = MapPointCategory::factory()->childOf($solar)->create();
+    $heatPumps = MapPointCategory::factory()->for($this->group)->create();
+    $inSubCategory = MapPoint::factory()->for($this->group)->create(['title' => 'Balkon', 'category_id' => $balcony->id]);
+    $elsewhere = MapPoint::factory()->for($this->group)->create(['title' => 'Beispielhof', 'category_id' => $heatPumps->id]);
+    $withoutCategory = MapPoint::factory()->for($this->group)->create(['title' => 'Scheune', 'category_id' => null]);
+    $token = uploadMapPointFile($this, "Bezeichnung;Breite;Länge\r\nBalkon;49,87;8,65\r\nBeispielhof;49,88;8,66\r\nScheune;49,89;8,67\r\nSchule;49,90;8,68");
+    $columns = [['header' => 'Bezeichnung', 'field' => 'title'], ['header' => 'Breite', 'field' => 'lat'], ['header' => 'Länge', 'field' => 'lng']];
+
+    $this->post(route('mappoints.import.store'), mainCategoryPayload($token, $columns, ['main_category_id' => $solar->uuid]))
+        ->assertRedirect(route('mappoints.index'));
+
+    expect($inSubCategory->refresh()->category_id)->toBe($balcony->id)
+        ->and($elsewhere->refresh()->category_id)->toBe($solar->id)
+        ->and($withoutCategory->refresh()->category_id)->toBe($solar->id)
+        ->and(MapPoint::where('title', 'Schule')->sole()->category_id)->toBe($solar->id);
+});
+
+test('a point without category found by its title gets the main category and the values of its fields', function (): void {
+    actingAsImportAdmin($this, $this->group);
+    ['category' => $category, 'power' => $power] = photovoltaicsWithFields($this->group);
+    $mapPoint = MapPoint::factory()->for($this->group)->create(['title' => 'Schule', 'category_id' => null]);
+    $token = uploadMapPointFile($this, "Bezeichnung;Breite;Länge;Leistung\r\nSchule;49,87;8,65;9,9");
+    $columns = [
+        ['header' => 'Bezeichnung', 'field' => 'title'],
+        ['header' => 'Breite', 'field' => 'lat'],
+        ['header' => 'Länge', 'field' => 'lng'],
+        ['header' => 'Leistung', 'field' => 'category_field', 'category_field_id' => $power->uuid],
+    ];
+
+    $this->postJson(route('mappoints.import.preview'), mainCategoryPayload($token, $columns, ['main_category_id' => $category->uuid]))
+        ->assertOk()
+        ->assertJsonPath('warnings', [])
+        ->assertJsonPath('rows.0.category', 'Photovoltaik');
+
+    $this->post(route('mappoints.import.store'), mainCategoryPayload($token, $columns, ['main_category_id' => $category->uuid]))
+        ->assertRedirect(route('mappoints.index'));
+
+    expect($mapPoint->refresh()->category_id)->toBe($category->id)
+        ->and($mapPoint->fields()->sole()->value)->toBe(9.9);
+});
+
+test('a new main category and new fields are only created by the import, not by the preview', function (): void {
+    actingAsImportAdmin($this, $this->group);
+    $token = uploadMapPointFile($this, "Bezeichnung;Breite;Länge;Leistung (kWp)\r\nSchule;49,87;8,65;9,9");
+    $payload = mainCategoryPayload($token, [
+        ['header' => 'Bezeichnung', 'field' => 'title'],
+        ['header' => 'Breite', 'field' => 'lat'],
+        ['header' => 'Länge', 'field' => 'lng'],
+        ['header' => 'Leistung (kWp)', 'field' => 'new_category_field', 'new_field_type' => 'number'],
+    ], ['new_main_category_name' => 'Photovoltaik']);
+
+    $this->postJson(route('mappoints.import.preview'), $payload)
+        ->assertOk()
+        ->assertJsonPath('created_categories', ['Photovoltaik'])
+        ->assertJsonPath('created_fields', ['Leistung (kWp)'])
+        ->assertJsonPath('rows.0.category', 'Photovoltaik');
+
+    $this->assertDatabaseCount('map_point_categories', 0);
+    $this->assertDatabaseCount('form_fields', 0);
+
+    $this->post(route('mappoints.import.store'), $payload)->assertRedirect(route('mappoints.index'));
+
+    $category = MapPointCategory::sole();
+    expect($category->name)->toBe('Photovoltaik')
+        ->and($category->formDefinition->fields()->sole()->only(['label', 'type']))->toBe(['label' => 'Leistung (kWp)', 'type' => FieldType::NUMBER])
+        ->and(MapPoint::sole()->fields()->sole()->value)->toBe(9.9);
+});
+
+test('new fields go to the category the main category inherits its fields from', function (): void {
+    actingAsImportAdmin($this, $this->group);
+    $solar = MapPointCategory::factory()->for($this->group)->create();
+    $solar->findOrCreateFormDefinition()->fields()->create(['type' => FieldType::NUMBER, 'label' => 'PV-Leistung (kWp)', 'sort_order' => 0]);
+    $balcony = MapPointCategory::factory()->childOf($solar)->create();
+    $token = uploadMapPointFile($this, "Bezeichnung;Breite;Länge;Hersteller\r\nBalkon;49,87;8,65;Muster AG");
+    $columns = [
+        ['header' => 'Bezeichnung', 'field' => 'title'],
+        ['header' => 'Breite', 'field' => 'lat'],
+        ['header' => 'Länge', 'field' => 'lng'],
+        ['header' => 'Hersteller', 'field' => 'new_category_field', 'new_field_type' => 'text'],
+    ];
+
+    $this->post(route('mappoints.import.store'), mainCategoryPayload($token, $columns, ['main_category_id' => $balcony->uuid]))
+        ->assertRedirect(route('mappoints.index'));
+
+    expect($solar->formDefinition->fields()->pluck('label')->all())->toBe(['PV-Leistung (kWp)', 'Hersteller'])
+        ->and($balcony->refresh()->form_definition_id)->toBeNull()
+        ->and(MapPoint::sole()->fields()->sole()->value)->toBe('Muster AG');
+});
+
+test('main category and new fields are refused when they cannot work', function (string $case, string $errorKey, string $message): void {
+    $parentGroup = Group::factory()->create();
+    $this->group->update(['parent_id' => $parentGroup->id]);
+    actingAsImportAdmin($this, $this->group);
+    $inherited = MapPointCategory::factory()->for($parentGroup)->create(['name' => 'Photovoltaik']);
+    $token = uploadMapPointFile($this, "Bezeichnung;Breite;Länge;Hersteller\r\nBalkon;49,87;8,65;Muster AG");
+    $columns = [
+        ['header' => 'Bezeichnung', 'field' => 'title'],
+        ['header' => 'Breite', 'field' => 'lat'],
+        ['header' => 'Länge', 'field' => 'lng'],
+        ['header' => 'Hersteller', 'field' => 'new_category_field', 'new_field_type' => 'text'],
+    ];
+    $extra = [
+        'new field without main category' => [],
+        'new main category that exists' => ['new_main_category_name' => 'photovoltaik'],
+        'new field in a category of a parent initiative' => ['main_category_id' => $inherited->uuid],
+    ][$case];
+
+    $this->post(route('mappoints.import.store'), mainCategoryPayload($token, $columns, $extra))
+        ->assertSessionHasErrors([$errorKey => $message]);
+
+    $this->assertDatabaseCount('form_fields', 0);
+})->with([
+    'new field without main category' => ['new field without main category', 'columns', 'Neue Zusatzfelder werden in der Hauptkategorie angelegt. Bitte wähle zuerst eine Hauptkategorie.'],
+    'new main category that exists' => ['new main category that exists', 'new_main_category_name', 'Diese Kategorie gibt es schon. Wähle sie als Hauptkategorie aus.'],
+    'new field in a category of a parent initiative' => ['new field in a category of a parent initiative', 'columns', 'Neue Zusatzfelder kämen in die Kategorie Photovoltaik einer übergeordneten Initiative. Dort kann nur deren Admin Felder anlegen.'],
+]);

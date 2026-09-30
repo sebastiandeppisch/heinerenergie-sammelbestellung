@@ -84,10 +84,14 @@ function runImport() {
                     <Badge variant="secondary">{{ preview.created_count }} neu</Badge>
                     <Badge variant="secondary">{{ preview.updated_count }} aktualisiert</Badge>
                     <Badge v-if="preview.errors.length > 0" variant="destructive">{{ preview.errors.length }} Fehler</Badge>
+                    <Badge v-if="preview.warnings.length > 0" variant="outline">{{ preview.warnings.length }} Hinweise</Badge>
                 </div>
 
                 <p v-if="preview.created_categories.length > 0" class="text-sm text-gray-700">
                     Neue Kategorien: {{ preview.created_categories.join(', ') }}
+                </p>
+                <p v-if="preview.created_fields.length > 0" class="text-sm text-gray-700" data-test="created-fields">
+                    Neue Zusatzfelder: {{ preview.created_fields.join(', ') }}
                 </p>
 
                 <div v-if="preview.errors.length > 0" class="space-y-2" data-test="row-errors">
@@ -108,6 +112,28 @@ function runImport() {
                                     <TableCell>{{ error.row }}</TableCell>
                                     <TableCell>{{ error.column ?? '–' }}</TableCell>
                                     <TableCell>{{ error.message }}</TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
+                    </div>
+                </div>
+
+                <div v-if="preview.warnings.length > 0" class="space-y-2" data-test="row-warnings">
+                    <p class="text-sm text-amber-700">Diese Werte werden nicht übernommen, der Import läuft trotzdem.</p>
+                    <div class="overflow-x-auto rounded-lg border border-amber-200">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead class="w-20">Zeile</TableHead>
+                                    <TableHead>Spalte</TableHead>
+                                    <TableHead>Hinweis</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                <TableRow v-for="(warning, index) in preview.warnings" :key="index">
+                                    <TableCell>{{ warning.row }}</TableCell>
+                                    <TableCell>{{ warning.column ?? '–' }}</TableCell>
+                                    <TableCell>{{ warning.message }}</TableCell>
                                 </TableRow>
                             </TableBody>
                         </Table>

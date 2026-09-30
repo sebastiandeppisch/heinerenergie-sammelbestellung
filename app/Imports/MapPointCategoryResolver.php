@@ -16,6 +16,10 @@ use Illuminate\Support\Str;
  * When a name exists on several levels of the hierarchy, the category of the nearest group wins.
  * Unknown names create a category in the group. A name only a sub initiative uses is refused instead,
  * because that sub initiative would then see two categories with the same name.
+ *
+ * With a main category, names are sub categories of it: they are looked up below the main category only, and
+ * unknown names create a sub category of it, which uses its fields. The same name below another category does
+ * not matter then.
  */
 class MapPointCategoryResolver
 {
@@ -28,14 +32,20 @@ class MapPointCategoryResolver
     /** @var array<int, string> */
     private array $createdNames = [];
 
-    public function __construct(private readonly Group $group)
+    public function __construct(private readonly Group $group, private readonly ?MapPointCategory $mainCategory = null)
     {
         $hierarchyIds = $group->getHierarchyIds();
+        $tree = MapPointCategory::tree();
+        $mainSubtreeIds = $mainCategory === null ? null : $tree->subtreeIds([$mainCategory->id]);
 
         $usableCategories = MapPointCategory::query()
             ->usableInGroup($group)
+            ->when($mainSubtreeIds !== null, fn ($query) => $query->whereIn('id', $mainSubtreeIds))
             ->get()
-            ->sortBy(fn (MapPointCategory $category): int => (int) array_search($category->group_id, $hierarchyIds, true));
+            // The main category and the levels right below it win over deeper sub categories with the same name.
+            ->sortBy(fn (MapPointCategory $category): int => $mainCategory !== null
+                ? count($tree->ancestorIds($category->id))
+                : (int) array_search($category->group_id, $hierarchyIds, true));
 
         foreach ($usableCategories as $category) {
             $this->usableByName[Str::lower($category->name)] ??= $category;
@@ -43,6 +53,7 @@ class MapPointCategoryResolver
 
         $descendantCategories = MapPointCategory::query()
             ->whereIn('group_id', array_diff($group->getSubtreeIds(), [$group->id]))
+            ->when($mainSubtreeIds !== null, fn ($query) => $query->whereIn('id', $mainSubtreeIds))
             ->with('group')
             ->get();
 
@@ -70,11 +81,19 @@ class MapPointCategoryResolver
             ), MapPointSpreadsheetField::CATEGORY->value);
         }
 
-        $category = MapPointCategory::create(['group_id' => $this->group->id, 'name' => $name]);
+        $category = MapPointCategory::create(['group_id' => $this->group->id, 'name' => $name, 'parent_id' => $this->mainCategory?->id]);
         $this->usableByName[$key] = $category;
         $this->createdNames[] = $name;
 
         return $category;
+    }
+
+    /**
+     * A category the import creates itself, e.g. a new main category, is reported like the ones created for rows.
+     */
+    public function reportCreated(MapPointCategory $category): void
+    {
+        $this->createdNames[] = $category->name;
     }
 
     /**

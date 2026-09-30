@@ -32,6 +32,15 @@ enum MapPointSpreadsheetField: string
 
     case PUBLISHED = 'published';
 
+    /** A field of a map point category. The column names the field with its category_field_id. */
+    case CATEGORY_FIELD = 'category_field';
+
+    /**
+     * A category field the import creates in the main category, named after the column. Only used for an import run,
+     * a saved template would create it again on every import.
+     */
+    case NEW_CATEGORY_FIELD = 'new_category_field';
+
     public function label(): string
     {
         return match ($this) {
@@ -44,6 +53,8 @@ enum MapPointSpreadsheetField: string
             self::LOCATION => 'Ort',
             self::CATEGORY => 'Kategorie',
             self::PUBLISHED => 'Veröffentlicht',
+            self::CATEGORY_FIELD => 'Zusatzfeld',
+            self::NEW_CATEGORY_FIELD => 'Neues Zusatzfeld',
         };
     }
 
@@ -72,5 +83,25 @@ enum MapPointSpreadsheetField: string
     public static function keyOptions(): array
     {
         return [self::IGNORE, ...self::keys()];
+    }
+
+    /**
+     * The types a new category field can get in an import. Fields with options are set up in the form builder.
+     *
+     * @return array<int, FieldType>
+     */
+    public static function newFieldTypes(): array
+    {
+        return [FieldType::TEXT, FieldType::NUMBER, FieldType::DATE];
+    }
+
+    /**
+     * The fields every point has. Category fields are offered one by one instead.
+     *
+     * @return array<int, self>
+     */
+    public static function pointFields(): array
+    {
+        return array_values(array_filter(self::cases(), fn (self $field): bool => ! in_array($field, [self::CATEGORY_FIELD, self::NEW_CATEGORY_FIELD], true)));
     }
 }

@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @property int $group_id
  * @property string $name
- * @property array<int, array{header: string, field: string}> $columns
+ * @property array<int, array{header: string, field: string, category_field_id?: string|null}> $columns
  * @property MapPointSpreadsheetField $key_field
  */
 class MapPointSpreadsheetMapping extends Model

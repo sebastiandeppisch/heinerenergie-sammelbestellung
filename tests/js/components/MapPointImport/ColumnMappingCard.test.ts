@@ -14,6 +14,9 @@ function mountCard(columnFields: Array<Field> = guessedFields, upload = makeUplo
             columnFields,
             keyField: 'title',
             defaultVisibility: 'private',
+            categories: [],
+            mainCategory: 'none',
+            newMainCategoryName: '',
         },
         slots: {
             templates: '<div data-test="templates-slot">Vorlagen</div>',

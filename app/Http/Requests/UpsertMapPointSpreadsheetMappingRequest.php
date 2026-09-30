@@ -6,9 +6,11 @@ namespace App\Http\Requests;
 
 use App\Context\GroupContextContract;
 use App\Enums\MapPointSpreadsheetField;
+use App\Models\Group;
 use App\Models\MapPointSpreadsheetMapping;
 use App\Rules\DistinctMapPointSpreadsheetFields;
 use App\Rules\IdColumnRequiresIdKey;
+use App\Rules\UsableCategoryFieldColumns;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -31,7 +33,7 @@ class UpsertMapPointSpreadsheetMappingRequest extends FormRequest
     {
         $mapping = $this->route('mapping');
         $mapping = $mapping instanceof MapPointSpreadsheetMapping ? $mapping : null;
-        $groupId = $mapping->group_id ?? app(GroupContextContract::class)->getCurrentGroup()?->id;
+        $groupId = $this->group()?->id;
 
         return [
             'name' => [
@@ -41,9 +43,11 @@ class UpsertMapPointSpreadsheetMappingRequest extends FormRequest
                 Rule::unique('map_point_spreadsheet_mappings', 'name')->where('group_id', $groupId)->ignore($mapping?->id),
             ],
             'key_field' => ['required', Rule::enum(MapPointSpreadsheetField::class)->only(MapPointSpreadsheetField::keyOptions()), new IdColumnRequiresIdKey($this->input('columns'))],
-            'columns' => ['required', 'array', 'min:1', new DistinctMapPointSpreadsheetFields],
+            'columns' => ['required', 'array', 'min:1', new DistinctMapPointSpreadsheetFields, new UsableCategoryFieldColumns($this->group())],
             'columns.*.header' => ['required', 'string', 'max:255'],
-            'columns.*.field' => ['required', Rule::enum(MapPointSpreadsheetField::class)],
+            // A new field would be created again on every import with the template.
+            'columns.*.field' => ['required', Rule::enum(MapPointSpreadsheetField::class)->except([MapPointSpreadsheetField::NEW_CATEGORY_FIELD])],
+            'columns.*.category_field_id' => ['nullable', 'required_if:columns.*.field,'.MapPointSpreadsheetField::CATEGORY_FIELD->value, 'uuid'],
         ];
     }
 
@@ -60,7 +64,17 @@ class UpsertMapPointSpreadsheetMappingRequest extends FormRequest
     }
 
     /**
-     * @return array{name: string, key_field: MapPointSpreadsheetField, columns: array<int, array{header: string, field: string}>}
+     * Templates belong to the group they were saved in, new ones to the current group.
+     */
+    private function group(): ?Group
+    {
+        $mapping = $this->route('mapping');
+
+        return $mapping instanceof MapPointSpreadsheetMapping ? $mapping->group : app(GroupContextContract::class)->getCurrentGroup();
+    }
+
+    /**
+     * @return array{name: string, key_field: MapPointSpreadsheetField, columns: array<int, array{header: string, field: string, category_field_id?: string}>}
      */
     public function mappingData(): array
     {
@@ -70,7 +84,11 @@ class UpsertMapPointSpreadsheetMappingRequest extends FormRequest
             'name' => $this->string('name')->toString(),
             'key_field' => MapPointSpreadsheetField::from($this->string('key_field')->toString()),
             'columns' => array_values(array_map(
-                fn (array $column): array => ['header' => (string) $column['header'], 'field' => (string) $column['field']],
+                fn (array $column): array => [
+                    'header' => (string) $column['header'],
+                    'field' => (string) $column['field'],
+                    ...(isset($column['category_field_id']) ? ['category_field_id' => (string) $column['category_field_id']] : []),
+                ],
                 is_array($columns) ? $columns : [],
             )),
         ];

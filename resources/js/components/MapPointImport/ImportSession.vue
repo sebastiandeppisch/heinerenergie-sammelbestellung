@@ -8,13 +8,19 @@ const props = defineProps<{
     upload: App.Data.SpreadsheetUploadData;
     fields: Array<App.Data.MapPointSpreadsheetFieldData>;
     mappings: Array<App.Data.MapPointSpreadsheetMappingData>;
+    categories: Array<App.Data.MapPointCategoryData>;
+    categoryFieldIds: Record<string, Array<string>>;
 }>();
 
 /**
  * The work on one uploaded file: mapping its columns and running the import with that mapping.
  * The session owns the mapping, the cards only show and edit it.
  */
-const { columnFields, keyField, defaultVisibility, columns, payload, applyTemplate } = useMapPointColumnMapping(props.upload, props.fields);
+const { columnFields, keyField, defaultVisibility, mainCategory, newMainCategoryName, columns, payload, applyTemplate } = useMapPointColumnMapping(
+    props.upload,
+    props.fields,
+    props.categoryFieldIds,
+);
 </script>
 
 <template>
@@ -23,8 +29,11 @@ const { columnFields, keyField, defaultVisibility, columns, payload, applyTempla
             v-model:column-fields="columnFields"
             v-model:key-field="keyField"
             v-model:default-visibility="defaultVisibility"
+            v-model:main-category="mainCategory"
+            v-model:new-main-category-name="newMainCategoryName"
             :upload="upload"
             :fields="fields"
+            :categories="categories"
         >
             <template #templates>
                 <ColumnTemplateBar :mappings="mappings" :columns="columns" :key-field="keyField" @apply="applyTemplate" />

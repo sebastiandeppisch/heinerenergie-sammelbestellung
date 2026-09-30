@@ -2,15 +2,15 @@ import type { MapPointImportPayload } from '@/composables/useMapPointColumnMappi
 
 /** The field options as the server sends them. */
 export const mapPointFields: Array<App.Data.MapPointSpreadsheetFieldData> = [
-    { value: 'ignore', label: 'Ignorieren', is_key: false },
-    { value: 'id', label: 'ID', is_key: true },
-    { value: 'title', label: 'Titel', is_key: true },
-    { value: 'description', label: 'Beschreibung', is_key: false },
-    { value: 'lat', label: 'Breitengrad', is_key: false },
-    { value: 'lng', label: 'Längengrad', is_key: false },
-    { value: 'location', label: 'Ort', is_key: true },
-    { value: 'category', label: 'Kategorie', is_key: false },
-    { value: 'published', label: 'Veröffentlicht', is_key: false },
+    { value: 'ignore', label: 'Ignorieren', is_key: false, category_field_id: null, category_id: null },
+    { value: 'id', label: 'ID', is_key: true, category_field_id: null, category_id: null },
+    { value: 'title', label: 'Titel', is_key: true, category_field_id: null, category_id: null },
+    { value: 'description', label: 'Beschreibung', is_key: false, category_field_id: null, category_id: null },
+    { value: 'lat', label: 'Breitengrad', is_key: false, category_field_id: null, category_id: null },
+    { value: 'lng', label: 'Längengrad', is_key: false, category_field_id: null, category_id: null },
+    { value: 'location', label: 'Ort', is_key: true, category_field_id: null, category_id: null },
+    { value: 'category', label: 'Kategorie', is_key: false, category_field_id: null, category_id: null },
+    { value: 'published', label: 'Veröffentlicht', is_key: false, category_field_id: null, category_id: null },
 ];
 
 export const exportedId = '3f1a5d4e-0c62-4a5f-9f1e-6d2b8c7a4e55';
@@ -39,11 +39,11 @@ export function makeTemplate(overrides: Partial<App.Data.MapPointSpreadsheetMapp
         name: 'Anlagenliste',
         key_field: 'location',
         columns: [
-            { header: 'Bezeichnung', field: 'title' },
-            { header: 'Art der Anlage', field: 'category' },
-            { header: 'Ortsbezeichnung', field: 'location' },
-            { header: 'Y-Koordinate', field: 'lat' },
-            { header: 'X-Koordinate', field: 'lng' },
+            { header: 'Bezeichnung', field: 'title', category_field_id: null, new_field_type: null },
+            { header: 'Art der Anlage', field: 'category', category_field_id: null, new_field_type: null },
+            { header: 'Ortsbezeichnung', field: 'location', category_field_id: null, new_field_type: null },
+            { header: 'Y-Koordinate', field: 'lat', category_field_id: null, new_field_type: null },
+            { header: 'X-Koordinate', field: 'lng', category_field_id: null, new_field_type: null },
         ],
         ...overrides,
     };
@@ -57,6 +57,8 @@ export function makePayload(overrides: Partial<MapPointImportPayload> = {}): Map
         key_field: 'title',
         default_published: false,
         columns: upload.headers.map((header, index) => ({ header, field: guessedFields[index] ?? 'ignore' })),
+        main_category_id: null,
+        new_main_category_name: null,
         ...overrides,
     };
 }
@@ -85,6 +87,8 @@ export function makeResult(overrides: Partial<App.Data.MapPointImportResultData>
         rows,
         created_categories: [],
         errors: [],
+        warnings: [],
+        created_fields: [],
         ...overrides,
     };
 }

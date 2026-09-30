@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { MapPointImportColumn } from '@/composables/useMapPointColumnMapping';
+import { templateColumn } from '@/composables/useMapPointColumnMapping';
 import { Button } from '@/shadcn/components/ui/button';
 import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
@@ -38,7 +39,7 @@ watch(selected, (template) => {
 const form = useForm({});
 
 function save(asNewTemplate: boolean) {
-    const template = { name: name.value, key_field: props.keyField, columns: props.columns };
+    const template = { name: name.value, key_field: props.keyField, columns: props.columns.map(templateColumn) };
     const options = {
         preserveScroll: true,
         preserveState: true,

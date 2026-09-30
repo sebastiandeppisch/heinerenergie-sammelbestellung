@@ -6,10 +6,12 @@ namespace App\Services;
 
 use App\Enums\FieldType;
 use App\Models\FormField;
+use App\Models\Group;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
 use App\Models\MapPointField;
 use App\ValueObjects\MapPointCategoryTree;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -61,16 +63,35 @@ class MapPointFieldService
     }
 
     /**
+     * The fields of all categories the group can use, for spreadsheet columns. Sorted by category, then by field.
+     *
+     * @return Collection<int, FormField>
+     */
+    public function fieldsUsableInGroup(Group $group): Collection
+    {
+        return FormField::query()
+            ->whereHas('formDefinition.mapPointCategory', fn (Builder $query) => $query->usableInGroup($group))
+            ->with(['options', 'formDefinition.mapPointCategory'])
+            ->get()
+            ->sortBy([
+                fn (FormField $a, FormField $b): int => strcmp((string) $a->formDefinition?->mapPointCategory?->name, (string) $b->formDefinition?->mapPointCategory?->name),
+                fn (FormField $a, FormField $b): int => $a->sort_order <=> $b->sort_order,
+            ])
+            ->values();
+    }
+
+    /**
      * Stores the given values, keyed by the uuid of the field. Only the stored value of a field that is given
      * and belongs to the point's category is touched. Values of other fields, including former values, are
      * kept. An empty value removes the stored value. A changed value gets a fresh snapshot of the field,
      * because it was entered against the field as it is now.
      *
      * @param  array<string, mixed>  $valuesByFieldUuid
+     * @param  Collection<int, FormField>|null  $fields  The fields of the point's category. Pass them when storing many points.
      */
-    public function syncValues(MapPoint $mapPoint, array $valuesByFieldUuid): void
+    public function syncValues(MapPoint $mapPoint, array $valuesByFieldUuid, ?Collection $fields = null): void
     {
-        $fields = $this->fieldsOfCategory($mapPoint->category_id);
+        $fields ??= $this->fieldsOfCategory($mapPoint->category_id);
         $storedFields = $mapPoint->fields()->whereIn('form_field_id', $fields->modelKeys())->get()->keyBy('form_field_id');
 
         DB::transaction(function () use ($mapPoint, $valuesByFieldUuid, $fields, $storedFields): void {

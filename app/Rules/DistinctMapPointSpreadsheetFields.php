@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Rules;
 
+use App\Data\MapPointSpreadsheetColumnData;
 use App\Enums\MapPointSpreadsheetField;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
 /**
- * Every map point field may be assigned to at most one spreadsheet column.
+ * Every map point field, and every category field, may be assigned to at most one spreadsheet column.
  */
 class DistinctMapPointSpreadsheetFields implements ValidationRule
 {
@@ -19,22 +20,27 @@ class DistinctMapPointSpreadsheetFields implements ValidationRule
             return;
         }
 
-        $fields = [];
+        $targets = [];
 
         foreach ($value as $column) {
             $field = is_array($column) && is_string($column['field'] ?? null)
                 ? MapPointSpreadsheetField::tryFrom($column['field'])
                 : null;
 
-            if ($field !== null && $field !== MapPointSpreadsheetField::IGNORE) {
-                $fields[] = $field->value;
+            // New fields are told apart by the header of their column, which is unique in a file.
+            if ($field === MapPointSpreadsheetField::CATEGORY_FIELD) {
+                $targets[] = MapPointSpreadsheetColumnData::categoryFieldTarget((string) ($column['category_field_id'] ?? ''));
+            } elseif ($field !== null && ! in_array($field, [MapPointSpreadsheetField::IGNORE, MapPointSpreadsheetField::NEW_CATEGORY_FIELD], true)) {
+                $targets[] = $field->value;
             }
         }
 
-        $duplicateLabels = collect($fields)
+        // Category fields are named by their id, which means nothing to people.
+        $duplicateLabels = collect($targets)
             ->duplicates()
             ->unique()
-            ->map(fn (string $field): string => MapPointSpreadsheetField::from($field)->label());
+            ->map(fn (string $target): string => MapPointSpreadsheetField::tryFrom($target)?->label() ?? MapPointSpreadsheetField::CATEGORY_FIELD->label())
+            ->unique();
 
         if ($duplicateLabels->isNotEmpty()) {
             $fail('Diese Felder sind mehreren Spalten zugeordnet: '.$duplicateLabels->implode(', ').'.');

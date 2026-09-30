@@ -1,8 +1,10 @@
 <?php
 
 use App\Data\SpreadsheetUploadData;
+use App\Enums\FieldType;
 use App\Models\Group;
 use App\Models\MapPoint;
+use App\Models\MapPointCategory;
 use App\Models\User;
 use App\Services\MapPointImportService;
 use App\Services\SessionService;
@@ -105,4 +107,47 @@ test('a mapping the server refuses is explained on the page', function (): void 
         ->assertButtonDisabled('Import ausführen');
 
     expect(MapPoint::count())->toBe(0);
+});
+
+test('a column named like a category field is assigned to it and imported', function (): void {
+    $category = MapPointCategory::factory()->for($this->group)->create(['name' => 'Photovoltaik']);
+    $power = $category->findOrCreateFormDefinition()->fields()->create(['type' => FieldType::NUMBER, 'label' => 'PV-Leistung (kWp)', 'sort_order' => 0]);
+
+    $upload = app(MapPointImportService::class)->storeUpload(UploadedFile::fake()->createWithContent('anlagen.csv', implode("\r\n", [
+        'Bezeichnung;Kategorie;Y-Koordinate;X-Koordinate;PV-Leistung (kWp)',
+        'Balkonkraftwerk Musterweg 5;Photovoltaik;49,123456;8,654321;0,8',
+    ])), $this->group);
+
+    visit(route('mappoints.import.create', ['token' => $upload->token]))
+        ->assertSee('Photovoltaik › PV-Leistung (kWp)')
+        ->click('Vorschau erstellen')
+        ->assertSee('1 neu')
+        ->click('Import ausführen')
+        ->assertPathIs('/mappoints')
+        ->assertNoJavaScriptErrors();
+
+    expect(MapPoint::sole()->fields()->sole()->only(['form_field_id', 'value']))->toBe(['form_field_id' => $power->id, 'value' => 0.8]);
+});
+
+test('a new main category and a new field for a column are created by the import', function (): void {
+    $upload = app(MapPointImportService::class)->storeUpload(UploadedFile::fake()->createWithContent('anlagen.csv', implode("\r\n", [
+        'Bezeichnung;Y-Koordinate;X-Koordinate;Leistung',
+        'Balkonkraftwerk Musterweg 5;49,123456;8,654321;0,8',
+    ])), $this->group);
+
+    visit(route('mappoints.import.create', ['token' => $upload->token]))
+        ->click('[data-test="main-category"] [data-slot="select-trigger"]')
+        ->click('Neue Kategorie anlegen …')
+        ->type('[data-test=new-main-category-name]', 'Photovoltaik')
+        ->click('[data-test="column-row"]:nth-child(4) [data-slot="select-trigger"]')
+        ->click('[data-test="new-field-number"]')
+        ->click('Vorschau erstellen')
+        ->assertSee('Neue Zusatzfelder: Leistung')
+        ->click('Import ausführen')
+        ->assertPathIs('/mappoints')
+        ->assertNoJavaScriptErrors();
+
+    $category = MapPointCategory::sole();
+    expect($category->name)->toBe('Photovoltaik')
+        ->and(MapPoint::sole()->fields()->sole()->only(['label', 'value']))->toBe(['label' => 'Leistung', 'value' => 0.8]);
 });

@@ -10,7 +10,9 @@ use App\Exports\MapPointsExport;
 use App\Http\Controllers\Concerns\RequiresCurrentGroup;
 use App\Http\Requests\ExportMapPointsRequest;
 use App\Models\MapPoint;
+use App\Models\MapPointCategory;
 use App\Models\MapPointSpreadsheetMapping;
+use App\Services\MapPointFieldService;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -25,22 +27,23 @@ class MapPointExportController extends Controller
     /**
      * Exports the points visible to the current group, using a saved mapping or all fields.
      */
-    public function __invoke(ExportMapPointsRequest $request, GroupContextContract $groupContext): BinaryFileResponse
+    public function __invoke(ExportMapPointsRequest $request, GroupContextContract $groupContext, MapPointFieldService $fieldService): BinaryFileResponse
     {
         $group = $this->currentGroup($groupContext);
         $mappingUuid = $request->mappingUuid();
+        $categoryFields = $fieldService->fieldsUsableInGroup($group);
 
         $columns = $mappingUuid === null
-            ? MapPointsExport::defaultColumns()
+            ? MapPointsExport::defaultColumns($categoryFields)
             : MapPointSpreadsheetMappingData::fromModel(
                 MapPointSpreadsheetMapping::query()->ownedByGroup($group)->where('uuid', $mappingUuid)->firstOrFail(),
             )->columns;
 
-        $mapPoints = MapPoint::query()->visibleFromGroup($group)->with('category')->orderBy('id')->get();
+        $mapPoints = MapPoint::query()->visibleFromGroup($group)->with(['category', 'fields.formField', 'fields.options'])->orderBy('id')->get();
         $format = $request->spreadsheetFormat();
 
         return Excel::download(
-            new MapPointsExport($mapPoints, $columns, $format),
+            new MapPointsExport($mapPoints, $columns, $format, $categoryFields, MapPointCategory::tree(), $fieldService),
             'kartenpunkte-'.now()->format('Y-m-d').'.'.$format->value,
             $format->excelType(),
         );

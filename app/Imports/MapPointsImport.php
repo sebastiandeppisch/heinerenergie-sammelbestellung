@@ -9,11 +9,18 @@ use App\Data\MapPointSpreadsheetColumnData;
 use App\Data\SpreadsheetRowErrorData;
 use App\Enums\MapPointSpreadsheetField;
 use App\Exceptions\SpreadsheetValueException;
+use App\Models\FormField;
 use App\Models\Group;
 use App\Models\MapPoint;
+use App\Models\MapPointCategory;
+use App\Services\MapPointFieldService;
 use App\ValueObjects\Coordinate;
+use App\ValueObjects\MapPointCategoryTree;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Maatwebsite\Excel\Concerns\OnEachRow;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
@@ -39,33 +46,68 @@ class MapPointsImport implements OnEachRow, SkipsEmptyRows, SkipsOnFailure, With
     /** @var array<int, SpreadsheetRowErrorData> */
     private array $errors = [];
 
+    /** @var array<int, SpreadsheetRowErrorData> */
+    private array $warnings = [];
+
     /**
-     * The column of every mapped field, keyed by the field.
+     * The fields of each category a row's point ended up in, keyed by category id and then by field uuid.
+     *
+     * @var array<int, EloquentCollection<string, FormField>>
+     */
+    private array $fieldsByCategoryId = [];
+
+    /**
+     * The column of every mapped field, keyed by the field, see MapPointSpreadsheetColumnData::target().
      *
      * @var array<string, int>
      */
     private readonly array $columnsByField;
 
     /**
+     * The main category and all categories below it.
+     *
+     * @var array<int, int>
+     */
+    private readonly array $mainSubtreeIds;
+
+    /**
+     * The mapped category fields, keyed by their uuid, with the key their column has in $columnsByField.
+     *
+     * @var array<string, string>
+     */
+    private readonly array $categoryFieldTargets;
+
+    /**
      * @param  array<int, MapPointSpreadsheetColumnData>  $columns  One entry per spreadsheet column, in the order of the file.
      * @param  bool  $defaultPublished  Whether created points are public. A mapped published column decides per row instead.
+     * @param  MapPointCategory|null  $mainCategory  New points without a category go here, category names are its sub categories.
      */
     public function __construct(
         private readonly array $columns,
         private readonly MapPointKeyMatcher $matcher,
         private readonly MapPointCategoryResolver $categories,
         private readonly Group $group,
+        private readonly MapPointFieldService $fieldService,
+        private readonly MapPointCategoryTree $tree,
         private readonly bool $defaultPublished = false,
+        private readonly ?MapPointCategory $mainCategory = null,
     ) {
         $columnsByField = [];
+        $categoryFieldTargets = [];
 
         foreach ($columns as $index => $column) {
             if ($column->field !== MapPointSpreadsheetField::IGNORE) {
-                $columnsByField[$column->field->value] = $index;
+                $columnsByField[$column->target()] = $index;
+            }
+
+            if ($column->field === MapPointSpreadsheetField::CATEGORY_FIELD && $column->category_field_id !== null) {
+                $categoryFieldTargets[$column->category_field_id] = $column->target();
             }
         }
 
         $this->columnsByField = $columnsByField;
+        $this->categoryFieldTargets = $categoryFieldTargets;
+        $this->mainSubtreeIds = $mainCategory === null ? [] : $tree->subtreeIds([$mainCategory->id]);
     }
 
     /**
@@ -160,9 +202,11 @@ class MapPointsImport implements OnEachRow, SkipsEmptyRows, SkipsOnFailure, With
         foreach ($this->columnsByField as $field => $column) {
             $value = $row[$column] ?? null;
 
-            $row[$column] = match (MapPointSpreadsheetField::from($field)) {
+            $row[$column] = match (MapPointSpreadsheetField::tryFrom($field)) {
                 MapPointSpreadsheetField::LATITUDE, MapPointSpreadsheetField::LONGITUDE => SpreadsheetCell::decimal($value) ?? SpreadsheetCell::text($value),
                 MapPointSpreadsheetField::PUBLISHED => SpreadsheetCell::boolean($value) ?? SpreadsheetCell::text($value),
+                // Category fields are read by their own type later, a date cell must stay a number until then.
+                null => $value,
                 default => SpreadsheetCell::text($value),
             };
         }
@@ -217,6 +261,16 @@ class MapPointsImport implements OnEachRow, SkipsEmptyRows, SkipsOnFailure, With
     }
 
     /**
+     * Values that were left out without stopping the import, because the point's category has no such field.
+     *
+     * @return array<int, SpreadsheetRowErrorData>
+     */
+    public function warnings(): array
+    {
+        return $this->warnings;
+    }
+
+    /**
      * @param  array<string, mixed>  $values  The cells of the row, keyed by the field they are mapped to.
      *
      * @throws SpreadsheetValueException When the row refers to a point or category that cannot be used.
@@ -227,7 +281,19 @@ class MapPointsImport implements OnEachRow, SkipsEmptyRows, SkipsOnFailure, With
 
         $categoryIsMapped = array_key_exists(MapPointSpreadsheetField::CATEGORY->value, $values);
         $categoryName = SpreadsheetCell::text($values[MapPointSpreadsheetField::CATEGORY->value] ?? null);
-        $category = $categoryName === null ? null : $this->categories->resolve($categoryName);
+
+        if ($categoryName !== null) {
+            $category = $this->categories->resolve($categoryName);
+            $categoryIsSet = true;
+        } elseif ($this->mainCategory !== null) {
+            // Without a category name, the points belong to the main category. A point already in the main category
+            // or below keeps its category, every other one moves into the main category, also one without category.
+            $category = $this->mainCategory;
+            $categoryIsSet = ! in_array($existingPoint?->category_id, $this->mainSubtreeIds, true);
+        } else {
+            $category = null;
+            $categoryIsSet = $categoryIsMapped;
+        }
 
         $attributes = [
             'title' => $this->requiredText($values, MapPointSpreadsheetField::TITLE),
@@ -236,7 +302,7 @@ class MapPointsImport implements OnEachRow, SkipsEmptyRows, SkipsOnFailure, With
                 $this->requiredDecimal($values, MapPointSpreadsheetField::LONGITUDE),
             ),
             ...$this->optionalTexts($values),
-            ...($categoryIsMapped ? ['category_id' => $category?->id] : []),
+            ...($categoryIsSet ? ['category_id' => $category?->id] : []),
             ...(array_key_exists(MapPointSpreadsheetField::PUBLISHED->value, $values)
                 ? ['published' => $values[MapPointSpreadsheetField::PUBLISHED->value] === true]
                 : []),
@@ -251,6 +317,8 @@ class MapPointsImport implements OnEachRow, SkipsEmptyRows, SkipsOnFailure, With
         $mapPoint = $existingPoint ?? new MapPoint(['group_id' => $this->group->id, 'published' => $this->defaultPublished]);
         $mapPoint->fill($attributes)->save();
 
+        $this->importFieldValues($rowNumber, $mapPoint, $values);
+
         return new MapPointImportRowData(
             row: $rowNumber,
             is_update: $existingPoint !== null,
@@ -258,7 +326,7 @@ class MapPointsImport implements OnEachRow, SkipsEmptyRows, SkipsOnFailure, With
             lat: $mapPoint->coordinate->lat,
             lng: $mapPoint->coordinate->lng,
             location: $mapPoint->location,
-            category: $categoryIsMapped ? $category?->name : $existingPoint?->category?->name,
+            category: $categoryIsSet ? $category?->name : $existingPoint?->category?->name,
             published: $mapPoint->published,
             group_name: $existingPoint?->group->name ?? $this->group->name,
         );
@@ -301,6 +369,71 @@ class MapPointsImport implements OnEachRow, SkipsEmptyRows, SkipsOnFailure, With
     {
         return SpreadsheetCell::decimal($values[$field->value] ?? null)
             ?? throw new SpreadsheetValueException('Der Wert ist keine Zahl.', $field->value);
+    }
+
+    /**
+     * Stores the values of the mapped category fields the point has. An empty cell removes the value, like for
+     * description and location. A file may hold columns for the fields of several categories, so a value for a
+     * field the point does not have is only reported as a warning.
+     *
+     * @param  array<string, mixed>  $values
+     *
+     * @throws SpreadsheetValueException When a value does not fit its field.
+     */
+    private function importFieldValues(int $rowNumber, MapPoint $mapPoint, array $values): void
+    {
+        if ($this->categoryFieldTargets === []) {
+            return;
+        }
+
+        $categoryFields = $this->fieldsOfCategory($mapPoint->category_id);
+        $fieldValues = [];
+
+        foreach ($this->categoryFieldTargets as $fieldUuid => $target) {
+            $cell = $values[$target] ?? null;
+            $field = $categoryFields->get($fieldUuid);
+
+            if ($field === null) {
+                if (SpreadsheetCell::text($cell) !== null) {
+                    $this->warnings[] = new SpreadsheetRowErrorData($rowNumber, $this->headerOf($target), 'Die Kategorie des Punkts hat dieses Feld nicht, der Wert wird nicht übernommen.');
+                }
+
+                continue;
+            }
+
+            try {
+                $value = MapPointFieldCell::import($field, $cell);
+            } catch (InvalidArgumentException $exception) {
+                throw new SpreadsheetValueException($exception->getMessage(), $target);
+            }
+
+            $validator = Validator::make(
+                ['values' => [$fieldUuid => $value]],
+                $this->fieldService->validationRules(new EloquentCollection([$field]), 'values'),
+                [],
+                ['values.'.$fieldUuid => (string) $this->headerOf($target)],
+            );
+
+            if ($validator->fails()) {
+                throw new SpreadsheetValueException((string) $validator->errors()->first(), $target);
+            }
+
+            $fieldValues[$fieldUuid] = $value;
+        }
+
+        $this->fieldService->syncValues($mapPoint, $fieldValues, $categoryFields->values());
+    }
+
+    /**
+     * @return EloquentCollection<string, FormField>
+     */
+    private function fieldsOfCategory(?int $categoryId): EloquentCollection
+    {
+        if ($categoryId === null) {
+            return new EloquentCollection;
+        }
+
+        return $this->fieldsByCategoryId[$categoryId] ??= $this->fieldService->fieldsOfCategory($categoryId, $this->tree)->keyBy('uuid');
     }
 
     private function headerOf(?string $field): ?string

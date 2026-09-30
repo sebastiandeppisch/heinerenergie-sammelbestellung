@@ -54,3 +54,22 @@ test('the detail row shows internal and former field values', function (): void 
         ->assertSee('alter Wert')
         ->assertNoJavaScriptErrors();
 });
+
+test('the popup of the backend map shows public and internal field values', function (): void {
+    $category = MapPointCategory::factory()->for($this->group)->withoutImage()->create();
+    $formDefinition = $category->findOrCreateFormDefinition();
+    $power = $formDefinition->fields()->create(['type' => FieldType::NUMBER, 'label' => 'PV-Leistung (kWp)', 'sort_order' => 0]);
+    $phone = $formDefinition->fields()->create(['type' => FieldType::PHONE, 'label' => 'Telefon', 'sort_order' => 1]);
+    $category->publicFields()->sync([$power->id]);
+    // The backend map opens at this position, so the marker can be clicked.
+    $mapPoint = MapPoint::factory()->for($this->group)->create(['lat' => 49.8728, 'lng' => 8.6512, 'category_id' => $category->id]);
+    $power->createMapPointField($mapPoint, 9.9);
+    $phone->createMapPointField($mapPoint, '06151 123456');
+
+    visit(route('map-points-map'))
+        ->click('.leaflet-marker-icon')
+        ->assertSeeIn('.leaflet-popup-content', '9,9')
+        ->assertSeeIn('.leaflet-popup-content', '06151 123456')
+        ->assertPresent('.leaflet-popup-content [aria-label="intern"]')
+        ->assertNoJavaScriptErrors();
+});

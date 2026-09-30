@@ -32,6 +32,7 @@ class MapPointSpreadsheetMappingData extends Data
                 fn (array $column): MapPointSpreadsheetColumnData => new MapPointSpreadsheetColumnData(
                     header: $column['header'],
                     field: MapPointSpreadsheetField::from($column['field']),
+                    category_field_id: $column['category_field_id'] ?? null,
                 ),
                 $mapping->columns,
             ),

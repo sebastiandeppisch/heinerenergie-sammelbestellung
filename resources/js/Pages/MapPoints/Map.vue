@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import MapPointFieldList from '@/components/MapPointFieldList.vue';
 import { useFillViewportHeight } from '@/composables/useFillViewportHeight';
 import Button from '@/shadcn/components/ui/button/Button.vue';
 import { categoryMarkerIcon } from '@/utils/categoryMarkerIcon';
@@ -107,6 +108,8 @@ function categoryIdToImagePath(category_id: string): string | undefined {
                             <div class="p-2">
                                 <h3 class="text-lg font-bold">{{ point.title }}</h3>
                                 <p class="text-sm">{{ point.description }}</p>
+                                <!-- Only admins see this map, so internal fields are shown and marked. -->
+                                <MapPointFieldList v-if="point.fields.length > 0" :fields="point.fields" mark-internal class="my-2" />
                                 <Button variant="outline" @click="router.visit(route('mappoints.edit', point.id))"> <Link /> Punkt öffnen </Button>
                             </div>
                         </LPopup>

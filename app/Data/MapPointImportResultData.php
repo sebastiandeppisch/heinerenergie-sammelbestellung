@@ -24,11 +24,15 @@ class MapPointImportResultData extends Data
      * @param  array<int, MapPointImportRowData>  $rows
      * @param  array<int, string>  $created_categories
      * @param  array<int, SpreadsheetRowErrorData>  $errors
+     * @param  array<int, SpreadsheetRowErrorData>  $warnings  Values left out without stopping the import.
+     * @param  array<int, string>  $created_fields  Labels of the category fields created for columns.
      */
     public function __construct(
         public array $rows,
         public array $created_categories,
         public array $errors,
+        public array $warnings = [],
+        public array $created_fields = [],
     ) {
         $this->updated_count = count(array_filter($rows, fn (MapPointImportRowData $row): bool => $row->is_update));
         $this->created_count = count($rows) - $this->updated_count;

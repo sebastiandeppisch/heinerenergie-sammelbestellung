@@ -6,14 +6,33 @@ type PreviewRows = Array<Array<string | null>>;
 
 export type DefaultVisibility = 'private' | 'public';
 
-export type MapPointImportColumn = { header: string; field: Field };
+/**
+ * What a column is assigned to: a field every point has, or one category field, named by its id.
+ */
+export type ColumnTarget = Field | `category_field:${string}` | `new_category_field:${App.Enums.FieldType}`;
+
+export type MapPointImportColumn = { header: string; field: Field; category_field_id?: string; new_field_type?: App.Enums.FieldType };
 
 export type MapPointImportPayload = {
     token: string;
     key_field: Field;
     default_published: boolean;
     columns: Array<MapPointImportColumn>;
+    /** Category names in the file are its sub categories, new points without a category go here. */
+    main_category_id: string | null;
+    /** Creates the main category with this name in the same transaction as the import. */
+    new_main_category_name: string | null;
 };
+
+/** The choice of the main category: none, an existing category by id, or a new one. */
+export type MainCategorySelection = 'none' | 'new' | string;
+
+/** The types a column can create a new category field with. Fields with options are set up in the form builder. */
+export const newFieldTypes: Array<{ type: App.Enums.FieldType; label: string }> = [
+    { type: 'text', label: 'Text' },
+    { type: 'number', label: 'Zahl' },
+    { type: 'date', label: 'Datum' },
+];
 
 export type KeyOption = { value: Field; label: string };
 
@@ -60,8 +79,67 @@ export function guessFields(headers: Array<string>, previewRows: PreviewRows): A
     });
 }
 
+const categoryFieldPrefix = 'category_field:';
+const newFieldPrefix = 'new_category_field:';
+
+export function targetOf(field: { value: Field; category_field_id: string | null }): ColumnTarget {
+    return field.category_field_id ? `${categoryFieldPrefix}${field.category_field_id}` : field.value;
+}
+
+export function newFieldTarget(type: App.Enums.FieldType): ColumnTarget {
+    return `${newFieldPrefix}${type}`;
+}
+
+export function columnFor(header: string, target: ColumnTarget): MapPointImportColumn {
+    if (target.startsWith(categoryFieldPrefix)) {
+        return { header, field: 'category_field', category_field_id: target.slice(categoryFieldPrefix.length) };
+    }
+
+    if (target.startsWith(newFieldPrefix)) {
+        return { header, field: 'new_category_field', new_field_type: target.slice(newFieldPrefix.length) as App.Enums.FieldType };
+    }
+
+    return { header, field: target as Field };
+}
+
+/**
+ * A new field would be created again on every import with the template, so templates leave such columns out.
+ */
+export function templateColumn(column: MapPointImportColumn): MapPointImportColumn {
+    return column.field === 'new_category_field' ? { header: column.header, field: 'ignore' } : column;
+}
+
+/**
+ * Suggests category fields for columns still unassigned, when the header is the field's label, with or without its
+ * category as written by the export.
+ */
+export function guessCategoryFields(headers: Array<string>, targets: Array<ColumnTarget>, fields: Array<FieldOption>): Array<ColumnTarget> {
+    const normalize = (text: string) => text.trim().toLowerCase();
+    const categoryFields = fields.filter((field) => field.category_field_id);
+    const usedTargets = new Set<ColumnTarget>(targets);
+
+    return targets.map((target, index) => {
+        if (target !== 'ignore') {
+            return target;
+        }
+
+        const header = normalize(headers[index] ?? '');
+        const match = categoryFields.find(
+            (field) =>
+                !usedTargets.has(targetOf(field)) && (normalize(field.label) === header || normalize(field.label.split('›').pop() ?? '') === header),
+        );
+
+        if (!match) {
+            return target;
+        }
+
+        usedTargets.add(targetOf(match));
+        return targetOf(match);
+    });
+}
+
 /** Matching by title keeps a repeated import from creating the same points twice. */
-export function defaultKeyField(columnFields: Array<Field>): Field {
+export function defaultKeyField(columnFields: Array<ColumnTarget>): Field {
     if (columnFields.includes('id')) {
         return 'id';
     }
@@ -70,7 +148,7 @@ export function defaultKeyField(columnFields: Array<Field>): Field {
 }
 
 /** Only assigned fields can recognise existing points. */
-export function keyOptionsFor(fields: Array<FieldOption>, columnFields: Array<Field>): Array<KeyOption> {
+export function keyOptionsFor(fields: Array<FieldOption>, columnFields: Array<ColumnTarget>): Array<KeyOption> {
     const assignedKeyFields = fields
         .filter((field) => field.is_key && columnFields.includes(field.value))
         .map((field) => ({ value: field.value, label: field.label }));
@@ -84,7 +162,7 @@ export function keyOptionsFor(fields: Array<FieldOption>, columnFields: Array<Fi
 }
 
 /** A column named like an id that is not assigned, because it holds a numbering of its own. */
-export function unassignedIdHeader(headers: Array<string>, columnFields: Array<Field>): string | null {
+export function unassignedIdHeader(headers: Array<string>, columnFields: Array<ColumnTarget>): string | null {
     if (columnFields.includes('id')) {
         return null;
     }
@@ -101,10 +179,26 @@ export function sampleValues(previewRows: PreviewRows, columnIndex: number): str
 }
 
 /** Matches the headers of a saved template to the uploaded file, regardless of case and surrounding spaces. */
-export function fieldsFromTemplate(headers: Array<string>, template: App.Data.MapPointSpreadsheetMappingData): Array<Field> {
+export function fieldsFromTemplate(
+    headers: Array<string>,
+    template: App.Data.MapPointSpreadsheetMappingData,
+    fields: Array<FieldOption> = [],
+): Array<ColumnTarget> {
     const normalize = (header: string) => header.trim().toLowerCase();
+    const knownTargets = new Set(fields.map(targetOf));
 
-    return headers.map((header) => template.columns.find((column) => normalize(column.header) === normalize(header))?.field ?? 'ignore');
+    return headers.map((header) => {
+        const column = template.columns.find((candidate) => normalize(candidate.header) === normalize(header));
+
+        if (!column) {
+            return 'ignore';
+        }
+
+        const target = targetOf({ value: column.field, category_field_id: column.category_field_id ?? null });
+
+        // A template may name a category field that was deleted since.
+        return column.category_field_id && !knownTargets.has(target) ? 'ignore' : target;
+    });
 }
 
 /**
@@ -117,7 +211,15 @@ const payloadPartEquals: { [Part in keyof MapPointImportPayload]: (a: MapPointIm
     default_published: (a, b) => a.default_published === b.default_published,
     columns: (a, b) =>
         a.columns.length === b.columns.length &&
-        a.columns.every((column, index) => column.header === b.columns[index]?.header && column.field === b.columns[index]?.field),
+        a.columns.every(
+            (column, index) =>
+                column.header === b.columns[index]?.header &&
+                column.field === b.columns[index]?.field &&
+                column.category_field_id === b.columns[index]?.category_field_id &&
+                column.new_field_type === b.columns[index]?.new_field_type,
+        ),
+    main_category_id: (a, b) => a.main_category_id === b.main_category_id,
+    new_main_category_name: (a, b) => a.new_main_category_name === b.new_main_category_name,
 };
 
 export function samePayload(a: MapPointImportPayload, b: MapPointImportPayload): boolean {
@@ -131,13 +233,39 @@ export function samePayload(a: MapPointImportPayload, b: MapPointImportPayload):
  * It lives exactly as long as the upload. The import page starts a new session for every file, so nothing
  * here has to be reset.
  */
-export function useMapPointColumnMapping(upload: App.Data.SpreadsheetUploadData, fields: Array<FieldOption>) {
-    const columnFields = ref<Array<Field>>(guessFields(upload.headers, upload.preview_rows));
+export function useMapPointColumnMapping(
+    upload: App.Data.SpreadsheetUploadData,
+    fields: Array<FieldOption>,
+    /** The ids of the fields each category has, keyed by category id. */
+    categoryFieldIds: Record<string, Array<string>> = {},
+) {
+    const columnFields = ref<Array<ColumnTarget>>(guessCategoryFields(upload.headers, guessFields(upload.headers, upload.preview_rows), fields));
     const keyField = ref<Field>(defaultKeyField(columnFields.value));
     const defaultVisibility = ref<DefaultVisibility>('private');
+    const mainCategoryId = ref<string | null>(null);
+    const newMainCategoryName = ref('');
+    const createsMainCategory = ref(false);
+    /** Once the main category was chosen by hand, it is no longer suggested. */
+    const mainCategoryChosen = ref(false);
+
+    const mainCategory = computed<MainCategorySelection>({
+        get: () => (createsMainCategory.value ? 'new' : (mainCategoryId.value ?? 'none')),
+        set: (selection) => {
+            mainCategoryChosen.value = true;
+            createsMainCategory.value = selection === 'new';
+            mainCategoryId.value = selection === 'new' || selection === 'none' ? null : selection;
+
+            if (mainCategoryId.value) {
+                const ownFields = fields.filter(
+                    (field) => field.category_field_id && (categoryFieldIds[mainCategoryId.value!] ?? []).includes(field.category_field_id),
+                );
+                columnFields.value = guessCategoryFields(upload.headers, columnFields.value, ownFields);
+            }
+        },
+    });
 
     const columns = computed<Array<MapPointImportColumn>>(() =>
-        upload.headers.map((header, index) => ({ header, field: columnFields.value[index] ?? 'ignore' })),
+        upload.headers.map((header, index) => columnFor(header, columnFields.value[index] ?? 'ignore')),
     );
 
     const payload = computed<MapPointImportPayload>(() => ({
@@ -145,7 +273,23 @@ export function useMapPointColumnMapping(upload: App.Data.SpreadsheetUploadData,
         key_field: keyField.value,
         default_published: defaultVisibility.value === 'public',
         columns: columns.value,
+        main_category_id: createsMainCategory.value ? null : mainCategoryId.value,
+        new_main_category_name: createsMainCategory.value ? newMainCategoryName.value.trim() || null : null,
     }));
+
+    // Assigning a category field suggests its category as main category, unless one was chosen already.
+    watch(
+        columnFields,
+        (current) => {
+            if (mainCategoryChosen.value || mainCategoryId.value || createsMainCategory.value) {
+                return;
+            }
+
+            const assignedField = fields.find((field) => field.category_field_id && field.category_id && current.includes(targetOf(field)));
+            mainCategoryId.value = assignedField?.category_id ?? null;
+        },
+        { deep: true, immediate: true },
+    );
 
     // The key field must stay assigned, otherwise the import could not find the points to update.
     watch(
@@ -161,9 +305,9 @@ export function useMapPointColumnMapping(upload: App.Data.SpreadsheetUploadData,
     );
 
     function applyTemplate(template: App.Data.MapPointSpreadsheetMappingData): void {
-        columnFields.value = fieldsFromTemplate(upload.headers, template);
+        columnFields.value = fieldsFromTemplate(upload.headers, template, fields);
         keyField.value = template.key_field;
     }
 
-    return { columnFields, keyField, defaultVisibility, columns, payload, applyTemplate };
+    return { columnFields, keyField, defaultVisibility, mainCategory, newMainCategoryName, columns, payload, applyTemplate };
 }

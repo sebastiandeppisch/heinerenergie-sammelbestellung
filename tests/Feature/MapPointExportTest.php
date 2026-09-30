@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\FieldType;
 use App\Enums\SpreadsheetFormat;
 use App\Exports\MapPointsExport;
 use App\Models\Group;
@@ -106,4 +107,40 @@ test('group members without admin rights cannot export', function (): void {
     $this->actingAs($member)
         ->get(route('mappoints.export', ['format' => 'csv']))
         ->assertForbidden();
+});
+
+test('without a mapping the fields of the categories follow, named after their category', function (): void {
+    actingAsExportAdmin($this, $this->group);
+    $category = MapPointCategory::factory()->for($this->group)->create(['name' => 'Photovoltaik']);
+    $fields = $category->findOrCreateFormDefinition()->fields();
+    $power = $fields->create(['type' => FieldType::NUMBER, 'label' => 'PV-Leistung (kWp)', 'sort_order' => 0]);
+    $kind = $fields->create(['type' => FieldType::SELECT, 'label' => 'Anlagenart', 'sort_order' => 1]);
+    $kind->options()->create(['value' => 'dach', 'label' => 'Dachanlage', 'sort_order' => 0]);
+    $contact = $fields->create(['type' => FieldType::PHONE, 'label' => 'Telefon', 'sort_order' => 2]);
+    $mapPoint = MapPoint::factory()->for($this->group)->create(['category_id' => $category->id]);
+    $power->createMapPointField($mapPoint, 9.9);
+    $kind->createMapPointField($mapPoint, 'dach');
+    $contact->createMapPointField($mapPoint, '06151 123456');
+
+    $this->get(route('mappoints.export', ['format' => 'xlsx']))->assertOk();
+
+    Excel::assertDownloaded(exportFilename(SpreadsheetFormat::XLSX), fn (MapPointsExport $export): bool => array_slice($export->headings(), -3) === ['Photovoltaik › PV-Leistung (kWp)', 'Photovoltaik › Anlagenart', 'Photovoltaik › Telefon']
+        && array_slice($export->map($export->collection()->sole()), -3) === [9.9, 'Dachanlage', '06151 123456']);
+});
+
+test('a template column of a category field that was deleted since is left out', function (): void {
+    actingAsExportAdmin($this, $this->group);
+    $category = MapPointCategory::factory()->for($this->group)->create();
+    $field = $category->findOrCreateFormDefinition()->fields()->create(['type' => FieldType::TEXT, 'label' => 'Ansprechperson', 'sort_order' => 0]);
+    $mapping = MapPointSpreadsheetMapping::factory()->for($this->group)->create([
+        'columns' => [
+            ['header' => 'Bezeichnung', 'field' => 'title'],
+            ['header' => 'Kontakt', 'field' => 'category_field', 'category_field_id' => $field->uuid],
+        ],
+    ]);
+    $field->delete();
+
+    $this->get(route('mappoints.export', ['mapping' => $mapping->uuid, 'format' => 'csv']))->assertOk();
+
+    Excel::assertDownloaded(exportFilename(SpreadsheetFormat::CSV), fn (MapPointsExport $export): bool => $export->headings() === ['ID', 'Bezeichnung']);
 });

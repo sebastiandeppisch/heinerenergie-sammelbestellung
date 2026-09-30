@@ -9,6 +9,8 @@ defineProps<{
     mappings: Array<App.Data.MapPointSpreadsheetMappingData>;
     fields: Array<App.Data.MapPointSpreadsheetFieldData>;
     upload: App.Data.SpreadsheetUploadData | null;
+    categories: Array<App.Data.MapPointCategoryData>;
+    categoryFieldIds: Record<string, Array<string>>;
 }>();
 
 setLayoutProps({
@@ -24,7 +26,15 @@ setLayoutProps({
             <UploadCard :upload="upload" />
 
             <!-- Keyed by the upload: a new file starts a new session, so mapping and preview never outlive their file. -->
-            <ImportSession v-if="upload" :key="upload.token" :upload="upload" :fields="fields" :mappings="mappings" />
+            <ImportSession
+                v-if="upload"
+                :key="upload.token"
+                :upload="upload"
+                :fields="fields"
+                :mappings="mappings"
+                :categories="categories"
+                :category-field-ids="categoryFieldIds"
+            />
         </div>
     </div>
 </template>

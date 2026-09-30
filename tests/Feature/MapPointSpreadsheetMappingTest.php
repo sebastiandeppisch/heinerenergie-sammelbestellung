@@ -1,7 +1,9 @@
 <?php
 
+use App\Enums\FieldType;
 use App\Enums\MapPointSpreadsheetField;
 use App\Models\Group;
+use App\Models\MapPointCategory;
 use App\Models\MapPointSpreadsheetMapping;
 use App\Models\User;
 use App\Services\SessionService;
@@ -135,6 +137,27 @@ test('a mapping with an id column must use the id as its key field', function ()
     $payload['columns'][] = ['header' => 'ID', 'field' => 'id'];
 
     $this->post(route('mappoints.spreadsheet-mappings.store'), $payload)->assertSessionHasErrors(['key_field']);
+
+    $this->assertDatabaseCount('map_point_spreadsheet_mappings', 0);
+});
+
+test('a mapping keeps the category field a column is assigned to', function (): void {
+    actingAsMappingAdmin($this, $this->group);
+    $field = MapPointCategory::factory()->for($this->group)->create()->findOrCreateFormDefinition()->fields()->create(['type' => FieldType::NUMBER, 'label' => 'PV-Leistung (kWp)', 'sort_order' => 0]);
+    $payload = mappingPayload('Anlagenliste');
+    $payload['columns'][1] = ['header' => 'Leistung', 'field' => 'category_field', 'category_field_id' => $field->uuid];
+
+    $this->post(route('mappoints.spreadsheet-mappings.store'), $payload)->assertSessionHasNoErrors();
+
+    expect(MapPointSpreadsheetMapping::sole()->columns[1])->toEqual(['header' => 'Leistung', 'field' => 'category_field', 'category_field_id' => $field->uuid]);
+});
+
+test('a mapping cannot hold a column that creates a new field', function (): void {
+    actingAsMappingAdmin($this, $this->group);
+    $payload = mappingPayload('Anlagenliste');
+    $payload['columns'][1] = ['header' => 'Leistung', 'field' => 'new_category_field', 'new_field_type' => 'number'];
+
+    $this->post(route('mappoints.spreadsheet-mappings.store'), $payload)->assertSessionHasErrors('columns.1.field');
 
     $this->assertDatabaseCount('map_point_spreadsheet_mappings', 0);
 });
