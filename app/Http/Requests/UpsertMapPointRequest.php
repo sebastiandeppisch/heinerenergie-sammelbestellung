@@ -4,17 +4,24 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Models\FormField;
 use App\Models\Group;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
 use App\Rules\GeographicCoordinate;
+use App\Services\MapPointFieldService;
 use App\Services\MapPointVisibilityService;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Validator;
 
 class UpsertMapPointRequest extends FormRequest
 {
+    /** @var Collection<int, FormField>|null */
+    private ?Collection $submittedCategoryFields = null;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -35,6 +42,7 @@ class UpsertMapPointRequest extends FormRequest
     public function rules(): array
     {
         return [
+            ...$this->fieldValueRules(),
             'title' => ['required'],
             'description' => ['nullable'],
             'coordinate' => new GeographicCoordinate,
@@ -42,7 +50,35 @@ class UpsertMapPointRequest extends FormRequest
             'group_id' => ['required', 'bail', 'uuid', 'exists:groups,uuid'],
             'category_id' => ['nullable', 'bail', 'uuid', 'exists:map_point_categories,uuid'],
             'location' => ['nullable', 'string', 'max:500'],
+            'field_values' => ['sometimes', 'array'],
         ];
+    }
+
+    /**
+     * The values are checked against the fields of the submitted category. Values of other fields are dropped.
+     *
+     * @return array<string, array<int, mixed>>
+     */
+    private function fieldValueRules(): array
+    {
+        return app(MapPointFieldService::class)->validationRules($this->submittedCategoryFields(), 'field_values');
+    }
+
+    /**
+     * Loaded once, because both the rules and the attribute names need them.
+     *
+     * @return Collection<int, FormField>
+     */
+    private function submittedCategoryFields(): Collection
+    {
+        if ($this->submittedCategoryFields !== null) {
+            return $this->submittedCategoryFields;
+        }
+
+        $categoryUuid = $this->input('category_id');
+        $categoryId = is_string($categoryUuid) && Str::isUuid($categoryUuid) ? MapPointCategory::where('uuid', $categoryUuid)->value('id') : null;
+
+        return $this->submittedCategoryFields = app(MapPointFieldService::class)->fieldsOfCategory($categoryId);
     }
 
     /**
@@ -50,10 +86,25 @@ class UpsertMapPointRequest extends FormRequest
      */
     public function attributes(): array
     {
+        $fieldLabels = $this->submittedCategoryFields()
+            ->mapWithKeys(fn (FormField $field): array => ['field_values.'.$field->uuid => $field->label])
+            ->all();
+
         return [
+            ...$fieldLabels,
             'group_id' => 'Initiative',
             'category_id' => 'Kategorie',
         ];
+    }
+
+    /**
+     * Values of the category fields keyed by field uuid. Missing when the client did not send any, so stored values are kept.
+     *
+     * @return array<string, mixed>
+     */
+    public function fieldValues(): array
+    {
+        return $this->validated('field_values') ?? [];
     }
 
     /**
@@ -101,7 +152,7 @@ class UpsertMapPointRequest extends FormRequest
     public function getData(): array
     {
         return [
-            ...$this->safe()->except(['group_id', 'category_id']),
+            ...$this->safe()->except(['group_id', 'category_id', 'field_values']),
             'group_id' => Group::where('uuid', $this->validated('group_id'))->value('id'),
             'category_id' => MapPointCategory::where('uuid', $this->validated('category_id'))->value('id'),
         ];

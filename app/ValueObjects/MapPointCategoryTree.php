@@ -16,7 +16,7 @@ readonly class MapPointCategoryTree
     private array $childIdsById;
 
     /**
-     * @param  array<int, array{uuid: string, parent_id: int|null, image_path: string|null}>  $categoriesById
+     * @param  array<int, array{uuid: string, parent_id: int|null, image_path: string|null, form_definition_id: int|null}>  $categoriesById  form_definition_id is only set when the category has fields
      */
     public function __construct(private array $categoriesById)
     {
@@ -33,8 +33,9 @@ readonly class MapPointCategoryTree
 
     /**
      * @param  Collection<int, MapPointCategory>  $categories
+     * @param  array<int, int>  $formDefinitionIdsWithFields  form definitions that have at least one field
      */
-    public static function fromCategories(Collection $categories): self
+    public static function fromCategories(Collection $categories, array $formDefinitionIdsWithFields = []): self
     {
         $categoriesById = [];
 
@@ -43,6 +44,7 @@ readonly class MapPointCategoryTree
                 'uuid' => $category->uuid,
                 'parent_id' => $category->parent_id,
                 'image_path' => $category->image_path,
+                'form_definition_id' => in_array($category->form_definition_id, $formDefinitionIdsWithFields, true) ? $category->form_definition_id : null,
             ];
         }
 
@@ -118,9 +120,38 @@ readonly class MapPointCategoryTree
      */
     public function markerImagePath(int $categoryId): ?string
     {
+        $id = $this->nearestCategoryWith($categoryId, 'image_path');
+
+        return $id === null ? null : $this->categoriesById[$id]['image_path'];
+    }
+
+    /**
+     * The category whose fields the points of this category have: the category itself if it has fields, or
+     * else its nearest ancestor with fields. The fields are never merged, own fields replace inherited ones.
+     */
+    public function fieldsCategoryId(int $categoryId): ?int
+    {
+        return $this->nearestCategoryWith($categoryId, 'form_definition_id');
+    }
+
+    /**
+     * The form definition holding the fields of this category's points, see fieldsCategoryId().
+     */
+    public function fieldsFormDefinitionId(int $categoryId): ?int
+    {
+        $id = $this->fieldsCategoryId($categoryId);
+
+        return $id === null ? null : $this->categoriesById[$id]['form_definition_id'];
+    }
+
+    /**
+     * @param  'image_path'|'form_definition_id'  $key
+     */
+    private function nearestCategoryWith(int $categoryId, string $key): ?int
+    {
         foreach ([$categoryId, ...$this->ancestorIds($categoryId)] as $id) {
-            if (($this->categoriesById[$id]['image_path'] ?? null) !== null) {
-                return $this->categoriesById[$id]['image_path'];
+            if (($this->categoriesById[$id][$key] ?? null) !== null) {
+                return $id;
             }
         }
 

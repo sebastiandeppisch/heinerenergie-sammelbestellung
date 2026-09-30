@@ -94,11 +94,18 @@ class FormDefinitionController extends Controller
             'name' => $group->name,
         ]);
 
+        $mapPointCategory = $formDefinition->type === FormType::MapPointFields ? $formDefinition->mapPointCategory : null;
+
+        if ($mapPointCategory !== null) {
+            $this->authorize('update', $mapPointCategory);
+        }
+
         return Inertia::render('FormBuilder/Edit', [
             'formDefinition' => $formDefinitionData,
-            'fieldTypes' => $this->activeFieldTypes(),
+            'fieldTypes' => $mapPointCategory !== null ? FieldType::typesForMapPointFields : $this->activeFieldTypes(),
             'isEdit' => true,
             'groups' => $groups,
+            'mapPointCategory' => $mapPointCategory === null ? null : ['id' => $mapPointCategory->uuid, 'name' => $mapPointCategory->name],
         ]);
     }
 
@@ -142,6 +149,9 @@ class FormDefinitionController extends Controller
      */
     public function destroy(FormDefinition $formDefinition): RedirectResponse
     {
+        // Fields of a map point category are deleted together with the category.
+        abort_if($formDefinition->type === FormType::MapPointFields, 404);
+
         $formDefinition->delete();
 
         return redirect()->route('form-definitions.index')

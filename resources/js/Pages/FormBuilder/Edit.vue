@@ -18,7 +18,7 @@ import SelectTrigger from '@/shadcn/components/ui/select/SelectTrigger.vue';
 import SelectValue from '@/shadcn/components/ui/select/SelectValue.vue';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';
 import { Textarea } from '@/shadcn/components/ui/textarea';
-import { router, setLayoutProps } from '@inertiajs/vue3';
+import { Link, router, setLayoutProps } from '@inertiajs/vue3';
 import { ArrowUpRightFromSquare } from '@lucide/vue';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, reactive, ref, watch } from 'vue';
@@ -35,6 +35,8 @@ const props = defineProps<{
     isEdit: boolean;
     groups: App.Data.GroupData[];
     initialType?: FormType;
+    /** Set when the definition holds the fields of a map point category. */
+    mapPointCategory?: { id: string; name: string } | null;
 }>();
 
 const formDefinition = reactive<FormDefinitionData>(
@@ -56,8 +58,13 @@ const formDefinition = reactive<FormDefinitionData>(
 );
 
 const isChecklist = computed(() => formDefinition.type === (1 as FormType));
+const isMapPointFields = computed(() => formDefinition.type === (2 as FormType));
+const isForm = computed(() => formDefinition.type === (0 as FormType));
 
 const pageTitle = computed(() => {
+    if (isMapPointFields.value) {
+        return `Felder der Kategorie ${props.mapPointCategory?.name ?? ''}`;
+    }
     if (isChecklist.value) {
         return props.isEdit ? 'Checkliste bearbeiten' : 'Neue Checkliste';
     }
@@ -65,7 +72,15 @@ const pageTitle = computed(() => {
 });
 
 setLayoutProps({
-    breadcrumbs: [{ title: 'Formulare' }, { title: 'Formular-Verwaltung', href: route('form-definitions.index') }, { title: pageTitle.value }],
+    breadcrumbs:
+        isMapPointFields.value && props.mapPointCategory
+            ? [
+                  { title: 'Kartenpunkte', href: route('mappoints.index') },
+                  { title: 'Kategorien', href: route('mappoint-categories.index') },
+                  { title: props.mapPointCategory.name, href: route('mappoint-categories.edit', props.mapPointCategory.id) },
+                  { title: 'Felder' },
+              ]
+            : [{ title: 'Formulare' }, { title: 'Formular-Verwaltung', href: route('form-definitions.index') }, { title: pageTitle.value }],
 });
 
 const selectedField = ref<FormFieldData | null>(null);
@@ -245,8 +260,8 @@ const allowedEmbedDomainsText = computed<string>({
     <div>
         <PageHeader :title="pageTitle">
             <template #actions>
-                <FormEmbedDialog :form-definition="props.formDefinition" v-if="props.isEdit && props.formDefinition !== null && !isChecklist" />
-                <Button @click="openFormular" variant="outline" v-if="props.isEdit && !isChecklist">
+                <FormEmbedDialog :form-definition="props.formDefinition" v-if="props.isEdit && props.formDefinition !== null && isForm" />
+                <Button @click="openFormular" variant="outline" v-if="props.isEdit && isForm">
                     Formular öffnen
                     <ArrowUpRightFromSquare />
                 </Button>
@@ -255,7 +270,23 @@ const allowedEmbedDomainsText = computed<string>({
         </PageHeader>
 
         <div class="form-builder">
-            <Card class="form-builder__header">
+            <Card class="form-builder__header" v-if="isMapPointFields">
+                <CardContent class="space-y-2 text-sm">
+                    <p>
+                        Diese Felder gelten für alle Punkte der Kategorie
+                        <Link v-if="mapPointCategory" :href="route('mappoint-categories.edit', mapPointCategory.id)" class="font-medium underline">{{
+                            mapPointCategory.name
+                        }}</Link>
+                        und ihrer Unterkategorien, solange diese keine eigenen Felder haben. Alle Felder sind freiwillig.
+                    </p>
+                    <p class="text-muted-foreground">
+                        Neue Felder sind intern. Welche Felder auf der öffentlichen Karte erscheinen, legst du in der Kategorie fest. Benennst du ein
+                        Feld um, behalten bereits gespeicherte Werte die alte Bezeichnung, bis sie geändert werden.
+                    </p>
+                </CardContent>
+            </Card>
+
+            <Card class="form-builder__header" v-else>
                 <CardContent>
                     <Form class="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <FormField v-slot="{ componentField }" name="name">
@@ -323,7 +354,7 @@ const allowedEmbedDomainsText = computed<string>({
                 </CardContent>
             </Card>
 
-            <Card class="form-builder__header" v-if="!isChecklist">
+            <Card class="form-builder__header" v-if="isForm">
                 <CardContent>
                     <h3 class="mb-4 text-lg font-semibold">Erfolgsmeldung</h3>
                     <Form class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -355,7 +386,7 @@ const allowedEmbedDomainsText = computed<string>({
                 </CardContent>
             </Card>
 
-            <Card class="form-builder__header" v-if="!isChecklist">
+            <Card class="form-builder__header" v-if="isForm">
                 <CardContent>
                     <h3 class="mb-4 text-lg font-semibold">Einbettung (iframe)</h3>
                     <Form class="grid grid-cols-1 gap-4">
@@ -379,7 +410,7 @@ const allowedEmbedDomainsText = computed<string>({
                 <TabsList>
                     <TabsTrigger value="canvas">Canvas</TabsTrigger>
                     <TabsTrigger value="preview">Vorschau</TabsTrigger>
-                    <TabsTrigger value="targets" v-if="!isChecklist">Ziele</TabsTrigger>
+                    <TabsTrigger value="targets" v-if="isForm">Ziele</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="canvas">
@@ -397,6 +428,7 @@ const allowedEmbedDomainsText = computed<string>({
                                 v-model="selectedField"
                                 v-if="selectedField"
                                 :required-locked="isAdviceAddressFieldSelected"
+                                :always-optional="isMapPointFields"
                                 class="form-builder__properties"
                             />
                         </div>

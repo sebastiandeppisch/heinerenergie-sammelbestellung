@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\FormType;
 use App\Models\Traits\HasUuid;
 use App\ValueObjects\MapPointCategoryTree;
 use Database\Factories\MapPointCategoryFactory;
@@ -21,6 +22,7 @@ use Override;
 /**
  * @property int $group_id
  * @property int|null $parent_id
+ * @property int|null $form_definition_id
  */
 class MapPointCategory extends Model
 {
@@ -69,6 +71,47 @@ class MapPointCategory extends Model
     }
 
     /**
+     * The additional fields of this category's points. Sub categories inherit them.
+     *
+     * @return BelongsTo<FormDefinition, $this>
+     */
+    public function formDefinition(): BelongsTo
+    {
+        return $this->belongsTo(FormDefinition::class);
+    }
+
+    /**
+     * The own fields that are shown on the public map. All other fields stay internal.
+     *
+     * @return BelongsToMany<FormField, $this>
+     */
+    public function publicFields(): BelongsToMany
+    {
+        return $this->belongsToMany(FormField::class, 'map_point_category_public_fields')->withTimestamps();
+    }
+
+    /**
+     * The form definition holding the category's fields, created on first use.
+     */
+    public function findOrCreateFormDefinition(): FormDefinition
+    {
+        if ($this->formDefinition !== null) {
+            return $this->formDefinition;
+        }
+
+        $formDefinition = FormDefinition::create([
+            'name' => 'Felder der Kategorie '.$this->name,
+            'group_id' => $this->group_id,
+            'type' => FormType::MapPointFields,
+            'is_active' => true,
+        ]);
+
+        $this->formDefinition()->associate($formDefinition)->save();
+
+        return $formDefinition;
+    }
+
+    /**
      * @return BelongsTo<Group, $this>
      */
     public function group(): BelongsTo
@@ -93,7 +136,25 @@ class MapPointCategory extends Model
      */
     public static function tree(): MapPointCategoryTree
     {
-        return MapPointCategoryTree::fromCategories(self::query()->get(['id', 'uuid', 'parent_id', 'image_path']));
+        $categories = self::query()->get(['id', 'uuid', 'parent_id', 'image_path', 'form_definition_id']);
+        $formDefinitionIdsWithFields = FormField::query()
+            ->whereIn('form_definition_id', $categories->pluck('form_definition_id')->filter())
+            ->distinct()
+            ->pluck('form_definition_id')
+            ->map(fn (mixed $id): int => (int) $id)
+            ->all();
+
+        return MapPointCategoryTree::fromCategories($categories, $formDefinitionIdsWithFields);
+    }
+
+    /**
+     * The ids of all fields shown on the public map. Loaded at once, because there are only few categories.
+     *
+     * @return array<int, int>
+     */
+    public static function publicFieldIds(): array
+    {
+        return DB::table('map_point_category_public_fields')->pluck('form_field_id')->map(fn (mixed $id): int => (int) $id)->all();
     }
 
     public function isUsableInGroup(Group $group): bool
@@ -111,7 +172,8 @@ class MapPointCategory extends Model
     }
 
     /**
-     * Sub categories and points move up to the parent, so nothing is lost. The parent's group is
+     * Sub categories and points move up to the parent, so nothing is lost. The category's own fields
+     * are deleted, their values stay on the points as former values. The parent's group is
      * an ancestor of this category's group, so they may still use it. Embeds showing this category
      * keep showing its sub categories.
      */
@@ -128,7 +190,14 @@ class MapPointCategory extends Model
             $this->children()->update(['parent_id' => $this->parent_id]);
             $this->mapPoints()->update(['category_id' => $this->parent_id]);
 
-            return parent::delete();
+            $this->publicFields()->detach();
+            $formDefinition = $this->formDefinition;
+            $isDeleted = parent::delete();
+
+            // Values of the deleted fields stay on the points as former values.
+            $formDefinition?->delete();
+
+            return $isDeleted;
         });
 
         if ($this->image_path) {

@@ -15,7 +15,7 @@ beforeEach(function (): void {
     $this->user = User::factory()->create();
     $this->group = Group::factory()->create(['name' => 'Test Initiative']);
     $this->group->users()->attach($this->user, ['is_admin' => true]);
-    app(SessionService::class)->actAsGroup($this->group);
+    app(SessionService::class)->actAsGroup($this->group, true);
     $this->actingAs($this->user);
 });
 

@@ -4,25 +4,52 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Context\GroupContextContract;
 use App\Enums\FieldType;
 use App\Enums\FormType;
+use App\Models\FormDefinition;
+use App\Models\Group;
 use App\Rules\FormFieldExistsInRequest;
 use App\Rules\Hostname;
 use App\Rules\MappedFormFieldMustBeRequired;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 use Override;
 
 class UpsertFormDefinitionRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Forms belong to an initiative, so only its admins may change them, and only admins of the target
+     * initiative may move a form there. Fields of a map point category follow the rights on the category.
      */
     public function authorize(): bool
     {
-        // TODO
-        return true;
+        $existing = $this->route('form_definition');
+
+        if ($existing instanceof FormDefinition && $existing->type === FormType::MapPointFields) {
+            $category = $existing->mapPointCategory;
+
+            return $category !== null && $this->user()->can('update', $category);
+        }
+
+        if ($existing instanceof FormDefinition && ! $this->isGroupAdmin($existing->group)) {
+            return false;
+        }
+
+        // An unknown initiative is rejected by the validation rules with a readable message.
+        $targetGroup = Group::where('uuid', $this->input('group_id'))->first();
+
+        return $targetGroup === null || $this->isGroupAdmin($targetGroup);
+    }
+
+    private function isGroupAdmin(Group $group): bool
+    {
+        $groupContext = app(GroupContextContract::class);
+
+        return $groupContext->isActingAsSystemAdmin($this->user())
+            || $groupContext->isActingAsTransitiveAdmin($this->user(), $group);
     }
 
     /**
@@ -78,6 +105,10 @@ class UpsertFormDefinitionRequest extends FormRequest
             'group_id' => 'required|exists:groups,uuid',
         ];
 
+        if ($this->isMapPointFieldsDefinition()) {
+            $rules['fields.*.type'] = ['required', Rule::enum(FieldType::class)->only(FieldType::typesForMapPointFields)];
+        }
+
         if ($this->has('advice_mapping') && ! is_null($this->input('advice_mapping')) && $this->input('advice_mapping.enabled') === true) {
             $rules['advice_mapping.first_name_field_id'] = ['nullable', 'string', new FormFieldExistsInRequest];
             $rules['advice_mapping.last_name_field_id'] = ['nullable', 'string', new FormFieldExistsInRequest];
@@ -100,6 +131,38 @@ class UpsertFormDefinitionRequest extends FormRequest
         }
 
         return $rules;
+    }
+
+    /**
+     * The fields of a map point category are created through the category and must stay such fields,
+     * otherwise they could be turned into a public form or a checklist and back.
+     *
+     * @return array<int, callable(Validator): void>
+     */
+    public function after(): array
+    {
+        return [
+            function (Validator $validator): void {
+                $existing = $this->route('form_definition');
+                $existingType = $existing instanceof FormDefinition ? $existing->type : null;
+                $requestedType = FormType::tryFrom((int) $this->input('type', FormType::Form->value));
+
+                if ($existingType === null && $requestedType === FormType::MapPointFields) {
+                    $validator->errors()->add('type', 'Felder einer Kartenpunkt-Kategorie legst du über die Kategorie an.');
+                }
+
+                if ($existingType !== null && $existingType !== $requestedType && in_array(FormType::MapPointFields, [$existingType, $requestedType], true)) {
+                    $validator->errors()->add('type', 'Der Typ von Kategorie-Feldern kann nicht geändert werden.');
+                }
+            },
+        ];
+    }
+
+    private function isMapPointFieldsDefinition(): bool
+    {
+        $existing = $this->route('form_definition');
+
+        return $existing instanceof FormDefinition && $existing->type === FormType::MapPointFields;
     }
 
     /**

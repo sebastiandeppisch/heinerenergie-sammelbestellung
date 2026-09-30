@@ -38,6 +38,9 @@ class UpsertMapPointsCategoryRequest extends FormRequest
             'group_id' => $this->isCreating()
                 ? ['required', 'bail', 'uuid', 'exists:groups,uuid']
                 : ['exclude'],
+            // Fields only exist after creation. Checkboxes of an empty list are not sent as form data, so a missing list means no public field.
+            'public_field_ids' => $this->isCreating() ? ['exclude'] : ['sometimes', 'array'],
+            'public_field_ids.*' => $this->isCreating() ? ['exclude'] : ['string', 'uuid'],
         ];
     }
 
@@ -114,6 +117,16 @@ class UpsertMapPointsCategoryRequest extends FormRequest
         }
 
         return $data;
+    }
+
+    /**
+     * The uuids of the category's own fields to show on the public map.
+     *
+     * @return array<int, string>
+     */
+    public function publicFieldIds(): array
+    {
+        return $this->validated('public_field_ids') ?? [];
     }
 
     private function isCreating(): bool

@@ -20,7 +20,7 @@ beforeEach(function (): void {
     $this->user = User::factory()->create();
     $this->group = Group::factory()->create(['name' => 'Test Initiative']);
     $this->group->users()->attach($this->user, ['is_admin' => true]);
-    app(SessionService::class)->actAsGroup($this->group);
+    app(SessionService::class)->actAsGroup($this->group, true);
     $this->actingAs($this->user);
 });
 
@@ -76,7 +76,7 @@ test('formbuilder create page can be rendered', function (): void {
 });
 
 test('formbuilder edit page can be rendered', function (): void {
-    $formDefinition = FormDefinition::factory()
+    $formDefinition = FormDefinition::factory()->for($this->group)
         ->hasFields(3)
         ->create();
 
@@ -201,7 +201,7 @@ test('form definition can be created', function (): void {
 
 test('form definition can be updated', function (): void {
     // Erstelle ein Formular mit Feldern
-    $formDefinition = FormDefinition::factory()->create([
+    $formDefinition = FormDefinition::factory()->for($this->group)->create([
         'name' => 'Original Form',
         'description' => 'Original description',
     ]);
@@ -255,7 +255,7 @@ test('form definition can be updated', function (): void {
 });
 
 test('allowed embed domains can be saved and updated', function (): void {
-    $formDefinition = FormDefinition::factory()->create(['allowed_embed_domains' => null]);
+    $formDefinition = FormDefinition::factory()->for($this->group)->create(['allowed_embed_domains' => null]);
 
     $data = FormDefinitionData::fromModel($formDefinition);
     $data->allowed_embed_domains = ['example.com', 'sub.example.org'];
@@ -267,7 +267,7 @@ test('allowed embed domains can be saved and updated', function (): void {
 });
 
 test('allowed embed domains reject values that are not a bare hostname', function (): void {
-    $formDefinition = FormDefinition::factory()->create(['allowed_embed_domains' => null]);
+    $formDefinition = FormDefinition::factory()->for($this->group)->create(['allowed_embed_domains' => null]);
 
     $data = FormDefinitionData::fromModel($formDefinition);
     $data->allowed_embed_domains = ['https://example.com/embed'];
@@ -280,7 +280,7 @@ test('allowed embed domains reject values that are not a bare hostname', functio
 
 test('form definition can be deleted', function (): void {
     // Erstelle ein Formular mit Feldern und Optionen
-    $formDefinition = FormDefinition::factory()->withFields(10)->create();
+    $formDefinition = FormDefinition::factory()->for($this->group)->withFields(10)->create();
 
     $response = $this->delete(route('form-definitions.destroy', $formDefinition));
 
@@ -324,7 +324,7 @@ test('form fields can be saved with required field', function (): void {
 
 test('form fields can be updated to be required', function (): void {
     $this->withoutExceptionHandling();
-    FormDefinition::factory()->withFields(1)->create();
+    FormDefinition::factory()->for($this->group)->withFields(1)->create();
 
     FormField::firstOrFail()->update([
         'required' => false,
@@ -345,7 +345,7 @@ test('form fields can be updated to be required', function (): void {
 test('form fields are updated in-place', function (): void {
     $this->withoutExceptionHandling();
 
-    $id = FormDefinition::factory()->withFields()->create()->id;
+    $id = FormDefinition::factory()->for($this->group)->withFields()->create()->id;
 
     $ids = FormDefinition::firstOrFail()->fields()->pluck('id');
 
@@ -362,7 +362,7 @@ test('form fields are updated in-place', function (): void {
 test('form fields can be deleted', function (): void {
     $this->withoutExceptionHandling();
 
-    $id = FormDefinition::factory()->withFields(3)->create()->id;
+    $id = FormDefinition::factory()->for($this->group)->withFields(3)->create()->id;
 
     $ids = FormDefinition::firstOrFail()->fields()->pluck('id');
     $ids->forget(1);
@@ -383,7 +383,7 @@ test('form fields can be deleted', function (): void {
 test('form field options can be deleted', function (): void {
     $this->withoutExceptionHandling();
 
-    $formDefinition = FormDefinition::factory()->withFields(1)->create();
+    $formDefinition = FormDefinition::factory()->for($this->group)->withFields(1)->create();
     $field = $formDefinition->fields->first();
     $field->options()->delete();
     $field->options()->createMany([
@@ -406,6 +406,7 @@ test('form field options can be deleted', function (): void {
 test('the address field mapped to an advice must be a required field', function (): void {
     $adviceMapping = FormDefinitionToAdvice::factory()->create();
     $formDefinition = $adviceMapping->formDefinition;
+    $formDefinition->update(['group_id' => $this->group->id]);
     $addressField = $adviceMapping->addressField;
 
     $payload = FormDefinitionData::fromModel($formDefinition)->toArray();
@@ -428,6 +429,7 @@ test('the address field mapped to an advice must be a required field', function 
 test('a form can contain a second optional address field next to the advice address', function (): void {
     $adviceMapping = FormDefinitionToAdvice::factory()->create();
     $formDefinition = $adviceMapping->formDefinition;
+    $formDefinition->update(['group_id' => $this->group->id]);
 
     $payload = FormDefinitionData::fromModel($formDefinition)->toArray();
     $payload['advice_mapping']['advice_type_home_option_value'] = (string) AdviceType::Home->value;
@@ -454,4 +456,41 @@ test('a form can contain a second optional address field next to the advice addr
 
     $newField = FormField::where('label', 'Abweichende Lieferadresse')->firstOrFail();
     $this->assertTrue(Str::isUuid($newField->uuid), 'Placeholder ids must not be stored as uuid, postgres rejects them.');
+});
+
+test('a form of an initiative the user does not administer cannot be changed', function (): void {
+    $formDefinition = FormDefinition::factory()->for(Group::factory())->create(['name' => 'Fremdes Formular']);
+    $payload = FormDefinitionData::fromModel($formDefinition)->toArray();
+
+    $this->put(route('form-definitions.update', $formDefinition), [...$payload, 'name' => 'Geändert'])
+        ->assertForbidden();
+
+    expect($formDefinition->refresh()->name)->toBe('Fremdes Formular');
+});
+
+test('a form cannot be moved to or created in an initiative the user does not administer', function (): void {
+    $otherGroup = Group::factory()->create();
+    $formDefinition = FormDefinition::factory()->for($this->group)->create();
+    $payload = FormDefinitionData::fromModel($formDefinition)->toArray();
+
+    $this->put(route('form-definitions.update', $formDefinition), [...$payload, 'group_id' => $otherGroup->uuid])
+        ->assertForbidden();
+
+    $this->post(route('form-definitions.store'), [...$payload, 'id' => 'temp', 'group_id' => $otherGroup->uuid])
+        ->assertForbidden();
+
+    expect($formDefinition->refresh()->group_id)->toBe($this->group->id)
+        ->and(FormDefinition::count())->toBe(1);
+});
+
+test('an admin of a parent initiative can change the forms of a sub initiative', function (): void {
+    $subGroup = Group::factory()->create(['parent_id' => $this->group->id]);
+    $formDefinition = FormDefinition::factory()->for($subGroup)->create();
+    $payload = FormDefinitionData::fromModel($formDefinition)->toArray();
+
+    $this->put(route('form-definitions.update', $formDefinition), [...$payload, 'name' => 'Geändert'])
+        ->assertSessionHasNoErrors()
+        ->assertRedirect();
+
+    expect($formDefinition->refresh()->name)->toBe('Geändert');
 });

@@ -73,6 +73,15 @@ class FormFieldOption extends Model
         ]);
     }
 
+    public function createMapPointFieldOption(MapPointField $mapPointField): MapPointFieldOption
+    {
+        return $mapPointField->options()->create([
+            'label' => $this->label,
+            'value' => $this->value,
+            'sort_order' => $this->sort_order,
+        ]);
+    }
+
     #[Override]
     public function delete(): ?bool
     {

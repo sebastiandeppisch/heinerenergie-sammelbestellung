@@ -34,9 +34,12 @@ const props = withDefaults(
     defineProps<{
         /** The field feeds a model attribute that can never be empty, so "Pflichtfeld" must stay on. */
         requiredLocked?: boolean;
+        /** Fields of map point categories are always optional, so "Pflichtfeld" is not offered. */
+        alwaysOptional?: boolean;
     }>(),
     {
         requiredLocked: false,
+        alwaysOptional: false,
     },
 );
 
@@ -196,7 +199,7 @@ function onValueChanged(e: any) {
                         <Input id="field_label" v-model="model.label" placeholder="Feldbezeichnung" />
                     </div>
 
-                    <div class="mt-4 grid gap-2" v-if="model.type !== FIELD_TYPES.CHECKBOX">
+                    <div class="mt-4 grid gap-2" v-if="model.type !== FIELD_TYPES.CHECKBOX && !props.alwaysOptional">
                         <div class="flex items-center space-x-2">
                             <Checkbox id="field_required" v-model="model.required" :disabled="props.requiredLocked" />
                             <Label for="field_required" :class="props.requiredLocked ? 'text-muted-foreground' : ''">Pflichtfeld</Label>
@@ -302,7 +305,7 @@ function onValueChanged(e: any) {
                                 />
                                 Standard
                             </label>
-                            <div class="flex gap-1">
+                            <div class="flex gap-1" v-if="!props.alwaysOptional">
                                 <Checkbox :id="option.id + '-required'" v-if="model.type === FIELD_TYPES.CHECKBOX" v-model="option.is_required" />
                                 <Label :for="option.id + '-required'">Pflichtfeld</Label>
                             </div>

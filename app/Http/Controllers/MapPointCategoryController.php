@@ -6,7 +6,9 @@ namespace App\Http\Controllers;
 
 use App\Data\GroupBaseData;
 use App\Data\MapPointCategoryData;
+use App\Data\MapPointCategoryFieldData;
 use App\Http\Requests\UpsertMapPointsCategoryRequest;
+use App\Models\FormField;
 use App\Models\Group;
 use App\Models\MapPointCategory;
 use App\Services\MapPointVisibilityService;
@@ -67,8 +69,19 @@ class MapPointCategoryController extends Controller
 
         return Inertia::render('Categories/Upsert', [
             'category' => MapPointCategoryData::fromModel($mappointCategory->load('group'), canEdit: true),
+            'fields' => $this->fieldData($mappointCategory),
             ...$this->formProps($visibility),
         ]);
+    }
+
+    /**
+     * Opens the form builder for the category's fields. The form definition holding them is created on first use.
+     */
+    public function editFields(MapPointCategory $mappointCategory): RedirectResponse
+    {
+        $this->authorize('update', $mappointCategory);
+
+        return redirect()->route('form-definitions.edit', $mappointCategory->findOrCreateFormDefinition());
     }
 
     public function update(UpsertMapPointsCategoryRequest $request, MapPointCategory $mappointCategory): RedirectResponse
@@ -86,6 +99,9 @@ class MapPointCategoryController extends Controller
 
         $mappointCategory->update($data);
 
+        $ownFieldIds = $mappointCategory->formDefinition?->fields()->whereIn('uuid', $request->publicFieldIds())->pluck('id')->all() ?? [];
+        $mappointCategory->publicFields()->sync($ownFieldIds);
+
         return redirect()->back()->with('success', 'Die Kategorie wurde aktualisiert');
     }
 
@@ -97,6 +113,31 @@ class MapPointCategoryController extends Controller
         $mappointCategory->delete();
 
         return redirect()->route('mappoint-categories.index')->with('info', 'Die Kategorie '.e($name).' wurde gelöscht');
+    }
+
+    /**
+     * The fields of the category's points: its own, or else those of the nearest parent category with fields.
+     *
+     * @return array<int, MapPointCategoryFieldData>
+     */
+    private function fieldData(MapPointCategory $category): array
+    {
+        $fieldsCategoryId = MapPointCategory::tree()->fieldsCategoryId($category->id);
+
+        if ($fieldsCategoryId === null) {
+            return [];
+        }
+
+        $fieldsCategory = MapPointCategory::with('formDefinition.fields')->findOrFail($fieldsCategoryId);
+        $publicFieldIds = $fieldsCategory->publicFields()->pluck('form_fields.id')->all();
+
+        return $fieldsCategory->formDefinition->fields
+            ->map(fn (FormField $field): MapPointCategoryFieldData => MapPointCategoryFieldData::fromModel(
+                $field,
+                $fieldsCategory,
+                in_array($field->id, $publicFieldIds, true),
+            ))
+            ->all();
     }
 
     /**

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Context\GroupContextContract;
+use App\Data\FormFieldData;
 use App\Data\GroupBaseData;
 use App\Data\MapPointCategoryData;
 use App\Data\MapPointData;
@@ -12,11 +13,13 @@ use App\Data\MapPointSpreadsheetMappingData;
 use App\Data\SpreadsheetFormatData;
 use App\Enums\SpreadsheetFormat;
 use App\Http\Requests\UpsertMapPointRequest;
+use App\Models\FormField;
 use App\Models\Group;
 use App\Models\MapEmbed;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
 use App\Services\CurrentGroupService;
+use App\Services\MapPointFieldService;
 use App\Services\MapPointVisibilityService;
 use App\ValueObjects\MapPointCategoryTree;
 use Illuminate\Database\Eloquent\Builder;
@@ -24,6 +27,7 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -34,7 +38,7 @@ class MapPointController extends Controller
         $this->authorize('viewAny', MapPoint::class);
 
         return Inertia::render('MapPoints/Map', [
-            'pointsByCategory' => $this->pointData($visibility->visiblePoints())->groupBy('category_id'),
+            'pointsByCategory' => $this->pointData($visibility->visiblePoints(), onlyPublic: false)->groupBy('category_id'),
             'categories' => $this->categoryData($visibility->relevantCategories()->with('group')->get()),
         ]);
     }
@@ -46,7 +50,7 @@ class MapPointController extends Controller
         $currentGroup = $groupContext->getCurrentGroup();
 
         return Inertia::render('MapPoints/Index', [
-            'mapPoints' => $this->pointData($visibility->visiblePoints()),
+            'mapPoints' => $this->pointData($visibility->visiblePoints(), onlyPublic: false),
             'categories' => $this->categoryData($visibility->relevantCategories()->with('group')->get()),
             'canImportAndExport' => $request->user()?->can('import', MapPoint::class) === true,
             // System admins may import without a selected group, but imported points need one to belong to.
@@ -81,7 +85,7 @@ class MapPointController extends Controller
             ->whereIn('category_id', $categories->pluck('id'));
 
         return Inertia::render('MapPoints/PublicMap', [
-            'pointsByCategory' => $this->pointData($mapPoints)->groupBy('category_id'),
+            'pointsByCategory' => $this->pointData($mapPoints, tree: $tree)->groupBy('category_id'),
             'categories' => $this->categoryData($categories, $tree),
             'center' => $mapEmbed->coordinate,
             'zoom' => $mapEmbed->zoom,
@@ -96,16 +100,19 @@ class MapPointController extends Controller
         $this->authorize('update', $mappoint);
 
         return Inertia::render('MapPoints/Upsert', [
-            'mapPoint' => MapPointData::fromModel($mappoint->load(['category', 'group'])),
+            'mapPoint' => MapPointData::fromModel($mappoint->load(['category', 'group']), onlyPublic: false),
             ...$this->formProps($visibility),
         ]);
     }
 
-    public function update(MapPoint $mappoint, UpsertMapPointRequest $request): RedirectResponse
+    public function update(MapPoint $mappoint, UpsertMapPointRequest $request, MapPointFieldService $fieldService): RedirectResponse
     {
         $this->authorize('update', $mappoint);
 
-        $mappoint->update($request->getData());
+        DB::transaction(function () use ($mappoint, $request, $fieldService): void {
+            $mappoint->update($request->getData());
+            $fieldService->syncValues($mappoint, $request->fieldValues());
+        });
 
         return redirect()->back()->with('success', 'Der Kartenpunkt wurde aktualisiert');
     }
@@ -128,38 +135,64 @@ class MapPointController extends Controller
         return Inertia::render('MapPoints/Upsert', $this->formProps($visibility));
     }
 
-    public function store(UpsertMapPointRequest $request): RedirectResponse
+    public function store(UpsertMapPointRequest $request, MapPointFieldService $fieldService): RedirectResponse
     {
         $this->authorize('create', MapPoint::class);
 
-        $mapPoint = MapPoint::create($request->getData());
+        $mapPoint = DB::transaction(function () use ($request, $fieldService): MapPoint {
+            $mapPoint = MapPoint::create($request->getData());
+            $fieldService->syncValues($mapPoint, $request->fieldValues());
+
+            return $mapPoint;
+        });
 
         return redirect()->route('mappoints.edit', $mapPoint)->with('success', 'Der Kartenpunkt wurde erstellt');
     }
 
     /**
-     * @return array{categories: Collection<int, MapPointCategoryData>, groups: Collection<int, GroupBaseData>, usableCategoryIdsByGroup: array<string, array<int, string>>}
+     * The inputs for the category fields are switched in the form when the category changes, so the fields of all categories are sent.
+     *
+     * @return array{categories: Collection<int, MapPointCategoryData>, groups: Collection<int, GroupBaseData>, usableCategoryIdsByGroup: array<string, array<int, string>>, fieldsByCategory: array<string, array<int, FormFieldData>>, publicFieldIds: array<int, string>}
      */
     private function formProps(MapPointVisibilityService $visibility): array
     {
         $categories = $visibility->relevantCategories()->with('group')->get();
         $groups = $visibility->selectableGroups();
+        $tree = MapPointCategory::tree();
+        $formDefinitionIds = $categories->mapWithKeys(fn (MapPointCategory $category): array => [$category->uuid => $tree->fieldsFormDefinitionId($category->id)]);
+        $fieldsByFormDefinition = FormField::whereIn('form_definition_id', $formDefinitionIds->filter())
+            ->with('options')
+            ->orderBy('sort_order')
+            ->get()
+            ->groupBy('form_definition_id');
+
+        $fieldsByCategory = $formDefinitionIds
+            ->map(fn (?int $formDefinitionId): array => $fieldsByFormDefinition->get($formDefinitionId, collect())->map(FormFieldData::fromModel(...))->values()->all())
+            ->all();
+
+        $publicFieldIds = FormField::whereIn('id', MapPointCategory::publicFieldIds())->pluck('uuid')->all();
 
         return [
-            'categories' => $this->categoryData($categories),
+            'categories' => $this->categoryData($categories, $tree),
             'groups' => $groups->map(fn (Group $group): GroupBaseData => GroupBaseData::fromModel($group))->toBase(),
             'usableCategoryIdsByGroup' => $visibility->usableCategoryIdsByGroup($groups, $categories),
+            'fieldsByCategory' => $fieldsByCategory,
+            'publicFieldIds' => $publicFieldIds,
         ];
     }
 
     /**
      * @param  Builder<MapPoint>  $query
+     * @param  bool  $onlyPublic  Pass false only for admins of the points: then internal and former field values are included.
      * @return Collection<int, MapPointData>
      */
-    private function pointData(Builder $query): Collection
+    private function pointData(Builder $query, bool $onlyPublic = true, ?MapPointCategoryTree $tree = null): Collection
     {
-        return $query->with(['category', 'group'])->get()
-            ->map(fn (MapPoint $mapPoint): MapPointData => MapPointData::fromModel($mapPoint))
+        $tree ??= MapPointCategory::tree();
+        $publicFieldIds = MapPointCategory::publicFieldIds();
+
+        return $query->with(['category', 'group', 'fields.options', 'fields.formField'])->get()
+            ->map(fn (MapPoint $mapPoint): MapPointData => MapPointData::fromModel($mapPoint, $onlyPublic, $tree, $publicFieldIds))
             ->toBase();
     }
 

@@ -122,11 +122,14 @@ class MapEmbedController extends Controller
      */
     private function publishedPointsByCategory(MapPointVisibilityService $visibility): Collection
     {
+        $tree = MapPointCategory::tree();
+        $publicFieldIds = MapPointCategory::publicFieldIds();
+
         return $visibility->visiblePoints()
             ->where('published', true)
-            ->with(['category', 'group'])
+            ->with(['category', 'group', 'fields.options', 'fields.formField'])
             ->get()
-            ->map(fn (MapPoint $mapPoint): MapPointData => MapPointData::fromModel($mapPoint))
+            ->map(fn (MapPoint $mapPoint): MapPointData => MapPointData::fromModel($mapPoint, tree: $tree, publicFieldIds: $publicFieldIds))
             ->groupBy('category_id');
     }
 }

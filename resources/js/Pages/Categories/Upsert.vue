@@ -2,13 +2,14 @@
 import PageHeader from '@/components/PageHeader.vue';
 import { Button } from '@/shadcn/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/shadcn/components/ui/card';
+import { Checkbox } from '@/shadcn/components/ui/checkbox';
 import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import type { CustomPageProps } from '@/types/pageProps';
 import { descendantIds, flattenCategoryTree } from '@/utils/categoryTree';
-import { setLayoutProps, useForm, usePage } from '@inertiajs/vue3';
-import { Upload } from '@lucide/vue';
+import { router, setLayoutProps, useForm, usePage } from '@inertiajs/vue3';
+import { ListPlus, Upload } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 import { route } from 'ziggy-js';
 
@@ -17,6 +18,8 @@ const props = defineProps<{
     groups: Array<App.Data.GroupBaseData>;
     categories: Array<App.Data.MapPointCategoryData>;
     usableCategoryIdsByGroup: Record<string, Array<string>>;
+    /** The fields of the category's points, inherited ones first. Only sent when editing. */
+    fields?: Array<App.Data.MapPointCategoryFieldData>;
 }>();
 
 const page = usePage<CustomPageProps>();
@@ -38,8 +41,24 @@ const form = useForm({
     group_id: props.category?.group_id ?? page.props.auth.currentGroup?.id ?? props.groups[0]?.id ?? null,
     parent_id: props.category?.parent_id ?? (null as string | null),
     image: null as File | null,
+    public_field_ids: (props.fields ?? []).filter((field) => field.category_id === props.category?.id && field.is_public).map((field) => field.id),
     _method: isEditing.value ? 'put' : 'post',
 });
+
+const ownFields = computed(() => (props.fields ?? []).filter((field) => field.category_id === props.category?.id));
+const inheritedFields = computed(() => (props.fields ?? []).filter((field) => field.category_id !== props.category?.id));
+
+function isPublic(fieldId: string): boolean {
+    return form.public_field_ids.includes(fieldId);
+}
+
+function setPublic(fieldId: string, isPublic: boolean | 'indeterminate') {
+    form.public_field_ids = isPublic === true ? [...form.public_field_ids, fieldId] : form.public_field_ids.filter((id) => id !== fieldId);
+}
+
+function editFields() {
+    router.post(route('mappoint-categories.fields.edit', props.category!.id));
+}
 
 /** Reka's select cannot hold null, so „no parent“ gets its own value. */
 const NO_PARENT = 'none';
@@ -189,9 +208,59 @@ function triggerFileInput() {
                             Das Bild wird als Pin-Symbol auf der Karte verwendet. Empfohlen: Quadratisches Format, mindestens 32x32 Pixel.
                         </p>
                     </div>
+
+                    <div v-if="isEditing" class="space-y-3" data-test="category-fields">
+                        <div class="flex items-center justify-between gap-2">
+                            <Label>Zusatzfelder</Label>
+                            <Button type="button" variant="outline" size="sm" :disabled="form.isDirty" @click="editFields">
+                                <ListPlus class="h-4 w-4" />
+                                Felder bearbeiten
+                            </Button>
+                        </div>
+                        <p class="text-xs text-gray-500">
+                            Zusätzliche Angaben für die Punkte dieser Kategorie, z. B. PV-Leistung. Unterkategorien ohne eigene Felder übernehmen die
+                            Felder. Eigene Felder einer Unterkategorie ersetzen die übernommenen, sie werden nicht ergänzt. Alle Felder sind
+                            freiwillig. Nur Felder mit Haken bei „öffentlich“ erscheinen auf der öffentlichen Karte, alle anderen bleiben intern, etwa
+                            für Kontaktdaten.
+                        </p>
+                        <p v-if="form.isDirty" class="text-xs text-amber-600">
+                            Speichere zuerst deine Änderungen, dann kannst du die Felder bearbeiten.
+                        </p>
+
+                        <ul v-if="ownFields.length > 0" class="divide-y rounded-md border">
+                            <li v-for="field in ownFields" :key="field.id" class="flex items-center justify-between gap-2 px-3 py-2 text-sm">
+                                <span>{{ field.label }}</span>
+                                <div class="flex items-center gap-2">
+                                    <Checkbox
+                                        :id="`public_${field.id}`"
+                                        :model-value="isPublic(field.id)"
+                                        @update:model-value="(checked) => setPublic(field.id, checked)"
+                                    />
+                                    <Label :for="`public_${field.id}`" class="font-normal">öffentlich</Label>
+                                </div>
+                            </li>
+                        </ul>
+                        <p v-else-if="inheritedFields.length === 0" class="text-sm text-gray-500 italic">Diese Kategorie hat noch keine Felder.</p>
+
+                        <div v-if="inheritedFields.length > 0" class="space-y-1">
+                            <p class="text-xs font-medium text-gray-500">
+                                Übernommen von der Oberkategorie {{ inheritedFields[0].category_name }}. Die Sichtbarkeit legst du dort fest.
+                            </p>
+                            <ul class="divide-y rounded-md border bg-muted/30">
+                                <li
+                                    v-for="field in inheritedFields"
+                                    :key="field.id"
+                                    class="flex items-center justify-between gap-2 px-3 py-2 text-sm"
+                                >
+                                    <span>{{ field.label }}</span>
+                                    <span class="text-xs text-gray-500">{{ field.is_public ? 'öffentlich' : 'intern' }}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </CardContent>
 
-                <CardFooter class="flex justify-between">
+                <CardFooter class="mt-6 flex justify-between">
                     <div></div>
                     <Button type="submit" :disabled="form.processing">
                         {{ isEditing ? 'Kategorie aktualisieren' : 'Kategorie erstellen' }}

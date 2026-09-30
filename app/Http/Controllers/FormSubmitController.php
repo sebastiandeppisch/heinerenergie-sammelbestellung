@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Data\FormDefinitionData;
 use App\Enums\FieldType;
+use App\Enums\FormType;
 use App\Http\Requests\StoreFormSubmissionRequest;
 use App\Models\FormDefinition;
 use App\Models\FormField;
@@ -29,6 +30,8 @@ class FormSubmitController extends Controller
 
     public function show(FormDefinition $formDefinition, Request $request): Response
     {
+        abort_if($formDefinition->type === FormType::MapPointFields, 404);
+
         if (! $this->embedAccess->isEmbedAllowed($formDefinition, $request)) {
             return Inertia::render('Forms/Show', [
                 'formDefinition' => null,
@@ -47,6 +50,8 @@ class FormSubmitController extends Controller
 
     public function submit(StoreFormSubmissionRequest $request, FormDefinition $formDefinition): Response
     {
+        abort_if($formDefinition->type === FormType::MapPointFields, 404);
+
         if (! $this->embedAccess->verifyToken($formDefinition, $request->input('_form_token'))) {
             throw new HttpException(422, 'Ungültiges oder abgelaufenes Formular, bitte Seite neu laden.');
         }

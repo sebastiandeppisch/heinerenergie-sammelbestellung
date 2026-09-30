@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import CategoryVisibilityFilter from '@/components/CategoryVisibilityFilter.vue';
 import CoordinateFieldPreview from '@/components/FormSubmissions/FieldPreview/CoordinateFieldPreview.vue';
+import MapPointFieldList from '@/components/MapPointFieldList.vue';
+import { useExpandedIds } from '@/composables/useExpandedIds';
 import { Button } from '@/shadcn/components/ui/button';
 import { Card, CardContent } from '@/shadcn/components/ui/card';
 import { Input } from '@/shadcn/components/ui/input';
@@ -8,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/shadcn/components/ui/
 import { Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { TooltipProvider } from '@/shadcn/components/ui/tooltip';
 import { categoryPath, isShownWithAncestors } from '@/utils/categoryTree';
-import { ChevronDown, ChevronUp, Filter } from '@lucide/vue';
+import { ChevronDown, ChevronRight, ChevronUp, Filter } from '@lucide/vue';
 import {
     createColumnHelper,
     FlexRender,
@@ -34,6 +36,7 @@ interface MapPointRow {
     categoryId: string | null;
     categoryName: string;
     categoryImagePath: string | null;
+    fields: Array<App.Data.MapPointFieldValueData>;
 }
 
 const props = defineProps<{
@@ -59,6 +62,7 @@ const rows = computed<Array<MapPointRow>>(() =>
                 categoryId: point.category_id,
                 categoryName: point.category_id ? categoryPath(props.categories, point.category_id) : '',
                 categoryImagePath: category?.marker_image_path ?? null,
+                fields: point.fields,
             };
         }),
 );
@@ -93,7 +97,17 @@ const columns = [
         header: 'Ort',
         enableColumnFilter: true,
     }),
+    /** Hidden, only there so the search also finds the values of the category fields. */
+    columnHelper.accessor((row) => row.fields.map((field) => field.display_value).join(' '), {
+        id: 'fields',
+        header: 'Zusatzfelder',
+        enableColumnFilter: false,
+        enableSorting: false,
+    }),
 ];
+
+/** The category fields are shown in a detail row, so the table does not get wider with every field. */
+const { isExpanded, toggleExpanded } = useExpandedIds();
 
 const table = useVueTable({
     get data() {
@@ -110,6 +124,7 @@ const table = useVueTable({
         get globalFilter() {
             return globalFilter.value;
         },
+        columnVisibility: { fields: false },
     },
     onSortingChange: (updater) => {
         sorting.value = typeof updater === 'function' ? updater(sorting.value) : updater;
@@ -157,6 +172,7 @@ watch(
                     <Table class="w-full">
                         <TableHeader>
                             <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
+                                <TableHead class="w-8"><span class="sr-only">Details</span></TableHead>
                                 <TableHead
                                     v-for="header in headerGroup.headers"
                                     :key="header.id"
@@ -186,6 +202,7 @@ watch(
                                 </TableHead>
                             </TableRow>
                             <TableRow v-if="showFilters">
+                                <TableHead />
                                 <TableHead v-for="header in table.getHeaderGroups()[0].headers" :key="`f-${header.id}`" class="py-1">
                                     <Input
                                         v-if="header.column.getCanFilter() && header.column.id !== 'category'"
@@ -198,27 +215,54 @@ watch(
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            <TableRow v-for="row in table.getRowModel().rows" :key="row.id">
-                                <TableCell class="whitespace-normal">
-                                    <div class="flex items-center gap-2">
-                                        <div v-if="row.original.categoryImagePath" class="h-6 w-6 flex-shrink-0 overflow-hidden rounded bg-gray-100">
-                                            <img
-                                                :src="row.original.categoryImagePath"
-                                                :alt="row.original.categoryName"
-                                                class="h-full w-full object-cover"
-                                            />
+                            <template v-for="row in table.getRowModel().rows" :key="row.id">
+                                <TableRow>
+                                    <TableCell class="w-8 px-1">
+                                        <Button
+                                            v-if="row.original.fields.length > 0"
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            class="h-7 w-7"
+                                            :aria-expanded="isExpanded(row.original.id)"
+                                            :aria-label="isExpanded(row.original.id) ? 'Details ausblenden' : 'Details anzeigen'"
+                                            data-test="toggle-point-details"
+                                            @click="toggleExpanded(row.original.id)"
+                                        >
+                                            <ChevronDown v-if="isExpanded(row.original.id)" class="h-4 w-4" />
+                                            <ChevronRight v-else class="h-4 w-4" />
+                                        </Button>
+                                    </TableCell>
+                                    <TableCell class="whitespace-normal">
+                                        <div class="flex items-center gap-2">
+                                            <div
+                                                v-if="row.original.categoryImagePath"
+                                                class="h-6 w-6 flex-shrink-0 overflow-hidden rounded bg-gray-100"
+                                            >
+                                                <img
+                                                    :src="row.original.categoryImagePath"
+                                                    :alt="row.original.categoryName"
+                                                    class="h-full w-full object-cover"
+                                                />
+                                            </div>
+                                            <span>{{ row.original.categoryName }}</span>
                                         </div>
-                                        <span>{{ row.original.categoryName }}</span>
-                                    </div>
-                                </TableCell>
-                                <TableCell class="min-w-48 font-medium whitespace-normal">{{ row.original.title }}</TableCell>
-                                <TableCell class="max-w-xs truncate">{{ row.original.description }}</TableCell>
-                                <TableCell>
-                                    <CoordinateFieldPreview :value="row.original.coordinate" :label="row.original.location || undefined" />
-                                </TableCell>
-                            </TableRow>
+                                    </TableCell>
+                                    <TableCell class="min-w-48 font-medium whitespace-normal">{{ row.original.title }}</TableCell>
+                                    <TableCell class="max-w-xs truncate">{{ row.original.description }}</TableCell>
+                                    <TableCell>
+                                        <CoordinateFieldPreview :value="row.original.coordinate" :label="row.original.location || undefined" />
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow v-if="isExpanded(row.original.id)" class="bg-muted/30 hover:bg-muted/30">
+                                    <TableCell />
+                                    <TableCell colspan="4" class="whitespace-normal">
+                                        <MapPointFieldList :fields="row.original.fields" />
+                                    </TableCell>
+                                </TableRow>
+                            </template>
 
-                            <TableEmpty v-if="table.getRowModel().rows.length === 0" :colspan="4"> Keine Punkte gefunden. </TableEmpty>
+                            <TableEmpty v-if="table.getRowModel().rows.length === 0" :colspan="5"> Keine Punkte gefunden. </TableEmpty>
                         </TableBody>
                     </Table>
                 </div>

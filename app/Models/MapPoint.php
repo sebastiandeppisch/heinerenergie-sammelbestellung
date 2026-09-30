@@ -13,8 +13,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use Override;
 
 /**
  * @property int $group_id
@@ -60,6 +63,29 @@ class MapPoint extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(MapPointCategory::class, 'category_id');
+    }
+
+    /**
+     * The stored field values go with the point. The foreign keys do not cascade, so they are deleted here.
+     */
+    #[Override]
+    public function delete(): ?bool
+    {
+        return DB::transaction(function (): ?bool {
+            $this->fields()->get()->each->delete();
+
+            return parent::delete();
+        });
+    }
+
+    /**
+     * The stored values of category fields, including values of fields the point no longer has.
+     *
+     * @return HasMany<MapPointField, $this>
+     */
+    public function fields(): HasMany
+    {
+        return $this->hasMany(MapPointField::class);
     }
 
     /**

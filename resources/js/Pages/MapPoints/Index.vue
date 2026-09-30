@@ -10,11 +10,13 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shad
 import { Link, router, setLayoutProps } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
+import { useExpandedIds } from '@/composables/useExpandedIds';
 import { useFillViewportHeight } from '@/composables/useFillViewportHeight';
 
 import MapPointCategory from '@/components/MapPointCategory.vue';
+import MapPointFieldList from '@/components/MapPointFieldList.vue';
 import Card from '@/shadcn/components/ui/card/Card.vue';
-import { Download, FileUp, Map, Pencil, Plus, Trash } from '@lucide/vue';
+import { ChevronDown, ChevronRight, Download, FileUp, Map, Pencil, Plus, Trash } from '@lucide/vue';
 import { toast } from 'vue-sonner';
 import { route } from 'ziggy-js';
 
@@ -55,9 +57,17 @@ const filteredMapPoints = computed(() => {
         (point) =>
             point.title.toLowerCase().includes(query) ||
             point.description.toLowerCase().includes(query) ||
-            point.userReadablePointableType.toLowerCase().includes(query),
+            point.userReadablePointableType.toLowerCase().includes(query) ||
+            point.fields.some((field) => field.display_value.toLowerCase().includes(query)),
     );
 });
+
+/** The category fields are shown in a detail row, so the table does not get wider with every field. */
+const { isExpanded, toggleExpanded } = useExpandedIds();
+
+function hasFieldValues(point: App.Data.MapPointData): boolean {
+    return point.fields.length > 0 || point.former_fields.length > 0;
+}
 
 // State for delete confirmation dialog
 const showDeleteDialog = ref(false);
@@ -123,6 +133,7 @@ function deleteMapPoint() {
                 <TableCaption>Liste aller Kartenpunkte</TableCaption>
                 <TableHeader>
                     <TableRow>
+                        <TableHead class="w-8"><span class="sr-only">Details</span></TableHead>
                         <TableHead>Titel</TableHead>
                         <TableHead>Kategorie</TableHead>
                         <TableHead>Ursprung</TableHead>
@@ -134,46 +145,77 @@ function deleteMapPoint() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    <TableRow v-for="point in filteredMapPoints" :key="point.id" class="odd:bg-white even:bg-gray-50">
-                        <TableCell class="min-w-48 font-medium whitespace-normal">{{ point.title }}</TableCell>
-                        <TableCell class="whitespace-normal">
-                            <div v-if="point.category_id !== null" class="flex items-center gap-2">
-                                <MapPointCategory :category_id="point.category_id" :allCategories="props.categories" :show-name="true" />
-                            </div>
-                            <span v-else class="text-gray-500 italic">Keine Kategorie</span>
-                        </TableCell>
-                        <TableCell>{{ point.userReadablePointableType }}</TableCell>
-                        <TableCell class="max-w-xs truncate">{{ point.description }}</TableCell>
-                        <TableCell class="min-w-40 whitespace-normal">{{
-                            point.location || `${point.coordinate.lat.toFixed(6)}, ${point.coordinate.lng.toFixed(6)}`
-                        }}</TableCell>
-                        <TableCell>
-                            <span
-                                :class="{
-                                    'rounded px-2 py-1 text-xs font-medium': true,
-                                    'bg-green-100 text-green-800': point.published,
-                                    'bg-red-100 text-red-800': !point.published,
-                                }"
-                            >
-                                {{ point.published ? 'Öffentlich' : 'Eingereicht' }}
-                            </span>
-                        </TableCell>
-                        <TableCell>
-                            {{ new Date(point.created_at).toLocaleDateString('de-DE') }}
-                        </TableCell>
-                        <TableCell>
-                            <div class="flex space-x-2">
-                                <Link :href="route('mappoints.edit', point.id)">
-                                    <Button variant="outline" size="sm"><Pencil /></Button>
-                                </Link>
-                                <Button variant="destructive" size="sm" @click="confirmDelete(point.id)">
-                                    <Trash />
+                    <template v-for="point in filteredMapPoints" :key="point.id">
+                        <TableRow class="odd:bg-white even:bg-gray-50">
+                            <TableCell class="w-8 px-1">
+                                <Button
+                                    v-if="hasFieldValues(point)"
+                                    variant="ghost"
+                                    size="icon"
+                                    class="h-7 w-7"
+                                    :aria-expanded="isExpanded(point.id)"
+                                    :aria-label="isExpanded(point.id) ? 'Zusatzfelder ausblenden' : 'Zusatzfelder anzeigen'"
+                                    data-test="toggle-point-details"
+                                    @click="toggleExpanded(point.id)"
+                                >
+                                    <ChevronDown v-if="isExpanded(point.id)" class="h-4 w-4" />
+                                    <ChevronRight v-else class="h-4 w-4" />
                                 </Button>
-                            </div>
-                        </TableCell>
-                    </TableRow>
+                            </TableCell>
+                            <TableCell class="min-w-48 font-medium whitespace-normal">{{ point.title }}</TableCell>
+                            <TableCell class="whitespace-normal">
+                                <div v-if="point.category_id !== null" class="flex items-center gap-2">
+                                    <MapPointCategory :category_id="point.category_id" :allCategories="props.categories" :show-name="true" />
+                                </div>
+                                <span v-else class="text-gray-500 italic">Keine Kategorie</span>
+                            </TableCell>
+                            <TableCell>{{ point.userReadablePointableType }}</TableCell>
+                            <TableCell class="max-w-xs truncate">{{ point.description }}</TableCell>
+                            <TableCell class="min-w-40 whitespace-normal">{{
+                                point.location || `${point.coordinate.lat.toFixed(6)}, ${point.coordinate.lng.toFixed(6)}`
+                            }}</TableCell>
+                            <TableCell>
+                                <span
+                                    :class="{
+                                        'rounded px-2 py-1 text-xs font-medium': true,
+                                        'bg-green-100 text-green-800': point.published,
+                                        'bg-red-100 text-red-800': !point.published,
+                                    }"
+                                >
+                                    {{ point.published ? 'Öffentlich' : 'Eingereicht' }}
+                                </span>
+                            </TableCell>
+                            <TableCell>
+                                {{ new Date(point.created_at).toLocaleDateString('de-DE') }}
+                            </TableCell>
+                            <TableCell>
+                                <div class="flex space-x-2">
+                                    <Link :href="route('mappoints.edit', point.id)">
+                                        <Button variant="outline" size="sm"><Pencil /></Button>
+                                    </Link>
+                                    <Button variant="destructive" size="sm" @click="confirmDelete(point.id)">
+                                        <Trash />
+                                    </Button>
+                                </div>
+                            </TableCell>
+                        </TableRow>
+                        <TableRow v-if="isExpanded(point.id)" class="bg-muted/30 hover:bg-muted/30">
+                            <TableCell />
+                            <TableCell colspan="8" class="whitespace-normal">
+                                <div class="flex flex-wrap gap-x-12 gap-y-4 py-1">
+                                    <MapPointFieldList v-if="point.fields.length > 0" :fields="point.fields" mark-internal />
+                                    <div v-if="point.former_fields.length > 0" class="space-y-1">
+                                        <p class="text-xs font-medium text-muted-foreground">
+                                            Frühere Angaben (gehören nicht mehr zur Kategorie, nur hier sichtbar)
+                                        </p>
+                                        <MapPointFieldList :fields="point.former_fields" class="opacity-70" />
+                                    </div>
+                                </div>
+                            </TableCell>
+                        </TableRow>
+                    </template>
                     <TableRow v-if="filteredMapPoints.length === 0">
-                        <TableCell colspan="8" class="py-8 text-center text-gray-500"> Keine Punkte gefunden </TableCell>
+                        <TableCell colspan="9" class="py-8 text-center text-gray-500"> Keine Punkte gefunden </TableCell>
                     </TableRow>
                 </TableBody>
             </Table>

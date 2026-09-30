@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import FormFieldInputRenderer from '@/components/FormBuilder/FormFieldInputRenderer.vue';
+import MapPointFieldList from '@/components/MapPointFieldList.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import PinLocationMap from '@/components/PinLocationMap.vue';
 import { Button } from '@/shadcn/components/ui/button';
@@ -11,6 +13,7 @@ import { Textarea } from '@/shadcn/components/ui/textarea';
 import type { CustomPageProps } from '@/types/pageProps';
 import { flattenCategoryTree } from '@/utils/categoryTree';
 import { setLayoutProps, useForm, usePage } from '@inertiajs/vue3';
+import { Lock } from '@lucide/vue';
 import axios from 'axios';
 import { computed, ref, watch } from 'vue';
 import { route } from 'ziggy-js';
@@ -20,6 +23,9 @@ const props = defineProps<{
     categories?: Array<App.Data.MapPointCategoryData>;
     groups: Array<App.Data.GroupBaseData>;
     usableCategoryIdsByGroup: Record<string, Array<string>>;
+    /** The fields of each category including the inherited ones, keyed by category id. */
+    fieldsByCategory: Record<string, Array<App.Data.FormFieldData>>;
+    publicFieldIds: Array<string>;
 }>();
 
 const isEditing = !!props.mapPoint;
@@ -42,9 +48,23 @@ const defaultMapPoint: App.Data.MapPointData = {
     group_id: page.props.auth.currentGroup?.id ?? props.groups[0]?.id ?? '',
     category_id: null,
     location: null,
+    fields: [],
+    former_fields: [],
 };
 
-const form = useForm<App.Data.MapPointData>(props.mapPoint || defaultMapPoint);
+const initialPoint = props.mapPoint || defaultMapPoint;
+
+const form = useForm<App.Data.MapPointData & { field_values: Record<string, App.Data.MapPointFieldValueData['value']> }>({
+    ...initialPoint,
+    /** Keyed by field id. Values of fields the chosen category does not have are ignored by the server. */
+    field_values: Object.fromEntries(initialPoint.fields.filter((field) => field.field_id !== null).map((field) => [field.field_id!, field.value])),
+});
+
+const categoryFields = computed(() => (form.category_id ? (props.fieldsByCategory[form.category_id] ?? []) : []));
+
+function fieldError(fieldId: string): string | undefined {
+    return (form.errors as Record<string, string>)[`field_values.${fieldId}`];
+}
 
 /** Only categories of the selected initiative and its parent initiatives can be assigned. */
 const availableCategories = computed(() => {
@@ -198,6 +218,34 @@ const errors: Record<string, string> = form.errors;
                             </SelectContent>
                         </Select>
                         <p v-if="errors.category_id" class="text-sm text-red-500">{{ errors.category_id }}</p>
+                    </div>
+
+                    <div v-if="categoryFields.length > 0" class="space-y-4 rounded-md border p-4" data-test="category-fields">
+                        <div>
+                            <h3 class="text-sm font-semibold">Zusatzfelder der Kategorie</h3>
+                            <p class="text-xs text-gray-500">
+                                Alle Angaben sind freiwillig. Felder mit Schloss sind intern und erscheinen nicht auf der öffentlichen Karte.
+                            </p>
+                        </div>
+                        <div v-for="field in categoryFields" :key="field.id" class="space-y-2">
+                            <Label :for="`field_${field.id}`" class="flex items-center gap-1">
+                                {{ field.label }}
+                                <Lock v-if="!publicFieldIds.includes(field.id)" class="h-3 w-3 text-muted-foreground" aria-label="intern" />
+                            </Label>
+                            <p v-if="field.help_text" class="text-xs text-muted-foreground">{{ field.help_text }}</p>
+                            <FormFieldInputRenderer v-model="form.field_values[field.id]" :field="field" :has-error="!!fieldError(field.id)" />
+                            <p v-if="fieldError(field.id)" class="text-sm text-red-500">{{ fieldError(field.id) }}</p>
+                        </div>
+                    </div>
+
+                    <div v-if="isEditing && props.mapPoint!.former_fields.length > 0" class="space-y-2 rounded-md border border-dashed p-4">
+                        <div>
+                            <h3 class="text-sm font-semibold">Frühere Angaben</h3>
+                            <p class="text-xs text-gray-500">
+                                Diese Felder gehören nicht mehr zur Kategorie des Punkts. Die Werte bleiben erhalten und sind nur hier sichtbar.
+                            </p>
+                        </div>
+                        <MapPointFieldList :fields="props.mapPoint!.former_fields" />
                     </div>
 
                     <div class="flex items-center space-x-2">

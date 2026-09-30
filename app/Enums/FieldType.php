@@ -45,6 +45,21 @@ enum FieldType: string
         self::PHONE,
     ];
 
+    /**
+     * Types usable as fields of map point categories. Files, images and locations cannot be imported from spreadsheets.
+     */
+    public const typesForMapPointFields = [
+        self::TEXT,
+        self::TEXTAREA,
+        self::NUMBER,
+        self::EMAIL,
+        self::PHONE,
+        self::SELECT,
+        self::RADIO,
+        self::CHECKBOX,
+        self::DATE,
+    ];
+
     public function supportsOptions(): bool
     {
         return in_array($this, self::typesWithOptions, true);

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import MapPointFieldList from '@/components/MapPointFieldList.vue';
 import { Button } from '@/shadcn/components/ui/button';
 import { categoryMarkerIcon } from '@/utils/categoryMarkerIcon';
 import { Minus, Plus } from '@lucide/vue';
@@ -87,6 +88,8 @@ function zoomOut() {
                         <div class="p-2">
                             <h3 class="text-lg font-bold">{{ point.title }}</h3>
                             <p class="text-sm">{{ point.description }}</p>
+                            <!-- The public map only receives public fields, so internal ones are marked for admins only. -->
+                            <MapPointFieldList v-if="point.fields.length > 0" :fields="point.fields" mark-internal class="mt-2" />
                         </div>
                     </LPopup>
                 </LMarker>

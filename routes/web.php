@@ -118,6 +118,7 @@ Route::middleware('auth')->group(function (): void {
     Route::get('mappoints/export', MapPointExportController::class)->name('mappoints.export');
 
     Route::resource('mappoints', MapPointController::class);
+    Route::post('mappoint-categories/{mappoint_category}/fields', [MapPointCategoryController::class, 'editFields'])->name('mappoint-categories.fields.edit');
     Route::resource('mappoint-categories', MapPointCategoryController::class);
     Route::resource('map-embeds', MapEmbedController::class);
 

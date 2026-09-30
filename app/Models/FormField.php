@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Override;
 
@@ -194,6 +195,28 @@ class FormField extends Model
         return $checklistEntryField;
     }
 
+    /**
+     * Stores a value of this category field on the point, together with a snapshot of the field.
+     */
+    public function createMapPointField(MapPoint $mapPoint, mixed $value): MapPointField
+    {
+        $this->loadMissing('options');
+
+        $mapPointField = $mapPoint->fields()->create([
+            'form_field_id' => $this->id,
+            'value' => $value,
+            'sort_order' => $this->sort_order,
+            'type' => $this->type,
+            'label' => $this->label,
+        ]);
+
+        foreach ($this->options as $option) {
+            $option->createMapPointFieldOption($mapPointField);
+        }
+
+        return $mapPointField;
+    }
+
     public function getSubmissionField(FormSubmission $submission): SubmissionField
     {
         return $this->submissionFields()->where('form_submission_id', $submission->id)->firstOrFail();
@@ -204,6 +227,8 @@ class FormField extends Model
     {
         SubmissionField::where('form_field_id', $this->id)->update(['form_field_id' => null]);
         ChecklistEntryField::where('form_field_id', $this->id)->update(['form_field_id' => null]);
+        MapPointField::where('form_field_id', $this->id)->update(['form_field_id' => null]);
+        DB::table('map_point_category_public_fields')->where('form_field_id', $this->id)->delete();
 
         FormDefinitionToAdvice::where('advice_type_field_id', $this->id)->update(['advice_type_field_id' => null]);
 

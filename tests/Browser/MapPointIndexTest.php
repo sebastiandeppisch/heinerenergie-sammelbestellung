@@ -1,7 +1,9 @@
 <?php
 
+use App\Enums\FieldType;
 use App\Models\Group;
 use App\Models\MapPoint;
+use App\Models\MapPointCategory;
 use App\Models\User;
 use App\Services\SessionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -32,4 +34,23 @@ test('many map points scroll inside the table instead of the page', function ():
     );
 
     expect($table['scrollHeight'])->toBeGreaterThan($table['clientHeight']);
+});
+
+test('the detail row shows internal and former field values', function (): void {
+    $category = MapPointCategory::factory()->for($this->group)->create();
+    $formDefinition = $category->findOrCreateFormDefinition();
+    $phone = $formDefinition->fields()->create(['type' => FieldType::PHONE, 'label' => 'Telefon', 'sort_order' => 0]);
+    $removed = $formDefinition->fields()->create(['type' => FieldType::TEXT, 'label' => 'Altes Feld', 'sort_order' => 1]);
+    $mapPoint = MapPoint::factory()->for($this->group)->create(['category_id' => $category->id]);
+    $phone->createMapPointField($mapPoint, '06151 123456');
+    $removed->createMapPointField($mapPoint, 'alter Wert');
+    $removed->delete();
+
+    visit(route('mappoints.index'))
+        ->assertDontSee('06151 123456')
+        ->click('[data-test=toggle-point-details]')
+        ->assertSee('06151 123456')
+        ->assertSee('Frühere Angaben')
+        ->assertSee('alter Wert')
+        ->assertNoJavaScriptErrors();
 });

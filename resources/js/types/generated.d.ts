@@ -262,6 +262,14 @@ map_points_count: number,
 created_at: string | null,
 can_edit: boolean,
 };
+export type MapPointCategoryFieldData = {
+id: string,
+label: string,
+type: App.Enums.FieldType,
+is_public: boolean,
+category_id: string,
+category_name: string,
+};
 export type MapPointData = {
 id: string,
 coordinate: App.ValueObjects.Coordinate,
@@ -273,6 +281,17 @@ created_at: string,
 group_id: string,
 category_id: string | null,
 location: string | null,
+fields: App.Data.MapPointFieldValueData[],
+former_fields: App.Data.MapPointFieldValueData[],
+};
+export type MapPointFieldValueData = {
+id: string,
+field_id: string | null,
+type: App.Enums.FieldType,
+label: string,
+value: number | string | string[] | null,
+display_value: string,
+is_public: boolean,
 };
 export type MapPointImportResultData = {
 created_count: number,
@@ -391,7 +410,7 @@ export type AdviceStatusResult = 0 | 1 | 2 | 3;
 export type AdviceType = 0 | 1 | 2;
 export type Aggregation = 'day' | 'week' | 'month' | 'quarter';
 export type FieldType = 'text' | 'textarea' | 'number' | 'email' | 'phone' | 'select' | 'radio' | 'checkbox' | 'file' | 'image' | 'date' | 'geo_coordinate' | 'address';
-export type FormType = 0 | 1;
+export type FormType = 0 | 1 | 2;
 export type GeocodingStatus = 'pending' | 'success' | 'not_found' | 'failed' | 'manual';
 export type HouseType = 0 | 1 | 2;
 export type MapPointSpreadsheetField = 'ignore' | 'id' | 'title' | 'description' | 'lat' | 'lng' | 'location' | 'category' | 'published';

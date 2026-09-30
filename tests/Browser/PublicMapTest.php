@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\FieldType;
 use App\Models\Group;
 use App\Models\MapEmbed;
 use App\Models\MapPoint;
@@ -157,4 +158,29 @@ test('points of a category without an image are shown with the default marker', 
     visit(route('map.public', $mapEmbed))
         ->assertNoJavaScriptErrors()
         ->assertPresent('img.leaflet-marker-icon');
+});
+
+test('the popup and the detail row of the table show the public field values', function (): void {
+    $category = MapPointCategory::factory()->for($this->group)->withoutImage()->create();
+    $formDefinition = $category->findOrCreateFormDefinition();
+    $power = $formDefinition->fields()->create(['type' => FieldType::NUMBER, 'label' => 'PV-Leistung (kWp)', 'sort_order' => 0]);
+    $phone = $formDefinition->fields()->create(['type' => FieldType::PHONE, 'label' => 'Telefon', 'sort_order' => 1]);
+    $category->publicFields()->sync([$power->id]);
+    $mapPoint = MapPoint::factory()->for($this->group)->create(['published' => true, 'category_id' => $category->id, 'title' => 'Solaranlage Nord']);
+    $power->createMapPointField($mapPoint, 9.9);
+    $phone->createMapPointField($mapPoint, '06151 123456');
+
+    $mapEmbed = MapEmbed::factory()->for($this->group)->create();
+    $mapEmbed->mapPointCategories()->sync([$category->id]);
+
+    visit(route('map.public', $mapEmbed))
+        ->click('.leaflet-marker-icon')
+        ->assertSeeIn('.leaflet-popup-content', 'PV-Leistung (kWp)')
+        ->assertSeeIn('.leaflet-popup-content', '9,9')
+        ->click('Tabelle')
+        ->assertDontSee('PV-Leistung (kWp)')
+        ->click('[data-test=toggle-point-details]')
+        ->assertSee('PV-Leistung (kWp)')
+        ->assertDontSee('06151 123456')
+        ->assertNoJavaScriptErrors();
 });

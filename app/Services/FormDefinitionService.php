@@ -10,6 +10,7 @@ use App\Data\FormFieldOptionData;
 use App\Data\FormToAdviceMappingData;
 use App\Data\FormToMapPointMappingData;
 use App\Enums\AdviceType;
+use App\Enums\FormType;
 use App\Models\FormDefinition;
 use App\Models\FormDefinitionToAdvice;
 use App\Models\FormDefinitionToMapPoint;
@@ -28,7 +29,11 @@ class FormDefinitionService
         return DB::transaction(function () use ($formDefinitionData) {
             $data = collect($formDefinitionData->toArray())->forget(['id', 'fields', 'group_id', 'advice_mapping', 'map_point_mapping'])->toArray();
             $formDefinition = FormDefinition::where('uuid', $formDefinitionData->id)->firstOrFail();
-            $formDefinition->group_id = Group::where('uuid', $formDefinitionData->group_id)->firstOrFail()->id;
+
+            // Fields of a map point category belong to the category's group.
+            if ($formDefinition->type !== FormType::MapPointFields) {
+                $formDefinition->group_id = Group::where('uuid', $formDefinitionData->group_id)->firstOrFail()->id;
+            }
 
             $formDefinition->update($data);
 
@@ -50,6 +55,11 @@ class FormDefinitionService
         foreach ($fields as $field) {
             $data = collect($field->toArray())->forget(['id', 'options', 'form_definition_id'])->toArray();
 
+            if ($formDefinition->type === FormType::MapPointFields) {
+                // Values of category fields are always optional, so points never become invalid when fields change.
+                $data['required'] = false;
+            }
+
             $uuid = $this->toUuidOrNull($field->id);
 
             $formField = $uuid === null ? null : FormField::where('uuid', $uuid)->first();
@@ -64,7 +74,7 @@ class FormDefinitionService
 
             $formFieldIds[] = $formField->id;
 
-            $this->updateFieldOptions($field->options, $formField);
+            $this->updateFieldOptions($field->options, $formField, allowRequired: $formDefinition->type !== FormType::MapPointFields);
         }
 
         FormField::where('form_definition_id', $formDefinition->id)->whereNotIn('id', $formFieldIds)->get()->each->delete();
@@ -73,12 +83,16 @@ class FormDefinitionService
     /**
      * @param  Collection<int, FormFieldOptionData>  $options
      */
-    private function updateFieldOptions(Collection $options, FormField $formField): void
+    private function updateFieldOptions(Collection $options, FormField $formField, bool $allowRequired = true): void
     {
         $formOptionIds = [];
         foreach ($options as $option) {
 
             $data = collect($option)->forget(['id'])->toArray();
+
+            if (! $allowRequired) {
+                $data['is_required'] = false;
+            }
 
             $uuid = $this->toUuidOrNull($option->id);
 

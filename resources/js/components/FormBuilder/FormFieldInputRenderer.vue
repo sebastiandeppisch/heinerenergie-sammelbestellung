@@ -124,6 +124,7 @@ const inputClasses = computed(() => ({
         :id="fieldId"
         v-model="modelValue"
         type="number"
+        step="any"
         :placeholder="field.placeholder"
         :disabled="disabled"
         :min="field.min_value"
