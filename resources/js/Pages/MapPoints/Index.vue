@@ -8,21 +8,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shadcn/components/ui/tooltip';
 import { Link, router, setLayoutProps } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 
 import { useExpandedIds } from '@/composables/useExpandedIds';
 import { useFillViewportHeight } from '@/composables/useFillViewportHeight';
 
+import CategoryVisibilityFilter from '@/components/CategoryVisibilityFilter.vue';
 import MapPointCategory from '@/components/MapPointCategory.vue';
 import MapPointFieldList from '@/components/MapPointFieldList.vue';
 import Card from '@/shadcn/components/ui/card/Card.vue';
-import { ChevronDown, ChevronRight, Download, FileUp, Map, Pencil, Plus, Trash } from '@lucide/vue';
+import { Checkbox } from '@/shadcn/components/ui/checkbox';
+import { Popover, PopoverContent, PopoverTrigger } from '@/shadcn/components/ui/popover';
+import { ancestorIds, flattenCategoryTree } from '@/utils/categoryTree';
+import { ChevronDown, ChevronRight, Download, Eye, EyeOff, FilePlus, FileUp, Filter, FolderInput, Map, Pencil, Plus, Trash } from '@lucide/vue';
 import { toast } from 'vue-sonner';
 import { route } from 'ziggy-js';
 
 const props = defineProps<{
     mapPoints: Array<App.Data.MapPointData>;
     categories: Array<App.Data.MapPointCategoryData>;
+    /** The categories each initiative can use, keyed by initiative id. */
+    usableCategoryIdsByGroup: Record<string, Array<string>>;
     canImportAndExport: boolean;
     importAndExportNeedGroup: boolean;
     spreadsheetMappings: Array<App.Data.MapPointSpreadsheetMappingData>;
@@ -48,12 +54,49 @@ const exportUrl = computed(() =>
 );
 const searchQuery = ref('');
 
-// Filter map points based on search query
+/** Selecting a category includes its sub categories. The category page links here with ?category=<id>. */
+const categorySelection = reactive<Record<string, boolean>>(
+    Object.fromEntries(
+        props.categories.map((category) => [category.id, category.id === new URLSearchParams(window.location.search).get('category')]),
+    ),
+);
+const withoutCategory = ref(false);
+
+const singleSelectedCategoryId = computed(() => {
+    const selectedIds = Object.entries(categorySelection)
+        .filter(([, selected]) => selected)
+        .map(([id]) => id);
+
+    return selectedIds.length === 1 && !withoutCategory.value ? selectedIds[0] : null;
+});
+
+const selectedCategoryCount = computed(() => Object.values(categorySelection).filter(Boolean).length + (withoutCategory.value ? 1 : 0));
+
+function matchesCategoryFilter(point: App.Data.MapPointData): boolean {
+    if (selectedCategoryCount.value === 0) {
+        return true;
+    }
+
+    if (point.category_id === null) {
+        return withoutCategory.value;
+    }
+
+    return [point.category_id, ...ancestorIds(props.categories, point.category_id)].some((id) => categorySelection[id]);
+}
+
+function resetCategoryFilter() {
+    Object.keys(categorySelection).forEach((id) => (categorySelection[id] = false));
+    withoutCategory.value = false;
+}
+
+// Filter map points based on search query and categories
 const filteredMapPoints = computed(() => {
-    if (!searchQuery.value) return props.mapPoints;
+    const byCategory = props.mapPoints.filter(matchesCategoryFilter);
+
+    if (!searchQuery.value) return byCategory;
 
     const query = searchQuery.value.toLowerCase();
-    return props.mapPoints.filter(
+    return byCategory.filter(
         (point) =>
             point.title.toLowerCase().includes(query) ||
             point.description.toLowerCase().includes(query) ||
@@ -67,6 +110,86 @@ const { isExpanded, toggleExpanded } = useExpandedIds();
 
 function hasFieldValues(point: App.Data.MapPointData): boolean {
     return point.fields.length > 0 || point.former_fields.length > 0;
+}
+
+/**
+ * Points are selected for deleting many at once. Only points the filters show are deleted, so a selection
+ * made before changing the filter cannot remove points that are no longer in view.
+ */
+const selectedPointIds = ref(new Set<string>());
+const selectedVisibleIds = computed(() => filteredMapPoints.value.filter((point) => selectedPointIds.value.has(point.id)).map((point) => point.id));
+const allVisibleSelected = computed(() => filteredMapPoints.value.length > 0 && selectedVisibleIds.value.length === filteredMapPoints.value.length);
+
+function togglePoint(pointId: string, checked: boolean | 'indeterminate') {
+    const ids = new Set(selectedPointIds.value);
+    if (checked === true) {
+        ids.add(pointId);
+    } else {
+        ids.delete(pointId);
+    }
+    selectedPointIds.value = ids;
+}
+
+function toggleAllVisible(checked: boolean | 'indeterminate') {
+    selectedPointIds.value = new Set(checked === true ? filteredMapPoints.value.map((point) => point.id) : []);
+}
+
+const showBulkDeleteDialog = ref(false);
+
+const showCategoryDialog = ref(false);
+/** Reka's select cannot hold null, so „no category“ gets its own value. */
+const NO_CATEGORY = 'none';
+const targetCategoryId = ref(NO_CATEGORY);
+
+/** Only categories usable in the initiatives of all selected points, as the server requires. */
+const targetCategoryEntries = computed(() => {
+    const groupIds = new Set(props.mapPoints.filter((point) => selectedVisibleIds.value.includes(point.id)).map((point) => point.group_id));
+    const usableIds = [...groupIds].map((groupId) => props.usableCategoryIdsByGroup[groupId] ?? []);
+
+    return flattenCategoryTree(props.categories.filter((category) => usableIds.every((ids) => ids.includes(category.id))));
+});
+
+function setSelectedPublished(published: boolean) {
+    router.patch(
+        route('mappoints.update-published-of-many'),
+        { ids: selectedVisibleIds.value, published },
+        {
+            preserveScroll: true,
+            onSuccess: () => (selectedPointIds.value = new Set()),
+            onError: (errors) => Object.values(errors).forEach((error) => toast.error(error)),
+        },
+    );
+}
+
+function openCategoryDialog() {
+    targetCategoryId.value = NO_CATEGORY;
+    showCategoryDialog.value = true;
+}
+
+function moveSelectedPoints() {
+    router.patch(
+        route('mappoints.update-category-of-many'),
+        { ids: selectedVisibleIds.value, category_id: targetCategoryId.value === NO_CATEGORY ? null : targetCategoryId.value },
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                showCategoryDialog.value = false;
+                selectedPointIds.value = new Set();
+            },
+            onError: (errors) => Object.values(errors).forEach((error) => toast.error(error)),
+        },
+    );
+}
+
+function deleteSelectedPoints() {
+    router.delete(route('mappoints.destroy-many'), {
+        data: { ids: selectedVisibleIds.value },
+        preserveScroll: true,
+        onSuccess: () => {
+            showBulkDeleteDialog.value = false;
+            selectedPointIds.value = new Set();
+        },
+    });
 }
 
 // State for delete confirmation dialog
@@ -120,6 +243,17 @@ function deleteMapPoint() {
                 <Link :href="route('mappoint-categories.index')">
                     <Button variant="outline">Kategorien verwalten</Button>
                 </Link>
+                <!-- Opens the form wizard in the form management, with the category of the filter when exactly one is chosen. -->
+                <Link
+                    :href="
+                        route('form-definitions.index', {
+                            template: 'map_point',
+                            ...(singleSelectedCategoryId ? { category: singleSelectedCategoryId } : {}),
+                        })
+                    "
+                >
+                    <Button variant="outline"><FilePlus />Formular erstellen</Button>
+                </Link>
                 <Link :href="route('map-embeds.index')">
                     <Button variant="outline"><Map />Einbettungen verwalten</Button>
                 </Link>
@@ -129,10 +263,77 @@ function deleteMapPoint() {
             </template>
         </PageHeader>
         <Card class="min-h-0 flex-1 p-4">
+            <div class="flex flex-wrap items-center gap-2">
+                <Popover>
+                    <PopoverTrigger as-child>
+                        <Button variant="outline" size="sm" data-test="category-filter">
+                            <Filter />
+                            {{
+                                selectedCategoryCount === 0
+                                    ? 'Alle Kategorien'
+                                    : selectedCategoryCount === 1
+                                      ? '1 Kategorie gewählt'
+                                      : `${selectedCategoryCount} Kategorien gewählt`
+                            }}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent class="max-h-96 w-72 overflow-y-auto">
+                        <div class="space-y-3">
+                            <p class="text-xs text-gray-500">Eine Kategorie schließt ihre Unterkategorien ein.</p>
+                            <CategoryVisibilityFilter
+                                v-model:visibility="categorySelection"
+                                :categories="categories"
+                                id-prefix="index-category-"
+                                include-descendants
+                            />
+                            <div class="flex items-center gap-2">
+                                <Checkbox id="index-without-category" v-model="withoutCategory" />
+                                <Label for="index-without-category" class="text-sm font-normal">Ohne Kategorie</Label>
+                            </div>
+                            <Button v-if="selectedCategoryCount > 0" variant="ghost" size="sm" @click="resetCategoryFilter"
+                                >Filter zurücksetzen</Button
+                            >
+                        </div>
+                    </PopoverContent>
+                </Popover>
+                <span class="text-sm text-gray-500">{{ filteredMapPoints.length === 1 ? '1 Punkt' : `${filteredMapPoints.length} Punkte` }}</span>
+                <template v-if="selectedVisibleIds.length > 0">
+                    <Button variant="outline" size="sm" class="ml-auto" data-test="publish-selected" @click="setSelectedPublished(true)">
+                        <Eye />
+                        Veröffentlichen
+                    </Button>
+                    <Button variant="outline" size="sm" data-test="unpublish-selected" @click="setSelectedPublished(false)">
+                        <EyeOff />
+                        Nicht veröffentlichen
+                    </Button>
+                </template>
+                <Button v-if="selectedVisibleIds.length > 0" variant="outline" size="sm" data-test="change-category" @click="openCategoryDialog">
+                    <FolderInput />
+                    Kategorie ändern
+                </Button>
+                <Button
+                    v-if="selectedVisibleIds.length > 0"
+                    variant="destructive"
+                    size="sm"
+                    data-test="delete-selected"
+                    @click="showBulkDeleteDialog = true"
+                >
+                    <Trash />
+                    {{ selectedVisibleIds.length === 1 ? '1 Punkt löschen' : `${selectedVisibleIds.length} Punkte löschen` }}
+                </Button>
+            </div>
             <Table>
                 <TableCaption>Liste aller Kartenpunkte</TableCaption>
                 <TableHeader>
                     <TableRow>
+                        <TableHead class="w-8">
+                            <Checkbox
+                                :model-value="allVisibleSelected ? true : selectedVisibleIds.length > 0 ? 'indeterminate' : false"
+                                aria-label="Alle angezeigten Punkte auswählen"
+                                data-test="select-all-points"
+                                @update:model-value="toggleAllVisible"
+                            />
+                        </TableHead>
                         <TableHead class="w-8"><span class="sr-only">Details</span></TableHead>
                         <TableHead>Titel</TableHead>
                         <TableHead>Kategorie</TableHead>
@@ -147,6 +348,13 @@ function deleteMapPoint() {
                 <TableBody>
                     <template v-for="point in filteredMapPoints" :key="point.id">
                         <TableRow class="odd:bg-white even:bg-gray-50">
+                            <TableCell class="w-8">
+                                <Checkbox
+                                    :model-value="selectedPointIds.has(point.id)"
+                                    :aria-label="`${point.title} auswählen`"
+                                    @update:model-value="(checked) => togglePoint(point.id, checked)"
+                                />
+                            </TableCell>
                             <TableCell class="w-8 px-1">
                                 <Button
                                     v-if="hasFieldValues(point)"
@@ -200,7 +408,7 @@ function deleteMapPoint() {
                             </TableCell>
                         </TableRow>
                         <TableRow v-if="isExpanded(point.id)" class="bg-muted/30 hover:bg-muted/30">
-                            <TableCell />
+                            <TableCell colspan="2" />
                             <TableCell colspan="8" class="whitespace-normal">
                                 <div class="flex flex-wrap gap-x-12 gap-y-4 py-1">
                                     <MapPointFieldList v-if="point.fields.length > 0" :fields="point.fields" mark-internal />
@@ -215,7 +423,7 @@ function deleteMapPoint() {
                         </TableRow>
                     </template>
                     <TableRow v-if="filteredMapPoints.length === 0">
-                        <TableCell colspan="9" class="py-8 text-center text-gray-500"> Keine Punkte gefunden </TableCell>
+                        <TableCell colspan="10" class="py-8 text-center text-gray-500"> Keine Punkte gefunden </TableCell>
                     </TableRow>
                 </TableBody>
             </Table>
@@ -266,6 +474,57 @@ function deleteMapPoint() {
                     <Button variant="outline" @click="showExportDialog = false">Abbrechen</Button>
                     <!-- A real file download, so deliberately not an Inertia visit. -->
                     <Button as="a" :href="exportUrl" @click="showExportDialog = false"><Download />Herunterladen</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+
+        <Dialog v-model:open="showCategoryDialog">
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle
+                        >Kategorie von {{ selectedVisibleIds.length === 1 ? '1 Punkt' : `${selectedVisibleIds.length} Punkten` }} ändern</DialogTitle
+                    >
+                    <DialogDescription>
+                        Werte von Zusatzfeldern, die die neue Kategorie nicht hat, bleiben als frühere Angaben erhalten.
+                    </DialogDescription>
+                </DialogHeader>
+                <div class="space-y-2">
+                    <Label for="target_category">Neue Kategorie</Label>
+                    <Select id="target_category" v-model="targetCategoryId">
+                        <SelectTrigger class="w-full" data-test="target-category">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem :value="NO_CATEGORY">Keine Kategorie</SelectItem>
+                            <SelectItem
+                                v-for="{ category, depth } in targetCategoryEntries"
+                                :key="category.id"
+                                :value="category.id"
+                                :style="{ paddingLeft: `${0.5 + depth * 1.25}rem` }"
+                            >
+                                {{ category.name }}
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" @click="showCategoryDialog = false">Abbrechen</Button>
+                    <Button data-test="confirm-change-category" @click="moveSelectedPoints">Kategorie ändern</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+
+        <Dialog v-model:open="showBulkDeleteDialog">
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle
+                        >{{ selectedVisibleIds.length === 1 ? '1 Punkt' : `${selectedVisibleIds.length} Punkte` }} wirklich löschen?</DialogTitle
+                    >
+                    <DialogDescription>Die ausgewählten Punkte werden mit ihren Zusatzfeldern unwiederbringlich gelöscht.</DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                    <Button variant="outline" @click="showBulkDeleteDialog = false">Abbrechen</Button>
+                    <Button variant="destructive" data-test="confirm-delete-selected" @click="deleteSelectedPoints">Löschen</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

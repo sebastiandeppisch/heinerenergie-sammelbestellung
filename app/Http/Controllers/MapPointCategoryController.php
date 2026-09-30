@@ -10,6 +10,7 @@ use App\Data\MapPointCategoryFieldData;
 use App\Http\Requests\UpsertMapPointsCategoryRequest;
 use App\Models\FormField;
 use App\Models\Group;
+use App\Models\MapPoint;
 use App\Models\MapPointCategory;
 use App\Services\MapPointVisibilityService;
 use Illuminate\Http\RedirectResponse;
@@ -30,11 +31,13 @@ class MapPointCategoryController extends Controller
         $this->authorize('viewAny', MapPointCategory::class);
 
         $tree = MapPointCategory::tree();
+        $pointCounts = MapPoint::query()->whereNotNull('category_id')->groupBy('category_id')->selectRaw('category_id, count(*) as aggregate')->pluck('aggregate', 'category_id');
         $categories = $visibility->usableCategories()->with('group')->withCount('mapPoints')->get()
             ->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel(
                 $category,
                 canEdit: $request->user()->can('update', $category),
                 tree: $tree,
+                mapPointsWithSubcategoriesCount: (int) collect($tree->subtreeIds([$category->id]))->sum(fn (int $id): int => (int) ($pointCounts[$id] ?? 0)),
             ));
 
         return Inertia::render('Categories/Index', [

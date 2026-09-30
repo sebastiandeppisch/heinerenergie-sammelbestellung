@@ -21,6 +21,8 @@ class MapPointCategoryData extends Data
         public string $group_id,
         public string $group_name,
         public int $map_points_count = 0,
+        /** The points of the category and all of its sub categories, only set where the category list needs it. */
+        public ?int $map_points_with_subcategories_count = null,
         public ?string $created_at = null,
         public bool $can_edit = false,
     ) {}
@@ -29,7 +31,7 @@ class MapPointCategoryData extends Data
      * @param  bool  $canEdit  Whether the current user may change the category. Categories inherited from an ancestor group are read-only.
      * @param  MapPointCategoryTree|null  $tree  Pass a loaded tree when converting many categories, otherwise it is loaded for each one.
      */
-    public static function fromModel(MapPointCategory $category, bool $canEdit = false, ?MapPointCategoryTree $tree = null): self
+    public static function fromModel(MapPointCategory $category, bool $canEdit = false, ?MapPointCategoryTree $tree = null, ?int $mapPointsWithSubcategoriesCount = null): self
     {
         $tree ??= MapPointCategory::tree();
         $markerImagePath = $tree->markerImagePath($category->id);
@@ -43,6 +45,7 @@ class MapPointCategoryData extends Data
             group_id: $category->group->uuid,
             group_name: $category->group->name,
             map_points_count: $category->mapPoints_count ?? $category->mapPoints()->count(),
+            map_points_with_subcategories_count: $mapPointsWithSubcategoriesCount,
             created_at: $category->created_at?->toISOString(),
             can_edit: $canEdit,
         );

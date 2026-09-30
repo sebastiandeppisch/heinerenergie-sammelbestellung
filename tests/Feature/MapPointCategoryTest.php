@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\SessionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
@@ -460,5 +461,19 @@ test('a sub category without an image uses the image of its nearest ancestor as 
             ->where('categories.2.image_path', null)
             ->where('categories.2.marker_image_path', asset('storage/categories/pin-blue.png'))
             ->where('categories.2.parent_id', $parent->uuid)
+        );
+});
+
+test('the category list counts the points of each category with and without its sub categories', function (): void {
+    $parent = MapPointCategory::factory()->for($this->group)->create();
+    $child = MapPointCategory::factory()->childOf($parent)->create();
+    MapPoint::factory()->count(2)->for($this->group)->create(['category_id' => $child->id]);
+
+    $this->actingAs($this->admin)
+        ->get(route('mappoint-categories.index'))
+        ->assertInertia(fn ($page) => $page
+            ->where('categories', fn (Collection $categories): bool => $categories->firstWhere('id', $parent->uuid)['map_points_count'] === 0
+                && $categories->firstWhere('id', $parent->uuid)['map_points_with_subcategories_count'] === 2
+                && $categories->firstWhere('id', $child->uuid)['map_points_with_subcategories_count'] === 2)
         );
 });

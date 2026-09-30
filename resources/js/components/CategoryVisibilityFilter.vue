@@ -50,8 +50,8 @@ function isDecidedByAncestor(categoryId: string): boolean {
                 class="flex items-center gap-2 text-sm font-normal"
                 :class="{ 'text-muted-foreground': isDecidedByAncestor(category.id) }"
             >
-                <div v-if="category.marker_image_path" class="h-5 w-5 flex-shrink-0 overflow-hidden rounded bg-gray-100">
-                    <img :src="category.marker_image_path" :alt="category.name" class="h-full w-full object-cover" />
+                <div v-if="category.marker_image_path" class="h-5 w-5 flex-shrink-0">
+                    <img :src="category.marker_image_path" :alt="category.name" class="h-full w-full object-contain" />
                 </div>
                 {{ category.name }}
             </Label>

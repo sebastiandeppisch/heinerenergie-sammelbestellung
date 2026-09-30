@@ -12,6 +12,9 @@ use App\Data\MapPointData;
 use App\Data\MapPointSpreadsheetMappingData;
 use App\Data\SpreadsheetFormatData;
 use App\Enums\SpreadsheetFormat;
+use App\Http\Requests\DestroyMapPointsRequest;
+use App\Http\Requests\UpdateMapPointsCategoryRequest;
+use App\Http\Requests\UpdateMapPointsPublishedRequest;
 use App\Http\Requests\UpsertMapPointRequest;
 use App\Models\FormField;
 use App\Models\Group;
@@ -51,7 +54,8 @@ class MapPointController extends Controller
 
         return Inertia::render('MapPoints/Index', [
             'mapPoints' => $this->pointData($visibility->visiblePoints(), onlyPublic: false),
-            'categories' => $this->categoryData($visibility->relevantCategories()->with('group')->get()),
+            'categories' => $this->categoryData($categories = $visibility->relevantCategories()->with('group')->get()),
+            'usableCategoryIdsByGroup' => $visibility->usableCategoryIdsByGroup($visibility->selectableGroups(), $categories),
             'canImportAndExport' => $request->user()?->can('import', MapPoint::class) === true,
             // System admins may import without a selected group, but imported points need one to belong to.
             'importAndExportNeedGroup' => $currentGroup === null,
@@ -126,6 +130,45 @@ class MapPointController extends Controller
         $mappoint->delete();
 
         return redirect()->back()->with('info', 'Der Kartenpunkt '.e($name).' wurde gelöscht');
+    }
+
+    /**
+     * Deletes the selected points at once, e.g. all points of some categories.
+     */
+    public function destroyMany(DestroyMapPointsRequest $request): RedirectResponse
+    {
+        $mapPoints = $request->mapPoints();
+
+        DB::transaction(fn () => $mapPoints->each->delete());
+
+        return redirect()->back()->with('info', $mapPoints->count() === 1 ? 'Ein Kartenpunkt wurde gelöscht' : "{$mapPoints->count()} Kartenpunkte wurden gelöscht");
+    }
+
+    /**
+     * Moves the selected points into one category at once. Values of fields the new category lacks stay as former values.
+     */
+    public function updateCategoryOfMany(UpdateMapPointsCategoryRequest $request): RedirectResponse
+    {
+        $mapPoints = $request->mapPoints();
+        $category = $request->category();
+
+        DB::transaction(fn () => $mapPoints->each->update(['category_id' => $category?->id]));
+
+        $count = $mapPoints->count() === 1 ? 'Ein Kartenpunkt' : "{$mapPoints->count()} Kartenpunkte";
+
+        return redirect()->back()->with('success', $category === null ? "{$count} ohne Kategorie" : "{$count} in „{$category->name}“ verschoben");
+    }
+
+    public function updatePublishedOfMany(UpdateMapPointsPublishedRequest $request): RedirectResponse
+    {
+        $mapPoints = $request->mapPoints();
+        $published = $request->boolean('published');
+
+        DB::transaction(fn () => $mapPoints->each->update(['published' => $published]));
+
+        $count = $mapPoints->count() === 1 ? 'Ein Kartenpunkt ist' : "{$mapPoints->count()} Kartenpunkte sind";
+
+        return redirect()->back()->with('success', $published ? "{$count} jetzt veröffentlicht" : "{$count} nicht mehr veröffentlicht");
     }
 
     public function create(MapPointVisibilityService $visibility, MapPointFieldService $fieldService): Response

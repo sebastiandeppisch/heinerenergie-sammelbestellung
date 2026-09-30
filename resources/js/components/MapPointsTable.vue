@@ -251,14 +251,11 @@ watch(
                                     </TableCell>
                                     <TableCell class="whitespace-normal">
                                         <div class="flex items-center gap-2">
-                                            <div
-                                                v-if="row.original.categoryImagePath"
-                                                class="h-6 w-6 flex-shrink-0 overflow-hidden rounded bg-gray-100"
-                                            >
+                                            <div v-if="row.original.categoryImagePath" class="h-6 w-6 flex-shrink-0">
                                                 <img
                                                     :src="row.original.categoryImagePath"
                                                     :alt="row.original.categoryName"
-                                                    class="h-full w-full object-cover"
+                                                    class="h-full w-full object-contain"
                                                 />
                                             </div>
                                             <span>{{ row.original.categoryName }}</span>

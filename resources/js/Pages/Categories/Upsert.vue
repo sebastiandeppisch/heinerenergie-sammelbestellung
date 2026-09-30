@@ -183,7 +183,7 @@ function triggerFileInput() {
                         <div v-if="isEditing && category?.image_path" class="mb-4">
                             <p class="mb-2 text-sm text-gray-600">Aktuelles Bild:</p>
                             <div class="flex h-24 w-24 items-center justify-center overflow-hidden rounded-lg bg-gray-100">
-                                <img :src="category.image_path" :alt="category.name" class="h-full w-full object-cover" />
+                                <img :src="category.image_path" :alt="category.name" class="h-full w-full object-contain" />
                             </div>
                         </div>
 
@@ -191,7 +191,7 @@ function triggerFileInput() {
                         <div v-if="form.image && imagePreviewUrl" class="mb-4">
                             <p class="mb-2 text-sm text-gray-600">Neue Bildvorschau:</p>
                             <div class="flex h-24 w-24 items-center justify-center overflow-hidden rounded-lg bg-gray-100">
-                                <img :src="imagePreviewUrl" alt="Vorschau" class="h-full w-full object-cover" />
+                                <img :src="imagePreviewUrl" alt="Vorschau" class="h-full w-full object-contain" />
                             </div>
                         </div>
 

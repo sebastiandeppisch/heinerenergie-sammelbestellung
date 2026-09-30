@@ -74,11 +74,14 @@ arch()->expect('App\Http\Requests')
     ->classes()
     ->toHaveSuffix('Request');
 
+// Traits shared by requests belong to the HTTP layer too, which no other layer may use.
 arch()->expect('App\Http\Requests')
-    ->toExtend(FormRequest::class);
+    ->toExtend(FormRequest::class)
+    ->ignoring('App\Http\Requests\Concerns');
 
 arch()->expect('App\Http\Requests')
-    ->toHaveMethod('rules');
+    ->toHaveMethod('rules')
+    ->ignoring('App\Http\Requests\Concerns');
 
 arch()->expect('App')
     ->not->toExtend(FormRequest::class)

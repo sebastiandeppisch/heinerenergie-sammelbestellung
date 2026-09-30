@@ -12,6 +12,7 @@ function makeCategory(id: string, parentId: string | null): App.Data.MapPointCat
         group_id: 'group',
         group_name: 'Initiative',
         map_points_count: 0,
+        map_points_with_subcategories_count: null,
         created_at: null,
         can_edit: true,
     };

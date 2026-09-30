@@ -8,7 +8,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from '@/shadcn/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';
-import { router, setLayoutProps } from '@inertiajs/vue3';
+import type { CustomPageProps } from '@/types/pageProps';
+import { router, setLayoutProps, usePage } from '@inertiajs/vue3';
 import { ChevronDown, Edit, Plus, Trash2 } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import { route } from 'ziggy-js';
@@ -19,14 +20,21 @@ const props = defineProps<{
     formDefinitions: FormDefinitionData[];
     checklists: FormDefinitionData[];
     groups: App.Data.GroupData[];
+    mapPointCategories: Array<App.Data.MapPointCategoryData>;
+    usableMapPointCategoryIdsByGroup: Record<string, Array<string>>;
 }>();
+
+const page = usePage<CustomPageProps>();
+
+/** The map point table links here with ?template=map_point, and optionally a category, to open the form wizard directly. */
+const query = new URLSearchParams(window.location.search);
 
 setLayoutProps({
     breadcrumbs: [{ title: 'Formulare' }, { title: 'Formular-Verwaltung' }],
 });
 
 const showAdviceModal = ref(false);
-const showMapPointModal = ref(false);
+const showMapPointModal = ref(query.get('template') === 'map_point');
 
 const activeTab = ref<'forms' | 'checklists'>('forms');
 
@@ -76,6 +84,10 @@ function editForm(formId: string) {
 function openAdviceTemplate() {
     showAdviceModal.value = true;
 }
+
+function openMapPointTemplate() {
+    showMapPointModal.value = true;
+}
 </script>
 
 <template>
@@ -93,6 +105,7 @@ function openAdviceTemplate() {
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem @click="createNewForm">Leeres Formular</DropdownMenuItem>
                         <DropdownMenuItem @click="openAdviceTemplate">Beratungsformular</DropdownMenuItem>
+                        <DropdownMenuItem @click="openMapPointTemplate">Kartenpunkt-Formular</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
                 <Button v-else @click="createNewChecklist">
@@ -103,7 +116,15 @@ function openAdviceTemplate() {
         </PageHeader>
 
         <CreateFromTemplateModal v-model:open="showAdviceModal" template-type="advice" :groups="props.groups" />
-        <CreateFromTemplateModal v-model:open="showMapPointModal" template-type="map_point" :groups="props.groups" />
+        <CreateFromTemplateModal
+            v-model:open="showMapPointModal"
+            template-type="map_point"
+            :groups="props.groups"
+            :categories="mapPointCategories"
+            :usable-category-ids-by-group="usableMapPointCategoryIdsByGroup"
+            :initial-group-id="page.props.auth.currentGroup?.id"
+            :initial-category-id="query.get('category') ?? undefined"
+        />
 
         <Tabs v-model="activeTab">
             <TabsList>

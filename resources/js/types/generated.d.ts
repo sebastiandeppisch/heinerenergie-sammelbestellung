@@ -271,6 +271,7 @@ parent_id: string | null,
 group_id: string,
 group_name: string,
 map_points_count: number,
+map_points_with_subcategories_count: number | null,
 created_at: string | null,
 can_edit: boolean,
 };

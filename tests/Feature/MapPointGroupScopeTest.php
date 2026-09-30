@@ -293,3 +293,86 @@ test('the map embed form offers each initiative the categories of its ancestors 
             ->where("mapCategoryIdsByGroup.{$this->child->uuid}", fn ($uuids): bool => $sortedUuids($uuids) === $sortedUuids([$rootCategory->uuid, $childCategory->uuid]))
         );
 });
+
+test('a group admin deletes several map points at once', function (): void {
+    [$first, $second, $kept] = MapPoint::factory()->count(3)->for($this->child)->create();
+
+    $this->actingAs(mapPointGroupAdmin($this->child))
+        ->delete(route('mappoints.destroy-many'), ['ids' => [$first->uuid, $second->uuid]])
+        ->assertRedirect()
+        ->assertSessionHas('info', '2 Kartenpunkte wurden gelöscht');
+
+    $this->assertModelMissing($first);
+    $this->assertModelMissing($second);
+    $this->assertModelExists($kept);
+});
+
+test('deleting several map points is refused as a whole when one belongs to another group', function (): void {
+    $own = MapPoint::factory()->for($this->child)->create();
+    $foreign = MapPoint::factory()->for($this->sibling)->create();
+
+    $this->actingAs(mapPointGroupAdmin($this->child))
+        ->delete(route('mappoints.destroy-many'), ['ids' => [$own->uuid, $foreign->uuid]])
+        ->assertForbidden();
+
+    $this->assertModelExists($own);
+    $this->assertModelExists($foreign);
+});
+
+test('a group admin moves several map points into one category at once', function (): void {
+    $category = MapPointCategory::factory()->for($this->root)->create(['name' => 'Photovoltaik']);
+    [$first, $second] = MapPoint::factory()->count(2)->for($this->child)->create();
+
+    $this->actingAs(mapPointGroupAdmin($this->root))
+        ->patch(route('mappoints.update-category-of-many'), ['ids' => [$first->uuid, $second->uuid], 'category_id' => $category->uuid])
+        ->assertRedirect()
+        ->assertSessionHas('success', '2 Kartenpunkte in „Photovoltaik“ verschoben');
+
+    expect([$first->refresh()->category_id, $second->refresh()->category_id])->toBe([$category->id, $category->id]);
+});
+
+test('points are only moved into a category usable in the initiative of every point', function (): void {
+    $childCategory = MapPointCategory::factory()->for($this->child)->create();
+    $rootPoint = MapPoint::factory()->for($this->root)->create();
+    $childPoint = MapPoint::factory()->for($this->child)->create();
+
+    $this->actingAs(mapPointGroupAdmin($this->root))
+        ->patch(route('mappoints.update-category-of-many'), ['ids' => [$rootPoint->uuid, $childPoint->uuid], 'category_id' => $childCategory->uuid])
+        ->assertSessionHasErrors(['category_id' => 'Diese Kategorie ist nicht für die Initiativen aller ausgewählten Punkte verfügbar.']);
+
+    expect($rootPoint->refresh()->category_id)->toBeNull();
+});
+
+test('moving several map points is refused as a whole when one belongs to another group', function (): void {
+    $own = MapPoint::factory()->for($this->child)->create();
+    $foreign = MapPoint::factory()->for($this->sibling)->create();
+
+    $this->actingAs(mapPointGroupAdmin($this->child))
+        ->patch(route('mappoints.update-category-of-many'), ['ids' => [$own->uuid, $foreign->uuid], 'category_id' => null])
+        ->assertForbidden();
+});
+
+test('a group admin publishes and unpublishes several map points at once', function (bool $published, string $message): void {
+    [$first, $second] = MapPoint::factory()->count(2)->for($this->child)->create(['published' => ! $published]);
+
+    $this->actingAs(mapPointGroupAdmin($this->child))
+        ->patch(route('mappoints.update-published-of-many'), ['ids' => [$first->uuid, $second->uuid], 'published' => $published])
+        ->assertRedirect()
+        ->assertSessionHas('success', $message);
+
+    expect([$first->refresh()->published, $second->refresh()->published])->toBe([$published, $published]);
+})->with([
+    'publish' => [true, '2 Kartenpunkte sind jetzt veröffentlicht'],
+    'unpublish' => [false, '2 Kartenpunkte sind nicht mehr veröffentlicht'],
+]);
+
+test('publishing several map points is refused as a whole when one belongs to another group', function (): void {
+    $own = MapPoint::factory()->for($this->child)->create(['published' => false]);
+    $foreign = MapPoint::factory()->for($this->sibling)->create(['published' => false]);
+
+    $this->actingAs(mapPointGroupAdmin($this->child))
+        ->patch(route('mappoints.update-published-of-many'), ['ids' => [$own->uuid, $foreign->uuid], 'published' => true])
+        ->assertForbidden();
+
+    expect($own->refresh()->published)->toBeFalse();
+});

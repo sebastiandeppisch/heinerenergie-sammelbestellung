@@ -5,10 +5,14 @@ import { Button } from '@/shadcn/components/ui/button';
 import { Card, CardContent } from '@/shadcn/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { flattenCategoryTree } from '@/utils/categoryTree';
-import { router, setLayoutProps } from '@inertiajs/vue3';
+import { Link, router, setLayoutProps } from '@inertiajs/vue3';
 import { Edit, Plus, Trash2 } from '@lucide/vue';
 import { computed } from 'vue';
 import { route } from 'ziggy-js';
+
+function pointCount(count: number): string {
+    return count === 1 ? '1 Punkt' : `${count} Punkte`;
+}
 
 const props = defineProps<{
     categories: Array<App.Data.MapPointCategoryData>;
@@ -58,28 +62,43 @@ function deleteCategory(category: App.Data.MapPointCategoryData) {
                     <TableBody>
                         <TableRow v-for="{ category, depth } in entries" :key="category.id">
                             <TableCell>
-                                <div class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg bg-gray-100">
+                                <div class="flex h-12 w-12 items-center justify-center">
                                     <img
                                         v-if="category.marker_image_path"
                                         :src="category.marker_image_path"
                                         :alt="category.name"
-                                        class="h-full w-full object-cover"
+                                        class="h-full w-full object-contain"
                                         :class="{ 'opacity-50': !category.image_path }"
                                         :title="category.image_path ? undefined : 'Bild der Oberkategorie'"
                                     />
                                     <span v-else class="text-xs text-gray-400">Kein Bild</span>
                                 </div>
                             </TableCell>
-                            <TableCell class="font-medium">
-                                <span :style="{ paddingLeft: `${depth * 1.5}rem` }">
-                                    <span v-if="depth > 0" class="mr-1 text-gray-400">↳</span>{{ category.name }}
-                                </span>
+                            <!-- Long names are cut with an ellipsis, the full name shows on hover. -->
+                            <TableCell class="max-w-md font-medium">
+                                <div class="flex min-w-0 items-center" :style="{ paddingLeft: `${depth * 1.5}rem` }" :title="category.name">
+                                    <span v-if="depth > 0" class="mr-1 shrink-0 text-gray-400">↳</span>
+                                    <span class="truncate" data-test="category-name">{{ category.name }}</span>
+                                </div>
                             </TableCell>
                             <TableCell class="text-gray-600">
                                 {{ category.group_name }}
                             </TableCell>
                             <TableCell>
-                                <Badge variant="secondary"> {{ category.map_points_count }} Punkte </Badge>
+                                <!-- Links to the points of the category and its sub categories, e.g. to delete them at once. -->
+                                <Link
+                                    :href="route('mappoints.index', { category: category.id })"
+                                    class="inline-flex flex-col items-start gap-1"
+                                    data-test="category-point-count"
+                                >
+                                    <Badge variant="secondary">{{ pointCount(category.map_points_count) }}</Badge>
+                                    <span
+                                        v-if="(category.map_points_with_subcategories_count ?? 0) > category.map_points_count"
+                                        class="text-xs text-gray-500"
+                                    >
+                                        {{ category.map_points_with_subcategories_count }} mit Unterkategorien
+                                    </span>
+                                </Link>
                             </TableCell>
                             <TableCell class="text-gray-500">
                                 {{ category.created_at ? new Date(category.created_at).toLocaleDateString('de-DE') : '-' }}

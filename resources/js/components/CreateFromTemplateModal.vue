@@ -8,19 +8,44 @@ import SelectItem from '@/shadcn/components/ui/select/SelectItem.vue';
 import SelectTrigger from '@/shadcn/components/ui/select/SelectTrigger.vue';
 import SelectValue from '@/shadcn/components/ui/select/SelectValue.vue';
 import { router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { flattenCategoryTree } from '@/utils/categoryTree';
+import { computed, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 import { route } from 'ziggy-js';
 
 type GroupData = App.Data.GroupData;
 
-const props = defineProps<{
-    templateType: 'advice' | 'map_point';
-    groups: GroupData[];
-}>();
+const props = withDefaults(
+    defineProps<{
+        templateType: 'advice' | 'map_point';
+        groups: GroupData[];
+        /** Only for map point forms: the categories points can be created in. */
+        categories?: Array<App.Data.MapPointCategoryData>;
+        usableCategoryIdsByGroup?: Record<string, Array<string>>;
+        initialGroupId?: string;
+        initialCategoryId?: string;
+    }>(),
+    { categories: () => [], usableCategoryIdsByGroup: () => ({}), initialGroupId: undefined, initialCategoryId: undefined },
+);
 
 const open = defineModel<boolean>('open', { required: true });
-const selectedGroupId = ref<string | undefined>(undefined);
+const selectedGroupId = ref<string | undefined>(props.initialGroupId);
+
+/** Reka's select cannot hold null, so „no category“ gets its own value. */
+const NO_CATEGORY = 'none';
+const selectedCategoryId = ref<string>(props.initialCategoryId ?? NO_CATEGORY);
+
+const categoryEntries = computed(() => {
+    const usableIds = selectedGroupId.value ? (props.usableCategoryIdsByGroup[selectedGroupId.value] ?? []) : [];
+
+    return flattenCategoryTree(props.categories.filter((category) => usableIds.includes(category.id)));
+});
+
+watch(categoryEntries, (entries) => {
+    if (selectedCategoryId.value !== NO_CATEGORY && !entries.some(({ category }) => category.id === selectedCategoryId.value)) {
+        selectedCategoryId.value = NO_CATEGORY;
+    }
+});
 
 const templateTitles = {
     advice: 'Beratungsformular erstellen',
@@ -29,7 +54,8 @@ const templateTitles = {
 
 const templateDescriptions = {
     advice: 'Erstellt automatisch ein vorkonfiguriertes Beratungsformular mit allen Standard-Feldern (Vorname, Nachname, Adresse, E-Mail, Telefon, Beratungstyp).',
-    map_point: 'Erstellt automatisch ein vorkonfiguriertes Kartenpunkt-Formular mit allen Standard-Feldern (Titel, Beschreibung, Koordinaten).',
+    map_point:
+        'Erstellt ein Formular, aus dem Kartenpunkte entstehen: mit Titel, Beschreibung und Standort. Mit einer Kategorie fragt es auch nach ihren Zusatzfeldern, alles ist schon zugeordnet.',
 };
 
 function handleCreate() {
@@ -43,6 +69,7 @@ function handleCreate() {
         {
             template_type: props.templateType,
             group_id: selectedGroupId.value,
+            map_point_category_id: props.templateType === 'map_point' && selectedCategoryId.value !== NO_CATEGORY ? selectedCategoryId.value : null,
         },
         {
             onSuccess: () => {
@@ -90,6 +117,26 @@ function handleCancel() {
                         </FormControl>
                     </FormItem>
                 </FormField>
+
+                <FormItem v-if="templateType === 'map_point'">
+                    <FormLabel>Kategorie der Kartenpunkte</FormLabel>
+                    <Select v-model="selectedCategoryId">
+                        <SelectTrigger data-test="template-category">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem :value="NO_CATEGORY">Keine Kategorie</SelectItem>
+                            <SelectItem
+                                v-for="{ category, depth } in categoryEntries"
+                                :key="category.id"
+                                :value="category.id"
+                                :style="{ paddingLeft: `${0.5 + depth * 1.25}rem` }"
+                            >
+                                {{ category.name }}
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+                </FormItem>
             </div>
 
             <DialogFooter>

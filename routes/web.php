@@ -116,6 +116,9 @@ Route::middleware('auth')->group(function (): void {
     Route::put('mappoints/spreadsheet-mappings/{mapping}', [MapPointSpreadsheetMappingController::class, 'update'])->name('mappoints.spreadsheet-mappings.update');
     Route::delete('mappoints/spreadsheet-mappings/{mapping}', [MapPointSpreadsheetMappingController::class, 'destroy'])->name('mappoints.spreadsheet-mappings.destroy');
     Route::get('mappoints/export', MapPointExportController::class)->name('mappoints.export');
+    Route::delete('mappoints', [MapPointController::class, 'destroyMany'])->name('mappoints.destroy-many');
+    Route::patch('mappoints/category', [MapPointController::class, 'updateCategoryOfMany'])->name('mappoints.update-category-of-many');
+    Route::patch('mappoints/published', [MapPointController::class, 'updatePublishedOfMany'])->name('mappoints.update-published-of-many');
 
     Route::resource('mappoints', MapPointController::class);
     Route::post('mappoint-categories/{mappoint_category}/fields', [MapPointCategoryController::class, 'editFields'])->name('mappoint-categories.fields.edit');

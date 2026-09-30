@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\FieldType;
+use App\Models\FormDefinition;
 use App\Models\Group;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
@@ -72,4 +73,70 @@ test('the popup of the backend map shows public and internal field values', func
         ->assertSeeIn('.leaflet-popup-content', '06151 123456')
         ->assertPresent('.leaflet-popup-content [aria-label="intern"]')
         ->assertNoJavaScriptErrors();
+});
+
+test('all points of a category and its sub categories are deleted with a few clicks', function (): void {
+    $solar = MapPointCategory::factory()->for($this->group)->create(['name' => 'Photovoltaik']);
+    $balcony = MapPointCategory::factory()->childOf($solar)->create(['name' => 'Balkonkraftwerke']);
+    $heatPumps = MapPointCategory::factory()->for($this->group)->create(['name' => 'Wärmepumpen']);
+    MapPoint::factory()->for($this->group)->create(['category_id' => $solar->id]);
+    MapPoint::factory()->for($this->group)->create(['category_id' => $balcony->id]);
+    $kept = MapPoint::factory()->for($this->group)->create(['category_id' => $heatPumps->id]);
+
+    visit(route('mappoints.index'))
+        ->click('[data-test="category-filter"]')
+        ->click("#index-category-{$solar->uuid}")
+        ->click('[data-test="category-filter"]')
+        ->assertSee('2 Punkte')
+        ->click('[data-test="select-all-points"]')
+        ->click('[data-test="delete-selected"]')
+        ->click('[data-test="confirm-delete-selected"]')
+        ->assertSee('2 Kartenpunkte wurden gelöscht')
+        ->assertNoJavaScriptErrors();
+
+    expect(MapPoint::pluck('id')->all())->toBe([$kept->id]);
+});
+
+test('the form wizard opens from the map point table with the filtered category', function (): void {
+    $category = MapPointCategory::factory()->for($this->group)->create(['name' => 'Photovoltaik']);
+    $category->findOrCreateFormDefinition()->fields()->create(['type' => FieldType::NUMBER, 'label' => 'PV-Leistung (kWp)', 'sort_order' => 0]);
+
+    visit(route('mappoints.index', ['category' => $category->uuid]))
+        ->click('Formular erstellen')
+        ->assertSee('Kartenpunkt-Formular erstellen')
+        ->assertSeeIn('[data-test="template-category"]', 'Photovoltaik')
+        ->click('Erstellen')
+        ->assertSee('Formular bearbeiten')
+        ->assertNoJavaScriptErrors();
+
+    $form = FormDefinition::where('name', 'Formular für Photovoltaik')->sole();
+    expect($form->mapPointCreator->map_point_category_id)->toBe($category->id);
+});
+
+test('selected points are moved into another category', function (): void {
+    $heatPumps = MapPointCategory::factory()->for($this->group)->create(['name' => 'Wärmepumpen']);
+    [$first, $second] = MapPoint::factory()->count(2)->for($this->group)->create(['category_id' => null]);
+
+    visit(route('mappoints.index'))
+        ->click('[data-test="select-all-points"]')
+        ->click('[data-test="change-category"]')
+        ->click('[data-test="target-category"]')
+        ->click('Wärmepumpen')
+        ->click('[data-test="confirm-change-category"]')
+        ->assertSee('2 Kartenpunkte in „Wärmepumpen“ verschoben')
+        ->assertNoJavaScriptErrors();
+
+    expect([$first->refresh()->category_id, $second->refresh()->category_id])->toBe([$heatPumps->id, $heatPumps->id]);
+});
+
+test('selected points are published at once', function (): void {
+    [$first, $second] = MapPoint::factory()->count(2)->for($this->group)->create(['published' => false]);
+
+    visit(route('mappoints.index'))
+        ->click('[data-test="select-all-points"]')
+        ->click('[data-test="publish-selected"]')
+        ->assertSee('2 Kartenpunkte sind jetzt veröffentlicht')
+        ->assertNoJavaScriptErrors();
+
+    expect([$first->refresh()->published, $second->refresh()->published])->toBe([true, true]);
 });

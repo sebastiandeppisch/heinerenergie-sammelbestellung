@@ -17,6 +17,7 @@ use App\Models\Group;
 use App\Models\MapPointCategory;
 use App\Services\FormDefinitionService;
 use App\Services\MapPointFieldService;
+use App\Services\MapPointVisibilityService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,7 +29,7 @@ class FormDefinitionController extends Controller
     /**
      * Display a listing of the form definitions.
      */
-    public function index(GroupContextContract $groupContext): Response
+    public function index(GroupContextContract $groupContext, MapPointVisibilityService $visibility): Response
     {
         $query = FormDefinition::with(['fields', 'fields.options', 'group', 'adviceCreator', 'mapPointCreator']);
 
@@ -46,10 +47,16 @@ class FormDefinitionController extends Controller
             'name' => $group->name,
         ]);
 
+        $mapPointCategories = $visibility->relevantCategories()->with('group')->withCount('mapPoints')->get();
+        $tree = MapPointCategory::tree();
+
         return Inertia::render('FormBuilder/Index', [
             'formDefinitions' => $formDefinitions,
             'checklists' => $checklists,
             'groups' => $groups,
+            // A map point form can ask for the fields of a category usable in its initiative.
+            'mapPointCategories' => $mapPointCategories->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel($category, tree: $tree))->all(),
+            'usableMapPointCategoryIdsByGroup' => $visibility->usableCategoryIdsByGroup(Group::all(), $mapPointCategories),
         ]);
     }
 
@@ -167,7 +174,8 @@ class FormDefinitionController extends Controller
     {
         $formDefinition = app(FormDefinitionService::class)->createFromTemplate(
             $request->input('template_type'),
-            $request->input('group_id')
+            $request->input('group_id'),
+            $request->mapPointCategory(),
         );
 
         return redirect()->route('form-definitions.edit', $formDefinition->uuid)

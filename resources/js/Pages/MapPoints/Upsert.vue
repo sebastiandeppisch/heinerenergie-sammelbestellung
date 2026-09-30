@@ -209,8 +209,8 @@ const errors: Record<string, string> = form.errors;
                                     :style="{ paddingLeft: `${0.5 + depth * 1.25}rem` }"
                                 >
                                     <div class="flex items-center gap-2">
-                                        <div v-if="category.marker_image_path" class="h-4 w-4 flex-shrink-0 overflow-hidden rounded bg-gray-100">
-                                            <img :src="category.marker_image_path" :alt="category.name" class="h-full w-full object-cover" />
+                                        <div v-if="category.marker_image_path" class="h-4 w-4 flex-shrink-0">
+                                            <img :src="category.marker_image_path" :alt="category.name" class="h-full w-full object-contain" />
                                         </div>
                                         <span>{{ category.name }}</span>
                                     </div>

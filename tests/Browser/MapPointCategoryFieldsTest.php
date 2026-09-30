@@ -42,3 +42,14 @@ test('the form builder for category fields hides the form settings', function ()
         ->assertDontSee('Formular öffnen')
         ->assertNoJavaScriptErrors();
 });
+
+test('a long category name is cut with an ellipsis in the category list', function (): void {
+    MapPointCategory::factory()->for($this->group)->create(['name' => str_repeat('Sehr langer Kategoriename ', 20)]);
+
+    $page = visit(route('mappoint-categories.index'))->assertNoJavaScriptErrors();
+
+    $name = $page->script('(() => { const el = document.querySelector("[data-test=category-name]"); return { scrollWidth: el.scrollWidth, clientWidth: el.clientWidth, overflow: getComputedStyle(el).textOverflow }; })()');
+
+    expect($name['overflow'])->toBe('ellipsis')
+        ->and($name['scrollWidth'])->toBeGreaterThan($name['clientWidth']);
+});

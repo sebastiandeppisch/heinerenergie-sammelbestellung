@@ -12,6 +12,7 @@ use App\Data\FormToMapPointFieldData;
 use App\Data\FormToMapPointMappingData;
 use App\Data\FormToMapPointSubcategoryData;
 use App\Enums\AdviceType;
+use App\Enums\FieldType;
 use App\Enums\FormType;
 use App\Models\FormDefinition;
 use App\Models\FormDefinitionToAdvice;
@@ -291,17 +292,69 @@ class FormDefinitionService
     /**
      * Create a FormDefinition from a template
      */
-    public function createFromTemplate(string $templateType, string $groupUuid): FormDefinition
+    /**
+     * @param  MapPointCategory|null  $mapPointCategory  Only for map point forms: the category of the points, whose fields the form asks for.
+     */
+    public function createFromTemplate(string $templateType, string $groupUuid, ?MapPointCategory $mapPointCategory = null): FormDefinition
     {
-        return DB::transaction(function () use ($templateType, $groupUuid): FormDefinition {
+        return DB::transaction(function () use ($templateType, $groupUuid, $mapPointCategory): FormDefinition {
             $group = Group::where('uuid', $groupUuid)->firstOrFail();
 
             return match ($templateType) {
                 'advice' => $this->createAdviceFormTemplate($group),
-                'map_point' => throw new InvalidArgumentException('Map Point template not yet implemented'),
+                'map_point' => $this->createMapPointFormTemplate($group, $mapPointCategory),
                 default => throw new InvalidArgumentException("Unknown template type: {$templateType}"),
             };
         });
+    }
+
+    /**
+     * A form that creates map points: title, description and location, and with a category one question per field
+     * of the category, already mapped to it. The form fields copy type, label and options of the category fields.
+     */
+    private function createMapPointFormTemplate(Group $group, ?MapPointCategory $category): FormDefinition
+    {
+        $formDefinition = new FormDefinition;
+        $formDefinition->name = $category === null ? 'Kartenpunkt-Formular für '.$group->name : 'Formular für '.$category->name;
+        $formDefinition->group()->associate($group);
+        $formDefinition->is_active = true;
+        $formDefinition->save();
+
+        $titleField = $formDefinition->fields()->create(['type' => FieldType::TEXT, 'label' => 'Titel', 'max_length' => 255, 'required' => true, 'sort_order' => 0]);
+        $descriptionField = $formDefinition->fields()->create(['type' => FieldType::TEXTAREA, 'label' => 'Beschreibung', 'required' => false, 'sort_order' => 1]);
+        $coordinateField = $formDefinition->fields()->create(['type' => FieldType::GEO_COORDINATE, 'label' => 'Standort', 'required' => true, 'sort_order' => 2]);
+
+        $creator = $formDefinition->mapPointCreator()->make();
+        $creator->titleField()->associate($titleField);
+        $creator->descriptionField()->associate($descriptionField);
+        $creator->coordinateField()->associate($coordinateField);
+        $creator->category()->associate($category);
+        $creator->save();
+
+        $sortOrder = 3;
+
+        foreach (app(MapPointFieldService::class)->fieldsOfCategory($category?->id) as $categoryField) {
+            $formField = $formDefinition->fields()->create([
+                'type' => $categoryField->type,
+                'label' => $categoryField->label,
+                'help_text' => $categoryField->help_text,
+                'placeholder' => $categoryField->placeholder,
+                'min_length' => $categoryField->min_length,
+                'max_length' => $categoryField->max_length,
+                'min_value' => $categoryField->min_value,
+                'max_value' => $categoryField->max_value,
+                'required' => false,
+                'sort_order' => $sortOrder++,
+            ]);
+
+            foreach ($categoryField->options as $option) {
+                $formField->options()->create(['label' => $option->label, 'value' => $option->value, 'sort_order' => $option->sort_order]);
+            }
+
+            $creator->fieldMappings()->create(['target_field_id' => $categoryField->id, 'source_field_id' => $formField->id]);
+        }
+
+        return $formDefinition->fresh();
     }
 
     /**
