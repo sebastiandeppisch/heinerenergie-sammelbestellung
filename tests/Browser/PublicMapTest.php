@@ -143,6 +143,25 @@ test('the table shows the coordinates instead of a dash when a point has no loca
         ->assertDontSee('–');
 });
 
+test('column filter on the public map table filters rows', function (): void {
+    $category = MapPointCategory::factory()->for($this->group)->withoutImage()->create();
+    MapPoint::factory()->for($this->group)->create(['published' => true, 'category_id' => $category->id, 'title' => 'Solaranlage Nord']);
+    MapPoint::factory()->for($this->group)->create(['published' => true, 'category_id' => $category->id, 'title' => 'Windrad Süd']);
+
+    $mapEmbed = MapEmbed::factory()->for($this->group)->create();
+    $mapEmbed->mapPointCategories()->sync([$category->id]);
+
+    visit(route('map.public', $mapEmbed))
+        ->click('Tabelle')
+        ->assertSee('Solaranlage Nord')
+        ->assertSee('Windrad Süd')
+        ->click('Suche pro Spalte')
+        ->fill('[data-test="filter-title"]', 'Solar')
+        ->assertSee('Solaranlage Nord')
+        ->assertDontSee('Windrad Süd')
+        ->assertNoJavaScriptErrors();
+});
+
 test('points of a category without an image are shown with the default marker', function (): void {
     $category = MapPointCategory::factory()->for($this->group)->withoutImage()->create();
     $mapEmbed = MapEmbed::factory()->for($this->group)->create(['zoom' => 12]);

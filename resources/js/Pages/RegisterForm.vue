@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
-import { defineOptions } from 'vue';
 import { route } from 'ziggy-js';
 import MainPublic from '../layouts/MainPublic.vue';
 import SingleCard from '../layouts/SingleCard.vue';
