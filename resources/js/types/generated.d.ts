@@ -161,11 +161,23 @@ advice_type_home_option_value: string | null,
 advice_type_virtual_option_value: string | null,
 default_group_id: string | null,
 };
+export type FormToMapPointFieldData = {
+target_field_id: string,
+source_field_id: string,
+};
 export type FormToMapPointMappingData = {
 enabled: boolean,
 title_field_id: string | null,
 description_field_id: string | null,
 coordinate_field_id: string | null,
+category_id: string | null,
+subcategory_field_id: string | null,
+subcategory_options: App.Data.FormToMapPointSubcategoryData[],
+field_mappings: App.Data.FormToMapPointFieldData[],
+};
+export type FormToMapPointSubcategoryData = {
+option_value: string,
+category_id: string,
 };
 export type GroupBaseData = {
 id: string,

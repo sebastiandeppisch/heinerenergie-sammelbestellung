@@ -6,13 +6,18 @@ namespace App\Http\Controllers;
 
 use App\Context\GroupContextContract;
 use App\Data\FormDefinitionData;
+use App\Data\FormFieldData;
+use App\Data\MapPointCategoryData;
 use App\Enums\FieldType;
 use App\Enums\FormType;
 use App\Http\Requests\StoreFormDefinitionFromTemplateRequest;
 use App\Http\Requests\UpsertFormDefinitionRequest;
 use App\Models\FormDefinition;
 use App\Models\Group;
+use App\Models\MapPointCategory;
 use App\Services\FormDefinitionService;
+use App\Services\MapPointFieldService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -51,7 +56,7 @@ class FormDefinitionController extends Controller
     /**
      * Show the form for creating a new form definition.
      */
-    public function create(Request $request): Response
+    public function create(Request $request, GroupContextContract $groupContext): Response
     {
         $groups = Group::all()->map(fn (Group $group): array => [
             'id' => $group->uuid,
@@ -66,6 +71,7 @@ class FormDefinitionController extends Controller
             'isEdit' => false,
             'groups' => $groups,
             'initialType' => $initialType,
+            ...$this->mapPointTargetProps($groupContext->getCurrentGroup()),
         ]);
     }
 
@@ -86,7 +92,7 @@ class FormDefinitionController extends Controller
      */
     public function edit(FormDefinition $formDefinition): Response
     {
-        $formDefinition->load('fields.options', 'adviceCreator.firstNameField', 'adviceCreator.lastNameField', 'adviceCreator.addressField', 'adviceCreator.emailField', 'adviceCreator.phoneField', 'adviceCreator.adviceTypeField', 'mapPointCreator.titleField', 'mapPointCreator.descriptionField', 'mapPointCreator.coordinateField');
+        $formDefinition->load('fields.options', 'adviceCreator.firstNameField', 'adviceCreator.lastNameField', 'adviceCreator.addressField', 'adviceCreator.emailField', 'adviceCreator.phoneField', 'adviceCreator.adviceTypeField', 'mapPointCreator.titleField', 'mapPointCreator.descriptionField', 'mapPointCreator.coordinateField', 'mapPointCreator.category', 'mapPointCreator.subcategoryField', 'mapPointCreator.subcategories.category', 'mapPointCreator.fieldMappings.targetField', 'mapPointCreator.fieldMappings.sourceField');
         $formDefinitionData = FormDefinitionData::fromModel($formDefinition);
 
         $groups = Group::all()->map(fn (Group $group): array => [
@@ -106,7 +112,31 @@ class FormDefinitionController extends Controller
             'isEdit' => true,
             'groups' => $groups,
             'mapPointCategory' => $mapPointCategory === null ? null : ['id' => $mapPointCategory->uuid, 'name' => $mapPointCategory->name],
+            ...$this->mapPointTargetProps($formDefinition->group),
         ]);
+    }
+
+    /**
+     * The categories a form of the group can create its points in, with the fields each of them has, and which form
+     * field types can fill which category field.
+     *
+     * @return array{mapPointCategories: array<int, MapPointCategoryData>, mapPointFieldsByCategory: array<string, array<int, FormFieldData>>, mapPointFieldSourceTypes: array<string, array<int, FieldType>>}
+     */
+    private function mapPointTargetProps(?Group $group): array
+    {
+        $categories = $group === null ? new Collection : MapPointCategory::usableInGroup($group)->with('group')->withCount('mapPoints')->get();
+        $tree = MapPointCategory::tree();
+
+        return [
+            'mapPointCategories' => $categories->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel($category, tree: $tree))->all(),
+            'mapPointFieldsByCategory' => array_map(
+                fn (Collection $fields): array => $fields->map(FormFieldData::fromModel(...))->all(),
+                app(MapPointFieldService::class)->fieldsByCategory($categories, $tree),
+            ),
+            'mapPointFieldSourceTypes' => collect(FieldType::typesForMapPointFields)
+                ->mapWithKeys(fn (FieldType $type): array => [$type->value => $type->mapPointFieldSourceTypes()])
+                ->all(),
+        ];
     }
 
     /**

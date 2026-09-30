@@ -95,13 +95,13 @@ class MapPointController extends Controller
         ]);
     }
 
-    public function edit(MapPoint $mappoint, MapPointVisibilityService $visibility): Response
+    public function edit(MapPoint $mappoint, MapPointVisibilityService $visibility, MapPointFieldService $fieldService): Response
     {
         $this->authorize('update', $mappoint);
 
         return Inertia::render('MapPoints/Upsert', [
             'mapPoint' => MapPointData::fromModel($mappoint->load(['category', 'group']), onlyPublic: false),
-            ...$this->formProps($visibility),
+            ...$this->formProps($visibility, $fieldService),
         ]);
     }
 
@@ -128,11 +128,11 @@ class MapPointController extends Controller
         return redirect()->back()->with('info', 'Der Kartenpunkt '.e($name).' wurde gelöscht');
     }
 
-    public function create(MapPointVisibilityService $visibility): Response
+    public function create(MapPointVisibilityService $visibility, MapPointFieldService $fieldService): Response
     {
         $this->authorize('create', MapPoint::class);
 
-        return Inertia::render('MapPoints/Upsert', $this->formProps($visibility));
+        return Inertia::render('MapPoints/Upsert', $this->formProps($visibility, $fieldService));
     }
 
     public function store(UpsertMapPointRequest $request, MapPointFieldService $fieldService): RedirectResponse
@@ -154,21 +154,15 @@ class MapPointController extends Controller
      *
      * @return array{categories: Collection<int, MapPointCategoryData>, groups: Collection<int, GroupBaseData>, usableCategoryIdsByGroup: array<string, array<int, string>>, fieldsByCategory: array<string, array<int, FormFieldData>>, publicFieldIds: array<int, string>}
      */
-    private function formProps(MapPointVisibilityService $visibility): array
+    private function formProps(MapPointVisibilityService $visibility, MapPointFieldService $fieldService): array
     {
         $categories = $visibility->relevantCategories()->with('group')->get();
         $groups = $visibility->selectableGroups();
         $tree = MapPointCategory::tree();
-        $formDefinitionIds = $categories->mapWithKeys(fn (MapPointCategory $category): array => [$category->uuid => $tree->fieldsFormDefinitionId($category->id)]);
-        $fieldsByFormDefinition = FormField::whereIn('form_definition_id', $formDefinitionIds->filter())
-            ->with('options')
-            ->orderBy('sort_order')
-            ->get()
-            ->groupBy('form_definition_id');
-
-        $fieldsByCategory = $formDefinitionIds
-            ->map(fn (?int $formDefinitionId): array => $fieldsByFormDefinition->get($formDefinitionId, collect())->map(FormFieldData::fromModel(...))->values()->all())
-            ->all();
+        $fieldsByCategory = array_map(
+            fn (EloquentCollection $fields): array => $fields->map(FormFieldData::fromModel(...))->all(),
+            $fieldService->fieldsByCategory($categories, $tree),
+        );
 
         $publicFieldIds = FormField::whereIn('id', MapPointCategory::publicFieldIds())->pluck('uuid')->all();
 

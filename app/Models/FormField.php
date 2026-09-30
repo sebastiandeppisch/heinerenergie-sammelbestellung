@@ -229,6 +229,13 @@ class FormField extends Model
         ChecklistEntryField::where('form_field_id', $this->id)->update(['form_field_id' => null]);
         MapPointField::where('form_field_id', $this->id)->update(['form_field_id' => null]);
         DB::table('map_point_category_public_fields')->where('form_field_id', $this->id)->delete();
+        FormDefinitionToMapPointField::where('target_field_id', $this->id)->orWhere('source_field_id', $this->id)->delete();
+
+        // Without the field, its options can no longer pick a sub category.
+        FormDefinitionToMapPoint::where('subcategory_field_id', $this->id)->get()->each(function (FormDefinitionToMapPoint $mapping): void {
+            $mapping->subcategories()->delete();
+            $mapping->subcategoryField()->dissociate()->save();
+        });
 
         FormDefinitionToAdvice::where('advice_type_field_id', $this->id)->update(['advice_type_field_id' => null]);
 

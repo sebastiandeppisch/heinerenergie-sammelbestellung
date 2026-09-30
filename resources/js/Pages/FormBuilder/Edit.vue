@@ -37,6 +37,9 @@ const props = defineProps<{
     initialType?: FormType;
     /** Set when the definition holds the fields of a map point category. */
     mapPointCategory?: { id: string; name: string } | null;
+    mapPointCategories: Array<App.Data.MapPointCategoryData>;
+    mapPointFieldsByCategory: Record<string, Array<FormFieldData>>;
+    mapPointFieldSourceTypes: Partial<Record<FieldType, Array<FieldType>>>;
 }>();
 
 const formDefinition = reactive<FormDefinitionData>(
@@ -440,7 +443,12 @@ const allowedEmbedDomainsText = computed<string>({
                 </TabsContent>
 
                 <TabsContent value="targets">
-                    <FormTargets v-model:form-definition="formDefinition" />
+                    <FormTargets
+                        v-model:form-definition="formDefinition"
+                        :map-point-categories="mapPointCategories"
+                        :map-point-fields-by-category="mapPointFieldsByCategory"
+                        :map-point-field-source-types="mapPointFieldSourceTypes"
+                    />
                 </TabsContent>
             </Tabs>
         </div>

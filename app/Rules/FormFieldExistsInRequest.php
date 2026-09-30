@@ -25,7 +25,12 @@ class FormFieldExistsInRequest implements ValidationRule
             'map_point_mapping.title_field_id' => 'Titel Feld',
             'map_point_mapping.description_field_id' => 'Beschreibung Feld',
             'map_point_mapping.coordinate_field_id' => 'Koordinaten Feld',
+            'map_point_mapping.subcategory_field_id' => 'Feld für die Unterkategorie',
         ];
+
+        if (str_starts_with($attribute, 'map_point_mapping.field_mappings.')) {
+            return 'Formularfeld für ein Kategoriefeld';
+        }
 
         return $mapping[$attribute] ?? $attribute;
     }

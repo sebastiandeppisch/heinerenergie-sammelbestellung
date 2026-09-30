@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import MapPointCategoryMapping from '@/components/MapPointCategoryMapping.vue';
 import { Badge } from '@/shadcn/components/ui/badge';
 import { Card, CardContent } from '@/shadcn/components/ui/card';
 import { Checkbox } from '@/shadcn/components/ui/checkbox';
@@ -14,6 +15,20 @@ import { computed } from 'vue';
 type FormDefinitionData = App.Data.FormDefinitionData;
 
 const formDefinition = defineModel<FormDefinitionData>('formDefinition', { required: true });
+
+withDefaults(
+    defineProps<{
+        /** The categories map points of this form can be created in. */
+        mapPointCategories?: Array<App.Data.MapPointCategoryData>;
+        mapPointFieldsByCategory?: Record<string, Array<App.Data.FormFieldData>>;
+        mapPointFieldSourceTypes?: Partial<Record<App.Enums.FieldType, Array<App.Enums.FieldType>>>;
+    }>(),
+    {
+        mapPointCategories: () => [],
+        mapPointFieldsByCategory: () => ({}),
+        mapPointFieldSourceTypes: () => ({}),
+    },
+);
 
 /**
  * Mirrors the label of each mapping select below, so a field named as missing is
@@ -483,6 +498,15 @@ const adviceTypeSelectValue = computed({
                                 </Select>
                             </FormItem>
                         </div>
+
+                        <MapPointCategoryMapping
+                            v-model:mapping="formDefinition.map_point_mapping"
+                            :form-fields="formDefinition.fields"
+                            :categories="mapPointCategories"
+                            :fields-by-category="mapPointFieldsByCategory"
+                            :field-source-types="mapPointFieldSourceTypes"
+                            class="border-t pt-4"
+                        />
                     </div>
                 </CardContent>
             </Card>

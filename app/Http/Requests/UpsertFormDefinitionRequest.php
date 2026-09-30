@@ -9,9 +9,11 @@ use App\Enums\FieldType;
 use App\Enums\FormType;
 use App\Models\FormDefinition;
 use App\Models\Group;
+use App\Models\MapPointCategory;
 use App\Rules\FormFieldExistsInRequest;
 use App\Rules\Hostname;
 use App\Rules\MappedFormFieldMustBeRequired;
+use App\Services\MapPointFieldService;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -109,6 +111,17 @@ class UpsertFormDefinitionRequest extends FormRequest
             $rules['fields.*.type'] = ['required', Rule::enum(FieldType::class)->only(FieldType::typesForMapPointFields)];
         }
 
+        if ($this->isMapPointMappingEnabled()) {
+            $rules['map_point_mapping.category_id'] = ['nullable', 'uuid', 'exists:map_point_categories,uuid'];
+            $rules['map_point_mapping.subcategory_field_id'] = ['nullable', 'string', new FormFieldExistsInRequest];
+            $rules['map_point_mapping.subcategory_options'] = ['array'];
+            $rules['map_point_mapping.subcategory_options.*.option_value'] = ['required', 'string'];
+            $rules['map_point_mapping.subcategory_options.*.category_id'] = ['required', 'uuid', 'exists:map_point_categories,uuid'];
+            $rules['map_point_mapping.field_mappings'] = ['array'];
+            $rules['map_point_mapping.field_mappings.*.target_field_id'] = ['required', 'uuid', 'exists:form_fields,uuid'];
+            $rules['map_point_mapping.field_mappings.*.source_field_id'] = ['required', 'string', new FormFieldExistsInRequest];
+        }
+
         if ($this->has('advice_mapping') && ! is_null($this->input('advice_mapping')) && $this->input('advice_mapping.enabled') === true) {
             $rules['advice_mapping.first_name_field_id'] = ['nullable', 'string', new FormFieldExistsInRequest];
             $rules['advice_mapping.last_name_field_id'] = ['nullable', 'string', new FormFieldExistsInRequest];
@@ -155,7 +168,80 @@ class UpsertFormDefinitionRequest extends FormRequest
                     $validator->errors()->add('type', 'Der Typ von Kategorie-Feldern kann nicht geändert werden.');
                 }
             },
+            function (Validator $validator): void {
+                if ($this->isMapPointMappingEnabled() && ! $validator->errors()->hasAny(['group_id', 'map_point_mapping.*'])) {
+                    $this->validateMapPointCategoryMapping($validator);
+                }
+            },
         ];
+    }
+
+    private function isMapPointMappingEnabled(): bool
+    {
+        return $this->boolean('map_point_mapping.enabled');
+    }
+
+    /**
+     * Checks the category of created points and which form fields fill its fields. Sub categories picked by an option
+     * must lie below the category and use its fields, because the field mappings refer to the fields of the category.
+     */
+    private function validateMapPointCategoryMapping(Validator $validator): void
+    {
+        $categoryUuid = $this->input('map_point_mapping.category_id');
+
+        if ($categoryUuid === null) {
+            return;
+        }
+
+        $category = MapPointCategory::where('uuid', $categoryUuid)->firstOrFail();
+        $group = Group::where('uuid', $this->input('group_id'))->firstOrFail();
+
+        if (! $category->isUsableInGroup($group)) {
+            $validator->errors()->add('map_point_mapping.category_id', 'Diese Kategorie ist für die Initiative des Formulars nicht verfügbar.');
+
+            return;
+        }
+
+        $submittedFields = $this->collect('fields')->keyBy('id');
+        $tree = MapPointCategory::tree();
+
+        $subcategoryField = $submittedFields->get($this->input('map_point_mapping.subcategory_field_id'));
+
+        if ($subcategoryField !== null && ! in_array($subcategoryField['type'] ?? null, [FieldType::SELECT->value, FieldType::RADIO->value], true)) {
+            $validator->errors()->add('map_point_mapping.subcategory_field_id', 'Die Unterkategorie kann nur ein Auswahlfeld oder Radio-Buttons bestimmen.');
+        }
+
+        $subcategoryOptions = $this->collect('map_point_mapping.subcategory_options');
+        $subcategories = MapPointCategory::whereIn('uuid', $subcategoryOptions->pluck('category_id'))->get()->keyBy('uuid');
+
+        foreach ($subcategoryOptions as $index => $option) {
+            $subcategory = $subcategories[$option['category_id']];
+            $isBelowWithSameFields = in_array($subcategory->id, $tree->descendantIds($category->id), true)
+                && $tree->fieldsCategoryId($subcategory->id) === $tree->fieldsCategoryId($category->id);
+
+            if (! $isBelowWithSameFields) {
+                $validator->errors()->add(
+                    "map_point_mapping.subcategory_options.{$index}.category_id",
+                    "Die Unterkategorie {$subcategory->name} muss unter der Kategorie {$category->name} liegen und deren Felder übernehmen.",
+                );
+            }
+        }
+
+        $categoryFields = app(MapPointFieldService::class)->fieldsOfCategory($category->id, $tree)->keyBy('uuid');
+
+        foreach ($this->input('map_point_mapping.field_mappings', []) as $index => $fieldMapping) {
+            $targetField = $categoryFields->get($fieldMapping['target_field_id']);
+            $sourceType = FieldType::tryFrom($submittedFields->get($fieldMapping['source_field_id'])['type'] ?? '');
+
+            if ($targetField === null) {
+                $validator->errors()->add("map_point_mapping.field_mappings.{$index}.target_field_id", 'Dieses Feld gehört nicht zur Kategorie der Kartenpunkte.');
+            } elseif ($sourceType === null || ! in_array($sourceType, $targetField->type->mapPointFieldSourceTypes(), true)) {
+                $validator->errors()->add(
+                    "map_point_mapping.field_mappings.{$index}.source_field_id",
+                    "Das Formularfeld passt nicht zum Typ des Kategoriefelds {$targetField->label}.",
+                );
+            }
+        }
     }
 
     private function isMapPointFieldsDefinition(): bool

@@ -95,7 +95,7 @@ class FormSubmitController extends Controller
      * @param  string[]  $storedImagePaths
      * @return string|int|string[]|null
      */
-    private function getValueFromField(FormField $field, Request $request, FormSubmission $submission, array &$storedImagePaths): string|int|array|null
+    private function getValueFromField(FormField $field, Request $request, FormSubmission $submission, array &$storedImagePaths): string|int|float|array|null
     {
         if ($field->type === FieldType::IMAGE) {
             return $this->storeImages($field, $request, $submission, $storedImagePaths);
@@ -103,10 +103,18 @@ class FormSubmitController extends Controller
 
         return match ($field->type) {
             FieldType::TEXT => (string) $request->string($field->uuid),
-            FieldType::NUMBER => $request->integer($field->uuid),
+            FieldType::NUMBER => $this->toNumberOrNull($request->input($field->uuid)),
             FieldType::ADDRESS => $this->normalizeAddress($request->input($field->uuid)),
             default => $request->input($field->uuid),
         };
+    }
+
+    /**
+     * Keeps decimals such as 9.9 kWp, and stores an empty field as empty instead of 0.
+     */
+    private function toNumberOrNull(mixed $value): int|float|null
+    {
+        return is_numeric($value) ? $value + 0 : null;
     }
 
     /**

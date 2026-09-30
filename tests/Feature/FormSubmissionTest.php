@@ -67,6 +67,27 @@ test('form with number field can be submitted', function (): void {
     $this->assertSame(123, $field->value);
 });
 
+test('a number field keeps decimals and stays empty when nothing is entered', function (mixed $input, int|float|null $stored): void {
+    $formDefinition = FormDefinition::factory()->create();
+    $formField = FormField::factory()->create([
+        'form_definition_id' => $formDefinition->id,
+        'type' => FieldType::NUMBER,
+        'label' => 'PV-Leistung (kWp)',
+        'required' => false,
+        'min_value' => null,
+        'max_value' => null,
+    ]);
+
+    $this->post(route('form.submit', ['formDefinition' => $formDefinition]), [
+        $formField->uuid => $input,
+    ])->assertSessionHasNoErrors();
+
+    expect(SubmissionField::sole()->value)->toBe($stored);
+})->with([
+    'decimal' => ['9.9', 9.9],
+    'nothing entered' => [null, null],
+]);
+
 test('form with single select can be submitted', function (): void {
     $formDefinition = FormDefinition::factory()->create();
     $formField = FormField::factory()->create([

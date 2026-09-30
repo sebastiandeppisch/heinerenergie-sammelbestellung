@@ -12,6 +12,7 @@ use App\Models\MapPointField;
 use App\ValueObjects\MapPointCategoryTree;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
 /**
@@ -36,6 +37,27 @@ class MapPointFieldService
         }
 
         return FormField::where('form_definition_id', $formDefinitionId)->with('options')->orderBy('sort_order')->get();
+    }
+
+    /**
+     * The fields of each category keyed by the category's uuid, loaded with one query for all categories.
+     *
+     * @param  Collection<int, MapPointCategory>  $categories
+     * @return array<string, Collection<int, FormField>>
+     */
+    public function fieldsByCategory(Collection $categories, ?MapPointCategoryTree $tree = null): array
+    {
+        $tree ??= MapPointCategory::tree();
+        $formDefinitionIds = $categories->mapWithKeys(fn (MapPointCategory $category): array => [$category->uuid => $tree->fieldsFormDefinitionId($category->id)]);
+        $fieldsByFormDefinition = FormField::whereIn('form_definition_id', $formDefinitionIds->filter())
+            ->with('options')
+            ->orderBy('sort_order')
+            ->get()
+            ->groupBy('form_definition_id');
+
+        return $formDefinitionIds
+            ->map(fn (?int $formDefinitionId): Collection => $fieldsByFormDefinition->get($formDefinitionId) ?? new Collection)
+            ->all();
     }
 
     /**
@@ -103,6 +125,32 @@ class MapPointFieldService
             ->reject(fn (MapPointField $field): bool => in_array($field->id, $activeIds, true))
             ->sortBy('sort_order')
             ->values();
+    }
+
+    /**
+     * Drops the values that are not valid for their field, so the other values can still be stored.
+     *
+     * @param  Collection<int, FormField>  $fields
+     * @param  array<string, mixed>  $valuesByFieldUuid
+     * @return array<string, mixed>
+     */
+    public function validValues(Collection $fields, array $valuesByFieldUuid): array
+    {
+        $validValues = [];
+
+        foreach ($fields as $field) {
+            if (! array_key_exists($field->uuid, $valuesByFieldUuid)) {
+                continue;
+            }
+
+            $data = ['values' => [$field->uuid => $valuesByFieldUuid[$field->uuid]]];
+
+            if (Validator::make($data, $this->validationRules(new Collection([$field]), 'values'))->passes()) {
+                $validValues[$field->uuid] = $valuesByFieldUuid[$field->uuid];
+            }
+        }
+
+        return $validValues;
     }
 
     /**

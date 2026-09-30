@@ -8,7 +8,9 @@ use App\Data\FormDefinitionData;
 use App\Data\FormFieldData;
 use App\Data\FormFieldOptionData;
 use App\Data\FormToAdviceMappingData;
+use App\Data\FormToMapPointFieldData;
 use App\Data\FormToMapPointMappingData;
+use App\Data\FormToMapPointSubcategoryData;
 use App\Enums\AdviceType;
 use App\Enums\FormType;
 use App\Models\FormDefinition;
@@ -17,6 +19,7 @@ use App\Models\FormDefinitionToMapPoint;
 use App\Models\FormField;
 use App\Models\FormFieldOption;
 use App\Models\Group;
+use App\Models\MapPointCategory;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -129,7 +132,10 @@ class FormDefinitionService
             $formDefinition = FormDefinition::create($data);
             foreach ($formDefinitionData->fields as $field) {
                 $data = collect($field->toArray())->forget(['id', 'options', 'form_definition_id'])->toArray();
-                $formField = $formDefinition->fields()->create($data);
+                // Keeping the id the client sent lets the mappings under "Ziele" refer to fields that are created now.
+                $formField = $formDefinition->fields()->make($data);
+                $formField->uuid = $this->toUuidOrNull($field->id);
+                $formField->save();
                 foreach ($field->options as $option) {
                     $data = collect($option)->forget(['id'])->toArray();
                     $formField->options()->create($data);
@@ -237,7 +243,49 @@ class FormDefinitionService
             $creator->coordinateField()->associate($coordinate);
         }
 
+        $category = $mapping->category_id === null ? null : MapPointCategory::where('uuid', $mapping->category_id)->first();
+        $subcategoryField = $category === null || $mapping->subcategory_field_id === null
+            ? null
+            : FormField::where('uuid', $mapping->subcategory_field_id)->first();
+
+        $creator->category()->associate($category);
+        $creator->subcategoryField()->associate($subcategoryField);
         $creator->save();
+
+        $this->updateMapPointSubcategories($creator, $subcategoryField === null ? new Collection : $mapping->subcategory_options);
+        $this->updateMapPointFieldMappings($creator, $category === null ? new Collection : $mapping->field_mappings);
+    }
+
+    /**
+     * @param  Collection<int, FormToMapPointSubcategoryData>  $options
+     */
+    private function updateMapPointSubcategories(FormDefinitionToMapPoint $creator, Collection $options): void
+    {
+        $creator->subcategories()->delete();
+        $categoryIds = MapPointCategory::whereIn('uuid', $options->pluck('category_id'))->pluck('id', 'uuid');
+
+        foreach ($options as $option) {
+            $creator->subcategories()->create([
+                'option_value' => $option->option_value,
+                'map_point_category_id' => $categoryIds[$option->category_id],
+            ]);
+        }
+    }
+
+    /**
+     * @param  Collection<int, FormToMapPointFieldData>  $fieldMappings
+     */
+    private function updateMapPointFieldMappings(FormDefinitionToMapPoint $creator, Collection $fieldMappings): void
+    {
+        $creator->fieldMappings()->delete();
+        $fieldIds = FormField::whereIn('uuid', [...$fieldMappings->pluck('target_field_id'), ...$fieldMappings->pluck('source_field_id')])->pluck('id', 'uuid');
+
+        foreach ($fieldMappings as $fieldMapping) {
+            $creator->fieldMappings()->create([
+                'target_field_id' => $fieldIds[$fieldMapping->target_field_id],
+                'source_field_id' => $fieldIds[$fieldMapping->source_field_id],
+            ]);
+        }
     }
 
     /**

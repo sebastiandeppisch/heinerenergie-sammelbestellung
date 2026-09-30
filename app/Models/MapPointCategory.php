@@ -190,6 +190,10 @@ class MapPointCategory extends Model
             $this->children()->update(['parent_id' => $this->parent_id]);
             $this->mapPoints()->update(['category_id' => $this->parent_id]);
 
+            // Forms create their points in the parent from now on, like the points of this category moved there.
+            FormDefinitionToMapPoint::where('map_point_category_id', $this->id)->update(['map_point_category_id' => $this->parent_id]);
+            FormDefinitionToMapPointSubcategory::where('map_point_category_id', $this->id)->delete();
+
             $this->publicFields()->detach();
             $formDefinition = $this->formDefinition;
             $isDeleted = parent::delete();

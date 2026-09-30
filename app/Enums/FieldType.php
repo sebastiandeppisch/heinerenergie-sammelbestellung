@@ -60,6 +60,22 @@ enum FieldType: string
         self::DATE,
     ];
 
+    /**
+     * The form field types whose values can fill a category field of this type, when a form creates a map point.
+     * Values of fields with options are matched by the label of the option.
+     *
+     * @return array<int, self>
+     */
+    public function mapPointFieldSourceTypes(): array
+    {
+        return match ($this) {
+            self::TEXT => [self::TEXT, self::TEXTAREA, self::EMAIL, self::PHONE],
+            self::TEXTAREA => [self::TEXT, self::TEXTAREA],
+            self::SELECT, self::RADIO => [self::SELECT, self::RADIO],
+            default => [$this],
+        };
+    }
+
     public function supportsOptions(): bool
     {
         return in_array($this, self::typesWithOptions, true);
