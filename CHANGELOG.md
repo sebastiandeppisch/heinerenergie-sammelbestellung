@@ -1,5 +1,36 @@
 # Changelog
 
+## [2026-09.1] - 2026-09-03
+
+### Neue Funktionen
+
+#### Für Administratoren
+
+- **Beratungsgebiet aus Postleitzahlen erstellen.** Statt das Gebiet einer Gruppe von Hand auf der Karte zu zeichnen, können einfach die Postleitzahlen eingegeben werden – aneinandergrenzende Postleitzahlgebiete werden zu einem Gebiet zusammengefasst. Die Postleitzahlen bleiben gespeichert und lassen sich jederzeit ergänzen oder entfernen. Ein bestehendes Gebiet kann außerdem nachträglich Eckpunkt für Eckpunkt angepasst werden und wird in der Farbe der Gruppe dargestellt.
+- **Karten-Einbettung einer Gruppe zuordnen.** Jede eingebettete Karte gehört zu einer Gruppe und wird in deren Farbe dargestellt – auch auf der öffentlich eingebundenen Seite. #58
+- **Seitenverhältnis der Einbettung einstellen.** Für jede Einbettung lässt sich aus mehreren Vorgaben wählen, wie hoch der Inhalt im Verhältnis zur Breite dargestellt wird. Karte und Tabelle nutzen dasselbe Verhältnis, sodass die Höhe beim Umschalten zwischen beiden Ansichten gleich bleibt; die Tabelle füllt den Bereich jetzt vollständig aus. Die Vorschau beim Bearbeiten zeigt das gewählte Verhältnis direkt an. #58
+- **Neue Gruppen sind sofort einsatzbereit.** Beim Anlegen einer Gruppe werden die Standard-Beratungsstatus automatisch angelegt und können anschließend verfeinert werden.
+- **Einfachere Erstinbetriebnahme.** Das erste registrierte Benutzerkonto wird automatisch Administrator der Standardgruppe.
+- **Fehlende Formular-Zuordnungen werden benannt.** Ist ein Formularziel unvollständig, steht jetzt direkt dabei, welche Zuordnungen noch fehlen, statt nur „Unvollständig“ anzuzeigen.
+
+#### Für Berater:innen
+
+- **Verständliche Meldung bei fehlenden Rechten.** Statt einer nackten Fehlerseite erscheint ein Hinweis, warum der Zugriff nicht möglich ist – zusammen mit der Möglichkeit, direkt in eine Rolle zu wechseln, die den Zugriff erlaubt.
+- **Beratungstabelle und Karte füllen den Bildschirm.** Beide nutzen die volle Fensterhöhe, ohne dass die Seite zusätzlich scrollt, und passen sich beim Verkleinern des Fensters oder Einklappen der Seitenleiste korrekt an.
+- **Klarere Anzeige des eigenen Beratungsgebiets.** Wird die Adresse im Profil geändert, weist ein Hinweis darauf hin, dass das Gebiet erst gespeichert werden muss, damit die Karte aktuell ist. Die Karte passt ihren Ausschnitt außerdem an das Beratungsgebiet an.
+
+### Fehlerbehebungen
+
+- Optionale Formularfelder konnten nicht leer abgeschickt werden – Formulare mit unausgefüllten optionalen Feldern wurden abgelehnt. Eine leere Adresse wird jetzt akzeptiert und als „Keine Adresse angegeben“ dargestellt.
+- Beim Anlegen einer neuen Beratung ließ sich der Status nicht setzen.
+- Beim Anlegen einer neuen Beratung ließen sich die Auswahlfelder nicht per Mausklick bedienen, sondern nur über die Tabulatortaste erreichen.
+- Im eigenen Profil wird auf der Karte jetzt das Symbol der eigenen Gruppe als Markierung angezeigt statt des Standardsymbols.
+- Lange Beratungstitel werden jetzt abgekürzt, statt aus der Ansicht zu laufen.
+- Ein Beratungsgebiet lässt sich auch dann zeichnen, wenn die Karte noch geladen wird.
+- Die Anwendung funktioniert wieder fehlerfrei, wenn keine Nextcloud-Verbindung eingerichtet ist.
+- Schlägt das Lösen einer Nextcloud-Ordnerverknüpfung fehl, wird der Grund angezeigt, statt dass der Klick wirkungslos erscheint.
+- Das Speichern einer Beratung funktioniert wieder als normale:r Benutzer:in; auch die Dashboard-Diagramme werden wieder zuverlässig aus dem Zwischenspeicher geladen.
+
 ## [2026-08.1] - 2026-08-19
 
 ### Neue Funktionen

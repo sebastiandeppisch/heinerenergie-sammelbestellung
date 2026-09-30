@@ -11,15 +11,21 @@ import { Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableR
 import { TooltipProvider } from '@/shadcn/components/ui/tooltip';
 import { categoryPath, isShownWithAncestors } from '@/utils/categoryTree';
 import { ChevronDown, ChevronRight, ChevronUp, Filter } from '@lucide/vue';
+import { filterFns, sortFns } from '@/lib/tableFns';
 import {
+    columnFilteringFeature,
+    columnVisibilityFeature,
     createColumnHelper,
+    createFilteredRowModel,
+    createSortedRowModel,
     FlexRender,
-    getCoreRowModel,
-    getFilteredRowModel,
-    getSortedRowModel,
-    useVueTable,
+    globalFilteringFeature,
+    rowSortingFeature,
+    tableFeatures,
+    useTable,
     type ColumnFiltersState,
     type SortingState,
+    type Updater,
 } from '@tanstack/vue-table';
 import { computed, reactive, ref, watch } from 'vue';
 
@@ -74,9 +80,20 @@ const columnFilters = ref<ColumnFiltersState>([]);
 const sorting = ref<SortingState>([]);
 const showFilters = ref(false);
 
-const columnHelper = createColumnHelper<MapPointRow>();
+const features = tableFeatures({
+    rowSortingFeature,
+    columnVisibilityFeature,
+    columnFilteringFeature,
+    globalFilteringFeature,
+    sortedRowModel: createSortedRowModel(),
+    sortFns,
+    filteredRowModel: createFilteredRowModel(),
+    filterFns,
+});
 
-const columns = [
+const columnHelper = createColumnHelper<typeof features, MapPointRow>();
+
+const columns = columnHelper.columns([
     columnHelper.accessor((row) => row.categoryName, {
         id: 'category',
         header: 'Kategorie',
@@ -104,12 +121,13 @@ const columns = [
         enableColumnFilter: false,
         enableSorting: false,
     }),
-];
+]);
 
 /** The category fields are shown in a detail row, so the table does not get wider with every field. */
 const { isExpanded, toggleExpanded } = useExpandedIds();
 
-const table = useVueTable({
+const table = useTable({
+    features,
     get data() {
         return rows.value;
     },
@@ -126,18 +144,15 @@ const table = useVueTable({
         },
         columnVisibility: { fields: false },
     },
-    onSortingChange: (updater) => {
+    onSortingChange: (updater: Updater<SortingState>) => {
         sorting.value = typeof updater === 'function' ? updater(sorting.value) : updater;
     },
-    onColumnFiltersChange: (updater) => {
+    onColumnFiltersChange: (updater: Updater<ColumnFiltersState>) => {
         columnFilters.value = typeof updater === 'function' ? updater(columnFilters.value) : updater;
     },
-    onGlobalFilterChange: (value) => {
+    onGlobalFilterChange: (value: string) => {
         globalFilter.value = value;
     },
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
 });
 
 watch(
@@ -206,8 +221,9 @@ watch(
                                 <TableHead v-for="header in table.getHeaderGroups()[0].headers" :key="`f-${header.id}`" class="py-1">
                                     <Input
                                         v-if="header.column.getCanFilter() && header.column.id !== 'category'"
-                                        :value="(header.column.getFilterValue() as string) ?? ''"
-                                        @input="(e: Event) => header.column.setFilterValue((e.target as HTMLInputElement).value)"
+                                        :model-value="(header.column.getFilterValue() as string) ?? ''"
+                                        @update:model-value="(v) => header.column.setFilterValue(String(v))"
+                                        :data-test="`filter-${header.column.id}`"
                                         class="h-6 text-xs"
                                         placeholder="Filter..."
                                     />

@@ -6,8 +6,6 @@ use App\Exceptions\DatabaseBackupException;
 use App\Services\MysqlDumper;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;
-use PDO;
-use Throwable;
 
 /**
  * A dump can only be proven by restoring it, and a restore drops and recreates

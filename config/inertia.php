@@ -2,7 +2,7 @@
 
 return [
     'pages' => [
-        'ensure_pages_exist' => true,
+        'ensure_pages_exist' => env('APP_ENV', 'production') === 'local',
         'paths' => [
             resource_path('js/Pages'),
         ],

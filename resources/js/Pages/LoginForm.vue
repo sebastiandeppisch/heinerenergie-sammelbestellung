@@ -5,7 +5,7 @@ import { Checkbox } from '@/shadcn/components/ui/checkbox';
 import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
 import { Link, useForm, usePage } from '@inertiajs/vue3';
-import { defineOptions, onMounted } from 'vue';
+import { onMounted } from 'vue';
 import { toast } from 'vue-sonner';
 import { route } from 'ziggy-js';
 import MainPublic from '../layouts/MainPublic.vue';

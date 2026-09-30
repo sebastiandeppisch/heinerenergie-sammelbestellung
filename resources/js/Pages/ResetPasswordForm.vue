@@ -4,7 +4,6 @@ import { Button } from '@/shadcn/components/ui/button';
 import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
 import { Link, useForm } from '@inertiajs/vue3';
-import { defineOptions } from 'vue';
 import { route } from 'ziggy-js';
 import MainPublic from '../layouts/MainPublic.vue';
 import SingleCard from '../layouts/SingleCard.vue';
