@@ -55,7 +55,7 @@
         "vuedraggable": "^4.1.0",
         "vuex": "^4.0.2",
         "ziggy-js": "^2.6.3",
-        "zod": "^3.25.23"
+        "zod": "^4.6.5"
     },
     "devDependencies": {
         "@eslint/js": "^10.0.0",
