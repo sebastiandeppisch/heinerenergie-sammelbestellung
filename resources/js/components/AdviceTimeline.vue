@@ -53,7 +53,6 @@ const submitComment = () => {
 
 <style scoped>
 .timeline-card {
-    padding: 20px;
     max-width: 600px;
 }
 

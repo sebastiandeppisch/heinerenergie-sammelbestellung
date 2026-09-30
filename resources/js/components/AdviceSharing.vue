@@ -72,7 +72,7 @@ async function saveAdvisors() {
 </script>
 
 <template>
-    <div class="sharing-container space-y-4">
+    <div class="space-y-4">
         <div>
             <Label class="mb-2 block">Teilen mit</Label>
             <Combobox v-model:open="open" :ignore-filter="true">
@@ -127,11 +127,6 @@ async function saveAdvisors() {
 </template>
 
 <style scoped>
-.sharing-container {
-    padding: 0 24px 24px;
-    padding-top: 16px;
-}
-
 .sharing-info {
     display: flex;
     align-items: flex-start;

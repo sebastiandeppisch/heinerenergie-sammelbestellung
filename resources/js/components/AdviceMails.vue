@@ -80,7 +80,7 @@ onMounted(loadMails);
 </script>
 
 <template>
-    <div class="p-4">
+    <div>
         <!-- No mail account / no encryption key -->
         <div v-if="error === 'no_key'" class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
             <p class="font-medium">Mail-Konto nicht verfügbar</p>

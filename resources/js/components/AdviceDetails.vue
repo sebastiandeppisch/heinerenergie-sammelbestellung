@@ -8,7 +8,7 @@ const props = defineProps<{
 </script>
 
 <template>
-    <div class="advice-details">
+    <div>
         <div class="detail-section">
             <h3 class="section-title">Benötigt Hilfe bei:</h3>
             <div class="help-types">
@@ -72,13 +72,6 @@ const props = defineProps<{
 </template>
 
 <style scoped>
-.advice-details {
-    background: white;
-    border-radius: 8px;
-    padding: 24px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
 .detail-section {
     margin-bottom: 24px;
 }
