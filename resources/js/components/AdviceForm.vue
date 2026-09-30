@@ -67,7 +67,7 @@ function onSubmit() {
 </script>
 
 <template>
-    <div class="p-4">
+    <div>
         <form @submit.prevent="onSubmit" class="space-y-4">
             <!-- Name Group -->
             <div class="space-y-2">

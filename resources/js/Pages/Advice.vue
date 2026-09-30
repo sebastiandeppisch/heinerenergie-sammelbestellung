@@ -6,6 +6,7 @@ import FormSubmissionRenderer from '@/components/FormBuilder/FormSubmissionRende
 import AdviceNextcloud from '@/components/Nextcloud/AdviceNextcloud.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import Button from '@/shadcn/components/ui/button/Button.vue';
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/shadcn/components/ui/card';
 import { Link, setLayoutProps } from '@inertiajs/vue3';
 import { Map } from '@lucide/vue';
 import { ref } from 'vue';
@@ -30,7 +31,28 @@ const props = defineProps<{
     checklistEntries: App.Data.ChecklistEntryData[];
     availableChecklists: App.Data.FormDefinitionData[];
     nextcloudConfigured: boolean;
+    relatedAdvices: Array<{
+        id: string;
+        created_at: string;
+        advisor_name: string | null;
+        status_name: string | null;
+        group_name: string | null;
+        can_view: boolean;
+    }>;
 }>();
+
+const formatDate = (iso: string) => (iso ? new Date(iso).toLocaleDateString('de-DE') : '');
+
+const describeRelated = (related: (typeof props.relatedAdvices)[number]): string => {
+    const parts = [related.advisor_name ?? 'nicht zugewiesen'];
+    if (related.status_name) {
+        parts.push(`Status: ${related.status_name}`);
+    }
+    if (related.group_name) {
+        parts.push(`Gruppe: ${related.group_name}`);
+    }
+    return parts.join(', ');
+};
 
 setLayoutProps({
     breadcrumbs: [
@@ -45,7 +67,7 @@ const advisor = user.value;
 </script>
 
 <template>
-    <div>
+    <div class="mx-auto max-w-7xl">
         <PageHeader :title="`Beratung für ${advice.first_name} ${advice.last_name}`">
             <template #actions>
                 <AdviceActions
@@ -57,112 +79,103 @@ const advisor = user.value;
             </template>
         </PageHeader>
 
-        <!-- Main Content -->
-        <div class="advice-content">
+        <div class="grid grid-cols-1 gap-4 xl:grid-cols-[2fr_1fr] xl:gap-6">
             <!-- Left Column - Main Information -->
-            <div class="content-main">
-                <div class="content-card">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center">
-                        <h3 class="card-title">Kontaktdaten & Details</h3>
-                        <Link :href="route('advices.map') + '#18/' + advice.lat + '/' + advice.lng" v-if="advice.lat && advice.lng" target="_blank">
-                            <Button variant="outline" size="sm" title="Adresse auf der Karte anzeigen">
-                                <Map class="mr-2 h-4 w-4" />
-                            </Button>
-                        </Link>
-                    </div>
-                    <AdviceGeocodingStatus v-if="!advice.lat || !advice.lng" :advice="advice" style="padding: 0 16px 16px" />
-                    <AdviceForm :advice="advice" :advice-status-options="adviceStatusOptions" :advice-types-options="adviceTypesOptions" />
-                </div>
+            <div class="flex flex-col gap-4 xl:gap-6">
+                <Card>
+                    <CardHeader class="border-b">
+                        <CardTitle>Kontaktdaten & Details</CardTitle>
+                        <CardAction v-if="advice.lat && advice.lng">
+                            <Link :href="route('advices.map') + '#18/' + advice.lat + '/' + advice.lng" target="_blank">
+                                <Button variant="outline" size="sm" title="Adresse auf der Karte anzeigen">
+                                    <Map class="h-4 w-4" />
+                                </Button>
+                            </Link>
+                        </CardAction>
+                    </CardHeader>
+                    <CardContent class="space-y-4">
+                        <AdviceGeocodingStatus v-if="!advice.lat || !advice.lng" :advice="advice" />
+                        <AdviceForm :advice="advice" :advice-status-options="adviceStatusOptions" :advice-types-options="adviceTypesOptions" />
+                    </CardContent>
+                </Card>
 
-                <div class="content-card">
-                    <h3 class="card-title card-header">Beratungsteam</h3>
-                    <AdviceSharing :advice-id="advice.id" v-model:shared-ids="sharedIds" />
-                </div>
+                <Card v-if="relatedAdvices.length > 0">
+                    <CardHeader class="border-b">
+                        <CardTitle>Weitere Beratungen mit dieser E-Mail-Adresse</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ul class="flex flex-col gap-2">
+                            <li v-for="related in relatedAdvices" :key="related.id">
+                                <Link v-if="related.can_view" :href="route('advices.show', related.id)" class="underline">
+                                    Beratung vom {{ formatDate(related.created_at) }}
+                                </Link>
+                                <span v-else>Beratung vom {{ formatDate(related.created_at) }}</span>
+                                <span class="text-muted-foreground"> – {{ describeRelated(related) }}</span>
+                            </li>
+                        </ul>
+                    </CardContent>
+                </Card>
 
-                <div v-if="checklistEntries.length > 0 || availableChecklists.length > 0" class="content-card">
-                    <h3 class="card-title card-header">Checklisten</h3>
-                    <div style="padding: 16px">
+                <Card>
+                    <CardHeader class="border-b">
+                        <CardTitle>Beratungsteam</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <AdviceSharing :advice-id="advice.id" v-model:shared-ids="sharedIds" />
+                    </CardContent>
+                </Card>
+
+                <Card v-if="checklistEntries.length > 0 || availableChecklists.length > 0">
+                    <CardHeader class="border-b">
+                        <CardTitle>Checklisten</CardTitle>
+                    </CardHeader>
+                    <CardContent>
                         <ChecklistPanel :checklist-entries="checklistEntries" :available-checklists="availableChecklists" :advice-id="advice.id" />
-                    </div>
-                </div>
+                    </CardContent>
+                </Card>
 
-                <div class="content-card" v-if="props.nextcloudConfigured">
-                    <h3 class="card-title card-header">Dateien (Nextcloud)</h3>
-                    <AdviceNextcloud :advice="advice" />
-                </div>
+                <Card v-if="props.nextcloudConfigured">
+                    <CardHeader class="border-b">
+                        <CardTitle>Dateien (Nextcloud)</CardTitle>
+                    </CardHeader>
+                    <CardContent class="p-0">
+                        <AdviceNextcloud :advice="advice" />
+                    </CardContent>
+                </Card>
 
-                <div class="content-card" v-if="advice.email && user?.is_admin">
-                    <h3 class="card-title card-header">E-Mails</h3>
-                    <AdviceMails :advice-id="advice.id" :contact-email="advice.email" />
-                </div>
+                <Card v-if="advice.email && user?.is_admin">
+                    <CardHeader class="border-b">
+                        <CardTitle>E-Mails</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <AdviceMails :advice-id="advice.id" :contact-email="advice.email" />
+                    </CardContent>
+                </Card>
             </div>
 
             <!-- Right Column - Timeline and Details -->
-            <div class="content-sidebar">
-                <div class="content-card" v-if="props.formSubmission === null">
-                    <h3 class="card-title card-header">Zusätzliche Informationen</h3>
-                    <AdviceDetails :advice="advice" />
-                </div>
-                <div class="content-card" v-else>
-                    <h3 class="card-title card-header">Zusätzliche Informationen aus dem Formular</h3>
-                    <div style="padding: 1.5rem">
-                        <FormSubmissionRenderer :form-submission="props.formSubmission" />
-                    </div>
-                </div>
+            <div class="flex flex-col gap-4 xl:gap-6">
+                <Card>
+                    <CardHeader class="border-b">
+                        <CardTitle>{{
+                            props.formSubmission === null ? 'Zusätzliche Informationen' : 'Zusätzliche Informationen aus dem Formular'
+                        }}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <AdviceDetails v-if="props.formSubmission === null" :advice="advice" />
+                        <FormSubmissionRenderer v-else :form-submission="props.formSubmission" />
+                    </CardContent>
+                </Card>
 
-                <div class="content-card">
-                    <h3 class="card-title card-header">Verlauf</h3>
-                    <AdviceTimeline :events="events" :advice-id="advice.id" />
-                </div>
+                <Card>
+                    <CardHeader class="border-b">
+                        <CardTitle>Verlauf</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <AdviceTimeline :events="events" :advice-id="advice.id" />
+                    </CardContent>
+                </Card>
             </div>
         </div>
     </div>
 </template>
-
-<style scoped>
-.advice-content {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 24px;
-}
-
-.content-main,
-.content-sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-}
-
-.content-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
-}
-
-.card-header {
-    padding: 20px 24px;
-    margin: 0;
-    border-bottom: 1px solid #e9ecef;
-}
-
-.card-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #2c3e50;
-}
-
-@media (max-width: 1200px) {
-    .advice-content {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 768px) {
-    .advice-content,
-    .content-main,
-    .content-sidebar {
-        gap: 16px;
-    }
-}
-</style>

@@ -102,6 +102,37 @@ class AdviceService
         ];
     }
 
+    /**
+     * Other advices with the same email address. Every match is listed with its
+     * advisor, status and group so the user knows whom to ask. Whether the user
+     * may open the advice itself is reported via `can_view`.
+     *
+     * @return list<array{id: string, created_at: string, advisor_name: ?string, status_name: ?string, group_name: ?string, can_view: bool}>
+     */
+    public function getRelatedAdvicesByEmail(Advice $advice, User $user): array
+    {
+        if (trim($advice->email) === '') {
+            return [];
+        }
+
+        return Advice::query()
+            ->where('id', '!=', $advice->id)
+            ->whereRaw('LOWER(email) = ?', [mb_strtolower(trim($advice->email))])
+            ->with(['group', 'shares', 'advisor', 'status'])
+            ->orderBy('created_at')
+            ->get()
+            ->map(fn (Advice $other): array => [
+                'id' => $other->uuid,
+                'created_at' => $other->created_at?->toIso8601String() ?? '',
+                'advisor_name' => $other->advisor?->name,
+                'status_name' => $other->status?->name,
+                'group_name' => $other->group?->name,
+                'can_view' => $user->can('view', $other),
+            ])
+            ->values()
+            ->all();
+    }
+
     public function getDistance(Advice $advice, ?User $user = null): ?Meter
     {
         if ($user === null) {
