@@ -30,10 +30,14 @@ const props = defineProps<{
     checklistEntries: App.Data.ChecklistEntryData[];
     availableChecklists: App.Data.FormDefinitionData[];
     nextcloudConfigured: boolean;
-    relatedAdvices: {
-        visible: Array<{ id: string; created_at: string }>;
-        hidden_count: number;
-    };
+    relatedAdvices: Array<{
+        id: string;
+        created_at: string;
+        advisor_name: string | null;
+        status_name: string | null;
+        group_name: string | null;
+        can_view: boolean;
+    }>;
 }>();
 
 const formatDate = (iso: string) => (iso ? new Date(iso).toLocaleDateString('de-DE') : '');
@@ -80,20 +84,19 @@ const advisor = user.value;
                     <AdviceForm :advice="advice" :advice-status-options="adviceStatusOptions" :advice-types-options="adviceTypesOptions" />
                 </div>
 
-                <div class="content-card" v-if="relatedAdvices.visible.length > 0 || relatedAdvices.hidden_count > 0">
+                <div class="content-card" v-if="relatedAdvices.length > 0">
                     <h3 class="card-title card-header">Weitere Beratungen mit dieser E-Mail-Adresse</h3>
                     <ul style="padding: 16px 24px; display: flex; flex-direction: column; gap: 8px">
-                        <li v-for="related in relatedAdvices.visible" :key="related.id">
-                            <Link :href="route('advices.show', related.id)" class="underline">
+                        <li v-for="related in relatedAdvices" :key="related.id">
+                            <Link v-if="related.can_view" :href="route('advices.show', related.id)" class="underline">
                                 Beratung vom {{ formatDate(related.created_at) }}
                             </Link>
-                        </li>
-                        <li v-if="relatedAdvices.hidden_count > 0">
-                            {{
-                                relatedAdvices.hidden_count === 1
-                                    ? 'Eine weitere Beratung existiert bei einer anderen Gruppe.'
-                                    : `${relatedAdvices.hidden_count} weitere Beratungen existieren bei anderen Gruppen.`
-                            }}
+                            <span v-else>Beratung vom {{ formatDate(related.created_at) }}</span>
+                            <span class="text-muted-foreground">
+                                – {{ related.advisor_name ?? 'nicht zugewiesen' }}
+                                <template v-if="related.status_name">, Status: {{ related.status_name }}</template>
+                                <template v-if="related.group_name">, Gruppe: {{ related.group_name }}</template>
+                            </span>
                         </li>
                     </ul>
                 </div>
