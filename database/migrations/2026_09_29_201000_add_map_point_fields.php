@@ -31,7 +31,7 @@ return new class extends Migration
             $table->foreignIdFor(FormField::class)->constrained();
             $table->timestamps();
 
-            $table->unique(['map_point_category_id', 'form_field_id']);
+            $table->unique(['map_point_category_id', 'form_field_id'], 'map_point_category_public_fields_unique');
         });
 
         Schema::create('map_point_fields', function (Blueprint $table): void {
