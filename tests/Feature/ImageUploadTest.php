@@ -7,6 +7,7 @@ use App\Models\SubmissionField;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Drivers\Gd\Driver;
 use Tests\Concerns\AutoAttachesFormEmbedToken;
 
 uses(RefreshDatabase::class, AutoAttachesFormEmbedToken::class);
@@ -190,6 +191,55 @@ test('image field stores files in submission-specific directory', function (): v
 
     expect($path)->toStartWith('form-images/');
 });
+
+test('image field strips exif geotags from uploaded jpegs', function (string $driver): void {
+    config(['intervention-image.driver' => $driver]);
+
+    $formDefinition = FormDefinition::factory()->create();
+    $formField = FormField::factory()->create([
+        'form_definition_id' => $formDefinition->id,
+        'type' => FieldType::IMAGE,
+        'label' => 'Foto',
+        'max_images' => 1,
+        'required' => false,
+    ]);
+
+    $file = UploadedFile::fake()->createWithContent('photo.jpg', jpegWithGpsExif());
+    expect(exif_read_data($file->getRealPath(), 'GPS'))->toBeArray();
+
+    $this->post(route('form.submit', $formDefinition), [
+        $formField->uuid => [$file],
+    ])->assertSessionHasNoErrors();
+
+    $submissionField = SubmissionField::where('form_field_id', $formField->id)->firstOrFail();
+    $storedPath = Storage::disk('public')->path($submissionField->value[0]);
+
+    expect(@exif_read_data($storedPath, 'GPS'))->toBeFalse();
+})->with([
+    'gd' => Driver::class,
+    'imagick' => Intervention\Image\Drivers\Imagick\Driver::class,
+]);
+
+/**
+ * Builds a JPEG whose EXIF block contains a GPS IFD with latitude and longitude references.
+ */
+function jpegWithGpsExif(): string
+{
+    $image = imagecreatetruecolor(100, 100);
+    ob_start();
+    imagejpeg($image);
+    $jpeg = ob_get_clean();
+
+    $ifd0 = pack('v', 1).pack('vvVV', 0x8825, 4, 1, 26).pack('V', 0);
+    $gpsIfd = pack('v', 2)
+        .pack('vvV', 1, 2, 2)."N\0\0\0"
+        .pack('vvV', 3, 2, 2)."E\0\0\0"
+        .pack('V', 0);
+    $exif = "Exif\0\0".'II'.pack('v', 42).pack('V', 8).$ifd0.$gpsIfd;
+    $app1Segment = "\xFF\xE1".pack('n', strlen($exif) + 2).$exif;
+
+    return substr($jpeg, 0, 2).$app1Segment.substr($jpeg, 2);
+}
 
 test('image bomb is rejected', function (): void {
     $formDefinition = FormDefinition::factory()->create();
