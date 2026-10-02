@@ -154,6 +154,16 @@ class FormDefinition extends Model
     }
 
     /**
+     * The map point characteristic whose fields this definition holds, only set for FormType::MapPointFields.
+     *
+     * @return HasOne<MapPointCharacteristic, $this>
+     */
+    public function mapPointCharacteristic(): HasOne
+    {
+        return $this->hasOne(MapPointCharacteristic::class);
+    }
+
+    /**
      * @return HasMany<ChecklistEntry, $this>
      */
     public function checklistEntries(): HasMany

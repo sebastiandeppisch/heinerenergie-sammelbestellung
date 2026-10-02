@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\FormType;
+use App\Models\Traits\HasMapPointFields;
 use App\Models\Traits\HasUuid;
 use App\ValueObjects\MapPointCategoryTree;
 use Database\Factories\MapPointCategoryFactory;
@@ -29,6 +29,7 @@ class MapPointCategory extends Model
     /** @use HasFactory<MapPointCategoryFactory> */
     use HasFactory;
 
+    use HasMapPointFields;
     use HasUuid;
 
     protected $fillable = [
@@ -71,66 +72,23 @@ class MapPointCategory extends Model
     }
 
     /**
-     * The additional fields of this category's points. Sub categories inherit them.
+     * The characteristics points of this category and of its sub categories can have.
      *
-     * @return BelongsTo<FormDefinition, $this>
+     * @return HasMany<MapPointCharacteristic, $this>
      */
-    public function formDefinition(): BelongsTo
+    public function characteristics(): HasMany
     {
-        return $this->belongsTo(FormDefinition::class);
+        return $this->hasMany(MapPointCharacteristic::class)->orderBy('sort_order');
     }
 
-    /**
-     * The own fields that are shown on the public map. All other fields stay internal.
-     *
-     * @return Builder<FormField>
-     */
-    public function publicFields(): Builder
+    protected function formDefinitionName(): string
     {
-        return FormField::query()
-            ->where('form_definition_id', $this->form_definition_id)
-            ->whereIn('id', DB::table('map_point_public_fields')->select('form_field_id'));
+        return 'Felder der Kategorie '.$this->name;
     }
 
-    /**
-     * Marks exactly the given own fields as public. The caller ensures the fields belong to the category.
-     *
-     * @param  array<int, int>  $formFieldIds
-     */
-    public function syncPublicFields(array $formFieldIds): void
+    protected function fieldsGroupId(): int
     {
-        DB::transaction(function () use ($formFieldIds): void {
-            DB::table('map_point_public_fields')
-                ->whereIn('form_field_id', FormField::query()->where('form_definition_id', $this->form_definition_id)->select('id'))
-                ->delete();
-
-            DB::table('map_point_public_fields')->insert(array_map(fn (int $formFieldId): array => [
-                'form_field_id' => $formFieldId,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ], $formFieldIds));
-        });
-    }
-
-    /**
-     * The form definition holding the category's fields, created on first use.
-     */
-    public function findOrCreateFormDefinition(): FormDefinition
-    {
-        if ($this->formDefinition !== null) {
-            return $this->formDefinition;
-        }
-
-        $formDefinition = FormDefinition::create([
-            'name' => 'Felder der Kategorie '.$this->name,
-            'group_id' => $this->group_id,
-            'type' => FormType::MapPointFields,
-            'is_active' => true,
-        ]);
-
-        $this->formDefinition()->associate($formDefinition)->save();
-
-        return $formDefinition;
+        return $this->group_id;
     }
 
     /**
@@ -194,8 +152,8 @@ class MapPointCategory extends Model
     }
 
     /**
-     * Sub categories and points move up to the parent, so nothing is lost. The category's own fields
-     * are deleted, their values stay on the points as former values. The parent's group is
+     * Sub categories and points move up to the parent, so nothing is lost. The category's own fields and
+     * characteristics are deleted, their values stay on the points as former values. The parent's group is
      * an ancestor of this category's group, so they may still use it. Embeds showing this category
      * keep showing its sub categories.
      */
@@ -215,6 +173,9 @@ class MapPointCategory extends Model
             // Forms create their points in the parent from now on, like the points of this category moved there.
             FormDefinitionToMapPoint::where('map_point_category_id', $this->id)->update(['map_point_category_id' => $this->parent_id]);
             FormDefinitionToMapPointSubcategory::where('map_point_category_id', $this->id)->delete();
+
+            // The points moved to the parent, where these characteristics can not be chosen.
+            $this->characteristics()->get()->each->delete();
 
             $formDefinition = $this->formDefinition;
             $isDeleted = parent::delete();

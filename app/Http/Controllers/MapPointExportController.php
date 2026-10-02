@@ -39,7 +39,7 @@ class MapPointExportController extends Controller
                 MapPointSpreadsheetMapping::query()->ownedByGroup($group)->where('uuid', $mappingUuid)->firstOrFail(),
             )->columns;
 
-        $mapPoints = MapPoint::query()->visibleFromGroup($group)->with(['category', 'fields.formField', 'fields.options'])->orderBy('id')->get();
+        $mapPoints = MapPoint::query()->visibleFromGroup($group)->with(['category', 'characteristics', 'fields.formField', 'fields.options'])->orderBy('id')->get();
         $format = $request->spreadsheetFormat();
 
         return Excel::download(

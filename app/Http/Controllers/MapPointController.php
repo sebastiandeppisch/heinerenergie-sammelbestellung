@@ -22,6 +22,7 @@ use App\Models\MapEmbed;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
 use App\Services\CurrentGroupService;
+use App\Services\MapPointCharacteristicService;
 use App\Services\MapPointFieldService;
 use App\Services\MapPointVisibilityService;
 use App\ValueObjects\MapPointCategoryTree;
@@ -115,7 +116,8 @@ class MapPointController extends Controller
 
         DB::transaction(function () use ($mappoint, $request, $fieldService): void {
             $mappoint->update($request->getData());
-            $fieldService->syncValues($mappoint, $request->fieldValues());
+            $mappoint->characteristics()->sync($request->characteristicIds());
+            $fieldService->syncValues($mappoint, $request->fieldValues(), $request->pointFields());
         });
 
         return redirect()->back()->with('success', 'Der Kartenpunkt wurde aktualisiert');
@@ -145,14 +147,18 @@ class MapPointController extends Controller
     }
 
     /**
-     * Moves the selected points into one category at once. Values of fields the new category lacks stay as former values.
+     * Moves the selected points into one category at once. Values of fields the new category lacks stay as former values,
+     * also those of characteristics the new category does not offer.
      */
-    public function updateCategoryOfMany(UpdateMapPointsCategoryRequest $request): RedirectResponse
+    public function updateCategoryOfMany(UpdateMapPointsCategoryRequest $request, MapPointCharacteristicService $characteristicService): RedirectResponse
     {
         $mapPoints = $request->mapPoints();
         $category = $request->category();
 
-        DB::transaction(fn () => $mapPoints->each->update(['category_id' => $category?->id]));
+        DB::transaction(function () use ($mapPoints, $category, $characteristicService): void {
+            $mapPoints->each->update(['category_id' => $category?->id]);
+            $characteristicService->detachUnselectable([$category?->id]);
+        });
 
         $count = $mapPoints->count() === 1 ? 'Ein Kartenpunkt' : "{$mapPoints->count()} Kartenpunkte";
 
@@ -184,7 +190,8 @@ class MapPointController extends Controller
 
         $mapPoint = DB::transaction(function () use ($request, $fieldService): MapPoint {
             $mapPoint = MapPoint::create($request->getData());
-            $fieldService->syncValues($mapPoint, $request->fieldValues());
+            $mapPoint->characteristics()->sync($request->characteristicIds());
+            $fieldService->syncValues($mapPoint, $request->fieldValues(), $request->pointFields());
 
             return $mapPoint;
         });
@@ -228,7 +235,7 @@ class MapPointController extends Controller
         $tree ??= MapPointCategory::tree();
         $publicFieldIds = MapPointCategory::publicFieldIds();
 
-        return $query->with(['category', 'group', 'fields.options', 'fields.formField'])->get()
+        return $query->with(['category', 'group', 'characteristics', 'fields.options', 'fields.formField'])->get()
             ->map(fn (MapPoint $mapPoint): MapPointData => MapPointData::fromModel($mapPoint, $onlyPublic, $tree, $publicFieldIds))
             ->toBase();
     }

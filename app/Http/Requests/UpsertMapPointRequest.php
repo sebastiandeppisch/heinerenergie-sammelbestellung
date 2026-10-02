@@ -8,6 +8,7 @@ use App\Models\FormField;
 use App\Models\Group;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
+use App\Models\MapPointCharacteristic;
 use App\Rules\GeographicCoordinate;
 use App\Services\MapPointFieldService;
 use App\Services\MapPointVisibilityService;
@@ -20,7 +21,10 @@ use Illuminate\Validation\Validator;
 class UpsertMapPointRequest extends FormRequest
 {
     /** @var Collection<int, FormField>|null */
-    private ?Collection $submittedCategoryFields = null;
+    private ?Collection $pointFields = null;
+
+    /** @var array<int, int>|null */
+    private ?array $characteristicIds = null;
 
     /**
      * Determine if the user is authorized to make this request.
@@ -51,34 +55,63 @@ class UpsertMapPointRequest extends FormRequest
             'category_id' => ['nullable', 'bail', 'uuid', 'exists:map_point_categories,uuid'],
             'location' => ['nullable', 'string', 'max:500'],
             'field_values' => ['sometimes', 'array'],
+            'characteristic_ids' => ['sometimes', 'array'],
+            'characteristic_ids.*' => ['bail', 'uuid', 'distinct', 'exists:map_point_characteristics,uuid'],
         ];
     }
 
     /**
-     * The values are checked against the fields of the submitted category. Values of other fields are dropped.
+     * The values are checked against the fields of the submitted category and characteristics. Values of other fields are dropped.
      *
      * @return array<string, array<int, mixed>>
      */
     private function fieldValueRules(): array
     {
-        return app(MapPointFieldService::class)->validationRules($this->submittedCategoryFields(), 'field_values');
+        return app(MapPointFieldService::class)->validationRules($this->pointFields(), 'field_values');
     }
 
     /**
-     * Loaded once, because both the rules and the attribute names need them.
+     * The fields the point has after saving. Loaded once, because the rules, the attribute names and storing the values need them.
      *
      * @return Collection<int, FormField>
      */
-    private function submittedCategoryFields(): Collection
+    public function pointFields(): Collection
     {
-        if ($this->submittedCategoryFields !== null) {
-            return $this->submittedCategoryFields;
+        return $this->pointFields ??= app(MapPointFieldService::class)->effectiveFields($this->submittedCategoryId(), $this->characteristicIds());
+    }
+
+    /**
+     * The characteristics the point has after saving. Without submitted characteristics, the point keeps its current
+     * ones. Characteristics the submitted category does not offer are dropped, e.g. after changing the category.
+     *
+     * @return array<int, int>
+     */
+    public function characteristicIds(): array
+    {
+        if ($this->characteristicIds !== null) {
+            return $this->characteristicIds;
         }
 
-        $categoryUuid = $this->input('category_id');
-        $categoryId = is_string($categoryUuid) && Str::isUuid($categoryUuid) ? MapPointCategory::where('uuid', $categoryUuid)->value('id') : null;
+        $mapPoint = $this->route('mappoint');
+        $submittedUuids = array_filter((array) $this->input('characteristic_ids', []), fn (mixed $uuid): bool => is_string($uuid) && Str::isUuid($uuid));
 
-        return $this->submittedCategoryFields = app(MapPointFieldService::class)->fieldsOfCategory($categoryId);
+        $characteristics = $this->has('characteristic_ids')
+            ? MapPointCharacteristic::whereIn('uuid', $submittedUuids)->get()
+            : ($mapPoint instanceof MapPoint ? $mapPoint->characteristics()->get() : new Collection);
+
+        $categoryId = $this->submittedCategoryId();
+        $tree = MapPointCategory::tree();
+
+        return $this->characteristicIds = $characteristics
+            ->filter(fn (MapPointCharacteristic $characteristic): bool => $characteristic->isSelectableFor($categoryId, $tree))
+            ->modelKeys();
+    }
+
+    private function submittedCategoryId(): ?int
+    {
+        $categoryUuid = $this->input('category_id');
+
+        return is_string($categoryUuid) && Str::isUuid($categoryUuid) ? MapPointCategory::where('uuid', $categoryUuid)->value('id') : null;
     }
 
     /**
@@ -86,7 +119,7 @@ class UpsertMapPointRequest extends FormRequest
      */
     public function attributes(): array
     {
-        $fieldLabels = $this->submittedCategoryFields()
+        $fieldLabels = $this->pointFields()
             ->mapWithKeys(fn (FormField $field): array => ['field_values.'.$field->uuid => $field->label])
             ->all();
 
@@ -94,11 +127,12 @@ class UpsertMapPointRequest extends FormRequest
             ...$fieldLabels,
             'group_id' => 'Initiative',
             'category_id' => 'Kategorie',
+            'characteristic_ids' => 'Maßnahmen',
         ];
     }
 
     /**
-     * Values of the category fields keyed by field uuid. Missing when the client did not send any, so stored values are kept.
+     * Values of the point's fields keyed by field uuid. Missing when the client did not send any, so stored values are kept.
      *
      * @return array<string, mixed>
      */
@@ -108,8 +142,8 @@ class UpsertMapPointRequest extends FormRequest
     }
 
     /**
-     * The point may only be assigned to a group the user administers, and its category
-     * must be usable in that group.
+     * The point may only be assigned to a group the user administers, its category must be usable
+     * in that group and its characteristics must be offered by the category.
      *
      * @return array<int, callable(Validator): void>
      */
@@ -141,6 +175,15 @@ class UpsertMapPointRequest extends FormRequest
                     $validator->errors()->add('category_id', 'Diese Kategorie ist für die gewählte Initiative nicht verfügbar.');
                 }
             },
+            function (Validator $validator): void {
+                if ($validator->errors()->hasAny(['category_id', 'characteristic_ids', 'characteristic_ids.*']) || ! $this->has('characteristic_ids')) {
+                    return;
+                }
+
+                if (count($this->characteristicIds()) !== count((array) $this->input('characteristic_ids'))) {
+                    $validator->errors()->add('characteristic_ids', 'Diese Maßnahmen sind für die gewählte Kategorie nicht verfügbar.');
+                }
+            },
         ];
     }
 
@@ -152,7 +195,7 @@ class UpsertMapPointRequest extends FormRequest
     public function getData(): array
     {
         return [
-            ...$this->safe()->except(['group_id', 'category_id', 'field_values']),
+            ...$this->safe()->except(['group_id', 'category_id', 'field_values', 'characteristic_ids']),
             'group_id' => Group::where('uuid', $this->validated('group_id'))->value('id'),
             'category_id' => MapPointCategory::where('uuid', $this->validated('category_id'))->value('id'),
         ];

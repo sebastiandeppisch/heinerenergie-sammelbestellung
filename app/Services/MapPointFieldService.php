@@ -9,6 +9,7 @@ use App\Models\FormField;
 use App\Models\Group;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
+use App\Models\MapPointCharacteristic;
 use App\Models\MapPointField;
 use App\ValueObjects\MapPointCategoryTree;
 use Illuminate\Database\Eloquent\Builder;
@@ -18,13 +19,27 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
 /**
- * Stores the values of category fields on points. The fields of a point come from its category, or from the
- * nearest parent category with fields. A value is active while its field is one of these fields. Otherwise
- * it is a former value: it is kept, but neither shown publicly nor editable. Changing the category back makes
- * it active again.
+ * Stores the values of map point fields on points. The fields of a point come from its category, or from the
+ * nearest parent category with fields, plus the fields of its characteristics. A value is active while its field
+ * is one of these fields. Otherwise it is a former value: it is kept, but neither shown publicly nor editable.
+ * Changing the category or the characteristics back makes it active again.
  */
 class MapPointFieldService
 {
+    /**
+     * The form definitions of all characteristics with fields, keyed by characteristic id. Loaded once.
+     *
+     * @var array<int, int>|null
+     */
+    private ?array $characteristicFormDefinitionIds = null;
+
+    /**
+     * Fields per combination of form definitions, so forms and imports do not load them for every point.
+     *
+     * @var array<string, Collection<int, FormField>>
+     */
+    private array $fieldsByFormDefinitionIds = [];
+
     /**
      * The fields the points of the category have, in field order.
      *
@@ -39,6 +54,49 @@ class MapPointFieldService
         }
 
         return FormField::where('form_definition_id', $formDefinitionId)->with('options')->orderBy('sort_order')->get();
+    }
+
+    /**
+     * The fields points of the category with the given characteristics have: the category fields first, then
+     * the fields of each characteristic, in field order. The point does not have to exist yet.
+     *
+     * @param  array<int, int>  $characteristicIds
+     * @return Collection<int, FormField>
+     */
+    public function effectiveFields(?int $categoryId, array $characteristicIds, ?MapPointCategoryTree $tree = null): Collection
+    {
+        $formDefinitionIds = $this->formDefinitionIds($categoryId, $characteristicIds, $tree);
+        $key = implode(',', $formDefinitionIds);
+
+        if (! array_key_exists($key, $this->fieldsByFormDefinitionIds)) {
+            $fields = FormField::whereIn('form_definition_id', $formDefinitionIds)->with('options')->get();
+            $this->fieldsByFormDefinitionIds[$key] = $this->sortByFormDefinitions($fields, $formDefinitionIds);
+        }
+
+        return $this->fieldsByFormDefinitionIds[$key];
+    }
+
+    /**
+     * The form definitions holding the fields of points of the category with the given characteristics,
+     * the one of the category first.
+     *
+     * @param  array<int, int>  $characteristicIds
+     * @return array<int, int>
+     */
+    public function formDefinitionIds(?int $categoryId, array $characteristicIds, ?MapPointCategoryTree $tree = null): array
+    {
+        $this->characteristicFormDefinitionIds ??= MapPointCharacteristic::query()
+            ->whereNotNull('form_definition_id')
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->pluck('form_definition_id', 'id')
+            ->map(fn (mixed $id): int => (int) $id)
+            ->all();
+
+        $categoryFormDefinitionId = $categoryId === null ? null : ($tree ?? MapPointCategory::tree())->fieldsFormDefinitionId($categoryId);
+        $characteristicFormDefinitionIds = array_values(array_intersect_key($this->characteristicFormDefinitionIds, array_flip($characteristicIds)));
+
+        return array_values(array_unique(array_filter([$categoryFormDefinitionId, ...$characteristicFormDefinitionIds])));
     }
 
     /**
@@ -82,16 +140,16 @@ class MapPointFieldService
 
     /**
      * Stores the given values, keyed by the uuid of the field. Only the stored value of a field that is given
-     * and belongs to the point's category is touched. Values of other fields, including former values, are
+     * and belongs to the point's category or characteristics is touched. Values of other fields, including former values, are
      * kept. An empty value removes the stored value. A changed value gets a fresh snapshot of the field,
      * because it was entered against the field as it is now.
      *
      * @param  array<string, mixed>  $valuesByFieldUuid
-     * @param  Collection<int, FormField>|null  $fields  The fields of the point's category. Pass them when storing many points.
+     * @param  Collection<int, FormField>|null  $fields  The fields of the point. Pass them when storing many points.
      */
     public function syncValues(MapPoint $mapPoint, array $valuesByFieldUuid, ?Collection $fields = null): void
     {
-        $fields ??= $this->fieldsOfCategory($mapPoint->category_id);
+        $fields ??= $this->effectiveFields($mapPoint->category_id, $mapPoint->characteristics()->pluck('map_point_characteristics.id')->all());
         $storedFields = $mapPoint->fields()->whereIn('form_field_id', $fields->modelKeys())->get()->keyBy('form_field_id');
 
         DB::transaction(function () use ($mapPoint, $valuesByFieldUuid, $fields, $storedFields): void {
@@ -119,17 +177,24 @@ class MapPointFieldService
     }
 
     /**
-     * The stored values of the point's current fields in field order. Needs the relation fields.formField.
+     * The stored values of the point's current fields: the category fields first, then the fields of each
+     * characteristic, in field order. Needs the relations fields.formField and characteristics.
      *
      * @return Collection<int, MapPointField>
      */
     public function activeFields(MapPoint $mapPoint, MapPointCategoryTree $tree): Collection
     {
-        $formDefinitionId = $this->fieldsFormDefinitionId($mapPoint, $tree);
+        $formDefinitionIds = array_values(array_unique(array_filter([
+            $mapPoint->category_id === null ? null : $tree->fieldsFormDefinitionId($mapPoint->category_id),
+            ...$mapPoint->characteristics->pluck('form_definition_id')->all(),
+        ])));
 
         return $mapPoint->fields
-            ->filter(fn (MapPointField $field): bool => $formDefinitionId !== null && $field->formField?->form_definition_id === $formDefinitionId)
-            ->sortBy(fn (MapPointField $field): int => $field->formField->sort_order ?? 0)
+            ->filter(fn (MapPointField $field): bool => in_array($field->formField?->form_definition_id, $formDefinitionIds, true))
+            ->sortBy([
+                fn (MapPointField $a, MapPointField $b): int => array_search($a->formField?->form_definition_id, $formDefinitionIds, true) <=> array_search($b->formField?->form_definition_id, $formDefinitionIds, true),
+                fn (MapPointField $a, MapPointField $b): int => ($a->formField->sort_order ?? 0) <=> ($b->formField->sort_order ?? 0),
+            ])
             ->values();
     }
 
@@ -207,9 +272,19 @@ class MapPointFieldService
         return $rules;
     }
 
-    private function fieldsFormDefinitionId(MapPoint $mapPoint, MapPointCategoryTree $tree): ?int
+    /**
+     * @param  Collection<int, FormField>  $fields
+     * @param  array<int, int>  $formDefinitionIds
+     * @return Collection<int, FormField>
+     */
+    private function sortByFormDefinitions(Collection $fields, array $formDefinitionIds): Collection
     {
-        return $mapPoint->category_id === null ? null : $tree->fieldsFormDefinitionId($mapPoint->category_id);
+        return $fields
+            ->sortBy([
+                fn (FormField $a, FormField $b): int => array_search($a->form_definition_id, $formDefinitionIds, true) <=> array_search($b->form_definition_id, $formDefinitionIds, true),
+                fn (FormField $a, FormField $b): int => $a->sort_order <=> $b->sort_order,
+            ])
+            ->values();
     }
 
     /**

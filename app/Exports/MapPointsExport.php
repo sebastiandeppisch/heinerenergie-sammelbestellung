@@ -46,7 +46,7 @@ class MapPointsExport extends DefaultValueBinder implements FromCollection, Shou
     private readonly MapPointFieldService $fieldService;
 
     /**
-     * @param  Collection<int, MapPoint>  $mapPoints  With the relations fields.formField and fields.options loaded.
+     * @param  Collection<int, MapPoint>  $mapPoints  With the relations characteristics, fields.formField and fields.options loaded.
      * @param  array<int, MapPointSpreadsheetColumnData>  $columns
      * @param  EloquentCollection<int, FormField>  $categoryFields  The category fields the group can use. Columns of other fields, e.g. deleted ones, are left out.
      */

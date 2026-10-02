@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
@@ -66,13 +67,14 @@ class MapPoint extends Model
     }
 
     /**
-     * The stored field values go with the point. The foreign keys do not cascade, so they are deleted here.
+     * The stored field values and characteristics go with the point. The foreign keys do not cascade, so they are deleted here.
      */
     #[Override]
     public function delete(): ?bool
     {
         return DB::transaction(function (): ?bool {
             $this->fields()->get()->each->delete();
+            $this->characteristics()->detach();
 
             return parent::delete();
         });
@@ -86,6 +88,16 @@ class MapPoint extends Model
     public function fields(): HasMany
     {
         return $this->hasMany(MapPointField::class);
+    }
+
+    /**
+     * Only characteristics that are selectable for the point's category, see MapPointCharacteristic::selectableFor().
+     *
+     * @return BelongsToMany<MapPointCharacteristic, $this>
+     */
+    public function characteristics(): BelongsToMany
+    {
+        return $this->belongsToMany(MapPointCharacteristic::class, 'map_point_characteristic_map_point')->withTimestamps()->orderBy('sort_order');
     }
 
     /**

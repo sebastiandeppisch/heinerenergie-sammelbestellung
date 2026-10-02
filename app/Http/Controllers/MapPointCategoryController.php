@@ -12,10 +12,12 @@ use App\Models\FormField;
 use App\Models\Group;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
+use App\Services\MapPointCharacteristicService;
 use App\Services\MapPointVisibilityService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -87,7 +89,10 @@ class MapPointCategoryController extends Controller
         return redirect()->route('form-definitions.edit', $mappointCategory->findOrCreateFormDefinition());
     }
 
-    public function update(UpsertMapPointsCategoryRequest $request, MapPointCategory $mappointCategory): RedirectResponse
+    /**
+     * Moving the category in the tree removes characteristics of its former ancestors from its points and the points of its sub categories.
+     */
+    public function update(UpsertMapPointsCategoryRequest $request, MapPointCategory $mappointCategory, MapPointCharacteristicService $characteristicService): RedirectResponse
     {
         $this->authorize('update', $mappointCategory);
         $data = $request->getData();
@@ -100,7 +105,14 @@ class MapPointCategoryController extends Controller
             $data['image_path'] = $request->file('image')->store('categories', 'public');
         }
 
-        $mappointCategory->update($data);
+        DB::transaction(function () use ($mappointCategory, $data, $characteristicService): void {
+            $mappointCategory->update($data);
+
+            if ($mappointCategory->wasChanged('parent_id')) {
+                $tree = MapPointCategory::tree();
+                $characteristicService->detachUnselectable($tree->subtreeIds([$mappointCategory->id]), $tree);
+            }
+        });
 
         $mappointCategory->syncPublicFields(FormField::whereIn('uuid', $request->publicFieldIds())->pluck('id')->all());
 
