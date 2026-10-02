@@ -28,8 +28,8 @@ class DistinctMapPointSpreadsheetFields implements ValidationRule
                 : null;
 
             // New fields are told apart by the header of their column, which is unique in a file.
-            if ($field === MapPointSpreadsheetField::CATEGORY_FIELD) {
-                $targets[] = MapPointSpreadsheetColumnData::categoryFieldTarget((string) ($column['category_field_id'] ?? ''));
+            if ($field === MapPointSpreadsheetField::FIELD) {
+                $targets[] = MapPointSpreadsheetColumnData::fieldTarget((string) ($column['form_field_id'] ?? ''));
             } elseif ($field !== null && ! in_array($field, [MapPointSpreadsheetField::IGNORE, MapPointSpreadsheetField::NEW_CATEGORY_FIELD], true)) {
                 $targets[] = $field->value;
             }
@@ -39,7 +39,7 @@ class DistinctMapPointSpreadsheetFields implements ValidationRule
         $duplicateLabels = collect($targets)
             ->duplicates()
             ->unique()
-            ->map(fn (string $target): string => MapPointSpreadsheetField::tryFrom($target)?->label() ?? MapPointSpreadsheetField::CATEGORY_FIELD->label())
+            ->map(fn (string $target): string => MapPointSpreadsheetField::tryFrom($target)?->label() ?? MapPointSpreadsheetField::FIELD->label())
             ->unique();
 
         if ($duplicateLabels->isNotEmpty()) {

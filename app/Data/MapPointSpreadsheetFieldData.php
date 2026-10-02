@@ -16,9 +16,9 @@ class MapPointSpreadsheetFieldData extends Data
         public MapPointSpreadsheetField $value,
         public string $label,
         public bool $is_key,
-        /** The uuid of the category field, only set for MapPointSpreadsheetField::CATEGORY_FIELD. */
-        public ?string $category_field_id = null,
-        /** The uuid of the category defining the field, only set for MapPointSpreadsheetField::CATEGORY_FIELD. */
+        /** The uuid of the form field, only set for MapPointSpreadsheetField::FIELD. */
+        public ?string $form_field_id = null,
+        /** The uuid of the category defining the field, only set for MapPointSpreadsheetField::FIELD. */
         public ?string $category_id = null,
     ) {}
 
@@ -37,10 +37,10 @@ class MapPointSpreadsheetFieldData extends Data
     public static function fromCategoryField(FormField $field): self
     {
         return new self(
-            value: MapPointSpreadsheetField::CATEGORY_FIELD,
+            value: MapPointSpreadsheetField::FIELD,
             label: self::categoryFieldLabel($field),
             is_key: false,
-            category_field_id: $field->uuid,
+            form_field_id: $field->uuid,
             category_id: $field->formDefinition?->mapPointCategory?->uuid,
         );
     }

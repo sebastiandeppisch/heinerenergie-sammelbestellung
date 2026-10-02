@@ -95,7 +95,7 @@ class MapPointImportService
                 'sort_order' => ++$sortOrder,
             ]);
 
-            $columns[$index] = new MapPointSpreadsheetColumnData($column->header, MapPointSpreadsheetField::CATEGORY_FIELD, $field->uuid);
+            $columns[$index] = new MapPointSpreadsheetColumnData($column->header, MapPointSpreadsheetField::FIELD, $field->uuid);
             $createdFields[] = $column->header;
         }
 

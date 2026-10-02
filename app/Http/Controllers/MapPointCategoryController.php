@@ -102,8 +102,7 @@ class MapPointCategoryController extends Controller
 
         $mappointCategory->update($data);
 
-        $ownFieldIds = $mappointCategory->formDefinition?->fields()->whereIn('uuid', $request->publicFieldIds())->pluck('id')->all() ?? [];
-        $mappointCategory->publicFields()->sync($ownFieldIds);
+        $mappointCategory->syncPublicFields(FormField::whereIn('uuid', $request->publicFieldIds())->pluck('id')->all());
 
         return redirect()->back()->with('success', 'Die Kategorie wurde aktualisiert');
     }
@@ -132,7 +131,7 @@ class MapPointCategoryController extends Controller
         }
 
         $fieldsCategory = MapPointCategory::with('formDefinition.fields')->findOrFail($fieldsCategoryId);
-        $publicFieldIds = $fieldsCategory->publicFields()->pluck('form_fields.id')->all();
+        $publicFieldIds = $fieldsCategory->publicFields()->pluck('id')->all();
 
         return $fieldsCategory->formDefinition->fields
             ->map(fn (FormField $field): MapPointCategoryFieldData => MapPointCategoryFieldData::fromModel(

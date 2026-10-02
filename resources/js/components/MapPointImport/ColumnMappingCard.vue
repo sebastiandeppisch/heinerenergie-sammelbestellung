@@ -37,8 +37,8 @@ const publishedColumnAssigned = computed(() => columnFields.value.includes('publ
 const unassignedId = computed(() => unassignedIdHeader(props.upload.headers, columnFields.value));
 
 /** The mapping belongs to the session, so a change is handed up as a new list instead of editing the old one. */
-const pointFields = computed(() => props.fields.filter((field) => !field.category_field_id));
-const categoryFields = computed(() => props.fields.filter((field) => field.category_field_id));
+const pointFields = computed(() => props.fields.filter((field) => !field.form_field_id));
+const categoryFields = computed(() => props.fields.filter((field) => field.form_field_id));
 
 function assignField(columnIndex: number, field: ColumnTarget) {
     columnFields.value = columnFields.value.map((current, index) => (index === columnIndex ? field : current));

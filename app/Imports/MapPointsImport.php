@@ -75,7 +75,7 @@ class MapPointsImport implements OnEachRow, SkipsEmptyRows, SkipsOnFailure, With
      *
      * @var array<string, string>
      */
-    private readonly array $categoryFieldTargets;
+    private readonly array $fieldTargets;
 
     /**
      * @param  array<int, MapPointSpreadsheetColumnData>  $columns  One entry per spreadsheet column, in the order of the file.
@@ -93,20 +93,20 @@ class MapPointsImport implements OnEachRow, SkipsEmptyRows, SkipsOnFailure, With
         private readonly ?MapPointCategory $mainCategory = null,
     ) {
         $columnsByField = [];
-        $categoryFieldTargets = [];
+        $fieldTargets = [];
 
         foreach ($columns as $index => $column) {
             if ($column->field !== MapPointSpreadsheetField::IGNORE) {
                 $columnsByField[$column->target()] = $index;
             }
 
-            if ($column->field === MapPointSpreadsheetField::CATEGORY_FIELD && $column->category_field_id !== null) {
-                $categoryFieldTargets[$column->category_field_id] = $column->target();
+            if ($column->field === MapPointSpreadsheetField::FIELD && $column->form_field_id !== null) {
+                $fieldTargets[$column->form_field_id] = $column->target();
             }
         }
 
         $this->columnsByField = $columnsByField;
-        $this->categoryFieldTargets = $categoryFieldTargets;
+        $this->fieldTargets = $fieldTargets;
         $this->mainSubtreeIds = $mainCategory === null ? [] : $tree->subtreeIds([$mainCategory->id]);
     }
 
@@ -382,14 +382,14 @@ class MapPointsImport implements OnEachRow, SkipsEmptyRows, SkipsOnFailure, With
      */
     private function importFieldValues(int $rowNumber, MapPoint $mapPoint, array $values): void
     {
-        if ($this->categoryFieldTargets === []) {
+        if ($this->fieldTargets === []) {
             return;
         }
 
         $categoryFields = $this->fieldsOfCategory($mapPoint->category_id);
         $fieldValues = [];
 
-        foreach ($this->categoryFieldTargets as $fieldUuid => $target) {
+        foreach ($this->fieldTargets as $fieldUuid => $target) {
             $cell = $values[$target] ?? null;
             $field = $categoryFields->get($fieldUuid);
 

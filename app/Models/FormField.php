@@ -228,7 +228,7 @@ class FormField extends Model
         SubmissionField::where('form_field_id', $this->id)->update(['form_field_id' => null]);
         ChecklistEntryField::where('form_field_id', $this->id)->update(['form_field_id' => null]);
         MapPointField::where('form_field_id', $this->id)->update(['form_field_id' => null]);
-        DB::table('map_point_category_public_fields')->where('form_field_id', $this->id)->delete();
+        DB::table('map_point_public_fields')->where('form_field_id', $this->id)->delete();
         FormDefinitionToMapPointField::where('target_field_id', $this->id)->orWhere('source_field_id', $this->id)->delete();
 
         // Without the field, its options can no longer pick a sub category.

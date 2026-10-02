@@ -39,7 +39,7 @@ class RunMapPointImportRequest extends FormRequest
             'columns' => ['required', 'array', 'min:1', new DistinctMapPointSpreadsheetFields, new UsableCategoryFieldColumns($this->group())],
             'columns.*.header' => ['required', 'string'],
             'columns.*.field' => ['required', Rule::enum(MapPointSpreadsheetField::class)],
-            'columns.*.category_field_id' => ['nullable', 'required_if:columns.*.field,'.MapPointSpreadsheetField::CATEGORY_FIELD->value, 'uuid'],
+            'columns.*.form_field_id' => ['nullable', 'required_if:columns.*.field,'.MapPointSpreadsheetField::FIELD->value, 'uuid'],
             'columns.*.new_field_type' => [
                 'nullable',
                 'required_if:columns.*.field,'.MapPointSpreadsheetField::NEW_CATEGORY_FIELD->value,
@@ -212,7 +212,7 @@ class RunMapPointImportRequest extends FormRequest
             fn (array $column): MapPointSpreadsheetColumnData => new MapPointSpreadsheetColumnData(
                 header: (string) $column['header'],
                 field: MapPointSpreadsheetField::from((string) $column['field']),
-                category_field_id: isset($column['category_field_id']) ? (string) $column['category_field_id'] : null,
+                form_field_id: isset($column['form_field_id']) ? (string) $column['form_field_id'] : null,
                 new_field_type: isset($column['new_field_type']) ? FieldType::tryFrom((string) $column['new_field_type']) : null,
             ),
             $columns,

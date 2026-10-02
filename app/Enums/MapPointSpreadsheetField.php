@@ -32,8 +32,8 @@ enum MapPointSpreadsheetField: string
 
     case PUBLISHED = 'published';
 
-    /** A field of a map point category. The column names the field with its category_field_id. */
-    case CATEGORY_FIELD = 'category_field';
+    /** A field of a form definition, e.g. of a map point category. The column names the field with its form_field_id. */
+    case FIELD = 'field';
 
     /**
      * A category field the import creates in the main category, named after the column. Only used for an import run,
@@ -53,7 +53,7 @@ enum MapPointSpreadsheetField: string
             self::LOCATION => 'Ort',
             self::CATEGORY => 'Kategorie',
             self::PUBLISHED => 'Veröffentlicht',
-            self::CATEGORY_FIELD => 'Zusatzfeld',
+            self::FIELD => 'Zusatzfeld',
             self::NEW_CATEGORY_FIELD => 'Neues Zusatzfeld',
         };
     }
@@ -102,6 +102,6 @@ enum MapPointSpreadsheetField: string
      */
     public static function pointFields(): array
     {
-        return array_values(array_filter(self::cases(), fn (self $field): bool => ! in_array($field, [self::CATEGORY_FIELD, self::NEW_CATEGORY_FIELD], true)));
+        return array_values(array_filter(self::cases(), fn (self $field): bool => ! in_array($field, [self::FIELD, self::NEW_CATEGORY_FIELD], true)));
     }
 }

@@ -184,7 +184,7 @@ test('the popup and the detail row of the table show the public field values', f
     $formDefinition = $category->findOrCreateFormDefinition();
     $power = $formDefinition->fields()->create(['type' => FieldType::NUMBER, 'label' => 'PV-Leistung (kWp)', 'sort_order' => 0]);
     $phone = $formDefinition->fields()->create(['type' => FieldType::PHONE, 'label' => 'Telefon', 'sort_order' => 1]);
-    $category->publicFields()->sync([$power->id]);
+    $category->syncPublicFields([$power->id]);
     // The marker must be inside the visible map to be clicked, so point and map center share one position.
     $position = ['lat' => 49.8728475, 'lng' => 8.6510204];
     $mapPoint = MapPoint::factory()->for($this->group)->create([...$position, 'published' => true, 'category_id' => $category->id, 'title' => 'Solaranlage Nord']);

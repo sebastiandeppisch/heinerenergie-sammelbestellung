@@ -69,7 +69,7 @@ class MapPointsExport extends DefaultValueBinder implements FromCollection, Shou
         $otherColumns = array_filter(
             $columns,
             fn (MapPointSpreadsheetColumnData $column): bool => ! in_array($column->field, [MapPointSpreadsheetField::ID, MapPointSpreadsheetField::IGNORE, MapPointSpreadsheetField::NEW_CATEGORY_FIELD], true)
-                && ($column->field !== MapPointSpreadsheetField::CATEGORY_FIELD || in_array($column->category_field_id, $categoryFieldIds, true)),
+                && ($column->field !== MapPointSpreadsheetField::FIELD || in_array($column->form_field_id, $categoryFieldIds, true)),
         );
 
         $this->exportColumns = [$idColumn, ...array_values($otherColumns)];
@@ -93,7 +93,7 @@ class MapPointsExport extends DefaultValueBinder implements FromCollection, Shou
             )),
             ...$categoryFields->map(fn (FormField $field): MapPointSpreadsheetColumnData => new MapPointSpreadsheetColumnData(
                 MapPointSpreadsheetFieldData::categoryFieldLabel($field),
-                MapPointSpreadsheetField::CATEGORY_FIELD,
+                MapPointSpreadsheetField::FIELD,
                 $field->uuid,
             ))->all(),
         ];
@@ -130,7 +130,7 @@ class MapPointsExport extends DefaultValueBinder implements FromCollection, Shou
             MapPointSpreadsheetField::LOCATION => $this->text($row->location),
             MapPointSpreadsheetField::CATEGORY => $this->text($row->category?->name),
             MapPointSpreadsheetField::PUBLISHED => $row->published ? 'ja' : 'nein',
-            MapPointSpreadsheetField::CATEGORY_FIELD => $this->categoryFieldValue($row, (string) $column->category_field_id),
+            MapPointSpreadsheetField::FIELD => $this->fieldValue($row, (string) $column->form_field_id),
             MapPointSpreadsheetField::IGNORE, MapPointSpreadsheetField::NEW_CATEGORY_FIELD => null,
         }, $this->exportColumns);
     }
@@ -138,9 +138,9 @@ class MapPointsExport extends DefaultValueBinder implements FromCollection, Shou
     /**
      * Only values of the point's current fields are exported. Former values would be dropped by an import anyway.
      */
-    private function categoryFieldValue(MapPoint $mapPoint, string $categoryFieldId): string|int|float|null
+    private function fieldValue(MapPoint $mapPoint, string $formFieldId): string|int|float|null
     {
-        $field = $this->fieldService->activeFields($mapPoint, $this->tree)->first(fn (MapPointField $field): bool => $field->formField?->uuid === $categoryFieldId);
+        $field = $this->fieldService->activeFields($mapPoint, $this->tree)->first(fn (MapPointField $field): bool => $field->formField?->uuid === $formFieldId);
         $value = $field === null ? null : MapPointFieldCell::export($field);
 
         return is_string($value) ? $this->text($value) : $value;

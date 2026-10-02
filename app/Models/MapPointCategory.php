@@ -83,11 +83,33 @@ class MapPointCategory extends Model
     /**
      * The own fields that are shown on the public map. All other fields stay internal.
      *
-     * @return BelongsToMany<FormField, $this>
+     * @return Builder<FormField>
      */
-    public function publicFields(): BelongsToMany
+    public function publicFields(): Builder
     {
-        return $this->belongsToMany(FormField::class, 'map_point_category_public_fields')->withTimestamps();
+        return FormField::query()
+            ->where('form_definition_id', $this->form_definition_id)
+            ->whereIn('id', DB::table('map_point_public_fields')->select('form_field_id'));
+    }
+
+    /**
+     * Marks exactly the given own fields as public. The caller ensures the fields belong to the category.
+     *
+     * @param  array<int, int>  $formFieldIds
+     */
+    public function syncPublicFields(array $formFieldIds): void
+    {
+        DB::transaction(function () use ($formFieldIds): void {
+            DB::table('map_point_public_fields')
+                ->whereIn('form_field_id', FormField::query()->where('form_definition_id', $this->form_definition_id)->select('id'))
+                ->delete();
+
+            DB::table('map_point_public_fields')->insert(array_map(fn (int $formFieldId): array => [
+                'form_field_id' => $formFieldId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ], $formFieldIds));
+        });
     }
 
     /**
@@ -154,7 +176,7 @@ class MapPointCategory extends Model
      */
     public static function publicFieldIds(): array
     {
-        return DB::table('map_point_category_public_fields')->pluck('form_field_id')->map(fn (mixed $id): int => (int) $id)->all();
+        return DB::table('map_point_public_fields')->pluck('form_field_id')->map(fn (mixed $id): int => (int) $id)->all();
     }
 
     public function isUsableInGroup(Group $group): bool
@@ -194,7 +216,6 @@ class MapPointCategory extends Model
             FormDefinitionToMapPoint::where('map_point_category_id', $this->id)->update(['map_point_category_id' => $this->parent_id]);
             FormDefinitionToMapPointSubcategory::where('map_point_category_id', $this->id)->delete();
 
-            $this->publicFields()->detach();
             $formDefinition = $this->formDefinition;
             $isDeleted = parent::delete();
 

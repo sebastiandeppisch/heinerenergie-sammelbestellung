@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Models\FormDefinition;
 use App\Models\FormField;
 use App\Models\MapPoint;
-use App\Models\MapPointCategory;
 use App\Models\MapPointField;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -14,7 +13,7 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Categories define additional fields for their points through a form definition. Points store their
  * values as snapshots of the field, like checklist entries do, so values survive renamed or deleted fields.
- * Which fields are public is kept per category, so private contact data never reaches the public map.
+ * Which fields are public is kept per field, so private contact data never reaches the public map.
  * Deleting is handled by the models, so the foreign keys do not cascade.
  */
 return new class extends Migration
@@ -25,13 +24,10 @@ return new class extends Migration
             $table->foreignIdFor(FormDefinition::class)->nullable()->unique()->after('parent_id')->constrained();
         });
 
-        Schema::create('map_point_category_public_fields', function (Blueprint $table): void {
+        Schema::create('map_point_public_fields', function (Blueprint $table): void {
             $table->id();
-            $table->foreignIdFor(MapPointCategory::class)->constrained();
-            $table->foreignIdFor(FormField::class)->constrained();
+            $table->foreignIdFor(FormField::class)->unique()->constrained();
             $table->timestamps();
-
-            $table->unique(['map_point_category_id', 'form_field_id']);
         });
 
         Schema::create('map_point_fields', function (Blueprint $table): void {
@@ -63,7 +59,7 @@ return new class extends Migration
     {
         Schema::dropIfExists('map_point_field_options');
         Schema::dropIfExists('map_point_fields');
-        Schema::dropIfExists('map_point_category_public_fields');
+        Schema::dropIfExists('map_point_public_fields');
 
         Schema::table('map_point_categories', function (Blueprint $table): void {
             $table->dropForeign(['form_definition_id']);

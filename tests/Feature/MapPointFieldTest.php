@@ -269,14 +269,14 @@ test('deleting a sub category turns its values into former values and makes the 
     $child = MapPointCategory::factory()->childOf($parent)->create();
     $power = categoryField($parent, ['label' => 'PV-Leistung (kWp)']);
     $storage = categoryField($child, ['label' => 'Speicher']);
-    $child->publicFields()->sync([$storage->id]);
+    $child->syncPublicFields([$storage->id]);
     $mapPoint = MapPoint::factory()->for($group)->create(['category_id' => $child->id]);
     $power->createMapPointField($mapPoint, '10');
     $storage->createMapPointField($mapPoint, 'ja');
 
     $child->delete();
 
-    $this->assertDatabaseCount('map_point_category_public_fields', 0);
+    $this->assertDatabaseCount('map_point_public_fields', 0);
     $this->assertModelMissing($storage);
 
     $point = indexedPoint(fieldTestGroupAdmin($group), $mapPoint);
@@ -306,7 +306,7 @@ test('the public map shows only public values of the current fields', function (
     $power = categoryField($category, ['label' => 'PV-Leistung (kWp)']);
     $phone = categoryField($category, ['label' => 'Telefon', 'type' => FieldType::PHONE]);
     $removed = categoryField($category, ['label' => 'Entferntes Feld']);
-    $category->publicFields()->sync([$power->id, $removed->id]);
+    $category->syncPublicFields([$power->id, $removed->id]);
     $mapPoint = MapPoint::factory()->for($group)->create(['category_id' => $category->id, 'published' => true]);
     $power->createMapPointField($mapPoint, '10');
     $phone->createMapPointField($mapPoint, '06151 123456');
@@ -329,7 +329,7 @@ test('a point converted without saying otherwise contains only public values', f
     $category = MapPointCategory::factory()->for($group)->create();
     $power = categoryField($category, ['label' => 'PV-Leistung (kWp)']);
     $phone = categoryField($category, ['label' => 'Telefon', 'type' => FieldType::PHONE]);
-    $category->publicFields()->sync([$power->id]);
+    $category->syncPublicFields([$power->id]);
     $mapPoint = MapPoint::factory()->for($group)->create(['category_id' => $category->id]);
     $power->createMapPointField($mapPoint, '10');
     $phone->createMapPointField($mapPoint, '06151 123456');
@@ -359,10 +359,10 @@ test('deleting a point deletes its field values and their options', function ():
 test('deleting a field removes it from the public fields of its category', function (): void {
     $category = MapPointCategory::factory()->create();
     $field = categoryField($category, ['label' => 'PV-Leistung (kWp)']);
-    $category->publicFields()->sync([$field->id]);
+    $category->syncPublicFields([$field->id]);
 
     $field->delete();
 
     $this->assertModelMissing($field);
-    $this->assertDatabaseCount('map_point_category_public_fields', 0);
+    $this->assertDatabaseCount('map_point_public_fields', 0);
 });

@@ -86,7 +86,7 @@ describe('sampleValues', () => {
 
 describe('fieldsFromTemplate', () => {
     it('matches the headers of a template regardless of case and surrounding spaces', () => {
-        const template = makeTemplate({ columns: [{ header: 'Bezeichnung', field: 'title', category_field_id: null, new_field_type: null }] });
+        const template = makeTemplate({ columns: [{ header: 'Bezeichnung', field: 'title', form_field_id: null, new_field_type: null }] });
 
         expect(fieldsFromTemplate([' bezeichnung ', 'Leistung'], template)).toEqual(['title', 'ignore']);
     });
@@ -177,7 +177,7 @@ describe('useMapPointColumnMapping', () => {
 
         mapping.applyTemplate(
             makeTemplate({
-                columns: [{ header: 'Bezeichnung', field: 'title', category_field_id: null, new_field_type: null }],
+                columns: [{ header: 'Bezeichnung', field: 'title', form_field_id: null, new_field_type: null }],
                 key_field: 'location',
             }),
         );
@@ -190,7 +190,7 @@ describe('useMapPointColumnMapping', () => {
 describe('category field columns', () => {
     const powerId = '9a1b2c3d-4e5f-4a6b-8c7d-0e1f2a3b4c5d';
     const categoryFields: Array<App.Data.MapPointSpreadsheetFieldData> = [
-        { value: 'category_field', label: 'Photovoltaik › PV-Leistung (kWp)', is_key: false, category_field_id: powerId, category_id: 'pv' },
+        { value: 'field', label: 'Photovoltaik › PV-Leistung (kWp)', is_key: false, form_field_id: powerId, category_id: 'pv' },
     ];
 
     it('suggests a category field for a column named like the field, with or without its category', () => {
@@ -198,16 +198,16 @@ describe('category field columns', () => {
 
         expect(guessCategoryFields(['Bezeichnung', 'PV-Leistung (kWp)'], ['title', 'ignore'], fields)).toEqual([
             'title',
-            `category_field:${powerId}`,
+            `field:${powerId}`,
         ]);
-        expect(guessCategoryFields(['Photovoltaik › PV-Leistung (kWp)'], ['ignore'], fields)).toEqual([`category_field:${powerId}`]);
+        expect(guessCategoryFields(['Photovoltaik › PV-Leistung (kWp)'], ['ignore'], fields)).toEqual([`field:${powerId}`]);
     });
 
     it('sends a category field column with the id of its field', () => {
-        expect(columnFor('Leistung', `category_field:${powerId}`)).toEqual({
+        expect(columnFor('Leistung', `field:${powerId}`)).toEqual({
             header: 'Leistung',
-            field: 'category_field',
-            category_field_id: powerId,
+            field: 'field',
+            form_field_id: powerId,
         });
         expect(columnFor('Bezeichnung', 'title')).toEqual({ header: 'Bezeichnung', field: 'title' });
     });
@@ -215,13 +215,13 @@ describe('category field columns', () => {
     it('ignores a template column whose category field no longer exists', () => {
         const template = makeTemplate({
             columns: [
-                { header: 'Leistung', field: 'category_field', category_field_id: powerId, new_field_type: null },
-                { header: 'Alt', field: 'category_field', category_field_id: 'deleted-field', new_field_type: null },
+                { header: 'Leistung', field: 'field', form_field_id: powerId, new_field_type: null },
+                { header: 'Alt', field: 'field', form_field_id: 'deleted-field', new_field_type: null },
             ],
         });
 
         expect(fieldsFromTemplate(['Leistung', 'Alt'], template, [...mapPointFields, ...categoryFields])).toEqual([
-            `category_field:${powerId}`,
+            `field:${powerId}`,
             'ignore',
         ]);
     });
@@ -230,10 +230,10 @@ describe('category field columns', () => {
 describe('main category', () => {
     const powerId = '9a1b2c3d-4e5f-4a6b-8c7d-0e1f2a3b4c5d';
     const power: App.Data.MapPointSpreadsheetFieldData = {
-        value: 'category_field',
+        value: 'field',
         label: 'Photovoltaik › Leistung',
         is_key: false,
-        category_field_id: powerId,
+        form_field_id: powerId,
         category_id: 'pv',
     };
     const upload = makeUpload({ headers: ['Bezeichnung', 'Leistung', 'Hersteller'], preview_rows: [['Schule', '9,9', 'Muster AG']] });
@@ -253,7 +253,7 @@ describe('main category', () => {
 
         mapping.mainCategory.value = 'balcony';
 
-        expect(mapping.columnFields.value[1]).toBe(`category_field:${powerId}`);
+        expect(mapping.columnFields.value[1]).toBe(`field:${powerId}`);
         expect(mapping.payload.value.main_category_id).toBe('balcony');
     });
 
@@ -263,7 +263,7 @@ describe('main category', () => {
         expect(mapping.mainCategory.value).toBe('pv');
 
         mapping.mainCategory.value = 'none';
-        mapping.columnFields.value = ['title', `category_field:${powerId}`, 'ignore'];
+        mapping.columnFields.value = ['title', `field:${powerId}`, 'ignore'];
         await nextTick();
 
         expect(mapping.mainCategory.value).toBe('none');

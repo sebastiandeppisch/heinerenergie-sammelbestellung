@@ -45,7 +45,7 @@ test('the category page lists the fields of the parent category when it has no o
     $category = MapPointCategory::factory()->childOf($parent)->create();
     $power = ownCategoryField($parent, ['label' => 'PV-Leistung (kWp)']);
     ownCategoryField($parent, ['label' => 'Ansprechperson']);
-    $parent->publicFields()->sync([$power->id]);
+    $parent->syncPublicFields([$power->id]);
 
     $this->actingAs(categoryFieldGroupAdmin($group))
         ->get(route('mappoint-categories.edit', $category))
@@ -84,19 +84,39 @@ test('saving a category stores which of its own fields are public', function ():
     $parentField = ownCategoryField($parent, ['label' => 'PV-Leistung (kWp)']);
     $power = ownCategoryField($category, ['label' => 'Speicher (kWh)']);
 
+    $parent->syncPublicFields([$parentField->id]);
+
     $this->actingAs(categoryFieldGroupAdmin($group))
         ->put(route('mappoint-categories.update', $category), [
             'name' => $category->name,
-            'public_field_ids' => [$power->uuid, $parentField->uuid],
+            'public_field_ids' => [$power->uuid],
         ])
         ->assertSessionHasNoErrors();
 
-    expect($category->publicFields()->pluck('form_fields.id')->all())->toBe([$power->id])
-        ->and($parent->publicFields()->count())->toBe(0);
+    expect($category->publicFields()->pluck('id')->all())->toBe([$power->id])
+        ->and($parent->publicFields()->pluck('id')->all())->toBe([$parentField->id]);
 
     $this->put(route('mappoint-categories.update', $category), ['name' => $category->name])->assertSessionHasNoErrors();
 
-    expect($category->publicFields()->count())->toBe(0);
+    expect($category->publicFields()->count())->toBe(0)
+        ->and($parent->publicFields()->count())->toBe(1);
+});
+
+test('a category cannot mark the fields of its parent category as public', function (): void {
+    $group = Group::factory()->create();
+    $parent = MapPointCategory::factory()->for($group)->create();
+    $category = MapPointCategory::factory()->childOf($parent)->create();
+    $parentField = ownCategoryField($parent, ['label' => 'PV-Leistung (kWp)']);
+    ownCategoryField($category, ['label' => 'Speicher (kWh)']);
+
+    $this->actingAs(categoryFieldGroupAdmin($group))
+        ->put(route('mappoint-categories.update', $category), [
+            'name' => $category->name,
+            'public_field_ids' => [$parentField->uuid],
+        ])
+        ->assertSessionHasErrors('public_field_ids.0');
+
+    $this->assertDatabaseCount('map_point_public_fields', 0);
 });
 
 test('editing the fields creates the form definition once and opens the form builder', function (): void {

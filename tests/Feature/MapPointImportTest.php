@@ -721,7 +721,7 @@ function columnsWithCategoryFields(array $fields): array
         ['header' => 'Breite', 'field' => 'lat'],
         ['header' => 'Länge', 'field' => 'lng'],
         ...array_map(
-            fn (string $header, FormField $field): array => ['header' => $header, 'field' => 'category_field', 'category_field_id' => $field->uuid],
+            fn (string $header, FormField $field): array => ['header' => $header, 'field' => 'field', 'form_field_id' => $field->uuid],
             array_keys($fields),
             $fields,
         ),
@@ -735,10 +735,10 @@ test('the import page offers the fields of the categories of the initiative, nam
 
     $this->get(route('mappoints.import.create'))
         ->assertInertia(fn ($page) => $page
-            ->where('fields', fn (Collection $fields): bool => $fields->where('value', 'category_field')->pluck('label')->all() === [
+            ->where('fields', fn (Collection $fields): bool => $fields->where('value', 'field')->pluck('label')->all() === [
                 'Photovoltaik › PV-Leistung (kWp)', 'Photovoltaik › Anlagenart', 'Photovoltaik › In Betrieb seit', 'Photovoltaik › Ausstattung',
             ])
-            ->where('fields', fn (Collection $fields): bool => $fields->firstWhere('label', 'Photovoltaik › PV-Leistung (kWp)')['category_field_id'] === $power->uuid)
+            ->where('fields', fn (Collection $fields): bool => $fields->firstWhere('label', 'Photovoltaik › PV-Leistung (kWp)')['form_field_id'] === $power->uuid)
         );
 });
 
@@ -896,7 +896,7 @@ test('a point without category found by its title gets the main category and the
         ['header' => 'Bezeichnung', 'field' => 'title'],
         ['header' => 'Breite', 'field' => 'lat'],
         ['header' => 'Länge', 'field' => 'lng'],
-        ['header' => 'Leistung', 'field' => 'category_field', 'category_field_id' => $power->uuid],
+        ['header' => 'Leistung', 'field' => 'field', 'form_field_id' => $power->uuid],
     ];
 
     $this->postJson(route('mappoints.import.preview'), mainCategoryPayload($token, $columns, ['main_category_id' => $category->uuid]))

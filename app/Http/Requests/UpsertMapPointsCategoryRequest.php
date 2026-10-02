@@ -9,6 +9,8 @@ use App\Models\MapPointCategory;
 use App\Services\MapPointVisibilityService;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\Validator;
 
 class UpsertMapPointsCategoryRequest extends FormRequest
@@ -40,7 +42,8 @@ class UpsertMapPointsCategoryRequest extends FormRequest
                 : ['exclude'],
             // Fields only exist after creation. Checkboxes of an empty list are not sent as form data, so a missing list means no public field.
             'public_field_ids' => $this->isCreating() ? ['exclude'] : ['sometimes', 'array'],
-            'public_field_ids.*' => $this->isCreating() ? ['exclude'] : ['string', 'uuid'],
+            // Only the category's own fields can be marked, the fields of a parent category are marked there.
+            'public_field_ids.*' => $this->isCreating() ? ['exclude'] : ['string', 'uuid', $this->ownFieldRule()],
         ];
     }
 
@@ -127,6 +130,17 @@ class UpsertMapPointsCategoryRequest extends FormRequest
     public function publicFieldIds(): array
     {
         return $this->validated('public_field_ids') ?? [];
+    }
+
+    /**
+     * Matches the fields of the category's form definition. Without one, no field matches, because every field belongs to a form definition.
+     */
+    private function ownFieldRule(): Exists
+    {
+        $category = $this->route('mappoint_category');
+        $formDefinitionId = $category instanceof MapPointCategory ? $category->form_definition_id : null;
+
+        return Rule::exists('form_fields', 'uuid')->where('form_definition_id', $formDefinitionId);
     }
 
     private function isCreating(): bool

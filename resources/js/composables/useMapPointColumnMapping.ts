@@ -9,9 +9,9 @@ export type DefaultVisibility = 'private' | 'public';
 /**
  * What a column is assigned to: a field every point has, or one category field, named by its id.
  */
-export type ColumnTarget = Field | `category_field:${string}` | `new_category_field:${App.Enums.FieldType}`;
+export type ColumnTarget = Field | `field:${string}` | `new_field:${App.Enums.FieldType}`;
 
-export type MapPointImportColumn = { header: string; field: Field; category_field_id?: string; new_field_type?: App.Enums.FieldType };
+export type MapPointImportColumn = { header: string; field: Field; form_field_id?: string; new_field_type?: App.Enums.FieldType };
 
 export type MapPointImportPayload = {
     token: string;
@@ -79,11 +79,11 @@ export function guessFields(headers: Array<string>, previewRows: PreviewRows): A
     });
 }
 
-const categoryFieldPrefix = 'category_field:';
-const newFieldPrefix = 'new_category_field:';
+const fieldPrefix = 'field:';
+const newFieldPrefix = 'new_field:';
 
-export function targetOf(field: { value: Field; category_field_id: string | null }): ColumnTarget {
-    return field.category_field_id ? `${categoryFieldPrefix}${field.category_field_id}` : field.value;
+export function targetOf(field: { value: Field; form_field_id: string | null }): ColumnTarget {
+    return field.form_field_id ? `${fieldPrefix}${field.form_field_id}` : field.value;
 }
 
 export function newFieldTarget(type: App.Enums.FieldType): ColumnTarget {
@@ -91,8 +91,8 @@ export function newFieldTarget(type: App.Enums.FieldType): ColumnTarget {
 }
 
 export function columnFor(header: string, target: ColumnTarget): MapPointImportColumn {
-    if (target.startsWith(categoryFieldPrefix)) {
-        return { header, field: 'category_field', category_field_id: target.slice(categoryFieldPrefix.length) };
+    if (target.startsWith(fieldPrefix)) {
+        return { header, field: 'field', form_field_id: target.slice(fieldPrefix.length) };
     }
 
     if (target.startsWith(newFieldPrefix)) {
@@ -115,7 +115,7 @@ export function templateColumn(column: MapPointImportColumn): MapPointImportColu
  */
 export function guessCategoryFields(headers: Array<string>, targets: Array<ColumnTarget>, fields: Array<FieldOption>): Array<ColumnTarget> {
     const normalize = (text: string) => text.trim().toLowerCase();
-    const categoryFields = fields.filter((field) => field.category_field_id);
+    const categoryFields = fields.filter((field) => field.form_field_id);
     const usedTargets = new Set<ColumnTarget>(targets);
 
     return targets.map((target, index) => {
@@ -194,10 +194,10 @@ export function fieldsFromTemplate(
             return 'ignore';
         }
 
-        const target = targetOf({ value: column.field, category_field_id: column.category_field_id ?? null });
+        const target = targetOf({ value: column.field, form_field_id: column.form_field_id ?? null });
 
         // A template may name a category field that was deleted since.
-        return column.category_field_id && !knownTargets.has(target) ? 'ignore' : target;
+        return column.form_field_id && !knownTargets.has(target) ? 'ignore' : target;
     });
 }
 
@@ -215,7 +215,7 @@ const payloadPartEquals: { [Part in keyof MapPointImportPayload]: (a: MapPointIm
             (column, index) =>
                 column.header === b.columns[index]?.header &&
                 column.field === b.columns[index]?.field &&
-                column.category_field_id === b.columns[index]?.category_field_id &&
+                column.form_field_id === b.columns[index]?.form_field_id &&
                 column.new_field_type === b.columns[index]?.new_field_type,
         ),
     main_category_id: (a, b) => a.main_category_id === b.main_category_id,
@@ -257,7 +257,7 @@ export function useMapPointColumnMapping(
 
             if (mainCategoryId.value) {
                 const ownFields = fields.filter(
-                    (field) => field.category_field_id && (categoryFieldIds[mainCategoryId.value!] ?? []).includes(field.category_field_id),
+                    (field) => field.form_field_id && (categoryFieldIds[mainCategoryId.value!] ?? []).includes(field.form_field_id),
                 );
                 columnFields.value = guessCategoryFields(upload.headers, columnFields.value, ownFields);
             }
@@ -285,7 +285,7 @@ export function useMapPointColumnMapping(
                 return;
             }
 
-            const assignedField = fields.find((field) => field.category_field_id && field.category_id && current.includes(targetOf(field)));
+            const assignedField = fields.find((field) => field.form_field_id && field.category_id && current.includes(targetOf(field)));
             mainCategoryId.value = assignedField?.category_id ?? null;
         },
         { deep: true, immediate: true },

@@ -145,11 +145,11 @@ test('a mapping keeps the category field a column is assigned to', function (): 
     actingAsMappingAdmin($this, $this->group);
     $field = MapPointCategory::factory()->for($this->group)->create()->findOrCreateFormDefinition()->fields()->create(['type' => FieldType::NUMBER, 'label' => 'PV-Leistung (kWp)', 'sort_order' => 0]);
     $payload = mappingPayload('Anlagenliste');
-    $payload['columns'][1] = ['header' => 'Leistung', 'field' => 'category_field', 'category_field_id' => $field->uuid];
+    $payload['columns'][1] = ['header' => 'Leistung', 'field' => 'field', 'form_field_id' => $field->uuid];
 
     $this->post(route('mappoints.spreadsheet-mappings.store'), $payload)->assertSessionHasNoErrors();
 
-    expect(MapPointSpreadsheetMapping::sole()->columns[1])->toEqual(['header' => 'Leistung', 'field' => 'category_field', 'category_field_id' => $field->uuid]);
+    expect(MapPointSpreadsheetMapping::sole()->columns[1])->toEqual(['header' => 'Leistung', 'field' => 'field', 'form_field_id' => $field->uuid]);
 });
 
 test('a mapping cannot hold a column that creates a new field', function (): void {

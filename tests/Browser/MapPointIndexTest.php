@@ -61,7 +61,7 @@ test('the popup of the backend map shows public and internal field values', func
     $formDefinition = $category->findOrCreateFormDefinition();
     $power = $formDefinition->fields()->create(['type' => FieldType::NUMBER, 'label' => 'PV-Leistung (kWp)', 'sort_order' => 0]);
     $phone = $formDefinition->fields()->create(['type' => FieldType::PHONE, 'label' => 'Telefon', 'sort_order' => 1]);
-    $category->publicFields()->sync([$power->id]);
+    $category->syncPublicFields([$power->id]);
     // The backend map opens at this position, so the marker can be clicked.
     $mapPoint = MapPoint::factory()->for($this->group)->create(['lat' => 49.8728, 'lng' => 8.6512, 'category_id' => $category->id]);
     $power->createMapPointField($mapPoint, 9.9);

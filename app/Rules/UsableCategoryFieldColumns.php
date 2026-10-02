@@ -25,8 +25,8 @@ class UsableCategoryFieldColumns implements ValidationRule
         }
 
         $requestedIds = collect($value)
-            ->filter(fn (mixed $column): bool => is_array($column) && ($column['field'] ?? null) === MapPointSpreadsheetField::CATEGORY_FIELD->value)
-            ->pluck('category_field_id');
+            ->filter(fn (mixed $column): bool => is_array($column) && ($column['field'] ?? null) === MapPointSpreadsheetField::FIELD->value)
+            ->pluck('form_field_id');
 
         if ($requestedIds->isEmpty()) {
             return;

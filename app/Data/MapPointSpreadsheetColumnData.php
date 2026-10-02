@@ -15,24 +15,24 @@ class MapPointSpreadsheetColumnData extends Data
     public function __construct(
         public string $header,
         public MapPointSpreadsheetField $field,
-        /** The uuid of the category field, only set for MapPointSpreadsheetField::CATEGORY_FIELD. */
-        public ?string $category_field_id = null,
+        /** The uuid of the form field, only set for MapPointSpreadsheetField::FIELD. */
+        public ?string $form_field_id = null,
         /** The type of the field to create, only set for MapPointSpreadsheetField::NEW_CATEGORY_FIELD. */
         public ?FieldType $new_field_type = null,
     ) {}
 
     /**
-     * Identifies what the column holds. Category fields are told apart by their id, all other fields by the field.
+     * Identifies what the column holds. Fields of a form definition are told apart by their id, all other fields by the field.
      */
     public function target(): string
     {
-        return $this->field === MapPointSpreadsheetField::CATEGORY_FIELD
-            ? self::categoryFieldTarget((string) $this->category_field_id)
+        return $this->field === MapPointSpreadsheetField::FIELD
+            ? self::fieldTarget((string) $this->form_field_id)
             : $this->field->value;
     }
 
-    public static function categoryFieldTarget(string $categoryFieldId): string
+    public static function fieldTarget(string $formFieldId): string
     {
-        return MapPointSpreadsheetField::CATEGORY_FIELD->value.':'.$categoryFieldId;
+        return MapPointSpreadsheetField::FIELD->value.':'.$formFieldId;
     }
 }

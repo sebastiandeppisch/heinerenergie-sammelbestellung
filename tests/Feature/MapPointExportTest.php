@@ -135,7 +135,7 @@ test('a template column of a category field that was deleted since is left out',
     $mapping = MapPointSpreadsheetMapping::factory()->for($this->group)->create([
         'columns' => [
             ['header' => 'Bezeichnung', 'field' => 'title'],
-            ['header' => 'Kontakt', 'field' => 'category_field', 'category_field_id' => $field->uuid],
+            ['header' => 'Kontakt', 'field' => 'field', 'form_field_id' => $field->uuid],
         ],
     ]);
     $field->delete();
