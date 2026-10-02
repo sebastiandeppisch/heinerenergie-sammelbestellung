@@ -224,6 +224,10 @@ email: string,
 is_admin: boolean,
 is_active: boolean,
 };
+export type ImageData = {
+name: string,
+url: string,
+};
 export type MailBodyData = {
 readonly uid: string,
 readonly folder: string,
@@ -305,6 +309,7 @@ label: string,
 value: number | string | string[] | null,
 display_value: string,
 is_public: boolean,
+images: App.Data.ImageData[],
 };
 export type MapPointImportResultData = {
 created_count: number,

@@ -10,12 +10,16 @@ use App\Models\Group;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
 use App\Models\MapPointField;
+use App\Rules\MapPointImageItem;
 use App\ValueObjects\MapPointCategoryTree;
+use App\ValueObjects\StoredImage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Throwable;
 
 /**
  * Stores the values of category fields on points. The fields of a point come from its category, or from the
@@ -25,6 +29,8 @@ use Illuminate\Validation\Rule;
  */
 class MapPointFieldService
 {
+    public function __construct(private readonly ImageStorage $imageStorage) {}
+
     /**
      * The fields the points of the category have, in field order.
      *
@@ -64,6 +70,7 @@ class MapPointFieldService
 
     /**
      * The fields of all categories the group can use, for spreadsheet columns. Sorted by category, then by field.
+     * Fields whose values cannot be put into a cell, such as images, are left out.
      *
      * @return Collection<int, FormField>
      */
@@ -73,6 +80,7 @@ class MapPointFieldService
             ->whereHas('formDefinition.mapPointCategory', fn (Builder $query) => $query->usableInGroup($group))
             ->with(['options', 'formDefinition.mapPointCategory'])
             ->get()
+            ->filter(fn (FormField $field): bool => $field->type->supportsSpreadsheet())
             ->sortBy([
                 fn (FormField $a, FormField $b): int => strcmp((string) $a->formDefinition?->mapPointCategory?->name, (string) $b->formDefinition?->mapPointCategory?->name),
                 fn (FormField $a, FormField $b): int => $a->sort_order <=> $b->sort_order,
@@ -93,29 +101,71 @@ class MapPointFieldService
     {
         $fields ??= $this->fieldsOfCategory($mapPoint->category_id);
         $storedFields = $mapPoint->fields()->whereIn('form_field_id', $fields->modelKeys())->get()->keyBy('form_field_id');
+        $newImages = [];
 
-        DB::transaction(function () use ($mapPoint, $valuesByFieldUuid, $fields, $storedFields): void {
-            foreach ($fields as $field) {
-                if (! array_key_exists($field->uuid, $valuesByFieldUuid)) {
-                    continue;
+        try {
+            DB::transaction(function () use ($mapPoint, $valuesByFieldUuid, $fields, $storedFields, &$newImages): void {
+                foreach ($fields as $field) {
+                    if (! array_key_exists($field->uuid, $valuesByFieldUuid)) {
+                        continue;
+                    }
+
+                    $storedField = $storedFields->get($field->id);
+                    $value = $field->type === FieldType::IMAGE
+                        ? $this->storeImages($mapPoint, $valuesByFieldUuid[$field->uuid], $newImages)
+                        : $this->normalize($field, $valuesByFieldUuid[$field->uuid]);
+
+                    if ($storedField !== null && $this->isSameValue($field, $storedField->value, $value)) {
+                        continue;
+                    }
+
+                    $storedField?->delete();
+
+                    if ($value !== null) {
+                        $field->createMapPointField($mapPoint, $value);
+                    }
+
+                    if ($field->type === FieldType::IMAGE && $storedField !== null) {
+                        $removedImages = array_values(array_diff((array) $storedField->value, (array) $value));
+                        DB::afterCommit(fn () => $this->imageStorage->delete($removedImages));
+                    }
                 }
+            });
+        } catch (Throwable $e) {
+            $this->imageStorage->delete($newImages);
 
-                $value = $this->normalize($field, $valuesByFieldUuid[$field->uuid]);
-                $storedField = $storedFields->get($field->id);
-
-                if ($storedField !== null && $this->isSameValue($field, $storedField->value, $value)) {
-                    continue;
-                }
-
-                $storedField?->delete();
-
-                if ($value !== null) {
-                    $field->createMapPointField($mapPoint, $value);
-                }
-            }
-        });
+            throw $e;
+        }
 
         $mapPoint->unsetRelation('fields');
+    }
+
+    /**
+     * The entries keep a stored image by its file name, upload a new one or copy an existing one. Their order is
+     * the order of the images.
+     *
+     * @param  array<int, string>  $newImages  collects the stored files, to remove them when saving fails
+     * @return array<int, string>|null
+     */
+    private function storeImages(MapPoint $mapPoint, mixed $entries, array &$newImages): ?array
+    {
+        $paths = [];
+
+        foreach ((array) $entries as $entry) {
+            $path = match (true) {
+                $entry instanceof UploadedFile => $this->imageStorage->store($entry, $mapPoint->imageDirectory()),
+                $entry instanceof StoredImage => $this->imageStorage->copy($entry->path, $mapPoint->imageDirectory()),
+                default => null,
+            };
+
+            if ($path !== null) {
+                $newImages[] = $path;
+            }
+
+            $paths[] = $path ?? $mapPoint->imageDirectory().'/'.$entry;
+        }
+
+        return $paths === [] ? null : $paths;
     }
 
     /**
@@ -178,9 +228,10 @@ class MapPointFieldService
      * Validation rules for the values of the given fields, keyed by "$prefix.$uuid". All fields are optional.
      *
      * @param  Collection<int, FormField>  $fields
+     * @param  MapPoint|null  $mapPoint  The point being edited. Its images may be kept by their file names.
      * @return array<string, array<int, mixed>>
      */
-    public function validationRules(Collection $fields, string $prefix): array
+    public function validationRules(Collection $fields, string $prefix, ?MapPoint $mapPoint = null): array
     {
         $rules = [];
 
@@ -190,6 +241,7 @@ class MapPointFieldService
             $fieldRules = match ($field->type) {
                 FieldType::SELECT => ['nullable', 'string', Rule::in($options)],
                 FieldType::CHECKBOX => ['nullable', 'array'],
+                FieldType::IMAGE => ['nullable', 'array', 'max:'.$field->max_images],
                 default => array_values(array_diff($field->getValidationRules()[$field->uuid] ?? [], ['required'])),
             };
 
@@ -202,9 +254,23 @@ class MapPointFieldService
             if ($field->type === FieldType::CHECKBOX) {
                 $rules[$prefix.'.'.$field->uuid.'.*'] = ['string', Rule::in($options)];
             }
+
+            if ($field->type === FieldType::IMAGE) {
+                $rules[$prefix.'.'.$field->uuid.'.*'] = [new MapPointImageItem($this->storedImageNames($mapPoint, $field))];
+            }
         }
 
         return $rules;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function storedImageNames(?MapPoint $mapPoint, FormField $field): array
+    {
+        $paths = $mapPoint?->fields()->where('form_field_id', $field->id)->first()?->value;
+
+        return array_map(basename(...), (array) $paths);
     }
 
     private function fieldsFormDefinitionId(MapPoint $mapPoint, MapPointCategoryTree $tree): ?int
@@ -234,7 +300,7 @@ class MapPointFieldService
 
     /**
      * Resending an unchanged value must keep its snapshot, even when the form sends "10.0" for 10 or checked
-     * boxes in another order.
+     * boxes in another order. The order of images matters.
      */
     private function isSameValue(FormField $field, mixed $storedValue, mixed $value): bool
     {
@@ -242,7 +308,7 @@ class MapPointFieldService
             return (float) $storedValue === (float) $value;
         }
 
-        if (is_array($storedValue) && is_array($value)) {
+        if (is_array($storedValue) && is_array($value) && $field->type !== FieldType::IMAGE) {
             sort($storedValue);
             sort($value);
         }

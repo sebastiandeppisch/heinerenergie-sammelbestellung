@@ -13,20 +13,20 @@ use App\Models\FormField;
 use App\Models\FormSubmission;
 use App\Services\CurrentGroupService;
 use App\Services\FormEmbedAccessService;
+use App\Services\ImageStorage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
-use Intervention\Image\Encoders\JpegEncoder;
-use Intervention\Image\Laravel\Facades\Image;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
 class FormSubmitController extends Controller
 {
-    public function __construct(private readonly FormEmbedAccessService $embedAccess) {}
+    public function __construct(
+        private readonly FormEmbedAccessService $embedAccess,
+        private readonly ImageStorage $imageStorage,
+    ) {}
 
     public function show(FormDefinition $formDefinition, Request $request): Response
     {
@@ -69,7 +69,7 @@ class FormSubmitController extends Controller
                 $submission->handleCreators();
             });
         } catch (Throwable $e) {
-            Storage::disk('public')->delete($storedImagePaths);
+            $this->imageStorage->delete($storedImagePaths);
             throw $e;
         }
 
@@ -147,15 +147,7 @@ class FormSubmitController extends Controller
         $files = $request->file($field->uuid) ?? [];
 
         foreach ($files as $file) {
-            $filename = Str::uuid().'.jpg';
-            $directory = 'form-images/'.$submission->uuid;
-            $path = $directory.'/'.$filename;
-
-            $image = Image::decode($file);
-            $image->scaleDown(width: 1920, height: 1920);
-            $encoded = $image->encode(new JpegEncoder(quality: 80, strip: true));
-
-            Storage::disk('public')->put($path, $encoded->toStream());
+            $path = $this->imageStorage->store($file, 'form-images/'.$submission->uuid);
             $storedImagePaths[] = $path;
             $paths[] = $path;
         }

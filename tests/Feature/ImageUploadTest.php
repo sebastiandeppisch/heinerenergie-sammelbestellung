@@ -1,9 +1,15 @@
 <?php
 
+use App\Data\SubmissionFieldData;
 use App\Enums\FieldType;
+use App\Models\Advice;
 use App\Models\FormDefinition;
 use App\Models\FormField;
+use App\Models\FormSubmission;
+use App\Models\Group;
 use App\Models\SubmissionField;
+use App\Models\User;
+use App\Services\SessionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -13,7 +19,8 @@ use Tests\Concerns\AutoAttachesFormEmbedToken;
 uses(RefreshDatabase::class, AutoAttachesFormEmbedToken::class);
 
 beforeEach(function (): void {
-    Storage::fake('public');
+    Storage::fake('images');
+    Storage::fake('image-cache');
 });
 
 test('image field can be submitted with a jpeg', function (): void {
@@ -42,7 +49,7 @@ test('image field can be submitted with a jpeg', function (): void {
     $paths = $submissionField->value;
 
     expect($paths)->toBeArray()->toHaveCount(1);
-    Storage::disk('public')->assertExists($paths[0]);
+    Storage::disk('images')->assertExists($paths[0]);
 });
 
 test('image field can be submitted with a png', function (): void {
@@ -64,7 +71,7 @@ test('image field can be submitted with a png', function (): void {
     $response->assertSessionHasNoErrors();
 
     $submissionField = SubmissionField::where('form_field_id', $formField->id)->firstOrFail();
-    Storage::disk('public')->assertExists($submissionField->value[0]);
+    Storage::disk('images')->assertExists($submissionField->value[0]);
 });
 
 test('image field stores multiple images up to max_images', function (): void {
@@ -93,7 +100,7 @@ test('image field stores multiple images up to max_images', function (): void {
     expect($submissionField->value)->toBeArray()->toHaveCount(3);
 
     foreach ($submissionField->value as $path) {
-        Storage::disk('public')->assertExists($path);
+        Storage::disk('images')->assertExists($path);
     }
 });
 
@@ -212,34 +219,13 @@ test('image field strips exif geotags from uploaded jpegs', function (string $dr
     ])->assertSessionHasNoErrors();
 
     $submissionField = SubmissionField::where('form_field_id', $formField->id)->firstOrFail();
-    $storedPath = Storage::disk('public')->path($submissionField->value[0]);
+    $storedPath = Storage::disk('images')->path($submissionField->value[0]);
 
     expect(@exif_read_data($storedPath, 'GPS'))->toBeFalse();
 })->with([
     'gd' => Driver::class,
     'imagick' => Intervention\Image\Drivers\Imagick\Driver::class,
 ]);
-
-/**
- * Builds a JPEG whose EXIF block contains a GPS IFD with latitude and longitude references.
- */
-function jpegWithGpsExif(): string
-{
-    $image = imagecreatetruecolor(100, 100);
-    ob_start();
-    imagejpeg($image);
-    $jpeg = ob_get_clean();
-
-    $ifd0 = pack('v', 1).pack('vvVV', 0x8825, 4, 1, 26).pack('V', 0);
-    $gpsIfd = pack('v', 2)
-        .pack('vvV', 1, 2, 2)."N\0\0\0"
-        .pack('vvV', 3, 2, 2)."E\0\0\0"
-        .pack('V', 0);
-    $exif = "Exif\0\0".'II'.pack('v', 42).pack('V', 8).$ifd0.$gpsIfd;
-    $app1Segment = "\xFF\xE1".pack('n', strlen($exif) + 2).$exif;
-
-    return substr($jpeg, 0, 2).$app1Segment.substr($jpeg, 2);
-}
 
 test('image bomb is rejected', function (): void {
     $formDefinition = FormDefinition::factory()->create();
@@ -289,7 +275,7 @@ test('orphaned images are deleted when transaction fails', function (): void {
 
     // Validation error means no files written at all — nothing to clean up
     $response->assertSessionHasErrors($textField->uuid);
-    Storage::disk('public')->assertDirectoryEmpty('form-images');
+    Storage::disk('images')->assertDirectoryEmpty('form-images');
 });
 
 test('form submit is rate limited', function (): void {
@@ -301,4 +287,52 @@ test('form submit is rate limited', function (): void {
 
     $response = $this->post(route('form.submit', $formDefinition), []);
     $response->assertStatus(429);
+});
+
+test('images of a submission are served to members of its group and to advisors of its advice only', function (): void {
+    Config::set('app.group_context', 'group');
+    $formDefinition = FormDefinition::factory()->create();
+    $formField = FormField::factory()->create([
+        'form_definition_id' => $formDefinition->id,
+        'type' => FieldType::IMAGE,
+        'label' => 'Foto',
+        'max_images' => 1,
+        'required' => false,
+    ]);
+    $this->post(route('form.submit', $formDefinition), [$formField->uuid => [UploadedFile::fake()->image('photo.jpg', 800, 600)]])->assertSessionHasNoErrors();
+    $submission = FormSubmission::sole();
+    $url = SubmissionFieldData::fromModel($submission->submissionFields()->sole())->value[0];
+    $member = User::factory()->create(['is_admin' => false]);
+    $formDefinition->group->users()->attach($member);
+    $advisor = User::factory()->create(['is_admin' => false]);
+    $stranger = User::factory()->create(['is_admin' => false]);
+
+    expect($url)->toContain('/form-images/'.$submission->uuid.'/');
+    $this->get($url)->assertRedirect(route('login'));
+    $otherGroup = Group::factory()->create();
+    $otherGroup->users()->attach($stranger);
+    app(SessionService::class)->actAsGroup($otherGroup);
+    $this->actingAs($stranger)->get($url)->assertNotFound();
+
+    app(SessionService::class)->actAsGroup($formDefinition->group);
+    $this->actingAs($member)->get($url)->assertOk()->assertHeader('Content-Type', 'image/jpeg');
+    $this->get($url.'?w=400')->assertOk();
+
+    $advice = Advice::factory()->create(['advisor_id' => $advisor->id]);
+    $submission->update(['advice_id' => $advice->id]);
+    $otherGroup->users()->attach($advisor);
+    app(SessionService::class)->actAsGroup($otherGroup);
+    $this->actingAs($advisor)->get($url)->assertOk();
+});
+
+test('the migration moves submitted images from the public to the private disk', function (): void {
+    Storage::fake('public');
+    Storage::disk('public')->put('form-images/abc/photo.jpg', 'jpeg');
+    Storage::disk('public')->put('logos/logo.png', 'png');
+    $migration = require database_path('migrations/2026_10_02_120000_move_form_images_to_private_disk.php');
+
+    $migration->up();
+
+    Storage::disk('images')->assertExists('form-images/abc/photo.jpg');
+    Storage::disk('public')->assertMissing('form-images/abc/photo.jpg')->assertExists('logos/logo.png');
 });

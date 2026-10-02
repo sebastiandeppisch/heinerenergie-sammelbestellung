@@ -7,7 +7,9 @@ namespace App\Models;
 use App\Enums\FieldType;
 use App\Events\MapPointCreatedByFormSubmission;
 use App\Models\Traits\HasUuid;
+use App\Services\ImageStorage;
 use App\Services\MapPointFieldService;
+use App\ValueObjects\StoredImage;
 use Database\Factories\FormDefinitionToMapPointFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -186,11 +188,19 @@ class FormDefinitionToMapPoint extends Model
     }
 
     /**
-     * Options of the form and of the category are matched by their label, because their values differ.
+     * Options of the form and of the category are matched by their label, because their values differ. Images are
+     * copied, because the submission and the point are deleted independently.
      */
     private function convert(FormField $targetField, SubmissionField $submissionField): mixed
     {
         $value = $submissionField->value;
+
+        if ($targetField->type === FieldType::IMAGE) {
+            $imageStorage = app(ImageStorage::class);
+            $paths = array_filter((array) $value, fn (mixed $path): bool => is_string($path) && $imageStorage->exists($path));
+
+            return array_map(fn (string $path): StoredImage => new StoredImage($path), array_slice(array_values($paths), 0, $targetField->max_images));
+        }
 
         if (! $targetField->type->supportsOptions()) {
             return is_array($value) ? null : $value;

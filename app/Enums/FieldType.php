@@ -46,7 +46,7 @@ enum FieldType: string
     ];
 
     /**
-     * Types usable as fields of map point categories. Files, images and locations cannot be imported from spreadsheets.
+     * Types usable as fields of map point categories. Files and locations are not supported.
      */
     public const typesForMapPointFields = [
         self::TEXT,
@@ -58,6 +58,7 @@ enum FieldType: string
         self::RADIO,
         self::CHECKBOX,
         self::DATE,
+        self::IMAGE,
     ];
 
     /**
@@ -84,6 +85,14 @@ enum FieldType: string
     public function supportsFileUpload(): bool
     {
         return in_array($this, self::typesWithFileUpload, true);
+    }
+
+    /**
+     * Whether values of this type can be imported from and exported to spreadsheets.
+     */
+    public function supportsSpreadsheet(): bool
+    {
+        return $this !== self::IMAGE;
     }
 
     public function supportsNumericValidation(): bool

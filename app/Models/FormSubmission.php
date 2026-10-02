@@ -16,6 +16,8 @@ use Illuminate\Support\Carbon;
 use Override;
 
 /**
+ * @property int $group_id
+ * @property int|null $advice_id
  * @property Carbon $submitted_at
  *
  * @implements Pointable<self>
@@ -57,6 +59,24 @@ class FormSubmission extends Model implements Pointable
     public function formDefinition(): BelongsTo
     {
         return $this->belongsTo(FormDefinition::class);
+    }
+
+    /**
+     * @return BelongsTo<Group, $this>
+     */
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(Group::class);
+    }
+
+    /**
+     * The advice created from this submission.
+     *
+     * @return BelongsTo<Advice, $this>
+     */
+    public function advice(): BelongsTo
+    {
+        return $this->belongsTo(Advice::class);
     }
 
     /**

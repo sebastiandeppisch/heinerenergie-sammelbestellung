@@ -61,7 +61,9 @@ class UpsertMapPointRequest extends FormRequest
      */
     private function fieldValueRules(): array
     {
-        return app(MapPointFieldService::class)->validationRules($this->submittedCategoryFields(), 'field_values');
+        $mapPoint = $this->route('mappoint');
+
+        return app(MapPointFieldService::class)->validationRules($this->submittedCategoryFields(), 'field_values', $mapPoint instanceof MapPoint ? $mapPoint : null);
     }
 
     /**

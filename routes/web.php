@@ -11,6 +11,7 @@ use App\Http\Controllers\FormSubmissionController;
 use App\Http\Controllers\FormSubmitController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\Groups\GroupUserController;
+use App\Http\Controllers\ImageController;
 use App\Http\Controllers\MailAccountController;
 use App\Http\Controllers\MapEmbedController;
 use App\Http\Controllers\MapPointCategoryController;
@@ -104,6 +105,7 @@ Route::middleware('auth')->group(function (): void {
         ->name('form-submissions.mark-seen');
     Route::post('form-submissions/{formSubmission}/mark-unseen', [FormSubmissionController::class, 'markUnseen'])
         ->name('form-submissions.mark-unseen');
+    Route::get('form-images/{formSubmission}/{image}', [ImageController::class, 'formSubmission'])->name('form-images.show');
 
     Route::get('mappoints-map', [MapPointController::class, 'map'])->name('map-points-map');
 
@@ -176,6 +178,10 @@ Route::post('/forms/{formDefinition}', [FormSubmitController::class, 'submit'])
 
 Route::get('/map/{mapEmbed}', [MapPointController::class, 'publicMap'])
     ->name('map.public');
+
+// Public images are served to anyone, so the route is outside of the auth group. Access is checked per image.
+Route::get('/map-point-images/{mapPoint}/{image}', [ImageController::class, 'mapPoint'])
+    ->name('map-point-images.show');
 
 Route::put('/users/{user}/password', [UserController::class, 'changePassword'])
     ->name('users.changePassword');

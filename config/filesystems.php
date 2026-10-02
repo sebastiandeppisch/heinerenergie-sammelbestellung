@@ -42,6 +42,18 @@ return [
             'visibility' => 'public',
         ],
 
+        // Images of form submissions and map points. Not public: they are served by routes that check access.
+        'images' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/images'),
+        ],
+
+        // Scaled down variants of the images, created when they are requested first.
+        'image-cache' => [
+            'driver' => 'local',
+            'root' => storage_path('app/image-cache'),
+        ],
+
         'uploads' => [
             'driver' => 'local',
             'root' => public_path('/uploads'),

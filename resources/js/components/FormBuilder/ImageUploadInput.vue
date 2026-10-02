@@ -9,6 +9,7 @@ const props = withDefaults(
         maxImages?: number;
         disabled?: boolean;
         hasError?: boolean;
+        /** Urls of stored images. */
         storedPaths?: string[];
     }>(),
     {
@@ -33,9 +34,9 @@ const previews = computed<string[]>(() => {
         if (modelValue.value[0] instanceof File) {
             return (modelValue.value as File[]).map((file) => URL.createObjectURL(file));
         }
-        return (modelValue.value as string[]).map((path) => `/storage/${path}`);
+        return modelValue.value as string[];
     }
-    return props.storedPaths.map((path) => `/storage/${path}`);
+    return props.storedPaths;
 });
 
 const canAddMore = computed(() => (modelValue.value?.length ?? 0) < props.maxImages);
