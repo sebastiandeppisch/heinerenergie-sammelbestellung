@@ -10,6 +10,7 @@ use App\Models\FormField;
 use App\Models\Group;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
+use App\Models\MapPointCharacteristic;
 use App\Models\User;
 use App\Services\SessionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -271,5 +272,133 @@ test('deleting fields and categories removes the parts of the mapping that refer
     expect($config->refresh()->subcategory_field_id)->toBeNull();
 
     $form->delete();
+    $this->assertModelMissing($config);
+});
+
+/**
+ * A form whose checkbox options pick the characteristics "Igeltor" (with a width field) and "Totholz" of a garden
+ * category, and whose number field fills the width.
+ *
+ * @return array{config: FormDefinitionToMapPoint, category: MapPointCategory, hedgehogGate: MapPointCharacteristic, width: FormField, formCharacteristics: FormField, formWidth: FormField}
+ */
+function characteristicMappingForm(): array
+{
+    $config = FormDefinitionToMapPoint::factory()->create();
+    $form = $config->formDefinition;
+    $category = MapPointCategory::factory()->for($form->group)->create();
+    $hedgehogGate = MapPointCharacteristic::factory()->for($category, 'category')->create(['name' => 'Igeltor']);
+    $deadwood = MapPointCharacteristic::factory()->for($category, 'category')->create(['name' => 'Totholz']);
+    $width = mappingField($hedgehogGate->findOrCreateFormDefinition(), ['label' => 'Breite (cm)', 'type' => FieldType::NUMBER]);
+    $formCharacteristics = mappingField($form, ['label' => 'Was gibt es?', 'type' => FieldType::CHECKBOX], ['igel' => 'Igeltor', 'holz' => 'Totholz']);
+    $formWidth = mappingField($form, ['label' => 'Breite', 'type' => FieldType::NUMBER]);
+    $config->category()->associate($category);
+    $config->characteristicsField()->associate($formCharacteristics)->save();
+    $config->characteristicMappings()->createMany([
+        ['option_value' => 'igel', 'map_point_characteristic_id' => $hedgehogGate->id],
+        ['option_value' => 'holz', 'map_point_characteristic_id' => $deadwood->id],
+    ]);
+    $config->fieldMappings()->create(['target_field_id' => $width->id, 'source_field_id' => $formWidth->id]);
+
+    return compact('config', 'category', 'hedgehogGate', 'width', 'formCharacteristics', 'formWidth');
+}
+
+test('checked options give the point characteristics and the fields of chosen characteristics are filled', function (): void {
+    ['config' => $config, 'formCharacteristics' => $formCharacteristics, 'formWidth' => $formWidth] = characteristicMappingForm();
+
+    $this->post(route('form.submit', $config->formDefinition), mapPointSubmission($config, [
+        $formCharacteristics->uuid => ['igel', 'holz'],
+        $formWidth->uuid => '13',
+    ]))->assertSessionHasNoErrors();
+
+    $mapPoint = MapPoint::sole();
+    expect($mapPoint->characteristics()->pluck('name')->sort()->values()->all())->toBe(['Igeltor', 'Totholz'])
+        ->and($mapPoint->fields()->pluck('value', 'label')->all())->toBe(['Breite (cm)' => 13]);
+});
+
+test('fields of characteristics that were not chosen are skipped', function (): void {
+    ['config' => $config, 'formCharacteristics' => $formCharacteristics, 'formWidth' => $formWidth] = characteristicMappingForm();
+
+    $this->post(route('form.submit', $config->formDefinition), mapPointSubmission($config, [
+        $formCharacteristics->uuid => ['holz'],
+        $formWidth->uuid => '13',
+    ]))->assertSessionHasNoErrors();
+
+    $mapPoint = MapPoint::sole();
+    expect($mapPoint->characteristics()->pluck('name')->all())->toBe(['Totholz'])
+        ->and($mapPoint->fields()->count())->toBe(0);
+});
+
+test('an option of a characteristic the category does not offer is ignored', function (): void {
+    ['config' => $config, 'hedgehogGate' => $hedgehogGate, 'formCharacteristics' => $formCharacteristics] = characteristicMappingForm();
+    $hedgehogGate->update(['map_point_category_id' => MapPointCategory::factory()->for($config->formDefinition->group)->create()->id]);
+
+    $this->post(route('form.submit', $config->formDefinition), mapPointSubmission($config, [
+        $formCharacteristics->uuid => ['igel'],
+    ]))->assertSessionHasNoErrors();
+
+    expect(MapPoint::sole()->characteristics()->count())->toBe(0);
+});
+
+test('the form builder saves the characteristic options and field mappings of characteristic fields', function (): void {
+    $config = FormDefinitionToMapPoint::factory()->create();
+    $form = $config->formDefinition;
+    $garden = MapPointCategory::factory()->for($form->group)->create();
+    $hedgehogGate = MapPointCharacteristic::factory()->for($garden, 'category')->create();
+    $width = mappingField($hedgehogGate->findOrCreateFormDefinition(), ['label' => 'Breite (cm)', 'type' => FieldType::NUMBER]);
+    $formCharacteristics = mappingField($form, ['label' => 'Was gibt es?', 'type' => FieldType::CHECKBOX], ['igel' => 'Igeltor']);
+    $formWidth = mappingField($form, ['label' => 'Breite', 'type' => FieldType::NUMBER]);
+
+    $payload = FormDefinitionData::fromModel($form->load('fields.options'))->toArray();
+    $payload['map_point_mapping'] = [...$payload['map_point_mapping'],
+        'category_id' => $garden->uuid,
+        'characteristics_field_id' => $formCharacteristics->uuid,
+        'characteristic_options' => [['option_value' => 'igel', 'characteristic_id' => $hedgehogGate->uuid]],
+        'field_mappings' => [['target_field_id' => $width->uuid, 'source_field_id' => $formWidth->uuid]],
+    ];
+
+    $this->actingAs(mapPointFormAdmin($form->group))
+        ->put(route('form-definitions.update', $form), $payload)
+        ->assertSessionHasNoErrors();
+
+    $mapping = FormToMapPointMappingData::fromModel($config->fresh());
+    expect($mapping->characteristics_field_id)->toBe($formCharacteristics->uuid)
+        ->and($mapping->characteristic_options->toArray())->toBe([['option_value' => 'igel', 'characteristic_id' => $hedgehogGate->uuid]])
+        ->and($mapping->field_mappings->toArray())->toBe([['target_field_id' => $width->uuid, 'source_field_id' => $formWidth->uuid]]);
+});
+
+test('the form builder rejects characteristics the category does not offer and fields other than checkboxes', function (): void {
+    $config = FormDefinitionToMapPoint::factory()->create();
+    $form = $config->formDefinition;
+    $garden = MapPointCategory::factory()->for($form->group)->create(['name' => 'Garten']);
+    $solar = MapPointCategory::factory()->for($form->group)->create();
+    $storage = MapPointCharacteristic::factory()->for($solar, 'category')->create();
+    $formKind = mappingField($form, ['label' => 'Art', 'type' => FieldType::SELECT], ['sp' => 'Speicher']);
+
+    $payload = FormDefinitionData::fromModel($form->load('fields.options'))->toArray();
+    $payload['map_point_mapping'] = [...$payload['map_point_mapping'],
+        'category_id' => $garden->uuid,
+        'characteristics_field_id' => $formKind->uuid,
+        'characteristic_options' => [['option_value' => 'sp', 'characteristic_id' => $storage->uuid]],
+    ];
+
+    $this->actingAs(mapPointFormAdmin($form->group))
+        ->put(route('form-definitions.update', $form), $payload)
+        ->assertSessionHasErrors([
+            'map_point_mapping.characteristics_field_id' => 'Die Maßnahmen können nur Checkboxen bestimmen.',
+            'map_point_mapping.characteristic_options.0.characteristic_id' => 'Diese Maßnahme ist für die Kategorie Garten nicht verfügbar.',
+        ]);
+});
+
+test('deleting the characteristics field or a characteristic removes the parts of the mapping that refer to them', function (): void {
+    ['config' => $config, 'hedgehogGate' => $hedgehogGate, 'formCharacteristics' => $formCharacteristics] = characteristicMappingForm();
+
+    $hedgehogGate->delete();
+    expect($config->characteristicMappings()->pluck('option_value')->all())->toBe(['holz']);
+
+    $formCharacteristics->delete();
+    expect($config->refresh()->characteristics_field_id)->toBeNull()
+        ->and($config->characteristicMappings()->count())->toBe(0);
+
+    $config->formDefinition->delete();
     $this->assertModelMissing($config);
 });

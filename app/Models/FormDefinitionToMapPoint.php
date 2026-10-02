@@ -87,6 +87,24 @@ class FormDefinitionToMapPoint extends Model
     }
 
     /**
+     * A checkbox field of the form whose checked options pick characteristics of the created points.
+     *
+     * @return BelongsTo<FormField, $this>
+     */
+    public function characteristicsField(): BelongsTo
+    {
+        return $this->belongsTo(FormField::class, 'characteristics_field_id');
+    }
+
+    /**
+     * @return HasMany<FormDefinitionToMapPointCharacteristic, $this>
+     */
+    public function characteristicMappings(): HasMany
+    {
+        return $this->hasMany(FormDefinitionToMapPointCharacteristic::class);
+    }
+
+    /**
      * @return HasMany<FormDefinitionToMapPointField, $this>
      */
     public function fieldMappings(): HasMany
@@ -102,6 +120,7 @@ class FormDefinitionToMapPoint extends Model
     {
         return DB::transaction(function (): ?bool {
             $this->subcategories()->delete();
+            $this->characteristicMappings()->delete();
             $this->fieldMappings()->delete();
 
             return parent::delete();
@@ -127,10 +146,14 @@ class FormDefinitionToMapPoint extends Model
                 'category_id' => $this->categoryFor($submission)?->id,
             ]);
 
+            $characteristicIds = $this->characteristicIdsFor($submission, $mapPoint->category_id);
+            $mapPoint->characteristics()->sync($characteristicIds);
+
             $fieldService = app(MapPointFieldService::class);
-            $fields = $fieldService->fieldsOfCategory($mapPoint->category_id);
+            // Fields of characteristics that were not chosen are not among these fields, so their values are skipped.
+            $fields = $fieldService->effectiveFields($mapPoint->category_id, $characteristicIds);
             // A value that does not fit its field is left out, the point is created anyway.
-            $fieldService->syncValues($mapPoint, $fieldService->validValues($fields, $this->mappedValues($submission)));
+            $fieldService->syncValues($mapPoint, $fieldService->validValues($fields, $this->mappedValues($submission)), $fields);
 
             // Associate with the form submission as pointable
             // @phpstan-ignore argument.type (Pointable<FormSubmission> satisfies Pointable<Model> at runtime; PHPStan invariance limitation)
@@ -162,6 +185,28 @@ class FormDefinitionToMapPoint extends Model
         }
 
         return $this->category;
+    }
+
+    /**
+     * The characteristics picked by the checked options. Options of characteristics the point's category does not
+     * offer, e.g. after the characteristic was moved, are ignored.
+     *
+     * @return array<int, int>
+     */
+    private function characteristicIdsFor(FormSubmission $submission, ?int $categoryId): array
+    {
+        if ($this->characteristicsField === null) {
+            return [];
+        }
+
+        $checkedOptions = (array) $this->characteristicsField->submissionFields()->where('form_submission_id', $submission->id)->first()?->value;
+        $tree = MapPointCategory::tree();
+
+        return MapPointCharacteristic::query()
+            ->whereIn('id', $this->characteristicMappings()->whereIn('option_value', array_map(strval(...), $checkedOptions))->select('map_point_characteristic_id'))
+            ->get()
+            ->filter(fn (MapPointCharacteristic $characteristic): bool => $characteristic->isSelectableFor($categoryId, $tree))
+            ->modelKeys();
     }
 
     /**

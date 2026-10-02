@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Data\FormFieldData;
+use App\Data\MapPointCharacteristicData;
 use App\Models\MapPointCategory;
+use App\Models\MapPointCharacteristic;
 use App\ValueObjects\MapPointCategoryTree;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Keeps the characteristics of points consistent with their categories. A point can only have characteristics of
- * its category or of an ancestor, so changing its category or moving a category in the tree can remove some.
+ * A point can only have characteristics of its category or of an ancestor. This keeps the characteristics of points
+ * consistent with their categories, and tells forms which characteristics each category offers.
  */
 class MapPointCharacteristicService
 {
@@ -47,5 +51,35 @@ class MapPointCharacteristicService
             ->pluck('id');
 
         DB::table('map_point_characteristic_map_point')->whereIn('id', $unselectableIds)->delete();
+    }
+
+    /**
+     * The characteristics the categories offer, which ones points of each category can have, and their fields.
+     *
+     * @param  EloquentCollection<int, MapPointCategory>  $categories
+     * @return array{characteristics: array<int, MapPointCharacteristicData>, characteristicIdsByCategory: array<string, array<int, string>>, fieldsByCharacteristic: array<string, array<int, FormFieldData>>}
+     */
+    public function characteristicProps(EloquentCollection $categories, MapPointCategoryTree $tree): array
+    {
+        $characteristics = MapPointCharacteristic::query()
+            ->whereIn('map_point_category_id', $categories->modelKeys())
+            ->with(['category', 'formDefinition.fields.options'])
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
+        return [
+            'characteristics' => $characteristics->map(MapPointCharacteristicData::fromModel(...))->all(),
+            'characteristicIdsByCategory' => $categories->mapWithKeys(fn (MapPointCategory $category): array => [
+                $category->uuid => $characteristics
+                    ->filter(fn (MapPointCharacteristic $characteristic): bool => $characteristic->isSelectableFor($category->id, $tree))
+                    ->pluck('uuid')
+                    ->values()
+                    ->all(),
+            ])->all(),
+            'fieldsByCharacteristic' => $characteristics->mapWithKeys(fn (MapPointCharacteristic $characteristic): array => [
+                $characteristic->uuid => $characteristic->formDefinition === null ? [] : $characteristic->formDefinition->fields->map(FormFieldData::fromModel(...))->all(),
+            ])->all(),
+        ];
     }
 }

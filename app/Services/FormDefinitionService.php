@@ -8,6 +8,7 @@ use App\Data\FormDefinitionData;
 use App\Data\FormFieldData;
 use App\Data\FormFieldOptionData;
 use App\Data\FormToAdviceMappingData;
+use App\Data\FormToMapPointCharacteristicData;
 use App\Data\FormToMapPointFieldData;
 use App\Data\FormToMapPointMappingData;
 use App\Data\FormToMapPointSubcategoryData;
@@ -21,6 +22,7 @@ use App\Models\FormField;
 use App\Models\FormFieldOption;
 use App\Models\Group;
 use App\Models\MapPointCategory;
+use App\Models\MapPointCharacteristic;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -249,11 +251,17 @@ class FormDefinitionService
             ? null
             : FormField::where('uuid', $mapping->subcategory_field_id)->first();
 
+        $characteristicsField = $category === null || $mapping->characteristics_field_id === null
+            ? null
+            : FormField::where('uuid', $mapping->characteristics_field_id)->first();
+
         $creator->category()->associate($category);
         $creator->subcategoryField()->associate($subcategoryField);
+        $creator->characteristicsField()->associate($characteristicsField);
         $creator->save();
 
         $this->updateMapPointSubcategories($creator, $subcategoryField === null ? new Collection : $mapping->subcategory_options);
+        $this->updateMapPointCharacteristics($creator, $characteristicsField === null ? new Collection : $mapping->characteristic_options);
         $this->updateMapPointFieldMappings($creator, $category === null ? new Collection : $mapping->field_mappings);
     }
 
@@ -269,6 +277,22 @@ class FormDefinitionService
             $creator->subcategories()->create([
                 'option_value' => $option->option_value,
                 'map_point_category_id' => $categoryIds[$option->category_id],
+            ]);
+        }
+    }
+
+    /**
+     * @param  Collection<int, FormToMapPointCharacteristicData>  $options
+     */
+    private function updateMapPointCharacteristics(FormDefinitionToMapPoint $creator, Collection $options): void
+    {
+        $creator->characteristicMappings()->delete();
+        $characteristicIds = MapPointCharacteristic::whereIn('uuid', $options->pluck('characteristic_id'))->pluck('id', 'uuid');
+
+        foreach ($options as $option) {
+            $creator->characteristicMappings()->create([
+                'option_value' => $option->option_value,
+                'map_point_characteristic_id' => $characteristicIds[$option->characteristic_id],
             ]);
         }
     }
@@ -334,27 +358,56 @@ class FormDefinitionService
         $sortOrder = 3;
 
         foreach (app(MapPointFieldService::class)->fieldsOfCategory($category?->id) as $categoryField) {
-            $formField = $formDefinition->fields()->create([
-                'type' => $categoryField->type,
-                'label' => $categoryField->label,
-                'help_text' => $categoryField->help_text,
-                'placeholder' => $categoryField->placeholder,
-                'min_length' => $categoryField->min_length,
-                'max_length' => $categoryField->max_length,
-                'min_value' => $categoryField->min_value,
-                'max_value' => $categoryField->max_value,
-                'required' => false,
-                'sort_order' => $sortOrder++,
-            ]);
-
-            foreach ($categoryField->options as $option) {
-                $formField->options()->create(['label' => $option->label, 'value' => $option->value, 'sort_order' => $option->sort_order]);
-            }
-
+            $formField = $this->copyMapPointField($formDefinition, $categoryField, $sortOrder++);
             $creator->fieldMappings()->create(['target_field_id' => $categoryField->id, 'source_field_id' => $formField->id]);
         }
 
+        $characteristics = $category === null ? new Collection : MapPointCharacteristic::selectableFor($category->id)->with('formDefinition.fields.options')->get();
+
+        if ($characteristics->isNotEmpty()) {
+            $characteristicsField = $formDefinition->fields()->create(['type' => FieldType::CHECKBOX, 'label' => 'Maßnahmen', 'required' => false, 'sort_order' => $sortOrder++]);
+            $creator->characteristicsField()->associate($characteristicsField)->save();
+
+            foreach ($characteristics as $optionSortOrder => $characteristic) {
+                $characteristicsField->options()->create(['label' => $characteristic->name, 'value' => $characteristic->uuid, 'sort_order' => $optionSortOrder]);
+                $creator->characteristicMappings()->create(['option_value' => $characteristic->uuid, 'map_point_characteristic_id' => $characteristic->id]);
+            }
+
+            // Asked for every characteristic, but only stored when the characteristic is checked.
+            foreach ($characteristics as $characteristic) {
+                foreach ($characteristic->formDefinition->fields ?? [] as $characteristicField) {
+                    $formField = $this->copyMapPointField($formDefinition, $characteristicField, $sortOrder++, $characteristic->name.': '.$characteristicField->label);
+                    $creator->fieldMappings()->create(['target_field_id' => $characteristicField->id, 'source_field_id' => $formField->id]);
+                }
+            }
+        }
+
         return $formDefinition->fresh();
+    }
+
+    /**
+     * A form field asking for the value of a field of a category or characteristic. It is optional, like the field.
+     */
+    private function copyMapPointField(FormDefinition $formDefinition, FormField $field, int $sortOrder, ?string $label = null): FormField
+    {
+        $formField = $formDefinition->fields()->create([
+            'type' => $field->type,
+            'label' => $label ?? $field->label,
+            'help_text' => $field->help_text,
+            'placeholder' => $field->placeholder,
+            'min_length' => $field->min_length,
+            'max_length' => $field->max_length,
+            'min_value' => $field->min_value,
+            'max_value' => $field->max_value,
+            'required' => false,
+            'sort_order' => $sortOrder,
+        ]);
+
+        foreach ($field->options as $option) {
+            $formField->options()->create(['label' => $option->label, 'value' => $option->value, 'sort_order' => $option->sort_order]);
+        }
+
+        return $formField;
     }
 
     /**

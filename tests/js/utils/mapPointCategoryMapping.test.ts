@@ -1,4 +1,4 @@
-import { sourceFieldCandidates, subcategoryCandidateIds } from '@/utils/mapPointCategoryMapping';
+import { mappingTargetGroups, sourceFieldCandidates, subcategoryCandidateIds } from '@/utils/mapPointCategoryMapping';
 import { describe, expect, it } from 'vitest';
 import { makeField } from '../fixtures/formDefinition';
 
@@ -44,5 +44,35 @@ describe('sourceFieldCandidates', () => {
         ]);
         expect(sourceFieldCandidates(formFields, makeField({ id: 'roof', type: 'select' }), sourceTypes).map((field) => field.id)).toEqual(['kind']);
         expect(sourceFieldCandidates(formFields, makeField({ id: 'date', type: 'date' }), sourceTypes)).toEqual([]);
+    });
+});
+
+describe('mappingTargetGroups', () => {
+    const hedgehogGate = { id: 'hedgehog-gate', name: 'Igeltor' };
+    const deadwood = { id: 'deadwood', name: 'Totholz' };
+    const storage = { id: 'storage', name: 'Speicher' };
+    const width = makeField({ id: 'width', type: 'number' });
+    const volume = makeField({ id: 'volume', type: 'number' });
+
+    it('offers the category fields first, then the fields of each characteristic the category offers', () => {
+        const groups = mappingTargetGroups(
+            'balcony',
+            { balcony: [power] },
+            [hedgehogGate, deadwood, storage],
+            { balcony: ['hedgehog-gate', 'deadwood'] },
+            { 'hedgehog-gate': [width], deadwood: [volume], storage: [makeField({ id: 'capacity', type: 'number' })] },
+        );
+
+        expect(groups.map((group) => [group.characteristicId, group.title, group.fields.map((field) => field.id)])).toEqual([
+            [null, 'Kategorie', ['power']],
+            ['hedgehog-gate', 'Maßnahme Igeltor', ['width']],
+            ['deadwood', 'Maßnahme Totholz', ['volume']],
+        ]);
+    });
+
+    it('leaves out groups without fields', () => {
+        const groups = mappingTargetGroups('balcony', {}, [hedgehogGate], { balcony: ['hedgehog-gate'] }, {});
+
+        expect(groups).toEqual([]);
     });
 });

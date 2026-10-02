@@ -10,6 +10,7 @@ use App\Enums\FormType;
 use App\Models\FormDefinition;
 use App\Models\Group;
 use App\Models\MapPointCategory;
+use App\Models\MapPointCharacteristic;
 use App\Rules\FormFieldExistsInRequest;
 use App\Rules\Hostname;
 use App\Rules\MappedFormFieldMustBeRequired;
@@ -117,6 +118,10 @@ class UpsertFormDefinitionRequest extends FormRequest
             $rules['map_point_mapping.subcategory_options'] = ['array'];
             $rules['map_point_mapping.subcategory_options.*.option_value'] = ['required', 'string'];
             $rules['map_point_mapping.subcategory_options.*.category_id'] = ['required', 'uuid', 'exists:map_point_categories,uuid'];
+            $rules['map_point_mapping.characteristics_field_id'] = ['nullable', 'string', new FormFieldExistsInRequest];
+            $rules['map_point_mapping.characteristic_options'] = ['array'];
+            $rules['map_point_mapping.characteristic_options.*.option_value'] = ['required', 'string'];
+            $rules['map_point_mapping.characteristic_options.*.characteristic_id'] = ['required', 'uuid', 'exists:map_point_characteristics,uuid'];
             $rules['map_point_mapping.field_mappings'] = ['array'];
             $rules['map_point_mapping.field_mappings.*.target_field_id'] = ['required', 'uuid', 'exists:form_fields,uuid'];
             $rules['map_point_mapping.field_mappings.*.source_field_id'] = ['required', 'string', new FormFieldExistsInRequest];
@@ -182,7 +187,7 @@ class UpsertFormDefinitionRequest extends FormRequest
     }
 
     /**
-     * Checks the category of created points and which form fields fill its fields. Sub categories picked by an option
+     * Checks the category of created points, which options pick characteristics and which form fields fill the fields. Sub categories picked by an option
      * must lie below the category and use its fields, because the field mappings refer to the fields of the category.
      */
     private function validateMapPointCategoryMapping(Validator $validator): void
@@ -227,14 +232,34 @@ class UpsertFormDefinitionRequest extends FormRequest
             }
         }
 
-        $categoryFields = app(MapPointFieldService::class)->fieldsOfCategory($category->id, $tree)->keyBy('uuid');
+        $characteristicsField = $submittedFields->get($this->input('map_point_mapping.characteristics_field_id'));
+
+        if ($characteristicsField !== null && ($characteristicsField['type'] ?? null) !== FieldType::CHECKBOX->value) {
+            $validator->errors()->add('map_point_mapping.characteristics_field_id', 'Die Maßnahmen können nur Checkboxen bestimmen.');
+        }
+
+        $selectableCharacteristics = MapPointCharacteristic::selectableFor($category->id, $tree)->get();
+
+        foreach ($this->collect('map_point_mapping.characteristic_options') as $index => $option) {
+            if (! $selectableCharacteristics->contains('uuid', $option['characteristic_id'])) {
+                $validator->errors()->add(
+                    "map_point_mapping.characteristic_options.{$index}.characteristic_id",
+                    "Diese Maßnahme ist für die Kategorie {$category->name} nicht verfügbar.",
+                );
+            }
+        }
+
+        // Fields of characteristics can be filled as well. They are only stored when the characteristic is chosen.
+        $categoryFields = app(MapPointFieldService::class)
+            ->effectiveFields($category->id, $selectableCharacteristics->modelKeys(), $tree)
+            ->keyBy('uuid');
 
         foreach ($this->input('map_point_mapping.field_mappings', []) as $index => $fieldMapping) {
             $targetField = $categoryFields->get($fieldMapping['target_field_id']);
             $sourceType = FieldType::tryFrom($submittedFields->get($fieldMapping['source_field_id'])['type'] ?? '');
 
             if ($targetField === null) {
-                $validator->errors()->add("map_point_mapping.field_mappings.{$index}.target_field_id", 'Dieses Feld gehört nicht zur Kategorie der Kartenpunkte.');
+                $validator->errors()->add("map_point_mapping.field_mappings.{$index}.target_field_id", 'Dieses Feld gehört weder zur Kategorie der Kartenpunkte noch zu ihren Maßnahmen.');
             } elseif ($sourceType === null || ! in_array($sourceType, $targetField->type->mapPointFieldSourceTypes(), true)) {
                 $validator->errors()->add(
                     "map_point_mapping.field_mappings.{$index}.source_field_id",

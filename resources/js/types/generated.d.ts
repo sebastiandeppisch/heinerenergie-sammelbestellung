@@ -161,6 +161,10 @@ advice_type_home_option_value: string | null,
 advice_type_virtual_option_value: string | null,
 default_group_id: string | null,
 };
+export type FormToMapPointCharacteristicData = {
+option_value: string,
+characteristic_id: string,
+};
 export type FormToMapPointFieldData = {
 target_field_id: string,
 source_field_id: string,
@@ -174,6 +178,8 @@ category_id: string | null,
 subcategory_field_id: string | null,
 subcategory_options: App.Data.FormToMapPointSubcategoryData[],
 field_mappings: App.Data.FormToMapPointFieldData[],
+characteristics_field_id: string | null,
+characteristic_options: App.Data.FormToMapPointCharacteristicData[],
 };
 export type FormToMapPointSubcategoryData = {
 option_value: string,

@@ -22,8 +22,14 @@ withDefaults(
         mapPointCategories?: Array<App.Data.MapPointCategoryData>;
         mapPointFieldsByCategory?: Record<string, Array<App.Data.FormFieldData>>;
         mapPointFieldSourceTypes?: Partial<Record<App.Enums.FieldType, Array<App.Enums.FieldType>>>;
+        mapPointCharacteristics?: Array<App.Data.MapPointCharacteristicData>;
+        mapPointCharacteristicIdsByCategory?: Record<string, Array<string>>;
+        mapPointFieldsByCharacteristic?: Record<string, Array<App.Data.FormFieldData>>;
     }>(),
     {
+        mapPointCharacteristics: () => [],
+        mapPointCharacteristicIdsByCategory: () => ({}),
+        mapPointFieldsByCharacteristic: () => ({}),
         mapPointCategories: () => [],
         mapPointFieldsByCategory: () => ({}),
         mapPointFieldSourceTypes: () => ({}),
@@ -505,6 +511,9 @@ const adviceTypeSelectValue = computed({
                             :categories="mapPointCategories"
                             :fields-by-category="mapPointFieldsByCategory"
                             :field-source-types="mapPointFieldSourceTypes"
+                            :characteristics="mapPointCharacteristics"
+                            :characteristic-ids-by-category="mapPointCharacteristicIdsByCategory"
+                            :fields-by-characteristic="mapPointFieldsByCharacteristic"
                             class="border-t pt-4"
                         />
                     </div>

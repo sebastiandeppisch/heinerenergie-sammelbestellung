@@ -5,6 +5,7 @@ use App\Models\FormDefinition;
 use App\Models\Group;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
+use App\Models\MapPointCharacteristic;
 use App\Models\User;
 use App\Services\SessionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -73,4 +74,33 @@ test('a form can only be created from a template in an initiative the user admin
         ->assertForbidden();
 
     $this->assertDatabaseCount('form_definitions', 0);
+});
+
+test('the map point form template lets people check the characteristics of the category and asks for their fields', function (): void {
+    $group = Group::factory()->create();
+    $garden = MapPointCategory::factory()->for($group)->create(['name' => 'Garten']);
+    $meadow = MapPointCategory::factory()->childOf($garden)->create(['name' => 'Wiese']);
+    $hedgehogGate = MapPointCharacteristic::factory()->for($garden, 'category')->create(['name' => 'Igeltor', 'sort_order' => 0]);
+    MapPointCharacteristic::factory()->for($meadow, 'category')->create(['name' => 'Blühstreifen', 'sort_order' => 1]);
+    $hedgehogGate->findOrCreateFormDefinition()->fields()->create(['type' => FieldType::NUMBER, 'label' => 'Breite (cm)', 'sort_order' => 0]);
+
+    $this->actingAs(templateGroupAdmin($group))
+        ->post(route('form-definitions.from-template'), ['template_type' => 'map_point', 'group_id' => $group->uuid, 'map_point_category_id' => $meadow->uuid])
+        ->assertRedirect();
+
+    $form = FormDefinition::where('name', 'Formular für Wiese')->with('fields.options')->sole();
+    expect($form->fields->pluck('label')->all())->toBe(['Titel', 'Beschreibung', 'Standort', 'Maßnahmen', 'Igeltor: Breite (cm)'])
+        ->and($form->fields->firstWhere('label', 'Maßnahmen')->options->pluck('label')->all())->toBe(['Igeltor', 'Blühstreifen']);
+
+    $formFields = $form->fields->keyBy('label');
+    $this->post(route('form.submit', $form), [
+        $formFields['Titel']->uuid => 'Garten am Bach',
+        $formFields['Standort']->uuid => ['lat' => 49.87, 'lng' => 8.65],
+        $formFields['Maßnahmen']->uuid => [$hedgehogGate->uuid],
+        $formFields['Igeltor: Breite (cm)']->uuid => '13',
+    ])->assertSessionHasNoErrors();
+
+    $mapPoint = MapPoint::sole();
+    expect($mapPoint->characteristics()->pluck('name')->all())->toBe(['Igeltor'])
+        ->and($mapPoint->fields()->pluck('value', 'label')->all())->toBe(['Breite (cm)' => 13]);
 });

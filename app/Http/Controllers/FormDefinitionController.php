@@ -8,6 +8,7 @@ use App\Context\GroupContextContract;
 use App\Data\FormDefinitionData;
 use App\Data\FormFieldData;
 use App\Data\MapPointCategoryData;
+use App\Data\MapPointCharacteristicData;
 use App\Enums\FieldType;
 use App\Enums\FormType;
 use App\Http\Requests\StoreFormDefinitionFromTemplateRequest;
@@ -16,6 +17,7 @@ use App\Models\FormDefinition;
 use App\Models\Group;
 use App\Models\MapPointCategory;
 use App\Services\FormDefinitionService;
+use App\Services\MapPointCharacteristicService;
 use App\Services\MapPointFieldService;
 use App\Services\MapPointVisibilityService;
 use Illuminate\Database\Eloquent\Collection;
@@ -99,7 +101,7 @@ class FormDefinitionController extends Controller
      */
     public function edit(FormDefinition $formDefinition): Response
     {
-        $formDefinition->load('fields.options', 'adviceCreator.firstNameField', 'adviceCreator.lastNameField', 'adviceCreator.addressField', 'adviceCreator.emailField', 'adviceCreator.phoneField', 'adviceCreator.adviceTypeField', 'mapPointCreator.titleField', 'mapPointCreator.descriptionField', 'mapPointCreator.coordinateField', 'mapPointCreator.category', 'mapPointCreator.subcategoryField', 'mapPointCreator.subcategories.category', 'mapPointCreator.fieldMappings.targetField', 'mapPointCreator.fieldMappings.sourceField');
+        $formDefinition->load('fields.options', 'adviceCreator.firstNameField', 'adviceCreator.lastNameField', 'adviceCreator.addressField', 'adviceCreator.emailField', 'adviceCreator.phoneField', 'adviceCreator.adviceTypeField', 'mapPointCreator.titleField', 'mapPointCreator.descriptionField', 'mapPointCreator.coordinateField', 'mapPointCreator.category', 'mapPointCreator.subcategoryField', 'mapPointCreator.subcategories.category', 'mapPointCreator.characteristicsField', 'mapPointCreator.characteristicMappings.characteristic', 'mapPointCreator.fieldMappings.targetField', 'mapPointCreator.fieldMappings.sourceField');
         $formDefinitionData = FormDefinitionData::fromModel($formDefinition);
 
         $groups = Group::all()->map(fn (Group $group): array => [
@@ -129,14 +131,18 @@ class FormDefinitionController extends Controller
      * The categories a form of the group can create its points in, with the fields each of them has, and which form
      * field types can fill which category field.
      *
-     * @return array{mapPointCategories: array<int, MapPointCategoryData>, mapPointFieldsByCategory: array<string, array<int, FormFieldData>>, mapPointFieldSourceTypes: array<string, array<int, FieldType>>}
+     * @return array{mapPointCategories: array<int, MapPointCategoryData>, mapPointFieldsByCategory: array<string, array<int, FormFieldData>>, mapPointFieldSourceTypes: array<string, array<int, FieldType>>, mapPointCharacteristics: array<int, MapPointCharacteristicData>, mapPointCharacteristicIdsByCategory: array<string, array<int, string>>, mapPointFieldsByCharacteristic: array<string, array<int, FormFieldData>>}
      */
     private function mapPointTargetProps(?Group $group): array
     {
         $categories = $group === null ? new Collection : MapPointCategory::usableInGroup($group)->with('group')->withCount('mapPoints')->get();
         $tree = MapPointCategory::tree();
+        $characteristicProps = app(MapPointCharacteristicService::class)->characteristicProps($categories, $tree);
 
         return [
+            'mapPointCharacteristics' => $characteristicProps['characteristics'],
+            'mapPointCharacteristicIdsByCategory' => $characteristicProps['characteristicIdsByCategory'],
+            'mapPointFieldsByCharacteristic' => $characteristicProps['fieldsByCharacteristic'],
             'mapPointCategories' => $categories->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel($category, tree: $tree))->all(),
             'mapPointFieldsByCategory' => array_map(
                 fn (Collection $fields): array => $fields->map(FormFieldData::fromModel(...))->all(),

@@ -237,6 +237,12 @@ class FormField extends Model
             $mapping->subcategoryField()->dissociate()->save();
         });
 
+        // Without the field, its options can no longer pick characteristics.
+        FormDefinitionToMapPoint::where('characteristics_field_id', $this->id)->get()->each(function (FormDefinitionToMapPoint $mapping): void {
+            $mapping->characteristicMappings()->delete();
+            $mapping->characteristicsField()->dissociate()->save();
+        });
+
         FormDefinitionToAdvice::where('advice_type_field_id', $this->id)->update(['advice_type_field_id' => null]);
 
         FormFieldOption::where('form_field_id', $this->id)->get()->each->delete();

@@ -42,6 +42,9 @@ const props = defineProps<{
     mapPointCategories: Array<App.Data.MapPointCategoryData>;
     mapPointFieldsByCategory: Record<string, Array<FormFieldData>>;
     mapPointFieldSourceTypes: Partial<Record<FieldType, Array<FieldType>>>;
+    mapPointCharacteristics: Array<App.Data.MapPointCharacteristicData>;
+    mapPointCharacteristicIdsByCategory: Record<string, Array<string>>;
+    mapPointFieldsByCharacteristic: Record<string, Array<FormFieldData>>;
 }>();
 
 const formDefinition = reactive<FormDefinitionData>(
@@ -460,6 +463,9 @@ const allowedEmbedDomainsText = computed<string>({
                         :map-point-categories="mapPointCategories"
                         :map-point-fields-by-category="mapPointFieldsByCategory"
                         :map-point-field-source-types="mapPointFieldSourceTypes"
+                        :map-point-characteristics="mapPointCharacteristics"
+                        :map-point-characteristic-ids-by-category="mapPointCharacteristicIdsByCategory"
+                        :map-point-fields-by-characteristic="mapPointFieldsByCharacteristic"
                     />
                 </TabsContent>
             </Tabs>

@@ -49,6 +49,8 @@ export function makeMapPointMapping(overrides: Partial<FormToMapPointMappingData
         subcategory_field_id: null,
         subcategory_options: [],
         field_mappings: [],
+        characteristics_field_id: null,
+        characteristic_options: [],
         ...overrides,
     };
 }

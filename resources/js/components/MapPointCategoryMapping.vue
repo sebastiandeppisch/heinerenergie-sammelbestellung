@@ -3,7 +3,7 @@ import { FormItem } from '@/shadcn/components/ui/form';
 import { Label } from '@/shadcn/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { flattenCategoryTree } from '@/utils/categoryTree';
-import { sourceFieldCandidates, subcategoryCandidateIds } from '@/utils/mapPointCategoryMapping';
+import { mappingTargetGroups, sourceFieldCandidates, subcategoryCandidateIds } from '@/utils/mapPointCategoryMapping';
 import { computed } from 'vue';
 
 type FormFieldData = App.Data.FormFieldData;
@@ -17,6 +17,11 @@ const props = defineProps<{
     fieldsByCategory: Record<string, Array<FormFieldData>>;
     /** Which form field types can fill a category field of the given type. */
     fieldSourceTypes: Partial<Record<FieldType, Array<FieldType>>>;
+    /** The characteristics („Maßnahmen“) the categories offer. */
+    characteristics: Array<App.Data.MapPointCharacteristicData>;
+    /** The characteristics points of each category can have, keyed by category id. */
+    characteristicIdsByCategory: Record<string, Array<string>>;
+    fieldsByCharacteristic: Record<string, Array<FormFieldData>>;
 }>();
 
 const mapping = defineModel<App.Data.FormToMapPointMappingData>('mapping', { required: true });
@@ -26,7 +31,23 @@ const NONE = 'none';
 
 const categoryEntries = computed(() => flattenCategoryTree(props.categories));
 
-const categoryFields = computed(() => (mapping.value.category_id ? (props.fieldsByCategory[mapping.value.category_id] ?? []) : []));
+const targetGroups = computed(() =>
+    mapping.value.category_id
+        ? mappingTargetGroups(
+              mapping.value.category_id,
+              props.fieldsByCategory,
+              props.characteristics,
+              props.characteristicIdsByCategory,
+              props.fieldsByCharacteristic,
+          )
+        : [],
+);
+
+const selectableCharacteristics = computed(() => {
+    const selectableIds = mapping.value.category_id ? (props.characteristicIdsByCategory[mapping.value.category_id] ?? []) : [];
+
+    return props.characteristics.filter((characteristic) => selectableIds.includes(characteristic.id));
+});
 
 const categorySelection = computed({
     get: () => mapping.value.category_id ?? NONE,
@@ -35,9 +56,33 @@ const categorySelection = computed({
         // Sub categories and fields belong to the category, so they no longer fit another one.
         mapping.value.subcategory_field_id = null;
         mapping.value.subcategory_options = [];
+        mapping.value.characteristics_field_id = null;
+        mapping.value.characteristic_options = [];
         mapping.value.field_mappings = [];
     },
 });
+
+const characteristicsFieldCandidates = computed(() => props.formFields.filter((field) => field.type === 'checkbox'));
+
+const characteristicsFieldSelection = computed({
+    get: () => mapping.value.characteristics_field_id ?? NONE,
+    set: (value: string) => {
+        mapping.value.characteristics_field_id = value === NONE ? null : value;
+        mapping.value.characteristic_options = [];
+    },
+});
+
+const characteristicOptions = computed(() => props.formFields.find((field) => field.id === mapping.value.characteristics_field_id)?.options ?? []);
+
+function characteristicFor(optionValue: string): string {
+    return mapping.value.characteristic_options.find((option) => option.option_value === optionValue)?.characteristic_id ?? NONE;
+}
+
+function setCharacteristic(optionValue: string, characteristicId: string) {
+    const others = mapping.value.characteristic_options.filter((option) => option.option_value !== optionValue);
+    mapping.value.characteristic_options =
+        characteristicId === NONE ? others : [...others, { option_value: optionValue, characteristic_id: characteristicId }];
+}
 
 const subcategoryFieldCandidates = computed(() => props.formFields.filter((field) => field.type === 'select' || field.type === 'radio'));
 
@@ -150,28 +195,72 @@ function setSource(targetFieldId: string, sourceFieldId: string) {
                 </FormItem>
             </div>
 
-            <div class="space-y-3" data-test="map-point-field-mappings">
-                <h4 class="text-sm font-medium">Zusatzfelder</h4>
-                <p v-if="categoryFields.length === 0" class="text-sm text-muted-foreground italic">Diese Kategorie hat keine Zusatzfelder.</p>
-                <template v-else>
+            <template v-if="selectableCharacteristics.length > 0">
+                <FormItem>
+                    <Label>Maßnahmen aus Formularfeld</Label>
+                    <Select v-model="characteristicsFieldSelection">
+                        <SelectTrigger data-test="map-point-characteristics-field">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem :value="NONE">Nicht auswählen lassen</SelectItem>
+                            <SelectItem v-for="field in characteristicsFieldCandidates" :key="field.id" :value="field.id">{{
+                                field.label
+                            }}</SelectItem>
+                        </SelectContent>
+                    </Select>
                     <p class="text-xs text-muted-foreground">
-                        Wähle, aus welchem Formularfeld ein Zusatzfeld befüllt wird. Alle Zuordnungen sind freiwillig. Bei Auswahlfeldern werden die
-                        Optionen über ihre Bezeichnung zugeordnet.
+                        Optional: Mit Checkboxen wählt die ausfüllende Person Maßnahmen für den Punkt, etwa ein Igeltor.
                     </p>
-                    <FormItem v-for="field in categoryFields" :key="field.id">
-                        <Label>{{ field.label }}</Label>
-                        <Select :model-value="sourceFor(field.id)" @update:model-value="(value) => setSource(field.id, String(value))">
-                            <SelectTrigger :data-test="`map-point-field-source-${field.id}`">
+                </FormItem>
+
+                <div v-if="mapping.characteristics_field_id" class="space-y-3 rounded-md border border-gray-200 bg-gray-50 p-4">
+                    <h4 class="text-sm font-medium text-gray-900">Maßnahme je Option</h4>
+                    <FormItem v-for="option in characteristicOptions" :key="option.id">
+                        <Label class="text-xs">{{ option.label }}</Label>
+                        <Select
+                            :model-value="characteristicFor(option.value)"
+                            @update:model-value="(value) => setCharacteristic(option.value, String(value))"
+                        >
+                            <SelectTrigger :data-test="`map-point-characteristic-option-${option.value}`">
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem :value="NONE">Nicht übernehmen</SelectItem>
-                                <SelectItem v-for="source in sourceCandidates(field)" :key="source.id" :value="source.id">{{
-                                    source.label
-                                }}</SelectItem>
+                                <SelectItem :value="NONE">Keine Maßnahme</SelectItem>
+                                <SelectItem v-for="characteristic in selectableCharacteristics" :key="characteristic.id" :value="characteristic.id">
+                                    {{ characteristic.name }}
+                                </SelectItem>
                             </SelectContent>
                         </Select>
                     </FormItem>
+                </div>
+            </template>
+
+            <div class="space-y-3" data-test="map-point-field-mappings">
+                <h4 class="text-sm font-medium">Zusatzfelder</h4>
+                <p v-if="targetGroups.length === 0" class="text-sm text-muted-foreground italic">Diese Kategorie hat keine Zusatzfelder.</p>
+                <template v-else>
+                    <p class="text-xs text-muted-foreground">
+                        Wähle, aus welchem Formularfeld ein Zusatzfeld befüllt wird. Alle Zuordnungen sind freiwillig. Bei Auswahlfeldern werden die
+                        Optionen über ihre Bezeichnung zugeordnet. Felder einer Maßnahme werden nur übernommen, wenn die Maßnahme gewählt wurde.
+                    </p>
+                    <template v-for="group in targetGroups" :key="group.characteristicId ?? 'category'">
+                        <h5 v-if="targetGroups.length > 1" class="text-xs font-semibold text-muted-foreground">{{ group.title }}</h5>
+                        <FormItem v-for="field in group.fields" :key="field.id">
+                            <Label>{{ field.label }}</Label>
+                            <Select :model-value="sourceFor(field.id)" @update:model-value="(value) => setSource(field.id, String(value))">
+                                <SelectTrigger :data-test="`map-point-field-source-${field.id}`">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem :value="NONE">Nicht übernehmen</SelectItem>
+                                    <SelectItem v-for="source in sourceCandidates(field)" :key="source.id" :value="source.id">{{
+                                        source.label
+                                    }}</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </FormItem>
+                    </template>
                 </template>
             </div>
         </template>
