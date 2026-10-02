@@ -115,6 +115,7 @@ show_next_form_button: boolean,
 next_form_button_text: string | null,
 type: App.Enums.FormType,
 allowed_embed_domains: string[] | null,
+requires_email_confirmation: boolean,
 };
 export type FormFieldData = {
 id: string,
@@ -147,6 +148,13 @@ form_name: string,
 fields: App.Data.SubmissionFieldData[],
 submitted_at: string,
 seen: boolean,
+awaiting_confirmation: boolean,
+};
+export type FormTargetNoticeData = {
+title: string,
+text: string | null,
+url: string | null,
+url_label: string | null,
 };
 export type FormToAdviceMappingData = {
 enabled: boolean,
@@ -160,6 +168,7 @@ advice_type_direct: string | null,
 advice_type_home_option_value: string | null,
 advice_type_virtual_option_value: string | null,
 default_group_id: string | null,
+condition_field_id: string | null,
 };
 export type FormToMapPointFieldData = {
 target_field_id: string,

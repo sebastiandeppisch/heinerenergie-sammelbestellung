@@ -87,6 +87,25 @@ class FormDefinitionToAdvice extends Model
         return $this->belongsTo(FormField::class, 'last_name_field_id');
     }
 
+    /**
+     * Optional checkbox that must be ticked for an advice to be created.
+     *
+     * @return BelongsTo<FormField, $this>
+     */
+    public function conditionField(): BelongsTo
+    {
+        return $this->belongsTo(FormField::class, 'condition_field_id');
+    }
+
+    public function shouldCreateFor(FormSubmission $submission): bool
+    {
+        if ($this->conditionField === null) {
+            return true;
+        }
+
+        return ! empty($this->conditionField->getSubmissionField($submission)->value);
+    }
+
     public function createAdvice(FormSubmission $submission): Advice
     {
         $advice = DB::transaction(function () use ($submission) {

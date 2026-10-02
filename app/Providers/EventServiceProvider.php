@@ -13,12 +13,12 @@ use App\Listeners\CalculateCoordinates;
 use App\Listeners\EmptyCoordinates;
 use App\Listeners\HandleAdviceEvents;
 use App\Listeners\SaveAdviceEvents;
+use App\Listeners\StoreOutgoingMail;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Mail\Events\MessageSent;
 use Override;
-use Wnx\Sends\Listeners\StoreOutgoingMailListener;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -40,7 +40,7 @@ class EventServiceProvider extends ServiceProvider
             CalculateCoordinates::class,
         ],
         MessageSent::class => [
-            StoreOutgoingMailListener::class,
+            StoreOutgoingMail::class,
         ],
         AdviceSaving::class => [
             HandleAdviceEvents::class,

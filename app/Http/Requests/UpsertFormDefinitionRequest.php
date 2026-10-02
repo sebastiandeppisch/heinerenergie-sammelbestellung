@@ -71,6 +71,7 @@ class UpsertFormDefinitionRequest extends FormRequest
             'next_form_button_text' => 'nullable|string|max:255|required_if:show_next_form_button,true',
             'allowed_embed_domains' => 'nullable|array',
             'allowed_embed_domains.*' => ['string', 'max:255', new Hostname],
+            'requires_email_confirmation' => 'boolean',
 
             // Felder-Array-Validierung
             'fields' => 'array',
@@ -141,6 +142,7 @@ class UpsertFormDefinitionRequest extends FormRequest
             $rules['advice_mapping.advice_type_home_option_value'] = 'nullable|string|required_with:advice_mapping.advice_type_field_id';
             $rules['advice_mapping.advice_type_virtual_option_value'] = 'nullable|string|required_with:advice_mapping.advice_type_field_id';
             $rules['advice_mapping.default_group_id'] = 'nullable|string';
+            $rules['advice_mapping.condition_field_id'] = ['nullable', 'string', new FormFieldExistsInRequest];
         }
 
         return $rules;
@@ -169,11 +171,48 @@ class UpsertFormDefinitionRequest extends FormRequest
                 }
             },
             function (Validator $validator): void {
+                if ($this->boolean('requires_email_confirmation')) {
+                    $this->validateEmailConfirmationField($validator);
+                }
+            },
+            function (Validator $validator): void {
+                if ($this->input('advice_mapping.enabled') === true && $this->input('advice_mapping.condition_field_id') !== null) {
+                    $this->validateAdviceConditionField($validator);
+                }
+            },
+            function (Validator $validator): void {
                 if ($this->isMapPointMappingEnabled() && ! $validator->errors()->hasAny(['group_id', 'map_point_mapping.*'])) {
                     $this->validateMapPointCategoryMapping($validator);
                 }
             },
         ];
+    }
+
+    /**
+     * The confirmation mail needs a single, unambiguous address that is always filled in.
+     */
+    private function validateEmailConfirmationField(Validator $validator): void
+    {
+        $emailFields = $this->collect('fields')->where('type', FieldType::EMAIL->value);
+
+        if ($emailFields->count() !== 1) {
+            $validator->errors()->add('requires_email_confirmation', 'Für die E-Mail-Bestätigung braucht das Formular genau ein E-Mail-Feld.');
+        } elseif (! filter_var($emailFields->first()['required'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
+            $validator->errors()->add('requires_email_confirmation', 'Für die E-Mail-Bestätigung muss das E-Mail-Feld ein Pflichtfeld sein.');
+        }
+    }
+
+    private function validateAdviceConditionField(Validator $validator): void
+    {
+        $field = $this->collect('fields')->firstWhere('id', $this->input('advice_mapping.condition_field_id'));
+
+        if ($field === null) {
+            return;
+        }
+
+        if (($field['type'] ?? null) !== FieldType::CHECKBOX->value || count($field['options'] ?? []) !== 1) {
+            $validator->errors()->add('advice_mapping.condition_field_id', 'Als Bedingung für die Beratung eignet sich nur eine Checkbox mit genau einer Option.');
+        }
     }
 
     private function isMapPointMappingEnabled(): bool
@@ -267,6 +306,7 @@ class UpsertFormDefinitionRequest extends FormRequest
             'show_next_form_button' => 'Button anzeigen',
             'next_form_button_text' => 'Button-Text',
             'allowed_embed_domains' => 'Erlaubte Domains für Einbettung',
+            'requires_email_confirmation' => 'E-Mail-Adresse bestätigen lassen',
             'fields' => 'Formularfelder',
             'fields.*.type' => 'Feldtyp',
             'fields.*.label' => 'Feldbezeichnung',
@@ -283,6 +323,7 @@ class UpsertFormDefinitionRequest extends FormRequest
             'advice_mapping.email_field_id' => 'E-Mail Feld',
             'advice_mapping.phone_field_id' => 'Telefon Feld',
             'advice_mapping.advice_type_field_id' => 'Beratungstyp Feld',
+            'advice_mapping.condition_field_id' => 'Bedingung für die Beratung',
             'map_point_mapping.title_field_id' => 'Titel Feld',
             'map_point_mapping.description_field_id' => 'Beschreibung Feld',
             'map_point_mapping.coordinate_field_id' => 'Koordinaten Feld',

@@ -25,6 +25,7 @@ class FormSubmissionData extends Data
         public Collection $fields,
         public Carbon $submitted_at,
         public bool $seen,
+        public bool $awaiting_confirmation = false,
     ) {}
 
     public static function fromModel(FormSubmission $model): self
@@ -34,6 +35,7 @@ class FormSubmissionData extends Data
             form_name: $model->form_name,
             submitted_at: $model->submitted_at,
             seen: $model->seen,
+            awaiting_confirmation: $model->isAwaitingConfirmation(),
             fields: $model->submissionFields->map(fn (SubmissionField $field): SubmissionFieldData => SubmissionFieldData::fromModel($field)),
         );
     }

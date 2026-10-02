@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\DevLoginController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\FormConfirmationController;
 use App\Http\Controllers\FormDefinitionController;
 use App\Http\Controllers\FormSubmissionController;
 use App\Http\Controllers\FormSubmitController;
@@ -168,6 +169,12 @@ Route::get('datapolicy', [PageController::class, 'datapolicy'])->name('datapolic
 if (app()->environment('local')) {
     Route::get('/dev-login/{user}', [DevLoginController::class, 'login'])->name('dev.login');
 }
+
+Route::get('/forms/confirm/{token}', [FormConfirmationController::class, 'show'])
+    ->name('form.confirm.show');
+Route::post('/forms/confirm/{token}', [FormConfirmationController::class, 'confirm'])
+    ->name('form.confirm')
+    ->middleware('throttle:form-submit');
 
 Route::get('/forms/{formDefinition}', [FormSubmitController::class, 'show'])
     ->name('form.show');

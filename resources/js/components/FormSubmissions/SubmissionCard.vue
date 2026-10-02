@@ -9,7 +9,10 @@
                 <Badge variant="outline" class="text-xs" v-if="showGroupBadge">
                     {{ submission.form_name }}
                 </Badge>
-                <span class="text-xs text-gray-500">{{ formatDateTime(submission.submitted_at) }}</span>
+                <div class="flex items-center gap-2">
+                    <Badge v-if="submission.awaiting_confirmation" variant="destructive" class="text-xs">unbestätigt</Badge>
+                    <span class="text-xs text-gray-500">{{ formatDateTime(submission.submitted_at) }}</span>
+                </div>
             </div>
             <!--  <p class="text-sm text-gray-600 font-medium">
         {{ submission.advice_id || '' }}

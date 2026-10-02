@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\FieldType;
 use App\Enums\FormType;
 use App\Models\Traits\HasUuid;
 use Database\Factories\FormDefinitionFactory;
@@ -32,6 +33,7 @@ class FormDefinition extends Model
         'show_next_form_button',
         'next_form_button_text',
         'allowed_embed_domains',
+        'requires_email_confirmation',
     ];
 
     protected $attributes = [
@@ -41,6 +43,7 @@ class FormDefinition extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'show_next_form_button' => 'boolean',
+        'requires_email_confirmation' => 'boolean',
         'type' => FormType::class,
         'allowed_embed_domains' => 'array',
     ];
@@ -117,6 +120,14 @@ class FormDefinition extends Model
             'submitted_at' => now(),
             'group_id' => $this->group_id,
         ]);
+    }
+
+    /**
+     * The field the confirmation mail is sent to, a confirmed form has exactly one.
+     */
+    public function emailField(): ?FormField
+    {
+        return $this->fields->firstWhere('type', FieldType::EMAIL);
     }
 
     /**

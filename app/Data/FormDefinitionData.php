@@ -34,6 +34,7 @@ class FormDefinitionData extends Data
         public ?string $next_form_button_text = null,
         public FormType $type = FormType::Form,
         public ?array $allowed_embed_domains = null,
+        public bool $requires_email_confirmation = false,
     ) {}
 
     public static function fromModel(FormDefinition $model): self
@@ -54,6 +55,20 @@ class FormDefinitionData extends Data
             show_next_form_button: $model->show_next_form_button ?? false,
             next_form_button_text: $model->next_form_button_text,
             allowed_embed_domains: $model->allowed_embed_domains,
+            requires_email_confirmation: $model->requires_email_confirmation ?? false,
         );
+    }
+
+    /**
+     * Form data for the public, anonymous-facing pages. Strips the embed domain
+     * whitelist, which is an internal access-control detail and must not be
+     * exposed to visitors of the public form.
+     */
+    public static function forPublic(FormDefinition $model): self
+    {
+        $data = self::fromModel($model);
+        $data->allowed_embed_domains = null;
+
+        return $data;
     }
 }

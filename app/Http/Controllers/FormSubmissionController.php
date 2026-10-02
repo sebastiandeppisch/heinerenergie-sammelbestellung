@@ -47,7 +47,10 @@ class FormSubmissionController extends Controller
             })
             ->when($request->selectedFormDefinitions(), function ($query) use ($request): void {
                 $query->whereIn('form_definition_id', $request->selectedFormDefinitions());
-            })->paginate(10);
+            })
+            ->when($request->confirmation() === 'unconfirmed', fn ($query) => $query->unconfirmed())
+            ->when($request->confirmation() === 'hide_unconfirmed', fn ($query) => $query->withoutUnconfirmed())
+            ->paginate(10);
 
         $formDefinitions = FormDefinition::with(['fields', 'adviceCreator', 'mapPointCreator'])
             ->where('type', FormType::Form);
@@ -68,6 +71,7 @@ class FormSubmissionController extends Controller
             'dateTo' => $request->dateTo(),
             'dateFrom' => $request->dateFrom(),
             'view' => $request->view(),
+            'confirmation' => $request->confirmation(),
             'formSubmissions' => $this->addPagedIndex($formsubmissions->items(), $formsubmissions->currentPage()),
             'pagination' => PaginationData::fromPagination($formsubmissions),
         ]);

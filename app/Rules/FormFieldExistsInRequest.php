@@ -22,6 +22,7 @@ class FormFieldExistsInRequest implements ValidationRule
             'advice_mapping.email_field_id' => 'E-Mail Feld',
             'advice_mapping.phone_field_id' => 'Telefon Feld',
             'advice_mapping.advice_type_field_id' => 'Beratungstyp Feld',
+            'advice_mapping.condition_field_id' => 'Feld für die Bedingung der Beratung',
             'map_point_mapping.title_field_id' => 'Titel Feld',
             'map_point_mapping.description_field_id' => 'Beschreibung Feld',
             'map_point_mapping.coordinate_field_id' => 'Koordinaten Feld',

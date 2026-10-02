@@ -57,6 +57,7 @@ const formDefinition = reactive<FormDefinitionData>(
         show_next_form_button: false,
         next_form_button_text: null,
         allowed_embed_domains: null,
+        requires_email_confirmation: false,
     },
 );
 
@@ -385,6 +386,26 @@ const allowedEmbedDomainsText = computed<string>({
                                 </FormControl>
                             </FormItem>
                         </FormField>
+                    </Form>
+                </CardContent>
+            </Card>
+
+            <Card class="form-builder__header" v-if="isForm">
+                <CardContent>
+                    <h3 class="mb-4 text-lg font-semibold">E-Mail-Bestätigung</h3>
+                    <Form class="grid grid-cols-1 gap-4">
+                        <FormField v-slot="{ componentField }" name="requires_email_confirmation">
+                            <FormItem class="flex flex-row items-center space-y-0 space-x-2">
+                                <FormControl>
+                                    <Checkbox v-model="formDefinition.requires_email_confirmation" />
+                                </FormControl>
+                                <FormLabel>E-Mail-Adresse bestätigen lassen</FormLabel>
+                            </FormItem>
+                        </FormField>
+                        <p class="text-sm text-muted-foreground">
+                            Nach dem Absenden bekommt die Person eine E-Mail mit einem Bestätigungslink. Erst nach der Bestätigung werden die Ziele
+                            (z. B. Beratung, Kartenpunkt) angelegt. Das Formular braucht dafür genau ein E-Mail-Feld, das ein Pflichtfeld ist.
+                        </p>
                     </Form>
                 </CardContent>
             </Card>

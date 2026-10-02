@@ -13,8 +13,10 @@ use App\Models\FormField;
 use App\Models\FormSubmission;
 use App\Services\CurrentGroupService;
 use App\Services\FormEmbedAccessService;
+use App\Services\FormSubmissionConfirmationService;
 use App\Services\ImageStorage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -26,6 +28,7 @@ class FormSubmitController extends Controller
     public function __construct(
         private readonly FormEmbedAccessService $embedAccess,
         private readonly ImageStorage $imageStorage,
+        private readonly FormSubmissionConfirmationService $confirmation,
     ) {}
 
     public function show(FormDefinition $formDefinition, Request $request): Response
@@ -42,7 +45,7 @@ class FormSubmitController extends Controller
         app(CurrentGroupService::class)->setGroup($formDefinition->group);
 
         return Inertia::render('Forms/Show', [
-            'formDefinition' => $this->publicFormData($formDefinition),
+            'formDefinition' => FormDefinitionData::forPublic($formDefinition),
             'formToken' => $this->embedAccess->issueToken($formDefinition),
             'embedBlocked' => false,
         ]);
@@ -58,37 +61,46 @@ class FormSubmitController extends Controller
 
         app(CurrentGroupService::class)->setGroup($formDefinition->group);
 
+        $email = $formDefinition->requires_email_confirmation
+            ? (string) $request->input($formDefinition->emailField()?->uuid ?? '')
+            : null;
+
+        if ($email !== null) {
+            $this->confirmation->ensureNotRateLimited((string) $request->ip(), $email);
+        }
+
         $storedImagePaths = [];
 
         try {
-            DB::transaction(function () use ($formDefinition, $request, &$storedImagePaths): void {
+            [$submission, $token, $notices] = DB::transaction(function () use ($formDefinition, $request, $email, &$storedImagePaths): array {
                 $submission = $formDefinition->createSubmission();
                 foreach ($formDefinition->fields as $field) {
                     $field->createSubmissionField($submission, $this->getValueFromField($field, $request, $submission, $storedImagePaths));
                 }
-                $submission->handleCreators();
+
+                if ($email !== null) {
+                    return [$submission, $this->confirmation->issueToken($submission), new Collection];
+                }
+
+                return [$submission, null, $submission->handleCreators()];
             });
         } catch (Throwable $e) {
             $this->imageStorage->delete($storedImagePaths);
             throw $e;
         }
 
+        if ($email !== null && $token !== null) {
+            $this->confirmation->sendMail($submission, $email, $token);
+
+            return Inertia::render('Forms/ConfirmationPending', [
+                'formDefinition' => FormDefinitionData::forPublic($formDefinition),
+            ]);
+        }
+
         return Inertia::render('Forms/Submitted', [
-            'formDefinition' => $this->publicFormData($formDefinition),
+            'formDefinition' => FormDefinitionData::forPublic($formDefinition),
+            'notices' => $notices,
         ]);
-    }
-
-    /**
-     * Form data for the public, anonymous-facing pages. Strips the embed domain
-     * whitelist, which is an internal access-control detail and must not be
-     * exposed to visitors of the public form.
-     */
-    private function publicFormData(FormDefinition $formDefinition): FormDefinitionData
-    {
-        $data = FormDefinitionData::fromModel($formDefinition);
-        $data->allowed_embed_domains = null;
-
-        return $data;
     }
 
     /**

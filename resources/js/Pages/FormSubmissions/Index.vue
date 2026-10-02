@@ -9,6 +9,7 @@
             v-model:date-to="dateToModel"
             v-model:sort-order="sortOrderModel"
             v-model:group-by-form="groupByFormModel"
+            v-model:confirmation="confirmationModel"
         />
 
         <Tabs v-model="viewModel" class="w-full">
@@ -42,6 +43,8 @@ import TabsTrigger from '@/shadcn/components/ui/tabs/TabsTrigger.vue';
 import { router, setLayoutProps } from '@inertiajs/vue3';
 import { computed, type WritableComputedRef } from 'vue';
 
+type ConfirmationFilter = 'all' | 'unconfirmed' | 'hide_unconfirmed';
+
 const props = defineProps<{
     formDefinitions: Array<App.Data.FormDefinitionData>;
     dateFrom: Date | null;
@@ -50,6 +53,7 @@ const props = defineProps<{
     sortOrder: 'asc' | 'desc';
     groupByForm: boolean;
     view: 'cards' | 'table';
+    confirmation: ConfirmationFilter;
     formSubmissions: App.Data.FormSubmissionData[] | any;
     pagination: App.Data.PaginationData<App.Data.FormSubmissionData>;
 }>();
@@ -79,6 +83,9 @@ const filter = computed(() => {
     }
     if (props.view === 'table') {
         result['view'] = props.view;
+    }
+    if (props.confirmation !== 'all') {
+        result['confirmation'] = props.confirmation;
     }
     return result;
 });
@@ -115,6 +122,11 @@ function filterQuery(query: any) {
     } else {
         result['view'] = undefined;
     }
+    if (query.confirmation && query.confirmation !== 'all') {
+        result['confirmation'] = query.confirmation;
+    } else {
+        result['confirmation'] = undefined;
+    }
     return result;
 }
 
@@ -139,4 +151,5 @@ const selectedFormDefinitionsModel = computedTriggerReload<string[]>('selectedFo
 const sortOrderModel = computedTriggerReload<'asc' | 'desc'>('sortOrder');
 const groupByFormModel = computedTriggerReload<boolean>('groupByForm');
 const viewModel = computedTriggerReload<'cards' | 'table'>('view');
+const confirmationModel = computedTriggerReload<ConfirmationFilter>('confirmation');
 </script>

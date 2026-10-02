@@ -132,6 +132,19 @@ const addressFields = computed(() => formDefinition.value.fields.filter((f: any)
 const geoCoordinateFields = computed(() => formDefinition.value.fields.filter((f: any) => f.type === 'geo_coordinate'));
 const textareaFields = computed(() => formDefinition.value.fields.filter((f: any) => f.type === 'textarea'));
 const selectFields = computed(() => formDefinition.value.fields.filter((f: any) => ['select', 'radio'].includes(f.type)));
+const singleCheckboxFields = computed(() => formDefinition.value.fields.filter((f) => f.type === 'checkbox' && f.options.length === 1));
+
+const NO_CONDITION = 'none';
+
+const adviceConditionValue = computed({
+    get: () => formDefinition.value.advice_mapping?.condition_field_id ?? NO_CONDITION,
+    set: (value: string) => {
+        const mapping = formDefinition.value.advice_mapping;
+        if (!mapping) return;
+
+        mapping.condition_field_id = value === NO_CONDITION ? null : value;
+    },
+});
 
 // Get the options of the selected advice type field
 const adviceTypeFieldOptions = computed(() => {
@@ -386,6 +399,22 @@ const adviceTypeSelectValue = computed({
                                     </Select>
                                 </FormItem>
                             </div>
+
+                            <FormItem>
+                                <Label>Nur anlegen, wenn angehakt</Label>
+                                <Select v-model="adviceConditionValue">
+                                    <SelectTrigger data-test="advice-condition">
+                                        <SelectValue placeholder="Immer anlegen" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem :value="NO_CONDITION">Immer anlegen</SelectItem>
+                                        <SelectItem v-for="field in singleCheckboxFields" :key="field.id" :value="field.id">
+                                            {{ field.label }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <p class="text-xs text-muted-foreground">Wählbar sind Checkboxen mit genau einer Option.</p>
+                            </FormItem>
                         </div>
                     </div>
                 </CardContent>

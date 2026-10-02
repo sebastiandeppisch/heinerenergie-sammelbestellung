@@ -35,6 +35,7 @@ export function makeAdviceMapping(overrides: Partial<FormToAdviceMappingData> = 
         advice_type_home_option_value: null,
         advice_type_virtual_option_value: null,
         default_group_id: null,
+        condition_field_id: null,
         ...overrides,
     };
 }
@@ -68,6 +69,7 @@ export function makeFormDefinition(overrides: Partial<FormDefinitionData> = {}):
         next_form_button_text: null,
         type: 0,
         allowed_embed_domains: null,
+        requires_email_confirmation: false,
         ...overrides,
     };
 }

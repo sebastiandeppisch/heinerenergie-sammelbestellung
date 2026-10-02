@@ -24,6 +24,7 @@ class FormToAdviceMappingData extends Data
         public ?string $advice_type_home_option_value = null,
         public ?string $advice_type_virtual_option_value = null,
         public ?string $default_group_id = null,
+        public ?string $condition_field_id = null,
     ) {}
 
     public static function fromModel(?FormDefinitionToAdvice $model): self
@@ -32,7 +33,7 @@ class FormToAdviceMappingData extends Data
             return new self(enabled: false);
         }
 
-        $model->loadMissing(['firstNameField', 'lastNameField', 'addressField', 'emailField', 'phoneField', 'adviceTypeField']);
+        $model->loadMissing(['firstNameField', 'lastNameField', 'addressField', 'emailField', 'phoneField', 'adviceTypeField', 'conditionField']);
 
         return new self(
             enabled: true,
@@ -46,6 +47,7 @@ class FormToAdviceMappingData extends Data
             advice_type_home_option_value: $model->advice_type_home_option_value,
             advice_type_virtual_option_value: $model->advice_type_virtual_option_value,
             default_group_id: optional(Group::find($model->default_group_id))->uuid,
+            condition_field_id: $model->conditionField?->uuid,
         );
     }
 }

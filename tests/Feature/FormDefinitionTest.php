@@ -494,3 +494,82 @@ test('an admin of a parent initiative can change the forms of a sub initiative',
 
     expect($formDefinition->refresh()->name)->toBe('Geändert');
 });
+
+/**
+ * @param  list<array{type: FieldType, required: bool}>  $emailFields
+ * @return array<string, mixed>
+ */
+function payloadWithEmailFields(FormDefinition $formDefinition, array $emailFields): array
+{
+    $payload = FormDefinitionData::fromModel($formDefinition)->toArray();
+    $payload['requires_email_confirmation'] = true;
+    $payload['fields'] = array_map(fn (array $field, int $index): array => [
+        'id' => (string) Str::uuid(),
+        'type' => $field['type']->value,
+        'label' => "Feld {$index}",
+        'required' => $field['required'],
+        'sort_order' => $index,
+        'options' => [],
+    ], $emailFields, array_keys($emailFields));
+
+    return $payload;
+}
+
+test('email confirmation needs exactly one required email field', /** @param list<array{type: FieldType, required: bool}> $fields */ function (array $fields, bool $valid): void {
+    $formDefinition = FormDefinition::factory()->for($this->group)->create();
+
+    $response = $this->put(route('form-definitions.update', $formDefinition), payloadWithEmailFields($formDefinition, $fields));
+
+    if ($valid) {
+        $response->assertSessionHasNoErrors();
+        expect($formDefinition->fresh()->requires_email_confirmation)->toBeTrue();
+    } else {
+        $response->assertSessionHasErrors('requires_email_confirmation');
+        expect($formDefinition->fresh()->requires_email_confirmation)->toBeFalse();
+    }
+})->with([
+    'one required email field' => [[['type' => FieldType::EMAIL, 'required' => true], ['type' => FieldType::TEXT, 'required' => false]], true],
+    'no email field' => [[['type' => FieldType::TEXT, 'required' => true]], false],
+    'two email fields' => [[['type' => FieldType::EMAIL, 'required' => true], ['type' => FieldType::EMAIL, 'required' => true]], false],
+    'optional email field' => [[['type' => FieldType::EMAIL, 'required' => false]], false],
+]);
+
+test('the advice condition must be a checkbox with exactly one option', function (FieldType $type, int $options, bool $valid): void {
+    $adviceMapping = FormDefinitionToAdvice::factory()->create();
+    $formDefinition = $adviceMapping->formDefinition;
+    $formDefinition->update(['group_id' => $this->group->id]);
+
+    $condition = $formDefinition->fields()->create(['type' => $type, 'label' => 'Bedingung', 'required' => false, 'sort_order' => 20]);
+    for ($i = 0; $i < $options; $i++) {
+        $condition->options()->create(['label' => "Option {$i}", 'value' => "option{$i}", 'sort_order' => $i]);
+    }
+
+    $payload = FormDefinitionData::fromModel($formDefinition->fresh())->toArray();
+    $payload['advice_mapping']['advice_type_home_option_value'] = (string) AdviceType::Home->value;
+    $payload['advice_mapping']['advice_type_virtual_option_value'] = (string) AdviceType::Virtual->value;
+    $payload['advice_mapping']['condition_field_id'] = $condition->uuid;
+
+    $response = $this->put(route('form-definitions.update', $formDefinition), $payload);
+
+    if ($valid) {
+        $response->assertSessionHasNoErrors();
+        expect($adviceMapping->fresh()->condition_field_id)->toBe($condition->id);
+    } else {
+        $response->assertSessionHasErrors('advice_mapping.condition_field_id');
+        expect($adviceMapping->fresh()->condition_field_id)->toBeNull();
+    }
+})->with([
+    'checkbox with one option' => [FieldType::CHECKBOX, 1, true],
+    'checkbox with two options' => [FieldType::CHECKBOX, 2, false],
+    'radio' => [FieldType::RADIO, 1, false],
+]);
+
+test('deleting the condition field makes the advice unconditional again', function (): void {
+    $adviceMapping = FormDefinitionToAdvice::factory()->create();
+    $condition = $adviceMapping->formDefinition->fields()->create(['type' => FieldType::CHECKBOX, 'label' => 'Bedingung', 'required' => false, 'sort_order' => 20]);
+    $adviceMapping->conditionField()->associate($condition)->save();
+
+    $condition->delete();
+
+    expect($adviceMapping->fresh()->condition_field_id)->toBeNull();
+});
