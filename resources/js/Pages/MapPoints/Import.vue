@@ -11,6 +11,7 @@ defineProps<{
     upload: App.Data.SpreadsheetUploadData | null;
     categories: Array<App.Data.MapPointCategoryData>;
     categoryFieldIds: Record<string, Array<string>>;
+    characteristicIdsByCategory: Record<string, Array<string>>;
 }>();
 
 setLayoutProps({
@@ -34,6 +35,7 @@ setLayoutProps({
                 :mappings="mappings"
                 :categories="categories"
                 :category-field-ids="categoryFieldIds"
+                :characteristic-ids-by-category="characteristicIdsByCategory"
             />
         </div>
     </div>

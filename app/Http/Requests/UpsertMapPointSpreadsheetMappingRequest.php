@@ -48,6 +48,7 @@ class UpsertMapPointSpreadsheetMappingRequest extends FormRequest
             // A new field would be created again on every import with the template.
             'columns.*.field' => ['required', Rule::enum(MapPointSpreadsheetField::class)->except([MapPointSpreadsheetField::NEW_CATEGORY_FIELD])],
             'columns.*.form_field_id' => ['nullable', 'required_if:columns.*.field,'.MapPointSpreadsheetField::FIELD->value, 'uuid'],
+            'columns.*.characteristic_id' => ['nullable', 'required_if:columns.*.field,'.MapPointSpreadsheetField::CHARACTERISTIC->value, 'uuid'],
         ];
     }
 
@@ -74,7 +75,7 @@ class UpsertMapPointSpreadsheetMappingRequest extends FormRequest
     }
 
     /**
-     * @return array{name: string, key_field: MapPointSpreadsheetField, columns: array<int, array{header: string, field: string, form_field_id?: string}>}
+     * @return array{name: string, key_field: MapPointSpreadsheetField, columns: array<int, array{header: string, field: string, form_field_id?: string, characteristic_id?: string}>}
      */
     public function mappingData(): array
     {
@@ -88,6 +89,7 @@ class UpsertMapPointSpreadsheetMappingRequest extends FormRequest
                     'header' => (string) $column['header'],
                     'field' => (string) $column['field'],
                     ...(isset($column['form_field_id']) ? ['form_field_id' => (string) $column['form_field_id']] : []),
+                    ...(isset($column['characteristic_id']) ? ['characteristic_id' => (string) $column['characteristic_id']] : []),
                 ],
                 is_array($columns) ? $columns : [],
             )),

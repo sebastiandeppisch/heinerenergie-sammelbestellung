@@ -5,6 +5,7 @@ use App\Enums\FieldType;
 use App\Models\Group;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
+use App\Models\MapPointCharacteristic;
 use App\Models\User;
 use App\Services\MapPointImportService;
 use App\Services\SessionService;
@@ -136,6 +137,7 @@ test('a new main category and a new field for a column are created by the import
     ])), $this->group);
 
     visit(route('mappoints.import.create', ['token' => $upload->token]))
+        ->click('Eine Kategorie mit Maßnahmen')
         ->click('[data-test="main-category"] [data-slot="select-trigger"]')
         ->click('Neue Kategorie anlegen …')
         ->type('[data-test=new-main-category-name]', 'Photovoltaik')
@@ -150,4 +152,26 @@ test('a new main category and a new field for a column are created by the import
     $category = MapPointCategory::sole();
     expect($category->name)->toBe('Photovoltaik')
         ->and(MapPoint::sole()->fields()->sole()->only(['label', 'value']))->toBe(['label' => 'Leistung', 'value' => 0.8]);
+});
+
+test('in the mode for one category the columns can be assigned to its characteristics', function (): void {
+    $garden = MapPointCategory::factory()->for($this->group)->create(['name' => 'Garten']);
+    $hedgehogGate = MapPointCharacteristic::factory()->for($garden, 'category')->create(['name' => 'Igeltor']);
+    $upload = app(MapPointImportService::class)->storeUpload(UploadedFile::fake()->createWithContent('gaerten.csv', implode("\r\n", [
+        'Bezeichnung;Y-Koordinate;X-Koordinate;Igeltor',
+        'Schulgarten;49,123456;8,654321;x',
+    ])), $this->group);
+
+    visit(route('mappoints.import.create', ['token' => $upload->token]))
+        ->click('Eine Kategorie mit Maßnahmen')
+        ->click('[data-test="main-category"] [data-slot="select-trigger"]')
+        ->click('[role=option]:has-text("Garten")')
+        ->click('[data-test="column-row"]:nth-child(4) [data-slot="select-trigger"]')
+        ->click('Garten › Maßnahme Igeltor')
+        ->click('Vorschau erstellen')
+        ->click('Import ausführen')
+        ->assertPathIs('/mappoints')
+        ->assertNoJavaScriptErrors();
+
+    expect(MapPoint::sole()->characteristics()->pluck('map_point_characteristics.id')->all())->toBe([$hedgehogGate->id]);
 });

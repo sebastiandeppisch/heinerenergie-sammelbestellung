@@ -59,6 +59,14 @@ readonly class MapPointCategoryTree
     }
 
     /**
+     * Categories created after the tree was loaded, e.g. by an import, are unknown to it.
+     */
+    public function contains(int $categoryId): bool
+    {
+        return isset($this->categoriesById[$categoryId]);
+    }
+
+    /**
      * The ids of the parent, grandparent and so on, nearest first.
      *
      * @return array<int, int>

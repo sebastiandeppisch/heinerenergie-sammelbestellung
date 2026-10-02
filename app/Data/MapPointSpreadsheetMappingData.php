@@ -33,6 +33,7 @@ class MapPointSpreadsheetMappingData extends Data
                     header: $column['header'],
                     field: MapPointSpreadsheetField::from($column['field']),
                     form_field_id: $column['form_field_id'] ?? null,
+                    characteristic_id: $column['characteristic_id'] ?? null,
                 ),
                 $mapping->columns,
             ),

@@ -5,14 +5,16 @@ import { Input } from '@/shadcn/components/ui/input';
 import { flattenCategoryTree } from '@/utils/categoryTree';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shadcn/components/ui/card';
 import { Label } from '@/shadcn/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/shadcn/components/ui/radio-group';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 type Field = App.Enums.MapPointSpreadsheetField;
 
 const props = defineProps<{
     upload: App.Data.SpreadsheetUploadData;
+    /** What the columns can be assigned to with the chosen main category. */
     fields: Array<App.Data.MapPointSpreadsheetFieldData>;
     categories: Array<App.Data.MapPointCategoryData>;
 }>();
@@ -26,6 +28,24 @@ const newMainCategoryName = defineModel<string>('newMainCategoryName', { require
 const categoryEntries = computed(() => flattenCategoryTree(props.categories));
 const hasMainCategory = computed(() => mainCategory.value !== 'none');
 
+/**
+ * Either points of several categories with the category fields, or points of one category with its characteristics.
+ * Mixing both would be hard to follow. Choosing one category leaves the category select empty until one is picked.
+ */
+const mode = ref<'several' | 'one'>(hasMainCategory.value ? 'one' : 'several');
+
+watch(hasMainCategory, (isSet) => {
+    if (isSet) {
+        mode.value = 'one';
+    }
+});
+
+watch(mode, (current) => {
+    if (current === 'several') {
+        mainCategory.value = 'none';
+    }
+});
+
 defineSlots<{
     /** Loading and saving column templates, shown above the mapping. */
     templates(): unknown;
@@ -37,8 +57,10 @@ const publishedColumnAssigned = computed(() => columnFields.value.includes('publ
 const unassignedId = computed(() => unassignedIdHeader(props.upload.headers, columnFields.value));
 
 /** The mapping belongs to the session, so a change is handed up as a new list instead of editing the old one. */
-const pointFields = computed(() => props.fields.filter((field) => !field.form_field_id));
-const categoryFields = computed(() => props.fields.filter((field) => field.form_field_id));
+const pointFields = computed(() => props.fields.filter((field) => !field.form_field_id && field.value !== 'characteristic'));
+const categoryFields = computed(() => props.fields.filter((field) => field.form_field_id && !field.characteristic_id));
+const characteristics = computed(() => props.fields.filter((field) => field.value === 'characteristic'));
+const characteristicFields = computed(() => props.fields.filter((field) => field.form_field_id && field.characteristic_id));
 
 function assignField(columnIndex: number, field: ColumnTarget) {
     columnFields.value = columnFields.value.map((current, index) => (index === columnIndex ? field : current));
@@ -91,14 +113,23 @@ function assignField(columnIndex: number, field: ColumnTarget) {
             </div>
 
             <div class="space-y-2" data-test="main-category">
-                <Label for="main_category">Hauptkategorie</Label>
-                <div class="grid gap-2 md:grid-cols-2">
+                <Label>Kategorien</Label>
+                <RadioGroup v-model="mode" class="flex flex-wrap gap-4" data-test="category-mode">
+                    <div class="flex items-center gap-2">
+                        <RadioGroupItem id="category_mode_several" value="several" />
+                        <Label for="category_mode_several" class="font-normal">Mehrere Kategorien</Label>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <RadioGroupItem id="category_mode_one" value="one" />
+                        <Label for="category_mode_one" class="font-normal">Eine Kategorie mit Maßnahmen</Label>
+                    </div>
+                </RadioGroup>
+                <div v-if="mode === 'one'" class="grid gap-2 md:grid-cols-2">
                     <Select id="main_category" v-model="mainCategory">
                         <SelectTrigger class="w-full">
-                            <SelectValue />
+                            <SelectValue placeholder="Kategorie wählen" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="none">Keine</SelectItem>
                             <SelectItem
                                 v-for="{ category, depth } in categoryEntries"
                                 :key="category.id"
@@ -117,11 +148,15 @@ function assignField(columnIndex: number, field: ColumnTarget) {
                         data-test="new-main-category-name"
                     />
                 </div>
-                <p class="text-xs text-gray-500">
-                    Optional. Die Punkte gehören dann zu dieser Kategorie: Die Kategorie-Spalte enthält ihre Unterkategorien, unbekannte werden als
-                    Unterkategorie angelegt und übernehmen ihre Zusatzfelder. Ohne Kategorie-Spalte oder bei leerer Zelle kommen die Punkte in die
-                    Hauptkategorie, Punkte in einer ihrer Unterkategorien bleiben dort. Spalten kannst du als neues Zusatzfeld der Hauptkategorie
-                    anlegen. Alles entsteht erst mit dem Import.
+                <p v-if="mode === 'several'" class="text-xs text-gray-500">
+                    Die Kategorie-Spalte bestimmt die Kategorie jedes Punkts. Spalten lassen sich den Zusatzfeldern aller Kategorien zuordnen,
+                    Maßnahmen nicht.
+                </p>
+                <p v-else class="text-xs text-gray-500">
+                    Die Punkte gehören zu dieser Kategorie: Die Kategorie-Spalte enthält ihre Unterkategorien, unbekannte werden als Unterkategorie
+                    angelegt und übernehmen ihre Zusatzfelder. Ohne Kategorie-Spalte oder bei leerer Zelle kommen die Punkte in diese Kategorie,
+                    Punkte in einer ihrer Unterkategorien bleiben dort. Spalten lassen sich den Maßnahmen der Kategorie zuordnen (ja/nein, x, 1/0)
+                    oder als neues Zusatzfeld anlegen. Alles entsteht erst mit dem Import.
                 </p>
             </div>
 
@@ -159,6 +194,18 @@ function assignField(columnIndex: number, field: ColumnTarget) {
                                         <SelectGroup v-if="categoryFields.length > 0">
                                             <SelectLabel>Zusatzfelder</SelectLabel>
                                             <SelectItem v-for="field in categoryFields" :key="targetOf(field)" :value="targetOf(field)">
+                                                {{ field.label }}
+                                            </SelectItem>
+                                        </SelectGroup>
+                                        <SelectGroup v-if="characteristics.length > 0">
+                                            <SelectLabel>Maßnahmen</SelectLabel>
+                                            <SelectItem v-for="field in characteristics" :key="targetOf(field)" :value="targetOf(field)">
+                                                {{ field.label }}
+                                            </SelectItem>
+                                        </SelectGroup>
+                                        <SelectGroup v-if="characteristicFields.length > 0">
+                                            <SelectLabel>Felder der Maßnahmen</SelectLabel>
+                                            <SelectItem v-for="field in characteristicFields" :key="targetOf(field)" :value="targetOf(field)">
                                                 {{ field.label }}
                                             </SelectItem>
                                         </SelectGroup>

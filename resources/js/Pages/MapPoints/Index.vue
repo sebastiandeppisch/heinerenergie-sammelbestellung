@@ -7,7 +7,7 @@ import { Label } from '@/shadcn/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shadcn/components/ui/tooltip';
-import { Link, router, setLayoutProps } from '@inertiajs/vue3';
+import { Link, router, setLayoutProps, usePage } from '@inertiajs/vue3';
 import { computed, reactive, ref } from 'vue';
 
 import { useExpandedIds } from '@/composables/useExpandedIds';
@@ -20,6 +20,8 @@ import MapPointFieldList from '@/components/MapPointFieldList.vue';
 import Card from '@/shadcn/components/ui/card/Card.vue';
 import { Checkbox } from '@/shadcn/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shadcn/components/ui/popover';
+import { RadioGroup, RadioGroupItem } from '@/shadcn/components/ui/radio-group';
+import type { CustomPageProps } from '@/types/pageProps';
 import { ancestorIds, flattenCategoryTree } from '@/utils/categoryTree';
 import { ChevronDown, ChevronRight, Download, Eye, EyeOff, FilePlus, FileUp, Filter, FolderInput, Map, Pencil, Plus, Tags, Trash } from '@lucide/vue';
 import { toast } from 'vue-sonner';
@@ -49,11 +51,24 @@ const { height: rootHeight } = useFillViewportHeight(rootEl);
 const showExportDialog = ref(false);
 const exportMappingId = ref<string | null>(null);
 const exportFormat = ref<App.Enums.SpreadsheetFormat>('xlsx');
+/** Either the points of all categories, or of one category with its characteristics, never mixed. */
+const exportMode = ref<'several' | 'one'>('several');
+const exportCategoryId = ref<string | null>(null);
+
+const page = usePage<CustomPageProps>();
+
+/** Like on import, only categories the current initiative can use. */
+const exportCategoryEntries = computed(() => {
+    const usableIds = props.usableCategoryIdsByGroup[page.props.auth.currentGroup?.id ?? ''] ?? [];
+
+    return flattenCategoryTree(props.categories.filter((category) => usableIds.includes(category.id)));
+});
 
 const exportUrl = computed(() =>
     route('mappoints.export', {
         format: exportFormat.value,
         ...(exportMappingId.value ? { mapping: exportMappingId.value } : {}),
+        ...(exportMode.value === 'one' && exportCategoryId.value ? { category: exportCategoryId.value } : {}),
     }),
 );
 const searchQuery = ref('');
@@ -507,6 +522,41 @@ function deleteMapPoint() {
                     </DialogDescription>
                 </DialogHeader>
                 <div class="space-y-4">
+                    <div class="space-y-2" data-test="export-category-mode">
+                        <Label>Kategorien</Label>
+                        <RadioGroup v-model="exportMode" class="flex flex-wrap gap-4">
+                            <div class="flex items-center gap-2">
+                                <RadioGroupItem id="export_mode_several" value="several" />
+                                <Label for="export_mode_several" class="font-normal">Alle Kategorien</Label>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <RadioGroupItem id="export_mode_one" value="one" />
+                                <Label for="export_mode_one" class="font-normal">Eine Kategorie mit Maßnahmen</Label>
+                            </div>
+                        </RadioGroup>
+                        <Select v-if="exportMode === 'one'" id="export_category" v-model="exportCategoryId">
+                            <SelectTrigger class="w-full" data-test="export-category">
+                                <SelectValue placeholder="Kategorie wählen" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem
+                                    v-for="{ category, depth } in exportCategoryEntries"
+                                    :key="category.id"
+                                    :value="category.id"
+                                    :style="{ paddingLeft: `${0.5 + depth * 1.25}rem` }"
+                                >
+                                    {{ category.name }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <p class="text-xs text-gray-500">
+                            {{
+                                exportMode === 'one'
+                                    ? 'Exportiert nur die Punkte dieser Kategorie und ihrer Unterkategorien, mit einer Spalte je Maßnahme (1 oder 0) und den Feldern der Maßnahmen.'
+                                    : 'Exportiert die Punkte aller Kategorien mit ihren Zusatzfeldern, ohne Maßnahmen.'
+                            }}
+                        </p>
+                    </div>
                     <div class="space-y-2">
                         <Label for="export_mapping">Spaltenvorlage</Label>
                         <Select id="export_mapping" v-model="exportMappingId">
@@ -541,7 +591,14 @@ function deleteMapPoint() {
                 <DialogFooter>
                     <Button variant="outline" @click="showExportDialog = false">Abbrechen</Button>
                     <!-- A real file download, so deliberately not an Inertia visit. -->
-                    <Button as="a" :href="exportUrl" @click="showExportDialog = false"><Download />Herunterladen</Button>
+                    <Button
+                        as="a"
+                        :href="exportUrl"
+                        :disabled="exportMode === 'one' && exportCategoryId === null"
+                        :class="{ 'pointer-events-none opacity-50': exportMode === 'one' && exportCategoryId === null }"
+                        @click="showExportDialog = false"
+                        ><Download />Herunterladen</Button
+                    >
                 </DialogFooter>
             </DialogContent>
         </Dialog>

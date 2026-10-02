@@ -6,13 +6,16 @@ namespace App\Rules;
 
 use App\Enums\MapPointSpreadsheetField;
 use App\Models\Group;
+use App\Models\MapPointCharacteristic;
 use App\Services\MapPointFieldService;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
- * Columns may only hold fields of the categories the group can use, so an import never writes fields of other
- * initiatives. A saved template can refer to a field that was deleted since, it has to be assigned anew.
+ * Columns may only hold fields and characteristics of the categories the group can use, so an import never writes
+ * those of other initiatives. A saved template can refer to a field or characteristic that was deleted since, it has
+ * to be assigned anew.
  */
 class UsableCategoryFieldColumns implements ValidationRule
 {
@@ -24,18 +27,27 @@ class UsableCategoryFieldColumns implements ValidationRule
             return;
         }
 
-        $requestedIds = collect($value)
-            ->filter(fn (mixed $column): bool => is_array($column) && ($column['field'] ?? null) === MapPointSpreadsheetField::FIELD->value)
-            ->pluck('form_field_id');
+        $columns = collect($value)->filter(fn (mixed $column): bool => is_array($column));
+        $requestedFieldIds = $columns->where('field', MapPointSpreadsheetField::FIELD->value)->pluck('form_field_id');
+        $requestedCharacteristicIds = $columns->where('field', MapPointSpreadsheetField::CHARACTERISTIC->value)->pluck('characteristic_id');
 
-        if ($requestedIds->isEmpty()) {
-            return;
+        if ($requestedFieldIds->isNotEmpty()) {
+            $fieldService = app(MapPointFieldService::class);
+            $usableIds = $fieldService->fieldsUsableInGroup($this->group)->pluck('uuid')
+                ->merge($fieldService->characteristicFieldsUsableInGroup($this->group)->pluck('uuid'));
+
+            if ($requestedFieldIds->diff($usableIds)->isNotEmpty()) {
+                $fail('Ein zugeordnetes Zusatzfeld gibt es in den Kategorien dieser Initiative nicht. Bitte ordne die Spalte neu zu.');
+            }
         }
 
-        $usableIds = app(MapPointFieldService::class)->fieldsUsableInGroup($this->group)->pluck('uuid');
+        if ($requestedCharacteristicIds->isNotEmpty()) {
+            $group = $this->group;
+            $usableIds = MapPointCharacteristic::whereHas('category', fn (Builder $query) => $query->usableInGroup($group))->pluck('uuid');
 
-        if ($requestedIds->diff($usableIds)->isNotEmpty()) {
-            $fail('Ein zugeordnetes Zusatzfeld gibt es in den Kategorien dieser Initiative nicht. Bitte ordne die Spalte neu zu.');
+            if ($requestedCharacteristicIds->diff($usableIds)->isNotEmpty()) {
+                $fail('Eine zugeordnete Maßnahme gibt es in den Kategorien dieser Initiative nicht. Bitte ordne die Spalte neu zu.');
+            }
         }
     }
 }

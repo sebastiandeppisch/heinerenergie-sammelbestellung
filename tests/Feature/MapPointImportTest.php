@@ -1,6 +1,7 @@
 <?php
 
 use App\Data\MapPointSpreadsheetColumnData;
+use App\Data\MapPointSpreadsheetMappingData;
 use App\Enums\FieldType;
 use App\Enums\SpreadsheetFormat;
 use App\Exports\MapPointsExport;
@@ -8,6 +9,8 @@ use App\Models\FormField;
 use App\Models\Group;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
+use App\Models\MapPointCharacteristic;
+use App\Models\MapPointSpreadsheetMapping;
 use App\Models\User;
 use App\Services\MapPointFieldService;
 use App\Services\SessionService;
@@ -986,3 +989,120 @@ test('main category and new fields are refused when they cannot work', function 
     'new main category that exists' => ['new main category that exists', 'new_main_category_name', 'Diese Kategorie gibt es schon. Wähle sie als Hauptkategorie aus.'],
     'new field in a category of a parent initiative' => ['new field in a category of a parent initiative', 'columns', 'Neue Zusatzfelder kämen in die Kategorie Photovoltaik einer übergeordneten Initiative. Dort kann nur deren Admin Felder anlegen.'],
 ]);
+
+/**
+ * A garden category with the characteristics "Igeltor" (with a width field) and "Totholz".
+ *
+ * @return array{category: MapPointCategory, hedgehogGate: MapPointCharacteristic, deadwood: MapPointCharacteristic, width: FormField}
+ */
+function gardenWithCharacteristics(Group $group): array
+{
+    $category = MapPointCategory::factory()->for($group)->create(['name' => 'Garten']);
+    $hedgehogGate = MapPointCharacteristic::factory()->for($category, 'category')->create(['name' => 'Igeltor', 'sort_order' => 0]);
+    $deadwood = MapPointCharacteristic::factory()->for($category, 'category')->create(['name' => 'Totholz', 'sort_order' => 1]);
+    $width = $hedgehogGate->findOrCreateFormDefinition()->fields()->create(['type' => FieldType::NUMBER, 'label' => 'Breite (cm)', 'sort_order' => 0]);
+
+    return compact('category', 'hedgehogGate', 'deadwood', 'width');
+}
+
+/**
+ * @return array<int, array<string, string>>
+ */
+function characteristicColumns(MapPointCharacteristic $hedgehogGate, MapPointCharacteristic $deadwood, FormField $width): array
+{
+    return [
+        ['header' => 'Bezeichnung', 'field' => 'title'],
+        ['header' => 'Breite', 'field' => 'lat'],
+        ['header' => 'Länge', 'field' => 'lng'],
+        ['header' => 'Igeltor', 'field' => 'characteristic', 'characteristic_id' => $hedgehogGate->uuid],
+        ['header' => 'Totholz', 'field' => 'characteristic', 'characteristic_id' => $deadwood->uuid],
+        ['header' => 'Torbreite', 'field' => 'field', 'form_field_id' => $width->uuid],
+    ];
+}
+
+test('the import page offers the characteristics and their fields for the categories that offer them', function (): void {
+    actingAsImportAdmin($this, $this->group);
+    ['category' => $garden, 'hedgehogGate' => $hedgehogGate, 'width' => $width] = gardenWithCharacteristics($this->group);
+    $meadow = MapPointCategory::factory()->childOf($garden)->create();
+    $solar = MapPointCategory::factory()->for($this->group)->create();
+
+    $this->get(route('mappoints.import.create'))
+        ->assertInertia(fn ($page) => $page
+            ->where('fields', fn (Collection $fields): bool => $fields->where('value', 'characteristic')->pluck('label')->all() === ['Garten › Maßnahme Igeltor', 'Garten › Maßnahme Totholz']
+                && $fields->firstWhere('form_field_id', $width->uuid)['label'] === 'Garten › Igeltor › Breite (cm)'
+                && $fields->firstWhere('form_field_id', $width->uuid)['characteristic_id'] === $hedgehogGate->uuid)
+            ->where("characteristicIdsByCategory.{$meadow->uuid}.0", $hedgehogGate->uuid)
+            ->where("characteristicIdsByCategory.{$solar->uuid}", [])
+        );
+});
+
+test('characteristic columns set and remove characteristics and fill the fields of set ones', function (): void {
+    actingAsImportAdmin($this, $this->group);
+    ['category' => $garden, 'hedgehogGate' => $hedgehogGate, 'deadwood' => $deadwood, 'width' => $width] = gardenWithCharacteristics($this->group);
+    $existing = MapPoint::factory()->for($this->group)->create(['title' => 'Am Bach', 'category_id' => $garden->id]);
+    $existing->characteristics()->attach([$hedgehogGate->id, $deadwood->id]);
+    $token = uploadMapPointFile($this, implode("\r\n", [
+        'Bezeichnung;Breite;Länge;Igeltor;Totholz;Torbreite',
+        'Am Bach;49,87;8,65;nein;x;',
+        'Schulgarten;49,88;8,66;ja;;13',
+    ]));
+
+    $this->post(route('mappoints.import.store'), mainCategoryPayload($token, characteristicColumns($hedgehogGate, $deadwood, $width), ['main_category_id' => $garden->uuid]))
+        ->assertRedirect(route('mappoints.index'));
+
+    $created = MapPoint::where('title', 'Schulgarten')->sole();
+    expect($existing->characteristics()->pluck('name')->all())->toBe(['Totholz'])
+        ->and($created->characteristics()->pluck('name')->all())->toBe(['Igeltor'])
+        ->and($created->fields()->pluck('value', 'label')->all())->toBe(['Breite (cm)' => 13]);
+});
+
+test('a value for a field of a characteristic that is not set is left out with a warning', function (): void {
+    actingAsImportAdmin($this, $this->group);
+    ['category' => $garden, 'hedgehogGate' => $hedgehogGate, 'deadwood' => $deadwood, 'width' => $width] = gardenWithCharacteristics($this->group);
+    $token = uploadMapPointFile($this, "Bezeichnung;Breite;Länge;Igeltor;Totholz;Torbreite\r\nSchulgarten;49,88;8,66;nein;nein;13");
+
+    $this->postJson(route('mappoints.import.preview'), mainCategoryPayload($token, characteristicColumns($hedgehogGate, $deadwood, $width), ['main_category_id' => $garden->uuid]))
+        ->assertOk()
+        ->assertJsonPath('errors', [])
+        ->assertJsonPath('warnings', [['row' => 2, 'column' => 'Torbreite', 'message' => 'Die Maßnahme Igeltor ist nicht gesetzt, der Wert wird nicht übernommen.']]);
+});
+
+test('a characteristic cell that is neither yes nor no is a row error', function (): void {
+    actingAsImportAdmin($this, $this->group);
+    ['category' => $garden, 'hedgehogGate' => $hedgehogGate, 'deadwood' => $deadwood, 'width' => $width] = gardenWithCharacteristics($this->group);
+    $token = uploadMapPointFile($this, "Bezeichnung;Breite;Länge;Igeltor;Totholz;Torbreite\r\nSchulgarten;49,88;8,66;vielleicht;0;");
+
+    $this->postJson(route('mappoints.import.preview'), mainCategoryPayload($token, characteristicColumns($hedgehogGate, $deadwood, $width), ['main_category_id' => $garden->uuid]))
+        ->assertOk()
+        ->assertJsonPath('errors', [['row' => 2, 'column' => 'Igeltor', 'message' => 'Erlaubt sind „ja“ oder „nein“, „x“, „1“ oder „0“.']]);
+});
+
+test('characteristic columns need a main category that offers the characteristics', function (?string $mainCategory, string $message): void {
+    actingAsImportAdmin($this, $this->group);
+    ['hedgehogGate' => $hedgehogGate, 'deadwood' => $deadwood, 'width' => $width] = gardenWithCharacteristics($this->group);
+    $solar = MapPointCategory::factory()->for($this->group)->create(['name' => 'Photovoltaik']);
+    $token = uploadMapPointFile($this, "Bezeichnung;Breite;Länge;Igeltor;Totholz;Torbreite\r\nSchulgarten;49,88;8,66;ja;nein;13");
+    $columns = characteristicColumns($hedgehogGate, $deadwood, $width);
+
+    $this->postJson(route('mappoints.import.preview'), mainCategoryPayload($token, $columns, $mainCategory === null ? [] : ['main_category_id' => $solar->uuid]))
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['columns' => $message]);
+
+    $this->assertDatabaseCount('map_points', 0);
+})->with([
+    'without main category' => [null, 'Maßnahmen lassen sich nur zusammen mit einer Hauptkategorie importieren. Bitte wähle „Eine Kategorie mit Maßnahmen“.'],
+    'other main category' => ['solar', 'Eine zugeordnete Maßnahme gehört nicht zur Kategorie Photovoltaik. Bitte ordne die Spalte neu zu.'],
+]);
+
+test('a template keeps characteristic columns', function (): void {
+    actingAsImportAdmin($this, $this->group);
+    ['hedgehogGate' => $hedgehogGate, 'deadwood' => $deadwood, 'width' => $width] = gardenWithCharacteristics($this->group);
+
+    $this->post(route('mappoints.spreadsheet-mappings.store'), [
+        'name' => 'Gärten',
+        'key_field' => 'title',
+        'columns' => characteristicColumns($hedgehogGate, $deadwood, $width),
+    ])->assertSessionHasNoErrors();
+
+    expect(MapPointSpreadsheetMappingData::fromModel(MapPointSpreadsheetMapping::sole())->columns[3]->characteristic_id)->toBe($hedgehogGate->uuid);
+});

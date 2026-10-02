@@ -6,6 +6,7 @@ namespace App\Data;
 
 use App\Enums\MapPointSpreadsheetField;
 use App\Models\FormField;
+use App\Models\MapPointCharacteristic;
 use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
@@ -18,8 +19,10 @@ class MapPointSpreadsheetFieldData extends Data
         public bool $is_key,
         /** The uuid of the form field, only set for MapPointSpreadsheetField::FIELD. */
         public ?string $form_field_id = null,
-        /** The uuid of the category defining the field, only set for MapPointSpreadsheetField::FIELD. */
+        /** The uuid of the category defining the field or characteristic, only set for MapPointSpreadsheetField::FIELD and CHARACTERISTIC. */
         public ?string $category_id = null,
+        /** The uuid of the characteristic, set for MapPointSpreadsheetField::CHARACTERISTIC and for the fields of a characteristic. */
+        public ?string $characteristic_id = null,
     ) {}
 
     public static function fromEnum(MapPointSpreadsheetField $field): self
@@ -32,23 +35,55 @@ class MapPointSpreadsheetFieldData extends Data
     }
 
     /**
-     * Named after its category, because categories may have fields with the same label.
+     * Named after its category and characteristic, because they may have fields with the same label. Needs the
+     * relations formDefinition.mapPointCategory and formDefinition.mapPointCharacteristic.category.
      */
-    public static function fromCategoryField(FormField $field): self
+    public static function fromField(FormField $field): self
     {
+        $characteristic = $field->formDefinition?->mapPointCharacteristic;
+
         return new self(
             value: MapPointSpreadsheetField::FIELD,
-            label: self::categoryFieldLabel($field),
+            label: self::fieldLabel($field),
             is_key: false,
             form_field_id: $field->uuid,
-            category_id: $field->formDefinition?->mapPointCategory?->uuid,
+            category_id: ($field->formDefinition->mapPointCategory ?? $characteristic?->category)?->uuid,
+            characteristic_id: $characteristic?->uuid,
         );
     }
 
-    public static function categoryFieldLabel(FormField $field): string
+    /**
+     * Needs the relation category.
+     */
+    public static function fromCharacteristic(MapPointCharacteristic $characteristic): self
     {
+        return new self(
+            value: MapPointSpreadsheetField::CHARACTERISTIC,
+            label: self::characteristicLabel($characteristic),
+            is_key: false,
+            category_id: $characteristic->category->uuid,
+            characteristic_id: $characteristic->uuid,
+        );
+    }
+
+    /**
+     * "Kategorie › Feld" for fields of a category, "Kategorie › Maßnahme › Feld" for fields of a characteristic.
+     */
+    public static function fieldLabel(FormField $field): string
+    {
+        $characteristic = $field->formDefinition?->mapPointCharacteristic;
+
+        if ($characteristic !== null) {
+            return $characteristic->category->name.' › '.$characteristic->name.' › '.$field->label;
+        }
+
         $categoryName = $field->formDefinition?->mapPointCategory?->name;
 
         return $categoryName === null ? $field->label : $categoryName.' › '.$field->label;
+    }
+
+    public static function characteristicLabel(MapPointCharacteristic $characteristic): string
+    {
+        return $characteristic->category->name.' › Maßnahme '.$characteristic->name;
     }
 }

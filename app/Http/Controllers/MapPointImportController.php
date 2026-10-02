@@ -14,6 +14,7 @@ use App\Http\Requests\RunMapPointImportRequest;
 use App\Http\Requests\UploadMapPointImportRequest;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
+use App\Models\MapPointCharacteristic;
 use App\Services\MapPointFieldService;
 use App\Services\MapPointImportService;
 use Illuminate\Database\Eloquent\Collection;
@@ -40,12 +41,18 @@ class MapPointImportController extends Controller
 
         $categories = MapPointCategory::usableInGroup($group)->with('group')->withCount('mapPoints')->get();
         $tree = MapPointCategory::tree();
+        $characteristics = MapPointCharacteristic::whereIn('map_point_category_id', $categories->modelKeys())
+            ->with('category')
+            ->orderBy('sort_order')
+            ->get();
 
         return Inertia::render('MapPoints/Import', [
             'mappings' => MapPointSpreadsheetMappingData::forGroup($group),
             'fields' => [
                 ...array_map(MapPointSpreadsheetFieldData::fromEnum(...), MapPointSpreadsheetField::pointFields()),
-                ...$fieldService->fieldsUsableInGroup($group)->map(MapPointSpreadsheetFieldData::fromCategoryField(...))->all(),
+                ...$fieldService->fieldsUsableInGroup($group)->map(MapPointSpreadsheetFieldData::fromField(...))->all(),
+                ...$characteristics->map(MapPointSpreadsheetFieldData::fromCharacteristic(...))->all(),
+                ...$fieldService->characteristicFieldsUsableInGroup($group)->map(MapPointSpreadsheetFieldData::fromField(...))->all(),
             ],
             'upload' => is_string($token) ? $imports->upload($token, $group) : null,
             'categories' => $categories->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel($category, tree: $tree))->all(),
@@ -54,6 +61,14 @@ class MapPointImportController extends Controller
                 fn (Collection $fields): array => $fields->pluck('uuid')->all(),
                 $fieldService->fieldsByCategory($categories, $tree),
             ),
+            // Characteristics and their fields are only offered for one main category, the ones it offers.
+            'characteristicIdsByCategory' => $categories->mapWithKeys(fn (MapPointCategory $category): array => [
+                $category->uuid => $characteristics
+                    ->filter(fn (MapPointCharacteristic $characteristic): bool => $characteristic->isSelectableFor($category->id, $tree))
+                    ->pluck('uuid')
+                    ->values()
+                    ->all(),
+            ])->all(),
         ]);
     }
 

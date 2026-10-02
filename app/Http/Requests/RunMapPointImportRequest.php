@@ -8,9 +8,11 @@ use App\Context\GroupContextContract;
 use App\Data\MapPointSpreadsheetColumnData;
 use App\Enums\FieldType;
 use App\Enums\MapPointSpreadsheetField;
+use App\Models\FormField;
 use App\Models\Group;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
+use App\Models\MapPointCharacteristic;
 use App\Rules\DistinctMapPointSpreadsheetFields;
 use App\Rules\IdColumnRequiresIdKey;
 use App\Rules\UsableCategoryFieldColumns;
@@ -45,6 +47,7 @@ class RunMapPointImportRequest extends FormRequest
                 'required_if:columns.*.field,'.MapPointSpreadsheetField::NEW_CATEGORY_FIELD->value,
                 Rule::enum(FieldType::class)->only(MapPointSpreadsheetField::newFieldTypes()),
             ],
+            'columns.*.characteristic_id' => ['nullable', 'required_if:columns.*.field,'.MapPointSpreadsheetField::CHARACTERISTIC->value, 'uuid'],
             'main_category_id' => ['nullable', 'bail', 'uuid', 'exists:map_point_categories,uuid'],
             'new_main_category_name' => ['nullable', 'string', 'max:255', 'prohibits:main_category_id'],
         ];
@@ -104,6 +107,11 @@ class RunMapPointImportRequest extends FormRequest
                     $this->validateMainCategory($validator);
                 }
             },
+            function (Validator $validator): void {
+                if ($validator->errors()->isEmpty()) {
+                    $this->validateCharacteristicColumns($validator);
+                }
+            },
         ];
     }
 
@@ -146,6 +154,39 @@ class RunMapPointImportRequest extends FormRequest
             if (! $this->user()->can('update', $fieldsCategory)) {
                 $validator->errors()->add('columns', "Neue Zusatzfelder kämen in die Kategorie {$fieldsCategory->name} einer übergeordneten Initiative. Dort kann nur deren Admin Felder anlegen.");
             }
+        }
+    }
+
+    /**
+     * Characteristics and their fields are only imported for one main category, so it is clear which characteristics
+     * the points can have. Mixing them with several categories would be hard to understand.
+     */
+    private function validateCharacteristicColumns(Validator $validator): void
+    {
+        $columns = collect($this->columnsFromInput());
+        $characteristicIds = $columns->where('field', MapPointSpreadsheetField::CHARACTERISTIC)->pluck('characteristic_id');
+        $fieldIds = $columns->where('field', MapPointSpreadsheetField::FIELD)->pluck('form_field_id');
+        $characteristicFieldCharacteristicIds = MapPointCharacteristic::query()
+            ->whereIn('form_definition_id', FormField::whereIn('uuid', $fieldIds)->select('form_definition_id'))
+            ->pluck('uuid');
+        $requestedIds = $characteristicIds->merge($characteristicFieldCharacteristicIds)->unique();
+
+        if ($requestedIds->isEmpty()) {
+            return;
+        }
+
+        $mainCategory = $this->mainCategory();
+
+        if ($mainCategory === null) {
+            $validator->errors()->add('columns', 'Maßnahmen lassen sich nur zusammen mit einer Hauptkategorie importieren. Bitte wähle „Eine Kategorie mit Maßnahmen“.');
+
+            return;
+        }
+
+        $selectableIds = MapPointCharacteristic::selectableFor($mainCategory->id)->pluck('uuid');
+
+        if ($requestedIds->diff($selectableIds)->isNotEmpty()) {
+            $validator->errors()->add('columns', "Eine zugeordnete Maßnahme gehört nicht zur Kategorie {$mainCategory->name}. Bitte ordne die Spalte neu zu.");
         }
     }
 
@@ -214,6 +255,7 @@ class RunMapPointImportRequest extends FormRequest
                 field: MapPointSpreadsheetField::from((string) $column['field']),
                 form_field_id: isset($column['form_field_id']) ? (string) $column['form_field_id'] : null,
                 new_field_type: isset($column['new_field_type']) ? FieldType::tryFrom((string) $column['new_field_type']) : null,
+                characteristic_id: isset($column['characteristic_id']) ? (string) $column['characteristic_id'] : null,
             ),
             $columns,
         ));

@@ -355,6 +355,7 @@ header: string,
 field: App.Enums.MapPointSpreadsheetField,
 form_field_id: string | null,
 new_field_type: App.Enums.FieldType | null,
+characteristic_id: string | null,
 };
 export type MapPointSpreadsheetFieldData = {
 value: App.Enums.MapPointSpreadsheetField,
@@ -362,6 +363,7 @@ label: string,
 is_key: boolean,
 form_field_id: string | null,
 category_id: string | null,
+characteristic_id: string | null,
 };
 export type MapPointSpreadsheetMappingData = {
 id: string,
@@ -456,7 +458,7 @@ export type FieldType = 'text' | 'textarea' | 'number' | 'email' | 'phone' | 'se
 export type FormType = 0 | 1 | 2;
 export type GeocodingStatus = 'pending' | 'success' | 'not_found' | 'failed' | 'manual';
 export type HouseType = 0 | 1 | 2;
-export type MapPointSpreadsheetField = 'ignore' | 'id' | 'title' | 'description' | 'lat' | 'lng' | 'location' | 'category' | 'published' | 'field' | 'new_category_field';
+export type MapPointSpreadsheetField = 'ignore' | 'id' | 'title' | 'description' | 'lat' | 'lng' | 'location' | 'category' | 'published' | 'field' | 'characteristic' | 'new_category_field';
 export type SpreadsheetFormat = 'xlsx' | 'ods' | 'xls' | 'csv';
 }
 namespace Nextcloud {

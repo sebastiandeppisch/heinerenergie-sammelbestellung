@@ -13,6 +13,7 @@ use App\Models\FormField;
 use App\Models\Group;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
+use App\Models\MapPointCharacteristic;
 use App\Services\MapPointFieldService;
 use App\ValueObjects\Coordinate;
 use App\ValueObjects\MapPointCategoryTree;
@@ -50,11 +51,25 @@ class MapPointsImport implements OnEachRow, SkipsEmptyRows, SkipsOnFailure, With
     private array $warnings = [];
 
     /**
-     * The fields of each category a row's point ended up in, keyed by category id and then by field uuid.
+     * The mapped characteristics, keyed by their uuid, with the key their column has in $columnsByField.
      *
-     * @var array<int, EloquentCollection<string, FormField>>
+     * @var array<string, string>
      */
-    private array $fieldsByCategoryId = [];
+    private readonly array $characteristicTargets;
+
+    /**
+     * The ids of the mapped characteristics, keyed by their uuid.
+     *
+     * @var array<string, int>
+     */
+    private readonly array $characteristicIds;
+
+    /**
+     * The names of the characteristics owning mapped fields, keyed by the uuid of the field.
+     *
+     * @var array<string, string>
+     */
+    private readonly array $characteristicNamesByFieldUuid;
 
     /**
      * The column of every mapped field, keyed by the field, see MapPointSpreadsheetColumnData::target().
@@ -94,6 +109,7 @@ class MapPointsImport implements OnEachRow, SkipsEmptyRows, SkipsOnFailure, With
     ) {
         $columnsByField = [];
         $fieldTargets = [];
+        $characteristicTargets = [];
 
         foreach ($columns as $index => $column) {
             if ($column->field !== MapPointSpreadsheetField::IGNORE) {
@@ -103,10 +119,23 @@ class MapPointsImport implements OnEachRow, SkipsEmptyRows, SkipsOnFailure, With
             if ($column->field === MapPointSpreadsheetField::FIELD && $column->form_field_id !== null) {
                 $fieldTargets[$column->form_field_id] = $column->target();
             }
+
+            if ($column->field === MapPointSpreadsheetField::CHARACTERISTIC && $column->characteristic_id !== null) {
+                $characteristicTargets[$column->characteristic_id] = $column->target();
+            }
         }
 
         $this->columnsByField = $columnsByField;
         $this->fieldTargets = $fieldTargets;
+        $this->characteristicTargets = $characteristicTargets;
+        $this->characteristicIds = MapPointCharacteristic::whereIn('uuid', array_keys($characteristicTargets))->pluck('id', 'uuid')->all();
+        $this->characteristicNamesByFieldUuid = FormField::query()
+            ->whereIn('uuid', array_keys($fieldTargets))
+            ->whereHas('formDefinition.mapPointCharacteristic')
+            ->with('formDefinition.mapPointCharacteristic')
+            ->get()
+            ->mapWithKeys(fn (FormField $field): array => [$field->uuid => (string) $field->formDefinition?->mapPointCharacteristic?->name])
+            ->all();
         $this->mainSubtreeIds = $mainCategory === null ? [] : $tree->subtreeIds([$mainCategory->id]);
     }
 
@@ -261,7 +290,7 @@ class MapPointsImport implements OnEachRow, SkipsEmptyRows, SkipsOnFailure, With
     }
 
     /**
-     * Values that were left out without stopping the import, because the point's category has no such field.
+     * Values that were left out without stopping the import, because the point does not have the field.
      *
      * @return array<int, SpreadsheetRowErrorData>
      */
@@ -317,7 +346,8 @@ class MapPointsImport implements OnEachRow, SkipsEmptyRows, SkipsOnFailure, With
         $mapPoint = $existingPoint ?? new MapPoint(['group_id' => $this->group->id, 'published' => $this->defaultPublished]);
         $mapPoint->fill($attributes)->save();
 
-        $this->importFieldValues($rowNumber, $mapPoint, $values);
+        $characteristicIds = $this->importCharacteristics($rowNumber, $mapPoint, $values);
+        $this->importFieldValues($rowNumber, $mapPoint, $characteristicIds, $values);
 
         return new MapPointImportRowData(
             row: $rowNumber,
@@ -372,30 +402,94 @@ class MapPointsImport implements OnEachRow, SkipsEmptyRows, SkipsOnFailure, With
     }
 
     /**
-     * Stores the values of the mapped category fields the point has. An empty cell removes the value, like for
-     * description and location. A file may hold columns for the fields of several categories, so a value for a
-     * field the point does not have is only reported as a warning.
+     * Sets or removes the mapped characteristics, others stay as they are. Characteristics the point's category does
+     * not offer are removed, e.g. after the point moved into another category.
      *
+     * @param  array<string, mixed>  $values
+     * @return array<int, int> The characteristics the point has now.
+     *
+     * @throws SpreadsheetValueException When a cell is neither yes nor no.
+     */
+    private function importCharacteristics(int $rowNumber, MapPoint $mapPoint, array $values): array
+    {
+        $characteristics = $mapPoint->characteristics()->get()->keyBy('id');
+        $characteristicIds = $characteristics->keys()->all();
+
+        foreach ($this->characteristicTargets as $uuid => $target) {
+            $isSet = SpreadsheetCell::boolean($values[$target] ?? null)
+                ?? throw new SpreadsheetValueException('Erlaubt sind „ja“ oder „nein“, „x“, „1“ oder „0“.', $target);
+            $characteristicId = $this->characteristicIds[$uuid] ?? null;
+
+            if ($characteristicId === null) {
+                continue;
+            }
+
+            $characteristicIds = $isSet
+                ? array_values(array_unique([...$characteristicIds, $characteristicId]))
+                : array_values(array_diff($characteristicIds, [$characteristicId]));
+        }
+
+        $selectableIds = $mapPoint->category_id === null ? [] : MapPointCharacteristic::query()
+            ->whereIn('map_point_category_id', $this->categoryWithAncestorIds($mapPoint->category_id))
+            ->pluck('id')
+            ->all();
+
+        foreach (array_diff($characteristicIds, $selectableIds) as $unselectableId) {
+            $target = array_search($unselectableId, $this->characteristicIds, true);
+
+            if ($target !== false && ! $characteristics->has($unselectableId)) {
+                $this->warnings[] = new SpreadsheetRowErrorData($rowNumber, $this->headerOf($this->characteristicTargets[$target]), 'Die Kategorie des Punkts bietet diese Maßnahme nicht an, sie wird nicht gesetzt.');
+            }
+        }
+
+        $characteristicIds = array_values(array_intersect($characteristicIds, $selectableIds));
+        $mapPoint->characteristics()->sync($characteristicIds);
+
+        return $characteristicIds;
+    }
+
+    /**
+     * Categories the import created are not in the tree yet. They are created below the main category.
+     *
+     * @return array<int, int>
+     */
+    private function categoryWithAncestorIds(int $categoryId): array
+    {
+        if ($this->tree->contains($categoryId) || $this->mainCategory === null) {
+            return [$categoryId, ...$this->tree->ancestorIds($categoryId)];
+        }
+
+        return [$categoryId, $this->mainCategory->id, ...$this->tree->ancestorIds($this->mainCategory->id)];
+    }
+
+    /**
+     * Stores the values of the mapped fields the point has. An empty cell removes the value, like for
+     * description and location. A file may hold columns for the fields of several categories or of characteristics
+     * the point does not have, so a value for a field the point does not have is only reported as a warning.
+     *
+     * @param  array<int, int>  $characteristicIds
      * @param  array<string, mixed>  $values
      *
      * @throws SpreadsheetValueException When a value does not fit its field.
      */
-    private function importFieldValues(int $rowNumber, MapPoint $mapPoint, array $values): void
+    private function importFieldValues(int $rowNumber, MapPoint $mapPoint, array $characteristicIds, array $values): void
     {
         if ($this->fieldTargets === []) {
             return;
         }
 
-        $categoryFields = $this->fieldsOfCategory($mapPoint->category_id);
+        $pointFields = $this->fieldService->effectiveFields($mapPoint->category_id, $characteristicIds, $this->tree)->keyBy('uuid');
         $fieldValues = [];
 
         foreach ($this->fieldTargets as $fieldUuid => $target) {
             $cell = $values[$target] ?? null;
-            $field = $categoryFields->get($fieldUuid);
+            $field = $pointFields->get($fieldUuid);
 
             if ($field === null) {
                 if (SpreadsheetCell::text($cell) !== null) {
-                    $this->warnings[] = new SpreadsheetRowErrorData($rowNumber, $this->headerOf($target), 'Die Kategorie des Punkts hat dieses Feld nicht, der Wert wird nicht übernommen.');
+                    $this->warnings[] = new SpreadsheetRowErrorData($rowNumber, $this->headerOf($target), isset($this->characteristicNamesByFieldUuid[$fieldUuid])
+                        ? "Die Maßnahme {$this->characteristicNamesByFieldUuid[$fieldUuid]} ist nicht gesetzt, der Wert wird nicht übernommen."
+                        : 'Die Kategorie des Punkts hat dieses Feld nicht, der Wert wird nicht übernommen.');
                 }
 
                 continue;
@@ -421,19 +515,7 @@ class MapPointsImport implements OnEachRow, SkipsEmptyRows, SkipsOnFailure, With
             $fieldValues[$fieldUuid] = $value;
         }
 
-        $this->fieldService->syncValues($mapPoint, $fieldValues, $categoryFields->values());
-    }
-
-    /**
-     * @return EloquentCollection<string, FormField>
-     */
-    private function fieldsOfCategory(?int $categoryId): EloquentCollection
-    {
-        if ($categoryId === null) {
-            return new EloquentCollection;
-        }
-
-        return $this->fieldsByCategoryId[$categoryId] ??= $this->fieldService->fieldsOfCategory($categoryId, $this->tree)->keyBy('uuid');
+        $this->fieldService->syncValues($mapPoint, $fieldValues, $pointFields->values());
     }
 
     private function headerOf(?string $field): ?string

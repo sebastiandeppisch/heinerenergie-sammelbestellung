@@ -13,6 +13,7 @@ use App\Imports\SpreadsheetCell;
 use App\Models\FormField;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
+use App\Models\MapPointCharacteristic;
 use App\Models\MapPointField;
 use App\Services\MapPointFieldService;
 use App\ValueObjects\MapPointCategoryTree;
@@ -48,15 +49,18 @@ class MapPointsExport extends DefaultValueBinder implements FromCollection, Shou
     /**
      * @param  Collection<int, MapPoint>  $mapPoints  With the relations characteristics, fields.formField and fields.options loaded.
      * @param  array<int, MapPointSpreadsheetColumnData>  $columns
-     * @param  EloquentCollection<int, FormField>  $categoryFields  The category fields the group can use. Columns of other fields, e.g. deleted ones, are left out.
+     * @param  EloquentCollection<int, FormField>  $usableFields  The fields that can be exported. Columns of other fields, e.g. deleted ones, are left out.
+     * @param  EloquentCollection<int, MapPointCharacteristic>  $usableCharacteristics  The characteristics that can be exported, only those of
+     *                                                                                  one category. Columns of others are left out.
      */
     public function __construct(
         private readonly Collection $mapPoints,
         array $columns,
         private readonly SpreadsheetFormat $format,
-        EloquentCollection $categoryFields = new EloquentCollection,
+        EloquentCollection $usableFields = new EloquentCollection,
         ?MapPointCategoryTree $tree = null,
         ?MapPointFieldService $fieldService = null,
+        EloquentCollection $usableCharacteristics = new EloquentCollection,
     ) {
         $this->tree = $tree ?? MapPointCategory::tree();
         $this->fieldService = $fieldService ?? app(MapPointFieldService::class);
@@ -64,26 +68,39 @@ class MapPointsExport extends DefaultValueBinder implements FromCollection, Shou
         $idColumn = collect($columns)->first(fn (MapPointSpreadsheetColumnData $column): bool => $column->field === MapPointSpreadsheetField::ID)
             ?? new MapPointSpreadsheetColumnData('ID', MapPointSpreadsheetField::ID);
 
-        $categoryFieldIds = $categoryFields->pluck('uuid')->all();
+        $usableFieldIds = $usableFields->pluck('uuid')->all();
+        $usableCharacteristicIds = $usableCharacteristics->pluck('uuid')->all();
 
         $otherColumns = array_filter(
             $columns,
-            fn (MapPointSpreadsheetColumnData $column): bool => ! in_array($column->field, [MapPointSpreadsheetField::ID, MapPointSpreadsheetField::IGNORE, MapPointSpreadsheetField::NEW_CATEGORY_FIELD], true)
-                && ($column->field !== MapPointSpreadsheetField::FIELD || in_array($column->form_field_id, $categoryFieldIds, true)),
+            fn (MapPointSpreadsheetColumnData $column): bool => match ($column->field) {
+                MapPointSpreadsheetField::ID, MapPointSpreadsheetField::IGNORE, MapPointSpreadsheetField::NEW_CATEGORY_FIELD => false,
+                MapPointSpreadsheetField::FIELD => in_array($column->form_field_id, $usableFieldIds, true),
+                MapPointSpreadsheetField::CHARACTERISTIC => in_array($column->characteristic_id, $usableCharacteristicIds, true),
+                default => true,
+            },
         );
 
         $this->exportColumns = [$idColumn, ...array_values($otherColumns)];
     }
 
     /**
-     * All fields with their labels as headers, used when no mapping is chosen. Category fields are named after their
-     * category, because categories may have fields with the same label.
+     * All fields with their labels as headers, used when no mapping is chosen. Fields are named after their category
+     * and characteristic, because they may have fields with the same label. Each characteristic comes right before its fields.
      *
-     * @param  EloquentCollection<int, FormField>  $categoryFields
+     * @param  EloquentCollection<int, FormField>  $fields  The fields of categories and characteristics. Fields of characteristics need the relation formDefinition.mapPointCharacteristic.
+     * @param  EloquentCollection<int, MapPointCharacteristic>  $characteristics
      * @return array<int, MapPointSpreadsheetColumnData>
      */
-    public static function defaultColumns(EloquentCollection $categoryFields = new EloquentCollection): array
+    public static function defaultColumns(EloquentCollection $fields = new EloquentCollection, EloquentCollection $characteristics = new EloquentCollection): array
     {
+        $fieldColumn = fn (FormField $field): MapPointSpreadsheetColumnData => new MapPointSpreadsheetColumnData(
+            MapPointSpreadsheetFieldData::fieldLabel($field),
+            MapPointSpreadsheetField::FIELD,
+            $field->uuid,
+        );
+        [$characteristicFields, $categoryFields] = $fields->partition(fn (FormField $field): bool => $field->formDefinition?->mapPointCharacteristic !== null);
+
         $fields = array_filter(MapPointSpreadsheetField::pointFields(), fn (MapPointSpreadsheetField $field): bool => $field !== MapPointSpreadsheetField::IGNORE);
 
         return [
@@ -91,11 +108,18 @@ class MapPointsExport extends DefaultValueBinder implements FromCollection, Shou
                 fn (MapPointSpreadsheetField $field): MapPointSpreadsheetColumnData => new MapPointSpreadsheetColumnData($field->label(), $field),
                 $fields,
             )),
-            ...$categoryFields->map(fn (FormField $field): MapPointSpreadsheetColumnData => new MapPointSpreadsheetColumnData(
-                MapPointSpreadsheetFieldData::categoryFieldLabel($field),
-                MapPointSpreadsheetField::FIELD,
-                $field->uuid,
-            ))->all(),
+            ...$categoryFields->map($fieldColumn)->all(),
+            ...$characteristics->flatMap(fn (MapPointCharacteristic $characteristic): array => [
+                new MapPointSpreadsheetColumnData(
+                    MapPointSpreadsheetFieldData::characteristicLabel($characteristic),
+                    MapPointSpreadsheetField::CHARACTERISTIC,
+                    characteristic_id: $characteristic->uuid,
+                ),
+                ...$characteristicFields
+                    ->filter(fn (FormField $field): bool => $field->form_definition_id === $characteristic->form_definition_id)
+                    ->map($fieldColumn)
+                    ->all(),
+            ])->all(),
         ];
     }
 
@@ -131,6 +155,7 @@ class MapPointsExport extends DefaultValueBinder implements FromCollection, Shou
             MapPointSpreadsheetField::CATEGORY => $this->text($row->category?->name),
             MapPointSpreadsheetField::PUBLISHED => $row->published ? 'ja' : 'nein',
             MapPointSpreadsheetField::FIELD => $this->fieldValue($row, (string) $column->form_field_id),
+            MapPointSpreadsheetField::CHARACTERISTIC => $row->characteristics->contains('uuid', $column->characteristic_id) ? 1 : 0,
             MapPointSpreadsheetField::IGNORE, MapPointSpreadsheetField::NEW_CATEGORY_FIELD => null,
         }, $this->exportColumns);
     }

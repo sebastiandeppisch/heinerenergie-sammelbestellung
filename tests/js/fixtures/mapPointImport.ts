@@ -2,15 +2,15 @@ import type { MapPointImportPayload } from '@/composables/useMapPointColumnMappi
 
 /** The field options as the server sends them. */
 export const mapPointFields: Array<App.Data.MapPointSpreadsheetFieldData> = [
-    { value: 'ignore', label: 'Ignorieren', is_key: false, form_field_id: null, category_id: null },
-    { value: 'id', label: 'ID', is_key: true, form_field_id: null, category_id: null },
-    { value: 'title', label: 'Titel', is_key: true, form_field_id: null, category_id: null },
-    { value: 'description', label: 'Beschreibung', is_key: false, form_field_id: null, category_id: null },
-    { value: 'lat', label: 'Breitengrad', is_key: false, form_field_id: null, category_id: null },
-    { value: 'lng', label: 'Längengrad', is_key: false, form_field_id: null, category_id: null },
-    { value: 'location', label: 'Ort', is_key: true, form_field_id: null, category_id: null },
-    { value: 'category', label: 'Kategorie', is_key: false, form_field_id: null, category_id: null },
-    { value: 'published', label: 'Veröffentlicht', is_key: false, form_field_id: null, category_id: null },
+    { value: 'ignore', label: 'Ignorieren', is_key: false, form_field_id: null, category_id: null, characteristic_id: null },
+    { value: 'id', label: 'ID', is_key: true, form_field_id: null, category_id: null, characteristic_id: null },
+    { value: 'title', label: 'Titel', is_key: true, form_field_id: null, category_id: null, characteristic_id: null },
+    { value: 'description', label: 'Beschreibung', is_key: false, form_field_id: null, category_id: null, characteristic_id: null },
+    { value: 'lat', label: 'Breitengrad', is_key: false, form_field_id: null, category_id: null, characteristic_id: null },
+    { value: 'lng', label: 'Längengrad', is_key: false, form_field_id: null, category_id: null, characteristic_id: null },
+    { value: 'location', label: 'Ort', is_key: true, form_field_id: null, category_id: null, characteristic_id: null },
+    { value: 'category', label: 'Kategorie', is_key: false, form_field_id: null, category_id: null, characteristic_id: null },
+    { value: 'published', label: 'Veröffentlicht', is_key: false, form_field_id: null, category_id: null, characteristic_id: null },
 ];
 
 export const exportedId = '3f1a5d4e-0c62-4a5f-9f1e-6d2b8c7a4e55';
@@ -39,11 +39,11 @@ export function makeTemplate(overrides: Partial<App.Data.MapPointSpreadsheetMapp
         name: 'Anlagenliste',
         key_field: 'location',
         columns: [
-            { header: 'Bezeichnung', field: 'title', form_field_id: null, new_field_type: null },
-            { header: 'Art der Anlage', field: 'category', form_field_id: null, new_field_type: null },
-            { header: 'Ortsbezeichnung', field: 'location', form_field_id: null, new_field_type: null },
-            { header: 'Y-Koordinate', field: 'lat', form_field_id: null, new_field_type: null },
-            { header: 'X-Koordinate', field: 'lng', form_field_id: null, new_field_type: null },
+            { header: 'Bezeichnung', field: 'title', form_field_id: null, new_field_type: null, characteristic_id: null },
+            { header: 'Art der Anlage', field: 'category', form_field_id: null, new_field_type: null, characteristic_id: null },
+            { header: 'Ortsbezeichnung', field: 'location', form_field_id: null, new_field_type: null, characteristic_id: null },
+            { header: 'Y-Koordinate', field: 'lat', form_field_id: null, new_field_type: null, characteristic_id: null },
+            { header: 'X-Koordinate', field: 'lng', form_field_id: null, new_field_type: null, characteristic_id: null },
         ],
         ...overrides,
     };

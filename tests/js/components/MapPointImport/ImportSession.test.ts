@@ -13,7 +13,14 @@ vi.mock('ziggy-js', async () => (await import('../../fixtures/inertia')).fakeZig
 
 function mountSession() {
     return mount(ImportSession, {
-        props: { upload: makeUpload(), fields: mapPointFields, mappings: [makeTemplate()], categories: [], categoryFieldIds: {} },
+        props: {
+            upload: makeUpload(),
+            fields: mapPointFields,
+            mappings: [makeTemplate()],
+            categories: [],
+            categoryFieldIds: {},
+            characteristicIdsByCategory: {},
+        },
     });
 }
 

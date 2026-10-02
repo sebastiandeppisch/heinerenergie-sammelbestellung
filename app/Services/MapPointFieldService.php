@@ -129,10 +129,30 @@ class MapPointFieldService
     {
         return FormField::query()
             ->whereHas('formDefinition.mapPointCategory', fn (Builder $query) => $query->usableInGroup($group))
-            ->with(['options', 'formDefinition.mapPointCategory'])
+            ->with(['options', 'formDefinition.mapPointCategory', 'formDefinition.mapPointCharacteristic'])
             ->get()
             ->sortBy([
                 fn (FormField $a, FormField $b): int => strcmp((string) $a->formDefinition?->mapPointCategory?->name, (string) $b->formDefinition?->mapPointCategory?->name),
+                fn (FormField $a, FormField $b): int => $a->sort_order <=> $b->sort_order,
+            ])
+            ->values();
+    }
+
+    /**
+     * The fields of all characteristics the group can use, for spreadsheet columns. Sorted by category, then by
+     * characteristic, then by field.
+     *
+     * @return Collection<int, FormField>
+     */
+    public function characteristicFieldsUsableInGroup(Group $group): Collection
+    {
+        return FormField::query()
+            ->whereHas('formDefinition.mapPointCharacteristic.category', fn (Builder $query) => $query->usableInGroup($group))
+            ->with(['options', 'formDefinition.mapPointCategory', 'formDefinition.mapPointCharacteristic.category'])
+            ->get()
+            ->sortBy([
+                fn (FormField $a, FormField $b): int => strcmp((string) $a->formDefinition?->mapPointCharacteristic?->category->name, (string) $b->formDefinition?->mapPointCharacteristic?->category->name),
+                fn (FormField $a, FormField $b): int => ($a->formDefinition?->mapPointCharacteristic->sort_order ?? 0) <=> ($b->formDefinition?->mapPointCharacteristic->sort_order ?? 0),
                 fn (FormField $a, FormField $b): int => $a->sort_order <=> $b->sort_order,
             ])
             ->values();

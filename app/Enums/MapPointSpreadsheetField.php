@@ -36,6 +36,12 @@ enum MapPointSpreadsheetField: string
     case FIELD = 'field';
 
     /**
+     * Whether the point has a characteristic ("Maßnahme"), 1 or 0. The column names the characteristic with its
+     * characteristic_id. Only offered for one main category, whose characteristics are known.
+     */
+    case CHARACTERISTIC = 'characteristic';
+
+    /**
      * A category field the import creates in the main category, named after the column. Only used for an import run,
      * a saved template would create it again on every import.
      */
@@ -54,6 +60,7 @@ enum MapPointSpreadsheetField: string
             self::CATEGORY => 'Kategorie',
             self::PUBLISHED => 'Veröffentlicht',
             self::FIELD => 'Zusatzfeld',
+            self::CHARACTERISTIC => 'Maßnahme',
             self::NEW_CATEGORY_FIELD => 'Neues Zusatzfeld',
         };
     }
@@ -96,12 +103,12 @@ enum MapPointSpreadsheetField: string
     }
 
     /**
-     * The fields every point has. Category fields are offered one by one instead.
+     * The fields every point has. Fields and characteristics are offered one by one instead.
      *
      * @return array<int, self>
      */
     public static function pointFields(): array
     {
-        return array_values(array_filter(self::cases(), fn (self $field): bool => ! in_array($field, [self::FIELD, self::NEW_CATEGORY_FIELD], true)));
+        return array_values(array_filter(self::cases(), fn (self $field): bool => ! in_array($field, [self::FIELD, self::CHARACTERISTIC, self::NEW_CATEGORY_FIELD], true)));
     }
 }

@@ -6,6 +6,7 @@ use App\Exports\MapPointsExport;
 use App\Models\Group;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
+use App\Models\MapPointCharacteristic;
 use App\Models\MapPointSpreadsheetMapping;
 use App\Models\User;
 use App\Services\SessionService;
@@ -143,4 +144,52 @@ test('a template column of a category field that was deleted since is left out',
     $this->get(route('mappoints.export', ['mapping' => $mapping->uuid, 'format' => 'csv']))->assertOk();
 
     Excel::assertDownloaded(exportFilename(SpreadsheetFormat::CSV), fn (MapPointsExport $export): bool => $export->headings() === ['ID', 'Bezeichnung']);
+});
+
+test('with a category only its points and those of its sub categories are exported, with their characteristics', function (): void {
+    actingAsExportAdmin($this, $this->group);
+    $garden = MapPointCategory::factory()->for($this->group)->create(['name' => 'Garten']);
+    $meadow = MapPointCategory::factory()->childOf($garden)->create(['name' => 'Wiese']);
+    $solar = MapPointCategory::factory()->for($this->group)->create(['name' => 'Photovoltaik']);
+    $solar->findOrCreateFormDefinition()->fields()->create(['type' => FieldType::NUMBER, 'label' => 'PV-Leistung (kWp)', 'sort_order' => 0]);
+    $garden->findOrCreateFormDefinition()->fields()->create(['type' => FieldType::NUMBER, 'label' => 'Fläche (m²)', 'sort_order' => 0]);
+    $hedgehogGate = MapPointCharacteristic::factory()->for($garden, 'category')->create(['name' => 'Igeltor', 'sort_order' => 0]);
+    $width = $hedgehogGate->findOrCreateFormDefinition()->fields()->create(['type' => FieldType::NUMBER, 'label' => 'Breite (cm)', 'sort_order' => 0]);
+    MapPointCharacteristic::factory()->for($garden, 'category')->create(['name' => 'Totholz', 'sort_order' => 1]);
+    MapPointCharacteristic::factory()->for($meadow, 'category')->create(['name' => 'Blühstreifen']);
+    $mapPoint = MapPoint::factory()->for($this->group)->create(['title' => 'Wiese am Bach', 'category_id' => $meadow->id]);
+    $mapPoint->characteristics()->attach($hedgehogGate);
+    $width->createMapPointField($mapPoint, 13);
+    MapPoint::factory()->for($this->group)->create(['category_id' => $solar->id]);
+
+    $this->get(route('mappoints.export', ['format' => 'xlsx', 'category' => $garden->uuid]))->assertOk();
+
+    Excel::assertDownloaded(exportFilename(SpreadsheetFormat::XLSX), fn (MapPointsExport $export): bool => array_slice($export->headings(), 8) === [
+        'Garten › Fläche (m²)', 'Garten › Maßnahme Igeltor', 'Garten › Igeltor › Breite (cm)', 'Garten › Maßnahme Totholz',
+    ] && array_slice($export->map($export->collection()->sole()), 8) === [null, 1, 13, 0]);
+});
+
+test('a template column of a characteristic is only exported for a category that offers it', function (): void {
+    actingAsExportAdmin($this, $this->group);
+    $garden = MapPointCategory::factory()->for($this->group)->create();
+    $hedgehogGate = MapPointCharacteristic::factory()->for($garden, 'category')->create();
+    $mapping = MapPointSpreadsheetMapping::factory()->for($this->group)->create([
+        'columns' => [
+            ['header' => 'Bezeichnung', 'field' => 'title'],
+            ['header' => 'Igeltor', 'field' => 'characteristic', 'characteristic_id' => $hedgehogGate->uuid],
+        ],
+    ]);
+
+    $this->get(route('mappoints.export', ['format' => 'csv', 'mapping' => $mapping->uuid]))->assertOk();
+    Excel::assertDownloaded(exportFilename(SpreadsheetFormat::CSV), fn (MapPointsExport $export): bool => $export->headings() === ['ID', 'Bezeichnung']);
+
+    $this->get(route('mappoints.export', ['format' => 'csv', 'mapping' => $mapping->uuid, 'category' => $garden->uuid]))->assertOk();
+    Excel::assertDownloaded(exportFilename(SpreadsheetFormat::CSV), fn (MapPointsExport $export): bool => $export->headings() === ['ID', 'Bezeichnung', 'Igeltor']);
+});
+
+test('a category of another initiative cannot be exported', function (): void {
+    actingAsExportAdmin($this, $this->group);
+
+    $this->get(route('mappoints.export', ['format' => 'csv', 'category' => MapPointCategory::factory()->create()->uuid]))
+        ->assertSessionHasErrors(['category' => 'Diese Kategorie ist für die Initiative nicht verfügbar.']);
 });
