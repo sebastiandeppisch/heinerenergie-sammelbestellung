@@ -24,6 +24,7 @@ class MapPointData extends Data
     /**
      * @param  Collection<int, MapPointFieldValueData>  $fields  values of the fields of the point's category
      * @param  Collection<int, MapPointFieldValueData>  $former_fields  values of fields the point no longer has, never sent to the public
+     * @param  Collection<int, MapPointCharacteristicData>  $characteristics
      */
     public function __construct(
         public string $id,
@@ -40,6 +41,8 @@ class MapPointData extends Data
         public Collection $fields = new Collection,
         #[DataCollectionOf(MapPointFieldValueData::class)]
         public Collection $former_fields = new Collection,
+        #[DataCollectionOf(MapPointCharacteristicData::class)]
+        public Collection $characteristics = new Collection,
     ) {}
 
     /**
@@ -54,10 +57,15 @@ class MapPointData extends Data
         $tree ??= MapPointCategory::tree();
         $publicFieldIds ??= MapPointCategory::publicFieldIds();
         $fieldService = app(MapPointFieldService::class);
-        $model->loadMissing(['characteristics', 'fields.options', 'fields.formField']);
+        $model->loadMissing(['characteristics.category', 'fields.options', 'fields.formField']);
+        $characteristicIdsByFormDefinition = $model->characteristics->whereNotNull('form_definition_id')->pluck('uuid', 'form_definition_id');
 
         $fields = $fieldService->activeFields($model, $tree)
-            ->map(fn (MapPointField $field): MapPointFieldValueData => MapPointFieldValueData::fromModel($field, in_array($field->form_field_id, $publicFieldIds, true)))
+            ->map(fn (MapPointField $field): MapPointFieldValueData => MapPointFieldValueData::fromModel(
+                $field,
+                in_array($field->form_field_id, $publicFieldIds, true),
+                $characteristicIdsByFormDefinition->get($field->formField?->form_definition_id),
+            ))
             ->filter(fn (MapPointFieldValueData $field): bool => ! $onlyPublic || $field->is_public)
             ->values()
             ->toBase();
@@ -79,6 +87,7 @@ class MapPointData extends Data
             location: $model->location,
             fields: $fields,
             former_fields: $formerFields,
+            characteristics: $model->characteristics->map(MapPointCharacteristicData::fromModel(...))->toBase(),
         );
     }
 

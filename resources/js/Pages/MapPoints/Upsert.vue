@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import FormFieldInputRenderer from '@/components/FormBuilder/FormFieldInputRenderer.vue';
+import MapPointCharacteristicBadge from '@/components/MapPointCharacteristics/MapPointCharacteristicBadge.vue';
 import MapPointFieldList from '@/components/MapPointFieldList.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import PinLocationMap from '@/components/PinLocationMap.vue';
 import { Button } from '@/shadcn/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/shadcn/components/ui/card';
+import { Checkbox } from '@/shadcn/components/ui/checkbox';
 import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
@@ -26,6 +28,11 @@ const props = defineProps<{
     /** The fields of each category including the inherited ones, keyed by category id. */
     fieldsByCategory: Record<string, Array<App.Data.FormFieldData>>;
     publicFieldIds: Array<string>;
+    /** All characteristics the categories offer. */
+    characteristics: Array<App.Data.MapPointCharacteristicData>;
+    /** The characteristics points of each category can have: those of the category and of its parents, keyed by category id. */
+    characteristicIdsByCategory: Record<string, Array<string>>;
+    fieldsByCharacteristic: Record<string, Array<App.Data.FormFieldData>>;
 }>();
 
 const isEditing = !!props.mapPoint;
@@ -50,17 +57,49 @@ const defaultMapPoint: App.Data.MapPointData = {
     location: null,
     fields: [],
     former_fields: [],
+    characteristics: [],
 };
 
 const initialPoint = props.mapPoint || defaultMapPoint;
 
-const form = useForm<App.Data.MapPointData & { field_values: Record<string, App.Data.MapPointFieldValueData['value']> }>({
+const form = useForm<
+    App.Data.MapPointData & { field_values: Record<string, App.Data.MapPointFieldValueData['value']>; characteristic_ids: Array<string> }
+>({
     ...initialPoint,
-    /** Keyed by field id. Values of fields the chosen category does not have are ignored by the server. */
+    /** Keyed by field id. Values of fields the chosen category and characteristics do not have are ignored by the server. */
     field_values: Object.fromEntries(initialPoint.fields.filter((field) => field.field_id !== null).map((field) => [field.field_id!, field.value])),
+    characteristic_ids: initialPoint.characteristics.map((characteristic) => characteristic.id),
 });
 
 const categoryFields = computed(() => (form.category_id ? (props.fieldsByCategory[form.category_id] ?? []) : []));
+
+const selectableCharacteristics = computed(() => {
+    const selectableIds = form.category_id ? (props.characteristicIdsByCategory[form.category_id] ?? []) : [];
+
+    return props.characteristics.filter((characteristic) => selectableIds.includes(characteristic.id));
+});
+
+/** The chosen characteristics with fields, in the order of the selection list. */
+const chosenCharacteristicsWithFields = computed(() =>
+    selectableCharacteristics.value.filter(
+        (characteristic) => form.characteristic_ids.includes(characteristic.id) && (props.fieldsByCharacteristic[characteristic.id] ?? []).length > 0,
+    ),
+);
+
+function setCharacteristic(characteristicId: string, isChosen: boolean | 'indeterminate') {
+    form.characteristic_ids =
+        isChosen === true ? [...form.characteristic_ids, characteristicId] : form.characteristic_ids.filter((id) => id !== characteristicId);
+}
+
+/** A point can only keep the characteristics its new category offers. */
+watch(
+    () => form.category_id,
+    () => {
+        form.characteristic_ids = form.characteristic_ids.filter((id) =>
+            selectableCharacteristics.value.some((characteristic) => characteristic.id === id),
+        );
+    },
+);
 
 function fieldError(fieldId: string): string | undefined {
     return (form.errors as Record<string, string>)[`field_values.${fieldId}`];
@@ -238,11 +277,52 @@ const errors: Record<string, string> = form.errors;
                         </div>
                     </div>
 
+                    <div v-if="selectableCharacteristics.length > 0" class="space-y-2" data-test="point-characteristics">
+                        <Label>Maßnahmen</Label>
+                        <div class="flex flex-wrap gap-x-4 gap-y-2">
+                            <div v-for="characteristic in selectableCharacteristics" :key="characteristic.id" class="flex items-center gap-2">
+                                <Checkbox
+                                    :id="`characteristic_${characteristic.id}`"
+                                    :model-value="form.characteristic_ids.includes(characteristic.id)"
+                                    @update:model-value="(checked) => setCharacteristic(characteristic.id, checked)"
+                                />
+                                <Label :for="`characteristic_${characteristic.id}`" class="font-normal">
+                                    <MapPointCharacteristicBadge :characteristic="characteristic" />
+                                </Label>
+                            </div>
+                        </div>
+                        <p v-if="errors.characteristic_ids" class="text-sm text-red-500">{{ errors.characteristic_ids }}</p>
+                    </div>
+
+                    <div
+                        v-for="characteristic in chosenCharacteristicsWithFields"
+                        :key="characteristic.id"
+                        class="space-y-4 rounded-md border p-4"
+                        data-test="characteristic-fields"
+                    >
+                        <div>
+                            <h3 class="text-sm font-semibold">Felder der Maßnahme {{ characteristic.name }}</h3>
+                            <p class="text-xs text-gray-500">
+                                Alle Angaben sind freiwillig. Felder mit Schloss sind intern und erscheinen nicht auf der öffentlichen Karte.
+                            </p>
+                        </div>
+                        <div v-for="field in fieldsByCharacteristic[characteristic.id]" :key="field.id" class="space-y-2">
+                            <Label :for="`field_${field.id}`" class="flex items-center gap-1">
+                                {{ field.label }}
+                                <Lock v-if="!publicFieldIds.includes(field.id)" class="h-3 w-3 text-muted-foreground" aria-label="intern" />
+                            </Label>
+                            <p v-if="field.help_text" class="text-xs text-muted-foreground">{{ field.help_text }}</p>
+                            <FormFieldInputRenderer v-model="form.field_values[field.id]" :field="field" :has-error="!!fieldError(field.id)" />
+                            <p v-if="fieldError(field.id)" class="text-sm text-red-500">{{ fieldError(field.id) }}</p>
+                        </div>
+                    </div>
+
                     <div v-if="isEditing && props.mapPoint!.former_fields.length > 0" class="space-y-2 rounded-md border border-dashed p-4">
                         <div>
                             <h3 class="text-sm font-semibold">Frühere Angaben</h3>
                             <p class="text-xs text-gray-500">
-                                Diese Felder gehören nicht mehr zur Kategorie des Punkts. Die Werte bleiben erhalten und sind nur hier sichtbar.
+                                Diese Felder gehören nicht mehr zur Kategorie oder zu den Maßnahmen des Punkts. Die Werte bleiben erhalten und sind
+                                nur hier sichtbar.
                             </p>
                         </div>
                         <MapPointFieldList :fields="props.mapPoint!.former_fields" />

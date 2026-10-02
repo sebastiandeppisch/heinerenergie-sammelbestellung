@@ -8,12 +8,14 @@ use App\Context\GroupContextContract;
 use App\Data\FormFieldData;
 use App\Data\GroupBaseData;
 use App\Data\MapPointCategoryData;
+use App\Data\MapPointCharacteristicData;
 use App\Data\MapPointData;
 use App\Data\MapPointSpreadsheetMappingData;
 use App\Data\SpreadsheetFormatData;
 use App\Enums\SpreadsheetFormat;
 use App\Http\Requests\DestroyMapPointsRequest;
 use App\Http\Requests\UpdateMapPointsCategoryRequest;
+use App\Http\Requests\UpdateMapPointsCharacteristicRequest;
 use App\Http\Requests\UpdateMapPointsPublishedRequest;
 use App\Http\Requests\UpsertMapPointRequest;
 use App\Models\FormField;
@@ -21,6 +23,7 @@ use App\Models\Group;
 use App\Models\MapEmbed;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
+use App\Models\MapPointCharacteristic;
 use App\Services\CurrentGroupService;
 use App\Services\MapPointCharacteristicService;
 use App\Services\MapPointFieldService;
@@ -57,6 +60,7 @@ class MapPointController extends Controller
             'mapPoints' => $this->pointData($visibility->visiblePoints(), onlyPublic: false),
             'categories' => $this->categoryData($categories = $visibility->relevantCategories()->with('group')->get()),
             'usableCategoryIdsByGroup' => $visibility->usableCategoryIdsByGroup($visibility->selectableGroups(), $categories),
+            ...$this->characteristicProps($categories, MapPointCategory::tree()),
             'canImportAndExport' => $request->user()?->can('import', MapPoint::class) === true,
             // System admins may import without a selected group, but imported points need one to belong to.
             'importAndExportNeedGroup' => $currentGroup === null,
@@ -105,7 +109,7 @@ class MapPointController extends Controller
         $this->authorize('update', $mappoint);
 
         return Inertia::render('MapPoints/Upsert', [
-            'mapPoint' => MapPointData::fromModel($mappoint->load(['category', 'group']), onlyPublic: false),
+            'mapPoint' => MapPointData::fromModel($mappoint->load(['category', 'group', 'characteristics.category']), onlyPublic: false),
             ...$this->formProps($visibility, $fieldService),
         ]);
     }
@@ -165,6 +169,28 @@ class MapPointController extends Controller
         return redirect()->back()->with('success', $category === null ? "{$count} ohne Kategorie" : "{$count} in „{$category->name}“ verschoben");
     }
 
+    /**
+     * Adds a characteristic to the selected points or removes it. Values of a removed characteristic stay as former values.
+     */
+    public function updateCharacteristicOfMany(UpdateMapPointsCharacteristicRequest $request): RedirectResponse
+    {
+        $mapPoints = $request->mapPoints();
+        $characteristic = $request->characteristic();
+        $isAdding = $request->isAdding();
+
+        DB::transaction(function () use ($mapPoints, $characteristic, $isAdding): void {
+            if ($isAdding) {
+                $characteristic->mapPoints()->syncWithoutDetaching($mapPoints->modelKeys());
+            } else {
+                $characteristic->mapPoints()->detach($mapPoints->modelKeys());
+            }
+        });
+
+        $count = $mapPoints->count() === 1 ? 'Ein Kartenpunkt hat' : "{$mapPoints->count()} Kartenpunkte haben";
+
+        return redirect()->back()->with('success', $isAdding ? "{$count} jetzt die Maßnahme „{$characteristic->name}“" : "{$count} die Maßnahme „{$characteristic->name}“ nicht mehr");
+    }
+
     public function updatePublishedOfMany(UpdateMapPointsPublishedRequest $request): RedirectResponse
     {
         $mapPoints = $request->mapPoints();
@@ -202,7 +228,7 @@ class MapPointController extends Controller
     /**
      * The inputs for the category fields are switched in the form when the category changes, so the fields of all categories are sent.
      *
-     * @return array{categories: Collection<int, MapPointCategoryData>, groups: Collection<int, GroupBaseData>, usableCategoryIdsByGroup: array<string, array<int, string>>, fieldsByCategory: array<string, array<int, FormFieldData>>, publicFieldIds: array<int, string>}
+     * @return array{categories: Collection<int, MapPointCategoryData>, groups: Collection<int, GroupBaseData>, usableCategoryIdsByGroup: array<string, array<int, string>>, fieldsByCategory: array<string, array<int, FormFieldData>>, publicFieldIds: array<int, string>, characteristics: array<int, MapPointCharacteristicData>, characteristicIdsByCategory: array<string, array<int, string>>, fieldsByCharacteristic: array<string, array<int, FormFieldData>>}
      */
     private function formProps(MapPointVisibilityService $visibility, MapPointFieldService $fieldService): array
     {
@@ -222,6 +248,37 @@ class MapPointController extends Controller
             'usableCategoryIdsByGroup' => $visibility->usableCategoryIdsByGroup($groups, $categories),
             'fieldsByCategory' => $fieldsByCategory,
             'publicFieldIds' => $publicFieldIds,
+            ...$this->characteristicProps($categories, $tree),
+        ];
+    }
+
+    /**
+     * The characteristics the categories offer, which ones points of each category can have, and their fields.
+     *
+     * @param  EloquentCollection<int, MapPointCategory>  $categories
+     * @return array{characteristics: array<int, MapPointCharacteristicData>, characteristicIdsByCategory: array<string, array<int, string>>, fieldsByCharacteristic: array<string, array<int, FormFieldData>>}
+     */
+    private function characteristicProps(EloquentCollection $categories, MapPointCategoryTree $tree): array
+    {
+        $characteristics = MapPointCharacteristic::query()
+            ->whereIn('map_point_category_id', $categories->modelKeys())
+            ->with(['category', 'formDefinition.fields.options'])
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
+        return [
+            'characteristics' => $characteristics->map(MapPointCharacteristicData::fromModel(...))->all(),
+            'characteristicIdsByCategory' => $categories->mapWithKeys(fn (MapPointCategory $category): array => [
+                $category->uuid => $characteristics
+                    ->filter(fn (MapPointCharacteristic $characteristic): bool => $characteristic->isSelectableFor($category->id, $tree))
+                    ->pluck('uuid')
+                    ->values()
+                    ->all(),
+            ])->all(),
+            'fieldsByCharacteristic' => $characteristics->mapWithKeys(fn (MapPointCharacteristic $characteristic): array => [
+                $characteristic->uuid => $characteristic->formDefinition === null ? [] : $characteristic->formDefinition->fields->map(FormFieldData::fromModel(...))->all(),
+            ])->all(),
         ];
     }
 
@@ -235,7 +292,7 @@ class MapPointController extends Controller
         $tree ??= MapPointCategory::tree();
         $publicFieldIds = MapPointCategory::publicFieldIds();
 
-        return $query->with(['category', 'group', 'characteristics', 'fields.options', 'fields.formField'])->get()
+        return $query->with(['category', 'group', 'characteristics.category', 'fields.options', 'fields.formField'])->get()
             ->map(fn (MapPoint $mapPoint): MapPointData => MapPointData::fromModel($mapPoint, $onlyPublic, $tree, $publicFieldIds))
             ->toBase();
     }

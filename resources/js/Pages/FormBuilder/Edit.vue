@@ -35,8 +35,10 @@ const props = defineProps<{
     isEdit: boolean;
     groups: App.Data.GroupData[];
     initialType?: FormType;
-    /** Set when the definition holds the fields of a map point category. */
+    /** Set when the definition holds the fields of a map point category, or of one of its characteristics („Maßnahmen“). */
     mapPointCategory?: { id: string; name: string } | null;
+    /** Set when the definition holds the fields of a characteristic of mapPointCategory. */
+    mapPointCharacteristic?: { id: string; name: string } | null;
     mapPointCategories: Array<App.Data.MapPointCategoryData>;
     mapPointFieldsByCategory: Record<string, Array<FormFieldData>>;
     mapPointFieldSourceTypes: Partial<Record<FieldType, Array<FieldType>>>;
@@ -66,7 +68,9 @@ const isForm = computed(() => formDefinition.type === (0 as FormType));
 
 const pageTitle = computed(() => {
     if (isMapPointFields.value) {
-        return `Felder der Kategorie ${props.mapPointCategory?.name ?? ''}`;
+        return props.mapPointCharacteristic
+            ? `Felder der Maßnahme ${props.mapPointCharacteristic.name}`
+            : `Felder der Kategorie ${props.mapPointCategory?.name ?? ''}`;
     }
     if (isChecklist.value) {
         return props.isEdit ? 'Checkliste bearbeiten' : 'Neue Checkliste';
@@ -81,7 +85,7 @@ setLayoutProps({
                   { title: 'Kartenpunkte', href: route('mappoints.index') },
                   { title: 'Kategorien', href: route('mappoint-categories.index') },
                   { title: props.mapPointCategory.name, href: route('mappoint-categories.edit', props.mapPointCategory.id) },
-                  { title: 'Felder' },
+                  { title: props.mapPointCharacteristic ? `Felder der Maßnahme ${props.mapPointCharacteristic.name}` : 'Felder' },
               ]
             : [{ title: 'Formulare' }, { title: 'Formular-Verwaltung', href: route('form-definitions.index') }, { title: pageTitle.value }],
 });
@@ -275,7 +279,15 @@ const allowedEmbedDomainsText = computed<string>({
         <div class="form-builder">
             <Card class="form-builder__header" v-if="isMapPointFields">
                 <CardContent class="space-y-2 text-sm">
-                    <p>
+                    <p v-if="mapPointCharacteristic">
+                        Diese Felder bekommen alle Punkte mit der Maßnahme {{ mapPointCharacteristic.name }} zusätzlich zu den Feldern ihrer
+                        Kategorie. Die Maßnahme gehört zur Kategorie
+                        <Link v-if="mapPointCategory" :href="route('mappoint-categories.edit', mapPointCategory.id)" class="font-medium underline">{{
+                            mapPointCategory.name
+                        }}</Link
+                        >. Alle Felder sind freiwillig.
+                    </p>
+                    <p v-else>
                         Diese Felder gelten für alle Punkte der Kategorie
                         <Link v-if="mapPointCategory" :href="route('mappoint-categories.edit', mapPointCategory.id)" class="font-medium underline">{{
                             mapPointCategory.name

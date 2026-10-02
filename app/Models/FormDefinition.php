@@ -164,6 +164,15 @@ class FormDefinition extends Model
     }
 
     /**
+     * The category owning these map point fields, directly or through one of its characteristics. Changing the fields
+     * follows the rights on this category.
+     */
+    public function mapPointFieldsCategory(): ?MapPointCategory
+    {
+        return $this->mapPointCategory ?? $this->mapPointCharacteristic?->category;
+    }
+
+    /**
      * @return HasMany<ChecklistEntry, $this>
      */
     public function checklistEntries(): HasMany

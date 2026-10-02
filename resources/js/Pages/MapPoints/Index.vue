@@ -15,12 +15,13 @@ import { useFillViewportHeight } from '@/composables/useFillViewportHeight';
 
 import CategoryVisibilityFilter from '@/components/CategoryVisibilityFilter.vue';
 import MapPointCategory from '@/components/MapPointCategory.vue';
+import MapPointCharacteristicBadge from '@/components/MapPointCharacteristics/MapPointCharacteristicBadge.vue';
 import MapPointFieldList from '@/components/MapPointFieldList.vue';
 import Card from '@/shadcn/components/ui/card/Card.vue';
 import { Checkbox } from '@/shadcn/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shadcn/components/ui/popover';
 import { ancestorIds, flattenCategoryTree } from '@/utils/categoryTree';
-import { ChevronDown, ChevronRight, Download, Eye, EyeOff, FilePlus, FileUp, Filter, FolderInput, Map, Pencil, Plus, Trash } from '@lucide/vue';
+import { ChevronDown, ChevronRight, Download, Eye, EyeOff, FilePlus, FileUp, Filter, FolderInput, Map, Pencil, Plus, Tags, Trash } from '@lucide/vue';
 import { toast } from 'vue-sonner';
 import { route } from 'ziggy-js';
 
@@ -33,6 +34,9 @@ const props = defineProps<{
     importAndExportNeedGroup: boolean;
     spreadsheetMappings: Array<App.Data.MapPointSpreadsheetMappingData>;
     spreadsheetFormats: Array<App.Data.SpreadsheetFormatData>;
+    characteristics: Array<App.Data.MapPointCharacteristicData>;
+    /** The characteristics points of each category can have, keyed by category id. */
+    characteristicIdsByCategory: Record<string, Array<string>>;
 }>();
 
 setLayoutProps({
@@ -181,6 +185,48 @@ function moveSelectedPoints() {
     );
 }
 
+const showCharacteristicDialog = ref(false);
+const targetCharacteristicId = ref<string | null>(null);
+
+const selectedPoints = computed(() => props.mapPoints.filter((point) => selectedVisibleIds.value.includes(point.id)));
+
+/** Characteristics the categories of all selected points offer, as the server requires for adding. */
+const addableCharacteristicIds = computed(() => {
+    const idsPerPoint = selectedPoints.value.map((point) => (point.category_id ? (props.characteristicIdsByCategory[point.category_id] ?? []) : []));
+
+    return props.characteristics.map((characteristic) => characteristic.id).filter((id) => idsPerPoint.every((ids) => ids.includes(id)));
+});
+
+const removableCharacteristicIds = computed(
+    () => new Set(selectedPoints.value.flatMap((point) => point.characteristics.map((characteristic) => characteristic.id))),
+);
+
+const targetCharacteristics = computed(() =>
+    props.characteristics.filter(
+        (characteristic) => addableCharacteristicIds.value.includes(characteristic.id) || removableCharacteristicIds.value.has(characteristic.id),
+    ),
+);
+
+function openCharacteristicDialog() {
+    targetCharacteristicId.value = null;
+    showCharacteristicDialog.value = true;
+}
+
+function updateSelectedCharacteristic(action: 'add' | 'remove') {
+    router.patch(
+        route('mappoints.update-characteristic-of-many'),
+        { ids: selectedVisibleIds.value, characteristic_id: targetCharacteristicId.value, action },
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                showCharacteristicDialog.value = false;
+                selectedPointIds.value = new Set();
+            },
+            onError: (errors) => Object.values(errors).forEach((error) => toast.error(error)),
+        },
+    );
+}
+
 function deleteSelectedPoints() {
     router.delete(route('mappoints.destroy-many'), {
         data: { ids: selectedVisibleIds.value },
@@ -312,6 +358,16 @@ function deleteMapPoint() {
                     Kategorie ändern
                 </Button>
                 <Button
+                    v-if="selectedVisibleIds.length > 0 && characteristics.length > 0"
+                    variant="outline"
+                    size="sm"
+                    data-test="change-characteristic"
+                    @click="openCharacteristicDialog"
+                >
+                    <Tags />
+                    Maßnahmen
+                </Button>
+                <Button
                     v-if="selectedVisibleIds.length > 0"
                     variant="destructive"
                     size="sm"
@@ -376,6 +432,13 @@ function deleteMapPoint() {
                                     <MapPointCategory :category_id="point.category_id" :allCategories="props.categories" :show-name="true" />
                                 </div>
                                 <span v-else class="text-gray-500 italic">Keine Kategorie</span>
+                                <div v-if="point.characteristics.length > 0" class="mt-1 flex flex-wrap gap-1">
+                                    <MapPointCharacteristicBadge
+                                        v-for="characteristic in point.characteristics"
+                                        :key="characteristic.id"
+                                        :characteristic="characteristic"
+                                    />
+                                </div>
                             </TableCell>
                             <TableCell>{{ point.userReadablePointableType }}</TableCell>
                             <TableCell class="max-w-xs truncate">{{ point.description }}</TableCell>
@@ -411,10 +474,15 @@ function deleteMapPoint() {
                             <TableCell colspan="2" />
                             <TableCell colspan="8" class="whitespace-normal">
                                 <div class="flex flex-wrap gap-x-12 gap-y-4 py-1">
-                                    <MapPointFieldList v-if="point.fields.length > 0" :fields="point.fields" mark-internal />
+                                    <MapPointFieldList
+                                        v-if="point.fields.length > 0"
+                                        :fields="point.fields"
+                                        :characteristics="point.characteristics"
+                                        mark-internal
+                                    />
                                     <div v-if="point.former_fields.length > 0" class="space-y-1">
                                         <p class="text-xs font-medium text-muted-foreground">
-                                            Frühere Angaben (gehören nicht mehr zur Kategorie, nur hier sichtbar)
+                                            Frühere Angaben (gehören nicht mehr zur Kategorie oder zu den Maßnahmen, nur hier sichtbar)
                                         </p>
                                         <MapPointFieldList :fields="point.former_fields" class="opacity-70" />
                                     </div>
@@ -510,6 +578,52 @@ function deleteMapPoint() {
                 <DialogFooter>
                     <Button variant="outline" @click="showCategoryDialog = false">Abbrechen</Button>
                     <Button data-test="confirm-change-category" @click="moveSelectedPoints">Kategorie ändern</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+
+        <Dialog v-model:open="showCharacteristicDialog">
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle
+                        >Maßnahme von {{ selectedVisibleIds.length === 1 ? '1 Punkt' : `${selectedVisibleIds.length} Punkten` }} ändern</DialogTitle
+                    >
+                    <DialogDescription>
+                        Hinzufügen lässt sich eine Maßnahme nur, wenn die Kategorien aller ausgewählten Punkte sie anbieten. Werte einer entfernten
+                        Maßnahme bleiben als frühere Angaben erhalten.
+                    </DialogDescription>
+                </DialogHeader>
+                <div class="space-y-2">
+                    <Label for="target_characteristic">Maßnahme</Label>
+                    <Select id="target_characteristic" v-model="targetCharacteristicId">
+                        <SelectTrigger class="w-full" data-test="target-characteristic">
+                            <SelectValue placeholder="Maßnahme wählen" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem v-for="characteristic in targetCharacteristics" :key="characteristic.id" :value="characteristic.id">
+                                {{ characteristic.name }} ({{ characteristic.category_name }})
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <p v-if="targetCharacteristics.length === 0" class="text-sm text-gray-500">
+                        Die Kategorien der ausgewählten Punkte bieten keine gemeinsame Maßnahme an.
+                    </p>
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" @click="showCharacteristicDialog = false">Abbrechen</Button>
+                    <Button
+                        variant="outline"
+                        data-test="remove-characteristic"
+                        :disabled="targetCharacteristicId === null || !removableCharacteristicIds.has(targetCharacteristicId)"
+                        @click="updateSelectedCharacteristic('remove')"
+                        >Entfernen</Button
+                    >
+                    <Button
+                        data-test="add-characteristic"
+                        :disabled="targetCharacteristicId === null || !addableCharacteristicIds.includes(targetCharacteristicId)"
+                        @click="updateSelectedCharacteristic('add')"
+                        >Hinzufügen</Button
+                    >
                 </DialogFooter>
             </DialogContent>
         </Dialog>

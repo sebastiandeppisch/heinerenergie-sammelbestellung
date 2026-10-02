@@ -7,11 +7,13 @@ namespace App\Http\Controllers;
 use App\Data\GroupBaseData;
 use App\Data\MapPointCategoryData;
 use App\Data\MapPointCategoryFieldData;
+use App\Data\MapPointCharacteristicData;
 use App\Http\Requests\UpsertMapPointsCategoryRequest;
 use App\Models\FormField;
 use App\Models\Group;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
+use App\Models\MapPointCharacteristic;
 use App\Services\MapPointCharacteristicService;
 use App\Services\MapPointVisibilityService;
 use Illuminate\Http\RedirectResponse;
@@ -34,7 +36,7 @@ class MapPointCategoryController extends Controller
 
         $tree = MapPointCategory::tree();
         $pointCounts = MapPoint::query()->whereNotNull('category_id')->groupBy('category_id')->selectRaw('category_id, count(*) as aggregate')->pluck('aggregate', 'category_id');
-        $categories = $visibility->usableCategories()->with('group')->withCount('mapPoints')->get()
+        $categories = $visibility->usableCategories()->with('group')->withCount(['mapPoints', 'characteristics'])->get()
             ->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel(
                 $category,
                 canEdit: $request->user()->can('update', $category),
@@ -75,6 +77,7 @@ class MapPointCategoryController extends Controller
         return Inertia::render('Categories/Upsert', [
             'category' => MapPointCategoryData::fromModel($mappointCategory->load('group'), canEdit: true),
             'fields' => $this->fieldData($mappointCategory),
+            ...$this->characteristicProps($mappointCategory),
             ...$this->formProps($visibility),
         ]);
     }
@@ -152,6 +155,27 @@ class MapPointCategoryController extends Controller
                 in_array($field->id, $publicFieldIds, true),
             ))
             ->all();
+    }
+
+    /**
+     * The own characteristics with their fields, and the read-only ones of the parent categories, which points of this category can have as well.
+     *
+     * @return array{characteristics: array<int, MapPointCharacteristicData>, inheritedCharacteristics: array<int, MapPointCharacteristicData>}
+     */
+    private function characteristicProps(MapPointCategory $category): array
+    {
+        $publicFieldIds = MapPointCategory::publicFieldIds();
+        $characteristics = $category->characteristics()->with(['category', 'formDefinition.fields'])->withCount('mapPoints')->get();
+        $inheritedCharacteristics = MapPointCharacteristic::query()
+            ->whereIn('map_point_category_id', MapPointCategory::tree()->ancestorIds($category->id))
+            ->with('category')
+            ->orderBy('sort_order')
+            ->get();
+
+        return [
+            'characteristics' => $characteristics->map(fn (MapPointCharacteristic $characteristic): MapPointCharacteristicData => MapPointCharacteristicData::forManagement($characteristic, $publicFieldIds))->all(),
+            'inheritedCharacteristics' => $inheritedCharacteristics->map(MapPointCharacteristicData::fromModel(...))->all(),
+        ];
     }
 
     /**

@@ -28,8 +28,12 @@ function deleteCategory(category: App.Data.MapPointCategoryData) {
     const consequence = category.parent_id
         ? 'Die Unterkategorien und Kartenpunkte werden der Oberkategorie zugeordnet.'
         : 'Die Unterkategorien werden zu Hauptkategorien, Kartenpunkte aller Initiativen verlieren die Kategorie.';
+    const characteristics =
+        category.characteristics_count === 0
+            ? ''
+            : ` ${category.characteristics_count === 1 ? 'Ihre Maßnahme wird' : `Ihre ${category.characteristics_count} Maßnahmen werden`} gelöscht, die Werte bleiben an den Punkten als frühere Angaben erhalten.`;
 
-    if (confirm(`Bist du sicher, dass du diese Kategorie löschen möchtest? ${consequence}`)) {
+    if (confirm(`Bist du sicher, dass du diese Kategorie löschen möchtest? ${consequence}${characteristics}`)) {
         router.delete(route('mappoint-categories.destroy', category.id));
     }
 }

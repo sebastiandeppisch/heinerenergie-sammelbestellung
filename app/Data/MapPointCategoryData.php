@@ -25,6 +25,8 @@ class MapPointCategoryData extends Data
         public ?int $map_points_with_subcategories_count = null,
         public ?string $created_at = null,
         public bool $can_edit = false,
+        /** Only counted where the category list needs it. */
+        public int $characteristics_count = 0,
     ) {}
 
     /**
@@ -48,6 +50,7 @@ class MapPointCategoryData extends Data
             map_points_with_subcategories_count: $mapPointsWithSubcategoriesCount,
             created_at: $category->created_at?->toISOString(),
             can_edit: $canEdit,
+            characteristics_count: $category->characteristics_count ?? 0,
         );
     }
 }

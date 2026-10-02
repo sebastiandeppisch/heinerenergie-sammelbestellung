@@ -107,7 +107,8 @@ class FormDefinitionController extends Controller
             'name' => $group->name,
         ]);
 
-        $mapPointCategory = $formDefinition->type === FormType::MapPointFields ? $formDefinition->mapPointCategory : null;
+        $mapPointCategory = $formDefinition->type === FormType::MapPointFields ? $formDefinition->mapPointFieldsCategory() : null;
+        $mapPointCharacteristic = $formDefinition->type === FormType::MapPointFields ? $formDefinition->mapPointCharacteristic : null;
 
         if ($mapPointCategory !== null) {
             $this->authorize('update', $mapPointCategory);
@@ -119,6 +120,7 @@ class FormDefinitionController extends Controller
             'isEdit' => true,
             'groups' => $groups,
             'mapPointCategory' => $mapPointCategory === null ? null : ['id' => $mapPointCategory->uuid, 'name' => $mapPointCategory->name],
+            'mapPointCharacteristic' => $mapPointCharacteristic === null ? null : ['id' => $mapPointCharacteristic->uuid, 'name' => $mapPointCharacteristic->name],
             ...$this->mapPointTargetProps($formDefinition->group),
         ]);
     }

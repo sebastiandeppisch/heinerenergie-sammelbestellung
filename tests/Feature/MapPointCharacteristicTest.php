@@ -12,6 +12,8 @@ use App\Models\User;
 use App\Services\MapPointFieldService;
 use App\Services\SessionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Inertia\Testing\AssertableInertia;
 
 uses(RefreshDatabase::class);
 
@@ -230,4 +232,186 @@ test('deleting a category deletes its characteristics', function (): void {
 
     expect(MapPointCharacteristic::pluck('id')->all())->toBe([$kept->id])
         ->and($mapPoint->characteristics()->pluck('map_point_characteristics.id')->all())->toBe([$kept->id]);
+});
+
+test('admins of the category manage its characteristics and their public fields', function (): void {
+    Storage::fake('public');
+    $group = Group::factory()->create();
+    $garden = MapPointCategory::factory()->for($group)->create();
+    $admin = characteristicGroupAdmin($group);
+
+    $this->actingAs($admin)
+        ->post(route('mappoint-categories.characteristics.store', $garden), [
+            'name' => 'Igeltor',
+            'color' => '#2e7d32',
+            'icon' => UploadedFile::fake()->image('igel.png'),
+        ])
+        ->assertSessionHasNoErrors();
+
+    $hedgehogGate = MapPointCharacteristic::sole();
+    $width = characteristicField($hedgehogGate, ['label' => 'Breite (cm)']);
+    $contact = characteristicField($hedgehogGate, ['label' => 'Kontakt']);
+
+    $this->actingAs($admin)
+        ->put(route('mappoint-characteristics.update', $hedgehogGate), [
+            'name' => 'Igeltor im Zaun',
+            'color' => null,
+            'remove_icon' => true,
+            'public_field_ids' => [$width->uuid],
+        ])
+        ->assertSessionHasNoErrors();
+
+    $hedgehogGate->refresh();
+    expect($hedgehogGate->only(['name', 'color', 'icon_path']))->toBe(['name' => 'Igeltor im Zaun', 'color' => null, 'icon_path' => null])
+        ->and($hedgehogGate->publicFields()->pluck('id')->all())->toBe([$width->id])
+        ->and(Storage::disk('public')->allFiles('characteristics'))->toBe([]);
+
+    $this->actingAs($admin)
+        ->put(route('mappoint-characteristics.update', $hedgehogGate), [
+            'name' => 'Igeltor',
+            'public_field_ids' => [$contact->uuid, characteristicField($garden, ['label' => 'Gartenfläche'])->uuid],
+        ])
+        ->assertSessionHasErrors('public_field_ids.1');
+});
+
+test('a characteristic needs a hex color', function (): void {
+    $group = Group::factory()->create();
+    $garden = MapPointCategory::factory()->for($group)->create();
+
+    $this->actingAs(characteristicGroupAdmin($group))
+        ->post(route('mappoint-categories.characteristics.store', $garden), ['name' => 'Igeltor', 'color' => 'red'])
+        ->assertSessionHasErrors('color');
+});
+
+test('characteristics are sorted in the given order', function (): void {
+    $group = Group::factory()->create();
+    $garden = MapPointCategory::factory()->for($group)->create();
+    $first = MapPointCharacteristic::factory()->for($garden, 'category')->create(['sort_order' => 0]);
+    $second = MapPointCharacteristic::factory()->for($garden, 'category')->create(['sort_order' => 1]);
+
+    $this->actingAs(characteristicGroupAdmin($group))
+        ->put(route('mappoint-categories.characteristics.reorder', $garden), ['ids' => [$second->uuid, $first->uuid]])
+        ->assertSessionHasNoErrors();
+
+    expect($garden->characteristics()->pluck('id')->all())->toBe([$second->id, $first->id]);
+});
+
+test('admins of a sub initiative can assign characteristics of an inherited category, but not manage them', function (): void {
+    $root = Group::factory()->create();
+    $child = Group::factory()->create(['parent_id' => $root->id]);
+    $garden = MapPointCategory::factory()->for($root)->create();
+    $hedgehogGate = MapPointCharacteristic::factory()->for($garden, 'category')->create();
+    $childAdmin = characteristicGroupAdmin($child);
+
+    $this->actingAs($childAdmin)
+        ->post(route('mappoints.store'), characteristicPointPayload($child, $garden, ['characteristic_ids' => [$hedgehogGate->uuid]]))
+        ->assertSessionHasNoErrors();
+
+    expect(MapPoint::sole()->characteristics()->count())->toBe(1);
+
+    $this->actingAs($childAdmin)->post(route('mappoint-categories.characteristics.store', $garden), ['name' => 'Totholz'])->assertForbidden();
+    $this->actingAs($childAdmin)->put(route('mappoint-characteristics.update', $hedgehogGate), ['name' => 'Totholz'])->assertForbidden();
+    $this->actingAs($childAdmin)->delete(route('mappoint-characteristics.destroy', $hedgehogGate))->assertForbidden();
+    $this->actingAs($childAdmin)->post(route('mappoint-characteristics.fields.edit', $hedgehogGate))->assertForbidden();
+    $this->actingAs($childAdmin)->get(route('form-definitions.edit', $hedgehogGate->findOrCreateFormDefinition()))->assertForbidden();
+});
+
+test('the fields of a characteristic are edited in the form builder', function (): void {
+    $group = Group::factory()->create();
+    $garden = MapPointCategory::factory()->for($group)->create(['name' => 'Garten']);
+    $hedgehogGate = MapPointCharacteristic::factory()->for($garden, 'category')->create(['name' => 'Igeltor']);
+    $admin = characteristicGroupAdmin($group);
+
+    $this->actingAs($admin)
+        ->post(route('mappoint-characteristics.fields.edit', $hedgehogGate))
+        ->assertRedirect(route('form-definitions.edit', $hedgehogGate->fresh()->formDefinition));
+
+    $this->actingAs($admin)
+        ->get(route('form-definitions.edit', $hedgehogGate->fresh()->formDefinition))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('mapPointCategory.name', 'Garten')
+            ->where('mapPointCharacteristic.name', 'Igeltor'));
+});
+
+test('deleting a characteristic through the category page', function (): void {
+    $group = Group::factory()->create();
+    $garden = MapPointCategory::factory()->for($group)->create();
+    $hedgehogGate = MapPointCharacteristic::factory()->for($garden, 'category')->create();
+
+    $this->actingAs(characteristicGroupAdmin($group))
+        ->delete(route('mappoint-characteristics.destroy', $hedgehogGate))
+        ->assertRedirect();
+
+    expect(MapPointCharacteristic::count())->toBe(0);
+});
+
+test('the category page lists own characteristics with their fields and the inherited ones', function (): void {
+    $group = Group::factory()->create();
+    $garden = MapPointCategory::factory()->for($group)->create(['name' => 'Garten']);
+    $meadow = MapPointCategory::factory()->childOf($garden)->create();
+    MapPointCharacteristic::factory()->for($garden, 'category')->create(['name' => 'Igeltor']);
+    $deadwood = MapPointCharacteristic::factory()->for($meadow, 'category')->create(['name' => 'Totholz']);
+    characteristicField($deadwood, ['label' => 'Menge (m³)']);
+
+    $this->actingAs(characteristicGroupAdmin($group))
+        ->get(route('mappoint-categories.edit', $meadow))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->has('characteristics', 1)
+            ->where('characteristics.0.name', 'Totholz')
+            ->where('characteristics.0.fields.0.label', 'Menge (m³)')
+            ->has('inheritedCharacteristics', 1)
+            ->where('inheritedCharacteristics.0.name', 'Igeltor')
+            ->where('inheritedCharacteristics.0.category_name', 'Garten'));
+});
+
+test('a characteristic is added to and removed from many points at once', function (): void {
+    $group = Group::factory()->create();
+    $garden = MapPointCategory::factory()->for($group)->create();
+    $meadow = MapPointCategory::factory()->childOf($garden)->create();
+    $hedgehogGate = MapPointCharacteristic::factory()->for($garden, 'category')->create();
+    $gardenPoint = MapPoint::factory()->for($group)->create(['category_id' => $garden->id]);
+    $meadowPoint = MapPoint::factory()->for($group)->create(['category_id' => $meadow->id]);
+    $admin = characteristicGroupAdmin($group);
+    $payload = ['ids' => [$gardenPoint->uuid, $meadowPoint->uuid], 'characteristic_id' => $hedgehogGate->uuid];
+
+    $this->actingAs($admin)->patch(route('mappoints.update-characteristic-of-many'), [...$payload, 'action' => 'add'])->assertSessionHasNoErrors();
+
+    expect($hedgehogGate->mapPoints()->count())->toBe(2);
+
+    $this->actingAs($admin)->patch(route('mappoints.update-characteristic-of-many'), [...$payload, 'action' => 'remove'])->assertSessionHasNoErrors();
+
+    expect($hedgehogGate->mapPoints()->count())->toBe(0);
+});
+
+test('a characteristic can only be added at once when the categories of all points offer it', function (): void {
+    $group = Group::factory()->create();
+    $garden = MapPointCategory::factory()->for($group)->create();
+    $solar = MapPointCategory::factory()->for($group)->create();
+    $hedgehogGate = MapPointCharacteristic::factory()->for($garden, 'category')->create();
+    $gardenPoint = MapPoint::factory()->for($group)->create(['category_id' => $garden->id]);
+    $solarPoint = MapPoint::factory()->for($group)->create(['category_id' => $solar->id]);
+
+    $this->actingAs(characteristicGroupAdmin($group))
+        ->patch(route('mappoints.update-characteristic-of-many'), [
+            'ids' => [$gardenPoint->uuid, $solarPoint->uuid],
+            'characteristic_id' => $hedgehogGate->uuid,
+            'action' => 'add',
+        ])
+        ->assertSessionHasErrors('characteristic_id');
+
+    expect($hedgehogGate->mapPoints()->count())->toBe(0);
+});
+
+test('points of other initiatives cannot get a characteristic at once', function (): void {
+    $group = Group::factory()->create();
+    $otherGroup = Group::factory()->create();
+    $garden = MapPointCategory::factory()->for($otherGroup)->create();
+    $hedgehogGate = MapPointCharacteristic::factory()->for($garden, 'category')->create();
+    $foreignPoint = MapPoint::factory()->for($otherGroup)->create(['category_id' => $garden->id]);
+
+    $this->actingAs(characteristicGroupAdmin($group))
+        ->patch(route('mappoints.update-characteristic-of-many'), ['ids' => [$foreignPoint->uuid], 'characteristic_id' => $hedgehogGate->uuid, 'action' => 'add'])
+        ->assertForbidden();
 });

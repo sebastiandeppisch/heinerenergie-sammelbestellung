@@ -24,14 +24,14 @@ class UpsertFormDefinitionRequest extends FormRequest
 {
     /**
      * Forms belong to an initiative, so only its admins may change them, and only admins of the target
-     * initiative may move a form there. Fields of a map point category follow the rights on the category.
+     * initiative may move a form there. Fields of a map point category or characteristic follow the rights on the category.
      */
     public function authorize(): bool
     {
         $existing = $this->route('form_definition');
 
         if ($existing instanceof FormDefinition && $existing->type === FormType::MapPointFields) {
-            $category = $existing->mapPointCategory;
+            $category = $existing->mapPointFieldsCategory();
 
             return $category !== null && $this->user()->can('update', $category);
         }

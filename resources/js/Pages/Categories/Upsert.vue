@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import MapPointCharacteristicsSection from '@/components/MapPointCharacteristics/MapPointCharacteristicsSection.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import { Button } from '@/shadcn/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/shadcn/components/ui/card';
@@ -20,6 +21,9 @@ const props = defineProps<{
     usableCategoryIdsByGroup: Record<string, Array<string>>;
     /** The fields of the category's points, inherited ones first. Only sent when editing. */
     fields?: Array<App.Data.MapPointCategoryFieldData>;
+    /** Only sent when editing. */
+    characteristics?: Array<App.Data.MapPointCharacteristicData>;
+    inheritedCharacteristics?: Array<App.Data.MapPointCharacteristicData>;
 }>();
 
 const page = usePage<CustomPageProps>();
@@ -268,5 +272,13 @@ function triggerFileInput() {
                 </CardFooter>
             </form>
         </Card>
+
+        <MapPointCharacteristicsSection
+            v-if="category"
+            class="mt-6"
+            :category-id="category.id"
+            :characteristics="characteristics ?? []"
+            :inherited-characteristics="inheritedCharacteristics ?? []"
+        />
     </div>
 </template>

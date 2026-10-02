@@ -274,6 +274,7 @@ map_points_count: number,
 map_points_with_subcategories_count: number | null,
 created_at: string | null,
 can_edit: boolean,
+characteristics_count: number,
 };
 export type MapPointCategoryFieldData = {
 id: string,
@@ -282,6 +283,21 @@ type: App.Enums.FieldType,
 is_public: boolean,
 category_id: string,
 category_name: string,
+};
+export type MapPointCharacteristicData = {
+id: string,
+name: string,
+icon_path: string | null,
+color: string | null,
+category_id: string,
+category_name: string,
+map_points_count: number | null,
+fields: App.Data.MapPointCharacteristicFieldData[] | null,
+};
+export type MapPointCharacteristicFieldData = {
+id: string,
+label: string,
+is_public: boolean,
 };
 export type MapPointData = {
 id: string,
@@ -296,6 +312,7 @@ category_id: string | null,
 location: string | null,
 fields: App.Data.MapPointFieldValueData[],
 former_fields: App.Data.MapPointFieldValueData[],
+characteristics: App.Data.MapPointCharacteristicData[],
 };
 export type MapPointFieldValueData = {
 id: string,
@@ -305,6 +322,7 @@ label: string,
 value: number | string | string[] | null,
 display_value: string,
 is_public: boolean,
+characteristic_id: string | null,
 };
 export type MapPointImportResultData = {
 created_count: number,

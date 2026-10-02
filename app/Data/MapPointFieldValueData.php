@@ -13,7 +13,7 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 use Throwable;
 
 /**
- * A stored value of a category field, labelled as the field was when the value was entered.
+ * A stored value of a field of a category or characteristic, labelled as the field was when the value was entered.
  */
 #[TypeScript]
 class MapPointFieldValueData extends Data
@@ -31,9 +31,11 @@ class MapPointFieldValueData extends Data
         /** The value as shown to people: option labels instead of option values, German number and date formats. */
         public string $display_value,
         public bool $is_public,
+        /** The characteristic of the point the field belongs to, null for fields of the category and former values. */
+        public ?string $characteristic_id = null,
     ) {}
 
-    public static function fromModel(MapPointField $model, bool $isPublic): self
+    public static function fromModel(MapPointField $model, bool $isPublic, ?string $characteristicId = null): self
     {
         return new self(
             id: $model->uuid,
@@ -43,6 +45,7 @@ class MapPointFieldValueData extends Data
             value: $model->value,
             display_value: self::displayValue($model),
             is_public: $isPublic,
+            characteristic_id: $characteristicId,
         );
     }
 

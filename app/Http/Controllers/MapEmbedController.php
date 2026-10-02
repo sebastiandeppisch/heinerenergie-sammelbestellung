@@ -127,7 +127,7 @@ class MapEmbedController extends Controller
 
         return $visibility->visiblePoints()
             ->where('published', true)
-            ->with(['category', 'group', 'characteristics', 'fields.options', 'fields.formField'])
+            ->with(['category', 'group', 'characteristics.category', 'fields.options', 'fields.formField'])
             ->get()
             ->map(fn (MapPoint $mapPoint): MapPointData => MapPointData::fromModel($mapPoint, tree: $tree, publicFieldIds: $publicFieldIds))
             ->groupBy('category_id');

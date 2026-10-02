@@ -14,6 +14,7 @@ use App\Http\Controllers\Groups\GroupUserController;
 use App\Http\Controllers\MailAccountController;
 use App\Http\Controllers\MapEmbedController;
 use App\Http\Controllers\MapPointCategoryController;
+use App\Http\Controllers\MapPointCharacteristicController;
 use App\Http\Controllers\MapPointController;
 use App\Http\Controllers\MapPointExportController;
 use App\Http\Controllers\MapPointImportController;
@@ -118,10 +119,16 @@ Route::middleware('auth')->group(function (): void {
     Route::get('mappoints/export', MapPointExportController::class)->name('mappoints.export');
     Route::delete('mappoints', [MapPointController::class, 'destroyMany'])->name('mappoints.destroy-many');
     Route::patch('mappoints/category', [MapPointController::class, 'updateCategoryOfMany'])->name('mappoints.update-category-of-many');
+    Route::patch('mappoints/characteristic', [MapPointController::class, 'updateCharacteristicOfMany'])->name('mappoints.update-characteristic-of-many');
     Route::patch('mappoints/published', [MapPointController::class, 'updatePublishedOfMany'])->name('mappoints.update-published-of-many');
 
     Route::resource('mappoints', MapPointController::class);
     Route::post('mappoint-categories/{mappoint_category}/fields', [MapPointCategoryController::class, 'editFields'])->name('mappoint-categories.fields.edit');
+    Route::post('mappoint-categories/{mappoint_category}/characteristics', [MapPointCharacteristicController::class, 'store'])->name('mappoint-categories.characteristics.store');
+    Route::put('mappoint-categories/{mappoint_category}/characteristics/order', [MapPointCharacteristicController::class, 'reorder'])->name('mappoint-categories.characteristics.reorder');
+    Route::put('mappoint-characteristics/{map_point_characteristic}', [MapPointCharacteristicController::class, 'update'])->name('mappoint-characteristics.update');
+    Route::delete('mappoint-characteristics/{map_point_characteristic}', [MapPointCharacteristicController::class, 'destroy'])->name('mappoint-characteristics.destroy');
+    Route::post('mappoint-characteristics/{map_point_characteristic}/fields', [MapPointCharacteristicController::class, 'editFields'])->name('mappoint-characteristics.fields.edit');
     Route::resource('mappoint-categories', MapPointCategoryController::class);
     Route::resource('map-embeds', MapEmbedController::class);
 

@@ -15,6 +15,7 @@ function makeCategory(id: string, parentId: string | null): App.Data.MapPointCat
         map_points_with_subcategories_count: null,
         created_at: null,
         can_edit: true,
+        characteristics_count: 0,
     };
 }
 

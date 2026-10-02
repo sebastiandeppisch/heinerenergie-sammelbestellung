@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import CategoryVisibilityFilter from '@/components/CategoryVisibilityFilter.vue';
 import CoordinateFieldPreview from '@/components/FormSubmissions/FieldPreview/CoordinateFieldPreview.vue';
+import MapPointCharacteristicBadge from '@/components/MapPointCharacteristics/MapPointCharacteristicBadge.vue';
 import MapPointFieldList from '@/components/MapPointFieldList.vue';
 import { useExpandedIds } from '@/composables/useExpandedIds';
 import { Button } from '@/shadcn/components/ui/button';
@@ -43,6 +44,7 @@ interface MapPointRow {
     categoryName: string;
     categoryImagePath: string | null;
     fields: Array<App.Data.MapPointFieldValueData>;
+    characteristics: Array<App.Data.MapPointCharacteristicData>;
 }
 
 const props = defineProps<{
@@ -69,6 +71,7 @@ const rows = computed<Array<MapPointRow>>(() =>
                 categoryName: point.category_id ? categoryPath(props.categories, point.category_id) : '',
                 categoryImagePath: category?.marker_image_path ?? null,
                 fields: point.fields,
+                characteristics: point.characteristics,
             };
         }),
 );
@@ -260,6 +263,13 @@ watch(
                                             </div>
                                             <span>{{ row.original.categoryName }}</span>
                                         </div>
+                                        <div v-if="row.original.characteristics.length > 0" class="mt-1 flex flex-wrap gap-1">
+                                            <MapPointCharacteristicBadge
+                                                v-for="characteristic in row.original.characteristics"
+                                                :key="characteristic.id"
+                                                :characteristic="characteristic"
+                                            />
+                                        </div>
                                     </TableCell>
                                     <TableCell class="min-w-48 font-medium whitespace-normal">{{ row.original.title }}</TableCell>
                                     <TableCell class="max-w-xs truncate">{{ row.original.description }}</TableCell>
@@ -270,7 +280,7 @@ watch(
                                 <TableRow v-if="isExpanded(row.original.id)" class="bg-muted/30 hover:bg-muted/30">
                                     <TableCell />
                                     <TableCell colspan="4" class="whitespace-normal">
-                                        <MapPointFieldList :fields="row.original.fields" />
+                                        <MapPointFieldList :fields="row.original.fields" :characteristics="row.original.characteristics" />
                                     </TableCell>
                                 </TableRow>
                             </template>

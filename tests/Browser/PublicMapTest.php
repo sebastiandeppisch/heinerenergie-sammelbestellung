@@ -5,6 +5,7 @@ use App\Models\Group;
 use App\Models\MapEmbed;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
+use App\Models\MapPointCharacteristic;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -203,5 +204,26 @@ test('the popup and the detail row of the table show the public field values', f
         ->click('[data-test=toggle-point-details]')
         ->assertSee('PV-Leistung (kWp)')
         ->assertDontSee('06151 123456')
+        ->assertNoJavaScriptErrors();
+});
+
+test('the popup shows the characteristics of the point and their public fields under their name', function (): void {
+    $category = MapPointCategory::factory()->for($this->group)->withoutImage()->create();
+    $hedgehogGate = MapPointCharacteristic::factory()->for($category, 'category')->create(['name' => 'Igeltor', 'color' => '#2e7d32']);
+    $width = $hedgehogGate->findOrCreateFormDefinition()->fields()->create(['type' => FieldType::NUMBER, 'label' => 'Breite (cm)', 'sort_order' => 0]);
+    $hedgehogGate->syncPublicFields([$width->id]);
+    $position = ['lat' => 49.8728475, 'lng' => 8.6510204];
+    $mapPoint = MapPoint::factory()->for($this->group)->create([...$position, 'published' => true, 'category_id' => $category->id]);
+    $mapPoint->characteristics()->attach($hedgehogGate);
+    $width->createMapPointField($mapPoint, 13);
+
+    $mapEmbed = MapEmbed::factory()->for($this->group)->create([...$position, 'zoom' => 13]);
+    $mapEmbed->mapPointCategories()->sync([$category->id]);
+
+    visit(route('map.public', $mapEmbed))
+        ->click('.leaflet-marker-icon')
+        ->assertSeeIn('.leaflet-popup-content [data-test=characteristic-badge]', 'Igeltor')
+        ->assertSeeIn('.leaflet-popup-content [data-test=map-point-fields-characteristic]', 'Igeltor')
+        ->assertSeeIn('.leaflet-popup-content', 'Breite (cm)')
         ->assertNoJavaScriptErrors();
 });

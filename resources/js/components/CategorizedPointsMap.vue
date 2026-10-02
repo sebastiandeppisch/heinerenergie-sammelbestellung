@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import MapPointCharacteristicBadge from '@/components/MapPointCharacteristics/MapPointCharacteristicBadge.vue';
 import MapPointFieldList from '@/components/MapPointFieldList.vue';
 import { Button } from '@/shadcn/components/ui/button';
 import { categoryMarkerIcon } from '@/utils/categoryMarkerIcon';
@@ -88,8 +89,21 @@ function zoomOut() {
                         <div class="p-2">
                             <h3 class="text-lg font-bold">{{ point.title }}</h3>
                             <p class="text-sm">{{ point.description }}</p>
+                            <div v-if="point.characteristics.length > 0" class="mt-2 flex flex-wrap gap-1">
+                                <MapPointCharacteristicBadge
+                                    v-for="characteristic in point.characteristics"
+                                    :key="characteristic.id"
+                                    :characteristic="characteristic"
+                                />
+                            </div>
                             <!-- The public map only receives public fields, so internal ones are marked for admins only. -->
-                            <MapPointFieldList v-if="point.fields.length > 0" :fields="point.fields" mark-internal class="mt-2" />
+                            <MapPointFieldList
+                                v-if="point.fields.length > 0"
+                                :fields="point.fields"
+                                :characteristics="point.characteristics"
+                                mark-internal
+                                class="mt-2"
+                            />
                         </div>
                     </LPopup>
                 </LMarker>
