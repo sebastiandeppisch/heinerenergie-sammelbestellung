@@ -44,7 +44,7 @@ test('the form builder for category fields hides the form settings', function ()
 });
 
 test('a long category name is cut with an ellipsis in the category list', function (): void {
-    MapPointCategory::factory()->for($this->group)->create(['name' => str_repeat('Sehr langer Kategoriename ', 20)]);
+    MapPointCategory::factory()->for($this->group)->create(['name' => str_repeat('Sehr langer Kategoriename ', 9)]);
 
     $page = visit(route('mappoint-categories.index'))->assertNoJavaScriptErrors();
 
