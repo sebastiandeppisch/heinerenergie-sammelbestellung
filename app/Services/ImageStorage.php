@@ -128,7 +128,7 @@ class ImageStorage
      */
     private function variant(string $path, ?int $width, ?int $height): string
     {
-        $variant = ($width !== null ? $width : 'h'.$height).'/'.$path;
+        $variant = ($width ?? 'h'.$height).'/'.$path;
 
         if (! $this->cacheDisk()->exists($variant)) {
             $image = Image::decode($this->disk()->get($path) ?? '');
