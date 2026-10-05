@@ -10,6 +10,7 @@ use App\Models\FormDefinition;
 use App\Models\FormDefinitionToAdvice;
 use App\Models\FormField;
 use App\Models\Group;
+use App\Services\FormTargetService;
 use App\ValueObjects\Address;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -113,10 +114,8 @@ class FormDefinitionToAdviceFactory extends Factory
 
             $creator->adviceTypeField->createSubmissionField($submission, fake()->randomElement(AdviceType::cases())->value);
 
-            $advice = $creator->createAdvice($submission);
-            $submission->update([
-                'advice_id' => $advice->id,
-            ]);
+            $targets = app(FormTargetService::class);
+            $targets->execute($submission, $targets->prepare($submission));
 
             return [];
         });

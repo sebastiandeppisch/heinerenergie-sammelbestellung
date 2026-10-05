@@ -39,6 +39,9 @@ class CalculateCoordinatesForAdvice implements ShouldQueue
     /** @var array<int, int> */
     public array $backoff = [30, 120, 600];
 
+    /** The advice is gone when a form target that created it was rolled back. */
+    public bool $deleteWhenMissingModels = true;
+
     public function __construct(public Advice $advice) {}
 
     public function handle(): void

@@ -8,6 +8,7 @@ use App\Enums\FieldType;
 use App\Models\FormDefinition;
 use App\Models\FormDefinitionToMapPoint;
 use App\Models\FormField;
+use App\Services\FormTargetService;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -70,7 +71,8 @@ class FormDefinitionToMapPointFactory extends Factory
                 'lng' => fake()->longitude(),
             ]);
 
-            $creator->createMapPoint($submission);
+            $targets = app(FormTargetService::class);
+            $targets->execute($submission, $targets->prepare($submission));
 
             return [];
         });

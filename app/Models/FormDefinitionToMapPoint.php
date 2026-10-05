@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Data\MapPointTargetPayload;
 use App\Enums\FieldType;
-use App\Events\MapPointCreatedByFormSubmission;
 use App\Models\Traits\HasUuid;
 use App\Services\ImageStorage;
-use App\Services\MapPointFieldService;
-use App\ValueObjects\StoredImage;
 use Database\Factories\FormDefinitionToMapPointFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -110,41 +108,19 @@ class FormDefinitionToMapPoint extends Model
         });
     }
 
-    public function createMapPoint(FormSubmission $submission): MapPoint
+    /**
+     * Reads the map point from the submission, including the category its options pick.
+     */
+    public function prepare(FormSubmission $submission): MapPointTargetPayload
     {
-        $mapPoint = DB::transaction(function () use ($submission) {
-            $titleField = $this->titleField->getSubmissionField($submission);
-            $descriptionField = $this->descriptionField->getSubmissionField($submission);
-            $coordinateField = $this->coordinateField->getSubmissionField($submission);
-
-            // Extract lat/lng from coordinate field value
-            $coordinateValue = $coordinateField->value;
-
-            $mapPoint = MapPoint::create([
-                'group_id' => $this->formDefinition->group_id,
-                'title' => $titleField->value,
-                'description' => $descriptionField->value,
-                'coordinate' => $coordinateValue,
-                'published' => false, // unpublished initially
-                'category_id' => $this->categoryFor($submission)?->id,
-            ]);
-
-            $fieldService = app(MapPointFieldService::class);
-            $fields = $fieldService->fieldsOfCategory($mapPoint->category_id);
-            // A value that does not fit its field is left out, the point is created anyway.
-            $fieldService->syncValues($mapPoint, $fieldService->validValues($fields, $this->mappedValues($submission)));
-
-            // Associate with the form submission as pointable
-            // @phpstan-ignore argument.type (Pointable<FormSubmission> satisfies Pointable<Model> at runtime; PHPStan invariance limitation)
-            $mapPoint->pointable()->associate($submission);
-            $mapPoint->save();
-
-            event(new MapPointCreatedByFormSubmission($mapPoint, $submission));
-
-            return $mapPoint->fresh();
-        });
-
-        return $mapPoint;
+        return new MapPointTargetPayload(
+            title: $this->titleField->getSubmissionField($submission)->value,
+            description: $this->descriptionField->getSubmissionField($submission)->value,
+            coordinate: $this->coordinateField->getSubmissionField($submission)->value,
+            category_id: $this->categoryFor($submission)?->id,
+            group_id: $this->formDefinition->group_id,
+            field_values: $this->mappedValues($submission),
+        );
     }
 
     /**
@@ -189,7 +165,7 @@ class FormDefinitionToMapPoint extends Model
 
     /**
      * Options of the form and of the category are matched by their label, because their values differ. Images are
-     * copied, because the submission and the point are deleted independently.
+     * kept as paths, they are copied when the point is created.
      */
     private function convert(FormField $targetField, SubmissionField $submissionField): mixed
     {
@@ -199,7 +175,7 @@ class FormDefinitionToMapPoint extends Model
             $imageStorage = app(ImageStorage::class);
             $paths = array_filter((array) $value, fn (mixed $path): bool => is_string($path) && $imageStorage->exists($path));
 
-            return array_map(fn (string $path): StoredImage => new StoredImage($path), array_slice(array_values($paths), 0, $targetField->max_images));
+            return array_slice(array_values($paths), 0, $targetField->max_images);
         }
 
         if (! $targetField->type->supportsOptions()) {

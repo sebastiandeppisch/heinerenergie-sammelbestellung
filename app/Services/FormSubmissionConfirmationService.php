@@ -18,6 +18,8 @@ class FormSubmissionConfirmationService
 {
     private const int DECAY_SECONDS = 3600;
 
+    public function __construct(private readonly FormTargetService $targets) {}
+
     /**
      * Each submission sends a mail, so the attempts are limited per sender and per recipient.
      */
@@ -65,7 +67,7 @@ class FormSubmissionConfirmationService
     }
 
     /**
-     * Confirms the submission and runs its targets exactly once.
+     * Confirms the submission and runs its targets exactly once. A failure of the targets still confirms it.
      *
      * @return Collection<int, FormTargetNoticeData>|null null when the submission was already confirmed
      */
@@ -80,7 +82,7 @@ class FormSubmissionConfirmationService
 
             $locked->update(['confirmed_at' => now()]);
 
-            return $locked->handleCreators();
+            return $this->targets->run($locked, $locked->target_payload);
         });
     }
 

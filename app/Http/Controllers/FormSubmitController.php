@@ -14,6 +14,7 @@ use App\Models\FormSubmission;
 use App\Services\CurrentGroupService;
 use App\Services\FormEmbedAccessService;
 use App\Services\FormSubmissionConfirmationService;
+use App\Services\FormTargetService;
 use App\Services\ImageStorage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -29,6 +30,7 @@ class FormSubmitController extends Controller
         private readonly FormEmbedAccessService $embedAccess,
         private readonly ImageStorage $imageStorage,
         private readonly FormSubmissionConfirmationService $confirmation,
+        private readonly FormTargetService $targets,
     ) {}
 
     public function show(FormDefinition $formDefinition, Request $request): Response
@@ -79,10 +81,12 @@ class FormSubmitController extends Controller
                 }
 
                 if ($email !== null) {
+                    $submission->update(['target_payload' => $this->targets->prepareOrNull($submission)]);
+
                     return [$submission, $this->confirmation->issueToken($submission), new Collection];
                 }
 
-                return [$submission, null, $submission->handleCreators()];
+                return [$submission, null, $this->targets->run($submission, null)];
             });
         } catch (Throwable $e) {
             $this->imageStorage->delete($storedImagePaths);

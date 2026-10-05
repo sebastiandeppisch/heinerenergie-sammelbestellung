@@ -149,6 +149,7 @@ fields: App.Data.SubmissionFieldData[],
 submitted_at: string,
 seen: boolean,
 awaiting_confirmation: boolean,
+targets_failed: boolean,
 };
 export type FormTargetNoticeData = {
 title: string,

@@ -58,6 +58,7 @@
                                     {{ submission.seen ? 'Gelesen' : 'Ungelesen' }}
                                 </Badge>
                                 <Badge v-if="submission.awaiting_confirmation" variant="destructive">unbestätigt</Badge>
+                                <Badge v-if="submission.targets_failed" variant="destructive">Ziele fehlgeschlagen</Badge>
                             </div>
                         </TableCell>
                         <template v-if="isSingleForm">
