@@ -12,6 +12,7 @@ use App\Models\SubmissionField;
 use App\Services\FormSubmissionConfirmationService;
 use App\Services\ImageStorage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -37,6 +38,9 @@ function confirmedForm(): array
     return [$form, $email];
 }
 
+/**
+ * @return TestResponse<Response>
+ */
 function submitConfirmedForm(FormDefinition $form, FormField $email, string $address = 'erika@example.com'): TestResponse
 {
     return test()->post(route('form.submit', $form), [$email->uuid => $address]);

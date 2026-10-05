@@ -62,7 +62,7 @@ class FormSubmitController extends Controller
         app(CurrentGroupService::class)->setGroup($formDefinition->group);
 
         $email = $formDefinition->requires_email_confirmation
-            ? (string) $request->input($formDefinition->emailField()?->uuid ?? '')
+            ? (string) $request->input($formDefinition->emailField()->uuid ?? '')
             : null;
 
         if ($email !== null) {

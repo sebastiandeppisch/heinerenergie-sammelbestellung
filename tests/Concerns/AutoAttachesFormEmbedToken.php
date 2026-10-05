@@ -6,6 +6,7 @@ namespace Tests\Concerns;
 
 use App\Models\FormDefinition;
 use App\Services\FormEmbedAccessService;
+use Illuminate\Support\Str;
 
 /**
  * Public form submissions require a stateless anti-spam token that is normally
@@ -25,7 +26,7 @@ trait AutoAttachesFormEmbedToken
      */
     public function post($uri, array $data = [], array $headers = [])
     {
-        if (! array_key_exists('_form_token', $data) && preg_match('#/forms/([^/?]+)#', (string) $uri, $matches)) {
+        if (! array_key_exists('_form_token', $data) && preg_match('#/forms/([^/?]+)#', (string) $uri, $matches) && Str::isUuid($matches[1])) {
             $formDefinition = FormDefinition::where('uuid', $matches[1])->first();
 
             if ($formDefinition) {
