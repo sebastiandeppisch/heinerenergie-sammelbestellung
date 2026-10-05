@@ -28,7 +28,7 @@ class ImageController extends Controller
 
         abort_unless($isStored && Gate::allows('view', $formSubmission), 404);
 
-        return $this->imageStorage->response($path, $this->width($request));
+        return $this->imageStorage->response($request, $path, $this->width($request));
     }
 
     public function mapPoint(Request $request, MapPoint $mapPoint, string $image, MapPointImageAccess $access): Response
@@ -37,7 +37,7 @@ class ImageController extends Controller
 
         abort_unless($access->allows($request->user(), $mapPoint, $path), 404);
 
-        return $this->imageStorage->response($path, $this->width($request));
+        return $this->imageStorage->response($request, $path, $this->width($request));
     }
 
     private function width(Request $request): ?int

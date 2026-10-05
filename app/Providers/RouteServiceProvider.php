@@ -58,5 +58,8 @@ class RouteServiceProvider extends ServiceProvider
 
             return Limit::perMinute(10)->by($request->ip());
         });
+
+        // Generous, because a popup or table of the public map loads many thumbnails at once.
+        RateLimiter::for('map-point-images', fn (Request $request) => Limit::perMinute(300)->by($request->ip()));
     }
 }

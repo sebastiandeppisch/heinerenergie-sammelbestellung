@@ -11,6 +11,7 @@ use App\Models\MapPoint;
 use App\Models\MapPointCategory;
 use App\Models\MapPointField;
 use App\Rules\MapPointImageItem;
+use App\Rules\MaxImagePixels;
 use App\ValueObjects\MapPointCategoryTree;
 use App\ValueObjects\StoredImage;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,6 +20,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\File;
 use Throwable;
 
 /**
@@ -256,7 +258,10 @@ class MapPointFieldService
             }
 
             if ($field->type === FieldType::IMAGE) {
-                $rules[$prefix.'.'.$field->uuid.'.*'] = [new MapPointImageItem($this->storedImageNames($mapPoint, $field))];
+                $storedNames = $this->storedImageNames($mapPoint, $field);
+                $rules[$prefix.'.'.$field->uuid.'.*'] = Rule::forEach(fn (mixed $entry): array => $entry instanceof UploadedFile
+                    ? [File::image()->types(['jpg', 'jpeg', 'png'])->max(10 * 1024), new MaxImagePixels]
+                    : ['distinct', new MapPointImageItem($storedNames)]);
             }
         }
 
