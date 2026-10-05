@@ -121,7 +121,7 @@ class FormDefinitionToAdvice extends Model
             return true;
         }
 
-        return ! empty($this->conditionField->submissionFields()->where('form_submission_id', $submission->id)->first()?->value);
+        return ! empty($this->conditionField->submissionFields()->where('form_submission_id', $submission->id)->first()->value);
     }
 
     /**
