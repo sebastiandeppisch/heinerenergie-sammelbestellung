@@ -72,6 +72,10 @@ Anonym / Bürger
     ▼  POST /forms/{formDefinition}  (keine Auth)
 FormSubmission + SubmissionFields
     │
+    ├─► (wenn E-Mail-Bestätigung aktiv) Bestätigungsmail, Ziele erst nach
+    │   POST /forms/confirm/{token}. Unbestätigte Einsendungen bleiben gespeichert,
+    │   bis FORM_CONFIRMATION_PRUNE_AFTER_DAYS gesetzt ist.
+    │
     ├─► E-Mail an Kunden (AdviceCreated Mail)
     │
     └─► (wenn FormDefinitionToAdvice konfiguriert)
@@ -92,6 +96,7 @@ FormSubmission + SubmissionFields
 |-------|--------|
 | `/map` | Veröffentlichte `MapPoints` (Koordinaten, Titel) |
 | `/forms/{formDefinition}` | Formular (keine Kundendaten) |
+| `/forms/confirm/{token}` | Bestätigung einer Einsendung (nur Formularname) |
 | `/newadvice` | Neue-Advice-Formular (erzeugt Advice ohne Auth!) |
 | `/impress`, `/datapolicy` | Statische Seiten |
 

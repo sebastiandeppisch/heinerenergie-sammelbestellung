@@ -95,3 +95,24 @@ function assertFillsViewport(object $page, string $selector): void
     // Below the element only the layout's content padding (24px) and the sidebar inset margin (8px) may remain
     expect($measured['bottom'])->toBeGreaterThanOrEqual($measured['innerHeight'] - 32);
 }
+
+/**
+ * Builds a JPEG whose EXIF block contains a GPS IFD with latitude and longitude references.
+ */
+function jpegWithGpsExif(): string
+{
+    $image = imagecreatetruecolor(100, 100);
+    ob_start();
+    imagejpeg($image);
+    $jpeg = ob_get_clean();
+
+    $ifd0 = pack('v', 1).pack('vvVV', 0x8825, 4, 1, 26).pack('V', 0);
+    $gpsIfd = pack('v', 2)
+        .pack('vvV', 1, 2, 2)."N\0\0\0"
+        .pack('vvV', 3, 2, 2)."E\0\0\0"
+        .pack('V', 0);
+    $exif = "Exif\0\0".'II'.pack('v', 42).pack('V', 8).$ifd0.$gpsIfd;
+    $app1Segment = "\xFF\xE1".pack('n', strlen($exif) + 2).$exif;
+
+    return substr($jpeg, 0, 2).$app1Segment.substr($jpeg, 2);
+}

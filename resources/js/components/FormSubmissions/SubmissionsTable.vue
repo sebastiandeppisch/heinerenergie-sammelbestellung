@@ -53,9 +53,13 @@
                             {{ formatDateTime(submission.submitted_at) }}
                         </TableCell>
                         <TableCell>
-                            <Badge :variant="submission.seen ? 'secondary' : 'default'">
-                                {{ submission.seen ? 'Gelesen' : 'Ungelesen' }}
-                            </Badge>
+                            <div class="flex flex-wrap gap-1">
+                                <Badge :variant="submission.seen ? 'secondary' : 'default'">
+                                    {{ submission.seen ? 'Gelesen' : 'Ungelesen' }}
+                                </Badge>
+                                <Badge v-if="submission.awaiting_confirmation" variant="destructive">unbestätigt</Badge>
+                                <Badge v-if="submission.targets_failed" variant="destructive">Ziele fehlgeschlagen</Badge>
+                            </div>
                         </TableCell>
                         <template v-if="isSingleForm">
                             <TableCell v-for="column in dynamicColumns" :key="column.id">

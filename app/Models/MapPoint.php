@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Contracts\Pointable;
 use App\Models\Traits\HasUuid;
+use App\Services\ImageStorage;
 use App\ValueObjects\Coordinate;
 use Database\Factories\MapPointFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -22,6 +23,8 @@ use Override;
 
 /**
  * @property int $group_id
+ * @property string $uuid
+ * @property bool $published
  * @property Coordinate $coordinate
  * @property Carbon $created_at
  */
@@ -68,6 +71,7 @@ class MapPoint extends Model
 
     /**
      * The stored field values and characteristics go with the point. The foreign keys do not cascade, so they are deleted here.
+     * The images of all values, including former ones, lie in the point's directory.
      */
     #[Override]
     public function delete(): ?bool
@@ -75,9 +79,15 @@ class MapPoint extends Model
         return DB::transaction(function (): ?bool {
             $this->fields()->get()->each->delete();
             $this->characteristics()->detach();
+            DB::afterCommit(fn () => app(ImageStorage::class)->deleteDirectory($this->imageDirectory()));
 
             return parent::delete();
         });
+    }
+
+    public function imageDirectory(): string
+    {
+        return 'map-point-images/'.$this->uuid;
     }
 
     /**

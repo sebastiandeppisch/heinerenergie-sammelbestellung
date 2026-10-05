@@ -131,3 +131,32 @@ test('invalid view value is rejected', function (): void {
     $response = $this->get(route('form-submissions.index', ['view' => 'invalid']));
     $response->assertSessionHasErrors('view');
 });
+
+test('unconfirmed submissions are marked and can be filtered', /** @param list<string> $expected */ function (string $filter, array $expected): void {
+    $formDefinition = FormDefinition::factory()->create(['group_id' => $this->group->id]);
+    $attributes = ['group_id' => $this->group->id, 'form_definition_id' => $formDefinition->id];
+
+    $plain = FormSubmission::factory()->create([...$attributes, 'submitted_at' => now()->subDays(3)]);
+    $unconfirmed = FormSubmission::factory()->create([...$attributes, 'submitted_at' => now()->subDays(2), 'confirmation_token_hash' => str_repeat('a', 64)]);
+    $confirmed = FormSubmission::factory()->create([...$attributes, 'submitted_at' => now()->subDay(), 'confirmation_token_hash' => str_repeat('b', 64), 'confirmed_at' => now()]);
+
+    $submissions = ['plain' => $plain, 'unconfirmed' => $unconfirmed, 'confirmed' => $confirmed];
+
+    $this->get(route('form-submissions.index', ['confirmation' => $filter, 'sortOrder' => 'asc']))
+        ->assertInertia(function (Assert $page) use ($expected, $submissions, $filter): Assert {
+            $page->component('FormSubmissions/Index')
+                ->where('confirmation', $filter)
+                ->has('formSubmissions', count($expected));
+
+            foreach ($expected as $index => $name) {
+                $page->where("formSubmissions.{$index}.id", $submissions[$name]->uuid)
+                    ->where("formSubmissions.{$index}.awaiting_confirmation", $name === 'unconfirmed');
+            }
+
+            return $page;
+        });
+})->with([
+    'all' => ['all', ['plain', 'unconfirmed', 'confirmed']],
+    'only unconfirmed' => ['unconfirmed', ['unconfirmed']],
+    'hide unconfirmed' => ['hide_unconfirmed', ['plain', 'confirmed']],
+]);

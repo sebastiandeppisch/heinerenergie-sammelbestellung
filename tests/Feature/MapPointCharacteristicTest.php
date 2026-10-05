@@ -415,3 +415,17 @@ test('points of other initiatives cannot get a characteristic at once', function
         ->patch(route('mappoints.update-characteristic-of-many'), ['ids' => [$foreignPoint->uuid], 'characteristic_id' => $hedgehogGate->uuid, 'action' => 'add'])
         ->assertForbidden();
 });
+
+test('an empty value removes all characteristics, because form data with images cannot send an empty list', function (): void {
+    $group = Group::factory()->create();
+    $garden = MapPointCategory::factory()->for($group)->create();
+    $deadwood = MapPointCharacteristic::factory()->for($garden, 'category')->create();
+    $mapPoint = MapPoint::factory()->for($group)->create(['category_id' => $garden->id]);
+    $mapPoint->characteristics()->attach($deadwood);
+
+    $this->actingAs(characteristicGroupAdmin($group))
+        ->put(route('mappoints.update', $mapPoint), characteristicPointPayload($mapPoint, $garden, ['characteristic_ids' => '']))
+        ->assertSessionHasNoErrors();
+
+    expect($mapPoint->characteristics()->count())->toBe(0);
+});

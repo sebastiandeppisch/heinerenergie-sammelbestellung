@@ -14,10 +14,15 @@ defineOptions({
     layout: isIframe ? NoLayout : PublicLayout,
 });
 
-const props = defineProps<{
-    formDefinition: App.Data.FormDefinitionData;
-    // embedded: boolean;
-}>();
+const props = withDefaults(
+    defineProps<{
+        formDefinition: App.Data.FormDefinitionData;
+        notices?: App.Data.FormTargetNoticeData[];
+    }>(),
+    {
+        notices: () => [],
+    },
+);
 
 useAutoResizeIframeIfIsIframe();
 
@@ -44,6 +49,15 @@ function handleNextFormButton() {
                     </div>
                     <div style="margin-top: 32px">
                         <CircleCheck :size="96" style="color: #00a651" />
+                    </div>
+                    <div v-if="notices.length > 0" class="mt-8 w-full space-y-4" data-test="form-target-notices">
+                        <div v-for="(notice, index) in notices" :key="index" class="rounded-md border p-4">
+                            <div class="font-semibold">{{ notice.title }}</div>
+                            <p v-if="notice.text" class="mt-1 text-sm">{{ notice.text }}</p>
+                            <a v-if="notice.url" :href="notice.url" class="mt-2 inline-block text-sm font-medium underline">
+                                {{ notice.url_label || notice.url }}
+                            </a>
+                        </div>
                     </div>
                     <div v-if="formDefinition.show_next_form_button" style="margin-top: 32px">
                         <Button @click="handleNextFormButton" variant="default">

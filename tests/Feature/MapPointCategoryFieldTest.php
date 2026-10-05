@@ -166,18 +166,35 @@ test('category fields are always optional and cannot become a form', function ()
     expect($formDefinition->refresh()->type)->toBe(FormType::MapPointFields);
 });
 
-test('category fields cannot use field types that spreadsheets cannot hold', function (): void {
+test('category fields cannot use files or locations', function (FieldType $type): void {
     $group = Group::factory()->create();
     $category = MapPointCategory::factory()->for($group)->create();
-    ownCategoryField($category, ['label' => 'Foto']);
+    ownCategoryField($category, ['label' => 'Ort']);
     $formDefinition = $category->formDefinition;
 
     $data = FormDefinitionData::fromModel($formDefinition->load('fields.options'))->toArray();
-    $data['fields'][0]['type'] = FieldType::IMAGE->value;
+    $data['fields'][0]['type'] = $type->value;
 
     $this->actingAs(categoryFieldGroupAdmin($group))
         ->put(route('form-definitions.update', $formDefinition), $data)
         ->assertSessionHasErrors('fields.0.type');
+})->with([FieldType::FILE, FieldType::GEO_COORDINATE, FieldType::ADDRESS]);
+
+test('category fields can be images with a maximum number of images', function (): void {
+    $group = Group::factory()->create();
+    $category = MapPointCategory::factory()->for($group)->create();
+    $field = ownCategoryField($category, ['label' => 'Foto']);
+    $formDefinition = $category->formDefinition;
+
+    $data = FormDefinitionData::fromModel($formDefinition->load('fields.options'))->toArray();
+    $data['fields'][0]['type'] = FieldType::IMAGE->value;
+    $data['fields'][0]['max_images'] = 3;
+
+    $this->actingAs(categoryFieldGroupAdmin($group))
+        ->put(route('form-definitions.update', $formDefinition), $data)
+        ->assertSessionHasNoErrors();
+
+    expect($field->refresh())->type->toBe(FieldType::IMAGE)->max_images->toBe(3);
 });
 
 test('category fields cannot be filled in as a public form', function (): void {

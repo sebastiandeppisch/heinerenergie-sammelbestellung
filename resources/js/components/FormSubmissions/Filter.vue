@@ -29,6 +29,20 @@
                     </Button>
 
                     <div>
+                        <label class="mb-2 block text-sm font-medium">E-Mail-Bestätigung</label>
+                        <Select v-model="confirmation">
+                            <SelectTrigger class="w-full" data-test="confirmation-filter">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Alle Einträge</SelectItem>
+                                <SelectItem value="unconfirmed">Nur unbestätigte</SelectItem>
+                                <SelectItem value="hide_unconfirmed">Unbestätigte ausblenden</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div>
                         <label class="mb-2 block text-sm font-medium">Darstellung</label>
                         <Button
                             @click="toggleGrouping"
@@ -49,6 +63,7 @@
 <script lang="ts" setup>
 import CheckBoxGroup from '@/shadcn/components/CheckboxGroup.vue';
 import Button from '@/shadcn/components/ui/button/Button.vue';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { ArrowDown, ArrowUp, Group, List } from '@lucide/vue';
 import { computed } from 'vue';
 const selectedFormTypes = defineModel<string[]>('selectedFormTypes', {
@@ -65,6 +80,10 @@ const sortOrder = defineModel<'asc' | 'desc'>('sortOrder', {
 
 const groupByForm = defineModel<boolean>('groupByForm', {
     default: false,
+});
+
+const confirmation = defineModel<'all' | 'unconfirmed' | 'hide_unconfirmed'>('confirmation', {
+    default: 'all',
 });
 
 const props = defineProps<{

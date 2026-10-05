@@ -6,11 +6,13 @@ use App\Http\Controllers\Auth\DevLoginController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\FormConfirmationController;
 use App\Http\Controllers\FormDefinitionController;
 use App\Http\Controllers\FormSubmissionController;
 use App\Http\Controllers\FormSubmitController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\Groups\GroupUserController;
+use App\Http\Controllers\ImageController;
 use App\Http\Controllers\MailAccountController;
 use App\Http\Controllers\MapEmbedController;
 use App\Http\Controllers\MapPointCategoryController;
@@ -105,6 +107,7 @@ Route::middleware('auth')->group(function (): void {
         ->name('form-submissions.mark-seen');
     Route::post('form-submissions/{formSubmission}/mark-unseen', [FormSubmissionController::class, 'markUnseen'])
         ->name('form-submissions.mark-unseen');
+    Route::get('form-images/{formSubmission}/{image}', [ImageController::class, 'formSubmission'])->name('form-images.show');
 
     Route::get('mappoints-map', [MapPointController::class, 'map'])->name('map-points-map');
 
@@ -174,6 +177,12 @@ if (app()->environment('local')) {
     Route::get('/dev-login/{user}', [DevLoginController::class, 'login'])->name('dev.login');
 }
 
+Route::get('/forms/confirm/{token}', [FormConfirmationController::class, 'show'])
+    ->name('form.confirm.show');
+Route::post('/forms/confirm/{token}', [FormConfirmationController::class, 'confirm'])
+    ->name('form.confirm')
+    ->middleware('throttle:form-submit');
+
 Route::get('/forms/{formDefinition}', [FormSubmitController::class, 'show'])
     ->name('form.show');
 Route::post('/forms/{formDefinition}', [FormSubmitController::class, 'submit'])
@@ -183,6 +192,11 @@ Route::post('/forms/{formDefinition}', [FormSubmitController::class, 'submit'])
 
 Route::get('/map/{mapEmbed}', [MapPointController::class, 'publicMap'])
     ->name('map.public');
+
+// Public images are served to anyone, so the route is outside of the auth group. Access is checked per image.
+Route::get('/map-point-images/{mapPoint}/{image}', [ImageController::class, 'mapPoint'])
+    ->name('map-point-images.show')
+    ->middleware('throttle:map-point-images');
 
 Route::put('/users/{user}/password', [UserController::class, 'changePassword'])
     ->name('users.changePassword');

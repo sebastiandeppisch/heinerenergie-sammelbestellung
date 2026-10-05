@@ -2,6 +2,7 @@
 import FormFieldInputRenderer from '@/components/FormBuilder/FormFieldInputRenderer.vue';
 import MapPointCharacteristicBadge from '@/components/MapPointCharacteristics/MapPointCharacteristicBadge.vue';
 import MapPointFieldList from '@/components/MapPointFieldList.vue';
+import MapPointImageInput from '@/components/MapPointImageInput.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import PinLocationMap from '@/components/PinLocationMap.vue';
 import { Button } from '@/shadcn/components/ui/button';
@@ -62,14 +63,30 @@ const defaultMapPoint: App.Data.MapPointData = {
 
 const initialPoint = props.mapPoint || defaultMapPoint;
 
-const form = useForm<
-    App.Data.MapPointData & { field_values: Record<string, App.Data.MapPointFieldValueData['value']>; characteristic_ids: Array<string> }
->({
+type FieldValue = App.Data.MapPointFieldValueData['value'] | Array<string | File>;
+
+/** Image fields hold the file names of their images, which keep them when saving. */
+function initialValue(field: App.Data.MapPointFieldValueData): FieldValue {
+    return field.type === 'image' ? field.images.map((image) => image.name) : field.value;
+}
+
+const form = useForm<App.Data.MapPointData & { field_values: Record<string, FieldValue>; characteristic_ids: Array<string> }>({
     ...initialPoint,
     /** Keyed by field id. Values of fields the chosen category and characteristics do not have are ignored by the server. */
-    field_values: Object.fromEntries(initialPoint.fields.filter((field) => field.field_id !== null).map((field) => [field.field_id!, field.value])),
+    field_values: Object.fromEntries(
+        initialPoint.fields.filter((field) => field.field_id !== null).map((field) => [field.field_id!, initialValue(field)]),
+    ),
     characteristic_ids: initialPoint.characteristics.map((characteristic) => characteristic.id),
 });
+
+function imageEntries(fieldId: string): Array<string | File> {
+    const value = form.field_values[fieldId];
+    return Array.isArray(value) ? value : [];
+}
+
+function storedImages(fieldId: string): Array<App.Data.ImageData> {
+    return initialPoint.fields.find((field) => field.field_id === fieldId)?.images ?? [];
+}
 
 const categoryFields = computed(() => (form.category_id ? (props.fieldsByCategory[form.category_id] ?? []) : []));
 
@@ -101,8 +118,12 @@ watch(
     },
 );
 
+/** Errors of single images are reported for the field. */
 function fieldError(fieldId: string): string | undefined {
-    return (form.errors as Record<string, string>)[`field_values.${fieldId}`];
+    const errors = form.errors as Record<string, string>;
+    const key = Object.keys(errors).find((key) => key === `field_values.${fieldId}` || key.startsWith(`field_values.${fieldId}.`));
+
+    return key ? errors[key] : undefined;
 }
 
 /** Only categories of the selected initiative and its parent initiatives can be assigned. */
@@ -167,11 +188,33 @@ watch(
     { deep: true },
 );
 
+/**
+ * Uploads are sent as multipart form data, which drops empty lists. They are sent as empty values instead, so
+ * removing all images or unchecking all boxes still clears the field. PHP only parses multipart bodies of POST
+ * requests, so updates with uploads are sent as POST with the method spoofed.
+ */
 function submit() {
-    if (isEditing) {
-        form.put(route('mappoints.update', props.mapPoint!.id));
-    } else {
+    const hasUploads = Object.values(form.field_values).some((value) => Array.isArray(value) && value.some((entry) => entry instanceof File));
+    const spoofsPut = isEditing && hasUploads;
+
+    form.transform(
+        ({ fields: _fields, former_fields: _formerFields, characteristics: _characteristics, field_values, characteristic_ids, ...data }) => ({
+            ...data,
+            ...(spoofsPut ? { _method: 'put' } : {}),
+            // Form data leaves out empty lists, the server reads an empty string as no characteristics.
+            characteristic_ids: characteristic_ids.length === 0 ? '' : characteristic_ids,
+            field_values: Object.fromEntries(
+                Object.entries(field_values).map(([id, value]) => [id, Array.isArray(value) && value.length === 0 ? '' : value]),
+            ),
+        }),
+    );
+
+    if (!isEditing) {
         form.post(route('mappoints.store'));
+    } else if (spoofsPut) {
+        form.post(route('mappoints.update', props.mapPoint!.id));
+    } else {
+        form.put(route('mappoints.update', props.mapPoint!.id));
     }
 }
 
@@ -272,7 +315,15 @@ const errors: Record<string, string> = form.errors;
                                 <Lock v-if="!publicFieldIds.includes(field.id)" class="h-3 w-3 text-muted-foreground" aria-label="intern" />
                             </Label>
                             <p v-if="field.help_text" class="text-xs text-muted-foreground">{{ field.help_text }}</p>
-                            <FormFieldInputRenderer v-model="form.field_values[field.id]" :field="field" :has-error="!!fieldError(field.id)" />
+                            <MapPointImageInput
+                                v-if="field.type === 'image'"
+                                :model-value="imageEntries(field.id)"
+                                @update:model-value="(entries) => (form.field_values[field.id] = entries)"
+                                :stored-images="storedImages(field.id)"
+                                :max-images="field.max_images"
+                                :has-error="!!fieldError(field.id)"
+                            />
+                            <FormFieldInputRenderer v-else v-model="form.field_values[field.id]" :field="field" :has-error="!!fieldError(field.id)" />
                             <p v-if="fieldError(field.id)" class="text-sm text-red-500">{{ fieldError(field.id) }}</p>
                         </div>
                     </div>
@@ -312,7 +363,15 @@ const errors: Record<string, string> = form.errors;
                                 <Lock v-if="!publicFieldIds.includes(field.id)" class="h-3 w-3 text-muted-foreground" aria-label="intern" />
                             </Label>
                             <p v-if="field.help_text" class="text-xs text-muted-foreground">{{ field.help_text }}</p>
-                            <FormFieldInputRenderer v-model="form.field_values[field.id]" :field="field" :has-error="!!fieldError(field.id)" />
+                            <MapPointImageInput
+                                v-if="field.type === 'image'"
+                                :model-value="imageEntries(field.id)"
+                                @update:model-value="(entries) => (form.field_values[field.id] = entries)"
+                                :stored-images="storedImages(field.id)"
+                                :max-images="field.max_images"
+                                :has-error="!!fieldError(field.id)"
+                            />
+                            <FormFieldInputRenderer v-else v-model="form.field_values[field.id]" :field="field" :has-error="!!fieldError(field.id)" />
                             <p v-if="fieldError(field.id)" class="text-sm text-red-500">{{ fieldError(field.id) }}</p>
                         </div>
                     </div>

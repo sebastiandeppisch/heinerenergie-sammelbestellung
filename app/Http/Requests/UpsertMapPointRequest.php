@@ -27,6 +27,17 @@ class UpsertMapPointRequest extends FormRequest
     private ?array $characteristicIds = null;
 
     /**
+     * Requests with images are sent as form data, which cannot hold an empty list, so the form sends an empty string
+     * (turned into null by the middleware).
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('characteristic_ids') && in_array($this->input('characteristic_ids'), ['', null], true)) {
+            $this->merge(['characteristic_ids' => []]);
+        }
+    }
+
+    /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
@@ -67,7 +78,9 @@ class UpsertMapPointRequest extends FormRequest
      */
     private function fieldValueRules(): array
     {
-        return app(MapPointFieldService::class)->validationRules($this->pointFields(), 'field_values');
+        $mapPoint = $this->route('mappoint');
+
+        return app(MapPointFieldService::class)->validationRules($this->pointFields(), 'field_values', $mapPoint instanceof MapPoint ? $mapPoint : null);
     }
 
     /**

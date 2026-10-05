@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Contracts\Pointable;
+use App\Data\FormTargetPayload;
 use App\Models\Traits\HasUuid;
 use App\Traits\HasPoints;
 use Database\Factories\FormSubmissionFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,7 +19,13 @@ use Illuminate\Support\Carbon;
 use Override;
 
 /**
+ * @property int $group_id
+ * @property int|null $advice_id
  * @property Carbon $submitted_at
+ * @property Carbon|null $confirmed_at
+ * @property Carbon|null $confirmation_expires_at
+ * @property FormTargetPayload|null $target_payload
+ * @property Carbon|null $targets_failed_at
  *
  * @implements Pointable<self>
  */
@@ -37,6 +46,17 @@ class FormSubmission extends Model implements Pointable
         'form_description',
         'submitted_at',
         'group_id',
+        'confirmed_at',
+        'confirmation_token_hash',
+        'confirmation_expires_at',
+        'target_payload',
+        'targets_failed_at',
+        'targets_error',
+    ];
+
+    protected $hidden = [
+        'confirmation_token_hash',
+        'target_payload',
     ];
 
     #[Override]
@@ -48,6 +68,10 @@ class FormSubmission extends Model implements Pointable
         return [
             'submitted_at' => 'datetime',
             'seen' => 'boolean',
+            'confirmed_at' => 'datetime',
+            'confirmation_expires_at' => 'datetime',
+            'target_payload' => FormTargetPayload::class,
+            'targets_failed_at' => 'datetime',
         ];
     }
 
@@ -60,6 +84,24 @@ class FormSubmission extends Model implements Pointable
     }
 
     /**
+     * @return BelongsTo<Group, $this>
+     */
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(Group::class);
+    }
+
+    /**
+     * The advice created from this submission.
+     *
+     * @return BelongsTo<Advice, $this>
+     */
+    public function advice(): BelongsTo
+    {
+        return $this->belongsTo(Advice::class);
+    }
+
+    /**
      * @return HasMany<SubmissionField, $this>
      */
     public function submissionFields(): HasMany
@@ -67,17 +109,31 @@ class FormSubmission extends Model implements Pointable
         return $this->hasMany(SubmissionField::class)->orderBy('sort_order');
     }
 
-    public function handleCreators(): void
+    public function isAwaitingConfirmation(): bool
     {
-        if ($this->formDefinition->adviceCreator) {
-            $advice = $this->formDefinition->adviceCreator->createAdvice($this);
-            $this->update([
-                'advice_id' => $advice->id,
-            ]);
-        }
+        return $this->confirmation_token_hash !== null && $this->confirmed_at === null;
+    }
 
-        if ($this->formDefinition->mapPointCreator) {
-            $this->formDefinition->mapPointCreator->createMapPoint($this);
-        }
+    public function isConfirmationExpired(): bool
+    {
+        return $this->confirmation_expires_at !== null && $this->confirmation_expires_at->isPast();
+    }
+
+    /**
+     * @param  Builder<FormSubmission>  $query
+     */
+    #[Scope]
+    protected function unconfirmed(Builder $query): void
+    {
+        $query->whereNotNull('confirmation_token_hash')->whereNull('confirmed_at');
+    }
+
+    /**
+     * @param  Builder<FormSubmission>  $query
+     */
+    #[Scope]
+    protected function withoutUnconfirmed(Builder $query): void
+    {
+        $query->where(fn (Builder $query) => $query->whereNull('confirmation_token_hash')->orWhereNotNull('confirmed_at'));
     }
 }

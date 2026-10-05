@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import ImageLightbox from '@/components/ImageLightbox.vue';
 import { Button } from '@/shadcn/components/ui/button';
-import { Dialog, DialogContent } from '@/shadcn/components/ui/dialog';
 import { ImageIcon, XIcon } from '@lucide/vue';
 import { computed, ref } from 'vue';
 
@@ -9,6 +9,7 @@ const props = withDefaults(
         maxImages?: number;
         disabled?: boolean;
         hasError?: boolean;
+        /** Urls of stored images. */
         storedPaths?: string[];
     }>(),
     {
@@ -28,14 +29,22 @@ const emit = defineEmits<{
 const inputRef = ref<HTMLInputElement | null>(null);
 const lightboxSrc = ref<string | null>(null);
 
-const previews = computed<string[]>(() => {
+/** Stored images are served by a route that scales them down to the height the thumbnails are shown at. */
+function thumbnail(url: string): string {
+    return url.startsWith('blob:') ? url : `${url}?h=192`;
+}
+
+const previews = computed<Array<{ src: string; thumbnail: string }>>(() => {
+    let urls: string[] = props.storedPaths;
+
     if (modelValue.value && modelValue.value.length > 0) {
-        if (modelValue.value[0] instanceof File) {
-            return (modelValue.value as File[]).map((file) => URL.createObjectURL(file));
-        }
-        return (modelValue.value as string[]).map((path) => `/storage/${path}`);
+        urls =
+            modelValue.value[0] instanceof File
+                ? (modelValue.value as File[]).map((file) => URL.createObjectURL(file))
+                : (modelValue.value as string[]);
     }
-    return props.storedPaths.map((path) => `/storage/${path}`);
+
+    return urls.map((url) => ({ src: url, thumbnail: thumbnail(url) }));
 });
 
 const canAddMore = computed(() => (modelValue.value?.length ?? 0) < props.maxImages);
@@ -66,13 +75,13 @@ function removeFile(index: number) {
 <template>
     <div class="space-y-3">
         <div v-if="previews.length > 0" class="flex flex-wrap gap-3">
-            <div v-for="(src, index) in previews" :key="index" class="group relative">
+            <div v-for="(preview, index) in previews" :key="index" class="group relative">
                 <img
-                    :src="src"
+                    :src="preview.thumbnail"
                     alt="Vorschau"
-                    class="h-24 w-24 rounded-md border object-cover"
+                    class="h-24 w-auto max-w-full rounded-md border object-contain"
                     :class="{ 'cursor-zoom-in': disabled }"
-                    @click="disabled ? (lightboxSrc = src) : undefined"
+                    @click="disabled ? (lightboxSrc = preview.src) : undefined"
                 />
                 <button
                     v-if="!disabled"
@@ -95,9 +104,5 @@ function removeFile(index: number) {
         </div>
     </div>
 
-    <Dialog :open="lightboxSrc !== null" @update:open="(open) => !open && (lightboxSrc = null)">
-        <DialogContent class="max-w-screen-lg p-2">
-            <img :src="lightboxSrc ?? ''" alt="Vollansicht" class="max-h-[90vh] w-full rounded object-contain" />
-        </DialogContent>
-    </Dialog>
+    <ImageLightbox v-model:src="lightboxSrc" alt="Vollansicht" />
 </template>

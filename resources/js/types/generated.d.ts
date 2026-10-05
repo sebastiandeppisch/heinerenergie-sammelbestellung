@@ -52,6 +52,15 @@ id: string,
 name: string,
 result: App.Enums.AdviceStatusResult,
 };
+export type AdviceTargetPayload = {
+first_name: any,
+last_name: any,
+email: any,
+phone: any,
+address: any,
+type: App.Enums.AdviceType,
+group_id: number,
+};
 export type ChecklistEntryData = {
 id: string,
 form_definition: App.Data.FormDefinitionData,
@@ -115,6 +124,7 @@ show_next_form_button: boolean,
 next_form_button_text: string | null,
 type: App.Enums.FormType,
 allowed_embed_domains: string[] | null,
+requires_email_confirmation: boolean,
 };
 export type FormFieldData = {
 id: string,
@@ -147,6 +157,18 @@ form_name: string,
 fields: App.Data.SubmissionFieldData[],
 submitted_at: string,
 seen: boolean,
+awaiting_confirmation: boolean,
+targets_failed: boolean,
+};
+export type FormTargetNoticeData = {
+title: string,
+text: string | null,
+url: string | null,
+url_label: string | null,
+};
+export type FormTargetPayload = {
+advice: App.Data.AdviceTargetPayload | null,
+map_point: App.Data.MapPointTargetPayload | null,
 };
 export type FormToAdviceMappingData = {
 enabled: boolean,
@@ -160,6 +182,7 @@ advice_type_direct: string | null,
 advice_type_home_option_value: string | null,
 advice_type_virtual_option_value: string | null,
 default_group_id: string | null,
+condition_field_id: string | null,
 };
 export type FormToMapPointCharacteristicData = {
 option_value: string,
@@ -229,6 +252,10 @@ name: string,
 email: string,
 is_admin: boolean,
 is_active: boolean,
+};
+export type ImageData = {
+name: string,
+url: string,
 };
 export type MailBodyData = {
 readonly uid: string,
@@ -328,6 +355,7 @@ label: string,
 value: number | string | string[] | null,
 display_value: string,
 is_public: boolean,
+images: App.Data.ImageData[],
 characteristic_id: string | null,
 };
 export type MapPointImportResultData = {
@@ -370,6 +398,15 @@ id: string,
 name: string,
 columns: App.Data.MapPointSpreadsheetColumnData[],
 key_field: App.Enums.MapPointSpreadsheetField,
+};
+export type MapPointTargetPayload = {
+title: any,
+description: any,
+coordinate: any,
+category_id: number | null,
+group_id: number,
+field_values: Record<string, any>,
+characteristic_ids: number[],
 };
 export type NextcloudGroupUserData = {
 nc_id: string | null,

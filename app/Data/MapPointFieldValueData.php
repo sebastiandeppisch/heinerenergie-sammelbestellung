@@ -7,6 +7,7 @@ namespace App\Data;
 use App\Enums\FieldType;
 use App\Models\MapPointField;
 use App\Models\MapPointFieldOption;
+use App\Services\MapPointImageAccess;
 use Illuminate\Support\Carbon;
 use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
@@ -31,27 +32,53 @@ class MapPointFieldValueData extends Data
         /** The value as shown to people: option labels instead of option values, German number and date formats. */
         public string $display_value,
         public bool $is_public,
+        /**
+         * The images of an image field. Its value is left out, because the paths are internal.
+         *
+         * @var array<int, ImageData>
+         */
+        public array $images = [],
         /** The characteristic of the point the field belongs to, null for fields of the category and former values. */
         public ?string $characteristic_id = null,
     ) {}
 
     public static function fromModel(MapPointField $model, bool $isPublic, ?string $characteristicId = null): self
     {
+        $isImage = $model->type === FieldType::IMAGE;
+
         return new self(
             id: $model->uuid,
             field_id: $model->formField?->uuid,
             type: $model->type,
             label: $model->label,
-            value: $model->value,
+            value: $isImage ? null : $model->value,
             display_value: self::displayValue($model),
             is_public: $isPublic,
+            images: $isImage ? self::images($model) : [],
             characteristic_id: $characteristicId,
+        );
+    }
+
+    /**
+     * @return array<int, ImageData>
+     */
+    private static function images(MapPointField $model): array
+    {
+        return array_map(
+            fn (string $path): ImageData => new ImageData(basename($path), MapPointImageAccess::url($model->mapPoint, $path)),
+            array_values((array) $model->value),
         );
     }
 
     private static function displayValue(MapPointField $model): string
     {
         $value = $model->value;
+
+        if ($model->type === FieldType::IMAGE) {
+            $count = count((array) $value);
+
+            return $count === 1 ? '1 Bild' : $count.' Bilder';
+        }
 
         if (in_array($model->type, [FieldType::SELECT, FieldType::RADIO, FieldType::CHECKBOX], true)) {
             $labels = $model->options->mapWithKeys(fn (MapPointFieldOption $option): array => [$option->value => $option->label]);

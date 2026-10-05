@@ -244,6 +244,7 @@ class FormField extends Model
         });
 
         FormDefinitionToAdvice::where('advice_type_field_id', $this->id)->update(['advice_type_field_id' => null]);
+        FormDefinitionToAdvice::where('condition_field_id', $this->id)->update(['condition_field_id' => null]);
 
         FormFieldOption::where('form_field_id', $this->id)->get()->each->delete();
 

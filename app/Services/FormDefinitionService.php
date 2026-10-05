@@ -210,6 +210,9 @@ class FormDefinitionService
             }
         }
 
+        $condition = $mapping->condition_field_id === null ? null : FormField::where('uuid', $mapping->condition_field_id)->first();
+        $creator->conditionField()->associate($condition);
+
         if ($mapping->default_group_id) {
             $creator->default_group_id = optional(Group::where('uuid', $mapping->default_group_id)->first())->id;
         } else {

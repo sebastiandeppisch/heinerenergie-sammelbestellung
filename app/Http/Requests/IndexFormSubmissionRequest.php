@@ -33,6 +33,7 @@ class IndexFormSubmissionRequest extends FormRequest
             'dateFrom' => ['nullable', 'date'],
             'dateTo' => ['nullable', 'date', 'after_or_equal:dateFrom'],
             'view' => ['string', 'in:cards,table'],
+            'confirmation' => ['string', 'in:all,unconfirmed,hide_unconfirmed'],
         ];
     }
 
@@ -62,6 +63,11 @@ class IndexFormSubmissionRequest extends FormRequest
     public function dateTo(): ?string
     {
         return $this->input('dateTo', null);
+    }
+
+    public function confirmation(): string
+    {
+        return $this->input('confirmation', 'all');
     }
 
     public function view(): string

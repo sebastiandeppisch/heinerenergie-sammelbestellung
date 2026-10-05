@@ -58,6 +58,7 @@ class MapPointData extends Data
         $publicFieldIds ??= MapPointCategory::publicFieldIds();
         $fieldService = app(MapPointFieldService::class);
         $model->loadMissing(['characteristics.category', 'fields.options', 'fields.formField']);
+        $model->fields->each(fn (MapPointField $field): MapPointField => $field->setRelation('mapPoint', $model));
         $characteristicIdsByFormDefinition = $model->characteristics->whereNotNull('form_definition_id')->pluck('uuid', 'form_definition_id');
 
         $fields = $fieldService->activeFields($model, $tree)

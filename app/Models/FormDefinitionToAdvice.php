@@ -4,18 +4,13 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Data\AdviceTargetPayload;
 use App\Enums\AdviceType;
-use App\Events\Advice\AdviceCreatedByFormSubmission;
-use App\Jobs\SendNewAdviceInfoToAdvisors;
-use App\Mail\AdviceCreated;
 use App\Models\Traits\HasUuid;
 use Database\Factories\FormDefinitionToAdviceFactory;
-use DB;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Log;
-use Mail;
 
 class FormDefinitionToAdvice extends Model
 {
@@ -87,46 +82,46 @@ class FormDefinitionToAdvice extends Model
         return $this->belongsTo(FormField::class, 'last_name_field_id');
     }
 
-    public function createAdvice(FormSubmission $submission): Advice
+    /**
+     * Optional checkbox that must be ticked for an advice to be created.
+     *
+     * @return BelongsTo<FormField, $this>
+     */
+    public function conditionField(): BelongsTo
     {
-        $advice = DB::transaction(function () use ($submission) {
-            $addressField = $this->addressField->getSubmissionField($submission);
-            $emailField = $this->emailField->getSubmissionField($submission);
-            $phoneField = $this->phoneField->getSubmissionField($submission);
-            $firstNameField = $this->firstNameField->getSubmissionField($submission);
-            $lastNameField = $this->lastNameField->getSubmissionField($submission);
+        return $this->belongsTo(FormField::class, 'condition_field_id');
+    }
 
-            // Determine advice type: use direct value if set, otherwise map from field
-            $adviceType = $this->getAdviceType($submission);
+    /**
+     * Reads the advice from the submission. Null when the condition checkbox was not ticked.
+     */
+    public function prepare(FormSubmission $submission): ?AdviceTargetPayload
+    {
+        if (! $this->isConditionMet($submission)) {
+            return null;
+        }
 
-            $advice = Advice::create([
-                'address' => $addressField->value,
-                'email' => $emailField->value,
-                'phone' => $phoneField->value,
-                'first_name' => $firstNameField->value,
-                'last_name' => $lastNameField->value,
-                'group_id' => $submission->group_id,
-                'type' => $adviceType,
-            ]);
+        return new AdviceTargetPayload(
+            first_name: $this->firstNameField->getSubmissionField($submission)->value,
+            last_name: $this->lastNameField->getSubmissionField($submission)->value,
+            email: $this->emailField->getSubmissionField($submission)->value,
+            phone: $this->phoneField->getSubmissionField($submission)->value,
+            address: $this->addressField->getSubmissionField($submission)->value,
+            type: $this->getAdviceType($submission),
+            group_id: $submission->group_id,
+        );
+    }
 
-            $advice->save();
+    /**
+     * A submission without an answer to the condition counts as not ticked.
+     */
+    private function isConditionMet(FormSubmission $submission): bool
+    {
+        if ($this->conditionField === null) {
+            return true;
+        }
 
-            event(new AdviceCreatedByFormSubmission($advice, $submission));
-
-            $advice = $advice->fresh();
-
-            return $advice;
-        });
-
-        Log::info('Created advice from form submission', [
-            'advice_id' => $advice->id,
-            'form_submission_id' => $submission->id,
-        ]);
-        SendNewAdviceInfoToAdvisors::dispatch($advice);
-
-        Mail::to($advice->email)->send(new AdviceCreated($advice));
-
-        return $advice;
+        return ! empty($this->conditionField->submissionFields()->where('form_submission_id', $submission->id)->first()->value);
     }
 
     /**
