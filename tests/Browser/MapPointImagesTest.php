@@ -62,3 +62,19 @@ test('stored images are shown in the detail row and can be removed', function ()
     expect($mapPoint->fields()->count())->toBe(0);
     Storage::disk('images')->assertMissing($path);
 });
+
+test('a point with an empty image field can be edited and saved', function (): void {
+    $category = MapPointCategory::factory()->for($this->group)->create();
+    $category->findOrCreateFormDefinition()->fields()->create(['type' => FieldType::IMAGE, 'label' => 'Foto vom Igeltor', 'sort_order' => 0, 'max_images' => 2]);
+    $mapPoint = MapPoint::factory()->for($this->group)->create(['category_id' => $category->id, 'title' => 'Igeltor']);
+
+    visit(route('mappoints.edit', $mapPoint))
+        ->assertCount('[data-test=map-point-images] img', 0)
+        ->fill('title', 'Igeltor am Park')
+        ->click('Kartenpunkt aktualisieren')
+        ->assertSee('Der Kartenpunkt wurde aktualisiert')
+        ->assertNoJavaScriptErrors();
+
+    expect($mapPoint->refresh()->title)->toBe('Igeltor am Park')
+        ->and($mapPoint->fields()->count())->toBe(0);
+});

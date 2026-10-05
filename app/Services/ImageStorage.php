@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Services;
 
 use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Intervention\Image\Encoders\JpegEncoder;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Laravel\Facades\Image;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Stores uploaded images on a disk that is not public. They are served by routes that check access first,
@@ -83,28 +84,48 @@ class ImageStorage
 
     /**
      * The image, or its variant scaled to the given width or height. Access must be checked before. The files
-     * never change, their names are random, so the name serves as ETag. Clients may keep them only shortly,
-     * because the image may become private.
+     * never change, their names are random, so a client that still has the file gets a 304 without the file
+     * being read. Clients may keep files only shortly, because the image may become private.
      */
-    public function response(string $path, ?int $width = null, ?int $height = null): StreamedResponse
+    public function response(Request $request, string $path, ?int $width = null, ?int $height = null): Response
     {
-        abort_unless($this->disk()->exists($path), 404);
         abort_if($width !== null && $height !== null, 404);
         abort_unless($width === null || in_array($width, self::WIDTHS, true), 404);
         abort_unless($height === null || in_array($height, self::HEIGHTS, true), 404);
+
+        $notModified = $this->withCacheHeaders(new Response, $path, $width, $height);
+
+        if ($notModified->isNotModified($request)) {
+            return $notModified;
+        }
+
+        abort_unless($this->disk()->exists($path), 404);
 
         $response = $width === null && $height === null
             ? $this->disk()->response($path)
             : $this->cacheDisk()->response($this->variant($path, $width, $height));
 
-        $response->setEtag(md5($path.'@'.$width.'x'.$height));
+        return $this->withCacheHeaders($response, $path, $width, $height);
+    }
+
+    public function etag(string $path, ?int $width = null, ?int $height = null): string
+    {
+        return md5($path.'@'.$width.'x'.$height);
+    }
+
+    private function withCacheHeaders(Response $response, string $path, ?int $width, ?int $height): Response
+    {
+        $response->setEtag($this->etag($path, $width, $height));
         $response->setPrivate();
         $response->setMaxAge(300);
-        $response->isNotModified(request());
 
         return $response;
     }
 
+    /**
+     * The variant is written to a temporary file and then moved, so a concurrent request never serves a file
+     * that is still being written.
+     */
     private function variant(string $path, ?int $width, ?int $height): string
     {
         $variant = ($width !== null ? $width : 'h'.$height).'/'.$path;
@@ -112,7 +133,9 @@ class ImageStorage
         if (! $this->cacheDisk()->exists($variant)) {
             $image = Image::decode($this->disk()->get($path) ?? '');
             $image->scaleDown(width: $width, height: $height);
-            $this->cacheDisk()->put($variant, (string) $image->encode(new JpegEncoder(quality: 80, strip: true)));
+            $temporary = $variant.'.'.Str::uuid().'.tmp';
+            $this->cacheDisk()->put($temporary, (string) $image->encode(new JpegEncoder(quality: 80, strip: true)));
+            $this->cacheDisk()->move($temporary, $variant);
         }
 
         return $variant;

@@ -188,7 +188,8 @@ Route::get('/map/{mapEmbed}', [MapPointController::class, 'publicMap'])
 
 // Public images are served to anyone, so the route is outside of the auth group. Access is checked per image.
 Route::get('/map-point-images/{mapPoint}/{image}', [ImageController::class, 'mapPoint'])
-    ->name('map-point-images.show');
+    ->name('map-point-images.show')
+    ->middleware('throttle:map-point-images');
 
 Route::put('/users/{user}/password', [UserController::class, 'changePassword'])
     ->name('users.changePassword');

@@ -10,11 +10,13 @@ use App\Models\MapEmbed;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
 use App\Models\User;
+use App\Services\ImageStorage;
 use App\Services\SessionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Tests\Concerns\AutoAttachesFormEmbedToken;
@@ -115,6 +117,35 @@ test('images are validated', function (Closure $images, string $errorKey): void 
     'image of another point' => [fn (string $otherName): array => [$otherName], '.0'],
     'path instead of a name' => [fn (string $otherName): array => ['../'.$otherName], '.0'],
 ]);
+
+test('the same stored image cannot be entered twice', function (): void {
+    $mapPoint = MapPoint::factory()->for($this->group)->create(['category_id' => $this->category->id]);
+    $admin = imageTestAdmin($this->group);
+    saveImages($admin, $mapPoint, $this->category, $this->photo, [UploadedFile::fake()->image('a.jpg')]);
+    $name = basename(storedImagePaths($mapPoint, $this->photo)[0]);
+
+    $this->put(route('mappoints.update', $mapPoint), imageTestPayload($mapPoint, $this->category, $this->photo, [$name, $name]))
+        ->assertSessionHasErrors("field_values.{$this->photo->uuid}.1");
+});
+
+test('a client that still has the image gets a 304 without the variant being created', function (): void {
+    $mapPoint = MapPoint::factory()->for($this->group)->create(['category_id' => $this->category->id]);
+    saveImages(imageTestAdmin($this->group), $mapPoint, $this->category, $this->photo, [UploadedFile::fake()->image('a.jpg')]);
+    $path = storedImagePaths($mapPoint, $this->photo)[0];
+    $etag = '"'.app(ImageStorage::class)->etag($path, 400).'"';
+
+    $this->get(route('map-point-images.show', [$mapPoint, basename($path), 'w' => 400]), ['If-None-Match' => $etag])
+        ->assertStatus(304)
+        ->assertContent('');
+
+    Storage::disk('image-cache')->assertMissing('400/'.$path);
+    $this->get(route('map-point-images.show', [$mapPoint, basename($path), 'w' => 400]))->assertOk()->assertHeader('ETag', $etag);
+    expect(Storage::disk('image-cache')->allFiles())->toBe(['400/'.$path]);
+});
+
+test('the public image route is rate limited', function (): void {
+    expect(Route::getRoutes()->getByName('map-point-images.show')->gatherMiddleware())->toContain('throttle:map-point-images');
+});
 
 test('removing and replacing images deletes their files and variants, sorting keeps them', function (): void {
     $mapPoint = MapPoint::factory()->for($this->group)->create(['category_id' => $this->category->id, 'published' => true]);
