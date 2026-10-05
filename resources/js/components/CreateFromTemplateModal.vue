@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Button from '@/shadcn/components/ui/button/Button.vue';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/shadcn/components/ui/dialog';
-import { FormControl, FormField, FormItem, FormLabel } from '@/shadcn/components/ui/form';
+import { Label } from '@/shadcn/components/ui/label';
 import { Select } from '@/shadcn/components/ui/select';
 import SelectContent from '@/shadcn/components/ui/select/SelectContent.vue';
 import SelectItem from '@/shadcn/components/ui/select/SelectItem.vue';
@@ -100,28 +100,24 @@ function handleCancel() {
             </DialogHeader>
 
             <div class="grid gap-4 py-4">
-                <FormField v-slot="{ componentField }" name="group_id">
-                    <FormItem>
-                        <FormLabel>Initiative *</FormLabel>
-                        <FormControl>
-                            <Select v-model="selectedGroupId">
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Wähle eine Initiative" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem v-for="group in groups" :key="group.id" :value="group.id">
-                                        {{ group.name }}
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </FormControl>
-                    </FormItem>
-                </FormField>
+                <div class="grid gap-2">
+                    <Label for="template-group">Initiative *</Label>
+                    <Select v-model="selectedGroupId">
+                        <SelectTrigger id="template-group">
+                            <SelectValue placeholder="Wähle eine Initiative" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem v-for="group in groups" :key="group.id" :value="group.id">
+                                {{ group.name }}
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
 
-                <FormItem v-if="templateType === 'map_point'">
-                    <FormLabel>Kategorie der Kartenpunkte</FormLabel>
+                <div v-if="templateType === 'map_point'" class="grid gap-2">
+                    <Label for="template-category">Kategorie der Kartenpunkte</Label>
                     <Select v-model="selectedCategoryId">
-                        <SelectTrigger data-test="template-category">
+                        <SelectTrigger id="template-category" data-test="template-category">
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -136,7 +132,7 @@ function handleCancel() {
                             </SelectItem>
                         </SelectContent>
                     </Select>
-                </FormItem>
+                </div>
             </div>
 
             <DialogFooter>
