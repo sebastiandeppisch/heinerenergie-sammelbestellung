@@ -36,7 +36,7 @@ function key(entry: string | File): string {
 function thumbnail(entry: string | File): string {
     if (typeof entry === 'string') {
         const image = props.storedImages.find((stored) => stored.name === entry);
-        return image ? `${image.url}?w=400` : '';
+        return image ? `${image.url}?h=192` : '';
     }
 
     if (!objectUrls.has(entry)) {
@@ -62,7 +62,7 @@ onBeforeUnmount(() => objectUrls.forEach((url) => URL.revokeObjectURL(url)));
     <div class="space-y-3">
         <div ref="container" class="flex flex-wrap gap-3" data-test="map-point-images">
             <div v-for="(entry, index) in entries" :key="key(entry)" class="group relative">
-                <img :src="thumbnail(entry)" alt="Vorschau" class="h-24 w-24 rounded-md border object-cover" />
+                <img :src="thumbnail(entry)" alt="Vorschau" class="h-24 w-auto max-w-full rounded-md border object-contain" />
                 <div
                     v-if="entries.length > 1"
                     class="image-drag-handle absolute bottom-1 left-1 cursor-grab rounded bg-background/80 p-0.5"

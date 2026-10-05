@@ -8,7 +8,8 @@ use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
 /**
- * A stored image. The url checks access on each request; append ?w=400 or ?w=800 for a smaller variant.
+ * A stored image. The url checks access on each request; append ?w=400 or ?w=800 for a smaller variant,
+ * ?h=128 or ?h=192 for a thumbnail of that height.
  */
 #[TypeScript]
 class ImageData extends Data

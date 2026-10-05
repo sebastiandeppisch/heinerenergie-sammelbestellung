@@ -27,6 +27,9 @@ class ImageStorage
     /** The widths a variant may be requested in, so a client cannot fill the disk with arbitrary sizes. */
     public const WIDTHS = [400, 800];
 
+    /** The heights of thumbnails: twice the 64 and 96 CSS pixels they are shown at, for high density screens. */
+    public const HEIGHTS = [128, 192];
+
     private const int MAX_EDGE = 1920;
 
     /**
@@ -64,8 +67,8 @@ class ImageStorage
     {
         $this->disk()->delete($paths);
 
-        foreach (self::WIDTHS as $width) {
-            $this->cacheDisk()->delete(array_map(fn (string $path): string => $width.'/'.$path, $paths));
+        foreach ($this->variantDirectories() as $directory) {
+            $this->cacheDisk()->delete(array_map(fn (string $path): string => $directory.'/'.$path, $paths));
         }
     }
 
@@ -73,26 +76,28 @@ class ImageStorage
     {
         $this->disk()->deleteDirectory($directory);
 
-        foreach (self::WIDTHS as $width) {
-            $this->cacheDisk()->deleteDirectory($width.'/'.$directory);
+        foreach ($this->variantDirectories() as $variantDirectory) {
+            $this->cacheDisk()->deleteDirectory($variantDirectory.'/'.$directory);
         }
     }
 
     /**
-     * The image, or its variant of the given width. Access must be checked before. The files never change,
-     * their names are random, so the name serves as ETag. Clients may keep them only shortly, because the
-     * image may become private.
+     * The image, or its variant scaled to the given width or height. Access must be checked before. The files
+     * never change, their names are random, so the name serves as ETag. Clients may keep them only shortly,
+     * because the image may become private.
      */
-    public function response(string $path, ?int $width = null): StreamedResponse
+    public function response(string $path, ?int $width = null, ?int $height = null): StreamedResponse
     {
         abort_unless($this->disk()->exists($path), 404);
+        abort_if($width !== null && $height !== null, 404);
         abort_unless($width === null || in_array($width, self::WIDTHS, true), 404);
+        abort_unless($height === null || in_array($height, self::HEIGHTS, true), 404);
 
-        $response = $width === null
+        $response = $width === null && $height === null
             ? $this->disk()->response($path)
-            : $this->cacheDisk()->response($this->variant($path, $width));
+            : $this->cacheDisk()->response($this->variant($path, $width, $height));
 
-        $response->setEtag(md5($path.'@'.$width));
+        $response->setEtag(md5($path.'@'.$width.'x'.$height));
         $response->setPrivate();
         $response->setMaxAge(300);
         $response->isNotModified(request());
@@ -100,17 +105,28 @@ class ImageStorage
         return $response;
     }
 
-    private function variant(string $path, int $width): string
+    private function variant(string $path, ?int $width, ?int $height): string
     {
-        $variant = $width.'/'.$path;
+        $variant = ($width !== null ? $width : 'h'.$height).'/'.$path;
 
         if (! $this->cacheDisk()->exists($variant)) {
             $image = Image::decode($this->disk()->get($path) ?? '');
-            $image->scaleDown(width: $width);
+            $image->scaleDown(width: $width, height: $height);
             $this->cacheDisk()->put($variant, (string) $image->encode(new JpegEncoder(quality: 80, strip: true)));
         }
 
         return $variant;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function variantDirectories(): array
+    {
+        return [
+            ...array_map(fn (int $width): string => (string) $width, self::WIDTHS),
+            ...array_map(fn (int $height): string => 'h'.$height, self::HEIGHTS),
+        ];
     }
 
     private function put(ImageInterface $image, string $directory): string

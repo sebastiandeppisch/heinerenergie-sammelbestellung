@@ -122,7 +122,8 @@ test('removing and replacing images deletes their files and variants, sorting ke
     saveImages($admin, $mapPoint, $this->category, $this->photo, [UploadedFile::fake()->image('a.jpg'), UploadedFile::fake()->image('b.jpg')]);
     [$first, $second] = storedImagePaths($mapPoint, $this->photo);
     $this->get(route('map-point-images.show', [$mapPoint, basename($first), 'w' => 400]))->assertOk();
-    Storage::disk('image-cache')->assertExists('400/'.$first);
+    $this->get(route('map-point-images.show', [$mapPoint, basename($first), 'h' => 128]))->assertOk();
+    Storage::disk('image-cache')->assertExists(['400/'.$first, 'h128/'.$first]);
 
     saveImages($admin, $mapPoint, $this->category, $this->photo, [basename($second), basename($first)]);
     expect(storedImagePaths($mapPoint, $this->photo))->toBe([$second, $first]);
@@ -130,7 +131,7 @@ test('removing and replacing images deletes their files and variants, sorting ke
     saveImages($admin, $mapPoint, $this->category, $this->photo, [basename($second), UploadedFile::fake()->image('c.jpg')]);
     [, $third] = storedImagePaths($mapPoint, $this->photo);
     Storage::disk('images')->assertMissing($first)->assertExists([$second, $third]);
-    Storage::disk('image-cache')->assertMissing('400/'.$first);
+    Storage::disk('image-cache')->assertMissing(['400/'.$first, 'h128/'.$first]);
 
     saveImages($admin, $mapPoint, $this->category, $this->photo, '');
     expect($mapPoint->fields()->count())->toBe(0);
@@ -170,7 +171,12 @@ test('images of public fields of published points are served to anyone, others o
     expect(getimagesizefromstring($response->streamedContent())[0])->toBe(400)
         ->and($response->headers->get('Cache-Control'))->toContain('private');
 
+    $thumbnail = $this->get($url.'?h=128')->assertOk();
+    expect(getimagesizefromstring($thumbnail->streamedContent()))->toMatchArray([0 => 171, 1 => 128]);
+
     $this->get($url.'?w=123')->assertNotFound();
+    $this->get($url.'?h=100')->assertNotFound();
+    $this->get($url.'?w=400&h=128')->assertNotFound();
 
     $mapPoint->update(['published' => false]);
     $this->get($url)->assertNotFound();

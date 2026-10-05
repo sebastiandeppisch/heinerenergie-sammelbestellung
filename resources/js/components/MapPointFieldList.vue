@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Dialog, DialogContent, DialogTitle } from '@/shadcn/components/ui/dialog';
+import ImageLightbox from '@/components/ImageLightbox.vue';
 import { Lock } from '@lucide/vue';
 import { ref } from 'vue';
 
@@ -14,7 +14,7 @@ withDefaults(
     },
 );
 
-const openedImage = ref<App.Data.ImageData | null>(null);
+const openedImageUrl = ref<string | null>(null);
 
 function href(field: App.Data.MapPointFieldValueData): string | null {
     if (field.type === 'email') {
@@ -34,9 +34,10 @@ function href(field: App.Data.MapPointFieldValueData): string | null {
                 {{ field.label }}
                 <Lock v-if="markInternal && !field.is_public" class="mt-0.5 h-3 w-3 shrink-0" aria-label="intern" />
             </dt>
-            <dd v-if="field.type === 'image'" class="flex flex-wrap gap-2" data-test="map-point-field-images">
-                <button v-for="image in field.images" :key="image.name" type="button" class="cursor-zoom-in" @click="openedImage = image">
-                    <img :src="`${image.url}?w=400`" :alt="field.label" loading="lazy" class="h-16 w-16 rounded border object-cover" />
+            <!-- Images get a row of their own below the label. The minimum width keeps Leaflet popups, which measure their width before the images are loaded, wide enough. -->
+            <dd v-if="field.type === 'image'" class="col-span-2 flex min-w-48 flex-wrap gap-2" data-test="map-point-field-images">
+                <button v-for="image in field.images" :key="image.name" type="button" class="cursor-zoom-in" @click="openedImageUrl = image.url">
+                    <img :src="`${image.url}?h=128`" :alt="field.label" loading="lazy" class="h-16 w-auto max-w-full rounded border object-contain" />
                 </button>
             </dd>
             <dd v-else class="break-words whitespace-pre-line">
@@ -46,10 +47,5 @@ function href(field: App.Data.MapPointFieldValueData): string | null {
         </template>
     </dl>
 
-    <Dialog :open="openedImage !== null" @update:open="(open) => !open && (openedImage = null)">
-        <DialogContent class="max-w-screen-lg p-2">
-            <DialogTitle class="sr-only">Bild</DialogTitle>
-            <img v-if="openedImage" :src="openedImage.url" alt="" class="max-h-[90vh] w-full rounded object-contain" />
-        </DialogContent>
-    </Dialog>
+    <ImageLightbox v-model:src="openedImageUrl" />
 </template>
