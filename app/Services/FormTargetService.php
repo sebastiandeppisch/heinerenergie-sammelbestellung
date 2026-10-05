@@ -121,7 +121,7 @@ class FormTargetService
 
         // A later target may still fail and roll the advice back, so nothing leaves before the commit.
         SendNewAdviceInfoToAdvisors::dispatch($advice)->afterCommit();
-        Mail::to($advice->email)->send((new AdviceCreated($advice))->afterCommit());
+        Mail::to($advice->email)->send(new AdviceCreated($advice)->afterCommit());
 
         return $advice;
     }
