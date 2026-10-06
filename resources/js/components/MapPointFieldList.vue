@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import ImageLightbox from '@/components/ImageLightbox.vue';
+import MapPointCharacteristicBadge from '@/components/MapPointCharacteristics/MapPointCharacteristicBadge.vue';
 import { Lock } from '@lucide/vue';
 import { computed, ref } from 'vue';
 
 const props = withDefaults(
     defineProps<{
         fields: Array<App.Data.MapPointFieldValueData>;
-        /** The characteristics of the point, to group their fields under their name. */
+        /** The characteristics of the point. Each is shown as a badge with its fields below, also without fields. */
         characteristics?: Array<App.Data.MapPointCharacteristicData>;
         /** Marks internal fields, for admins who see public and internal values side by side. */
         markInternal?: boolean;
@@ -17,14 +18,17 @@ const props = withDefaults(
     },
 );
 
-/** Fields of the category first, then the fields of each characteristic under its name. */
-const groups = computed(() => [
-    { id: null, name: null, fields: props.fields.filter((field) => field.characteristic_id === null) },
-    ...props.characteristics.map((characteristic) => ({
-        id: characteristic.id,
-        name: characteristic.name,
+/** Fields of the category first, then each characteristic with its fields. */
+const categoryFields = computed(() => props.fields.filter((field) => field.characteristic_id === null));
+const characteristicGroups = computed(() =>
+    props.characteristics.map((characteristic) => ({
+        characteristic,
         fields: props.fields.filter((field) => field.characteristic_id === characteristic.id),
     })),
+);
+const groups = computed(() => [
+    ...(categoryFields.value.length > 0 ? [{ id: 'category', characteristic: null, fields: categoryFields.value }] : []),
+    ...characteristicGroups.value.map((group) => ({ id: group.characteristic.id, ...group })),
 ]);
 
 const openedImageUrl = ref<string | null>(null);
@@ -41,19 +45,26 @@ function href(field: App.Data.MapPointFieldValueData): string | null {
 </script>
 
 <template>
-    <dl class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm" data-test="map-point-fields">
-        <template v-for="group in groups" :key="group.id ?? 'category'">
-            <template v-if="group.fields.length > 0">
-                <dt v-if="group.name" class="col-span-2 mt-1 text-xs font-semibold" data-test="map-point-fields-characteristic">
-                    {{ group.name }}
-                </dt>
-                <template v-for="field in group.fields" :key="field.id">
-                    <dt class="flex items-start gap-1 text-muted-foreground">
+    <!-- Each label stands above its value, so long labels and values never squeeze each other in narrow popups. -->
+    <div class="space-y-3 text-sm" data-test="map-point-fields">
+        <div v-for="group in groups" :key="group.id" class="space-y-1.5">
+            <div v-if="group.characteristic" data-test="map-point-fields-characteristic">
+                <MapPointCharacteristicBadge :characteristic="group.characteristic" />
+            </div>
+            <!-- Below a characteristic, a line in its color ties the fields to the badge. -->
+            <dl
+                v-if="group.fields.length > 0"
+                class="space-y-2"
+                :class="{ 'ml-3 border-l-2 pl-3': group.characteristic }"
+                :style="group.characteristic?.color ? { borderColor: group.characteristic.color } : undefined"
+            >
+                <div v-for="field in group.fields" :key="field.id">
+                    <dt class="flex items-start gap-1 text-xs text-muted-foreground">
                         {{ field.label }}
                         <Lock v-if="markInternal && !field.is_public" class="mt-0.5 h-3 w-3 shrink-0" aria-label="intern" />
                     </dt>
-                    <!-- Images get a row of their own below the label. The minimum width keeps Leaflet popups, which measure their width before the images are loaded, wide enough. -->
-                    <dd v-if="field.type === 'image'" class="col-span-2 flex min-w-48 flex-wrap gap-2" data-test="map-point-field-images">
+                    <!-- The minimum width keeps Leaflet popups, which measure their width before the images are loaded, wide enough. -->
+                    <dd v-if="field.type === 'image'" class="mt-1 flex min-w-48 flex-wrap gap-2" data-test="map-point-field-images">
                         <button
                             v-for="image in field.images"
                             :key="image.name"
@@ -73,10 +84,10 @@ function href(field: App.Data.MapPointFieldValueData): string | null {
                         <a v-if="href(field)" :href="href(field)!" class="underline">{{ field.display_value }}</a>
                         <template v-else>{{ field.display_value }}</template>
                     </dd>
-                </template>
-            </template>
-        </template>
-    </dl>
+                </div>
+            </dl>
+        </div>
+    </div>
 
     <ImageLightbox v-model:src="openedImageUrl" />
 </template>

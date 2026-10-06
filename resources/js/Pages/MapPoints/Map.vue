@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import MapPointCharacteristicBadge from '@/components/MapPointCharacteristics/MapPointCharacteristicBadge.vue';
 import MapPointFieldList from '@/components/MapPointFieldList.vue';
 import { useFillViewportHeight } from '@/composables/useFillViewportHeight';
 import Button from '@/shadcn/components/ui/button/Button.vue';
@@ -109,22 +108,17 @@ function categoryIdToImagePath(category_id: string): string | undefined {
                             <div class="p-2">
                                 <h3 class="text-lg font-bold">{{ point.title }}</h3>
                                 <p class="text-sm">{{ point.description }}</p>
-                                <div v-if="point.characteristics.length > 0" class="mt-2 flex flex-wrap gap-1">
-                                    <MapPointCharacteristicBadge
-                                        v-for="characteristic in point.characteristics"
-                                        :key="characteristic.id"
-                                        :characteristic="characteristic"
-                                    />
-                                </div>
                                 <!-- Only admins see this map, so internal fields are shown and marked. -->
                                 <MapPointFieldList
-                                    v-if="point.fields.length > 0"
+                                    v-if="point.fields.length > 0 || point.characteristics.length > 0"
                                     :fields="point.fields"
                                     :characteristics="point.characteristics"
                                     mark-internal
                                     class="my-2"
                                 />
-                                <Button variant="outline" @click="router.visit(route('mappoints.edit', point.id))"> <Link /> Punkt öffnen </Button>
+                                <Button variant="outline" class="mt-3" @click="router.visit(route('mappoints.edit', point.id))">
+                                    <Link /> Punkt öffnen
+                                </Button>
                             </div>
                         </LPopup>
                     </LMarker>

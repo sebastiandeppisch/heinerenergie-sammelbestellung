@@ -207,23 +207,26 @@ test('the popup and the detail row of the table show the public field values', f
         ->assertNoJavaScriptErrors();
 });
 
-test('the popup shows the characteristics of the point and their public fields under their name', function (): void {
+test('the popup shows each characteristic of the point once, with its public fields below', function (): void {
     $category = MapPointCategory::factory()->for($this->group)->withoutImage()->create();
     $hedgehogGate = MapPointCharacteristic::factory()->for($category, 'category')->create(['name' => 'Igeltor', 'color' => '#2e7d32']);
     $width = $hedgehogGate->findOrCreateFormDefinition()->fields()->create(['type' => FieldType::NUMBER, 'label' => 'Breite (cm)', 'sort_order' => 0]);
     $hedgehogGate->syncPublicFields([$width->id]);
     $position = ['lat' => 49.8728475, 'lng' => 8.6510204];
     $mapPoint = MapPoint::factory()->for($this->group)->create([...$position, 'published' => true, 'category_id' => $category->id]);
-    $mapPoint->characteristics()->attach($hedgehogGate);
+    $deadwood = MapPointCharacteristic::factory()->for($category, 'category')->create(['name' => 'Totholz', 'sort_order' => 1]);
+    $mapPoint->characteristics()->attach([$hedgehogGate->id, $deadwood->id]);
     $width->createMapPointField($mapPoint, 13);
 
     $mapEmbed = MapEmbed::factory()->for($this->group)->create([...$position, 'zoom' => 13]);
     $mapEmbed->mapPointCategories()->sync([$category->id]);
 
-    visit(route('map.public', $mapEmbed))
+    $page = visit(route('map.public', $mapEmbed))
         ->click('.leaflet-marker-icon')
-        ->assertSeeIn('.leaflet-popup-content [data-test=characteristic-badge]', 'Igeltor')
-        ->assertSeeIn('.leaflet-popup-content [data-test=map-point-fields-characteristic]', 'Igeltor')
+        ->assertSeeIn('.leaflet-popup-content [data-test=map-point-fields-characteristic] [data-test=characteristic-badge]', 'Igeltor')
         ->assertSeeIn('.leaflet-popup-content', 'Breite (cm)')
+        ->assertSeeIn('.leaflet-popup-content', 'Totholz')
         ->assertNoJavaScriptErrors();
+
+    expect($page->script("document.querySelectorAll('.leaflet-popup-content [data-test=characteristic-badge]').length"))->toBe(2);
 });
