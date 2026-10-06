@@ -6,6 +6,7 @@ import CardHeader from '@/shadcn/components/ui/card/CardHeader.vue';
 import { Checkbox } from '@/shadcn/components/ui/checkbox';
 import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { Textarea } from '@/shadcn/components/ui/textarea';
 import { PlusIcon, TrashIcon } from '@lucide/vue';
 import { nanoid } from 'nanoid';
@@ -36,15 +37,59 @@ const props = withDefaults(
         requiredLocked?: boolean;
         /** Fields of map point categories are always optional, so "Pflichtfeld" is not offered. */
         alwaysOptional?: boolean;
+        /** All fields of the form, the field can depend on an earlier one with options. */
+        fields?: Array<FormFieldData>;
     }>(),
     {
         requiredLocked: false,
         alwaysOptional: false,
+        fields: () => [],
     },
 );
 
 const model = defineModel<FormFieldData>({
     required: true,
+});
+
+const ALWAYS_VISIBLE = 'always';
+
+/** Map point fields are no form a person fills in, and a locked field must always be asked. */
+const supportsCondition = computed(() => !props.alwaysOptional && !props.requiredLocked);
+
+/** A field shown only under a condition must never block a submission, so it is always optional. */
+const isOptional = computed(() => props.alwaysOptional || model.value.visible_if_field_id !== null);
+
+/** Only earlier fields, so the form reads from top to bottom and conditions never form a cycle. */
+const conditionFieldCandidates = computed(() => {
+    const position = props.fields.findIndex((field) => field.id === model.value.id);
+
+    return props.fields
+        .slice(0, position === -1 ? props.fields.length : position)
+        .filter((field) => [FIELD_TYPES.SELECT, FIELD_TYPES.RADIO, FIELD_TYPES.CHECKBOX].includes(field.type) && field.options.length > 0);
+});
+
+const conditionField = computed(() => props.fields.find((field) => field.id === model.value.visible_if_field_id));
+
+const conditionFieldId = computed({
+    get: () => model.value.visible_if_field_id ?? ALWAYS_VISIBLE,
+    set: (fieldId: string) => {
+        const field = conditionFieldCandidates.value.find((candidate) => candidate.id === fieldId);
+
+        model.value.visible_if_field_id = field?.id ?? null;
+        model.value.visible_if_option_value = field?.options[0]?.value ?? null;
+
+        if (field !== undefined) {
+            model.value.required = false;
+            model.value.options.forEach((option) => (option.is_required = false));
+        }
+    },
+});
+
+const conditionOptionValue = computed({
+    get: () => model.value.visible_if_option_value ?? '',
+    set: (value: string) => {
+        model.value.visible_if_option_value = value;
+    },
 });
 
 //TODO export arrays from backend
@@ -153,7 +198,7 @@ function addOption() {
         sort_order: model.value.options.length,
         is_default: false,
         id: uuidv4(),
-        is_required: true,
+        is_required: !isOptional.value,
     };
 
     model.value.options.push(newOption as FormFieldOptionData);
@@ -199,7 +244,7 @@ function onValueChanged(e: any) {
                         <Input id="field_label" v-model="model.label" placeholder="Feldbezeichnung" />
                     </div>
 
-                    <div class="mt-4 grid gap-2" v-if="model.type !== FIELD_TYPES.CHECKBOX && !props.alwaysOptional">
+                    <div class="mt-4 grid gap-2" v-if="model.type !== FIELD_TYPES.CHECKBOX && !isOptional">
                         <div class="flex items-center space-x-2">
                             <Checkbox id="field_required" v-model="model.required" :disabled="props.requiredLocked" />
                             <Label for="field_required" :class="props.requiredLocked ? 'text-muted-foreground' : ''">Pflichtfeld</Label>
@@ -208,6 +253,43 @@ function onValueChanged(e: any) {
                             Dieses Feld ist unter „Ziele" als Adresse der Beratung hinterlegt. Da jede Beratung eine Adresse braucht, kannst du es
                             nicht optional machen. Weitere Adressfelder im Formular darfst du optional lassen.
                         </p>
+                    </div>
+                </div>
+
+                <div v-if="supportsCondition" class="form-section" data-test="field-visibility">
+                    <h4 class="section-title">Sichtbarkeit</h4>
+
+                    <div class="grid gap-2">
+                        <Label for="field_visible_if_field">Anzeigen</Label>
+                        <Select v-model="conditionFieldId">
+                            <SelectTrigger id="field_visible_if_field">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem :value="ALWAYS_VISIBLE">Immer</SelectItem>
+                                <SelectItem v-for="field in conditionFieldCandidates" :key="field.id" :value="field.id">
+                                    Nur wenn „{{ field.label }}“ …
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <p v-if="conditionFieldCandidates.length === 0" class="text-hint">
+                            Ein Feld kann von einer Auswahl, Radio-Buttons oder Checkboxen abhängen, die weiter oben stehen.
+                        </p>
+                    </div>
+
+                    <div v-if="conditionField" class="mt-4 grid gap-2">
+                        <Label for="field_visible_if_option">… diese Option hat</Label>
+                        <Select v-model="conditionOptionValue">
+                            <SelectTrigger id="field_visible_if_option">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem v-for="option in conditionField.options" :key="option.id" :value="option.value">
+                                    {{ option.label }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <p class="text-hint">Das Feld erscheint direkt unter der Option und ist immer optional.</p>
                     </div>
                 </div>
 
@@ -305,7 +387,7 @@ function onValueChanged(e: any) {
                                 />
                                 Standard
                             </label>
-                            <div class="flex gap-1" v-if="!props.alwaysOptional">
+                            <div class="flex gap-1" v-if="!isOptional">
                                 <Checkbox :id="option.id + '-required'" v-if="model.type === FIELD_TYPES.CHECKBOX" v-model="option.is_required" />
                                 <Label :for="option.id + '-required'">Pflichtfeld</Label>
                             </div>

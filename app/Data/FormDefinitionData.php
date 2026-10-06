@@ -39,7 +39,7 @@ class FormDefinitionData extends Data
 
     public static function fromModel(FormDefinition $model): self
     {
-        $model->loadMissing('group', 'adviceCreator', 'mapPointCreator');
+        $model->loadMissing('group', 'adviceCreator', 'mapPointCreator', 'fields.visibleIfField');
 
         return new self(
             id: $model->uuid,

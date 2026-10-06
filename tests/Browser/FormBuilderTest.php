@@ -1,6 +1,9 @@
 <?php
 
+use App\Enums\FieldType;
+use App\Models\FormDefinition;
 use App\Models\FormDefinitionToAdvice;
+use App\Models\FormField;
 use App\Models\Group;
 use App\Models\User;
 use App\Services\SessionService;
@@ -113,4 +116,57 @@ test('the public form renders a usable address field', function (): void {
         ->assertDontSee('Keine Adresse angegeben')
         ->assertEnabled('#street')
         ->assertNoJavaScriptErrors();
+});
+
+/**
+ * A form with a checkbox "Maßnahmen" and a number field "Breite", which depends on "Igeltor" when the condition is set.
+ *
+ * @return array{0: FormDefinition, 1: FormField, 2: FormField}
+ */
+function formWithCharacteristicCheckbox(Group $group, bool $withCondition): array
+{
+    $formDefinition = FormDefinition::factory()->for($group)->create(['is_active' => true]);
+    $characteristics = $formDefinition->fields()->create(['type' => FieldType::CHECKBOX, 'label' => 'Maßnahmen', 'required' => false, 'sort_order' => 0]);
+    $characteristics->options()->create(['label' => 'Igeltor', 'value' => 'gate', 'sort_order' => 0]);
+    $characteristics->options()->create(['label' => 'Totholz', 'value' => 'deadwood', 'sort_order' => 1]);
+    $width = $formDefinition->fields()->create(['type' => FieldType::NUMBER, 'label' => 'Breite', 'required' => false, 'sort_order' => 1]);
+
+    if ($withCondition) {
+        $width->visibleIfField()->associate($characteristics);
+        $width->update(['visible_if_option_value' => 'gate']);
+    }
+
+    return [$formDefinition, $characteristics, $width];
+}
+
+test('the public form shows the fields of an option only while it is checked', function (): void {
+    [$formDefinition] = formWithCharacteristicCheckbox($this->group, withCondition: true);
+
+    $page = visit(route('form.show', $formDefinition));
+
+    $page->assertSee('Totholz')
+        ->assertDontSee('Breite')
+        ->click('Igeltor')
+        ->assertVisible('[data-test="dependent-fields"]')
+        ->assertSee('Breite')
+        ->click('Igeltor')
+        ->assertDontSee('Breite')
+        ->assertNoJavaScriptErrors();
+});
+
+test('a field can be shown only for an option in the form builder', function (): void {
+    [$formDefinition, $characteristics, $width] = formWithCharacteristicCheckbox($this->group, withCondition: false);
+
+    $page = visit(route('form-definitions.edit', $formDefinition));
+
+    $page->click('.form-field:nth-child(2)')
+        ->click('#field_visible_if_field')
+        ->click('Nur wenn „Maßnahmen“ …')
+        ->assertSee('… diese Option hat')
+        ->assertSee('Nur wenn „Maßnahmen“: Igeltor')
+        ->click('Speichern')
+        ->assertNoJavaScriptErrors();
+
+    expect($width->fresh()->only(['visible_if_field_id', 'visible_if_option_value']))
+        ->toBe(['visible_if_field_id' => $characteristics->id, 'visible_if_option_value' => 'gate']);
 });

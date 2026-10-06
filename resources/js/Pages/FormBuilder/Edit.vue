@@ -18,6 +18,7 @@ import SelectTrigger from '@/shadcn/components/ui/select/SelectTrigger.vue';
 import SelectValue from '@/shadcn/components/ui/select/SelectValue.vue';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';
 import { Textarea } from '@/shadcn/components/ui/textarea';
+import { clearBrokenConditions } from '@/utils/formFieldVisibility';
 import { Link, router, setLayoutProps } from '@inertiajs/vue3';
 import { ArrowUpRightFromSquare } from '@lucide/vue';
 import { v4 as uuidv4 } from 'uuid';
@@ -128,6 +129,13 @@ function handleFieldsUpdate(fields: FormFieldData[]) {
     formDefinition.fields = fields;
 }
 
+// Deleting a field or an option removes the conditions on it, like the server does.
+watch(
+    () => formDefinition.fields,
+    (fields) => clearBrokenConditions(fields),
+    { deep: true },
+);
+
 function saveForm() {
     formDefinition.fields.forEach((field, index) => {
         field.sort_order = index;
@@ -169,6 +177,8 @@ function createField(type: FieldType): FormFieldData {
         sort_order: formDefinition.fields.length,
         options: [],
         max_images: 1,
+        visible_if_field_id: null,
+        visible_if_option_value: null,
     };
 
     switch (type) {
@@ -468,6 +478,7 @@ const allowedEmbedDomainsText = computed<string>({
                                 v-if="selectedField"
                                 :required-locked="isAdviceAddressFieldSelected"
                                 :always-optional="isMapPointFields"
+                                :fields="formDefinition.fields"
                                 class="form-builder__properties"
                             />
                         </div>

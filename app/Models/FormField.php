@@ -41,6 +41,7 @@ class FormField extends Model
         'max_value',
         'accepted_file_types',
         'max_images',
+        'visible_if_option_value',
     ];
 
     /**
@@ -59,6 +60,7 @@ class FormField extends Model
         'accepted_file_types' => 'array',
         'max_images' => 'integer',
         'form_definition_id' => 'integer',
+        'visible_if_field_id' => 'integer',
     ];
 
     /**
@@ -67,6 +69,17 @@ class FormField extends Model
     public function formDefinition(): BelongsTo
     {
         return $this->belongsTo(FormDefinition::class);
+    }
+
+    /**
+     * The field is only shown when this earlier option field has the option `visible_if_option_value`. Such fields
+     * are always optional, so hidden fields never block a submission.
+     *
+     * @return BelongsTo<FormField, $this>
+     */
+    public function visibleIfField(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'visible_if_field_id');
     }
 
     /**
@@ -245,6 +258,9 @@ class FormField extends Model
 
         FormDefinitionToAdvice::where('advice_type_field_id', $this->id)->update(['advice_type_field_id' => null]);
         FormDefinitionToAdvice::where('condition_field_id', $this->id)->update(['condition_field_id' => null]);
+
+        // Without the field, the fields shown depending on it are always shown.
+        self::where('visible_if_field_id', $this->id)->update(['visible_if_field_id' => null, 'visible_if_option_value' => null]);
 
         FormFieldOption::where('form_field_id', $this->id)->get()->each->delete();
 

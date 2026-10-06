@@ -573,3 +573,75 @@ test('deleting the condition field makes the advice unconditional again', functi
 
     expect($adviceMapping->fresh()->condition_field_id)->toBeNull();
 });
+
+/**
+ * A form with a checkbox "Maßnahmen" and a field shown only when "Igeltor" is checked, as the builder sends it.
+ *
+ * @param  array<string, mixed>  $conditionalField
+ * @param  array<string, mixed>  $conditionField
+ * @return array<string, mixed>
+ */
+function formWithConditionalField(FormDefinition $formDefinition, array $conditionalField = [], array $conditionField = [], bool $conditionFirst = true): array
+{
+    $payload = FormDefinitionData::fromModel($formDefinition)->toArray();
+    $condition = [
+        'id' => (string) Str::uuid(),
+        'type' => FieldType::CHECKBOX->value,
+        'label' => 'Maßnahmen',
+        'required' => false,
+        'options' => [
+            ['id' => (string) Str::uuid(), 'label' => 'Igeltor', 'value' => 'gate', 'sort_order' => 0, 'is_default' => false, 'is_required' => false],
+        ],
+        ...$conditionField,
+    ];
+    $dependent = [
+        'id' => (string) Str::uuid(),
+        'type' => FieldType::NUMBER->value,
+        'label' => 'Breite',
+        'required' => false,
+        'options' => [],
+        'visible_if_field_id' => $condition['id'],
+        'visible_if_option_value' => 'gate',
+        ...$conditionalField,
+    ];
+    $payload['fields'] = $conditionFirst ? [$condition, $dependent] : [$dependent, $condition];
+
+    return $payload;
+}
+
+test('a field can depend on an option of a field created in the same request', function (): void {
+    $formDefinition = FormDefinition::factory()->for($this->group)->create();
+
+    $this->put(route('form-definitions.update', $formDefinition), formWithConditionalField($formDefinition))->assertSessionHasNoErrors();
+
+    $condition = $formDefinition->fields()->where('label', 'Maßnahmen')->sole();
+    $dependent = $formDefinition->fields()->where('label', 'Breite')->sole();
+    expect($dependent->visible_if_field_id)->toBe($condition->id)
+        ->and($dependent->visible_if_option_value)->toBe('gate')
+        ->and(FormDefinitionData::fromModel($formDefinition->fresh())->fields[1]->visible_if_field_id)->toBe($condition->uuid);
+});
+
+test('a condition must point to an existing option of an earlier option field and keep the field optional', function (array $conditionalField, array $conditionField, bool $conditionFirst, string $errorKey): void {
+    $formDefinition = FormDefinition::factory()->for($this->group)->create();
+    $payload = formWithConditionalField($formDefinition, $conditionalField, $conditionField, $conditionFirst);
+
+    $this->put(route('form-definitions.update', $formDefinition), $payload)->assertSessionHasErrors($errorKey);
+
+    expect($formDefinition->fields()->count())->toBe(0);
+})->with([
+    'later field' => [[], [], false, 'fields.0.visible_if_field_id'],
+    'field without options' => [[], ['type' => FieldType::TEXT->value, 'options' => []], true, 'fields.1.visible_if_field_id'],
+    'unknown option' => [['visible_if_option_value' => 'removed'], [], true, 'fields.1.visible_if_option_value'],
+    'required field' => [['required' => true], [], true, 'fields.1.required'],
+    'required checkbox option' => [['type' => FieldType::CHECKBOX->value, 'options' => [['id' => (string) Str::uuid(), 'label' => 'Ja', 'value' => 'yes', 'sort_order' => 0, 'is_default' => false, 'is_required' => true]]], [], true, 'fields.1.required'],
+]);
+
+test('deleting the condition field shows the dependent field always', function (): void {
+    $formDefinition = FormDefinition::factory()->for($this->group)->create();
+    $this->put(route('form-definitions.update', $formDefinition), formWithConditionalField($formDefinition))->assertSessionHasNoErrors();
+    $dependent = $formDefinition->fields()->where('label', 'Breite')->sole();
+
+    $formDefinition->fields()->where('label', 'Maßnahmen')->sole()->delete();
+
+    expect($dependent->fresh()->only(['visible_if_field_id', 'visible_if_option_value']))->toBe(['visible_if_field_id' => null, 'visible_if_option_value' => null]);
+});

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { Button } from '@/shadcn/components/ui/button';
 import { RotateCcw, Send } from '@lucide/vue';
-import { ref } from 'vue';
+import { dependentFieldsByOption, topLevelFields } from '@/utils/formFieldVisibility';
+import { computed, ref } from 'vue';
 import { toast } from 'vue-sonner';
-import FormFieldRenderer from './FormFieldRenderer.vue';
+import ConditionalFormField from './ConditionalFormField.vue';
 
 type FormDefinitionData = App.Data.FormDefinitionData;
 
@@ -12,6 +13,9 @@ const props = defineProps<{
 }>();
 
 const formValues = ref<Record<string, any>>({});
+
+const topFields = computed(() => topLevelFields(props.formDefinition.fields));
+const dependents = computed(() => dependentFieldsByOption(props.formDefinition.fields));
 
 function resetForm() {
     formValues.value = {};
@@ -42,8 +46,13 @@ function submitForm() {
         </p>
 
         <div class="fields-container">
-            <div v-for="(field, index) in formDefinition.fields" :key="field.id ?? index" class="field-wrapper">
-                <FormFieldRenderer :field="field" :is-preview="true" :field-name="field.id" :errors="[]" v-model="formValues[field.id]" />
+            <div v-for="(field, index) in topFields" :key="field.id ?? index" class="field-wrapper">
+                <ConditionalFormField
+                    :field="field"
+                    :values="formValues"
+                    :dependents="dependents"
+                    @update="(fieldId, value) => (formValues[fieldId] = value)"
+                />
             </div>
         </div>
 

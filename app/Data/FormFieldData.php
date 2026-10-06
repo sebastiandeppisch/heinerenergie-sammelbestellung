@@ -40,6 +40,9 @@ class FormFieldData extends Data
         /** @var array<int, string>|null */
         public ?array $accepted_file_types = null,
         public int $max_images = 1,
+        /** The uuid of the earlier option field this field depends on, it is only shown when that field has the option. */
+        public ?string $visible_if_field_id = null,
+        public ?string $visible_if_option_value = null,
     ) {}
 
     public static function fromModel(FormField $model): self
@@ -61,6 +64,8 @@ class FormFieldData extends Data
             max_value: $model->max_value,
             accepted_file_types: $model->accepted_file_types,
             max_images: $model->max_images ?? 1,
+            visible_if_field_id: $model->visible_if_field_id === null ? null : $model->loadMissing('visibleIfField')->visibleIfField?->uuid,
+            visible_if_option_value: $model->visible_if_option_value,
             options: $model->options->map(fn (FormFieldOption $option): FormFieldOptionData => FormFieldOptionData::fromModel($option)),
         );
     }

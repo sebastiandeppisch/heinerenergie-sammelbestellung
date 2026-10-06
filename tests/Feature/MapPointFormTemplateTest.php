@@ -90,7 +90,9 @@ test('the map point form template lets people check the characteristics of the c
 
     $form = FormDefinition::where('name', 'Formular für Wiese')->with('fields.options')->sole();
     expect($form->fields->pluck('label')->all())->toBe(['Titel', 'Beschreibung', 'Standort', 'Maßnahmen', 'Igeltor: Breite (cm)'])
-        ->and($form->fields->firstWhere('label', 'Maßnahmen')->options->pluck('label')->all())->toBe(['Igeltor', 'Blühstreifen']);
+        ->and($form->fields->firstWhere('label', 'Maßnahmen')->options->pluck('label')->all())->toBe(['Igeltor', 'Blühstreifen'])
+        ->and($form->fields->firstWhere('label', 'Igeltor: Breite (cm)')->only(['visible_if_field_id', 'visible_if_option_value']))
+        ->toBe(['visible_if_field_id' => $form->fields->firstWhere('label', 'Maßnahmen')->id, 'visible_if_option_value' => $hedgehogGate->uuid]);
 
     $formFields = $form->fields->keyBy('label');
     $this->post(route('form.submit', $form), [
@@ -104,3 +106,32 @@ test('the map point form template lets people check the characteristics of the c
     expect($mapPoint->characteristics()->pluck('name')->all())->toBe(['Igeltor'])
         ->and($mapPoint->fields()->pluck('value', 'label')->all())->toBe(['Breite (cm)' => 13]);
 });
+
+test('a point from the template stores no values for empty fields or fields of unchecked characteristics', function (?string $hiddenWidth): void {
+    $group = Group::factory()->create();
+    $garden = MapPointCategory::factory()->for($group)->create(['name' => 'Garten']);
+    $garden->findOrCreateFormDefinition()->fields()->create(['type' => FieldType::TEXT, 'label' => 'Pflanzen', 'sort_order' => 0]);
+    $hedgehogGate = MapPointCharacteristic::factory()->for($garden, 'category')->create(['name' => 'Igeltor']);
+    $hedgehogGate->findOrCreateFormDefinition()->fields()->create(['type' => FieldType::NUMBER, 'label' => 'Breite (cm)', 'sort_order' => 0]);
+
+    $this->actingAs(templateGroupAdmin($group))
+        ->post(route('form-definitions.from-template'), ['template_type' => 'map_point', 'group_id' => $group->uuid, 'map_point_category_id' => $garden->uuid])
+        ->assertRedirect();
+
+    $form = FormDefinition::where('name', 'Formular für Garten')->sole();
+    $formFields = $form->fields()->get()->keyBy('label');
+    $this->post(route('form.submit', $form), [
+        $formFields['Titel']->uuid => 'Garten am Bach',
+        $formFields['Standort']->uuid => ['lat' => 49.87, 'lng' => 8.65],
+        $formFields['Pflanzen']->uuid => '',
+        $formFields['Maßnahmen']->uuid => [],
+        $formFields['Igeltor: Breite (cm)']->uuid => $hiddenWidth,
+    ])->assertSessionHasNoErrors();
+
+    $mapPoint = MapPoint::sole();
+    expect($mapPoint->characteristics()->count())->toBe(0)
+        ->and($mapPoint->fields()->count())->toBe(0);
+})->with([
+    'hidden field sent empty' => [null],
+    'value typed in before unchecking' => ['13'],
+]);

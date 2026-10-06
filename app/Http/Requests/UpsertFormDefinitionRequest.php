@@ -87,6 +87,8 @@ class UpsertFormDefinitionRequest extends FormRequest
             'fields.*.min_value' => 'nullable|numeric',
             'fields.*.max_value' => 'nullable|numeric',
             'fields.*.accepted_file_types' => 'nullable|array',
+            'fields.*.visible_if_field_id' => ['nullable', 'string', new FormFieldExistsInRequest],
+            'fields.*.visible_if_option_value' => 'nullable|string|required_with:fields.*.visible_if_field_id',
 
             // Optionen-Validierung für Select-, Radio- und Checkbox-Felder
             'fields.*.options' => 'array|required_if:fields.*.type,select,radio,checkbox',
@@ -176,6 +178,9 @@ class UpsertFormDefinitionRequest extends FormRequest
                 }
             },
             function (Validator $validator): void {
+                $this->validateVisibilityConditions($validator);
+            },
+            function (Validator $validator): void {
                 if ($this->boolean('requires_email_confirmation')) {
                     $this->validateEmailConfirmationField($validator);
                 }
@@ -204,6 +209,43 @@ class UpsertFormDefinitionRequest extends FormRequest
             $validator->errors()->add('requires_email_confirmation', 'Für die E-Mail-Bestätigung braucht das Formular genau ein E-Mail-Feld.');
         } elseif (! filter_var($emailFields->first()['required'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
             $validator->errors()->add('requires_email_confirmation', 'Für die E-Mail-Bestätigung muss das E-Mail-Feld ein Pflichtfeld sein.');
+        }
+    }
+
+    /**
+     * A field can depend on an option of an earlier option field. Pointing only backwards rules out cycles and keeps
+     * the form readable from top to bottom. Hidden fields must never block a submission, so they are optional.
+     */
+    private function validateVisibilityConditions(Validator $validator): void
+    {
+        $fields = array_values($this->collect('fields')->all());
+        $positionsById = array_flip(array_map(fn (array $field): string => is_string($field['id'] ?? null) ? $field['id'] : '', $fields));
+
+        foreach ($fields as $position => $field) {
+            $conditionFieldId = $field['visible_if_field_id'] ?? null;
+
+            if ($conditionFieldId === null || ! isset($positionsById[$conditionFieldId])) {
+                continue;
+            }
+
+            $key = "fields.{$position}.visible_if_field_id";
+            $label = is_string($field['label'] ?? null) ? $field['label'] : 'Das Feld';
+            $conditionField = $fields[$positionsById[$conditionFieldId]];
+
+            if (! in_array($conditionField['type'] ?? null, array_map(fn (FieldType $type): string => $type->value, FieldType::typesWithOptions), true)) {
+                $validator->errors()->add($key, "„{$label}“ kann nur von einem Auswahlfeld, Radio-Buttons oder Checkboxen abhängen.");
+            } elseif ($positionsById[$conditionFieldId] >= $position) {
+                $validator->errors()->add($key, "„{$label}“ kann nur von einem Feld abhängen, das weiter oben steht.");
+            } elseif (! in_array($field['visible_if_option_value'] ?? null, array_column($conditionField['options'] ?? [], 'value'), true)) {
+                $validator->errors()->add("fields.{$position}.visible_if_option_value", "Die Option, von der „{$label}“ abhängt, gibt es nicht mehr.");
+            }
+
+            $options = is_array($field['options'] ?? null) ? $field['options'] : [];
+            $hasRequiredOption = array_any($options, fn (mixed $option): bool => is_array($option) && filter_var($option['is_required'] ?? false, FILTER_VALIDATE_BOOLEAN));
+
+            if (filter_var($field['required'] ?? false, FILTER_VALIDATE_BOOLEAN) || $hasRequiredOption) {
+                $validator->errors()->add("fields.{$position}.required", "„{$label}“ wird nur unter einer Bedingung angezeigt und kann deshalb kein Pflichtfeld sein.");
+            }
         }
     }
 

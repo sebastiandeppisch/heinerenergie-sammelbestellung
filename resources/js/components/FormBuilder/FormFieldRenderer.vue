@@ -89,7 +89,11 @@ const fieldId = computed<string>(() => `field_${props.field.id}`);
             v-model="modelValue"
             @change="handleChange"
             @input="handleInput"
-        />
+        >
+            <template v-if="$slots['after-option']" #after-option="{ optionValue }">
+                <slot name="after-option" :option-value="optionValue" />
+            </template>
+        </FormFieldInputRenderer>
 
         <div v-if="hasError" class="mt-1 text-xs text-destructive">
             <div v-if="typeof errors === 'string'">
@@ -101,6 +105,8 @@ const fieldId = computed<string>(() => `field_${props.field.id}`);
                 </div>
             </div>
         </div>
+
+        <slot name="after-input" />
     </div>
 </template>
 

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { Button } from '@/shadcn/components/ui/button';
+import { dependentFieldsByOption, topLevelFields, withoutHiddenValues } from '@/utils/formFieldVisibility';
 import { useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
-import FormFieldRenderer from './FormFieldRenderer.vue';
+import ConditionalFormField from './ConditionalFormField.vue';
 
 type FormDefinitionData = App.Data.FormDefinitionData;
 
@@ -57,13 +58,18 @@ function validateField(fieldName: string) {
 
 function submitForm() {
     emit('submit', form.data());
-    form.submit({
+    form.transform((data) => withoutHiddenValues(props.formDefinition.fields, data)).submit({
         onSuccess: (page) => emit('success', page),
         onError: (errors) => emit('error', errors),
     });
 }
 
-const visibleFields = computed(() => props.formDefinition.fields);
+const visibleFields = computed(() => topLevelFields(props.formDefinition.fields));
+const dependents = computed(() => dependentFieldsByOption(props.formDefinition.fields));
+
+function updateValue(fieldId: string, value: unknown) {
+    form[fieldId] = value;
+}
 </script>
 
 <template>
@@ -77,15 +83,16 @@ const visibleFields = computed(() => props.formDefinition.fields);
             </div>
 
             <div class="space-y-4">
-                <FormFieldRenderer
+                <ConditionalFormField
                     v-for="field in visibleFields"
                     :key="field.id"
                     :field="field"
-                    :field-name="field.id"
-                    :errors="form.errors[field.id] || []"
+                    :values="form.data()"
+                    :dependents="dependents"
+                    :errors="form.errors"
                     :disabled="form.processing"
-                    v-model="form[field.id]"
-                    @validate="validateField(field.id)"
+                    @update="updateValue"
+                    @validate="validateField"
                 />
             </div>
 

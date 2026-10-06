@@ -59,7 +59,7 @@ class FormDefinitionService
     {
         $formFieldIds = [];
         foreach ($fields as $field) {
-            $data = collect($field->toArray())->forget(['id', 'options', 'form_definition_id'])->toArray();
+            $data = collect($field->toArray())->forget(['id', 'options', 'form_definition_id', 'visible_if_field_id'])->toArray();
 
             if ($formDefinition->type === FormType::MapPointFields) {
                 // Values of category fields are always optional, so points never become invalid when fields change.
@@ -84,6 +84,27 @@ class FormDefinitionService
         }
 
         FormField::where('form_definition_id', $formDefinition->id)->whereNotIn('id', $formFieldIds)->get()->each->delete();
+
+        $this->updateVisibilityConditions($fields, $formDefinition);
+    }
+
+    /**
+     * Runs after all fields are saved, because a condition can refer to a field created in the same request.
+     *
+     * @param  Collection<int, FormFieldData>  $fields
+     */
+    private function updateVisibilityConditions(Collection $fields, FormDefinition $formDefinition): void
+    {
+        $idsByUuid = FormField::where('form_definition_id', $formDefinition->id)->pluck('id', 'uuid');
+
+        foreach ($fields as $field) {
+            $conditionFieldId = $field->visible_if_field_id === null ? null : $idsByUuid->get($field->visible_if_field_id);
+
+            FormField::where('form_definition_id', $formDefinition->id)->where('uuid', $field->id)->update([
+                'visible_if_field_id' => $conditionFieldId,
+                'visible_if_option_value' => $conditionFieldId === null ? null : $field->visible_if_option_value,
+            ]);
+        }
     }
 
     /**
@@ -134,7 +155,7 @@ class FormDefinitionService
             $data['group_id'] = Group::where('uuid', $formDefinitionData->group_id)->firstOrFail()->id;
             $formDefinition = FormDefinition::create($data);
             foreach ($formDefinitionData->fields as $field) {
-                $data = collect($field->toArray())->forget(['id', 'options', 'form_definition_id'])->toArray();
+                $data = collect($field->toArray())->forget(['id', 'options', 'form_definition_id', 'visible_if_field_id'])->toArray();
                 // Keeping the id the client sent lets the mappings under "Ziele" refer to fields that are created now.
                 $formField = $formDefinition->fields()->make($data);
                 $formField->uuid = $this->toUuidOrNull($field->id);
@@ -145,6 +166,7 @@ class FormDefinitionService
                 }
             }
 
+            $this->updateVisibilityConditions($formDefinitionData->fields, $formDefinition);
             $this->updateAdviceMapping($formDefinition, $formDefinitionData->advice_mapping);
             $this->updateMapPointMapping($formDefinition, $formDefinitionData->map_point_mapping);
 
@@ -376,10 +398,12 @@ class FormDefinitionService
                 $creator->characteristicMappings()->create(['option_value' => $characteristic->uuid, 'map_point_characteristic_id' => $characteristic->id]);
             }
 
-            // Asked for every characteristic, but only stored when the characteristic is checked.
+            // Shown below the characteristic once it is checked. The label keeps its name, submissions show the fields without that nesting.
             foreach ($characteristics as $characteristic) {
                 foreach ($characteristic->formDefinition->fields ?? [] as $characteristicField) {
                     $formField = $this->copyMapPointField($formDefinition, $characteristicField, $sortOrder++, $characteristic->name.': '.$characteristicField->label);
+                    $formField->visibleIfField()->associate($characteristicsField);
+                    $formField->update(['visible_if_option_value' => $characteristic->uuid]);
                     $creator->fieldMappings()->create(['target_field_id' => $characteristicField->id, 'source_field_id' => $formField->id]);
                 }
             }

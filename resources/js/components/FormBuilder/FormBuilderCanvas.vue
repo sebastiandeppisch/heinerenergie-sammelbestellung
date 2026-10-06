@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Copy, GripVertical, Trash2 } from '@lucide/vue';
+import { conditionDescription } from '@/utils/formFieldVisibility';
+import { Copy, Eye, GripVertical, Trash2 } from '@lucide/vue';
 import { useSortable } from '@vueuse/integrations/useSortable';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, ref, useTemplateRef, watch } from 'vue';
@@ -101,6 +102,14 @@ const { option } = useSortable(fieldsContainer, fields, {
                     </div>
                 </div>
                 <div class="field-content">
+                    <p
+                        v-if="conditionDescription(field, fields)"
+                        class="mb-2 flex items-center gap-1 text-xs text-muted-foreground"
+                        data-test="field-condition"
+                    >
+                        <Eye :size="14" />
+                        {{ conditionDescription(field, fields) }}
+                    </p>
                     <FormFieldRenderer :field="field" :is-preview="false" />
                 </div>
             </div>

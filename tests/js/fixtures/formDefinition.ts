@@ -18,6 +18,8 @@ export function makeField(overrides: Partial<FormFieldData> & Pick<FormFieldData
         max_value: null,
         accepted_file_types: null,
         max_images: 1,
+        visible_if_field_id: null,
+        visible_if_option_value: null,
         ...overrides,
     };
 }

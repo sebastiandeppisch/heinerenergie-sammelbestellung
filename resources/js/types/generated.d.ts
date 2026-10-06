@@ -142,6 +142,8 @@ min_value: number | null,
 max_value: number | null,
 accepted_file_types: string[] | null,
 max_images: number,
+visible_if_field_id: string | null,
+visible_if_option_value: string | null,
 };
 export type FormFieldOptionData = {
 id: string,
