@@ -57,7 +57,7 @@ class FormDefinitionService
      */
     private function updateFields(Collection $fields, FormDefinition $formDefinition): void
     {
-        $formFieldIds = [];
+        $savedFields = [];
         foreach ($fields as $field) {
             $data = collect($field->toArray())->forget(['id', 'options', 'form_definition_id', 'visible_if_field_id'])->toArray();
 
@@ -78,31 +78,39 @@ class FormDefinitionService
                 $formField->update($data);
             }
 
-            $formFieldIds[] = $formField->id;
+            $savedFields[] = $formField;
 
             $this->updateFieldOptions($field->options, $formField, allowRequired: $formDefinition->type !== FormType::MapPointFields);
         }
 
-        FormField::where('form_definition_id', $formDefinition->id)->whereNotIn('id', $formFieldIds)->get()->each->delete();
+        FormField::where('form_definition_id', $formDefinition->id)->whereNotIn('id', array_map(fn (FormField $formField): int => $formField->id, $savedFields))->get()->each->delete();
 
-        $this->updateVisibilityConditions($fields, $formDefinition);
+        $this->updateVisibilityConditions($fields, $savedFields);
     }
 
     /**
      * Runs after all fields are saved, because a condition can refer to a field created in the same request.
+     * New fields arrive with placeholder ids, so conditions are resolved via the ids the client sent.
      *
      * @param  Collection<int, FormFieldData>  $fields
+     * @param  list<FormField>  $savedFields  the saved models, in the same order as $fields
      */
-    private function updateVisibilityConditions(Collection $fields, FormDefinition $formDefinition): void
+    private function updateVisibilityConditions(Collection $fields, array $savedFields): void
     {
-        $idsByUuid = FormField::where('form_definition_id', $formDefinition->id)->pluck('id', 'uuid');
+        $fields = $fields->values();
+        $savedFieldsByClientId = [];
+        foreach ($fields as $index => $field) {
+            if ($field->id !== null) {
+                $savedFieldsByClientId[$field->id] ??= $savedFields[$index];
+            }
+        }
 
-        foreach ($fields as $field) {
-            $conditionFieldId = $field->visible_if_field_id === null ? null : $idsByUuid->get($field->visible_if_field_id);
+        foreach ($fields as $index => $field) {
+            $conditionField = $field->visible_if_field_id === null ? null : ($savedFieldsByClientId[$field->visible_if_field_id] ?? null);
 
-            FormField::where('form_definition_id', $formDefinition->id)->where('uuid', $field->id)->update([
-                'visible_if_field_id' => $conditionFieldId,
-                'visible_if_option_value' => $conditionFieldId === null ? null : $field->visible_if_option_value,
+            FormField::whereKey($savedFields[$index]->id)->update([
+                'visible_if_field_id' => $conditionField?->id,
+                'visible_if_option_value' => $conditionField === null ? null : $field->visible_if_option_value,
             ]);
         }
     }
@@ -154,19 +162,21 @@ class FormDefinitionService
             $data = collect($formDefinitionData->toArray())->forget(['id', 'fields', 'group_id', 'advice_mapping', 'map_point_mapping'])->toArray();
             $data['group_id'] = Group::where('uuid', $formDefinitionData->group_id)->firstOrFail()->id;
             $formDefinition = FormDefinition::create($data);
+            $savedFields = [];
             foreach ($formDefinitionData->fields as $field) {
                 $data = collect($field->toArray())->forget(['id', 'options', 'form_definition_id', 'visible_if_field_id'])->toArray();
                 // Keeping the id the client sent lets the mappings under "Ziele" refer to fields that are created now.
                 $formField = $formDefinition->fields()->make($data);
                 $formField->uuid = $this->toUuidOrNull($field->id);
                 $formField->save();
+                $savedFields[] = $formField;
                 foreach ($field->options as $option) {
                     $data = collect($option)->forget(['id'])->toArray();
                     $formField->options()->create($data);
                 }
             }
 
-            $this->updateVisibilityConditions($formDefinitionData->fields, $formDefinition);
+            $this->updateVisibilityConditions($formDefinitionData->fields, $savedFields);
             $this->updateAdviceMapping($formDefinition, $formDefinitionData->advice_mapping);
             $this->updateMapPointMapping($formDefinition, $formDefinitionData->map_point_mapping);
 

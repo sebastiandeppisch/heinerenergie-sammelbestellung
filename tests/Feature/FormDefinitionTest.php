@@ -609,17 +609,21 @@ function formWithConditionalField(FormDefinition $formDefinition, array $conditi
     return $payload;
 }
 
-test('a field can depend on an option of a field created in the same request', function (): void {
+test('a field can depend on an option of a field created in the same request', function (array $conditionField): void {
     $formDefinition = FormDefinition::factory()->for($this->group)->create();
+    $payload = formWithConditionalField($formDefinition, conditionalField: isset($conditionField['id']) ? ['id' => 'temp-2', 'visible_if_field_id' => $conditionField['id']] : [], conditionField: $conditionField);
 
-    $this->put(route('form-definitions.update', $formDefinition), formWithConditionalField($formDefinition))->assertSessionHasNoErrors();
+    $this->put(route('form-definitions.update', $formDefinition), $payload)->assertSessionHasNoErrors();
 
     $condition = $formDefinition->fields()->where('label', 'Maßnahmen')->sole();
     $dependent = $formDefinition->fields()->where('label', 'Breite')->sole();
     expect($dependent->visible_if_field_id)->toBe($condition->id)
         ->and($dependent->visible_if_option_value)->toBe('gate')
         ->and(FormDefinitionData::fromModel($formDefinition->fresh())->fields[1]->visible_if_field_id)->toBe($condition->uuid);
-});
+})->with([
+    'client generated uuids' => [[]],
+    'placeholder ids' => [['id' => 'temp-1']],
+]);
 
 test('a condition must point to an existing option of an earlier option field and keep the field optional', function (array $conditionalField, array $conditionField, bool $conditionFirst, string $errorKey): void {
     $formDefinition = FormDefinition::factory()->for($this->group)->create();
