@@ -24,7 +24,7 @@
                 <FormSubmissionRenderer :form-submission="submission" />
             </p>
 
-            <div class="mt-4">
+            <div class="mt-4 flex flex-wrap gap-2">
                 <Button v-if="!submission.seen" class="text-xs" @click="seen(submission.id)">
                     <MailCheck />
                     Als gelesen markieren
@@ -32,6 +32,10 @@
                 <Button v-else variant="secondary" class="text-xs" @click="unseen(submission.id)">
                     <MailOpen />
                     Als ungesehen markieren
+                </Button>
+                <Button v-if="submission.awaiting_confirmation" variant="outline" class="text-xs" @click="resendConfirmation(submission.id)">
+                    <Send />
+                    Bestätigungsmail erneut senden
                 </Button>
             </div>
 
@@ -48,7 +52,7 @@ import CardContent from '@/shadcn/components/ui/card/CardContent.vue';
 import CardFooter from '@/shadcn/components/ui/card/CardFooter.vue';
 import CardHeader from '@/shadcn/components/ui/card/CardHeader.vue';
 import { router } from '@inertiajs/vue3';
-import { MailCheck, MailOpen } from '@lucide/vue';
+import { MailCheck, MailOpen, Send } from '@lucide/vue';
 import { route } from 'ziggy-js';
 import FormSubmissionRenderer from '../FormBuilder/FormSubmissionRenderer.vue';
 const props = withDefaults(
@@ -88,6 +92,16 @@ function seen(id: string) {
 function unseen(id: string) {
     router.post(
         route('form-submissions.mark-unseen', id),
+        {},
+        {
+            preserveScroll: true,
+        },
+    );
+}
+
+function resendConfirmation(id: string) {
+    router.post(
+        route('form-submissions.resend-confirmation', id),
         {},
         {
             preserveScroll: true,

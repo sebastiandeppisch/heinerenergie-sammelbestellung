@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Contracts\Pointable;
 use App\Data\FormTargetPayload;
+use App\Enums\FieldType;
 use App\Models\Traits\HasUuid;
 use App\Traits\HasPoints;
 use Database\Factories\FormSubmissionFactory;
@@ -117,6 +118,16 @@ class FormSubmission extends Model implements Pointable
     public function isConfirmationExpired(): bool
     {
         return $this->confirmation_expires_at !== null && $this->confirmation_expires_at->isPast();
+    }
+
+    /**
+     * The submitted address the confirmation mail is sent to.
+     */
+    public function confirmationEmail(): ?string
+    {
+        $value = $this->submissionFields->firstWhere('type', FieldType::EMAIL)?->value;
+
+        return is_string($value) && $value !== '' ? $value : null;
     }
 
     /**

@@ -12,6 +12,7 @@ use App\Enums\FormType;
 use App\Http\Requests\IndexFormSubmissionRequest;
 use App\Models\FormDefinition;
 use App\Models\FormSubmission;
+use App\Services\FormSubmissionConfirmationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -106,5 +107,27 @@ class FormSubmissionController extends Controller
         $formSubmission->save();
 
         return back()->with('success', 'Der Formulareintrag wurde als ungelesen markiert');
+    }
+
+    /**
+     * Issues a new link, so a previously sent one stops working and an expired one is renewed.
+     */
+    public function resendConfirmation(FormSubmission $formSubmission, FormSubmissionConfirmationService $confirmation): RedirectResponse
+    {
+        $this->authorize('view', $formSubmission);
+
+        if (! $formSubmission->isAwaitingConfirmation()) {
+            return back()->withErrors(['error' => 'Der Formulareintrag ist bereits bestätigt']);
+        }
+
+        $email = $formSubmission->confirmationEmail();
+
+        if ($email === null) {
+            return back()->withErrors(['error' => 'Der Formulareintrag enthält keine E-Mail-Adresse']);
+        }
+
+        $confirmation->sendMail($formSubmission, $email, $confirmation->issueToken($formSubmission));
+
+        return back()->with('success', 'Die Bestätigungsmail wurde erneut an '.$email.' gesendet');
     }
 }

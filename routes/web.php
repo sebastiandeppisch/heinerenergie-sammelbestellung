@@ -107,6 +107,8 @@ Route::middleware('auth')->group(function (): void {
         ->name('form-submissions.mark-seen');
     Route::post('form-submissions/{formSubmission}/mark-unseen', [FormSubmissionController::class, 'markUnseen'])
         ->name('form-submissions.mark-unseen');
+    Route::post('form-submissions/{formSubmission}/resend-confirmation', [FormSubmissionController::class, 'resendConfirmation'])
+        ->name('form-submissions.resend-confirmation');
     Route::get('form-images/{formSubmission}/{image}', [ImageController::class, 'formSubmission'])->name('form-images.show');
 
     Route::get('mappoints-map', [MapPointController::class, 'map'])->name('map-points-map');

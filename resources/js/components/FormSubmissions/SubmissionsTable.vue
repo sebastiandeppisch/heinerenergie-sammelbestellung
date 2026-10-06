@@ -47,6 +47,15 @@
                                 <Button v-else size="sm" variant="ghost" title="Als ungesehen markieren" @click="markUnseen(submission.id)">
                                     <MailOpen class="h-4 w-4" />
                                 </Button>
+                                <Button
+                                    v-if="submission.awaiting_confirmation"
+                                    size="sm"
+                                    variant="ghost"
+                                    title="Bestätigungsmail erneut senden"
+                                    @click="resendConfirmation(submission.id)"
+                                >
+                                    <Send class="h-4 w-4" />
+                                </Button>
                             </div>
                         </TableCell>
                         <TableCell class="whitespace-nowrap">
@@ -98,7 +107,7 @@ import TableHead from '@/shadcn/components/ui/table/TableHead.vue';
 import TableHeader from '@/shadcn/components/ui/table/TableHeader.vue';
 import TableRow from '@/shadcn/components/ui/table/TableRow.vue';
 import { router } from '@inertiajs/vue3';
-import { Eye, MailCheck, MailOpen } from '@lucide/vue';
+import { Eye, MailCheck, MailOpen, Send } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import { route } from 'ziggy-js';
 
@@ -190,5 +199,9 @@ function markSeen(id: string) {
 
 function markUnseen(id: string) {
     router.post(route('form-submissions.mark-unseen', id), {}, { preserveUrl: true, preserveScroll: true });
+}
+
+function resendConfirmation(id: string) {
+    router.post(route('form-submissions.resend-confirmation', id), {}, { preserveUrl: true, preserveScroll: true });
 }
 </script>

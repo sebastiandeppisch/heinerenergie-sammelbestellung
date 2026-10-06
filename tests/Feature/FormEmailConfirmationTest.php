@@ -9,8 +9,10 @@ use App\Models\FormDefinitionToAdvice;
 use App\Models\FormField;
 use App\Models\FormSubmission;
 use App\Models\SubmissionField;
+use App\Models\User;
 use App\Services\FormSubmissionConfirmationService;
 use App\Services\ImageStorage;
+use App\Services\SessionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Http;
@@ -97,6 +99,63 @@ test('an unknown token is rejected', function (): void {
         ->assertInertia(fn (Assert $page): Assert => $page->component('Forms/Confirm')->where('status', 'invalid'));
     $this->post(route('form.confirm', 'unknown'))
         ->assertInertia(fn (Assert $page): Assert => $page->component('Forms/Confirm')->where('status', 'invalid'));
+});
+
+function actAsGroupAdmin(FormDefinition $form): void
+{
+    $user = User::factory()->create();
+    $form->group->users()->attach($user, ['is_admin' => true]);
+    app(SessionService::class)->actAsGroup($form->group);
+    test()->actingAs($user);
+}
+
+test('a group admin can resend the confirmation mail with a renewed link', function (): void {
+    [$form, $email] = confirmedForm();
+    submitConfirmedForm($form, $email);
+    $oldToken = issuedToken();
+    $submission = FormSubmission::sole();
+
+    $this->travel(31)->days();
+    actAsGroupAdmin($form);
+
+    $this->post(route('form-submissions.resend-confirmation', $submission))
+        ->assertRedirect()
+        ->assertSessionHas('success');
+
+    Mail::assertQueued(FormSubmissionConfirmation::class, 2);
+    Mail::assertQueued(FormSubmissionConfirmation::class, fn (FormSubmissionConfirmation $mail): bool => $mail->hasTo('erika@example.com'));
+    $newToken = issuedToken();
+
+    expect($newToken)->not->toBe($oldToken);
+    $this->get(route('form.confirm.show', $oldToken))
+        ->assertInertia(fn (Assert $page): Assert => $page->component('Forms/Confirm')->where('status', 'invalid'));
+    $this->get(route('form.confirm.show', $newToken))
+        ->assertInertia(fn (Assert $page): Assert => $page->component('Forms/Confirm')->where('status', 'pending'));
+});
+
+test('an already confirmed submission gets no new confirmation mail', function (): void {
+    [$form, $email] = confirmedForm();
+    submitConfirmedForm($form, $email);
+    $submission = FormSubmission::sole();
+    $submission->update(['confirmed_at' => now()]);
+    actAsGroupAdmin($form);
+
+    $this->post(route('form-submissions.resend-confirmation', $submission))
+        ->assertSessionHasErrors('error');
+
+    Mail::assertQueued(FormSubmissionConfirmation::class, 1);
+});
+
+test('members of other groups cannot resend the confirmation mail', function (): void {
+    [$form, $email] = confirmedForm();
+    submitConfirmedForm($form, $email);
+    $other = FormDefinition::factory()->create();
+    actAsGroupAdmin($other);
+
+    $this->post(route('form-submissions.resend-confirmation', FormSubmission::sole()))
+        ->assertForbidden();
+
+    Mail::assertQueued(FormSubmissionConfirmation::class, 1);
 });
 
 test('confirmation mails are limited per address', function (): void {
