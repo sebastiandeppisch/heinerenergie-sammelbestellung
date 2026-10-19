@@ -45,6 +45,8 @@ export function makeMapPointMapping(overrides: Partial<FormToMapPointMappingData
         title_field_id: null,
         description_field_id: null,
         coordinate_field_id: null,
+        contact_email_field_id: null,
+        contact_enabled_field_id: null,
         ...overrides,
     };
 }

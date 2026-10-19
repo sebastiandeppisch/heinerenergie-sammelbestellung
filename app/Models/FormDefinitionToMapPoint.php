@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\FieldType;
 use App\Events\MapPointCreatedByFormSubmission;
 use App\Models\Traits\HasUuid;
+use App\Services\MapPointContactService;
 use Database\Factories\FormDefinitionToMapPointFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -53,6 +55,22 @@ class FormDefinitionToMapPoint extends Model
         return $this->belongsTo(FormField::class, 'coordinate_field_id');
     }
 
+    /**
+     * @return BelongsTo<FormField, $this>
+     */
+    public function contactEmailField(): BelongsTo
+    {
+        return $this->belongsTo(FormField::class, 'contact_email_field_id');
+    }
+
+    /**
+     * @return BelongsTo<FormField, $this>
+     */
+    public function contactEnabledField(): BelongsTo
+    {
+        return $this->belongsTo(FormField::class, 'contact_enabled_field_id');
+    }
+
     public function createMapPoint(FormSubmission $submission): MapPoint
     {
         $mapPoint = DB::transaction(function () use ($submission) {
@@ -69,6 +87,8 @@ class FormDefinitionToMapPoint extends Model
                 'description' => $descriptionField->value,
                 'coordinate' => $coordinateValue,
                 'published' => false, // unpublished initially
+                'contact_email' => $this->contactEmail($submission),
+                'contact_enabled' => $this->contactEnabled($submission),
             ]);
 
             // Associate with the form submission as pointable
@@ -81,6 +101,31 @@ class FormDefinitionToMapPoint extends Model
             return $mapPoint->fresh();
         });
 
+        // Whoever submitted the form may have entered someone else's address, so it needs confirming.
+        app(MapPointContactService::class)->requestVerification($mapPoint);
+
         return $mapPoint;
+    }
+
+    private function contactEmail(FormSubmission $submission): ?string
+    {
+        if ($this->contactEmailField === null) {
+            return null;
+        }
+
+        $email = filter_var($this->contactEmailField->getSubmissionField($submission)->value, FILTER_VALIDATE_EMAIL);
+
+        return $email === false ? null : $email;
+    }
+
+    private function contactEnabled(FormSubmission $submission): bool
+    {
+        if ($this->contactEnabledField === null || $this->contactEnabledField->type !== FieldType::CHECKBOX) {
+            return false;
+        }
+
+        $value = $this->contactEnabledField->getSubmissionField($submission)->value;
+
+        return is_array($value) ? $value !== [] : filled($value);
     }
 }

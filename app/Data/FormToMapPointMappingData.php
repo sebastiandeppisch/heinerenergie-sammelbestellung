@@ -16,6 +16,8 @@ class FormToMapPointMappingData extends Data
         public ?string $title_field_id = null,
         public ?string $description_field_id = null,
         public ?string $coordinate_field_id = null,
+        public ?string $contact_email_field_id = null,
+        public ?string $contact_enabled_field_id = null,
     ) {}
 
     public static function fromModel(?FormDefinitionToMapPoint $model): self
@@ -24,13 +26,15 @@ class FormToMapPointMappingData extends Data
             return new self(enabled: false);
         }
 
-        $model->loadMissing(['titleField', 'descriptionField', 'coordinateField']);
+        $model->loadMissing(['titleField', 'descriptionField', 'coordinateField', 'contactEmailField', 'contactEnabledField']);
 
         return new self(
             enabled: true,
             title_field_id: $model->titleField?->uuid,
             description_field_id: $model->descriptionField?->uuid,
             coordinate_field_id: $model->coordinateField?->uuid,
+            contact_email_field_id: $model->contactEmailField?->uuid,
+            contact_enabled_field_id: $model->contactEnabledField?->uuid,
         );
     }
 }

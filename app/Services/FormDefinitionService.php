@@ -223,6 +223,9 @@ class FormDefinitionService
             $creator->coordinateField()->associate($coordinate);
         }
 
+        $creator->contactEmailField()->associate(FormField::where('uuid', $mapping->contact_email_field_id)->first());
+        $creator->contactEnabledField()->associate(FormField::where('uuid', $mapping->contact_enabled_field_id)->first());
+
         $creator->save();
     }
 

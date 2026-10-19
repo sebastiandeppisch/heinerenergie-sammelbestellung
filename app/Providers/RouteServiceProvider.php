@@ -58,5 +58,13 @@ class RouteServiceProvider extends ServiceProvider
 
             return Limit::perMinute(10)->by($request->ip());
         });
+
+        RateLimiter::for('map-contact', function (Request $request) {
+            if ($request->isPrecognitive()) {
+                return Limit::none();
+            }
+
+            return Limit::perMinute(20)->by($request->ip());
+        });
     }
 }
