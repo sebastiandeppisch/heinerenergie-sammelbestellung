@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Data\FormTargetNoticeData;
 use App\Mail\FormSubmissionConfirmation;
 use App\Models\FormSubmission;
+use App\Support\TokenHash;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -41,15 +42,12 @@ class FormSubmissionConfirmationService
         }
     }
 
-    /**
-     * Only a keyed hash is stored, so the database alone is not enough to confirm a submission.
-     */
     public function issueToken(FormSubmission $submission): string
     {
         $token = Str::random(64);
 
         $submission->update([
-            'confirmation_token_hash' => $this->hash($token),
+            'confirmation_token_hash' => TokenHash::make($token),
             'confirmation_expires_at' => now()->addDays((int) config('forms.confirmation.expires_days')),
         ]);
 
@@ -63,7 +61,7 @@ class FormSubmissionConfirmationService
 
     public function findByToken(string $token): ?FormSubmission
     {
-        return FormSubmission::where('confirmation_token_hash', $this->hash($token))->first();
+        return FormSubmission::where('confirmation_token_hash', TokenHash::make($token))->first();
     }
 
     /**
@@ -84,10 +82,5 @@ class FormSubmissionConfirmationService
 
             return $this->targets->run($locked, $locked->target_payload);
         });
-    }
-
-    private function hash(string $token): string
-    {
-        return hash_hmac('sha256', $token, (string) config('app.key'));
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Data\ConsentChoiceData;
 use App\Models\FormDefinition;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -26,7 +27,21 @@ class StoreFormSubmissionRequest extends FormRequest
      */
     public function rules(): array
     {
-        return $this->formDefinition()->getValidationRules();
+        return [
+            ...$this->formDefinition()->getValidationRules(),
+            '_consent_show' => ['nullable', 'boolean'],
+            '_consent_details' => ['nullable', 'boolean'],
+        ];
+    }
+
+    /**
+     * The choice in the consent block forms with a map point target show. The details need the point itself.
+     */
+    public function consentChoice(): ConsentChoiceData
+    {
+        $show = $this->boolean('_consent_show');
+
+        return new ConsentChoiceData(show: $show, details: $show && $this->boolean('_consent_details'));
     }
 
     #[Override]

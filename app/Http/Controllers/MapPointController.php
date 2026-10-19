@@ -9,6 +9,7 @@ use App\Data\FormFieldData;
 use App\Data\GroupBaseData;
 use App\Data\MapPointCategoryData;
 use App\Data\MapPointCharacteristicData;
+use App\Data\MapPointConsentInfoData;
 use App\Data\MapPointData;
 use App\Data\MapPointSpreadsheetMappingData;
 use App\Data\SpreadsheetFormatData;
@@ -27,6 +28,7 @@ use App\Services\CurrentGroupService;
 use App\Services\MapPointCharacteristicService;
 use App\Services\MapPointFieldService;
 use App\Services\MapPointVisibilityService;
+use App\Services\PublicMapPointPresenter;
 use App\ValueObjects\MapPointCategoryTree;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -76,7 +78,7 @@ class MapPointController extends Controller
      * A category includes its sub categories, also those created after the embed. Sub categories of
      * groups outside the embed's map are left out.
      */
-    public function publicMap(MapEmbed $mapEmbed): Response
+    public function publicMap(MapEmbed $mapEmbed, PublicMapPointPresenter $presenter): Response
     {
         app(CurrentGroupService::class)->setGroup($mapEmbed->group);
 
@@ -89,11 +91,10 @@ class MapPointController extends Controller
 
         $mapPoints = MapPoint::query()
             ->visibleFromGroup($mapEmbed->group)
-            ->where('published', true)
             ->whereIn('category_id', $categories->pluck('id'));
 
         return Inertia::render('MapPoints/PublicMap', [
-            'pointsByCategory' => $this->pointData($mapPoints, tree: $tree)->groupBy('category_id'),
+            'pointsByCategory' => $presenter->presentAll($mapPoints, $tree)->groupBy('category_id'),
             'categories' => $this->categoryData($categories, $tree),
             'center' => $mapEmbed->coordinate,
             'zoom' => $mapEmbed->zoom,
@@ -109,6 +110,7 @@ class MapPointController extends Controller
 
         return Inertia::render('MapPoints/Upsert', [
             'mapPoint' => MapPointData::fromModel($mappoint->load(['category', 'group', 'characteristics.category']), onlyPublic: false),
+            'consent' => MapPointConsentInfoData::fromModel($mappoint),
             ...$this->formProps($visibility, $fieldService),
         ]);
     }

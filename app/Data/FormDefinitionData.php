@@ -7,6 +7,7 @@ namespace App\Data;
 use App\Enums\FormType;
 use App\Models\FormDefinition;
 use App\Models\FormField;
+use App\Services\MapPointConsentService;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Data;
@@ -35,6 +36,8 @@ class FormDefinitionData extends Data
         public FormType $type = FormType::Form,
         public ?array $allowed_embed_domains = null,
         public bool $requires_email_confirmation = false,
+        /** Only on the public form with a map point target: drives the consent block. */
+        public ?MapPointConsentConfigData $map_point_consent = null,
     ) {}
 
     public static function fromModel(FormDefinition $model): self
@@ -62,12 +65,13 @@ class FormDefinitionData extends Data
     /**
      * Form data for the public, anonymous-facing pages. Strips the embed domain
      * whitelist, which is an internal access-control detail and must not be
-     * exposed to visitors of the public form.
+     * exposed to visitors of the public form, and adds the consent block.
      */
     public static function forPublic(FormDefinition $model): self
     {
         $data = self::fromModel($model);
         $data->allowed_embed_domains = null;
+        $data->map_point_consent = $model->mapPointCreator === null ? null : app(MapPointConsentService::class)->frontendConfig($model->mapPointCreator);
 
         return $data;
     }

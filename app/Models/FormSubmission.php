@@ -8,6 +8,7 @@ use App\Contracts\Pointable;
 use App\Data\FormTargetPayload;
 use App\Enums\FieldType;
 use App\Models\Traits\HasUuid;
+use App\Services\ImageStorage;
 use App\Traits\HasPoints;
 use Database\Factories\FormSubmissionFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Override;
 
 /**
@@ -108,6 +110,28 @@ class FormSubmission extends Model implements Pointable
     public function submissionFields(): HasMany
     {
         return $this->hasMany(SubmissionField::class)->orderBy('sort_order');
+    }
+
+    /**
+     * The submitted values and uploaded images go with the submission. The foreign keys do not cascade, so they are
+     * deleted here.
+     */
+    #[Override]
+    public function delete(): ?bool
+    {
+        return DB::transaction(function (): ?bool {
+            $fieldIds = SubmissionField::where('form_submission_id', $this->id)->pluck('id');
+            SubmissionFieldOption::whereIn('submission_field_id', $fieldIds)->delete();
+            SubmissionField::whereIn('id', $fieldIds)->delete();
+            DB::afterCommit(fn () => app(ImageStorage::class)->deleteDirectory($this->imageDirectory()));
+
+            return parent::delete();
+        });
+    }
+
+    public function imageDirectory(): string
+    {
+        return 'form-images/'.$this->uuid;
     }
 
     public function isAwaitingConfirmation(): bool

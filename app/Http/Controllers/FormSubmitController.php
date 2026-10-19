@@ -72,21 +72,22 @@ class FormSubmitController extends Controller
         }
 
         $storedImagePaths = [];
+        $consentChoice = $request->consentChoice();
 
         try {
-            [$submission, $token, $notices] = DB::transaction(function () use ($formDefinition, $request, $email, &$storedImagePaths): array {
+            [$submission, $token, $notices] = DB::transaction(function () use ($formDefinition, $request, $email, $consentChoice, &$storedImagePaths): array {
                 $submission = $formDefinition->createSubmission();
                 foreach ($formDefinition->fields as $field) {
                     $field->createSubmissionField($submission, $this->getValueFromField($field, $request, $submission, $storedImagePaths));
                 }
 
                 if ($email !== null) {
-                    $submission->update(['target_payload' => $this->targets->prepareOrNull($submission)]);
+                    $submission->update(['target_payload' => $this->targets->prepareOrNull($submission, $consentChoice)]);
 
                     return [$submission, $this->confirmation->issueToken($submission), new Collection];
                 }
 
-                return [$submission, null, $this->targets->run($submission, null)];
+                return [$submission, null, $this->targets->run($submission, null, $consentChoice)];
             });
         } catch (Throwable $e) {
             $this->imageStorage->delete($storedImagePaths);

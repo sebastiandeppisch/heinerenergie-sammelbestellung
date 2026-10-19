@@ -250,16 +250,19 @@ describe('FormTargets map point mapping', () => {
         expect(statusOf(wrapper, 'map-point')).toBe('Vollständig');
     });
 
-    it.each([['title_field_id'], ['description_field_id'], ['coordinate_field_id']] as const)('is incomplete when %s is missing', (field) => {
-        const wrapper = mountWith(
-            makeFormDefinition({
-                fields: mapPointFields,
-                map_point_mapping: { ...completeMapPointMapping, [field]: null },
-            }),
-        );
+    it.each([['title_field_id'], ['description_field_id'], ['coordinate_field_id'], ['consent_text']] as const)(
+        'is incomplete when %s is missing',
+        (field) => {
+            const wrapper = mountWith(
+                makeFormDefinition({
+                    fields: mapPointFields,
+                    map_point_mapping: { ...completeMapPointMapping, [field]: null },
+                }),
+            );
 
-        expect(statusOf(wrapper, 'map-point')).toBe('Unvollständig');
-    });
+            expect(statusOf(wrapper, 'map-point')).toBe('Unvollständig');
+        },
+    );
 
     it('warns when the coordinate mapping points at a non-coordinate field', () => {
         const wrapper = mountWith(
@@ -270,6 +273,18 @@ describe('FormTargets map point mapping', () => {
         );
 
         expect(warningsOf(wrapper, 'map-point')).toContain('Koordinaten Feld sollte vom Typ "geo_coordinate" sein');
+    });
+
+    it('warns but stays complete when the consent text does not name the details', () => {
+        const wrapper = mountWith(
+            makeFormDefinition({
+                fields: mapPointFields,
+                map_point_mapping: { ...completeMapPointMapping, consent_text: 'Ich bin einverstanden.' },
+            }),
+        );
+
+        expect(statusOf(wrapper, 'map-point')).toBe('Vollständig');
+        expect(warningsOf(wrapper, 'map-point').join()).toContain('{felder}');
     });
 });
 

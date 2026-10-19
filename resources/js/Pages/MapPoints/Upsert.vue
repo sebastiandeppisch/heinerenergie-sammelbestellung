@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import FormFieldInputRenderer from '@/components/FormBuilder/FormFieldInputRenderer.vue';
 import MapPointCharacteristicBadge from '@/components/MapPointCharacteristics/MapPointCharacteristicBadge.vue';
+import MapPointConsentCard from '@/components/MapPointConsentCard.vue';
 import MapPointFieldList from '@/components/MapPointFieldList.vue';
 import MapPointImageInput from '@/components/MapPointImageInput.vue';
 import PageHeader from '@/components/PageHeader.vue';
@@ -23,6 +24,8 @@ import { route } from 'ziggy-js';
 
 const props = defineProps<{
     mapPoint?: App.Data.MapPointData;
+    /** Only when editing. */
+    consent?: App.Data.MapPointConsentInfoData;
     categories?: Array<App.Data.MapPointCategoryData>;
     groups: Array<App.Data.GroupBaseData>;
     usableCategoryIdsByGroup: Record<string, Array<string>>;
@@ -406,5 +409,7 @@ const errors: Record<string, string> = form.errors;
                 </CardFooter>
             </form>
         </Card>
+
+        <MapPointConsentCard v-if="isEditing && consent" class="mt-6" :map-point-id="props.mapPoint!.id" :consent="consent" />
     </div>
 </template>

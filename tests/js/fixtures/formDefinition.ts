@@ -54,6 +54,8 @@ export function makeMapPointMapping(overrides: Partial<FormToMapPointMappingData
         field_mappings: [],
         characteristics_field_id: null,
         characteristic_options: [],
+        consent_text: 'Ich bin einverstanden, dass mein Eintrag auf der Karte von {initiative} mit {felder} angezeigt wird.',
+        contact_email_field_id: null,
         ...overrides,
     };
 }
@@ -74,6 +76,7 @@ export function makeFormDefinition(overrides: Partial<FormDefinitionData> = {}):
         type: 0,
         allowed_embed_domains: null,
         requires_email_confirmation: false,
+        map_point_consent: null,
         ...overrides,
     };
 }

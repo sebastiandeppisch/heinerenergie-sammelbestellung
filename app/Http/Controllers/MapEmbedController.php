@@ -11,9 +11,9 @@ use App\Data\MapPointData;
 use App\Http\Requests\UpsertMapEmbedRequest;
 use App\Models\Group;
 use App\Models\MapEmbed;
-use App\Models\MapPoint;
 use App\Models\MapPointCategory;
 use App\Services\MapPointVisibilityService;
+use App\Services\PublicMapPointPresenter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
@@ -122,14 +122,6 @@ class MapEmbedController extends Controller
      */
     private function publishedPointsByCategory(MapPointVisibilityService $visibility): Collection
     {
-        $tree = MapPointCategory::tree();
-        $publicFieldIds = MapPointCategory::publicFieldIds();
-
-        return $visibility->visiblePoints()
-            ->where('published', true)
-            ->with(['category', 'group', 'characteristics.category', 'fields.options', 'fields.formField'])
-            ->get()
-            ->map(fn (MapPoint $mapPoint): MapPointData => MapPointData::fromModel($mapPoint, tree: $tree, publicFieldIds: $publicFieldIds))
-            ->groupBy('category_id');
+        return app(PublicMapPointPresenter::class)->presentAll($visibility->visiblePoints())->groupBy('category_id');
     }
 }

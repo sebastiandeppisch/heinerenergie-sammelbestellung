@@ -23,7 +23,10 @@ class MapPointImageAccess
     /** @var array<int, int>|null */
     private ?array $publicFieldIds = null;
 
-    public function __construct(private readonly MapPointFieldService $fieldService) {}
+    public function __construct(
+        private readonly MapPointFieldService $fieldService,
+        private readonly PublicMapPointPresenter $presenter,
+    ) {}
 
     public static function url(MapPoint $mapPoint, string $path): string
     {
@@ -43,19 +46,19 @@ class MapPointImageAccess
     }
 
     /**
-     * The same rule as for the public map: a published point, a value of one of the point's current fields,
-     * and the field is public. Needs the relation fields.formField. The categories and public fields are loaded
+     * The same rule as for the public map, see PublicMapPointPresenter: a visible point, a value of one of the point's
+     * current fields, and the field is public and consented to. Needs the relation fields.formField. The categories and public fields are loaded
      * once per instance, which lives for one request, so a field made private is hidden with the next request.
      */
     public function isPublic(MapPoint $mapPoint, MapPointField $field): bool
     {
-        if (! $mapPoint->published) {
+        if (! $this->presenter->isVisible($mapPoint)) {
             return false;
         }
 
         $this->publicFieldIds ??= MapPointCategory::publicFieldIds();
 
-        if (! in_array($field->form_field_id, $this->publicFieldIds, true)) {
+        if (! $this->presenter->isFieldPublic($mapPoint, $field, $this->publicFieldIds)) {
             return false;
         }
 

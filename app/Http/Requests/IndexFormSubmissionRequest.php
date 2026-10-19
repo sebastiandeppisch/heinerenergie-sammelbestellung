@@ -34,6 +34,7 @@ class IndexFormSubmissionRequest extends FormRequest
             'dateTo' => ['nullable', 'date', 'after_or_equal:dateFrom'],
             'view' => ['string', 'in:cards,table'],
             'confirmation' => ['string', 'in:all,unconfirmed,hide_unconfirmed'],
+            'submission' => ['nullable', 'uuid'],
         ];
     }
 
@@ -68,6 +69,14 @@ class IndexFormSubmissionRequest extends FormRequest
     public function confirmation(): string
     {
         return $this->input('confirmation', 'all');
+    }
+
+    /**
+     * Shows only this submission, e.g. when coming from the map point it created.
+     */
+    public function submission(): ?string
+    {
+        return $this->input('submission');
     }
 
     public function view(): string

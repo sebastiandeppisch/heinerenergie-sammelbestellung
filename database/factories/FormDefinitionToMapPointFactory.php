@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Data\ConsentChoiceData;
 use App\Enums\FieldType;
 use App\Models\FormDefinition;
 use App\Models\FormDefinitionToMapPoint;
 use App\Models\FormField;
 use App\Services\FormTargetService;
+use App\Services\MapPointConsentService;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -54,6 +56,7 @@ class FormDefinitionToMapPointFactory extends Factory
             'title_field_id' => $titleField->id,
             'description_field_id' => $descriptionField->id,
             'coordinate_field_id' => $coordinateField->id,
+            'consent_text' => MapPointConsentService::DEFAULT_TEXT,
         ];
     }
 
@@ -72,7 +75,7 @@ class FormDefinitionToMapPointFactory extends Factory
             ]);
 
             $targets = app(FormTargetService::class);
-            $targets->execute($submission, $targets->prepare($submission));
+            $targets->execute($submission, $targets->prepare($submission, new ConsentChoiceData(show: true, details: true)));
 
             return [];
         });

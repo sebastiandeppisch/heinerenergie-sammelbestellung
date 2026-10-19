@@ -51,6 +51,7 @@ class FormSubmissionController extends Controller
             })
             ->when($request->confirmation() === 'unconfirmed', fn ($query) => $query->unconfirmed())
             ->when($request->confirmation() === 'hide_unconfirmed', fn ($query) => $query->withoutUnconfirmed())
+            ->when($request->submission(), fn ($query, string $uuid) => $query->where('uuid', $uuid))
             ->paginate(10);
 
         $formDefinitions = FormDefinition::with(['fields', 'adviceCreator', 'mapPointCreator'])

@@ -87,6 +87,7 @@ watch(map, () => {
                         v-model:zoom="map.zoom"
                         :points-by-category="pointsByCategory"
                         :categories="visibleCategories"
+                        show-manage-link
                     />
                 </div>
             </TabsContent>

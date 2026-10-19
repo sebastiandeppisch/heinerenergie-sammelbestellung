@@ -7,6 +7,7 @@ import { LControl, LIcon, LLayerGroup, LMap, LMarker, LPopup, LTileLayer } from 
 import { latLng } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { ref } from 'vue';
+import { route } from 'ziggy-js';
 
 const props = withDefaults(
     defineProps<{
@@ -16,10 +17,13 @@ const props = withDefaults(
         zoom: number;
         minZoom?: number;
         maxZoom?: number;
+        /** On the public map, the person behind a point can request a link to manage it. */
+        showManageLink?: boolean;
     }>(),
     {
         minZoom: 3,
         maxZoom: 18,
+        showManageLink: false,
     },
 );
 
@@ -96,6 +100,15 @@ function zoomOut() {
                                 mark-internal
                                 class="mt-2"
                             />
+                            <a
+                                v-if="showManageLink"
+                                :href="route('map-point.manage.request-for-point', point.id)"
+                                target="_blank"
+                                rel="noopener"
+                                class="mt-2 inline-block text-xs text-gray-500 underline"
+                            >
+                                Eintrag verwalten
+                            </a>
                         </div>
                     </LPopup>
                 </LMarker>

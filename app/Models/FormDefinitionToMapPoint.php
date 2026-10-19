@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Data\ConsentChoiceData;
 use App\Data\MapPointTargetPayload;
 use App\Enums\FieldType;
 use App\Models\Traits\HasUuid;
 use App\Services\ImageStorage;
+use App\Services\MapPointConsentService;
 use Database\Factories\FormDefinitionToMapPointFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -56,6 +58,16 @@ class FormDefinitionToMapPoint extends Model
     public function coordinateField(): BelongsTo
     {
         return $this->belongsTo(FormField::class, 'coordinate_field_id');
+    }
+
+    /**
+     * An email field of the form whose value becomes the contact address of the point, for its manage links.
+     *
+     * @return BelongsTo<FormField, $this>
+     */
+    public function contactEmailField(): BelongsTo
+    {
+        return $this->belongsTo(FormField::class, 'contact_email_field_id');
     }
 
     /**
@@ -128,11 +140,15 @@ class FormDefinitionToMapPoint extends Model
     }
 
     /**
-     * Reads the map point from the submission, including the category and the characteristics its options pick.
+     * Reads the map point from the submission, including the category and the characteristics its options pick,
+     * and the consent of the submitter with the text as they saw it.
      */
-    public function prepare(FormSubmission $submission): MapPointTargetPayload
+    public function prepare(FormSubmission $submission, ConsentChoiceData $consentChoice): MapPointTargetPayload
     {
         $categoryId = $this->categoryFor($submission)?->id;
+        $characteristicIds = $this->characteristicIdsFor($submission, $categoryId);
+        $consent = app(MapPointConsentService::class)->forTarget($this, $consentChoice, $categoryId, $characteristicIds);
+        $contactEmail = $this->contactEmailField?->submissionFields()->where('form_submission_id', $submission->id)->first()?->value;
 
         return new MapPointTargetPayload(
             title: $this->titleField->getSubmissionField($submission)->value,
@@ -141,7 +157,11 @@ class FormDefinitionToMapPoint extends Model
             category_id: $categoryId,
             group_id: $this->formDefinition->group_id,
             field_values: $this->mappedValues($submission),
-            characteristic_ids: $this->characteristicIdsFor($submission, $categoryId),
+            characteristic_ids: $characteristicIds,
+            public_consent: $consent->consent,
+            public_consent_text: $consent->text,
+            public_consent_fields: $consent->fields,
+            contact_email: is_string($contactEmail) && $contactEmail !== '' ? $contactEmail : null,
         );
     }
 

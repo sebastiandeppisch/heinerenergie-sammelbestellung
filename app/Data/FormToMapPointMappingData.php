@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Data;
 
 use App\Models\FormDefinitionToMapPoint;
+use App\Services\MapPointConsentService;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Data;
@@ -33,15 +34,19 @@ class FormToMapPointMappingData extends Data
         public ?string $characteristics_field_id = null,
         #[DataCollectionOf(FormToMapPointCharacteristicData::class)]
         public Collection $characteristic_options = new Collection,
+        /** The consent text with the placeholders {initiative} and {felder}. */
+        public ?string $consent_text = null,
+        /** An email field of the form whose value becomes the contact address of the point. */
+        public ?string $contact_email_field_id = null,
     ) {}
 
     public static function fromModel(?FormDefinitionToMapPoint $model): self
     {
         if ($model === null) {
-            return new self(enabled: false);
+            return new self(enabled: false, consent_text: MapPointConsentService::DEFAULT_TEXT);
         }
 
-        $model->loadMissing(['titleField', 'descriptionField', 'coordinateField', 'category', 'subcategoryField', 'subcategories.category', 'fieldMappings.targetField', 'fieldMappings.sourceField', 'characteristicsField', 'characteristicMappings.characteristic']);
+        $model->loadMissing(['titleField', 'descriptionField', 'coordinateField', 'category', 'subcategoryField', 'subcategories.category', 'fieldMappings.targetField', 'fieldMappings.sourceField', 'characteristicsField', 'characteristicMappings.characteristic', 'contactEmailField']);
 
         return new self(
             enabled: true,
@@ -54,6 +59,8 @@ class FormToMapPointMappingData extends Data
             field_mappings: $model->fieldMappings->map(FormToMapPointFieldData::fromModel(...))->toBase(),
             characteristics_field_id: $model->characteristicsField?->uuid,
             characteristic_options: $model->characteristicMappings->map(FormToMapPointCharacteristicData::fromModel(...))->toBase(),
+            consent_text: $model->consent_text,
+            contact_email_field_id: $model->contactEmailField?->uuid,
         );
     }
 }

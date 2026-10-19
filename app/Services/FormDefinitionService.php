@@ -293,6 +293,8 @@ class FormDefinitionService
         $creator->category()->associate($category);
         $creator->subcategoryField()->associate($subcategoryField);
         $creator->characteristicsField()->associate($characteristicsField);
+        $creator->contactEmailField()->associate($mapping->contact_email_field_id === null ? null : FormField::where('uuid', $mapping->contact_email_field_id)->first());
+        $creator->consent_text = $mapping->consent_text ?: MapPointConsentService::DEFAULT_TEXT;
         $creator->save();
 
         $this->updateMapPointSubcategories($creator, $subcategoryField === null ? new Collection : $mapping->subcategory_options);
@@ -368,7 +370,7 @@ class FormDefinitionService
     }
 
     /**
-     * A form that creates map points: title, description and location, and with a category one question per field
+     * A form that creates map points: title, description, location and the contact address, and with a category one question per field
      * of the category, already mapped to it. The form fields copy type, label and options of the category fields.
      */
     private function createMapPointFormTemplate(Group $group, ?MapPointCategory $category): FormDefinition
@@ -382,15 +384,18 @@ class FormDefinitionService
         $titleField = $formDefinition->fields()->create(['type' => FieldType::TEXT, 'label' => 'Titel', 'max_length' => 255, 'required' => true, 'sort_order' => 0]);
         $descriptionField = $formDefinition->fields()->create(['type' => FieldType::TEXTAREA, 'label' => 'Beschreibung', 'required' => false, 'sort_order' => 1]);
         $coordinateField = $formDefinition->fields()->create(['type' => FieldType::GEO_COORDINATE, 'label' => 'Standort', 'required' => true, 'sort_order' => 2]);
+        $emailField = $formDefinition->fields()->create(['type' => FieldType::EMAIL, 'label' => 'E-Mail-Adresse', 'help_text' => 'Hierhin schicken wir dir den Link, mit dem du deinen Eintrag verwalten kannst. Sie wird nicht veröffentlicht.', 'required' => false, 'sort_order' => 3]);
 
         $creator = $formDefinition->mapPointCreator()->make();
         $creator->titleField()->associate($titleField);
         $creator->descriptionField()->associate($descriptionField);
         $creator->coordinateField()->associate($coordinateField);
+        $creator->contactEmailField()->associate($emailField);
+        $creator->consent_text = MapPointConsentService::DEFAULT_TEXT;
         $creator->category()->associate($category);
         $creator->save();
 
-        $sortOrder = 3;
+        $sortOrder = 4;
 
         foreach (app(MapPointFieldService::class)->fieldsOfCategory($category?->id) as $categoryField) {
             $formField = $this->copyMapPointField($formDefinition, $categoryField, $sortOrder++);

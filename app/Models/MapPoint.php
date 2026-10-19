@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Contracts\Pointable;
+use App\Enums\PublicConsent;
 use App\Models\Traits\HasUuid;
 use App\Services\ImageStorage;
 use App\ValueObjects\Coordinate;
@@ -25,6 +26,13 @@ use Override;
  * @property int $group_id
  * @property string $uuid
  * @property bool $published
+ * @property string|null $contact_email
+ * @property PublicConsent $public_consent
+ * @property Carbon|null $public_consent_at
+ * @property string|null $public_consent_text
+ * @property array<int, string>|null $public_consent_fields
+ * @property string|null $edit_token_hash
+ * @property Carbon|null $edit_token_expires_at
  * @property Coordinate $coordinate
  * @property Carbon $created_at
  */
@@ -45,11 +53,31 @@ class MapPoint extends Model
         'published',
         'category_id',
         'location',
+        'contact_email',
+        'public_consent',
+        'public_consent_at',
+        'public_consent_text',
+        'public_consent_fields',
+        'edit_token_hash',
+        'edit_token_expires_at',
+    ];
+
+    protected $hidden = [
+        'contact_email',
+        'edit_token_hash',
+    ];
+
+    protected $attributes = [
+        'public_consent' => 'not_required',
     ];
 
     protected $casts = [
         'coordinate' => Coordinate::class,
         'published' => 'boolean',
+        'public_consent' => PublicConsent::class,
+        'public_consent_at' => 'datetime',
+        'public_consent_fields' => 'array',
+        'edit_token_expires_at' => 'datetime',
     ];
 
     /**

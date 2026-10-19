@@ -17,9 +17,11 @@ use App\Http\Controllers\MailAccountController;
 use App\Http\Controllers\MapEmbedController;
 use App\Http\Controllers\MapPointCategoryController;
 use App\Http\Controllers\MapPointCharacteristicController;
+use App\Http\Controllers\MapPointConsentController;
 use App\Http\Controllers\MapPointController;
 use App\Http\Controllers\MapPointExportController;
 use App\Http\Controllers\MapPointImportController;
+use App\Http\Controllers\MapPointManageController;
 use App\Http\Controllers\MapPointSpreadsheetMappingController;
 use App\Http\Controllers\NextcloudGroupController;
 use App\Http\Controllers\PageController;
@@ -126,6 +128,9 @@ Route::middleware('auth')->group(function (): void {
     Route::patch('mappoints/category', [MapPointController::class, 'updateCategoryOfMany'])->name('mappoints.update-category-of-many');
     Route::patch('mappoints/characteristic', [MapPointController::class, 'updateCharacteristicOfMany'])->name('mappoints.update-characteristic-of-many');
     Route::patch('mappoints/published', [MapPointController::class, 'updatePublishedOfMany'])->name('mappoints.update-published-of-many');
+    Route::patch('mappoints/{mappoint}/contact-email', [MapPointConsentController::class, 'updateContactEmail'])->name('mappoints.update-contact-email');
+    Route::post('mappoints/{mappoint}/refuse-consent', [MapPointConsentController::class, 'refuse'])->name('mappoints.refuse-consent');
+    Route::post('mappoints/{mappoint}/send-edit-link', [MapPointConsentController::class, 'sendEditLink'])->name('mappoints.send-edit-link');
 
     Route::resource('mappoints', MapPointController::class);
     Route::post('mappoint-categories/{mappoint_category}/fields', [MapPointCategoryController::class, 'editFields'])->name('mappoint-categories.fields.edit');
@@ -194,6 +199,22 @@ Route::post('/forms/{formDefinition}', [FormSubmitController::class, 'submit'])
 
 Route::get('/map/{mapEmbed}', [MapPointController::class, 'publicMap'])
     ->name('map.public');
+
+// The person behind a map point manages it with a link sent to its contact address.
+Route::get('/eintrag', [MapPointManageController::class, 'request'])->name('map-point.manage.request');
+Route::post('/eintrag', [MapPointManageController::class, 'sendForAddress'])
+    ->name('map-point.manage.send-for-address')
+    ->middleware('throttle:form-submit');
+Route::get('/eintrag/{mapPoint}/link', [MapPointManageController::class, 'requestForPoint'])->name('map-point.manage.request-for-point');
+Route::post('/eintrag/{mapPoint}/link', [MapPointManageController::class, 'sendForPoint'])
+    ->name('map-point.manage.send-for-point')
+    ->middleware('throttle:form-submit');
+Route::get('/eintrag/verwalten/{token}', [MapPointManageController::class, 'show'])->name('map-point.manage.show');
+Route::middleware('throttle:form-submit')->group(function (): void {
+    Route::put('/eintrag/verwalten/{token}/einwilligung', [MapPointManageController::class, 'updateConsent'])->name('map-point.manage.consent');
+    Route::post('/eintrag/verwalten/{token}/widerrufen', [MapPointManageController::class, 'revoke'])->name('map-point.manage.revoke');
+    Route::delete('/eintrag/verwalten/{token}', [MapPointManageController::class, 'destroy'])->name('map-point.manage.destroy');
+});
 
 // Public images are served to anyone, so the route is outside of the auth group. Access is checked per image.
 Route::get('/map-point-images/{mapPoint}/{image}', [ImageController::class, 'mapPoint'])

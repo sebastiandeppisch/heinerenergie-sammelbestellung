@@ -9,10 +9,12 @@ use App\Events\AdviceCreated;
 use App\Events\AdviceSaved;
 use App\Events\AdviceSaving;
 use App\Events\AdviceUpdated;
+use App\Events\MapPointCreatedByFormSubmission;
 use App\Listeners\CalculateCoordinates;
 use App\Listeners\EmptyCoordinates;
 use App\Listeners\HandleAdviceEvents;
 use App\Listeners\SaveAdviceEvents;
+use App\Listeners\SendMapPointCreatedMail;
 use App\Listeners\StoreOutgoingMail;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -50,6 +52,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         AdviceEventContract::class => [
             SaveAdviceEvents::class,
+        ],
+        MapPointCreatedByFormSubmission::class => [
+            SendMapPointCreatedMail::class,
         ],
     ];
 

@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Data\AdviceTargetPayload;
+use App\Data\ConsentChoiceData;
 use App\Data\FormTargetNoticeData;
 use App\Data\FormTargetPayload;
 use App\Data\MapPointTargetPayload;
 use App\Enums\FieldType;
+use App\Enums\PublicConsent;
 use App\Events\Advice\AdviceCreatedByFormSubmission;
 use App\Events\MapPointCreatedByFormSubmission;
 use App\Jobs\SendNewAdviceInfoToAdvisors;
@@ -37,23 +39,27 @@ class FormTargetService
 {
     public function __construct(private readonly MapPointFieldService $mapPointFields) {}
 
-    public function prepare(FormSubmission $submission): FormTargetPayload
+    /**
+     * @param  ConsentChoiceData  $consentChoice  what the submitter chose in the consent block of a map point target
+     */
+    public function prepare(FormSubmission $submission, ConsentChoiceData $consentChoice = new ConsentChoiceData): FormTargetPayload
     {
         $formDefinition = $submission->formDefinition;
 
         return new FormTargetPayload(
             advice: $formDefinition->adviceCreator?->prepare($submission),
-            map_point: $formDefinition->mapPointCreator?->prepare($submission),
+            map_point: $formDefinition->mapPointCreator?->prepare($submission, $consentChoice),
         );
     }
 
     /**
      * Like prepare, but a failure leaves the payload empty, so the targets are prepared again when they run.
+     * The choice in the consent block is lost then, so the point is not shown until the submitter consents.
      */
-    public function prepareOrNull(FormSubmission $submission): ?FormTargetPayload
+    public function prepareOrNull(FormSubmission $submission, ConsentChoiceData $consentChoice = new ConsentChoiceData): ?FormTargetPayload
     {
         try {
-            return DB::transaction(fn (): FormTargetPayload => $this->prepare($submission));
+            return DB::transaction(fn (): FormTargetPayload => $this->prepare($submission, $consentChoice));
         } catch (Throwable $e) {
             report($e);
 
@@ -64,12 +70,13 @@ class FormTargetService
     /**
      * Creates all targets or none. A failure keeps the submission, marks it and notifies the system admins.
      *
+     * @param  ConsentChoiceData  $consentChoice  only used when there is no payload yet
      * @return Collection<int, FormTargetNoticeData>
      */
-    public function run(FormSubmission $submission, ?FormTargetPayload $payload): Collection
+    public function run(FormSubmission $submission, ?FormTargetPayload $payload, ConsentChoiceData $consentChoice = new ConsentChoiceData): Collection
     {
         try {
-            return DB::transaction(fn (): Collection => $this->execute($submission, $payload ?? $this->prepare($submission)));
+            return DB::transaction(fn (): Collection => $this->execute($submission, $payload ?? $this->prepare($submission, $consentChoice)));
         } catch (Throwable $e) {
             report($e);
             $submission->refresh()->update(['targets_failed_at' => now(), 'targets_error' => $e->getMessage()]);
@@ -84,15 +91,24 @@ class FormTargetService
      */
     public function execute(FormSubmission $submission, FormTargetPayload $payload): Collection
     {
+        $notices = new Collection;
+
         if ($payload->advice !== null) {
             $this->createAdvice($submission, $payload->advice);
         }
 
         if ($payload->map_point !== null) {
-            $this->createMapPoint($submission, $payload->map_point);
+            $mapPoint = $this->createMapPoint($submission, $payload->map_point);
+
+            if ($mapPoint->contact_email !== null) {
+                $notices->push(new FormTargetNoticeData(
+                    title: 'Dein Eintrag ist angelegt.',
+                    text: 'Den Link zum Verwalten haben wir dir per E-Mail geschickt.',
+                ));
+            }
         }
 
-        return new Collection;
+        return $notices;
     }
 
     private function createAdvice(FormSubmission $submission, AdviceTargetPayload $payload): Advice
@@ -137,6 +153,11 @@ class FormTargetService
                 'coordinate' => $payload->coordinate,
                 'published' => false,
                 'category_id' => $payload->category_id === null ? null : MapPointCategory::findOrFail($payload->category_id)->id,
+                'contact_email' => $payload->contact_email,
+                'public_consent' => $payload->public_consent,
+                'public_consent_at' => $payload->public_consent === PublicConsent::NOT_REQUIRED ? null : $submission->submitted_at,
+                'public_consent_text' => $payload->public_consent_text,
+                'public_consent_fields' => $payload->public_consent_fields,
             ]);
 
             // Characteristics deleted or moved away since the submission are left out.

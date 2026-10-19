@@ -71,6 +71,10 @@ export type ChecklistEntryFieldData = {
 field: App.Data.FormFieldData,
 value: number | string | string[] | null,
 };
+export type ConsentChoiceData = {
+show: boolean,
+details: boolean,
+};
 export type CrmUserData = {
 id: string,
 name: string,
@@ -125,6 +129,7 @@ next_form_button_text: string | null,
 type: App.Enums.FormType,
 allowed_embed_domains: string[] | null,
 requires_email_confirmation: boolean,
+map_point_consent: App.Data.MapPointConsentConfigData | null,
 };
 export type FormFieldData = {
 id: string,
@@ -205,6 +210,8 @@ subcategory_options: App.Data.FormToMapPointSubcategoryData[],
 field_mappings: App.Data.FormToMapPointFieldData[],
 characteristics_field_id: string | null,
 characteristic_options: App.Data.FormToMapPointCharacteristicData[],
+consent_text: string | null,
+contact_email_field_id: string | null,
 };
 export type FormToMapPointSubcategoryData = {
 option_value: string,
@@ -334,6 +341,34 @@ id: string,
 label: string,
 is_public: boolean,
 };
+export type MapPointConsentCharacteristicData = {
+option_value: string,
+labels: string[],
+selectable_for: string[],
+};
+export type MapPointConsentConfigData = {
+text: string,
+base_labels: string[],
+subcategory_field_id: string | null,
+default_category_labels: string[],
+category_labels: Record<string, string[]>,
+characteristics_field_id: string | null,
+characteristics: App.Data.MapPointConsentCharacteristicData[],
+};
+export type MapPointConsentData = {
+consent: App.Enums.PublicConsent,
+text: string | null,
+fields: string[] | null,
+};
+export type MapPointConsentInfoData = {
+public_consent: App.Enums.PublicConsent,
+public_consent_label: string,
+public_consent_at: string | null,
+public_consent_text: string | null,
+field_labels: string[],
+contact_email: string | null,
+submission_id: string | null,
+};
 export type MapPointData = {
 id: string,
 coordinate: App.ValueObjects.Coordinate,
@@ -380,6 +415,20 @@ category: string | null,
 published: boolean,
 group_name: string,
 };
+export type MapPointManageData = {
+title: string,
+description: string,
+category: string | null,
+characteristics: string[],
+published: boolean,
+public_consent: App.Enums.PublicConsent,
+public_consent_label: string,
+public_consent_at: string | null,
+shows_details: boolean,
+consented_labels: string[],
+consent_text: string,
+offered_labels: string[],
+};
 export type MapPointSpreadsheetColumnData = {
 header: string,
 field: App.Enums.MapPointSpreadsheetField,
@@ -409,6 +458,10 @@ category_id: number | null,
 group_id: number,
 field_values: Record<string, any>,
 characteristic_ids: number[],
+public_consent: App.Enums.PublicConsent,
+public_consent_text: string | null,
+public_consent_fields: string[] | null,
+contact_email: string | null,
 };
 export type NextcloudGroupUserData = {
 nc_id: string | null,
@@ -498,6 +551,7 @@ export type FormType = 0 | 1 | 2;
 export type GeocodingStatus = 'pending' | 'success' | 'not_found' | 'failed' | 'manual';
 export type HouseType = 0 | 1 | 2;
 export type MapPointSpreadsheetField = 'ignore' | 'id' | 'title' | 'description' | 'lat' | 'lng' | 'location' | 'category' | 'published' | 'field' | 'characteristic' | 'new_category_field';
+export type PublicConsent = 'not_required' | 'given' | 'refused';
 export type SpreadsheetFormat = 'xlsx' | 'ods' | 'xls' | 'csv';
 }
 namespace Nextcloud {

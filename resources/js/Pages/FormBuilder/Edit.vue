@@ -64,6 +64,7 @@ const formDefinition = reactive<FormDefinitionData>(
         next_form_button_text: null,
         allowed_embed_domains: null,
         requires_email_confirmation: false,
+        map_point_consent: null,
     },
 );
 

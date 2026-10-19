@@ -4,6 +4,7 @@ import { dependentFieldsByOption, topLevelFields, withoutHiddenValues } from '@/
 import { useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import ConditionalFormField from './ConditionalFormField.vue';
+import MapPointConsentBlock from './MapPointConsentBlock.vue';
 
 type FormDefinitionData = App.Data.FormDefinitionData;
 
@@ -46,6 +47,11 @@ const createInitialFormData = () => {
     }
 
     data._form_token = props.formToken || '';
+
+    if (props.formDefinition.map_point_consent) {
+        data._consent_show = false;
+        data._consent_details = false;
+    }
 
     return data;
 };
@@ -95,6 +101,16 @@ function updateValue(fieldId: string, value: unknown) {
                     @validate="validateField"
                 />
             </div>
+
+            <MapPointConsentBlock
+                v-if="formDefinition.map_point_consent"
+                v-model:show="form._consent_show"
+                v-model:details="form._consent_details"
+                class="mt-6"
+                :config="formDefinition.map_point_consent"
+                :values="form.data()"
+                :disabled="form.processing"
+            />
 
             <div class="flex items-center justify-end space-x-4 pt-6">
                 <Button type="submit" :disabled="form.processing" class="min-w-[120px]">

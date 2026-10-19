@@ -10,6 +10,7 @@ import SelectContent from '@/shadcn/components/ui/select/SelectContent.vue';
 import SelectItem from '@/shadcn/components/ui/select/SelectItem.vue';
 import SelectTrigger from '@/shadcn/components/ui/select/SelectTrigger.vue';
 import SelectValue from '@/shadcn/components/ui/select/SelectValue.vue';
+import { Textarea } from '@/shadcn/components/ui/textarea';
 import { AlertTriangle, CheckCircle, XCircle } from '@lucide/vue';
 import { computed } from 'vue';
 type FormDefinitionData = App.Data.FormDefinitionData;
@@ -52,6 +53,7 @@ const mappingLabels: Record<string, string> = {
     title_field_id: 'Titel',
     description_field_id: 'Beschreibung',
     coordinate_field_id: 'Koordinaten',
+    consent_text: 'Einwilligungstext',
 };
 
 function labelFor(field: string): string {
@@ -112,8 +114,8 @@ const mapPointValidation = computed(() => {
     const mapping = formDefinition.value.map_point_mapping;
     if (!mapping?.enabled) return { status: 'disabled', missing: [], warnings: [] };
 
-    const required = ['title_field_id', 'description_field_id', 'coordinate_field_id'] as const;
-    const missing: string[] = required.filter((field) => !mapping[field]);
+    const required = ['title_field_id', 'description_field_id', 'coordinate_field_id', 'consent_text'] as const;
+    const missing: string[] = required.filter((field) => !mapping[field]?.trim());
 
     const warnings: string[] = [];
 
@@ -121,6 +123,10 @@ const mapPointValidation = computed(() => {
     if (mapping.coordinate_field_id) {
         const field = formDefinition.value.fields.find((f: any) => f.id === mapping.coordinate_field_id);
         if (field && field.type !== 'geo_coordinate') warnings.push('Koordinaten Feld sollte vom Typ "geo_coordinate" sein');
+    }
+
+    if (mapping.consent_text && !mapping.consent_text.includes('{felder}')) {
+        warnings.push('Der Einwilligungstext nennt die Angaben nicht. Füge {felder} ein, damit die Person sieht, was öffentlich wird.');
     }
 
     return {
@@ -141,6 +147,17 @@ const selectFields = computed(() => formDefinition.value.fields.filter((f: any) 
 const singleCheckboxFields = computed(() => formDefinition.value.fields.filter((f) => f.type === 'checkbox' && f.options.length === 1));
 
 const NO_CONDITION = 'none';
+const NO_CONTACT_EMAIL = 'none';
+
+const contactEmailValue = computed({
+    get: () => formDefinition.value.map_point_mapping?.contact_email_field_id ?? NO_CONTACT_EMAIL,
+    set: (value: string) => {
+        const mapping = formDefinition.value.map_point_mapping;
+        if (!mapping) return;
+
+        mapping.contact_email_field_id = value === NO_CONTACT_EMAIL ? null : value;
+    },
+});
 
 const adviceConditionValue = computed({
     get: () => formDefinition.value.advice_mapping?.condition_field_id ?? NO_CONDITION,
@@ -531,6 +548,39 @@ const adviceTypeSelectValue = computed({
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
+                            </FormItem>
+
+                            <FormItem>
+                                <Label>Kontaktadresse</Label>
+                                <Select v-model="contactEmailValue">
+                                    <SelectTrigger data-test="map-point-contact-email-field">
+                                        <SelectValue placeholder="Feld auswählen" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem :value="NO_CONTACT_EMAIL">Keine</SelectItem>
+                                        <SelectItem v-for="field in emailFields" :key="field.id" :value="field.id">
+                                            {{ field.label }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <p class="text-xs text-muted-foreground">
+                                    An diese Adresse geht der Link, mit dem die Person ihren Eintrag verwalten kann. Sie wird nie veröffentlicht.
+                                </p>
+                            </FormItem>
+
+                            <FormItem>
+                                <Label for="map-point-consent-text">Einwilligungstext *</Label>
+                                <Textarea
+                                    id="map-point-consent-text"
+                                    :model-value="formDefinition.map_point_mapping.consent_text ?? ''"
+                                    rows="4"
+                                    data-test="map-point-consent-text"
+                                    @update:model-value="(value) => (formDefinition.map_point_mapping!.consent_text = String(value))"
+                                />
+                                <p class="text-xs text-muted-foreground">
+                                    Erscheint unter dem Formular, sobald die Person „Meinen Eintrag auf der Karte zeigen“ wählt. Platzhalter:
+                                    <code>{initiative}</code> für den Namen der Initiative, <code>{felder}</code> für die öffentlichen Angaben.
+                                </p>
                             </FormItem>
                         </div>
 
