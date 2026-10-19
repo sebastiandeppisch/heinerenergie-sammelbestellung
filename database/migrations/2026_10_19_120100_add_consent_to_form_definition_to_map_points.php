@@ -14,7 +14,15 @@ return new class extends Migration
             $table->foreignId('contact_email_field_id')->nullable()->constrained('form_fields')->nullOnDelete();
         });
 
-        DB::table('form_definition_to_map_points')->update(['consent_text' => 'Ich bin einverstanden, dass mein Eintrag auf der Karte von {initiative} öffentlich angezeigt wird, mit folgenden Angaben: {felder} sowie dem Standort. Ich kann meine Einwilligung jederzeit über den Link in der Bestätigungsmail widerrufen.']);
+        $this->fillConsentTexts();
+    }
+
+    /**
+     * Existing targets get the default text, so a consent text is always stored.
+     */
+    public function fillConsentTexts(): void
+    {
+        DB::table('form_definition_to_map_points')->whereNull('consent_text')->update(['consent_text' => 'Ich bin einverstanden, dass mein Eintrag auf der Karte von {initiative} öffentlich angezeigt wird, mit folgenden Angaben: {felder} sowie dem Standort. Ich kann meine Einwilligung jederzeit über den Link in der Bestätigungsmail widerrufen.']);
     }
 
     public function down(): void

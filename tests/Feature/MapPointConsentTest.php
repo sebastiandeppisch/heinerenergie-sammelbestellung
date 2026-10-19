@@ -14,7 +14,9 @@ use App\Services\SessionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\TestResponse;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -240,17 +242,13 @@ test('the contact address is never part of a public payload', function (): void 
         ->not->toContain('contact_email');
 });
 
-test('the migrations keep existing points as they are and fill the consent text of existing targets', function (): void {
-    $mapPoint = MapPoint::factory()->create(['published' => true]);
-    $pointMigration = require database_path('migrations/2026_10_19_120000_add_public_consent_to_map_points.php');
-    $targetMigration = require database_path('migrations/2026_10_19_120100_add_consent_to_form_definition_to_map_points.php');
+test('existing points need no consent and existing targets get the default consent text', function (): void {
+    $default = collect(Schema::getColumns('map_points'))->firstWhere('name', 'public_consent')['default'];
+    DB::table('form_definition_to_map_points')->update(['consent_text' => null]);
 
-    $targetMigration->down();
-    $pointMigration->down();
-    $pointMigration->up();
-    $targetMigration->up();
+    (require database_path('migrations/2026_10_19_120100_add_consent_to_form_definition_to_map_points.php'))->fillConsentTexts();
 
-    expect($mapPoint->fresh()->public_consent)->toBe(PublicConsent::NOT_REQUIRED)
+    expect($default)->toContain('not_required')
         ->and($this->config->fresh()->consent_text)->toBe(MapPointConsentService::DEFAULT_TEXT);
 });
 

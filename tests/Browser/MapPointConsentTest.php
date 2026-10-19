@@ -24,11 +24,14 @@ test('a person consents to the point only and later shows the details on the man
     $embed = MapEmbed::factory()->for($form->group)->create(['show_table' => true]);
     $embed->mapPointCategories()->sync([$category->id]);
 
-    visit(route('form.show', $form))
+    $page = visit(route('form.show', $form))
         ->fill("#field_{$config->titleField->uuid}", 'Garten Müller')
-        ->fill("#field_{$config->descriptionField->uuid}", 'Mit Teich und Totholz')
-        ->click('.leaflet-container')
-        ->fill("#field_{$email->uuid}", 'erika@example.com')
+        ->fill("#field_{$config->descriptionField->uuid}", 'Mit Teich und Totholz');
+
+    // Places the pin in the middle of the map, a real click may hit a tile that is still loading.
+    $page->script('(() => { const map = document.querySelector(".leaflet-container"); const box = map.getBoundingClientRect(); map.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: box.left + box.width / 2, clientY: box.top + box.height / 2 })); })()');
+
+    $page->fill("#field_{$email->uuid}", 'erika@example.com')
         ->click('Meinen Eintrag auf der Karte zeigen')
         ->assertSee('zusätzlich diese Angaben zeigen: Titel, Beschreibung')
         ->click('Absenden')
