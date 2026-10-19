@@ -33,7 +33,7 @@ class FormDefinitionService
     public function updateFormDefinitionData(FormDefinitionData $formDefinitionData): FormDefinition
     {
         return DB::transaction(function () use ($formDefinitionData) {
-            $data = collect($formDefinitionData->toArray())->forget(['id', 'fields', 'group_id', 'advice_mapping', 'map_point_mapping'])->toArray();
+            $data = collect($formDefinitionData->toArray())->forget(['id', 'fields', 'group_id', 'advice_mapping', 'map_point_mapping', 'map_point_consent'])->toArray();
             $formDefinition = FormDefinition::where('uuid', $formDefinitionData->id)->firstOrFail();
 
             // Fields of a map point category belong to the category's group.
@@ -159,7 +159,7 @@ class FormDefinitionService
     public function storeFormDefinitionData(FormDefinitionData $formDefinitionData): FormDefinition
     {
         return DB::transaction(function () use ($formDefinitionData) {
-            $data = collect($formDefinitionData->toArray())->forget(['id', 'fields', 'group_id', 'advice_mapping', 'map_point_mapping'])->toArray();
+            $data = collect($formDefinitionData->toArray())->forget(['id', 'fields', 'group_id', 'advice_mapping', 'map_point_mapping', 'map_point_consent'])->toArray();
             $data['group_id'] = Group::where('uuid', $formDefinitionData->group_id)->firstOrFail()->id;
             $formDefinition = FormDefinition::create($data);
             $savedFields = [];

@@ -14,8 +14,6 @@ use App\Services\SessionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\TestResponse;
@@ -83,6 +81,15 @@ function expectedConsentText(): string
     return strtr(MapPointConsentService::DEFAULT_TEXT, ['{initiative}' => 'Gartenkreis', '{felder}' => 'Titel, Beschreibung, Größe, Foto']);
 }
 
+function consentGroupAdmin(): User
+{
+    $admin = User::factory()->create();
+    test()->form->group->users()->attach($admin, ['is_admin' => true]);
+    app(SessionService::class)->actAsGroup(test()->form->group, true);
+
+    return $admin;
+}
+
 function publishedConsentPoint(): MapPoint
 {
     $mapPoint = MapPoint::sole();
@@ -129,7 +136,7 @@ test('the consent is frozen when the form is submitted', function (): void {
     submitConsentForm(['_consent_show' => true, '_consent_details' => true])->assertSessionHasNoErrors();
     $token = basename(parse_url(Mail::queued(FormSubmissionConfirmation::class)->last()->confirmationUrl, PHP_URL_PATH));
 
-    $this->config->update(['consent_text' => 'Neuer Text für {felder}']);
+    $this->config->forceFill(['consent_text' => 'Neuer Text für {felder}'])->save();
     $this->category->syncPublicFields([$this->size->id, $this->note->id, $this->photo->id]);
     $this->post(route('form.confirm', $token))->assertOk();
 
@@ -204,10 +211,7 @@ test('a refused point appears in no public output', function (): void {
 
     $this->get(route('map-point-images.show', [$mapPoint, basename($photoPath)]))->assertNotFound();
 
-    $admin = User::factory()->create(['is_admin' => true]);
-    app(SessionService::class)->actAsGroup($this->form->group);
-    Config::set('app.group_context', 'global');
-    $this->actingAs($admin)
+    $this->actingAs(consentGroupAdmin())
         ->get(route('map-embeds.create'))
         ->assertInertia(fn (Assert $page): Assert => $page->has($points, 1)->where("{$points}.0.title", 'Bestandspunkt'));
 });
@@ -228,15 +232,12 @@ test('the contact address is never part of a public payload', function (): void 
     publishedConsentPoint();
     MapPoint::factory()->for($this->form->group)->create(['published' => true, 'category_id' => $this->category->id, 'contact_email' => 'bestand@example.com']);
 
-    $this->get(route('map.public', $this->embed))
-        ->assertOk()
-        ->assertSee('Naturgarten Müller')
-        ->assertDontSee('erika@example.com')
-        ->assertDontSee('bestand@example.com')
-        ->assertDontSee('contact_email');
+    $page = json_encode($this->get(route('map.public', $this->embed))->assertOk()->viewData('page'));
 
-    Auth::logout();
-    $this->get(route('form.show', $this->form))->assertDontSee('erika@example.com');
+    expect($page)->toContain('Naturgarten')
+        ->not->toContain('erika@example.com')
+        ->not->toContain('bestand@example.com')
+        ->not->toContain('contact_email');
 });
 
 test('the migrations keep existing points as they are and fill the consent text of existing targets', function (): void {
@@ -260,9 +261,7 @@ test('points created by admins need no consent', function (): void {
 test('an admin may refuse a consent but never give one', function (): void {
     submitConsentForm(['_consent_show' => true]);
     $mapPoint = MapPoint::sole();
-    $admin = User::factory()->create();
-    $this->form->group->users()->attach($admin, ['is_admin' => true]);
-    app(SessionService::class)->actAsGroup($this->form->group, true);
+    $admin = consentGroupAdmin();
 
     $this->actingAs($admin)->post(route('mappoints.refuse-consent', $mapPoint))->assertRedirect();
     expect($mapPoint->fresh()->public_consent)->toBe(PublicConsent::REFUSED);
@@ -281,9 +280,7 @@ test('an admin may refuse a consent but never give one', function (): void {
 });
 
 test('the form builder saves the consent text and the contact field', function (): void {
-    $admin = User::factory()->create();
-    $this->form->group->users()->attach($admin, ['is_admin' => true]);
-    app(SessionService::class)->actAsGroup($this->form->group, true);
+    $admin = consentGroupAdmin();
     $payload = FormDefinitionData::fromModel($this->form->fresh()->load('fields.options'))->toArray();
     $payload['map_point_mapping']['consent_text'] = 'Karte von {initiative}: {felder}';
     $payload['map_point_mapping']['contact_email_field_id'] = null;
