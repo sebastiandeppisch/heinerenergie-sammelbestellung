@@ -9,13 +9,15 @@ use App\Models\MapPointCategory;
 use App\Services\FormSubmissionConfirmationService;
 use App\Services\MapPointEditLinkService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Concerns\AutoAttachesFormEmbedToken;
 
-uses(RefreshDatabase::class);
+uses(RefreshDatabase::class, AutoAttachesFormEmbedToken::class);
 
 test('a person consents to the point only and later shows the details on the manage page', function (): void {
     $config = FormDefinitionToMapPoint::factory()->create();
     $form = $config->formDefinition;
     $form->update(['is_active' => true, 'requires_email_confirmation' => true]);
+    $form->group->update(['name' => 'Gartenkreis']);
     $category = MapPointCategory::factory()->for($form->group)->withoutImage()->create(['name' => 'Naturgarten']);
     $email = $form->fields()->create(['type' => FieldType::EMAIL, 'label' => 'E-Mail', 'required' => true, 'sort_order' => 10]);
     $config->category()->associate($category);
@@ -24,36 +26,23 @@ test('a person consents to the point only and later shows the details on the man
     $embed = MapEmbed::factory()->for($form->group)->create(['show_table' => true]);
     $embed->mapPointCategories()->sync([$category->id]);
 
-    $page = visit(route('form.show', $form))
-        ->fill("#field_{$config->titleField->uuid}", 'Garten Müller')
-        ->fill("#field_{$config->descriptionField->uuid}", 'Mit Teich und Totholz');
-
-    // The map listens to clicks once it is ready and shows its controls. A real click may hit a tile that is still loading.
-    $mapIsReady = $page->script('(async () => {
-        const sleep = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
-        for (let attempt = 0; attempt < 100 && !document.querySelector(".leaflet-control button"); attempt++) {
-            await sleep(100);
-        }
-        const map = document.querySelector(".leaflet-container");
-        if (!map || !document.querySelector(".leaflet-control button")) {
-            return false;
-        }
-        await sleep(300);
-        const box = map.getBoundingClientRect();
-        map.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: box.left + box.width / 2, clientY: box.top + box.height / 2 }));
-        return true;
-    })()');
-    expect($mapIsReady)->toBeTrue();
-
-    $page->fill("#field_{$email->uuid}", 'erika@example.com')
+    visit(route('form.show', $form))
+        ->assertDontSee('zusätzlich diese Angaben zeigen')
         ->click('Meinen Eintrag auf der Karte zeigen')
         ->assertSee('zusätzlich diese Angaben zeigen: Titel, Beschreibung')
-        ->click('Absenden')
-        ->assertSee('Fast geschafft, bitte bestätige deine E-Mail-Adresse.')
+        ->assertSee('auf der Karte von Gartenkreis öffentlich angezeigt wird, mit folgenden Angaben: Titel, Beschreibung sowie dem Standort')
         ->assertNoJavaScriptErrors();
 
-    $token = app(FormSubmissionConfirmationService::class)->issueToken(FormSubmission::sole());
-    visit(route('form.confirm.show', $token))
+    // Placing the pin depends on the map tiles, so the form is sent without the browser.
+    $this->post(route('form.submit', $form), [
+        $config->titleField->uuid => 'Garten Müller',
+        $config->descriptionField->uuid => 'Mit Teich und Totholz',
+        $config->coordinateField->uuid => ['lat' => 49.8728, 'lng' => 8.6510],
+        $email->uuid => 'erika@example.com',
+        '_consent_show' => true,
+    ])->assertSessionHasNoErrors();
+
+    visit(route('form.confirm.show', app(FormSubmissionConfirmationService::class)->issueToken(FormSubmission::sole())))
         ->click('E-Mail-Adresse bestätigen')
         ->assertSee('Dein Eintrag ist angelegt.')
         ->assertNoJavaScriptErrors();
