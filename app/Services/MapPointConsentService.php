@@ -173,7 +173,7 @@ class MapPointConsentService
             ->map(fn (FormDefinitionToMapPointCharacteristic $mapping): MapPointConsentCharacteristicData => new MapPointConsentCharacteristicData(
                 option_value: (string) $mapping->option_value,
                 labels: $this->publicLabels($mapping->characteristic->form_definition_id, $publicFieldIds),
-                selectable_for: $this->selectableFor($mapping->characteristic, $categoryId, $categoryIdsByOption, $tree),
+                selectable_for: $this->selectableFor($mapping->characteristic, $categoryId, $categoryIdsByOption->all(), $tree),
             ))
             ->values();
 
@@ -232,16 +232,13 @@ class MapPointConsentService
     }
 
     /**
-     * @param  Collection<string, int>  $categoryIdsByOption
+     * @param  array<string, int>  $categoryIdsByOption
      * @return array<int, string>
      */
-    private function selectableFor(MapPointCharacteristic $characteristic, ?int $categoryId, Collection $categoryIdsByOption, MapPointCategoryTree $tree): array
+    private function selectableFor(MapPointCharacteristic $characteristic, ?int $categoryId, array $categoryIdsByOption, MapPointCategoryTree $tree): array
     {
-        $options = $categoryIdsByOption
-            ->filter(fn (int $id): bool => $characteristic->isSelectableFor($id, $tree))
-            ->keys()
-            ->map(fn (mixed $option): string => (string) $option)
-            ->all();
+        $options = array_keys(array_filter($categoryIdsByOption, fn (int $id): bool => $characteristic->isSelectableFor($id, $tree)));
+        $options = array_map(strval(...), $options);
 
         return $characteristic->isSelectableFor($categoryId, $tree) ? ['', ...$options] : $options;
     }

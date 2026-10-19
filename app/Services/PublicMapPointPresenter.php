@@ -86,7 +86,7 @@ class PublicMapPointPresenter
     {
         $data = MapPointData::fromModel($mapPoint, onlyPublic: true, tree: $tree, publicFieldIds: $publicFieldIds);
 
-        $data->title = $this->allowsKey($mapPoint, MapPointConsentService::TITLE) ? $data->title : ($mapPoint->category?->name ?? '');
+        $data->title = $this->allowsKey($mapPoint, MapPointConsentService::TITLE) ? $data->title : ($mapPoint->category->name ?? '');
         $data->description = $this->allowsKey($mapPoint, MapPointConsentService::DESCRIPTION) ? $data->description : '';
         $data->location = $this->allowsKey($mapPoint, MapPointConsentService::LOCATION) ? $data->location : null;
         $data->fields = $data->fields

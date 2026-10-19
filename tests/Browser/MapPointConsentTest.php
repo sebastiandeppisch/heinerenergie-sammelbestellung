@@ -35,7 +35,7 @@ test('a person consents to the point only and later shows the details on the man
         ->click('Meinen Eintrag auf der Karte zeigen')
         ->assertSee('zusätzlich diese Angaben zeigen: Titel, Beschreibung')
         ->click('Absenden')
-        ->assertSee('E-Mail')
+        ->assertSee('Fast geschafft, bitte bestätige deine E-Mail-Adresse.')
         ->assertNoJavaScriptErrors();
 
     $token = app(FormSubmissionConfirmationService::class)->issueToken(FormSubmission::sole());

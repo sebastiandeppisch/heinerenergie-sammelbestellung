@@ -48,16 +48,16 @@ beforeEach(function (): void {
  * @param  array<string, mixed>  $values
  * @return TestResponse<Response>
  */
-function submitEditLinkForm(array $values = []): TestResponse
+function submitEditLinkForm(FormDefinitionToMapPoint $config, array $values = []): TestResponse
 {
-    $test = test();
+    $fields = $config->formDefinition->fields()->get()->keyBy('label');
 
-    return $test->post(route('form.submit', $test->form), [
-        $test->config->titleField->uuid => 'Naturgarten Müller',
-        $test->config->descriptionField->uuid => 'Mit Teich',
-        $test->config->coordinateField->uuid => ['lat' => 49.8728, 'lng' => 8.6510],
-        $test->formPhoto->uuid => [UploadedFile::fake()->image('teich.jpg')],
-        $test->email->uuid => 'erika@example.com',
+    return test()->post(route('form.submit', $config->formDefinition), [
+        $config->titleField->uuid => 'Naturgarten Müller',
+        $config->descriptionField->uuid => 'Mit Teich',
+        $config->coordinateField->uuid => ['lat' => 49.8728, 'lng' => 8.6510],
+        $fields['Foto']->uuid => [UploadedFile::fake()->image('teich.jpg')],
+        $fields['E-Mail']->uuid => 'erika@example.com',
         '_consent_show' => true,
         ...$values,
     ]);
@@ -92,7 +92,7 @@ function assertManagePageIsInvalid(string $token): void
 }
 
 test('a form without confirmation sends the mail with the manage link once and tells the submitter', function (): void {
-    submitEditLinkForm()
+    submitEditLinkForm($this->config)
         ->assertInertia(fn (Assert $page): Assert => $page
             ->component('Forms/Submitted')
             ->where('notices.0.title', 'Dein Eintrag ist angelegt.')
@@ -109,7 +109,7 @@ test('a form without confirmation sends the mail with the manage link once and t
 
 test('a form with confirmation sends the mail only after the confirmation', function (): void {
     $this->form->update(['requires_email_confirmation' => true]);
-    submitEditLinkForm();
+    submitEditLinkForm($this->config);
     Mail::assertNotQueued(MapPointCreated::class);
 
     $confirmationToken = tokenOfUrl(Mail::queued(FormSubmissionConfirmation::class)->last()->confirmationUrl);
@@ -128,14 +128,14 @@ test('a form with confirmation sends the mail only after the confirmation', func
 test('no mail leaves when the point is rolled back', function (): void {
     Event::listen(MapPointCreatedByFormSubmission::class, fn () => throw new RuntimeException('später fehlgeschlagen'));
 
-    submitEditLinkForm();
+    submitEditLinkForm($this->config);
 
     expect(MapPoint::count())->toBe(0);
     Mail::assertNotQueued(MapPointCreated::class);
 });
 
 test('only a keyed hash of the token is stored and the link expires', function (): void {
-    submitEditLinkForm();
+    submitEditLinkForm($this->config);
     $token = createdMailToken();
 
     expect(MapPoint::sole()->edit_token_hash)->toBe(TokenHash::make($token));
@@ -145,7 +145,7 @@ test('only a keyed hash of the token is stored and the link expires', function (
 });
 
 test('a new link replaces the old one', function (): void {
-    submitEditLinkForm();
+    submitEditLinkForm($this->config);
     $oldToken = createdMailToken();
 
     $this->post(route('map-point.manage.send-for-point', MapPoint::sole()))
@@ -156,7 +156,7 @@ test('a new link replaces the old one', function (): void {
 });
 
 test('requesting links by address answers the same for unknown addresses', function (): void {
-    submitEditLinkForm();
+    submitEditLinkForm($this->config);
 
     $this->post(route('map-point.manage.send-for-address'), ['email' => 'unbekannt@example.com'])
         ->assertInertia(fn (Assert $page): Assert => $page->component('MapPointManage/Message')->where('status', 'sent'));
@@ -177,7 +177,7 @@ test('requesting a link for a point without contact address answers the same and
 });
 
 test('requests are rate limited per address, per point and per ip', function (string $limit): void {
-    submitEditLinkForm();
+    submitEditLinkForm($this->config);
     $mapPoint = MapPoint::sole();
     Config::set('forms.map_point_edit.max_per_address_per_hour', 100);
     Config::set('forms.map_point_edit.max_per_point_per_hour', 100);
@@ -187,7 +187,7 @@ test('requests are rate limited per address, per point and per ip', function (st
     $request = fn (int $attempt): TestResponse => match ($limit) {
         'address' => $this->withServerVariables(['REMOTE_ADDR' => "10.0.0.{$attempt}"])->post(route('map-point.manage.send-for-address'), ['email' => 'erika@example.com']),
         'point' => $this->withServerVariables(['REMOTE_ADDR' => "10.0.0.{$attempt}"])->post(route('map-point.manage.send-for-point', $mapPoint)),
-        'ip' => $this->post(route('map-point.manage.send-for-address'), ['email' => "person{$attempt}@example.com"]),
+        default => $this->post(route('map-point.manage.send-for-address'), ['email' => "person{$attempt}@example.com"]),
     };
 
     $request(1)->assertOk();
@@ -196,7 +196,7 @@ test('requests are rate limited per address, per point and per ip', function (st
 })->with(['address', 'point', 'ip']);
 
 test('the person can change the consent levels', function (): void {
-    submitEditLinkForm();
+    submitEditLinkForm($this->config);
     $token = createdMailToken();
     $this->travel(1)->hours();
 
@@ -214,7 +214,7 @@ test('the person can change the consent levels', function (): void {
 });
 
 test('the person can withdraw the consent', function (): void {
-    submitEditLinkForm();
+    submitEditLinkForm($this->config);
     $token = createdMailToken();
 
     $this->post(route('map-point.manage.revoke', $token))->assertRedirect(route('map-point.manage.show', $token));
@@ -223,7 +223,7 @@ test('the person can withdraw the consent', function (): void {
 });
 
 test('deleting removes the point, its images and the submission', function (): void {
-    submitEditLinkForm();
+    submitEditLinkForm($this->config);
     $mapPoint = MapPoint::sole();
     $submission = FormSubmission::sole();
     $pointImages = Storage::disk('images')->allFiles($mapPoint->imageDirectory());
@@ -240,7 +240,7 @@ test('deleting removes the point, its images and the submission', function (): v
 });
 
 test('an admin can send the manage link to the contact address', function (): void {
-    submitEditLinkForm();
+    submitEditLinkForm($this->config);
     $mapPoint = MapPoint::sole();
     $admin = User::factory()->create();
     $this->form->group->users()->attach($admin, ['is_admin' => true]);

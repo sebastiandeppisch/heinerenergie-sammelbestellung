@@ -5,6 +5,8 @@ use App\Enums\FieldType;
 use App\Enums\PublicConsent;
 use App\Mail\FormSubmissionConfirmation;
 use App\Models\FormDefinitionToMapPoint;
+use App\Models\FormSubmission;
+use App\Models\Group;
 use App\Models\MapEmbed;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
@@ -62,18 +64,18 @@ beforeEach(function (): void {
  * @param  array<string, mixed>  $consent
  * @return TestResponse<Response>
  */
-function submitConsentForm(array $consent = []): TestResponse
+function submitConsentForm(FormDefinitionToMapPoint $config, array $consent = []): TestResponse
 {
-    $test = test();
+    $fields = $config->formDefinition->fields()->get()->keyBy('label');
 
-    return $test->post(route('form.submit', $test->form), [
-        $test->config->titleField->uuid => 'Naturgarten Müller',
-        $test->config->descriptionField->uuid => 'Mit Teich',
-        $test->config->coordinateField->uuid => ['lat' => 49.8728, 'lng' => 8.6510],
-        $test->formSize->uuid => '200 m²',
-        $test->formNote->uuid => 'Schlüssel unter der Matte',
-        $test->formPhoto->uuid => [UploadedFile::fake()->image('teich.jpg')],
-        $test->email->uuid => 'erika@example.com',
+    return test()->post(route('form.submit', $config->formDefinition), [
+        $config->titleField->uuid => 'Naturgarten Müller',
+        $config->descriptionField->uuid => 'Mit Teich',
+        $config->coordinateField->uuid => ['lat' => 49.8728, 'lng' => 8.6510],
+        $fields['Größe']->uuid => '200 m²',
+        $fields['Zugang']->uuid => 'Schlüssel unter der Matte',
+        $fields['Foto']->uuid => [UploadedFile::fake()->image('teich.jpg')],
+        $fields['E-Mail']->uuid => 'erika@example.com',
         ...$consent,
     ]);
 }
@@ -83,11 +85,11 @@ function expectedConsentText(): string
     return strtr(MapPointConsentService::DEFAULT_TEXT, ['{initiative}' => 'Gartenkreis', '{felder}' => 'Titel, Beschreibung, Größe, Foto']);
 }
 
-function consentGroupAdmin(): User
+function consentGroupAdmin(Group $group): User
 {
     $admin = User::factory()->create();
-    test()->form->group->users()->attach($admin, ['is_admin' => true]);
-    app(SessionService::class)->actAsGroup(test()->form->group, true);
+    $group->users()->attach($admin, ['is_admin' => true]);
+    app(SessionService::class)->actAsGroup($group, true);
 
     return $admin;
 }
@@ -101,12 +103,12 @@ function publishedConsentPoint(): MapPoint
 }
 
 test('the choice in the consent block decides the consent of the point', function (array $consent, PublicConsent $expected, ?array $expectedKeys, bool $hasText): void {
-    submitConsentForm($consent)->assertSessionHasNoErrors();
+    submitConsentForm($this->config, $consent)->assertSessionHasNoErrors();
 
     $mapPoint = MapPoint::sole();
     $fieldKeys = $expectedKeys === null ? null : array_map(fn (string $key): string => match ($key) {
-        'size' => 'field:'.test()->size->uuid,
-        'photo' => 'field:'.test()->photo->uuid,
+        'size' => 'field:'.$this->size->uuid,
+        'photo' => 'field:'.$this->photo->uuid,
         default => $key,
     }, $expectedKeys);
 
@@ -135,7 +137,7 @@ test('the public form offers the consent block with the labels of the public fie
 
 test('the consent is frozen when the form is submitted', function (): void {
     $this->form->update(['requires_email_confirmation' => true]);
-    submitConsentForm(['_consent_show' => true, '_consent_details' => true])->assertSessionHasNoErrors();
+    submitConsentForm($this->config, ['_consent_show' => true, '_consent_details' => true])->assertSessionHasNoErrors();
     $token = basename(parse_url(Mail::queued(FormSubmissionConfirmation::class)->last()->confirmationUrl, PHP_URL_PATH));
 
     $this->config->forceFill(['consent_text' => 'Neuer Text für {felder}'])->save();
@@ -148,7 +150,7 @@ test('the consent is frozen when the form is submitted', function (): void {
 });
 
 test('a field made public later stays private for a given consent, a field made private disappears at once', function (): void {
-    submitConsentForm(['_consent_show' => true, '_consent_details' => true]);
+    submitConsentForm($this->config, ['_consent_show' => true, '_consent_details' => true]);
     publishedConsentPoint();
     $points = "pointsByCategory.{$this->category->uuid}";
 
@@ -170,7 +172,7 @@ test('a field made public later stays private for a given consent, a field made 
 });
 
 test('without consent to the details the category replaces the title and description and location are left out', function (): void {
-    submitConsentForm(['_consent_show' => true]);
+    submitConsentForm($this->config, ['_consent_show' => true]);
     publishedConsentPoint();
     $points = "pointsByCategory.{$this->category->uuid}";
 
@@ -188,7 +190,7 @@ test('without consent to the details the category replaces the title and descrip
 });
 
 test('with consent to the details title and description are shown, the location is never consented to by a form', function (): void {
-    submitConsentForm(['_consent_show' => true, '_consent_details' => true]);
+    submitConsentForm($this->config, ['_consent_show' => true, '_consent_details' => true]);
     publishedConsentPoint();
     $points = "pointsByCategory.{$this->category->uuid}";
 
@@ -201,7 +203,7 @@ test('with consent to the details title and description are shown, the location 
 });
 
 test('a refused point appears in no public output', function (): void {
-    submitConsentForm();
+    submitConsentForm($this->config);
     $mapPoint = publishedConsentPoint();
     MapPoint::factory()->for($this->form->group)->create(['published' => true, 'category_id' => $this->category->id, 'title' => 'Bestandspunkt']);
     $photoPath = $mapPoint->fields()->where('form_field_id', $this->photo->id)->sole()->value[0];
@@ -213,13 +215,13 @@ test('a refused point appears in no public output', function (): void {
 
     $this->get(route('map-point-images.show', [$mapPoint, basename($photoPath)]))->assertNotFound();
 
-    $this->actingAs(consentGroupAdmin())
+    $this->actingAs(consentGroupAdmin($this->form->group))
         ->get(route('map-embeds.create'))
         ->assertInertia(fn (Assert $page): Assert => $page->has($points, 1)->where("{$points}.0.title", 'Bestandspunkt'));
 });
 
 test('an image is served publicly only with consent to its field', function (): void {
-    submitConsentForm(['_consent_show' => true]);
+    submitConsentForm($this->config, ['_consent_show' => true]);
     $mapPoint = publishedConsentPoint();
     $url = route('map-point-images.show', [$mapPoint, basename($mapPoint->fields()->where('form_field_id', $this->photo->id)->sole()->value[0])]);
 
@@ -230,7 +232,7 @@ test('an image is served publicly only with consent to its field', function (): 
 });
 
 test('the contact address is never part of a public payload', function (): void {
-    submitConsentForm(['_consent_show' => true, '_consent_details' => true]);
+    submitConsentForm($this->config, ['_consent_show' => true, '_consent_details' => true]);
     publishedConsentPoint();
     MapPoint::factory()->for($this->form->group)->create(['published' => true, 'category_id' => $this->category->id, 'contact_email' => 'bestand@example.com']);
 
@@ -257,9 +259,9 @@ test('points created by admins need no consent', function (): void {
 });
 
 test('an admin may refuse a consent but never give one', function (): void {
-    submitConsentForm(['_consent_show' => true]);
+    submitConsentForm($this->config, ['_consent_show' => true]);
     $mapPoint = MapPoint::sole();
-    $admin = consentGroupAdmin();
+    $admin = consentGroupAdmin($this->form->group);
 
     $this->actingAs($admin)->post(route('mappoints.refuse-consent', $mapPoint))->assertRedirect();
     expect($mapPoint->fresh()->public_consent)->toBe(PublicConsent::REFUSED);
@@ -273,12 +275,12 @@ test('an admin may refuse a consent but never give one', function (): void {
             ->where('consent.public_consent', 'refused')
             ->where('consent.contact_email', 'neu@example.com')
             ->where('consent.public_consent_text', expectedConsentText())
-            ->where('consent.submission_id', $mapPoint->pointable->uuid)
+            ->where('consent.submission_id', FormSubmission::sole()->uuid)
         );
 });
 
 test('the form builder saves the consent text and the contact field', function (): void {
-    $admin = consentGroupAdmin();
+    $admin = consentGroupAdmin($this->form->group);
     $payload = FormDefinitionData::fromModel($this->form->fresh()->load('fields.options'))->toArray();
     $payload['map_point_mapping']['consent_text'] = 'Karte von {initiative}: {felder}';
     $payload['map_point_mapping']['contact_email_field_id'] = null;
