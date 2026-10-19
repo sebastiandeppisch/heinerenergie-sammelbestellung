@@ -28,8 +28,23 @@ test('a person consents to the point only and later shows the details on the man
         ->fill("#field_{$config->titleField->uuid}", 'Garten Müller')
         ->fill("#field_{$config->descriptionField->uuid}", 'Mit Teich und Totholz');
 
-    // Places the pin in the middle of the map, a real click may hit a tile that is still loading.
-    $page->script('(() => { const map = document.querySelector(".leaflet-container"); const box = map.getBoundingClientRect(); map.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: box.left + box.width / 2, clientY: box.top + box.height / 2 })); })()');
+    // Places the pin in the middle of the map once the map listens to clicks, a real click may hit a tile that is still loading.
+    $pinIsPlaced = $page->script('(async () => {
+        for (let attempt = 0; attempt < 50; attempt++) {
+            const map = document.querySelector(".leaflet-container");
+            if (map) {
+                const box = map.getBoundingClientRect();
+                map.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: box.left + box.width / 2, clientY: box.top + box.height / 2 }));
+                await new Promise((resolve) => setTimeout(resolve, 100));
+                if (document.querySelectorAll(".leaflet-marker-icon").length > 1) {
+                    return true;
+                }
+            }
+            await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+        return false;
+    })()');
+    expect($pinIsPlaced)->toBeTrue();
 
     $page->fill("#field_{$email->uuid}", 'erika@example.com')
         ->click('Meinen Eintrag auf der Karte zeigen')
