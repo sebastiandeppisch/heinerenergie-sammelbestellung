@@ -29,12 +29,21 @@ test('a person consents to the point only and later shows the details on the man
         ->fill("#field_{$config->descriptionField->uuid}", 'Mit Teich und Totholz');
 
     // The map listens to clicks once it is ready and shows its controls. A real click may hit a tile that is still loading.
-    $page->assertPresent('.leaflet-control button')
-        ->script('(() => {
-            const map = document.querySelector(".leaflet-container");
-            const box = map.getBoundingClientRect();
-            map.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: box.left + box.width / 2, clientY: box.top + box.height / 2 }));
-        })()');
+    $mapIsReady = $page->script('(async () => {
+        const sleep = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+        for (let attempt = 0; attempt < 100 && !document.querySelector(".leaflet-control button"); attempt++) {
+            await sleep(100);
+        }
+        const map = document.querySelector(".leaflet-container");
+        if (!map || !document.querySelector(".leaflet-control button")) {
+            return false;
+        }
+        await sleep(300);
+        const box = map.getBoundingClientRect();
+        map.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: box.left + box.width / 2, clientY: box.top + box.height / 2 }));
+        return true;
+    })()');
+    expect($mapIsReady)->toBeTrue();
 
     $page->fill("#field_{$email->uuid}", 'erika@example.com')
         ->click('Meinen Eintrag auf der Karte zeigen')
