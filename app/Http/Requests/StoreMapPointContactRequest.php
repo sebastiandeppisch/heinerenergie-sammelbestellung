@@ -24,7 +24,6 @@ class StoreMapPointContactRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255'],
             'message' => ['required', 'string', 'max:'.(int) config('map_contact.message_max_length')],
-            'privacy' => ['accepted'],
             'website' => ['nullable', 'string'],
         ];
     }
@@ -39,7 +38,6 @@ class StoreMapPointContactRequest extends FormRequest
             'name' => 'Name',
             'email' => 'E-Mail-Adresse',
             'message' => 'Nachricht',
-            'privacy' => 'Datenschutzerklärung',
         ];
     }
 

@@ -4,7 +4,6 @@ import NoLayout from '@/layouts/NoLayout.vue';
 import PublicLayout from '@/layouts/PublicLayout.vue';
 import { Button } from '@/shadcn/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shadcn/components/ui/card';
-import { Checkbox } from '@/shadcn/components/ui/checkbox';
 import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
 import { Textarea } from '@/shadcn/components/ui/textarea';
@@ -19,7 +18,6 @@ defineOptions({
 const props = defineProps<{
     mapEmbedId: string;
     mapPoint: { id: string; title: string };
-    initiative: string;
     messageMaxLength: number;
 }>();
 
@@ -29,7 +27,6 @@ const form = useForm('post', route('map-contact.store', [props.mapEmbedId, props
     name: '',
     email: '',
     message: '',
-    privacy: false,
     website: '',
 });
 form.setValidationTimeout(300);
@@ -94,20 +91,6 @@ function submit() {
                     <div class="hidden" aria-hidden="true">
                         <Label for="contact-website">Website</Label>
                         <Input id="contact-website" v-model="form.website" name="website" tabindex="-1" autocomplete="off" />
-                    </div>
-
-                    <div class="space-y-1">
-                        <div class="flex items-start gap-2">
-                            <Checkbox id="contact-privacy" v-model="form.privacy" class="mt-0.5" />
-                            <Label for="contact-privacy" class="text-sm font-normal">
-                                <span>
-                                    Ich habe die
-                                    <a :href="route('datapolicy')" target="_blank" rel="noopener" class="underline">Datenschutzerklärung</a>
-                                    gelesen und bin einverstanden, dass {{ initiative }} meine Angaben zur Weiterleitung dieser Anfrage verarbeitet.
-                                </span>
-                            </Label>
-                        </div>
-                        <p v-if="form.errors.privacy" class="text-sm text-red-500">{{ form.errors.privacy }}</p>
                     </div>
 
                     <div class="flex justify-end">

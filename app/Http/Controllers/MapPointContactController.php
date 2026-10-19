@@ -26,7 +26,6 @@ class MapPointContactController extends Controller
         return Inertia::render('MapPointContact/Create', [
             'mapEmbedId' => $mapEmbed->uuid,
             'mapPoint' => ['id' => $mapPoint->uuid, 'title' => $mapPoint->title],
-            'initiative' => $mapPoint->group->name,
             'messageMaxLength' => (int) config('map_contact.message_max_length'),
         ]);
     }

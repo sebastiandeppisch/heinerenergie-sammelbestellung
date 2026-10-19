@@ -112,7 +112,7 @@ test('a form point can only be contacted after the activation link was used', fu
     $this->get(route('map.public', $embed))
         ->assertInertia(fn ($page) => $page->where("pointsByCategory.{$category->uuid}.0.has_contact", false));
     $this->post(route('map-contact.store', [$embed, $point]), [
-        'name' => 'Erika', 'email' => 'erika@example.org', 'message' => 'Hallo', 'privacy' => true,
+        'name' => 'Erika', 'email' => 'erika@example.org', 'message' => 'Hallo',
     ])->assertNotFound();
 
     $token = verificationToken();
@@ -131,7 +131,7 @@ test('a form point can only be contacted after the activation link was used', fu
     $this->get(route('map.public', $embed))
         ->assertInertia(fn ($page) => $page->where("pointsByCategory.{$category->uuid}.0.has_contact", true));
     $this->post(route('map-contact.store', [$embed, $point]), [
-        'name' => 'Erika', 'email' => 'erika@example.org', 'message' => 'Hallo', 'privacy' => true,
+        'name' => 'Erika', 'email' => 'erika@example.org', 'message' => 'Hallo',
     ])->assertOk();
     Mail::assertQueued(ContactRequestConfirmation::class);
 });

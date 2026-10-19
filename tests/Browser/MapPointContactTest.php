@@ -36,7 +36,6 @@ test('a visitor contacts a point from the map popup and the owner gets the messa
         ->fill('#contact-name', 'Erika Muster')
         ->fill('#contact-email', 'erika@example.org')
         ->fill('#contact-message', 'Darf ich mir deinen Garten anschauen?')
-        ->click('#contact-privacy')
         ->click('Nachricht senden')
         ->assertSee('Bitte bestätige deine E-Mail-Adresse')
         ->assertNoJavaScriptErrors();

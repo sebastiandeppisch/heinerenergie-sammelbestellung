@@ -43,7 +43,6 @@ function contactPayload(array $overrides = []): array
         'name' => 'Erika Muster',
         'email' => 'erika@example.org',
         'message' => 'Darf ich mir deinen Garten anschauen?',
-        'privacy' => true,
         'website' => '',
         ...$overrides,
     ];
@@ -226,9 +225,9 @@ test('a filled honeypot discards the request silently', function (): void {
     Mail::assertNothingQueued();
 });
 
-test('the privacy policy has to be accepted and the message is limited', function (): void {
-    sendContactRequest($this, $this->embed, $this->point, ['privacy' => false, 'message' => str_repeat('a', 2001)])
-        ->assertSessionHasErrors(['privacy', 'message']);
+test('the message is limited to 2000 characters', function (): void {
+    sendContactRequest($this, $this->embed, $this->point, ['message' => str_repeat('a', 2001)])
+        ->assertSessionHasErrors(['message']);
 
     expect(MapPointContactRequest::count())->toBe(0);
 });
