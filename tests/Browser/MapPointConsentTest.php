@@ -55,7 +55,7 @@ test('a person consents to the point only and later shows the details on the man
 
     visit(route('map-point.manage.show', app(MapPointEditLinkService::class)->issue($mapPoint)))
         ->assertSee('Garten Müller')
-        ->click('zusätzlich diese Angaben zeigen')
+        ->click('#manage-details')
         ->click('Auswahl speichern')
         ->assertSee('Deine Auswahl ist gespeichert.')
         ->assertNoJavaScriptErrors();
