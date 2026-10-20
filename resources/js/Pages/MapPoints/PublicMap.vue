@@ -8,13 +8,15 @@ import PublicLayout from '@/layouts/PublicLayout.vue';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';
 import { Map as MapIcon, Table as TableIcon } from '@lucide/vue';
 import { computed, reactive, ref, watch } from 'vue';
+import { route } from 'ziggy-js';
 
 defineOptions({
     layout: isIframe ? NoLayout : PublicLayout,
 });
 
 const props = defineProps<{
-    pointsByCategory: Record<string, Array<App.Data.MapPointData>>;
+    mapEmbedId: string;
+    pointsByCategory: Record<string, Array<App.Data.PublicMapPointData>>;
     categories: Array<App.Data.MapPointCategoryData>;
     center: App.ValueObjects.Coordinate;
     zoom: number;
@@ -24,6 +26,8 @@ const props = defineProps<{
 }>();
 
 useAutoResizeIframeIfIsIframe();
+
+const contactUrl = (pointId: string) => route('map-contact.create', [props.mapEmbedId, pointId]);
 
 const activeTab = ref<'map' | 'table'>('map');
 
@@ -84,13 +88,14 @@ watch(map, () => {
                         v-model:zoom="map.zoom"
                         :points-by-category="pointsByCategory"
                         :categories="visibleCategories"
+                        :contact-url="contactUrl"
                     />
                 </div>
             </TabsContent>
 
             <TabsContent v-if="showTable" value="table">
                 <div class="w-full overflow-hidden" :style="contentBoxStyle">
-                    <MapPointsTable :points-by-category="pointsByCategory" :categories="categories" />
+                    <MapPointsTable :points-by-category="pointsByCategory" :categories="categories" :contact-url="contactUrl" />
                 </div>
             </TabsContent>
         </Tabs>

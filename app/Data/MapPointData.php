@@ -26,6 +26,9 @@ class MapPointData extends Data
         public string $group_id,
         public ?string $category_id = null,
         public ?string $location = null,
+        public ?string $contact_email = null,
+        public bool $contact_enabled = false,
+        public ?Carbon $contact_email_verified_at = null,
     ) {}
 
     public static function fromModel(MapPoint $model): self
@@ -41,6 +44,9 @@ class MapPointData extends Data
             group_id: $model->group->uuid,
             category_id: $model->category?->uuid,
             location: $model->location,
+            contact_email: $model->contact_email,
+            contact_enabled: $model->contact_enabled,
+            contact_email_verified_at: $model->contact_email_verified_at,
         );
     }
 

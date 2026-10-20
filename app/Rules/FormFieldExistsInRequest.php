@@ -25,6 +25,8 @@ class FormFieldExistsInRequest implements ValidationRule
             'map_point_mapping.title_field_id' => 'Titel Feld',
             'map_point_mapping.description_field_id' => 'Beschreibung Feld',
             'map_point_mapping.coordinate_field_id' => 'Koordinaten Feld',
+            'map_point_mapping.contact_email_field_id' => 'Kontaktadresse Feld',
+            'map_point_mapping.contact_enabled_field_id' => 'Kontakt erlauben Feld',
         ];
 
         return $mapping[$attribute] ?? $attribute;

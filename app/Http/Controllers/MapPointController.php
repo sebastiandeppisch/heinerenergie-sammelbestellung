@@ -7,8 +7,10 @@ namespace App\Http\Controllers;
 use App\Context\GroupContextContract;
 use App\Data\GroupBaseData;
 use App\Data\MapPointCategoryData;
+use App\Data\MapPointContactRequestData;
 use App\Data\MapPointData;
 use App\Data\MapPointSpreadsheetMappingData;
+use App\Data\PublicMapPointData;
 use App\Data\SpreadsheetFormatData;
 use App\Enums\SpreadsheetFormat;
 use App\Http\Requests\UpsertMapPointRequest;
@@ -16,7 +18,9 @@ use App\Models\Group;
 use App\Models\MapEmbed;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
+use App\Models\MapPointContactRequest;
 use App\Services\CurrentGroupService;
+use App\Services\MapPointContactService;
 use App\Services\MapPointVisibilityService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -73,7 +77,11 @@ class MapPointController extends Controller
             ->whereIn('category_id', $categories->pluck('id'));
 
         return Inertia::render('MapPoints/PublicMap', [
-            'pointsByCategory' => $this->pointData($mapPoints)->groupBy('category_id'),
+            'mapEmbedId' => $mapEmbed->uuid,
+            'pointsByCategory' => $mapPoints->with('category')->get()
+                ->map(fn (MapPoint $mapPoint): PublicMapPointData => PublicMapPointData::fromModel($mapPoint))
+                ->toBase()
+                ->groupBy('category_id'),
             'categories' => $this->categoryData($categories),
             'center' => $mapEmbed->coordinate,
             'zoom' => $mapEmbed->zoom,
@@ -89,6 +97,9 @@ class MapPointController extends Controller
 
         return Inertia::render('MapPoints/Upsert', [
             'mapPoint' => MapPointData::fromModel($mappoint->load(['category', 'group'])),
+            'contactRequests' => $mappoint->contactRequests()->latest()->get()
+                ->map(fn (MapPointContactRequest $contactRequest): MapPointContactRequestData => MapPointContactRequestData::fromModel($contactRequest))
+                ->toBase(),
             ...$this->formProps($visibility),
         ]);
     }
@@ -100,6 +111,19 @@ class MapPointController extends Controller
         $mappoint->update($request->getData());
 
         return redirect()->back()->with('success', 'Der Kartenpunkt wurde aktualisiert');
+    }
+
+    public function requestContactVerification(MapPoint $mappoint, MapPointContactService $contact): RedirectResponse
+    {
+        $this->authorize('update', $mappoint);
+
+        if ($mappoint->contact_email === null) {
+            return redirect()->back()->with('error', 'Der Kartenpunkt hat keine Kontaktadresse');
+        }
+
+        $contact->requestVerification($mappoint);
+
+        return redirect()->back()->with('success', 'Die Bestätigungsmail wurde verschickt');
     }
 
     public function destroy(MapPoint $mappoint): RedirectResponse

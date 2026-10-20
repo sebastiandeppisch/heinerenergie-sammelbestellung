@@ -166,6 +166,8 @@ enabled: boolean,
 title_field_id: string | null,
 description_field_id: string | null,
 coordinate_field_id: string | null,
+contact_email_field_id: string | null,
+contact_enabled_field_id: string | null,
 };
 export type GroupBaseData = {
 id: string,
@@ -260,6 +262,14 @@ map_points_count: number,
 created_at: string | null,
 can_edit: boolean,
 };
+export type MapPointContactRequestData = {
+id: string,
+created_at: string,
+sender_name: string,
+sender_email: string,
+message: string,
+status: 'forwarded' | 'confirmed' | 'expired' | 'pending',
+};
 export type MapPointData = {
 id: string,
 coordinate: App.ValueObjects.Coordinate,
@@ -271,6 +281,9 @@ created_at: string,
 group_id: string,
 category_id: string | null,
 location: string | null,
+contact_email: string | null,
+contact_enabled: boolean,
+contact_email_verified_at: string | null,
 };
 export type MapPointImportResultData = {
 created_count: number,
@@ -318,6 +331,15 @@ total: number,
 perPage: number,
 currentPage: number,
 lastPage: number,
+};
+export type PublicMapPointData = {
+id: string,
+coordinate: App.ValueObjects.Coordinate,
+title: string,
+description: string,
+category_id: string | null,
+location: string | null,
+has_contact: boolean,
 };
 export type SpreadsheetFormatData = {
 value: App.Enums.SpreadsheetFormat,

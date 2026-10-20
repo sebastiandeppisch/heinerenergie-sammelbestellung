@@ -22,6 +22,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('advices:geocode-pending')
             ->hourly()
             ->withoutOverlapping();
+
+        $schedule->command('map-contact:prune')
+            ->daily()
+            ->withoutOverlapping();
     }
 
     /**
