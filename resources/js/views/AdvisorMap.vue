@@ -21,6 +21,14 @@ const mapKey = computed<string>(() => {
     return props.advisor.lat.toString() + props.advisor.long.toString();
 });
 
+const center = computed(() => {
+    if (props.advisor.lat === null || props.advisor.long === null || props.advisor.lat === undefined || props.advisor.long === undefined) {
+        return null;
+    }
+
+    return latLng(props.advisor.lat, props.advisor.long);
+});
+
 /**
  * Bounding box of the advice radius circle, used to zoom the map so the whole circle fits.
  */
@@ -53,25 +61,13 @@ watch(circleBounds, fitToCircle);
 </script>
 
 <template>
-    <div style="height: 300px; width: 100%" class="isolate" v-if="props.advisor.lat !== null && props.advisor.long !== null">
-        <LMap
-            :key="mapKey"
-            ref="mapRef"
-            :zoom="zoom"
-            :center="[props.advisor.lat, props.advisor.long]"
-            :minZoom="3"
-            :maxZoom="18"
-            @ready="onLeafletReady"
-        >
+    <div style="height: 300px; width: 100%" class="isolate" v-if="center">
+        <LMap :key="mapKey" ref="mapRef" :zoom="zoom" :center="[center.lat, center.lng]" :minZoom="3" :maxZoom="18" @ready="onLeafletReady">
             <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" layer-type="base" name="OpenStreetMap" />
-            <LMarker :lat-lng="latLng(props.advisor.lat, props.advisor.long)">
+            <LMarker :lat-lng="center!">
                 <LIcon :icon-url="props.advisorMarker" :icon-size="[50, 50]" />
             </LMarker>
-            <LCircle
-                v-if="props.advisor.advice_radius"
-                :lat-lng="latLng(props.advisor.lat, props.advisor.long)"
-                :radius="props.advisor.advice_radius"
-            />
+            <LCircle v-if="props.advisor.advice_radius" :lat-lng="center!" :radius="props.advisor.advice_radius" />
         </LMap>
     </div>
     <div v-else>
