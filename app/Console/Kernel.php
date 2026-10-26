@@ -26,6 +26,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('form-submissions:prune-unconfirmed')
             ->daily()
             ->withoutOverlapping();
+
+        $schedule->command('map-contact:prune')
+            ->daily()
+            ->withoutOverlapping();
     }
 
     /**

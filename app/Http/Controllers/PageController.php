@@ -50,7 +50,7 @@ class PageController extends Controller
     public function dashboard(CurrentGroupService $currentGroupService): Response
     {
         $currentGroup = $currentGroupService->getGroup();
-        $advisorInfo = $currentGroup !== null ? $currentGroup->dashboard_info : null;
+        $advisorInfo = $currentGroup?->dashboard_info;
         $advisorInfo ??= Setting::get('advisorInfo');
 
         return Inertia::render('Dashboard', [

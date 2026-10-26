@@ -68,6 +68,8 @@ class UpsertMapPointRequest extends FormRequest
             'field_values' => ['sometimes', 'array'],
             'characteristic_ids' => ['sometimes', 'array'],
             'characteristic_ids.*' => ['bail', 'uuid', 'distinct', 'exists:map_point_characteristics,uuid'],
+            'contact_email' => ['nullable', 'string', 'email', 'max:255'],
+            'contact_enabled' => ['boolean'],
         ];
     }
 
@@ -141,6 +143,7 @@ class UpsertMapPointRequest extends FormRequest
             'group_id' => 'Initiative',
             'category_id' => 'Kategorie',
             'characteristic_ids' => 'Maßnahmen',
+            'contact_email' => 'Kontaktadresse',
         ];
     }
 
@@ -202,15 +205,32 @@ class UpsertMapPointRequest extends FormRequest
 
     /**
      * Group and category are submitted as uuids and translated into foreign keys here.
+     * An address entered by an admin counts as confirmed.
      *
      * @return array<string, mixed>
      */
     public function getData(): array
     {
-        return [
+        $data = [
             ...$this->safe()->except(['group_id', 'category_id', 'field_values', 'characteristic_ids']),
             'group_id' => Group::where('uuid', $this->validated('group_id'))->value('id'),
             'category_id' => MapPointCategory::where('uuid', $this->validated('category_id'))->value('id'),
         ];
+
+        if ($this->has('contact_email')) {
+            $contactEmail = $this->validated('contact_email');
+            $mapPoint = $this->route('mappoint');
+            $previousEmail = $mapPoint instanceof MapPoint ? $mapPoint->contact_email : null;
+
+            $data['contact_email'] = $contactEmail;
+
+            if ($contactEmail === null) {
+                $data['contact_email_verified_at'] = null;
+            } elseif ($contactEmail !== $previousEmail) {
+                $data['contact_email_verified_at'] = now();
+            }
+        }
+
+        return $data;
     }
 }

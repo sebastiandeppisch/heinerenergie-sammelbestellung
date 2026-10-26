@@ -59,6 +59,22 @@ class FormDefinitionToMapPoint extends Model
     }
 
     /**
+     * @return BelongsTo<FormField, $this>
+     */
+    public function contactEmailField(): BelongsTo
+    {
+        return $this->belongsTo(FormField::class, 'contact_email_field_id');
+    }
+
+    /**
+     * @return BelongsTo<FormField, $this>
+     */
+    public function contactEnabledField(): BelongsTo
+    {
+        return $this->belongsTo(FormField::class, 'contact_enabled_field_id');
+    }
+
+    /**
      * The category of the created points, unless an option of the sub category field picks a sub category.
      *
      * @return BelongsTo<MapPointCategory, $this>
@@ -142,7 +158,31 @@ class FormDefinitionToMapPoint extends Model
             group_id: $this->formDefinition->group_id,
             field_values: $this->mappedValues($submission),
             characteristic_ids: $this->characteristicIdsFor($submission, $categoryId),
+            contact_email: $this->contactEmail($submission),
+            contact_enabled: $this->contactEnabled($submission),
         );
+    }
+
+    private function contactEmail(FormSubmission $submission): ?string
+    {
+        if ($this->contactEmailField === null) {
+            return null;
+        }
+
+        $email = filter_var($this->contactEmailField->getSubmissionField($submission)->value, FILTER_VALIDATE_EMAIL);
+
+        return $email === false ? null : $email;
+    }
+
+    private function contactEnabled(FormSubmission $submission): bool
+    {
+        if ($this->contactEnabledField === null || $this->contactEnabledField->type !== FieldType::CHECKBOX) {
+            return false;
+        }
+
+        $value = $this->contactEnabledField->getSubmissionField($submission)->value;
+
+        return is_array($value) ? $value !== [] : filled($value);
     }
 
     /**

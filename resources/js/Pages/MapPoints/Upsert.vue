@@ -5,17 +5,19 @@ import MapPointFieldList from '@/components/MapPointFieldList.vue';
 import MapPointImageInput from '@/components/MapPointImageInput.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import PinLocationMap from '@/components/PinLocationMap.vue';
+import { Badge } from '@/shadcn/components/ui/badge';
 import { Button } from '@/shadcn/components/ui/button';
-import { Card, CardContent, CardFooter } from '@/shadcn/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/shadcn/components/ui/card';
 import { Checkbox } from '@/shadcn/components/ui/checkbox';
 import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { Switch } from '@/shadcn/components/ui/switch';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { Textarea } from '@/shadcn/components/ui/textarea';
 import type { CustomPageProps } from '@/types/pageProps';
 import { flattenCategoryTree } from '@/utils/categoryTree';
-import { setLayoutProps, useForm, usePage } from '@inertiajs/vue3';
+import { router, setLayoutProps, useForm, usePage } from '@inertiajs/vue3';
 import { Lock } from '@lucide/vue';
 import axios from 'axios';
 import { computed, ref, watch } from 'vue';
@@ -34,6 +36,7 @@ const props = defineProps<{
     /** The characteristics points of each category can have: those of the category and of its parents, keyed by category id. */
     characteristicIdsByCategory: Record<string, Array<string>>;
     fieldsByCharacteristic: Record<string, Array<App.Data.FormFieldData>>;
+    contactRequests?: Array<App.Data.MapPointContactRequestData>;
 }>();
 
 const isEditing = !!props.mapPoint;
@@ -59,6 +62,9 @@ const defaultMapPoint: App.Data.MapPointData = {
     fields: [],
     former_fields: [],
     characteristics: [],
+    contact_email: null,
+    contact_enabled: false,
+    contact_email_verified_at: null,
 };
 
 const initialPoint = props.mapPoint || defaultMapPoint;
@@ -187,6 +193,30 @@ watch(
     },
     { deep: true },
 );
+
+const contactEmailInput = computed({
+    get: () => form.contact_email ?? '',
+    set: (value: string) => {
+        form.contact_email = value === '' ? null : value;
+    },
+});
+
+const contactEmailSaved = computed(() => props.mapPoint?.contact_email !== null && props.mapPoint?.contact_email === form.contact_email);
+
+function requestContactVerification() {
+    router.post(route('mappoints.contact-verification', props.mapPoint!.id), {}, { preserveScroll: true });
+}
+
+const contactRequestStatusLabels: Record<App.Data.MapPointContactRequestData['status'], string> = {
+    forwarded: 'Weitergeleitet',
+    confirmed: 'Bestätigt, nicht weitergeleitet',
+    expired: 'Nicht bestätigt (abgelaufen)',
+    pending: 'Wartet auf Bestätigung',
+};
+
+function formatDate(date: string) {
+    return new Date(date).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' });
+}
 
 /**
  * Uploads are sent as multipart form data, which drops empty lists. They are sent as empty values instead, so
@@ -396,6 +426,35 @@ const errors: Record<string, string> = form.errors;
                     <div v-if="isEditing">
                         <p class="text-sm text-gray-500">Typ: {{ props.mapPoint!.userReadablePointableType }}</p>
                     </div>
+
+                    <div class="space-y-4 rounded-lg border p-4">
+                        <h3 class="font-semibold">Kontakt über die Karte</h3>
+
+                        <div class="space-y-2">
+                            <Label for="contact_email">Kontaktadresse</Label>
+                            <Input id="contact_email" v-model="contactEmailInput" type="email" placeholder="name@example.org" />
+                            <p v-if="errors.contact_email" class="text-sm text-red-500">{{ errors.contact_email }}</p>
+                            <p class="text-xs text-gray-500">
+                                Wird nie öffentlich angezeigt. Anfragen von der Karte werden an diese Adresse weitergeleitet. Eine hier eingetragene
+                                Adresse gilt als bestätigt.
+                            </p>
+                        </div>
+
+                        <div v-if="contactEmailSaved" class="flex flex-wrap items-center gap-2">
+                            <Badge v-if="mapPoint!.contact_email_verified_at" data-test="contact-email-verified">Adresse bestätigt</Badge>
+                            <Badge v-else variant="secondary" data-test="contact-email-unverified">Adresse nicht bestätigt</Badge>
+                            <Button type="button" variant="outline" size="sm" @click="requestContactVerification">Bestätigung anfordern</Button>
+                        </div>
+
+                        <div class="flex items-center space-x-2">
+                            <Switch id="contact_enabled" v-model="form.contact_enabled" />
+                            <Label for="contact_enabled">Kontakt über die Karte erlauben</Label>
+                        </div>
+                        <p class="text-xs text-gray-500">
+                            Der Button „Kontakt aufnehmen“ erscheint nur, wenn der Punkt veröffentlicht ist, Kontakt erlaubt ist und die Adresse
+                            bestätigt wurde.
+                        </p>
+                    </div>
                 </CardContent>
 
                 <CardFooter class="flex justify-between">
@@ -405,6 +464,37 @@ const errors: Record<string, string> = form.errors;
                     </Button>
                 </CardFooter>
             </form>
+        </Card>
+
+        <Card v-if="isEditing" class="mt-6">
+            <CardHeader>
+                <CardTitle>Kontaktanfragen</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p v-if="!contactRequests || contactRequests.length === 0" class="text-sm text-gray-500">Noch keine Kontaktanfragen.</p>
+                <Table v-else>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Datum</TableHead>
+                            <TableHead>Absender:in</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Nachricht</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <TableRow v-for="contactRequest in contactRequests" :key="contactRequest.id">
+                            <TableCell class="whitespace-nowrap">{{ formatDate(contactRequest.created_at) }}</TableCell>
+                            <TableCell>
+                                <div>{{ contactRequest.sender_name }}</div>
+                                <div class="text-xs text-gray-500">{{ contactRequest.sender_email }}</div>
+                            </TableCell>
+                            <TableCell>{{ contactRequestStatusLabels[contactRequest.status] }}</TableCell>
+                            <TableCell class="max-w-md whitespace-pre-wrap">{{ contactRequest.message }}</TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+                <p class="mt-4 text-xs text-gray-500">Anfragen werden nach Ablauf der Aufbewahrungsfrist automatisch gelöscht.</p>
+            </CardContent>
         </Card>
     </div>
 </template>

@@ -205,6 +205,8 @@ subcategory_options: App.Data.FormToMapPointSubcategoryData[],
 field_mappings: App.Data.FormToMapPointFieldData[],
 characteristics_field_id: string | null,
 characteristic_options: App.Data.FormToMapPointCharacteristicData[],
+contact_email_field_id: string | null,
+contact_enabled_field_id: string | null,
 };
 export type FormToMapPointSubcategoryData = {
 option_value: string,
@@ -334,6 +336,14 @@ id: string,
 label: string,
 is_public: boolean,
 };
+export type MapPointContactRequestData = {
+id: string,
+created_at: string,
+sender_name: string,
+sender_email: string,
+message: string,
+status: 'forwarded' | 'confirmed' | 'expired' | 'pending',
+};
 export type MapPointData = {
 id: string,
 coordinate: App.ValueObjects.Coordinate,
@@ -348,6 +358,9 @@ location: string | null,
 fields: App.Data.MapPointFieldValueData[],
 former_fields: App.Data.MapPointFieldValueData[],
 characteristics: App.Data.MapPointCharacteristicData[],
+contact_email: string | null,
+contact_enabled: boolean,
+contact_email_verified_at: string | null,
 };
 export type MapPointFieldValueData = {
 id: string,
@@ -409,6 +422,8 @@ category_id: number | null,
 group_id: number,
 field_values: Record<string, any>,
 characteristic_ids: number[],
+contact_email: string | null,
+contact_enabled: boolean,
 };
 export type NextcloudGroupUserData = {
 nc_id: string | null,
@@ -423,6 +438,17 @@ total: number,
 perPage: number,
 currentPage: number,
 lastPage: number,
+};
+export type PublicMapPointData = {
+id: string,
+coordinate: App.ValueObjects.Coordinate,
+title: string,
+description: string,
+category_id: string | null,
+location: string | null,
+fields: App.Data.MapPointFieldValueData[],
+characteristics: App.Data.MapPointCharacteristicData[],
+has_contact: boolean,
 };
 export type SpreadsheetFormatData = {
 value: App.Enums.SpreadsheetFormat,

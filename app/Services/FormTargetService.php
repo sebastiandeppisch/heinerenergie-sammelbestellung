@@ -35,7 +35,10 @@ use Throwable;
  */
 class FormTargetService
 {
-    public function __construct(private readonly MapPointFieldService $mapPointFields) {}
+    public function __construct(
+        private readonly MapPointFieldService $mapPointFields,
+        private readonly MapPointContactService $contact,
+    ) {}
 
     public function prepare(FormSubmission $submission): FormTargetPayload
     {
@@ -137,6 +140,8 @@ class FormTargetService
                 'coordinate' => $payload->coordinate,
                 'published' => false,
                 'category_id' => $payload->category_id === null ? null : MapPointCategory::findOrFail($payload->category_id)->id,
+                'contact_email' => $payload->contact_email,
+                'contact_enabled' => $payload->contact_enabled,
             ]);
 
             // Characteristics deleted or moved away since the submission are left out.
@@ -155,6 +160,9 @@ class FormTargetService
             $mapPoint->save();
 
             event(new MapPointCreatedByFormSubmission($mapPoint, $submission));
+
+            // Whoever submitted the form may have entered someone else's address, so it needs confirming.
+            DB::afterCommit(fn () => $this->contact->requestVerification($mapPoint));
 
             return $mapPoint->fresh() ?? $mapPoint;
         });

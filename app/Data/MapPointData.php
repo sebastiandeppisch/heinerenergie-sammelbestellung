@@ -43,6 +43,9 @@ class MapPointData extends Data
         public Collection $former_fields = new Collection,
         #[DataCollectionOf(MapPointCharacteristicData::class)]
         public Collection $characteristics = new Collection,
+        public ?string $contact_email = null,
+        public bool $contact_enabled = false,
+        public ?Carbon $contact_email_verified_at = null,
     ) {}
 
     /**
@@ -89,6 +92,9 @@ class MapPointData extends Data
             fields: $fields,
             former_fields: $formerFields,
             characteristics: $model->characteristics->map(MapPointCharacteristicData::fromModel(...))->toBase(),
+            contact_email: $onlyPublic ? null : $model->contact_email,
+            contact_enabled: ! $onlyPublic && $model->contact_enabled,
+            contact_email_verified_at: $onlyPublic ? null : $model->contact_email_verified_at,
         );
     }
 

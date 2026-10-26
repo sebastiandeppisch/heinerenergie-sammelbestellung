@@ -33,6 +33,8 @@ class FormToMapPointMappingData extends Data
         public ?string $characteristics_field_id = null,
         #[DataCollectionOf(FormToMapPointCharacteristicData::class)]
         public Collection $characteristic_options = new Collection,
+        public ?string $contact_email_field_id = null,
+        public ?string $contact_enabled_field_id = null,
     ) {}
 
     public static function fromModel(?FormDefinitionToMapPoint $model): self
@@ -41,7 +43,7 @@ class FormToMapPointMappingData extends Data
             return new self(enabled: false);
         }
 
-        $model->loadMissing(['titleField', 'descriptionField', 'coordinateField', 'category', 'subcategoryField', 'subcategories.category', 'fieldMappings.targetField', 'fieldMappings.sourceField', 'characteristicsField', 'characteristicMappings.characteristic']);
+        $model->loadMissing(['titleField', 'descriptionField', 'coordinateField', 'category', 'subcategoryField', 'subcategories.category', 'fieldMappings.targetField', 'fieldMappings.sourceField', 'characteristicsField', 'characteristicMappings.characteristic', 'contactEmailField', 'contactEnabledField']);
 
         return new self(
             enabled: true,
@@ -54,6 +56,8 @@ class FormToMapPointMappingData extends Data
             field_mappings: $model->fieldMappings->map(FormToMapPointFieldData::fromModel(...))->toBase(),
             characteristics_field_id: $model->characteristicsField?->uuid,
             characteristic_options: $model->characteristicMappings->map(FormToMapPointCharacteristicData::fromModel(...))->toBase(),
+            contact_email_field_id: $model->contactEmailField?->uuid,
+            contact_enabled_field_id: $model->contactEnabledField?->uuid,
         );
     }
 }
