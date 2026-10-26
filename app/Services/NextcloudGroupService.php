@@ -57,7 +57,7 @@ class NextcloudGroupService
                 nc_id: $ncUser?->id,
                 nc_email: $ncUser?->email,
                 nc_displayname: $ncUser?->displayname,
-                nc_enabled: $ncUser !== null ? $ncUser->enabled : null,
+                nc_enabled: $ncUser?->enabled,
                 crm_user: $crmUser ? CrmUserData::fromUser($crmUser) : null,
                 crm_is_group_member: $isGroupMember,
             );
