@@ -21,7 +21,7 @@ class ContactRequestForward extends MapPointContactMail implements ShouldBeEncry
 
         $this->senderName = $contactRequest->sender_name;
         $this->senderMessage = $contactRequest->message;
-        $this->unsubscribeUrl = route('map-contact.unsubscribe', $contactRequest->mapPoint);
+        $this->unsubscribeUrl = route('map-point.manage.request-for-point', $contactRequest->mapPoint);
 
         $this->replyTo($contactRequest->sender_email, $contactRequest->sender_name);
     }

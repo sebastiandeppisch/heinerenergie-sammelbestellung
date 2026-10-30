@@ -206,8 +206,9 @@ const contactEmailInput = computed({
 
 const contactEmailSaved = computed(() => props.mapPoint?.contact_email !== null && props.mapPoint?.contact_email === form.contact_email);
 
-function requestContactVerification() {
-    router.post(route('mappoints.contact-verification', props.mapPoint!.id), {}, { preserveScroll: true });
+/** The person confirms the address by using the manage link, e.g. by switching contact requests on. */
+function sendEditLink() {
+    router.post(route('mappoints.send-edit-link', props.mapPoint!.id), {}, { preserveScroll: true });
 }
 
 const contactRequestStatusLabels: Record<App.Data.MapPointContactRequestData['status'], string> = {
@@ -446,7 +447,7 @@ const errors: Record<string, string> = form.errors;
                         <div v-if="contactEmailSaved" class="flex flex-wrap items-center gap-2">
                             <Badge v-if="mapPoint!.contact_email_verified_at" data-test="contact-email-verified">Adresse bestätigt</Badge>
                             <Badge v-else variant="secondary" data-test="contact-email-unverified">Adresse nicht bestätigt</Badge>
-                            <Button type="button" variant="outline" size="sm" @click="requestContactVerification">Bestätigung anfordern</Button>
+                            <Button type="button" variant="outline" size="sm" @click="sendEditLink">Verwaltungslink senden</Button>
                         </div>
 
                         <div class="flex items-center space-x-2">

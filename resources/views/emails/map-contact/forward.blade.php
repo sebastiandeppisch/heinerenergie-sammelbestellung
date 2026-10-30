@@ -13,5 +13,5 @@ Antworte direkt auf diese Mail. Deine Adresse sieht die Person erst, wenn du ant
 
 ---
 
-Du möchtest keine Kontaktanfragen mehr erhalten? Unter {{ $unsubscribeUrl }} kannst du sie abschalten.
+Du möchtest keine Kontaktanfragen mehr erhalten? Unter {{ $unsubscribeUrl }} forderst du einen Link an, mit dem du sie abschaltest.
 @endcomponent

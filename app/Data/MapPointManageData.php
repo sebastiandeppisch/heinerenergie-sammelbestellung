@@ -35,6 +35,9 @@ class MapPointManageData extends Data
         public array $consented_labels,
         public string $consent_text,
         public array $offered_labels,
+        public bool $has_contact_email,
+        public bool $contact_enabled,
+        public bool $contact_email_confirmed,
     ) {}
 
     public static function fromModel(MapPoint $model): self
@@ -57,6 +60,9 @@ class MapPointManageData extends Data
             consented_labels: $model->public_consent === PublicConsent::GIVEN ? $consents->labelsOf($fields) : [],
             consent_text: $preview['text'],
             offered_labels: $preview['labels'],
+            has_contact_email: $model->contact_email !== null,
+            contact_enabled: $model->contact_enabled,
+            contact_email_confirmed: $model->contact_email_verified_at !== null,
         );
     }
 }

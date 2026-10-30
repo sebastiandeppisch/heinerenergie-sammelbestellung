@@ -17,10 +17,6 @@ function refuse() {
     router.post(route('mappoints.refuse-consent', props.mapPointId), {}, { preserveScroll: true, onFinish: () => (confirmingRefuse.value = false) });
 }
 
-function sendEditLink() {
-    router.post(route('mappoints.send-edit-link', props.mapPointId), {}, { preserveScroll: true });
-}
-
 function formatDate(date: string): string {
     return new Date(date).toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' });
 }
@@ -67,7 +63,6 @@ function formatDate(date: string): string {
             </dl>
 
             <div class="flex flex-wrap gap-2">
-                <Button v-if="consent.contact_email" variant="outline" @click="sendEditLink">Verwaltungslink an Kontaktadresse senden</Button>
                 <template v-if="consent.public_consent !== 'refused'">
                     <Button v-if="!confirmingRefuse" variant="destructive" @click="confirmingRefuse = true"
                         >Einwilligung als widerrufen markieren</Button

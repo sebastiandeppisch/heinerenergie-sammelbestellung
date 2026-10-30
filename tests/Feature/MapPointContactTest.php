@@ -104,7 +104,7 @@ test('the contact address appears in no public output', function (): void {
 
     sendContactRequest($this, $this->embed, $this->point)->assertDontSee('owner@example.org');
 
-    $this->get(route('map-contact.unsubscribe', $this->point))->assertDontSee('owner@example.org');
+    $this->get(route('map-point.manage.request-for-point', $this->point))->assertDontSee('owner@example.org');
 });
 
 test('a point of another embed cannot be contacted through this embed', function (): void {
@@ -193,10 +193,11 @@ test('the forwarded mail comes from the system, replies go to the sender and it 
     $mail->assertSeeInHtml('Darf ich mir deinen Garten anschauen?');
     $mail->assertSeeInHtml('Solar-Initiative Darmstadt');
     $mail->assertSeeInHtml('Deine Adresse sieht die Person erst, wenn du antwortest.');
-    $mail->assertSeeInHtml(route('map-contact.unsubscribe', $this->point));
+    $mail->assertSeeInHtml(route('map-point.manage.request-for-point', $this->point));
     $mail->assertDontSeeInHtml($token);
     $mail->assertDontSeeInHtml('/map-contact/confirm/');
     $mail->assertDontSeeInHtml('/map-contact/manage/');
+    $mail->assertDontSeeInHtml('/eintrag/verwalten/');
     $mail->assertDontSeeInHtml('/map-contact/verify/');
 });
 

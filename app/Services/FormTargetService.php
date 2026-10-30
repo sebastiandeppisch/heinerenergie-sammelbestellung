@@ -39,7 +39,6 @@ class FormTargetService
 {
     public function __construct(
         private readonly MapPointFieldService $mapPointFields,
-        private readonly MapPointContactService $contact,
     ) {}
 
     /**
@@ -180,9 +179,6 @@ class FormTargetService
             $mapPoint->save();
 
             event(new MapPointCreatedByFormSubmission($mapPoint, $submission));
-
-            // Whoever submitted the form may have entered someone else's address, so it needs confirming.
-            DB::afterCommit(fn () => $this->contact->requestVerification($mapPoint));
 
             return $mapPoint->fresh() ?? $mapPoint;
         });

@@ -9,6 +9,7 @@ use App\Data\MapPointManageData;
 use App\Models\MapPoint;
 use App\Services\CurrentGroupService;
 use App\Services\MapPointConsentManager;
+use App\Services\MapPointContactService;
 use App\Services\MapPointEditLinkService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,14 +17,15 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * Lets the person behind a point manage it without an account. Links are requested by mail, the answer is the same
- * whether a point or address is known or not.
+ * Lets the person behind a point manage its consent and contact requests without an account. Links are requested
+ * by mail, the answer is the same whether a point or address is known or not.
  */
 class MapPointManageController extends Controller
 {
     public function __construct(
         private readonly MapPointEditLinkService $editLinks,
         private readonly MapPointConsentManager $consents,
+        private readonly MapPointContactService $contact,
     ) {}
 
     public function request(): Response
@@ -83,6 +85,7 @@ class MapPointManageController extends Controller
         $validated = $request->validate(['show' => ['required', 'boolean'], 'details' => ['required', 'boolean']]);
 
         $this->consents->change($mapPoint, new ConsentChoiceData(show: $validated['show'], details: $validated['show'] && $validated['details']));
+        $this->contact->confirmAddress($mapPoint);
 
         return redirect()->route('map-point.manage.show', $token)->with('success', 'Deine Auswahl ist gespeichert.');
     }
@@ -96,8 +99,27 @@ class MapPointManageController extends Controller
         }
 
         $this->consents->refuse($mapPoint);
+        $this->contact->confirmAddress($mapPoint);
 
         return redirect()->route('map-point.manage.show', $token)->with('success', 'Deine Einwilligung ist widerrufen. Der Eintrag wird nicht mehr öffentlich angezeigt.');
+    }
+
+    public function updateContact(Request $request, string $token): RedirectResponse|Response
+    {
+        $mapPoint = $this->editLinks->findByToken($token);
+
+        if ($mapPoint === null || $mapPoint->contact_email === null) {
+            return $this->message('invalid');
+        }
+
+        $enabled = $request->validate(['enabled' => ['required', 'boolean']])['enabled'];
+
+        $mapPoint->forceFill(['contact_enabled' => $enabled])->save();
+        $this->contact->confirmAddress($mapPoint);
+
+        return redirect()->route('map-point.manage.show', $token)->with('success', $enabled
+            ? 'Kontaktanfragen sind eingeschaltet. Wir leiten sie an deine E-Mail-Adresse weiter.'
+            : 'Kontaktanfragen sind ausgeschaltet.');
     }
 
     public function destroy(string $token): Response

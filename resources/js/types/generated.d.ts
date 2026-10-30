@@ -440,6 +440,9 @@ shows_details: boolean,
 consented_labels: string[],
 consent_text: string,
 offered_labels: string[],
+has_contact_email: boolean,
+contact_enabled: boolean,
+contact_email_confirmed: boolean,
 };
 export type MapPointSpreadsheetColumnData = {
 header: string,

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Listeners;
 
 use App\Mail\FormSubmissionConfirmation;
-use App\Mail\MapPointContact\ContactEmailVerification;
 use App\Mail\MapPointContact\ContactRequestConfirmation;
-use App\Mail\MapPointContact\EditLink;
+use App\Mail\MapPointCreated;
+use App\Mail\MapPointEditLinks;
 use Illuminate\Mail\Events\MessageSent;
 use Override;
 use Wnx\Sends\Listeners\StoreOutgoingMailListener;
@@ -20,8 +20,8 @@ class StoreOutgoingMail extends StoreOutgoingMailListener
     private const array WITHOUT_CONTENT = [
         FormSubmissionConfirmation::class,
         ContactRequestConfirmation::class,
-        ContactEmailVerification::class,
-        EditLink::class,
+        MapPointCreated::class,
+        MapPointEditLinks::class,
     ];
 
     /**

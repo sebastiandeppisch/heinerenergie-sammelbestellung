@@ -2,8 +2,9 @@
 
 use App\Data\FormDefinitionData;
 use App\Enums\FieldType;
-use App\Mail\MapPointContact\ContactEmailVerification;
 use App\Mail\MapPointContact\ContactRequestConfirmation;
+use App\Mail\MapPointCreated;
+use App\Mail\MapPointEditLinks;
 use App\Models\FormDefinitionToMapPoint;
 use App\Models\FormField;
 use App\Models\FormFieldOption;
@@ -13,8 +14,9 @@ use App\Models\MapPoint;
 use App\Models\MapPointCategory;
 use App\Models\MapPointContactRequest;
 use App\Models\User;
-use App\Services\MapPointContactService;
+use App\Services\MapPointEditLinkService;
 use App\Services\SessionService;
+use App\Support\TokenHash;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Mail\MailManager;
 use Illuminate\Support\Collection;
@@ -57,17 +59,18 @@ function contactMappedSubmission(FormDefinitionToMapPoint $config, ?string $emai
         $config->coordinateField->uuid => ['lat' => 49.8728, 'lng' => 8.6510],
         $config->contactEmailField->uuid => $email,
         $config->contactEnabledField->uuid => $enabled,
+        '_consent_show' => true,
     ];
 }
 
-function verificationToken(): string
+function manageToken(): string
 {
-    $mail = Mail::queued(ContactEmailVerification::class)->last();
+    $mail = Mail::queued(MapPointCreated::class)->last();
 
-    return basename((string) parse_url($mail->verificationUrl, PHP_URL_PATH));
+    return basename((string) parse_url($mail->manageUrl, PHP_URL_PATH));
 }
 
-test('a point from a form takes over the contact fields and sends an activation mail', function (): void {
+test('a point from a form takes over the contact fields and sends the manage link', function (): void {
     $config = contactMappedForm();
 
     $this->post(route('form.submit', $config->formDefinition), contactMappedSubmission($config, 'owner@example.org', ['yes']))
@@ -78,8 +81,8 @@ test('a point from a form takes over the contact fields and sends an activation 
         ->and($point->contact_enabled)->toBeTrue()
         ->and($point->contact_email_verified_at)->toBeNull();
 
-    Mail::assertQueued(ContactEmailVerification::class, fn ($mail) => $mail->hasTo('owner@example.org'));
-    Mail::queued(ContactEmailVerification::class)->sole()->assertSeeInHtml($config->formDefinition->group->name);
+    Mail::assertQueued(MapPointCreated::class, fn ($mail) => $mail->hasTo('owner@example.org'));
+    Mail::queued(MapPointCreated::class)->sole()->assertSeeInHtml('Kontaktanfragen einschalten');
 });
 
 test('an unchecked checkbox leaves contact disabled', function (): void {
@@ -90,16 +93,16 @@ test('an unchecked checkbox leaves contact disabled', function (): void {
     expect(MapPoint::sole()->contact_enabled)->toBeFalse();
 });
 
-test('without an address no activation mail is sent', function (): void {
+test('without an address no manage link is sent', function (): void {
     $config = contactMappedForm();
 
     $this->post(route('form.submit', $config->formDefinition), contactMappedSubmission($config, null, ['yes']));
 
     expect(MapPoint::sole()->contact_email)->toBeNull();
-    Mail::assertNotQueued(ContactEmailVerification::class);
+    Mail::assertNotQueued(MapPointCreated::class);
 });
 
-test('a form point can only be contacted after the activation link was used', function (): void {
+test('a form point can only be contacted after the manage link was used', function (): void {
     $config = contactMappedForm();
     $this->post(route('form.submit', $config->formDefinition), contactMappedSubmission($config, 'owner@example.org', ['yes']));
 
@@ -115,18 +118,14 @@ test('a form point can only be contacted after the activation link was used', fu
         'name' => 'Erika', 'email' => 'erika@example.org', 'message' => 'Hallo',
     ])->assertNotFound();
 
-    $token = verificationToken();
+    $token = manageToken();
 
-    $this->get(route('map-contact.verify.show', $token))
-        ->assertInertia(fn ($page) => $page->component('MapPointContact/Verify')->where('status', 'pending'));
+    $this->get(route('map-point.manage.show', $token))
+        ->assertInertia(fn ($page) => $page->component('MapPointManage/Manage')->where('mapPoint.contact_email_confirmed', false));
     expect($point->fresh()->contact_email_verified_at)->toBeNull();
 
-    $this->post(route('map-contact.verify', $token))
-        ->assertInertia(fn ($page) => $page->where('status', 'verified'));
+    $this->put(route('map-point.manage.contact', $token), ['enabled' => true])->assertRedirect();
     expect($point->fresh()->contact_email_verified_at)->not->toBeNull();
-
-    $this->post(route('map-contact.verify', $token))
-        ->assertInertia(fn ($page) => $page->where('status', 'invalid'));
 
     $this->get(route('map.public', $embed))
         ->assertInertia(fn ($page) => $page->where("pointsByCategory.{$category->uuid}.0.has_contact", true));
@@ -136,16 +135,26 @@ test('a form point can only be contacted after the activation link was used', fu
     Mail::assertQueued(ContactRequestConfirmation::class);
 });
 
-test('an expired activation link is rejected', function (): void {
-    $config = contactMappedForm();
-    $this->post(route('form.submit', $config->formDefinition), contactMappedSubmission($config, 'owner@example.org', ['yes']));
-    $token = verificationToken();
+test('activation links of older mails still confirm the address until they expire', function (): void {
+    $point = MapPoint::factory()->create(['contact_email' => 'owner@example.org', 'contact_enabled' => true]);
+    $point->forceFill([
+        'contact_verification_token_hash' => TokenHash::make('alter-link'),
+        'contact_verification_expires_at' => now()->addDays(7),
+    ])->save();
+
+    $this->get(route('map-contact.verify.show', 'alter-link'))
+        ->assertInertia(fn ($page) => $page->component('MapPointContact/Verify')->where('status', 'pending'));
+    expect($point->fresh()->contact_email_verified_at)->toBeNull();
 
     $this->travel(8)->days();
-
-    $this->post(route('map-contact.verify', $token))
+    $this->post(route('map-contact.verify', 'alter-link'))
         ->assertInertia(fn ($page) => $page->where('status', 'expired'));
-    expect(MapPoint::sole()->contact_email_verified_at)->toBeNull();
+    expect($point->fresh()->contact_email_verified_at)->toBeNull();
+
+    $this->travelBack();
+    $this->post(route('map-contact.verify', 'alter-link'))
+        ->assertInertia(fn ($page) => $page->where('status', 'verified'));
+    expect($point->fresh()->contact_email_verified_at)->not->toBeNull();
 });
 
 test('the form target accepts only an email field and a checkbox with exactly one option', function (): void {
@@ -195,12 +204,12 @@ test('an address entered by an admin counts as confirmed', function (): void {
     expect($point->contact_email)->toBe('admin-set@example.org');
     expect($point->contact_email_verified_at)->not->toBeNull();
     expect($point->hasContact())->toBeTrue();
-    Mail::assertNotQueued(ContactEmailVerification::class);
+    Mail::assertNothingQueued();
 
-    $this->actingAs($admin)->post(route('mappoints.contact-verification', $point))->assertRedirect();
+    $this->actingAs($admin)->post(route('mappoints.send-edit-link', $point))->assertRedirect();
 
-    expect($point->fresh()->contact_email_verified_at)->toBeNull();
-    Mail::assertQueued(ContactEmailVerification::class, fn ($mail) => $mail->hasTo('admin-set@example.org'));
+    expect($point->fresh()->contact_email_verified_at)->not->toBeNull();
+    Mail::assertQueued(MapPointEditLinks::class, fn ($mail) => $mail->hasTo('admin-set@example.org'));
 });
 
 test('the edit page lists the contact requests of the point', function (): void {
@@ -224,9 +233,9 @@ test('mails with a one-time link are stored without content', function (): void 
     config(['mail.default' => 'array', 'queue.default' => 'sync']);
 
     $point = MapPoint::factory()->create(['contact_email' => 'owner@example.org']);
-    app(MapPointContactService::class)->requestVerification($point);
+    app(MapPointEditLinkService::class)->send($point);
 
     $send = Send::sole();
-    expect($send->mail_class)->toBe(ContactEmailVerification::class)
+    expect($send->mail_class)->toBe(MapPointEditLinks::class)
         ->and($send->content)->toBeNull();
 });

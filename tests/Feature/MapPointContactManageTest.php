@@ -1,13 +1,12 @@
 <?php
 
-use App\Mail\MapPointContact\EditLink;
+use App\Mail\MapPointEditLinks;
 use App\Models\Group;
 use App\Models\MapPoint;
+use App\Services\MapPointEditLinkService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Testing\TestResponse;
-use Tests\TestCase;
+use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
 
@@ -23,108 +22,67 @@ beforeEach(function (): void {
     ]);
 });
 
-function editToken(): string
-{
-    $mail = Mail::queued(EditLink::class)->last();
-
-    return basename((string) parse_url($mail->manageUrl, PHP_URL_PATH));
-}
-
-/**
- * @return TestResponse<Response>
- */
-function requestEditLink(TestCase $test, MapPoint $point, string $ip = '10.0.0.1'): TestResponse
-{
-    return $test->withServerVariables(['REMOTE_ADDR' => $ip])
-        ->post(route('map-contact.unsubscribe.request', $point));
-}
-
 test('the request page answers the same way for points with and without a contact address', function (): void {
     $withoutContact = MapPoint::factory()->create(['contact_email' => null]);
 
-    $responses = [];
-
     foreach ([$this->point, $withoutContact] as $point) {
-        $redirect = requestEditLink($this, $point);
-        $page = $this->get((string) $redirect->headers->get('Location'));
-
-        $responses[] = [$redirect->status(), $page->status(), $page->viewData('page')['props']['linkRequested']];
+        $this->post(route('map-point.manage.send-for-point', $point))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page): Assert => $page->component('MapPointManage/Message')->where('status', 'sent'));
     }
 
-    expect($responses[0])->toBe($responses[1])
-        ->and($responses[0])->toBe([302, 200, true]);
-
-    Mail::assertQueued(EditLink::class, 1);
-    Mail::assertQueued(EditLink::class, fn ($mail) => $mail->hasTo('owner@example.org'));
+    Mail::assertQueued(MapPointEditLinks::class, 1);
+    Mail::assertQueued(MapPointEditLinks::class, fn (MapPointEditLinks $mail): bool => $mail->hasTo('owner@example.org'));
 });
 
-test('the edit link mail names the initiative and is stored without content', function (): void {
-    requestEditLink($this, $this->point);
+test('the edit link mail names the initiative', function (): void {
+    $this->post(route('map-point.manage.send-for-point', $this->point));
 
-    Mail::queued(EditLink::class)->sole()->assertSeeInHtml('Solar-Initiative Darmstadt');
+    Mail::queued(MapPointEditLinks::class)->sole()->assertSeeInHtml('Solar-Initiative Darmstadt');
 });
 
-test('contact requests can be switched off and on again with the token', function (): void {
-    requestEditLink($this, $this->point);
-    $token = editToken();
+test('contact requests can be switched off and on again on the manage page', function (): void {
+    $token = app(MapPointEditLinkService::class)->issue($this->point);
 
-    $this->get(route('map-contact.manage.show', $token))
+    $this->get(route('map-point.manage.show', $token))
         ->assertOk()
-        ->assertInertia(fn ($page) => $page->component('MapPointContact/Manage')->where('contactEnabled', true))
+        ->assertInertia(fn (Assert $page): Assert => $page->component('MapPointManage/Manage')->where('mapPoint.contact_enabled', true))
         ->assertDontSee('owner@example.org');
 
-    $this->post(route('map-contact.manage.disable', $token))
-        ->assertInertia(fn ($page) => $page->where('contactEnabled', false));
+    $this->put(route('map-point.manage.contact', $token), ['enabled' => false])->assertRedirect(route('map-point.manage.show', $token));
     expect($this->point->fresh()->contact_enabled)->toBeFalse()
         ->and($this->point->fresh()->hasContact())->toBeFalse();
 
-    $this->post(route('map-contact.manage.enable', $token))
-        ->assertInertia(fn ($page) => $page->where('contactEnabled', true));
-    expect($this->point->fresh()->contact_enabled)->toBeTrue();
+    $this->put(route('map-point.manage.contact', $token), ['enabled' => true]);
+    expect($this->point->fresh()->contact_enabled)->toBeTrue()
+        ->and($this->point->fresh()->hasContact())->toBeTrue();
 });
 
-test('a new link invalidates the old one', function (): void {
-    requestEditLink($this, $this->point);
-    $oldToken = editToken();
+test('a new link invalidates the old one for contact requests too', function (): void {
+    $editLinks = app(MapPointEditLinkService::class);
+    $oldToken = $editLinks->issue($this->point);
+    $newToken = $editLinks->issue($this->point);
 
-    requestEditLink($this, $this->point);
-    $newToken = editToken();
-
-    expect($newToken)->not->toBe($oldToken);
-
-    $this->post(route('map-contact.manage.disable', $oldToken))
-        ->assertInertia(fn ($page) => $page->where('token', null));
+    $this->put(route('map-point.manage.contact', $oldToken), ['enabled' => false])
+        ->assertInertia(fn (Assert $page): Assert => $page->component('MapPointManage/Message')->where('status', 'invalid'));
     expect($this->point->fresh()->contact_enabled)->toBeTrue();
 
-    $this->post(route('map-contact.manage.disable', $newToken));
+    $this->put(route('map-point.manage.contact', $newToken), ['enabled' => false]);
     expect($this->point->fresh()->contact_enabled)->toBeFalse();
 });
 
-test('an edit link expires after seven days', function (): void {
-    requestEditLink($this, $this->point);
-    $token = editToken();
+test('links of older mails lead to the manage page of the point', function (): void {
+    $token = app(MapPointEditLinkService::class)->issue($this->point);
 
-    $this->travel(8)->days();
-
-    $this->post(route('map-contact.manage.disable', $token))
-        ->assertInertia(fn ($page) => $page->where('token', null));
-    expect($this->point->fresh()->contact_enabled)->toBeTrue();
-});
-
-test('requesting edit links is rate limited per IP and point without changing the answer', function (): void {
-    foreach (range(1, 4) as $i) {
-        requestEditLink($this, $this->point)->assertRedirect(route('map-contact.unsubscribe', $this->point));
-    }
-
-    Mail::assertQueued(EditLink::class, 3);
-
-    requestEditLink($this, $this->point, '10.0.0.2');
-    Mail::assertQueued(EditLink::class, 4);
-});
-
-test('the unsubscribe page has no token and does not reveal the address', function (): void {
     $this->get(route('map-contact.unsubscribe', $this->point))
+        ->assertRedirect(route('map-point.manage.request-for-point', $this->point));
+    $this->get(route('map-contact.manage.show', $token))
+        ->assertRedirect(route('map-point.manage.show', $token));
+});
+
+test('the request page has no token and does not reveal the address', function (): void {
+    $this->get(route('map-point.manage.request-for-point', $this->point))
         ->assertOk()
-        ->assertInertia(fn ($page) => $page->component('MapPointContact/Unsubscribe')->where('linkRequested', false))
+        ->assertInertia(fn (Assert $page): Assert => $page->component('MapPointManage/Request')->where('mapPointId', $this->point->uuid))
         ->assertDontSee('owner@example.org');
 });

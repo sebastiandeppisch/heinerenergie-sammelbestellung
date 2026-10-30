@@ -28,7 +28,6 @@ use App\Models\MapPointCategory;
 use App\Models\MapPointContactRequest;
 use App\Services\CurrentGroupService;
 use App\Services\MapPointCharacteristicService;
-use App\Services\MapPointContactService;
 use App\Services\MapPointFieldService;
 use App\Services\MapPointVisibilityService;
 use App\Services\PublicMapPointPresenter;
@@ -133,19 +132,6 @@ class MapPointController extends Controller
         });
 
         return redirect()->back()->with('success', 'Der Kartenpunkt wurde aktualisiert');
-    }
-
-    public function requestContactVerification(MapPoint $mappoint, MapPointContactService $contact): RedirectResponse
-    {
-        $this->authorize('update', $mappoint);
-
-        if ($mappoint->contact_email === null) {
-            return redirect()->back()->with('error', 'Der Kartenpunkt hat keine Kontaktadresse');
-        }
-
-        $contact->requestVerification($mappoint);
-
-        return redirect()->back()->with('success', 'Die Bestätigungsmail wurde verschickt');
     }
 
     public function destroy(MapPoint $mappoint): RedirectResponse

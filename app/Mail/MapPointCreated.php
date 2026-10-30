@@ -28,7 +28,7 @@ class MapPointCreated extends Mailable implements ShouldBeEncrypted, ShouldQueue
     public function build(): self
     {
         $this->renderForGroup($this->mapPoint->group);
-        $this->storeClassName();
+        $this->storeClassName()->associateWith($this->mapPoint);
 
         return $this->markdown('emails.mappointcreated')->subject(app_name().': Dein Eintrag ist da');
     }

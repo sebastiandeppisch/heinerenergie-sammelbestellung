@@ -130,7 +130,6 @@ Route::middleware('auth')->group(function (): void {
     Route::patch('mappoints/category', [MapPointController::class, 'updateCategoryOfMany'])->name('mappoints.update-category-of-many');
     Route::patch('mappoints/characteristic', [MapPointController::class, 'updateCharacteristicOfMany'])->name('mappoints.update-characteristic-of-many');
     Route::patch('mappoints/published', [MapPointController::class, 'updatePublishedOfMany'])->name('mappoints.update-published-of-many');
-    Route::post('mappoints/{mappoint}/contact-verification', [MapPointController::class, 'requestContactVerification'])->name('mappoints.contact-verification');
     Route::post('mappoints/{mappoint}/refuse-consent', [MapPointConsentController::class, 'refuse'])->name('mappoints.refuse-consent');
     Route::post('mappoints/{mappoint}/send-edit-link', [MapPointConsentController::class, 'sendEditLink'])->name('mappoints.send-edit-link');
 
@@ -215,6 +214,7 @@ Route::get('/eintrag/verwalten/{token}', [MapPointManageController::class, 'show
 Route::middleware('throttle:form-submit')->group(function (): void {
     Route::put('/eintrag/verwalten/{token}/einwilligung', [MapPointManageController::class, 'updateConsent'])->name('map-point.manage.consent');
     Route::post('/eintrag/verwalten/{token}/widerrufen', [MapPointManageController::class, 'revoke'])->name('map-point.manage.revoke');
+    Route::put('/eintrag/verwalten/{token}/kontakt', [MapPointManageController::class, 'updateContact'])->name('map-point.manage.contact');
     Route::delete('/eintrag/verwalten/{token}', [MapPointManageController::class, 'destroy'])->name('map-point.manage.destroy');
 });
 
@@ -237,12 +237,9 @@ Route::prefix('map-contact')->name('map-contact.')->middleware('throttle:map-con
     Route::get('/verify/{token}', [MapPointContactManageController::class, 'showVerification'])->name('verify.show');
     Route::post('/verify/{token}', [MapPointContactManageController::class, 'verify'])->name('verify');
 
+    // Links of older mails, the manage page of the point took over.
     Route::get('/points/{mapPoint}/unsubscribe', [MapPointContactManageController::class, 'unsubscribe'])->name('unsubscribe');
-    Route::post('/points/{mapPoint}/unsubscribe', [MapPointContactManageController::class, 'requestEditLink'])->name('unsubscribe.request');
-
     Route::get('/manage/{token}', [MapPointContactManageController::class, 'manage'])->name('manage.show');
-    Route::post('/manage/{token}/disable', [MapPointContactManageController::class, 'disable'])->name('manage.disable');
-    Route::post('/manage/{token}/enable', [MapPointContactManageController::class, 'enable'])->name('manage.enable');
 });
 
 Route::put('/users/{user}/password', [UserController::class, 'changePassword'])

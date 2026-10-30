@@ -42,6 +42,10 @@ function save() {
     form.put(route('map-point.manage.consent', props.token), { preserveScroll: true });
 }
 
+function setContact(enabled: boolean) {
+    router.put(route('map-point.manage.contact', props.token), { enabled }, { preserveScroll: true });
+}
+
 function revoke() {
     router.post(route('map-point.manage.revoke', props.token), {}, { preserveScroll: true });
 }
@@ -105,6 +109,31 @@ function destroy() {
                         <Button type="submit" :disabled="form.processing">Auswahl speichern</Button>
                     </div>
                 </form>
+
+                <section v-if="mapPoint.has_contact_email" class="flex flex-col gap-3 rounded-md border p-4" data-test="manage-contact">
+                    <h2 class="font-semibold">Kontaktanfragen</h2>
+                    <template v-if="mapPoint.contact_enabled && mapPoint.contact_email_confirmed">
+                        <p class="text-sm">
+                            Besucher:innen der Karte können dir schreiben. Wir leiten die Nachrichten an deine E-Mail-Adresse weiter, ohne sie zu
+                            zeigen.
+                        </p>
+                        <div>
+                            <Button variant="outline" @click="setContact(false)">Kontaktanfragen ausschalten</Button>
+                        </div>
+                    </template>
+                    <template v-else>
+                        <p class="text-sm">
+                            <template v-if="mapPoint.contact_enabled"
+                                >Du hast Kontaktanfragen gewünscht, sie sind aber noch nicht freigeschaltet.</template
+                            >
+                            <template v-else>Kontaktanfragen über die Karte sind ausgeschaltet.</template>
+                            Eingeschaltet können dir Besucher:innen der Karte schreiben, ohne deine Adresse zu sehen.
+                        </p>
+                        <div>
+                            <Button @click="setContact(true)">Kontaktanfragen einschalten</Button>
+                        </div>
+                    </template>
+                </section>
 
                 <section class="flex flex-col gap-3 rounded-md border p-4">
                     <h2 class="font-semibold">Widerrufen oder löschen</h2>
