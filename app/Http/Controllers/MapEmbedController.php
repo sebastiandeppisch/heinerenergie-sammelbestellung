@@ -7,7 +7,7 @@ namespace App\Http\Controllers;
 use App\Data\GroupBaseData;
 use App\Data\MapEmbedData;
 use App\Data\MapPointCategoryData;
-use App\Data\MapPointData;
+use App\Data\PublicMapPointData;
 use App\Http\Requests\UpsertMapEmbedRequest;
 use App\Models\Group;
 use App\Models\MapEmbed;
@@ -91,7 +91,7 @@ class MapEmbedController extends Controller
     }
 
     /**
-     * @return array{categories: Collection<int, MapPointCategoryData>, pointsByCategory: Collection<string, Collection<int, MapPointData>>, groups: Collection<int, GroupBaseData>, mapCategoryIdsByGroup: array<string, array<int, string>>}
+     * @return array{categories: Collection<int, MapPointCategoryData>, pointsByCategory: Collection<string, Collection<int, PublicMapPointData>>, groups: Collection<int, GroupBaseData>, mapCategoryIdsByGroup: array<string, array<int, string>>}
      */
     private function formProps(MapPointVisibilityService $visibility): array
     {
@@ -118,7 +118,7 @@ class MapEmbedController extends Controller
     }
 
     /**
-     * @return Collection<string, Collection<int, MapPointData>>
+     * @return Collection<string, Collection<int, PublicMapPointData>>
      */
     private function publishedPointsByCategory(MapPointVisibilityService $visibility): Collection
     {

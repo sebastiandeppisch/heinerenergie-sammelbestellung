@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Data\MapPointData;
 use App\Data\MapPointFieldValueData;
+use App\Data\PublicMapPointData;
 use App\Enums\PublicConsent;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
@@ -48,6 +49,14 @@ class PublicMapPointPresenter
     }
 
     /**
+     * Without consent to the title, the name of the category stands in for it.
+     */
+    public function title(MapPoint $mapPoint): string
+    {
+        return $this->allowsKey($mapPoint, MapPointConsentService::TITLE) ? $mapPoint->title : ($mapPoint->category->name ?? '');
+    }
+
+    /**
      * Whether the value is public by its field and by the consent. Needs the relation formField.
      *
      * @param  array<int, int>  $publicFieldIds  see MapPointCategory::publicFieldIds()
@@ -63,7 +72,7 @@ class PublicMapPointPresenter
      * The visible points of the query as the public sees them.
      *
      * @param  Builder<MapPoint>  $query
-     * @return Collection<int, MapPointData>
+     * @return Collection<int, PublicMapPointData>
      */
     public function presentAll(Builder $query, ?MapPointCategoryTree $tree = null): Collection
     {
@@ -73,12 +82,13 @@ class PublicMapPointPresenter
         return $this->scopeVisible($query)
             ->with(['category', 'group', 'characteristics.category', 'fields.options', 'fields.formField'])
             ->get()
-            ->map(fn (MapPoint $mapPoint): MapPointData => $this->present($mapPoint, $tree, $publicFieldIds))
+            ->map(fn (MapPoint $mapPoint): PublicMapPointData => PublicMapPointData::fromModel($mapPoint, $tree, $publicFieldIds))
             ->toBase();
     }
 
     /**
-     * The point as the public sees it. Does not check whether it is visible, see isVisible().
+     * The values of the point the public may see. Does not check whether it is visible, see isVisible().
+     * Public outputs use PublicMapPointData, which builds on this.
      *
      * @param  array<int, int>|null  $publicFieldIds
      */
@@ -86,7 +96,7 @@ class PublicMapPointPresenter
     {
         $data = MapPointData::fromModel($mapPoint, onlyPublic: true, tree: $tree, publicFieldIds: $publicFieldIds);
 
-        $data->title = $this->allowsKey($mapPoint, MapPointConsentService::TITLE) ? $data->title : ($mapPoint->category->name ?? '');
+        $data->title = $this->title($mapPoint);
         $data->description = $this->allowsKey($mapPoint, MapPointConsentService::DESCRIPTION) ? $data->description : '';
         $data->location = $this->allowsKey($mapPoint, MapPointConsentService::LOCATION) ? $data->location : null;
         $data->fields = $data->fields

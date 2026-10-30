@@ -18,6 +18,8 @@ use App\Http\Controllers\MapEmbedController;
 use App\Http\Controllers\MapPointCategoryController;
 use App\Http\Controllers\MapPointCharacteristicController;
 use App\Http\Controllers\MapPointConsentController;
+use App\Http\Controllers\MapPointContactController;
+use App\Http\Controllers\MapPointContactManageController;
 use App\Http\Controllers\MapPointController;
 use App\Http\Controllers\MapPointExportController;
 use App\Http\Controllers\MapPointImportController;
@@ -128,7 +130,7 @@ Route::middleware('auth')->group(function (): void {
     Route::patch('mappoints/category', [MapPointController::class, 'updateCategoryOfMany'])->name('mappoints.update-category-of-many');
     Route::patch('mappoints/characteristic', [MapPointController::class, 'updateCharacteristicOfMany'])->name('mappoints.update-characteristic-of-many');
     Route::patch('mappoints/published', [MapPointController::class, 'updatePublishedOfMany'])->name('mappoints.update-published-of-many');
-    Route::patch('mappoints/{mappoint}/contact-email', [MapPointConsentController::class, 'updateContactEmail'])->name('mappoints.update-contact-email');
+    Route::post('mappoints/{mappoint}/contact-verification', [MapPointController::class, 'requestContactVerification'])->name('mappoints.contact-verification');
     Route::post('mappoints/{mappoint}/refuse-consent', [MapPointConsentController::class, 'refuse'])->name('mappoints.refuse-consent');
     Route::post('mappoints/{mappoint}/send-edit-link', [MapPointConsentController::class, 'sendEditLink'])->name('mappoints.send-edit-link');
 
@@ -220,6 +222,28 @@ Route::middleware('throttle:form-submit')->group(function (): void {
 Route::get('/map-point-images/{mapPoint}/{image}', [ImageController::class, 'mapPoint'])
     ->name('map-point-images.show')
     ->middleware('throttle:map-point-images');
+Route::get('/map/{mapEmbed}/points/{mapPoint}/contact', [MapPointContactController::class, 'create'])
+    ->name('map-contact.create')
+    ->middleware('throttle:map-contact');
+Route::post('/map/{mapEmbed}/points/{mapPoint}/contact', [MapPointContactController::class, 'store'])
+    ->name('map-contact.store')
+    ->withoutMiddleware(PreventRequestForgery::class)
+    ->middleware([HandlePrecognitiveRequests::class, 'throttle:map-contact']);
+
+Route::prefix('map-contact')->name('map-contact.')->middleware('throttle:map-contact')->group(function (): void {
+    Route::get('/confirm/{token}', [MapPointContactController::class, 'showConfirmation'])->name('confirm.show');
+    Route::post('/confirm/{token}', [MapPointContactController::class, 'confirm'])->name('confirm');
+
+    Route::get('/verify/{token}', [MapPointContactManageController::class, 'showVerification'])->name('verify.show');
+    Route::post('/verify/{token}', [MapPointContactManageController::class, 'verify'])->name('verify');
+
+    Route::get('/points/{mapPoint}/unsubscribe', [MapPointContactManageController::class, 'unsubscribe'])->name('unsubscribe');
+    Route::post('/points/{mapPoint}/unsubscribe', [MapPointContactManageController::class, 'requestEditLink'])->name('unsubscribe.request');
+
+    Route::get('/manage/{token}', [MapPointContactManageController::class, 'manage'])->name('manage.show');
+    Route::post('/manage/{token}/disable', [MapPointContactManageController::class, 'disable'])->name('manage.disable');
+    Route::post('/manage/{token}/enable', [MapPointContactManageController::class, 'enable'])->name('manage.enable');
+});
 
 Route::put('/users/{user}/password', [UserController::class, 'changePassword'])
     ->name('users.changePassword');

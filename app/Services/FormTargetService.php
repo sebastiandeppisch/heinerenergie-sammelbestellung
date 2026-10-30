@@ -37,7 +37,10 @@ use Throwable;
  */
 class FormTargetService
 {
-    public function __construct(private readonly MapPointFieldService $mapPointFields) {}
+    public function __construct(
+        private readonly MapPointFieldService $mapPointFields,
+        private readonly MapPointContactService $contact,
+    ) {}
 
     /**
      * @param  ConsentChoiceData  $consentChoice  what the submitter chose in the consent block of a map point target
@@ -154,6 +157,7 @@ class FormTargetService
                 'published' => false,
                 'category_id' => $payload->category_id === null ? null : MapPointCategory::findOrFail($payload->category_id)->id,
                 'contact_email' => $payload->contact_email,
+                'contact_enabled' => $payload->contact_enabled,
                 'public_consent' => $payload->public_consent,
                 'public_consent_at' => $payload->public_consent === PublicConsent::NOT_REQUIRED ? null : $submission->submitted_at,
                 'public_consent_text' => $payload->public_consent_text,
@@ -176,6 +180,9 @@ class FormTargetService
             $mapPoint->save();
 
             event(new MapPointCreatedByFormSubmission($mapPoint, $submission));
+
+            // Whoever submitted the form may have entered someone else's address, so it needs confirming.
+            DB::afterCommit(fn () => $this->contact->requestVerification($mapPoint));
 
             return $mapPoint->fresh() ?? $mapPoint;
         });

@@ -15,8 +15,10 @@ use App\Rules\FormFieldExistsInRequest;
 use App\Rules\Hostname;
 use App\Rules\MappedFormFieldMustBeRequired;
 use App\Services\MapPointFieldService;
+use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 use Override;
@@ -107,6 +109,8 @@ class UpsertFormDefinitionRequest extends FormRequest
             'map_point_mapping.title_field_id' => ['nullable', 'string', new FormFieldExistsInRequest],
             'map_point_mapping.description_field_id' => ['nullable', 'string', new FormFieldExistsInRequest],
             'map_point_mapping.coordinate_field_id' => ['nullable', 'string', new FormFieldExistsInRequest],
+            'map_point_mapping.contact_email_field_id' => ['nullable', 'string', new FormFieldExistsInRequest, $this->mappedFieldOfType('email')],
+            'map_point_mapping.contact_enabled_field_id' => ['nullable', 'string', new FormFieldExistsInRequest, $this->mappedFieldOfType('checkbox', exactlyOneOption: true)],
 
             'group_id' => 'required|exists:groups,uuid',
         ];
@@ -129,7 +133,6 @@ class UpsertFormDefinitionRequest extends FormRequest
             $rules['map_point_mapping.field_mappings.*.target_field_id'] = ['required', 'uuid', 'exists:form_fields,uuid'];
             $rules['map_point_mapping.field_mappings.*.source_field_id'] = ['required', 'string', new FormFieldExistsInRequest];
             $rules['map_point_mapping.consent_text'] = ['required', 'string', 'max:5000'];
-            $rules['map_point_mapping.contact_email_field_id'] = ['nullable', 'string', new FormFieldExistsInRequest];
         }
 
         if ($this->has('advice_mapping') && ! is_null($this->input('advice_mapping')) && $this->input('advice_mapping.enabled') === true) {
@@ -193,11 +196,6 @@ class UpsertFormDefinitionRequest extends FormRequest
                 }
             },
             function (Validator $validator): void {
-                if ($this->isMapPointMappingEnabled() && $this->input('map_point_mapping.contact_email_field_id') !== null) {
-                    $this->validateContactEmailField($validator);
-                }
-            },
-            function (Validator $validator): void {
                 if ($this->isMapPointMappingEnabled() && ! $validator->errors()->hasAny(['group_id', 'map_point_mapping.*'])) {
                     $this->validateMapPointCategoryMapping($validator);
                 }
@@ -253,15 +251,6 @@ class UpsertFormDefinitionRequest extends FormRequest
             if (filter_var($field['required'] ?? false, FILTER_VALIDATE_BOOLEAN) || $hasRequiredOption) {
                 $validator->errors()->add("fields.{$position}.required", "„{$label}“ wird nur unter einer Bedingung angezeigt und kann deshalb kein Pflichtfeld sein.");
             }
-        }
-    }
-
-    private function validateContactEmailField(Validator $validator): void
-    {
-        $field = $this->collect('fields')->firstWhere('id', $this->input('map_point_mapping.contact_email_field_id'));
-
-        if ($field !== null && ($field['type'] ?? null) !== FieldType::EMAIL->value) {
-            $validator->errors()->add('map_point_mapping.contact_email_field_id', 'Als Kontaktadresse eignet sich nur ein E-Mail-Feld.');
         }
     }
 
@@ -410,8 +399,9 @@ class UpsertFormDefinitionRequest extends FormRequest
             'map_point_mapping.title_field_id' => 'Titel Feld',
             'map_point_mapping.description_field_id' => 'Beschreibung Feld',
             'map_point_mapping.coordinate_field_id' => 'Koordinaten Feld',
+            'map_point_mapping.contact_email_field_id' => 'Kontaktadresse Feld',
+            'map_point_mapping.contact_enabled_field_id' => 'Kontakt erlauben Feld',
             'map_point_mapping.consent_text' => 'Einwilligungstext',
-            'map_point_mapping.contact_email_field_id' => 'Feld für die Kontaktadresse',
         ];
     }
 
@@ -426,5 +416,34 @@ class UpsertFormDefinitionRequest extends FormRequest
         return [
             'fields.*.options.required_if' => 'Für Auswahlfelder müssen Optionen angegeben werden.',
         ];
+    }
+
+    /**
+     * The mapped field must have the given type in the submitted fields.
+     */
+    private function mappedFieldOfType(string $type, bool $exactlyOneOption = false): Closure
+    {
+        return function (string $attribute, mixed $value, Closure $fail) use ($type, $exactlyOneOption): void {
+            if ($value === null) {
+                return;
+            }
+
+            $fields = $this->input('fields', []);
+            $field = is_array($fields) ? Arr::first($fields, fn (mixed $field): bool => is_array($field) && ($field['id'] ?? null) === $value) : null;
+
+            if (! is_array($field)) {
+                return;
+            }
+
+            if (($field['type'] ?? null) !== $type) {
+                $fail("Das Feld für :attribute muss vom Typ \"{$type}\" sein.");
+
+                return;
+            }
+
+            if ($exactlyOneOption && count($field['options'] ?? []) !== 1) {
+                $fail('Das Feld für :attribute muss genau eine Option haben.');
+            }
+        };
     }
 }

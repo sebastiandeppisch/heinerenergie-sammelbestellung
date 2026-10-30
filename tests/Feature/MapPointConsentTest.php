@@ -266,8 +266,8 @@ test('an admin may refuse a consent but never give one', function (): void {
     $this->actingAs($admin)->post(route('mappoints.refuse-consent', $mapPoint))->assertRedirect();
     expect($mapPoint->fresh()->public_consent)->toBe(PublicConsent::REFUSED);
 
-    $this->actingAs($admin)->patch(route('mappoints.update-contact-email', $mapPoint), ['contact_email' => 'neu@example.com'])->assertRedirect();
-    expect($mapPoint->fresh()->contact_email)->toBe('neu@example.com');
+    // Admins edit the contact address with the point, see MapPointContactVerificationTest.
+    $mapPoint->update(['contact_email' => 'neu@example.com']);
 
     $this->actingAs($admin)
         ->get(route('mappoints.edit', $mapPoint))

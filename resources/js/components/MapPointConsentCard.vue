@@ -2,9 +2,7 @@
 import { Badge } from '@/shadcn/components/ui/badge';
 import { Button } from '@/shadcn/components/ui/button';
 import { Card, CardContent } from '@/shadcn/components/ui/card';
-import { Input } from '@/shadcn/components/ui/input';
-import { Label } from '@/shadcn/components/ui/label';
-import { router, useForm } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { route } from 'ziggy-js';
 
@@ -13,12 +11,7 @@ const props = defineProps<{
     consent: App.Data.MapPointConsentInfoData;
 }>();
 
-const contactForm = useForm({ contact_email: props.consent.contact_email ?? '' });
 const confirmingRefuse = ref(false);
-
-function saveContactEmail() {
-    contactForm.patch(route('mappoints.update-contact-email', props.mapPointId), { preserveScroll: true });
-}
 
 function refuse() {
     router.post(route('mappoints.refuse-consent', props.mapPointId), {}, { preserveScroll: true, onFinish: () => (confirmingRefuse.value = false) });
@@ -37,7 +30,7 @@ function formatDate(date: string): string {
     <Card data-test="map-point-consent-card">
         <CardContent class="space-y-4">
             <div class="flex items-center gap-2">
-                <h2 class="font-semibold">Einwilligung und Kontakt</h2>
+                <h2 class="font-semibold">Einwilligung zur Veröffentlichung</h2>
                 <Badge :variant="consent.public_consent === 'refused' ? 'destructive' : 'secondary'" data-test="map-point-consent-status">
                     {{ consent.public_consent_label }}
                 </Badge>
@@ -72,18 +65,6 @@ function formatDate(date: string): string {
                     </dd>
                 </template>
             </dl>
-
-            <form class="flex flex-col gap-2" @submit.prevent="saveContactEmail">
-                <Label for="contact-email">Kontaktadresse</Label>
-                <div class="flex flex-wrap gap-2">
-                    <Input id="contact-email" v-model="contactForm.contact_email" type="email" class="max-w-80" />
-                    <Button type="submit" variant="outline" :disabled="contactForm.processing">Speichern</Button>
-                </div>
-                <p v-if="contactForm.errors.contact_email" class="text-sm text-red-500">{{ contactForm.errors.contact_email }}</p>
-                <p class="text-xs text-gray-500">
-                    Wird nie veröffentlicht. Dorthin gehen die Links, mit denen die Person den Eintrag verwalten kann.
-                </p>
-            </form>
 
             <div class="flex flex-wrap gap-2">
                 <Button v-if="consent.contact_email" variant="outline" @click="sendEditLink">Verwaltungslink an Kontaktadresse senden</Button>

@@ -2,21 +2,27 @@
 import MapPointFieldList from '@/components/MapPointFieldList.vue';
 import { Button } from '@/shadcn/components/ui/button';
 import { categoryMarkerIcon } from '@/utils/categoryMarkerIcon';
-import { Minus, Plus } from '@lucide/vue';
+import { Link } from '@inertiajs/vue3';
+import { Mail, Minus, Plus } from '@lucide/vue';
 import { LControl, LIcon, LLayerGroup, LMap, LMarker, LPopup, LTileLayer } from '@vue-leaflet/vue-leaflet';
 import { latLng } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { ref } from 'vue';
 import { route } from 'ziggy-js';
 
+type MapPoint = Pick<App.Data.PublicMapPointData, 'id' | 'coordinate' | 'title' | 'description' | 'fields' | 'characteristics'> & {
+    has_contact?: boolean;
+};
+
 const props = withDefaults(
     defineProps<{
-        pointsByCategory: Record<string, Array<App.Data.MapPointData>>;
+        pointsByCategory: Record<string, Array<MapPoint>>;
         categories: Array<App.Data.MapPointCategoryData>;
         center: { lat: number; lng: number };
         zoom: number;
         minZoom?: number;
         maxZoom?: number;
+        contactUrl?: (pointId: string) => string;
         /** On the public map, the person behind a point can request a link to manage it. */
         showManageLink?: boolean;
     }>(),
@@ -100,12 +106,18 @@ function zoomOut() {
                                 mark-internal
                                 class="mt-2"
                             />
+                            <Button v-if="point.has_contact && contactUrl" as-child size="sm" class="mt-2">
+                                <Link :href="contactUrl(point.id)" class="!text-primary-foreground">
+                                    <Mail class="h-4 w-4" />
+                                    Kontakt aufnehmen
+                                </Link>
+                            </Button>
                             <a
                                 v-if="showManageLink"
                                 :href="route('map-point.manage.request-for-point', point.id)"
                                 target="_blank"
                                 rel="noopener"
-                                class="mt-2 inline-block text-xs text-gray-500 underline"
+                                class="mt-2 block text-xs text-gray-500 underline"
                             >
                                 Eintrag verwalten
                             </a>

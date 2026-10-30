@@ -11,7 +11,6 @@ return new class extends Migration
     {
         Schema::table('form_definition_to_map_points', function (Blueprint $table): void {
             $table->text('consent_text')->nullable();
-            $table->foreignId('contact_email_field_id')->nullable()->constrained('form_fields')->nullOnDelete();
         });
 
         $this->fillConsentTexts();
@@ -28,7 +27,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('form_definition_to_map_points', function (Blueprint $table): void {
-            $table->dropConstrainedForeignId('contact_email_field_id');
             $table->dropColumn('consent_text');
         });
     }

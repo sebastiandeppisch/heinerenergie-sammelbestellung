@@ -293,8 +293,10 @@ class FormDefinitionService
         $creator->category()->associate($category);
         $creator->subcategoryField()->associate($subcategoryField);
         $creator->characteristicsField()->associate($characteristicsField);
-        $creator->contactEmailField()->associate($mapping->contact_email_field_id === null ? null : FormField::where('uuid', $mapping->contact_email_field_id)->first());
+        $creator->contactEmailField()->associate(FormField::where('uuid', $mapping->contact_email_field_id)->first());
+        $creator->contactEnabledField()->associate(FormField::where('uuid', $mapping->contact_enabled_field_id)->first());
         $creator->consent_text = $mapping->consent_text ?: MapPointConsentService::DEFAULT_TEXT;
+
         $creator->save();
 
         $this->updateMapPointSubcategories($creator, $subcategoryField === null ? new Collection : $mapping->subcategory_options);

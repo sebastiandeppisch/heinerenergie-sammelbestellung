@@ -1,5 +1,35 @@
 # Changelog
 
+## [2026-10.1] - 2026-10-20
+
+### Neue Funktionen
+
+#### Für Administratoren
+
+- **Kartenpunkte aus Tabellen importieren und exportieren.** Kartenpunkte lassen sich aus CSV-, Excel- und OpenDocument-Dateien importieren und wieder in diese Formate exportieren. So kann eine Liste in einer Tabellenkalkulation gepflegt und zurückgespielt werden. Beim Import wird jede Spalte einem Feld zugeordnet, wobei passende Felder anhand der Spaltenüberschriften vorgeschlagen werden. Bestehende Punkte werden wahlweise über ID, Titel oder Ort wiedererkannt und aktualisiert. Eine Vorschau zeigt vorab, was passieren würde, und solange eine Zeile fehlerhaft ist, wird nichts übernommen. Unbekannte Kategorien werden automatisch angelegt. Spaltenvorlagen werden pro Gruppe gespeichert und gelten für Import und Export gleichermaßen. #157
+- **Kartenpunkte, Kategorien und Einbettungen gehören zu einer Gruppe.** Kartenpunkte sind für ihre Gruppe und alle übergeordneten Gruppen sichtbar. Eine Einbettung zeigt die Punkte ihrer Gruppe und aller Untergruppen. Kategorien werden an Untergruppen vererbt, ändern dürfen sie aber nur die Administratoren der Gruppe, der sie gehören. Bestehende Kartendaten wurden automatisch der ersten Hauptgruppe zugeordnet.
+- **Kontaktanfragen über die öffentliche Karte.** Besucher:innen der öffentlichen Karte können die Verantwortlichen eines Kartenpunkts über ein Kontaktformular anschreiben, direkt aus dem Karten-Popup oder aus der Tabellenansicht. Die Adresse der Verantwortlichen wird dabei nie angezeigt. Die Absender:innen bestätigen zuerst ihre eigene E-Mail-Adresse, danach wird die Nachricht weitergeleitet, sodass direkt geantwortet werden kann. Pro Kartenpunkt lassen sich eine Kontaktadresse und die Zustimmung zu Kontaktanfragen hinterlegen, auch über ein Formular. Die Verantwortlichen können Kontaktanfragen jederzeit selbst ab- und wieder anschalten.
+- **Datenbank-Backups herunterladen.** Systemadministratoren können auf der Systemverwaltungsseite eine Sicherung der Datenbank erstellen, vorhandene Sicherungen herunterladen und löschen. Das funktioniert auch auf Webspace ohne Kommandozeilenzugang. #158
+- **Übersicht zur Adressauflösung.** Die Systemverwaltungsseite zeigt, wie viele Beratungen auf eine Adressauflösung warten oder dabei gescheitert sind, und bietet eine Schaltfläche, um ausstehende Beratungen erneut aufzulösen.
+- **Kartenpunkt-Tabellen passen auf den Bildschirm.** Lange Titel, Kategorien und Orte werden umbrochen, die Liste nutzt die volle Fensterhöhe und Datumsangaben werden lesbar formatiert. Bei den Karten-Einbettungen öffnet eine eigene Schaltfläche direkt die öffentliche Karte.
+
+#### Für Berater:innen
+
+- **Einheitliche Seitenköpfe mit Navigationspfad.** In der Kopfzeile wird jetzt angezeigt, auf welcher Seite man sich befindet und wie man dorthin gelangt ist. Überschriften und Abstände sind auf allen Seiten einheitlich.
+- **Nur noch eine Beratungsansicht.** Die Umschaltung zwischen alter und neuer Beratungstabelle entfällt, die neue Ansicht ist jetzt die einzige.
+- **Status der Adressauflösung in der Beratung.** Eine Beratung zeigt an, ob ihre Adresse noch aufgelöst wird, nicht gefunden wurde oder die Auflösung fehlgeschlagen ist. Ein von Hand gesetzter Kartenpunkt wird dabei nie überschrieben.
+
+### Fehlerbehebungen
+
+- Fällt der Kartendienst für die Adresssuche aus oder antwortet langsam, gehen Formulare und Seiten nicht mehr kaputt. Die Adresse einer Beratung wird später automatisch nachgeholt.
+- Ein langsamer oder gestörter Mailserver verhindert nicht mehr das Absenden des öffentlichen Beratungsformulars.
+- Beratungen, bei denen nur eine Postleitzahl angegeben war, konnten falsche Koordinaten erhalten.
+- Das Speichern der Adresse im eigenen Profil schlug fehl. Die Postleitzahl wird jetzt als Text behandelt, sodass auch führende Nullen erhalten bleiben.
+- Der Hinweis unter der Karte im Profil behauptete fälschlich, Beratungen würden automatisch zugeteilt.
+- In den Spaltenfiltern der Tabellen gingen in Chrome getippte Zeichen verloren oder wurden verdoppelt.
+- Spaltenfilter in den Tabellen filterten nicht mehr, und Textspalten wurden nach Groß- und Kleinschreibung getrennt sortiert.
+- Kartenpunkte von Kategorien ohne eigenes Bild waren auf der Karte unsichtbar.
+
 ## [2026-09.1] - 2026-09-03
 
 ### Neue Funktionen

@@ -34,10 +34,10 @@ class FormToMapPointMappingData extends Data
         public ?string $characteristics_field_id = null,
         #[DataCollectionOf(FormToMapPointCharacteristicData::class)]
         public Collection $characteristic_options = new Collection,
+        public ?string $contact_email_field_id = null,
+        public ?string $contact_enabled_field_id = null,
         /** The consent text with the placeholders {initiative} and {felder}. */
         public ?string $consent_text = null,
-        /** An email field of the form whose value becomes the contact address of the point. */
-        public ?string $contact_email_field_id = null,
     ) {}
 
     public static function fromModel(?FormDefinitionToMapPoint $model): self
@@ -46,7 +46,7 @@ class FormToMapPointMappingData extends Data
             return new self(enabled: false, consent_text: MapPointConsentService::DEFAULT_TEXT);
         }
 
-        $model->loadMissing(['titleField', 'descriptionField', 'coordinateField', 'category', 'subcategoryField', 'subcategories.category', 'fieldMappings.targetField', 'fieldMappings.sourceField', 'characteristicsField', 'characteristicMappings.characteristic', 'contactEmailField']);
+        $model->loadMissing(['titleField', 'descriptionField', 'coordinateField', 'category', 'subcategoryField', 'subcategories.category', 'fieldMappings.targetField', 'fieldMappings.sourceField', 'characteristicsField', 'characteristicMappings.characteristic', 'contactEmailField', 'contactEnabledField']);
 
         return new self(
             enabled: true,
@@ -59,8 +59,9 @@ class FormToMapPointMappingData extends Data
             field_mappings: $model->fieldMappings->map(FormToMapPointFieldData::fromModel(...))->toBase(),
             characteristics_field_id: $model->characteristicsField?->uuid,
             characteristic_options: $model->characteristicMappings->map(FormToMapPointCharacteristicData::fromModel(...))->toBase(),
-            consent_text: $model->consent_text,
             contact_email_field_id: $model->contactEmailField?->uuid,
+            contact_enabled_field_id: $model->contactEnabledField?->uuid,
+            consent_text: $model->consent_text,
         );
     }
 }

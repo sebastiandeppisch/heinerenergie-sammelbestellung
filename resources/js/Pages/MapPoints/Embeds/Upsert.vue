@@ -19,7 +19,7 @@ import { route } from 'ziggy-js';
 const props = defineProps<{
     mapEmbed?: App.Data.MapEmbedData;
     categories: Array<App.Data.MapPointCategoryData>;
-    pointsByCategory: Record<string, Array<App.Data.MapPointData>>;
+    pointsByCategory: Record<string, Array<App.Data.PublicMapPointData>>;
     groups: Array<App.Data.GroupBaseData>;
     mapCategoryIdsByGroup: Record<string, Array<string>>;
 }>();

@@ -320,7 +320,7 @@ test('the public map shows only public values of the current fields', function (
         ->assertInertia(fn ($page) => $page
             ->has("pointsByCategory.{$category->uuid}.0.fields", 1)
             ->where("pointsByCategory.{$category->uuid}.0.fields.0.label", 'PV-Leistung (kWp)')
-            ->where("pointsByCategory.{$category->uuid}.0.former_fields", [])
+            ->missing("pointsByCategory.{$category->uuid}.0.former_fields")
         );
 });
 

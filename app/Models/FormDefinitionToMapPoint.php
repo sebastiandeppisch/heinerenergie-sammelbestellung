@@ -61,13 +61,21 @@ class FormDefinitionToMapPoint extends Model
     }
 
     /**
-     * An email field of the form whose value becomes the contact address of the point, for its manage links.
+     * An email field of the form whose value becomes the contact address of the point, for its manage links and contact requests.
      *
      * @return BelongsTo<FormField, $this>
      */
     public function contactEmailField(): BelongsTo
     {
         return $this->belongsTo(FormField::class, 'contact_email_field_id');
+    }
+
+    /**
+     * @return BelongsTo<FormField, $this>
+     */
+    public function contactEnabledField(): BelongsTo
+    {
+        return $this->belongsTo(FormField::class, 'contact_enabled_field_id');
     }
 
     /**
@@ -148,7 +156,6 @@ class FormDefinitionToMapPoint extends Model
         $categoryId = $this->categoryFor($submission)?->id;
         $characteristicIds = $this->characteristicIdsFor($submission, $categoryId);
         $consent = app(MapPointConsentService::class)->forTarget($this, $consentChoice, $categoryId, $characteristicIds);
-        $contactEmail = $this->contactEmailField?->submissionFields()->where('form_submission_id', $submission->id)->first()?->value;
 
         return new MapPointTargetPayload(
             title: $this->titleField->getSubmissionField($submission)->value,
@@ -158,11 +165,34 @@ class FormDefinitionToMapPoint extends Model
             group_id: $this->formDefinition->group_id,
             field_values: $this->mappedValues($submission),
             characteristic_ids: $characteristicIds,
+            contact_email: $this->contactEmail($submission),
+            contact_enabled: $this->contactEnabled($submission),
             public_consent: $consent->consent,
             public_consent_text: $consent->text,
             public_consent_fields: $consent->fields,
-            contact_email: is_string($contactEmail) && $contactEmail !== '' ? $contactEmail : null,
         );
+    }
+
+    private function contactEmail(FormSubmission $submission): ?string
+    {
+        if ($this->contactEmailField === null) {
+            return null;
+        }
+
+        $email = filter_var($this->contactEmailField->getSubmissionField($submission)->value, FILTER_VALIDATE_EMAIL);
+
+        return $email === false ? null : $email;
+    }
+
+    private function contactEnabled(FormSubmission $submission): bool
+    {
+        if ($this->contactEnabledField === null || $this->contactEnabledField->type !== FieldType::CHECKBOX) {
+            return false;
+        }
+
+        $value = $this->contactEnabledField->getSubmissionField($submission)->value;
+
+        return is_array($value) ? $value !== [] : filled($value);
     }
 
     /**

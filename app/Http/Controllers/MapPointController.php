@@ -10,6 +10,7 @@ use App\Data\GroupBaseData;
 use App\Data\MapPointCategoryData;
 use App\Data\MapPointCharacteristicData;
 use App\Data\MapPointConsentInfoData;
+use App\Data\MapPointContactRequestData;
 use App\Data\MapPointData;
 use App\Data\MapPointSpreadsheetMappingData;
 use App\Data\SpreadsheetFormatData;
@@ -24,8 +25,10 @@ use App\Models\Group;
 use App\Models\MapEmbed;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
+use App\Models\MapPointContactRequest;
 use App\Services\CurrentGroupService;
 use App\Services\MapPointCharacteristicService;
+use App\Services\MapPointContactService;
 use App\Services\MapPointFieldService;
 use App\Services\MapPointVisibilityService;
 use App\Services\PublicMapPointPresenter;
@@ -94,6 +97,7 @@ class MapPointController extends Controller
             ->whereIn('category_id', $categories->pluck('id'));
 
         return Inertia::render('MapPoints/PublicMap', [
+            'mapEmbedId' => $mapEmbed->uuid,
             'pointsByCategory' => $presenter->presentAll($mapPoints, $tree)->groupBy('category_id'),
             'categories' => $this->categoryData($categories, $tree),
             'center' => $mapEmbed->coordinate,
@@ -111,6 +115,9 @@ class MapPointController extends Controller
         return Inertia::render('MapPoints/Upsert', [
             'mapPoint' => MapPointData::fromModel($mappoint->load(['category', 'group', 'characteristics.category']), onlyPublic: false),
             'consent' => MapPointConsentInfoData::fromModel($mappoint),
+            'contactRequests' => $mappoint->contactRequests()->latest()->get()
+                ->map(fn (MapPointContactRequest $contactRequest): MapPointContactRequestData => MapPointContactRequestData::fromModel($contactRequest))
+                ->toBase(),
             ...$this->formProps($visibility, $fieldService),
         ]);
     }
@@ -126,6 +133,19 @@ class MapPointController extends Controller
         });
 
         return redirect()->back()->with('success', 'Der Kartenpunkt wurde aktualisiert');
+    }
+
+    public function requestContactVerification(MapPoint $mappoint, MapPointContactService $contact): RedirectResponse
+    {
+        $this->authorize('update', $mappoint);
+
+        if ($mappoint->contact_email === null) {
+            return redirect()->back()->with('error', 'Der Kartenpunkt hat keine Kontaktadresse');
+        }
+
+        $contact->requestVerification($mappoint);
+
+        return redirect()->back()->with('success', 'Die Bestätigungsmail wurde verschickt');
     }
 
     public function destroy(MapPoint $mappoint): RedirectResponse

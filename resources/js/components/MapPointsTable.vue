@@ -10,8 +10,9 @@ import { Input } from '@/shadcn/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shadcn/components/ui/popover';
 import { Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table';
 import { TooltipProvider } from '@/shadcn/components/ui/tooltip';
+import { Link } from '@inertiajs/vue3';
 import { categoryPath, isShownWithAncestors } from '@/utils/categoryTree';
-import { ChevronDown, ChevronRight, ChevronUp, Filter } from '@lucide/vue';
+import { ChevronDown, ChevronRight, ChevronUp, Filter, Mail } from '@lucide/vue';
 import { filterFns, sortFns } from '@/lib/tableFns';
 import {
     columnFilteringFeature,
@@ -30,7 +31,7 @@ import {
 } from '@tanstack/vue-table';
 import { computed, reactive, ref, watch } from 'vue';
 
-type MapPointData = App.Data.MapPointData;
+type MapPointData = App.Data.PublicMapPointData;
 type MapPointCategoryData = App.Data.MapPointCategoryData;
 type Coordinate = App.ValueObjects.Coordinate;
 
@@ -45,11 +46,13 @@ interface MapPointRow {
     categoryImagePath: string | null;
     fields: Array<App.Data.MapPointFieldValueData>;
     characteristics: Array<App.Data.MapPointCharacteristicData>;
+    hasContact: boolean;
 }
 
 const props = defineProps<{
     pointsByCategory: Record<string, Array<MapPointData>>;
     categories: Array<MapPointCategoryData>;
+    contactUrl?: (pointId: string) => string;
 }>();
 
 function categoryById(categoryId: string | null): MapPointCategoryData | undefined {
@@ -72,6 +75,7 @@ const rows = computed<Array<MapPointRow>>(() =>
                 categoryImagePath: category?.marker_image_path ?? null,
                 fields: point.fields,
                 characteristics: point.characteristics,
+                hasContact: point.has_contact,
             };
         }),
 );
@@ -218,6 +222,7 @@ watch(
                                         </Popover>
                                     </div>
                                 </TableHead>
+                                <TableHead v-if="contactUrl" />
                             </TableRow>
                             <TableRow v-if="showFilters">
                                 <TableHead />
@@ -231,6 +236,7 @@ watch(
                                         placeholder="Filter..."
                                     />
                                 </TableHead>
+                                <TableHead v-if="contactUrl" />
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -276,16 +282,26 @@ watch(
                                     <TableCell>
                                         <CoordinateFieldPreview :value="row.original.coordinate" :label="row.original.location || undefined" />
                                     </TableCell>
+                                    <TableCell v-if="contactUrl">
+                                        <Button v-if="row.original.hasContact" as-child variant="outline" size="sm">
+                                            <Link :href="contactUrl(row.original.id)">
+                                                <Mail class="h-4 w-4" />
+                                                Kontakt aufnehmen
+                                            </Link>
+                                        </Button>
+                                    </TableCell>
                                 </TableRow>
                                 <TableRow v-if="isExpanded(row.original.id)" class="bg-muted/30 hover:bg-muted/30">
                                     <TableCell />
-                                    <TableCell colspan="4" class="whitespace-normal">
+                                    <TableCell :colspan="contactUrl ? 5 : 4" class="whitespace-normal">
                                         <MapPointFieldList :fields="row.original.fields" :characteristics="row.original.characteristics" />
                                     </TableCell>
                                 </TableRow>
                             </template>
 
-                            <TableEmpty v-if="table.getRowModel().rows.length === 0" :colspan="5"> Keine Punkte gefunden. </TableEmpty>
+                            <TableEmpty v-if="table.getRowModel().rows.length === 0" :colspan="contactUrl ? 6 : 5">
+                                Keine Punkte gefunden.
+                            </TableEmpty>
                         </TableBody>
                     </Table>
                 </div>

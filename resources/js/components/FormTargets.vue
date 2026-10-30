@@ -53,6 +53,8 @@ const mappingLabels: Record<string, string> = {
     title_field_id: 'Titel',
     description_field_id: 'Beschreibung',
     coordinate_field_id: 'Koordinaten',
+    contact_email_field_id: 'Kontaktadresse',
+    contact_enabled_field_id: 'Kontakt erlauben',
     consent_text: 'Einwilligungstext',
 };
 
@@ -129,6 +131,10 @@ const mapPointValidation = computed(() => {
         warnings.push('Der Einwilligungstext nennt die Angaben nicht. Füge {felder} ein, damit die Person sieht, was öffentlich wird.');
     }
 
+    if (mapping.contact_enabled_field_id && !mapping.contact_email_field_id) {
+        warnings.push('Ohne Kontaktadresse-Feld hat „Kontakt erlauben“ keine Wirkung');
+    }
+
     return {
         status: missing.length === 0 ? 'complete' : 'incomplete',
         missing,
@@ -143,21 +149,13 @@ const phoneFields = computed(() => formDefinition.value.fields.filter((f: any) =
 const addressFields = computed(() => formDefinition.value.fields.filter((f: any) => f.type === 'address'));
 const geoCoordinateFields = computed(() => formDefinition.value.fields.filter((f: any) => f.type === 'geo_coordinate'));
 const textareaFields = computed(() => formDefinition.value.fields.filter((f: any) => f.type === 'textarea'));
+const singleOptionCheckboxFields = computed(() =>
+    formDefinition.value.fields.filter((f: any) => f.type === 'checkbox' && (f.options?.length ?? 0) === 1),
+);
 const selectFields = computed(() => formDefinition.value.fields.filter((f: any) => ['select', 'radio'].includes(f.type)));
 const singleCheckboxFields = computed(() => formDefinition.value.fields.filter((f) => f.type === 'checkbox' && f.options.length === 1));
 
 const NO_CONDITION = 'none';
-const NO_CONTACT_EMAIL = 'none';
-
-const contactEmailValue = computed({
-    get: () => formDefinition.value.map_point_mapping?.contact_email_field_id ?? NO_CONTACT_EMAIL,
-    set: (value: string) => {
-        const mapping = formDefinition.value.map_point_mapping;
-        if (!mapping) return;
-
-        mapping.contact_email_field_id = value === NO_CONTACT_EMAIL ? null : value;
-    },
-});
 
 const adviceConditionValue = computed({
     get: () => formDefinition.value.advice_mapping?.condition_field_id ?? NO_CONDITION,
@@ -551,21 +549,38 @@ const adviceTypeSelectValue = computed({
                             </FormItem>
 
                             <FormItem>
-                                <Label>Kontaktadresse</Label>
-                                <Select v-model="contactEmailValue">
-                                    <SelectTrigger data-test="map-point-contact-email-field">
-                                        <SelectValue placeholder="Feld auswählen" />
+                                <Label>Kontaktadresse (optional)</Label>
+                                <Select v-model="formDefinition.map_point_mapping.contact_email_field_id">
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Kein Feld" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem :value="NO_CONTACT_EMAIL">Keine</SelectItem>
+                                        <SelectItem :value="null">Kein Feld</SelectItem>
                                         <SelectItem v-for="field in emailFields" :key="field.id" :value="field.id">
                                             {{ field.label }}
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <p class="text-xs text-muted-foreground">
-                                    An diese Adresse geht der Link, mit dem die Person ihren Eintrag verwalten kann. Sie wird nie veröffentlicht.
+                                    An diese Adresse geht der Link, mit dem die Person ihren Eintrag verwalten und Kontaktanfragen freischalten kann.
+                                    Sie wird nie veröffentlicht.
                                 </p>
+                            </FormItem>
+
+                            <FormItem>
+                                <Label>Kontakt über die Karte erlauben (optional)</Label>
+                                <Select v-model="formDefinition.map_point_mapping.contact_enabled_field_id">
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Kein Feld" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem :value="null">Kein Feld</SelectItem>
+                                        <SelectItem v-for="field in singleOptionCheckboxFields" :key="field.id" :value="field.id">
+                                            {{ field.label }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <p class="text-xs text-muted-foreground">Ein Checkbox-Feld mit genau einer Option. Angehakt erlaubt den Kontakt.</p>
                             </FormItem>
 
                             <FormItem>
