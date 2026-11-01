@@ -134,7 +134,7 @@ class MapPoint extends Model implements HasSends
     public function deleteBy(MapPointDeletedBy $deletedBy): void
     {
         DB::transaction(function () use ($deletedBy): void {
-            $submission = $this->pointable;
+            $submission = $this->loadMissing('pointable')->pointable;
 
             if ($submission instanceof FormSubmission) {
                 $submission->noteMapPointDeleted($deletedBy);

@@ -30,7 +30,11 @@ test('a person consents to the point only and later shows the details on the man
         ->assertDontSee('zusätzlich diese Angaben zeigen')
         ->click('Meinen Eintrag auf der Karte zeigen')
         ->assertSee('zusätzlich diese Angaben zeigen: Titel, Beschreibung')
+        ->assertSee('auf der Karte von Gartenkreis mit seinem Standort öffentlich angezeigt wird. Ich kann meine Einwilligung jederzeit über den Link widerrufen')
+        ->assertDontSee('mit folgenden Angaben')
+        ->click('#map-point-consent-details')
         ->assertSee('auf der Karte von Gartenkreis öffentlich angezeigt wird, mit folgenden Angaben: Titel, Beschreibung sowie dem Standort')
+        ->click('#map-point-consent-details')
         ->assertNoJavaScriptErrors();
 
     // Placing the pin depends on the map tiles, so the form is sent without the browser.
