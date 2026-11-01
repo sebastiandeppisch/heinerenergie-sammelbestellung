@@ -51,6 +51,9 @@ class MapPoint extends Model implements HasSends
     use HasSendsTrait;
     use HasUuid;
 
+    /** The length of the column location. */
+    public const int LOCATION_MAX_LENGTH = 255;
+
     protected $fillable = [
         'group_id',
         'title',

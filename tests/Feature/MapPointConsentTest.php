@@ -90,7 +90,7 @@ function expectedConsentText(bool $details = true, string $labels = 'Titel, Besc
 
 function mapLocationField(FormDefinitionToMapPoint $config): FormField
 {
-    $field = $config->formDefinition->fields()->create(['type' => FieldType::TEXT, 'label' => 'Ortsbeschreibung', 'required' => false, 'sort_order' => 14]);
+    $field = $config->formDefinition->fields()->create(['type' => FieldType::TEXT, 'label' => 'Ortsbeschreibung', 'required' => false, 'max_length' => 255, 'sort_order' => 14]);
     $config->locationField()->associate($field)->save();
 
     return $field;
@@ -409,4 +409,19 @@ test('the form builder saves both consent texts and the location field and check
     $payload['map_point_mapping']['location_field_id'] = $this->email->uuid;
     $this->actingAs($admin)->put(route('form-definitions.update', $this->form), $payload)
         ->assertSessionHasErrors(['map_point_mapping.consent_point_text', 'map_point_mapping.location_field_id']);
+
+    $payload['map_point_mapping']['consent_point_text'] = 'Karte von {initiative}. {widerruf}';
+    $payload['map_point_mapping']['location_field_id'] = $location->uuid;
+    $payload['fields'] = array_map(fn (array $field): array => $field['id'] === $location->uuid ? [...$field, 'max_length' => null] : $field, $payload['fields']);
+    $this->actingAs($admin)->put(route('form-definitions.update', $this->form), $payload)
+        ->assertSessionHasErrors(['map_point_mapping.location_field_id']);
+});
+
+test('a location description longer than the column is cut instead of failing the point', function (): void {
+    $location = mapLocationField($this->config);
+    $location->update(['max_length' => null]);
+
+    submitConsentForm($this->config, ['_consent_show' => true, $location->uuid => str_repeat('a', 300)])->assertSessionHasNoErrors();
+
+    expect(mb_strlen(MapPoint::sole()->location))->toBe(MapPoint::LOCATION_MAX_LENGTH);
 });

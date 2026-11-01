@@ -56,6 +56,8 @@ const mappingLabels: Record<string, string> = {
     contact_email_field_id: 'Kontaktadresse',
     contact_enabled_field_id: 'Kontakt erlauben',
     consent_point_text: 'Einwilligungstext für den Eintrag',
+    consent_point_text_without_fields: 'Einwilligungstext für den Eintrag ohne {felder}, er listet keine Angaben',
+    location_field_max_length: 'Maximale Länge des Ortsbeschreibung-Felds (höchstens 255 Zeichen)',
     consent_text: 'Einwilligungstext für Eintrag und Angaben',
 };
 
@@ -129,7 +131,7 @@ const mapPointValidation = computed(() => {
     }
 
     if (mapping.consent_point_text?.includes('{felder}')) {
-        warnings.push('Der Text für den Eintrag listet keine Angaben. {felder} gehört nur in den Text für Eintrag und Angaben.');
+        missing.push('consent_point_text_without_fields');
     }
 
     if (mapping.consent_text && !mapping.consent_text.includes('{felder}')) {
@@ -150,6 +152,7 @@ const mapPointValidation = computed(() => {
     if (mapping.location_field_id) {
         const field = formDefinition.value.fields.find((f: any) => f.id === mapping.location_field_id);
         if (field && !['text', 'textarea'].includes(field.type)) warnings.push('Ortsbeschreibung Feld sollte vom Typ "text" oder "textarea" sein');
+        if (field && !(field.max_length && field.max_length <= 255)) missing.push('location_field_max_length');
     }
 
     if (mapping.contact_enabled_field_id && !mapping.contact_email_field_id) {

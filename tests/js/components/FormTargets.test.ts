@@ -298,7 +298,7 @@ describe('FormTargets map point mapping', () => {
         expect(warningsOf(wrapper, 'map-point')).toContain('Ein Einwilligungstext sagt nicht, wie man widerruft. Füge {widerruf} ein.');
     });
 
-    it('warns when the text for the point lists the details', () => {
+    it('is incomplete when the text for the point lists the details', () => {
         const wrapper = mountWith(
             makeFormDefinition({
                 fields: mapPointFields,
@@ -306,7 +306,22 @@ describe('FormTargets map point mapping', () => {
             }),
         );
 
-        expect(warningsOf(wrapper, 'map-point').join()).toContain('Der Text für den Eintrag listet keine Angaben.');
+        expect(statusOf(wrapper, 'map-point')).toBe('Unvollständig');
+        expect(missingOf(wrapper, 'map-point').join()).toContain('Einwilligungstext für den Eintrag ohne {felder}');
+    });
+
+    it('is incomplete when the location field may take longer answers than a point holds', () => {
+        const withLength = (max_length: number | null) =>
+            mountWith(
+                makeFormDefinition({
+                    fields: [...mapPointFields, makeField({ id: 'f-where', type: 'textarea', max_length })],
+                    map_point_mapping: { ...completeMapPointMapping, location_field_id: 'f-where' },
+                }),
+            );
+
+        expect(statusOf(withLength(null), 'map-point')).toBe('Unvollständig');
+        expect(statusOf(withLength(500), 'map-point')).toBe('Unvollständig');
+        expect(statusOf(withLength(255), 'map-point')).toBe('Vollständig');
     });
 
     it('warns without an email field and not with one', () => {

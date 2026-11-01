@@ -9,6 +9,7 @@ use App\Enums\FieldType;
 use App\Enums\FormType;
 use App\Models\FormDefinition;
 use App\Models\Group;
+use App\Models\MapPoint;
 use App\Models\MapPointCategory;
 use App\Models\MapPointCharacteristic;
 use App\Rules\FormFieldExistsInRequest;
@@ -111,7 +112,7 @@ class UpsertFormDefinitionRequest extends FormRequest
             'map_point_mapping.coordinate_field_id' => ['nullable', 'string', new FormFieldExistsInRequest],
             'map_point_mapping.contact_email_field_id' => ['nullable', 'string', new FormFieldExistsInRequest, $this->mappedFieldOfType('email')],
             'map_point_mapping.contact_enabled_field_id' => ['nullable', 'string', new FormFieldExistsInRequest, $this->mappedFieldOfType('checkbox', exactlyOneOption: true)],
-            'map_point_mapping.location_field_id' => ['nullable', 'string', new FormFieldExistsInRequest, $this->mappedFieldOfType(['text', 'textarea'])],
+            'map_point_mapping.location_field_id' => ['nullable', 'string', new FormFieldExistsInRequest, $this->mappedFieldOfType(['text', 'textarea']), $this->mappedFieldWithMaxLength(MapPoint::LOCATION_MAX_LENGTH)],
 
             'group_id' => 'required|exists:groups,uuid',
         ];
@@ -426,6 +427,21 @@ class UpsertFormDefinitionRequest extends FormRequest
     /**
      * The mapped field must have the given type in the submitted fields.
      */
+    /**
+     * The mapped field must not take longer answers than the column of the point holds.
+     */
+    private function mappedFieldWithMaxLength(int $maxLength): Closure
+    {
+        return function (string $attribute, mixed $value, Closure $fail) use ($maxLength): void {
+            $fields = $this->input('fields', []);
+            $field = $value === null || ! is_array($fields) ? null : Arr::first($fields, fn (mixed $field): bool => is_array($field) && ($field['id'] ?? null) === $value);
+
+            if (is_array($field) && (! is_numeric($field['max_length'] ?? null) || (int) $field['max_length'] < 1 || (int) $field['max_length'] > $maxLength)) {
+                $fail("Das Feld für :attribute braucht eine maximale Länge von höchstens {$maxLength} Zeichen.");
+            }
+        };
+    }
+
     /**
      * @param  string|array<int, string>  $types
      */

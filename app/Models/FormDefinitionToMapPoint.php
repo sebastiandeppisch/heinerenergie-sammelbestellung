@@ -202,7 +202,12 @@ class FormDefinitionToMapPoint extends Model
         /** @var mixed $value stored as json, a string for text fields */
         $value = $this->locationField?->submissionFields()->where('form_submission_id', $submission->id)->first()?->value;
 
-        return is_string($value) && trim($value) !== '' ? trim($value) : null;
+        if (! is_string($value) || trim($value) === '') {
+            return null;
+        }
+
+        // The column holds 255 characters. The form builder asks for a field that is not longer, this guards older forms.
+        return mb_substr(trim($value), 0, MapPoint::LOCATION_MAX_LENGTH);
     }
 
     private function contactEnabled(FormSubmission $submission): bool
