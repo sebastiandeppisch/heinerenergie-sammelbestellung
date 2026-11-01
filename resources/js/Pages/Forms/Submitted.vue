@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import HexNetHighlight from '@/components/HexNet/HexNetHighlight.vue';
 import { isIframe, useAutoResizeIframeIfIsIframe } from '@/helpers';
 import NoLayout from '@/layouts/NoLayout.vue';
 import PublicLayout from '@/layouts/PublicLayout.vue';
 import { Button } from '@/shadcn/components/ui/button';
 import Card from '@/shadcn/components/ui/card/Card.vue';
 import CardContent from '@/shadcn/components/ui/card/CardContent.vue';
-import { router } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 import { CircleCheck } from '@lucide/vue';
 import { computed } from 'vue';
 import { route } from 'ziggy-js';
@@ -25,6 +26,8 @@ const props = withDefaults(
 );
 
 useAutoResizeIframeIfIsIframe();
+
+const hexNetHighlight = computed(() => usePage().props.hexNetHighlight as App.HexNet.Data.HexNetHighlightData | undefined);
 
 const successMessage = computed(() => {
     return props.formDefinition.success_message || 'Vielen Dank für Deine Anfrage';
@@ -49,6 +52,9 @@ function handleNextFormButton() {
                     </div>
                     <div style="margin-top: 32px">
                         <CircleCheck :size="96" style="color: #00a651" />
+                    </div>
+                    <div v-if="hexNetHighlight" class="mt-8 w-full">
+                        <HexNetHighlight :highlight="hexNetHighlight" />
                     </div>
                     <div v-if="notices.length > 0" class="mt-8 w-full space-y-4" data-test="form-target-notices">
                         <div v-for="(notice, index) in notices" :key="index" class="rounded-md border p-4">
