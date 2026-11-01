@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\Handler;
+use App\HexNet\HexNetServiceProvider;
 use App\LaravelExtensions\StrictGates\AuthServiceProvider;
 use App\LaravelExtensions\StrictGates\MissingGateException;
 use App\Mail\BaseNotificationMail;
@@ -30,7 +31,8 @@ arch()->expect('App\Concerns')
 
 arch()->expect('App')
     ->not->toBeEnums()
-    ->ignoring('App\Enums');
+    ->ignoring('App\Enums')
+    ->ignoring('App\HexNet\Enums');
 
 arch()->expect('App\Enums')
     ->toBeEnums()
@@ -68,7 +70,8 @@ arch()->expect('App\Models')
 
 arch()->expect('App')
     ->not->toExtend(Model::class)
-    ->ignoring('App\Models');
+    ->ignoring('App\Models')
+    ->ignoring('App\HexNet\Models');
 
 arch()->expect('App\Http\Requests')
     ->classes()
@@ -101,7 +104,8 @@ arch()->expect('App\Console\Commands')
 
 arch()->expect('App')
     ->not->toExtend(Command::class)
-    ->ignoring('App\Console\Commands');
+    ->ignoring('App\Console\Commands')
+    ->ignoring('App\HexNet\Console');
 
 arch()->expect('App\Mail')
     ->classes()
@@ -146,23 +150,26 @@ arch()->expect('App\Providers')
 arch()->expect('App')
     ->not->toExtend(ServiceProvider::class)
     ->ignoring('App\Providers')
-    ->ignoring(AuthServiceProvider::class);
+    ->ignoring(AuthServiceProvider::class)
+    ->ignoring(HexNetServiceProvider::class);
 
 arch()->expect('App')
     ->not->toHaveSuffix('ServiceProvider')
     ->ignoring('App\Providers')
-    ->ignoring(AuthServiceProvider::class);
+    ->ignoring(AuthServiceProvider::class)
+    ->ignoring(HexNetServiceProvider::class);
 
 arch()->expect('App')
     ->not->toHaveSuffix('Controller')
-    ->ignoring('App\Http\Controllers');
+    ->ignoring('App\Http\Controllers')
+    ->ignoring('App\HexNet\Http\Controllers');
 
 arch()->expect('App\Http\Controllers')
     ->classes()
     ->toHaveSuffix('Controller');
 
 arch()->expect('App\Http')
-    ->toOnlyBeUsedIn('App\Http');
+    ->toOnlyBeUsedIn(['App\Http', 'App\HexNet\Http']);
 
 arch()->expect([
     'dd',
@@ -177,3 +184,28 @@ arch()->expect([
 arch()->expect('App\Policies')
     ->classes()
     ->toHaveSuffix('Policy');
+
+// HexaNetz is a plugin with its own namespace. It follows the same rules inside App\HexNet.
+
+arch()->expect('App\HexNet\Enums')
+    ->toBeEnums();
+
+arch()->expect('App\HexNet\Models')
+    ->classes()
+    ->toExtend(Model::class);
+
+arch()->expect('App\HexNet\Console')
+    ->classes()
+    ->toHaveSuffix('Command')
+    ->toExtend(Command::class);
+
+arch()->expect('App\HexNet\Http\Controllers')
+    ->classes()
+    ->toHaveSuffix('Controller');
+
+arch()->expect('App\HexNet\Policies')
+    ->classes()
+    ->toHaveSuffix('Policy');
+
+arch()->expect('App\HexNet\Listeners')
+    ->toHaveMethod('handle');

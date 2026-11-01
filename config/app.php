@@ -1,5 +1,6 @@
 <?php
 
+use App\HexNet\HexNetServiceProvider;
 use App\Providers\AppServiceProvider;
 use App\Providers\AuthServiceProvider;
 use App\Providers\EventServiceProvider;
@@ -249,6 +250,7 @@ return [
         GroupServiceProvider::class,
         GeocodingServiceProvider::class,
         TypeScriptTransformerServiceProvider::class,
+        HexNetServiceProvider::class,
 
     ],
 

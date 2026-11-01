@@ -595,6 +595,72 @@ export type MapPointSpreadsheetField = 'ignore' | 'id' | 'title' | 'description'
 export type PublicConsent = 'not_required' | 'given' | 'refused';
 export type SpreadsheetFormat = 'xlsx' | 'ods' | 'xls' | 'csv';
 }
+namespace HexNet {
+namespace Data {
+export type HexNetData = {
+id: string,
+name: string,
+slug: string,
+status: App.HexNet.Enums.HexNetStatus,
+status_label: string,
+title: string | null,
+subtitle: string | null,
+cta_text: string | null,
+play_area: App.ValueObjects.Polygon | null,
+grid_origin: App.ValueObjects.Coordinate | null,
+hex_radius_m: number,
+grid_locked: boolean,
+threshold_medium: number,
+threshold_dark: number,
+jitter_m: number,
+group_id: string,
+group_name: string,
+category_ids: string[],
+form_definition_id: string | null,
+form_definition_name: string | null,
+public_url: string,
+stats: App.HexNet.Data.HexNetStatsData | null,
+};
+export type HexNetHighlightData = {
+hex_net: App.HexNet.Data.HexNetPublicData,
+cells: Record<string, any>,
+counts: Record<string, number>,
+stats: App.HexNet.Data.HexNetStatsData,
+cell: string,
+coordinate: App.ValueObjects.Coordinate,
+public_url: string,
+};
+export type HexNetPointData = {
+point: App.Data.PublicMapPointData,
+since: number,
+cell: string,
+};
+export type HexNetPublicData = {
+id: string,
+slug: string,
+name: string,
+title: string,
+subtitle: string | null,
+cta_text: string | null,
+threshold_medium: number,
+threshold_dark: number,
+jitter_m: number,
+hex_radius_m: number,
+form_url: string | null,
+bounds: App.ValueObjects.Coordinate[],
+is_draft: boolean,
+};
+export type HexNetStatsData = {
+percent: number,
+playable_cells: number,
+levels: number[],
+total_points: number,
+};
+}
+namespace Enums {
+export type HexNetStatus = 'draft' | 'active';
+}
+}
 namespace Nextcloud {
 namespace Data {
 export type NextcloudDir = {
