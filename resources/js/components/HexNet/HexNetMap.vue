@@ -38,9 +38,14 @@ let hexLayer: L.GeoJSON | null = null;
 let pointLayer: L.LayerGroup | null = null;
 let highlightLayer: L.Polygon | null = null;
 let popup: L.Popup | null = null;
+const canvasRenderer = L.canvas({ padding: 0.5 });
+const svgRenderer = L.svg();
 let resizeObserver: ResizeObserver | null = null;
 const mediaQuery = window.matchMedia('(max-width: 820px)');
-const onMediaChange = (event: MediaQueryListEvent) => (isMobile.value = event.matches);
+function onMediaChange(event: MediaQueryListEvent) {
+    close();
+    isMobile.value = event.matches;
+}
 
 function styleFor(feature?: GeoJSON.Feature): L.PathOptions {
     const id = (feature?.properties as { id: string } | undefined)?.id ?? '';
@@ -54,13 +59,14 @@ function styleFor(feature?: GeoJSON.Feature): L.PathOptions {
     };
 }
 
-function select(latlng: L.LatLngExpression) {
+function select(latlng: L.LatLngExpression, offsetY = 0) {
     if (!map.value) return;
     if (isMobile.value) {
         popup?.remove();
         return;
     }
     popup ??= L.popup({ maxWidth: 320, minWidth: 240, autoPanPadding: [24, 24], className: 'hexnet-popup' });
+    popup.options.offset = L.point(0, 7 + offsetY);
     popup.setLatLng(latlng).setContent(popupContent).openOn(map.value);
     nextTick(() => popup?.update());
 }
@@ -74,9 +80,8 @@ function close() {
 function renderCells() {
     if (!map.value) return;
     hexLayer?.remove();
-    const renderer = L.canvas({ padding: 0.5 });
     hexLayer = L.geoJSON(props.cells, {
-        style: (feature) => ({ ...styleFor(feature), renderer }),
+        style: (feature) => ({ ...styleFor(feature), renderer: canvasRenderer }),
         interactive: props.interactive,
         onEachFeature: (feature, layer) => {
             if (!props.interactive) return;
@@ -116,13 +121,12 @@ function renderPoints() {
             className: 'hexnet-lolly',
             iconSize: [size, size * 1.6],
             iconAnchor: [size / 2, size * 1.6],
-            popupAnchor: [0, -size * 1.4],
         });
         L.marker([entry.point.coordinate.lat, entry.point.coordinate.lng], { icon, riseOnHover: true })
             .on('click', () => {
                 selectedCell.value = null;
                 selectedPoint.value = entry;
-                select([entry.point.coordinate.lat, entry.point.coordinate.lng]);
+                select([entry.point.coordinate.lat, entry.point.coordinate.lng], -size * 1.4);
             })
             .addTo(pointLayer);
     }
@@ -136,7 +140,7 @@ function renderHighlight() {
     if (!feature) return;
     const latlngs = feature.geometry.coordinates[0].map(([lng, lat]) => L.latLng(lat, lng));
     highlightLayer = L.polygon(latlngs, {
-        renderer: L.svg(),
+        renderer: svgRenderer,
         className: 'hexnet-pulse',
         color: '#e8720c',
         weight: 3,

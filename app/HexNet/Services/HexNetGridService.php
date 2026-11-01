@@ -22,9 +22,35 @@ class HexNetGridService
 {
     public const string POINTS_VERSION_KEY = 'hexnet:points:version';
 
+    /** Upper bound for the cells of a play area, it keeps rendering and counting fast. */
+    public const int MAX_CELLS = 20000;
+
     public static function invalidatePoints(): void
     {
         Cache::forever(self::POINTS_VERSION_KEY, Str::random(12));
+    }
+
+    /**
+     * Rough number of cells of a play area from its bounding box, cheap enough to check before computing the cells.
+     */
+    public static function estimateCells(HexGrid $grid, Polygon $playArea): int
+    {
+        $points = array_map($grid->project(...), $playArea->coordinates);
+        $xs = array_column($points, 0);
+        $ys = array_column($points, 1);
+
+        return $points === [] ? 0 : (int) ceil((max($xs) - min($xs)) * (max($ys) - min($ys)) / ($grid->cellAreaHa() * 10000));
+    }
+
+    /**
+     * A point counts in a HexaNetz if it lies in the play area and its cell is a play-area cell. Counting, the visible
+     * points and the page after the confirmation all use this rule.
+     *
+     * @param  array<string, int|true>  $cellSet  cell ids as keys
+     */
+    public static function countsAt(HexGrid $grid, Polygon $playArea, array $cellSet, ?Coordinate $coordinate): bool
+    {
+        return $coordinate !== null && $grid->contains($playArea, $coordinate) && isset($cellSet[$grid->cellOf($coordinate)]);
     }
 
     /**
@@ -89,7 +115,7 @@ class HexNetGridService
     {
         $key = sprintf('hexnet:%d:counts:%s:%s', $hexNet->id, Cache::get(self::POINTS_VERSION_KEY, '0'), $this->configHash($hexNet));
 
-        return Cache::rememberForever($key, function () use ($hexNet): array {
+        return Cache::remember($key, now()->addDay(), function () use ($hexNet): array {
             $grid = $hexNet->grid();
 
             return $grid === null || $hexNet->play_area === null ? [] : $this->countIn($hexNet, $grid, $hexNet->play_area, $this->cellIds($hexNet));
@@ -108,13 +134,8 @@ class HexNetGridService
         $counts = [];
 
         foreach ($this->pointsQuery($hexNet, $playArea)->get(['id', 'lat', 'lng']) as $point) {
-            if (! $grid->contains($playArea, $point->coordinate)) {
-                continue;
-            }
-
-            $cell = $grid->cellOf($point->coordinate);
-
-            if (isset($cells[$cell])) {
+            if (self::countsAt($grid, $playArea, $cells, $point->coordinate)) {
+                $cell = $grid->cellOf($point->coordinate);
                 $counts[$cell] = ($counts[$cell] ?? 0) + 1;
             }
         }
@@ -147,7 +168,7 @@ class HexNetGridService
     }
 
     /**
-     * Points of the categories and their subcategories that lie in the play area.
+     * Points of the categories and their subcategories that count in the HexaNetz, see countsAt().
      *
      * @param  array<int, string>  $columns
      * @param  (callable(Builder<MapPoint>): void)|null  $tap
@@ -169,8 +190,10 @@ class HexNetGridService
             $tap($query);
         }
 
+        $cells = array_flip($this->cellIds($hexNet));
+
         return $query->get($columns)
-            ->filter(fn (MapPoint $point): bool => $grid->contains($playArea, $point->coordinate))
+            ->filter(fn (MapPoint $point): bool => self::countsAt($grid, $playArea, $cells, $point->coordinate))
             ->values()
             ->toBase();
     }
@@ -204,13 +227,14 @@ class HexNetGridService
         return md5(json_encode([$hexNet->grid_origin_lat, $hexNet->grid_origin_lng, $hexNet->hex_radius_m, $hexNet->play_area?->toJson()]) ?: '');
     }
 
+    /**
+     * Includes the resolved subtree, so moving a category into or out of the subtree changes the key.
+     */
     private function configHash(HexNet $hexNet): string
     {
-        return md5($this->gridHash($hexNet).'|'.$hexNet->updated_at->getTimestamp().'|'.$this->categoryIdsKey($hexNet));
-    }
+        $categoryIds = $this->categoryIds($hexNet);
+        sort($categoryIds);
 
-    private function categoryIdsKey(HexNet $hexNet): string
-    {
-        return implode(',', $hexNet->categories()->pluck('map_point_categories.id')->sort()->all());
+        return md5($this->gridHash($hexNet).'|'.$hexNet->updated_at->getTimestamp().'|'.implode(',', $categoryIds));
     }
 }

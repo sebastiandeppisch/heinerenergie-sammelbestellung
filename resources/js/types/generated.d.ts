@@ -633,7 +633,6 @@ public_url: string,
 export type HexNetPointData = {
 point: App.Data.PublicMapPointData,
 since: number,
-cell: string,
 };
 export type HexNetPublicData = {
 id: string,
@@ -644,7 +643,6 @@ subtitle: string | null,
 cta_text: string | null,
 threshold_medium: number,
 threshold_dark: number,
-jitter_m: number,
 hex_radius_m: number,
 form_url: string | null,
 bounds: App.ValueObjects.Coordinate[],

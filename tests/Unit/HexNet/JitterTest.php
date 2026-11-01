@@ -38,3 +38,10 @@ test('the offset depends on the key', function (): void {
 test('zero meters keeps the coordinate', function (): void {
     expect($this->jitter->apply($this->coordinate, 'abc', 0))->toBe($this->coordinate);
 });
+
+test('another maximum gives an unrelated offset, not a scaled copy', function (): void {
+    [$x40, $y40] = $this->jitter->offset('a', 40);
+    [$x50, $y50] = $this->jitter->offset('a', 50);
+
+    expect(abs($x50 - $x40 * 50 / 40) + abs($y50 - $y40 * 50 / 40))->toBeGreaterThan(0.5);
+});

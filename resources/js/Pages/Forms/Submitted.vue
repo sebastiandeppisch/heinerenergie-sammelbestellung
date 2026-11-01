@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import HexNetHighlight from '@/components/HexNet/HexNetHighlight.vue';
 import { isIframe, useAutoResizeIframeIfIsIframe } from '@/helpers';
 import NoLayout from '@/layouts/NoLayout.vue';
 import PublicLayout from '@/layouts/PublicLayout.vue';
@@ -8,7 +7,7 @@ import Card from '@/shadcn/components/ui/card/Card.vue';
 import CardContent from '@/shadcn/components/ui/card/CardContent.vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { CircleCheck } from '@lucide/vue';
-import { computed } from 'vue';
+import { computed, defineAsyncComponent, type Component } from 'vue';
 import { route } from 'ziggy-js';
 
 defineOptions({
@@ -27,7 +26,12 @@ const props = withDefaults(
 
 useAutoResizeIframeIfIsIframe();
 
-const hexNetHighlight = computed(() => usePage().props.hexNetHighlight as App.HexNet.Data.HexNetHighlightData | undefined);
+/** Optional plugin component: the glob is empty when the HexaNetz plugin is removed. */
+const highlightLoaders = import.meta.glob<{ default: Component }>('@/components/HexNet/HexNetHighlight.vue');
+const HexNetHighlight = Object.values(highlightLoaders)[0] ? defineAsyncComponent(Object.values(highlightLoaders)[0]) : null;
+const hexNetHighlight = computed(() =>
+    HexNetHighlight ? (usePage().props.hexNetHighlight as App.HexNet.Data.HexNetHighlightData | undefined) : undefined,
+);
 
 const successMessage = computed(() => {
     return props.formDefinition.success_message || 'Vielen Dank für Deine Anfrage';

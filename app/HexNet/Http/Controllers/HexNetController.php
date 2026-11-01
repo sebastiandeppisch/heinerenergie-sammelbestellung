@@ -20,7 +20,6 @@ use App\Models\FormDefinition;
 use App\Models\Group;
 use App\Models\MapPointCategory;
 use App\Services\MapPointVisibilityService;
-use App\ValueObjects\Coordinate;
 use App\ValueObjects\Polygon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -35,6 +34,8 @@ use Inertia\Response;
 class HexNetController extends Controller
 {
     public const array STEPS = ['basics', 'texts', 'categories', 'play-area', 'grid', 'form', 'launch'];
+
+    private const string TOO_MANY_CELLS = 'Zu viele Waben. Wähle einen größeren Radius oder ein kleineres Spielfeld.';
 
     public function __construct(private readonly HexNetGridService $gridService) {}
 
@@ -103,7 +104,7 @@ class HexNetController extends Controller
             'categories' => $this->updateCategories($request, $hexNet),
             'play-area' => $this->updatePlayArea($request, $hexNet),
             'grid' => $this->updateGrid($request, $hexNet),
-            'form' => $hexNet->update(['form_definition_id' => $this->validateForm($request)]),
+            'form' => $hexNet->update(['form_definition_id' => $this->validateForm($request, $hexNet)]),
             'launch' => $this->updateStatus($request, $hexNet),
         };
 
@@ -154,37 +155,35 @@ class HexNetController extends Controller
     }
 
     /**
-     * Cells of a polygon for the preview in the wizard, without saving.
+     * Cells and counts of the saved play area for another radius, for the preview in the wizard. Origin and play area
+     * are always the saved ones, so the preview cannot be used to probe the counts of arbitrary areas.
      */
-    public function gridPreview(Request $request): JsonResponse
+    public function gridPreview(Request $request, HexNet $hexNet): JsonResponse
     {
-        $this->authorize('create', HexNet::class);
+        $this->authorize('update', $hexNet);
 
         $data = $request->validate([
-            'play_area.coordinates' => ['required', 'array', 'min:3', 'max:2000'],
-            'play_area.coordinates.*.lat' => ['required', 'numeric', 'between:-90,90'],
-            'play_area.coordinates.*.lng' => ['required', 'numeric', 'between:-180,180'],
-            'origin.lat' => ['nullable', 'numeric'],
-            'origin.lng' => ['nullable', 'numeric'],
-            'hex_radius_m' => ['required', 'integer', 'min:'.HexNet::MIN_RADIUS_M, 'max:'.HexNet::MAX_RADIUS_M],
-            'hex_net_id' => ['nullable', 'uuid'],
+            'hex_radius_m' => ['required', 'integer', 'multiple_of:10', 'min:'.HexNet::MIN_RADIUS_M, 'max:'.HexNet::MAX_RADIUS_M],
         ]);
 
-        $polygon = new Polygon($data['play_area']['coordinates']);
-        $origin = isset($data['origin']['lat'], $data['origin']['lng']) ? Coordinate::fromArray($data['origin']) : $polygon->getCenter();
-        $grid = new HexGrid($origin, (float) $data['hex_radius_m']);
-        $cells = $grid->cellsInPolygon($polygon);
+        $origin = $hexNet->origin();
+        $playArea = $hexNet->play_area;
 
-        if (count($cells) > 20000) {
-            return response()->json(['message' => 'Zu viele Waben. Wähle einen größeren Radius oder ein kleineres Spielfeld.'], 422);
+        if ($origin === null || $playArea === null || ! $hexNet->hasPlayArea()) {
+            return response()->json(['message' => 'Zeichne zuerst das Spielfeld.'], 422);
         }
 
-        $hexNet = isset($data['hex_net_id']) ? HexNet::where('uuid', $data['hex_net_id'])->first() : null;
-        $counts = $hexNet !== null && $request->user()->can('update', $hexNet) ? $this->gridService->countIn($hexNet, $grid, $polygon, $cells) : [];
+        $grid = new HexGrid($origin, (float) $data['hex_radius_m']);
+
+        if (HexNetGridService::estimateCells($grid, $playArea) > HexNetGridService::MAX_CELLS) {
+            return response()->json(['message' => self::TOO_MANY_CELLS], 422);
+        }
+
+        $cells = $grid->cellsInPolygon($playArea);
 
         return response()->json([
             'cells' => HexNetGridService::toGeoJson($grid, $cells),
-            'counts' => (object) $counts,
+            'counts' => (object) $this->gridService->countIn($hexNet, $grid, $playArea, $cells),
             'count' => count($cells),
             'cell_area_ha' => round($grid->cellAreaHa(), 2),
         ]);
@@ -211,6 +210,15 @@ class HexNetController extends Controller
             throw ValidationException::withMessages(['group_id' => 'Du darfst dieser Initiative kein HexaNetz zuordnen.']);
         }
 
+        if ($hexNet !== null && $hexNet->group_id !== $group->id) {
+            $foreignCategories = $hexNet->categories()->whereNotIn('map_point_categories.group_id', $group->getHierarchyIds())->exists();
+            $foreignForm = $hexNet->formDefinition !== null && ! in_array($hexNet->formDefinition->group_id, $group->getHierarchyIds(), true);
+
+            if ($foreignCategories || $foreignForm) {
+                throw ValidationException::withMessages(['group_id' => 'Kategorien oder Formular gehören nicht zu dieser Initiative. Wähle sie zuerst neu.']);
+            }
+        }
+
         return [...$data, 'group_id' => $group->id];
     }
 
@@ -221,7 +229,17 @@ class HexNetController extends Controller
             'category_ids.*' => ['uuid', 'exists:map_point_categories,uuid'],
         ]);
 
-        $ids = MapPointCategory::whereIn('uuid', $data['category_ids'])->pluck('id')->map(fn (mixed $id): int => (int) $id)->all();
+        $ids = MapPointCategory::query()
+            ->whereIn('group_id', $hexNet->group->getHierarchyIds())
+            ->whereIn('uuid', $data['category_ids'])
+            ->pluck('id')
+            ->map(fn (mixed $id): int => (int) $id)
+            ->all();
+
+        if (count($ids) !== count(array_unique($data['category_ids']))) {
+            throw ValidationException::withMessages(['category_ids' => 'Wähle nur Kategorien, die diese Initiative nutzen darf.']);
+        }
+
         $error = app(HexNetCategoryValidator::class)->validate($ids);
 
         if ($error !== null) {
@@ -249,24 +267,30 @@ class HexNetController extends Controller
             $hexNet->grid_origin_lng = $center->lng;
         }
 
+        $this->assertCellLimit($hexNet, $hexNet->hex_radius_m, 'play_area.coordinates');
         $hexNet->save();
     }
 
     private function updateGrid(Request $request, HexNet $hexNet): void
     {
         $data = $request->validate([
-            'hex_radius_m' => ['required', 'integer', 'min:'.HexNet::MIN_RADIUS_M, 'max:'.HexNet::MAX_RADIUS_M],
+            'hex_radius_m' => ['required', 'integer', 'multiple_of:10', 'min:'.HexNet::MIN_RADIUS_M, 'max:'.HexNet::MAX_RADIUS_M],
             'grid_locked' => ['required', 'boolean'],
             'threshold_medium' => ['required', 'integer', 'min:1', 'max:50'],
             'threshold_dark' => ['required', 'integer', 'gt:threshold_medium', 'max:100'],
-            'jitter_m' => ['required', 'integer', 'min:0', 'max:200'],
+            'jitter_m' => ['required', 'integer', 'multiple_of:10', 'min:'.HexNet::MIN_JITTER_M, 'max:'.HexNet::MAX_JITTER_M],
             'confirm_radius_change' => ['sometimes', 'boolean'],
         ]);
 
         $radiusChanged = (int) $data['hex_radius_m'] !== $hexNet->hex_radius_m;
+        $jitterChanged = (int) $data['jitter_m'] !== $hexNet->jitter_m;
 
-        if ($radiusChanged && $hexNet->grid_locked && $data['grid_locked']) {
-            throw ValidationException::withMessages(['hex_radius_m' => 'Das Raster ist gesperrt. Entsperre es, um den Radius zu ändern.']);
+        if ($hexNet->grid_locked && ($radiusChanged || $jitterChanged)) {
+            throw ValidationException::withMessages([$radiusChanged ? 'hex_radius_m' : 'jitter_m' => 'Das Raster ist gesperrt. Entsperre es und speichere, bevor du Radius oder Versatz änderst.']);
+        }
+
+        if ($radiusChanged) {
+            $this->assertCellLimit($hexNet, (int) $data['hex_radius_m'], 'hex_radius_m');
         }
 
         if ($radiusChanged && $hexNet->isActive() && ! ($data['confirm_radius_change'] ?? false)) {
@@ -277,11 +301,45 @@ class HexNetController extends Controller
         $hexNet->update($data);
     }
 
-    private function validateForm(Request $request): ?int
+    /**
+     * Only map point forms of the group hierarchy that create points in one of the categories.
+     */
+    private function validateForm(Request $request, HexNet $hexNet): ?int
     {
-        $data = $request->validate(['form_definition_id' => ['nullable', 'uuid', 'exists:form_definitions,uuid']]);
+        $data = $request->validate(['form_definition_id' => ['nullable', 'uuid']]);
 
-        return $data['form_definition_id'] === null ? null : FormDefinition::where('uuid', $data['form_definition_id'])->value('id');
+        if ($data['form_definition_id'] === null) {
+            return null;
+        }
+
+        $id = $this->usableForms($hexNet)->where('uuid', $data['form_definition_id'])->value('id');
+
+        if ($id === null) {
+            throw ValidationException::withMessages(['form_definition_id' => 'Das Formular muss Kartenpunkte in einer Kategorie dieses HexaNetzes anlegen.']);
+        }
+
+        return (int) $id;
+    }
+
+    /**
+     * @return Builder<FormDefinition>
+     */
+    private function usableForms(HexNet $hexNet): Builder
+    {
+        $categoryIds = $this->gridService->categoryIds($hexNet);
+
+        return FormDefinition::query()
+            ->whereIn('group_id', $hexNet->group->getHierarchyIds())
+            ->whereHas('mapPointCreator', fn (Builder $query) => $query->whereIn('map_point_category_id', $categoryIds));
+    }
+
+    private function assertCellLimit(HexNet $hexNet, int $radius, string $errorKey): void
+    {
+        $origin = $hexNet->origin();
+
+        if ($origin !== null && $hexNet->play_area !== null && HexNetGridService::estimateCells(new HexGrid($origin, $radius), $hexNet->play_area) > HexNetGridService::MAX_CELLS) {
+            throw ValidationException::withMessages([$errorKey => self::TOO_MANY_CELLS]);
+        }
     }
 
     private function updateStatus(Request $request, HexNet $hexNet): void
@@ -305,10 +363,14 @@ class HexNetController extends Controller
      */
     private function checklist(HexNet $hexNet): array
     {
+        $form = $hexNet->formDefinition()->with('mapPointCreator.characteristicsField')->first();
+
         return [
             'Kategorien' => $hexNet->categories()->exists(),
             'Spielfeld' => $hexNet->hasPlayArea(),
-            'Mitmach-Formular' => $hexNet->form_definition_id !== null,
+            'Mitmach-Formular' => $form !== null,
+            'Formular mit E-Mail-Bestätigung' => (bool) $form?->requires_email_confirmation,
+            'Maßnahmen im Formular Pflicht' => (bool) $form?->mapPointCreator?->characteristicsField?->required,
         ];
     }
 
@@ -349,11 +411,7 @@ class HexNetController extends Controller
             ->orderBy('name')
             ->get();
 
-        $forms = $hexNet === null ? collect() : FormDefinition::query()
-            ->whereIn('group_id', $hexNet->group->getHierarchyIds())
-            ->whereHas('mapPointCreator')
-            ->orderBy('name')
-            ->get(['id', 'uuid', 'name']);
+        $forms = $hexNet === null ? collect() : $this->usableForms($hexNet)->orderBy('name')->get(['id', 'uuid', 'name']);
 
         return [
             'hexNet' => $hexNet === null ? null : HexNetData::fromModel($hexNet, $this->gridService->stats($hexNet)),

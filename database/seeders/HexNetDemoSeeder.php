@@ -19,6 +19,7 @@ use App\ValueObjects\Coordinate;
 use App\ValueObjects\Polygon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Demo HexaNetz "Darmstadt wird grün" with about 130 stepping stones. For development and demos only.
@@ -62,6 +63,13 @@ class HexNetDemoSeeder extends Seeder
             return;
         }
 
+        DB::transaction(fn () => $this->seed());
+
+        $this->command?->info('Demo-HexaNetz angelegt: '.route('hexnet.public', self::SLUG));
+    }
+
+    private function seed(): void
+    {
         mt_srand(4711);
 
         $group = Group::firstOrCreate(['name' => 'BUND Darmstadt'], ['description' => 'Demo-Initiative für HexaNetz', 'accepts_transfers' => false]);
@@ -89,10 +97,9 @@ class HexNetDemoSeeder extends Seeder
         $category = $setup->createCategories($hexNet, HexNetDefaults::MAIN_CATEGORY, HexNetDefaults::MAIN_CATEGORY.' 2027', HexNetDefaults::MEASURES);
         $setup->createForm($hexNet->refresh());
 
-        HexNet::create([
+        HexNet::firstOrCreate(['slug' => 'darmstadt-wird-gruen-2028'], [
             'group_id' => $group->id,
             'name' => 'Darmstadt wird grün 2028',
-            'slug' => 'darmstadt-wird-gruen-2028',
             'status' => HexNetStatus::DRAFT,
             'title' => HexNetDefaults::TITLE,
             'subtitle' => 'Entwurf für das nächste Jahr',
@@ -100,8 +107,6 @@ class HexNetDemoSeeder extends Seeder
         ]);
 
         $this->createPoints($hexNet, $group, $category, $polygon, 130);
-
-        $this->command?->info('Demo-HexaNetz angelegt: '.route('hexnet.public', self::SLUG));
     }
 
     private function createAdmin(Group $group): void

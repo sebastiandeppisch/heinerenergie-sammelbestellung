@@ -62,6 +62,7 @@ function saveStep(step: Step, form: ReturnType<typeof useForm>, advance = true) 
     if (!props.hexNet) return;
     form.transform((data) => ({ ...data, next: advance ? nextStep.value : null })).put(route('hexnets.update-step', [props.hexNet.id, step]), {
         preserveScroll: true,
+        preserveState: !advance,
     });
 }
 
@@ -93,7 +94,7 @@ function submitBasics() {
     if (props.hexNet) {
         saveStep('basics', basics);
     } else {
-        basics.post(route('hexnets.store'));
+        basics.post(route('hexnets.store'), { preserveState: false });
     }
 }
 

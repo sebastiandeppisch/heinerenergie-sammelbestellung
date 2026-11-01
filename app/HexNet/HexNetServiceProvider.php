@@ -6,12 +6,14 @@ namespace App\HexNet;
 
 use App\Events\MapPointCreatedByFormSubmission;
 use App\HexNet\Console\HexNetDemoCommand;
+use App\HexNet\Listeners\PauseHexNetsWithoutCategories;
 use App\HexNet\Listeners\ShareHexNetHighlight;
 use App\HexNet\Models\HexNet;
 use App\HexNet\Observers\MapPointObserver;
 use App\HexNet\Policies\HexNetPolicy;
 use App\HexNet\Services\HexNetJitter;
 use App\Models\MapPoint;
+use App\Models\MapPointCategory;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
@@ -32,6 +34,7 @@ class HexNetServiceProvider extends ServiceProvider
     {
         Gate::policy(HexNet::class, HexNetPolicy::class);
         MapPoint::observe(MapPointObserver::class);
+        MapPointCategory::deleting(fn (MapPointCategory $category) => app(PauseHexNetsWithoutCategories::class)->handle($category));
         Event::listen(MapPointCreatedByFormSubmission::class, ShareHexNetHighlight::class);
 
         Route::middleware('web')->group(base_path('routes/hexnet.php'));

@@ -8,7 +8,8 @@ use App\ValueObjects\Coordinate;
 
 /**
  * Moves a point by a fixed offset derived from HMAC(uuid, app.key), so the same point always lands on the same
- * public position and the exact address cannot be read from it.
+ * public position and the exact address cannot be read from it. The maximum length is part of the message: a scaled
+ * copy of one offset would give the exact position away as soon as the point is seen with two lengths.
  */
 class HexNetJitter
 {
@@ -31,7 +32,7 @@ class HexNetJitter
      */
     public function offset(string $uuid, int $maxMeters): array
     {
-        $hash = hash_hmac('sha256', $uuid, $this->key, true);
+        $hash = hash_hmac('sha256', $uuid.'|'.$maxMeters, $this->key, true);
         $angle = $this->unit(substr($hash, 0, 4)) * 2 * M_PI;
         $length = sqrt($this->unit(substr($hash, 4, 4))) * $maxMeters;
 

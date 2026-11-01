@@ -30,7 +30,7 @@ class HexNetResolver
                 return $grid !== null
                     && $hexNet->play_area !== null
                     && in_array((int) $mapPoint->category_id, $this->gridService->categoryIds($hexNet), true)
-                    && $grid->contains($hexNet->play_area, $mapPoint->coordinate);
+                    && HexNetGridService::countsAt($grid, $hexNet->play_area, array_flip($this->gridService->cellIds($hexNet)), $mapPoint->coordinate);
             });
     }
 }

@@ -54,6 +54,10 @@ class HexNet extends Model
 
     public const int MAX_RADIUS_M = 1000;
 
+    public const int MIN_JITTER_M = 20;
+
+    public const int MAX_JITTER_M = 150;
+
     protected $fillable = [
         'group_id',
         'name',

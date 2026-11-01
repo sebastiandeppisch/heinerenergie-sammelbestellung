@@ -43,7 +43,6 @@ function createFromTemplate() {
         preserveScroll: true,
         onSuccess: () => {
             mode.value = 'existing';
-            Object.keys(selection).forEach((key) => delete selection[key]);
             emit('saved');
         },
     });

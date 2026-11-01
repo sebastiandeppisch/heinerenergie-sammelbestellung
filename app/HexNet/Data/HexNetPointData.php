@@ -17,6 +17,5 @@ class HexNetPointData extends Data
     public function __construct(
         public PublicMapPointData $point,
         public int $since,
-        public string $cell,
     ) {}
 }

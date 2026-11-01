@@ -31,22 +31,22 @@ const form = useForm({
 const preview = ref<{ cells: HexCells; counts: Record<string, number>; count: number; cell_area_ha: number } | null>(null);
 const previewError = ref<string | null>(null);
 const confirmOpen = ref(false);
-const radiusLocked = computed(() => props.hexNet.grid_locked && form.grid_locked);
+const radiusLocked = computed(() => props.hexNet.grid_locked);
 const radiusChanged = computed(() => form.hex_radius_m !== props.hexNet.hex_radius_m);
 let timer: ReturnType<typeof setTimeout> | undefined;
+let requestId = 0;
 
 async function loadPreview() {
     if (!props.hexNet.play_area) return;
+    const id = ++requestId;
     try {
-        const { data } = await axios.post(route('hexnets.grid-preview'), {
-            play_area: props.hexNet.play_area,
-            origin: props.hexNet.grid_origin,
-            hex_radius_m: form.hex_radius_m,
-            hex_net_id: props.hexNet.id,
-        });
+        const { data } = await axios.post(route('hexnets.grid-preview', props.hexNet.id), { hex_radius_m: form.hex_radius_m });
+        if (id !== requestId) return;
         preview.value = data;
         previewError.value = null;
     } catch (error) {
+        if (id !== requestId) return;
+        preview.value = null;
         previewError.value = axios.isAxiosError(error) ? (error.response?.data?.message ?? 'Vorschau nicht möglich') : 'Vorschau nicht möglich';
     }
 }
@@ -114,7 +114,7 @@ function save(confirmed = false) {
                 <Switch v-model="form.grid_locked" />
             </div>
             <p class="-mt-3 text-xs text-muted-foreground">
-                Gesperrt kann der Radius nicht versehentlich geändert werden. Zum Ändern erst entsperren und speichern.
+                Gesperrt lassen sich Radius und Versatz nicht ändern. Zum Ändern erst entsperren und speichern.
             </p>
 
             <div class="space-y-1">
@@ -145,7 +145,17 @@ function save(confirmed = false) {
                     <Label for="jitter">Standort verwischen</Label>
                     <span class="font-mono text-sm font-semibold text-green-800">{{ form.jitter_m }} m</span>
                 </div>
-                <input id="jitter" v-model.number="form.jitter_m" type="range" min="0" max="150" step="10" class="w-full accent-green-800" />
+                <input
+                    id="jitter"
+                    v-model.number="form.jitter_m"
+                    type="range"
+                    min="20"
+                    max="150"
+                    step="10"
+                    class="w-full accent-green-800"
+                    :disabled="hexNet.grid_locked"
+                />
+                <p v-if="form.errors.jitter_m" class="text-sm text-red-500">{{ form.errors.jitter_m }}</p>
                 <p class="text-xs text-muted-foreground">
                     Ein Punkt auf einem Privatgarten ist eine Wohnadresse. Der Versatz hält die Adresse unscharf.
                 </p>
