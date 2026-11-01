@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Data\ConsentChoiceData;
+use App\Enums\MapPointDeletedBy;
 use App\Enums\PublicConsent;
 use App\Models\FormSubmission;
 use App\Models\MapPoint;
@@ -45,19 +46,23 @@ class MapPointConsentManager
     }
 
     /**
-     * Deletes the point with its values and images, and the submission it was created from, so nothing personal
-     * is left.
+     * Deletes the point with its values and images, and the submission it was created from, so nothing personal is
+     * left. A submission that also asked for an advice is kept for it and notes that the person deleted the point.
      */
     public function delete(MapPoint $mapPoint): void
     {
         DB::transaction(function () use ($mapPoint): void {
             $submission = $mapPoint->pointable;
-            $mapPoint->delete();
 
-            if ($submission instanceof FormSubmission) {
-                $submission->points()->get()->each->delete();
-                $submission->delete();
+            if (! $submission instanceof FormSubmission || $submission->advice_id !== null) {
+                $mapPoint->deleteBy(MapPointDeletedBy::PERSON);
+
+                return;
             }
+
+            $mapPoint->delete();
+            $submission->points()->get()->each->delete();
+            $submission->delete();
         });
     }
 }

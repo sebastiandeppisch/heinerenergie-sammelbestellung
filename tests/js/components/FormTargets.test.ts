@@ -250,7 +250,7 @@ describe('FormTargets map point mapping', () => {
         expect(statusOf(wrapper, 'map-point')).toBe('Vollständig');
     });
 
-    it.each([['title_field_id'], ['description_field_id'], ['coordinate_field_id'], ['consent_text']] as const)(
+    it.each([['title_field_id'], ['description_field_id'], ['coordinate_field_id'], ['consent_point_text'], ['consent_text']] as const)(
         'is incomplete when %s is missing',
         (field) => {
             const wrapper = mountWith(
@@ -285,6 +285,42 @@ describe('FormTargets map point mapping', () => {
 
         expect(statusOf(wrapper, 'map-point')).toBe('Vollständig');
         expect(warningsOf(wrapper, 'map-point').join()).toContain('{felder}');
+    });
+
+    it('warns when a consent text does not say how to withdraw it', () => {
+        const wrapper = mountWith(
+            makeFormDefinition({
+                fields: mapPointFields,
+                map_point_mapping: { ...completeMapPointMapping, consent_point_text: 'Ich bin einverstanden.' },
+            }),
+        );
+
+        expect(warningsOf(wrapper, 'map-point')).toContain('Ein Einwilligungstext sagt nicht, wie man widerruft. Füge {widerruf} ein.');
+    });
+
+    it('warns when the text for the point lists the details', () => {
+        const wrapper = mountWith(
+            makeFormDefinition({
+                fields: mapPointFields,
+                map_point_mapping: { ...completeMapPointMapping, consent_point_text: 'Mit {felder}. {widerruf}' },
+            }),
+        );
+
+        expect(warningsOf(wrapper, 'map-point').join()).toContain('Der Text für den Eintrag listet keine Angaben.');
+    });
+
+    it('warns without an email field and not with one', () => {
+        const withoutEmail = mountWith(makeFormDefinition({ fields: mapPointFields, map_point_mapping: completeMapPointMapping }));
+        const withEmail = mountWith(
+            makeFormDefinition({
+                fields: [...mapPointFields, makeField({ id: 'f-mail', type: 'email' })],
+                map_point_mapping: { ...completeMapPointMapping, contact_email_field_id: 'f-mail' },
+            }),
+        );
+        const warning = 'Ohne E-Mail-Feld können Teilnehmende ihren Eintrag nicht selbst verwalten oder widerrufen.';
+
+        expect(warningsOf(withoutEmail, 'map-point')).toContain(warning);
+        expect(warningsOf(withEmail, 'map-point')).not.toContain(warning);
     });
 });
 

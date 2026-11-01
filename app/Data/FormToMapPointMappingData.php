@@ -36,17 +36,21 @@ class FormToMapPointMappingData extends Data
         public Collection $characteristic_options = new Collection,
         public ?string $contact_email_field_id = null,
         public ?string $contact_enabled_field_id = null,
-        /** The consent text with the placeholders {initiative} and {felder}. */
+        /** The consent text of the second level, with the placeholders {initiative}, {felder} and {widerruf}. */
         public ?string $consent_text = null,
+        /** The consent text of the first level, with the placeholders {initiative} and {widerruf}. */
+        public ?string $consent_point_text = null,
+        /** A text field whose value becomes the location description of the point. */
+        public ?string $location_field_id = null,
     ) {}
 
     public static function fromModel(?FormDefinitionToMapPoint $model): self
     {
         if ($model === null) {
-            return new self(enabled: false, consent_text: MapPointConsentService::DEFAULT_TEXT);
+            return new self(enabled: false, consent_text: MapPointConsentService::DEFAULT_DETAILS_TEXT, consent_point_text: MapPointConsentService::DEFAULT_POINT_TEXT);
         }
 
-        $model->loadMissing(['titleField', 'descriptionField', 'coordinateField', 'category', 'subcategoryField', 'subcategories.category', 'fieldMappings.targetField', 'fieldMappings.sourceField', 'characteristicsField', 'characteristicMappings.characteristic', 'contactEmailField', 'contactEnabledField']);
+        $model->loadMissing(['titleField', 'descriptionField', 'coordinateField', 'category', 'subcategoryField', 'subcategories.category', 'fieldMappings.targetField', 'fieldMappings.sourceField', 'characteristicsField', 'characteristicMappings.characteristic', 'contactEmailField', 'contactEnabledField', 'locationField']);
 
         return new self(
             enabled: true,
@@ -62,6 +66,8 @@ class FormToMapPointMappingData extends Data
             contact_email_field_id: $model->contactEmailField?->uuid,
             contact_enabled_field_id: $model->contactEnabledField?->uuid,
             consent_text: $model->consent_text,
+            consent_point_text: $model->consent_point_text,
+            location_field_id: $model->locationField?->uuid,
         );
     }
 }

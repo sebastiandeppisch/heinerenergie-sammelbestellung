@@ -55,7 +55,8 @@ const mappingLabels: Record<string, string> = {
     coordinate_field_id: 'Koordinaten',
     contact_email_field_id: 'Kontaktadresse',
     contact_enabled_field_id: 'Kontakt erlauben',
-    consent_text: 'Einwilligungstext',
+    consent_point_text: 'Einwilligungstext für den Eintrag',
+    consent_text: 'Einwilligungstext für Eintrag und Angaben',
 };
 
 function labelFor(field: string): string {
@@ -116,7 +117,7 @@ const mapPointValidation = computed(() => {
     const mapping = formDefinition.value.map_point_mapping;
     if (!mapping?.enabled) return { status: 'disabled', missing: [], warnings: [] };
 
-    const required = ['title_field_id', 'description_field_id', 'coordinate_field_id', 'consent_text'] as const;
+    const required = ['title_field_id', 'description_field_id', 'coordinate_field_id', 'consent_point_text', 'consent_text'] as const;
     const missing: string[] = required.filter((field) => !mapping[field]?.trim());
 
     const warnings: string[] = [];
@@ -127,8 +128,28 @@ const mapPointValidation = computed(() => {
         if (field && field.type !== 'geo_coordinate') warnings.push('Koordinaten Feld sollte vom Typ "geo_coordinate" sein');
     }
 
+    if (mapping.consent_point_text?.includes('{felder}')) {
+        warnings.push('Der Text für den Eintrag listet keine Angaben. {felder} gehört nur in den Text für Eintrag und Angaben.');
+    }
+
     if (mapping.consent_text && !mapping.consent_text.includes('{felder}')) {
-        warnings.push('Der Einwilligungstext nennt die Angaben nicht. Füge {felder} ein, damit die Person sieht, was öffentlich wird.');
+        warnings.push('Der Text für Eintrag und Angaben nennt die Angaben nicht. Füge {felder} ein, damit die Person sieht, was öffentlich wird.');
+    }
+
+    if (
+        (mapping.consent_point_text && !mapping.consent_point_text.includes('{widerruf}')) ||
+        (mapping.consent_text && !mapping.consent_text.includes('{widerruf}'))
+    ) {
+        warnings.push('Ein Einwilligungstext sagt nicht, wie man widerruft. Füge {widerruf} ein.');
+    }
+
+    if (!mapping.contact_email_field_id) {
+        warnings.push('Ohne E-Mail-Feld können Teilnehmende ihren Eintrag nicht selbst verwalten oder widerrufen.');
+    }
+
+    if (mapping.location_field_id) {
+        const field = formDefinition.value.fields.find((f: any) => f.id === mapping.location_field_id);
+        if (field && !['text', 'textarea'].includes(field.type)) warnings.push('Ortsbeschreibung Feld sollte vom Typ "text" oder "textarea" sein');
     }
 
     if (mapping.contact_enabled_field_id && !mapping.contact_email_field_id) {
@@ -149,6 +170,7 @@ const phoneFields = computed(() => formDefinition.value.fields.filter((f: any) =
 const addressFields = computed(() => formDefinition.value.fields.filter((f: any) => f.type === 'address'));
 const geoCoordinateFields = computed(() => formDefinition.value.fields.filter((f: any) => f.type === 'geo_coordinate'));
 const textareaFields = computed(() => formDefinition.value.fields.filter((f: any) => f.type === 'textarea'));
+const locationFields = computed(() => formDefinition.value.fields.filter((f: any) => ['text', 'textarea'].includes(f.type)));
 const singleOptionCheckboxFields = computed(() =>
     formDefinition.value.fields.filter((f: any) => f.type === 'checkbox' && (f.options?.length ?? 0) === 1),
 );
@@ -584,7 +606,40 @@ const adviceTypeSelectValue = computed({
                             </FormItem>
 
                             <FormItem>
-                                <Label for="map-point-consent-text">Einwilligungstext *</Label>
+                                <Label>Ortsbeschreibung (optional)</Label>
+                                <Select v-model="formDefinition.map_point_mapping.location_field_id">
+                                    <SelectTrigger data-test="map-point-location-field">
+                                        <SelectValue placeholder="Kein Feld" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem :value="null">Kein Feld</SelectItem>
+                                        <SelectItem v-for="field in locationFields" :key="field.id" :value="field.id">
+                                            {{ field.label }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <p class="text-xs text-muted-foreground">
+                                    Wird zur Ortsangabe des Punkts. Öffentlich nur, wenn die Person die Angaben zeigt und das Feld ausgefüllt hat.
+                                </p>
+                            </FormItem>
+
+                            <FormItem>
+                                <Label for="map-point-consent-point-text">Einwilligungstext für den Eintrag *</Label>
+                                <Textarea
+                                    id="map-point-consent-point-text"
+                                    :model-value="formDefinition.map_point_mapping.consent_point_text ?? ''"
+                                    rows="3"
+                                    data-test="map-point-consent-point-text"
+                                    @update:model-value="(value) => (formDefinition.map_point_mapping!.consent_point_text = String(value))"
+                                />
+                                <p class="text-xs text-muted-foreground">
+                                    Gilt, wenn die Person nur „Meinen Eintrag auf der Karte zeigen“ wählt. Platzhalter: <code>{initiative}</code> für
+                                    den Namen der Initiative, <code>{widerruf}</code> für den Satz, wie man widerruft.
+                                </p>
+                            </FormItem>
+
+                            <FormItem>
+                                <Label for="map-point-consent-text">Einwilligungstext für Eintrag und Angaben *</Label>
                                 <Textarea
                                     id="map-point-consent-text"
                                     :model-value="formDefinition.map_point_mapping.consent_text ?? ''"
@@ -593,8 +648,8 @@ const adviceTypeSelectValue = computed({
                                     @update:model-value="(value) => (formDefinition.map_point_mapping!.consent_text = String(value))"
                                 />
                                 <p class="text-xs text-muted-foreground">
-                                    Erscheint unter dem Formular, sobald die Person „Meinen Eintrag auf der Karte zeigen“ wählt. Platzhalter:
-                                    <code>{initiative}</code> für den Namen der Initiative, <code>{felder}</code> für die öffentlichen Angaben.
+                                    Gilt, wenn die Person zusätzlich die Angaben zeigt. <code>{felder}</code> listet die öffentlichen Angaben aus dem
+                                    Formular, dazu <code>{initiative}</code> und <code>{widerruf}</code>.
                                 </p>
                             </FormItem>
                         </div>

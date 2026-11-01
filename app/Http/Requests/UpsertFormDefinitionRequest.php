@@ -111,6 +111,7 @@ class UpsertFormDefinitionRequest extends FormRequest
             'map_point_mapping.coordinate_field_id' => ['nullable', 'string', new FormFieldExistsInRequest],
             'map_point_mapping.contact_email_field_id' => ['nullable', 'string', new FormFieldExistsInRequest, $this->mappedFieldOfType('email')],
             'map_point_mapping.contact_enabled_field_id' => ['nullable', 'string', new FormFieldExistsInRequest, $this->mappedFieldOfType('checkbox', exactlyOneOption: true)],
+            'map_point_mapping.location_field_id' => ['nullable', 'string', new FormFieldExistsInRequest, $this->mappedFieldOfType(['text', 'textarea'])],
 
             'group_id' => 'required|exists:groups,uuid',
         ];
@@ -133,6 +134,7 @@ class UpsertFormDefinitionRequest extends FormRequest
             $rules['map_point_mapping.field_mappings.*.target_field_id'] = ['required', 'uuid', 'exists:form_fields,uuid'];
             $rules['map_point_mapping.field_mappings.*.source_field_id'] = ['required', 'string', new FormFieldExistsInRequest];
             $rules['map_point_mapping.consent_text'] = ['required', 'string', 'max:5000'];
+            $rules['map_point_mapping.consent_point_text'] = ['required', 'string', 'max:5000', 'not_regex:/\{felder\}/'];
         }
 
         if ($this->has('advice_mapping') && ! is_null($this->input('advice_mapping')) && $this->input('advice_mapping.enabled') === true) {
@@ -401,7 +403,9 @@ class UpsertFormDefinitionRequest extends FormRequest
             'map_point_mapping.coordinate_field_id' => 'Koordinaten Feld',
             'map_point_mapping.contact_email_field_id' => 'Kontaktadresse Feld',
             'map_point_mapping.contact_enabled_field_id' => 'Kontakt erlauben Feld',
-            'map_point_mapping.consent_text' => 'Einwilligungstext',
+            'map_point_mapping.consent_text' => 'Einwilligungstext für Eintrag und Angaben',
+            'map_point_mapping.consent_point_text' => 'Einwilligungstext für den Eintrag',
+            'map_point_mapping.location_field_id' => 'Ortsbeschreibung Feld',
         ];
     }
 
@@ -415,15 +419,21 @@ class UpsertFormDefinitionRequest extends FormRequest
     {
         return [
             'fields.*.options.required_if' => 'Für Auswahlfelder müssen Optionen angegeben werden.',
+            'map_point_mapping.consent_point_text.not_regex' => 'Der Text für den Eintrag listet keine Angaben, {felder} gehört nur in den Text für Eintrag und Angaben.',
         ];
     }
 
     /**
      * The mapped field must have the given type in the submitted fields.
      */
-    private function mappedFieldOfType(string $type, bool $exactlyOneOption = false): Closure
+    /**
+     * @param  string|array<int, string>  $types
+     */
+    private function mappedFieldOfType(string|array $types, bool $exactlyOneOption = false): Closure
     {
-        return function (string $attribute, mixed $value, Closure $fail) use ($type, $exactlyOneOption): void {
+        $types = (array) $types;
+
+        return function (string $attribute, mixed $value, Closure $fail) use ($types, $exactlyOneOption): void {
             if ($value === null) {
                 return;
             }
@@ -435,8 +445,8 @@ class UpsertFormDefinitionRequest extends FormRequest
                 return;
             }
 
-            if (($field['type'] ?? null) !== $type) {
-                $fail("Das Feld für :attribute muss vom Typ \"{$type}\" sein.");
+            if (! in_array($field['type'] ?? null, $types, true)) {
+                $fail('Das Feld für :attribute muss vom Typ "'.implode('" oder "', $types).'" sein.');
 
                 return;
             }

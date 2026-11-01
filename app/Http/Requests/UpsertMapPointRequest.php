@@ -219,8 +219,7 @@ class UpsertMapPointRequest extends FormRequest
 
         if ($this->has('contact_email')) {
             $contactEmail = $this->validated('contact_email');
-            $mapPoint = $this->route('mappoint');
-            $previousEmail = $mapPoint instanceof MapPoint ? $mapPoint->contact_email : null;
+            $previousEmail = $this->previousContactEmail();
 
             $data['contact_email'] = $contactEmail;
 
@@ -232,5 +231,20 @@ class UpsertMapPointRequest extends FormRequest
         }
 
         return $data;
+    }
+
+    /**
+     * The manage link of the old address must not work any longer, the new address gets a link of its own.
+     */
+    public function contactEmailChanged(): bool
+    {
+        return $this->has('contact_email') && $this->validated('contact_email') !== $this->previousContactEmail();
+    }
+
+    private function previousContactEmail(): ?string
+    {
+        $mapPoint = $this->route('mappoint');
+
+        return $mapPoint instanceof MapPoint ? $mapPoint->contact_email : null;
     }
 }

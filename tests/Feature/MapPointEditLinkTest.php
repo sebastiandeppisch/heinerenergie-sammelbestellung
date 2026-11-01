@@ -1,11 +1,14 @@
 <?php
 
 use App\Enums\FieldType;
+use App\Enums\FormType;
+use App\Enums\MapPointDeletedBy;
 use App\Enums\PublicConsent;
 use App\Events\MapPointCreatedByFormSubmission;
 use App\Mail\FormSubmissionConfirmation;
 use App\Mail\MapPointCreated;
 use App\Mail\MapPointEditLinks;
+use App\Models\Advice;
 use App\Models\FormDefinitionToMapPoint;
 use App\Models\FormSubmission;
 use App\Models\MapPoint;
@@ -19,6 +22,7 @@ use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\TestResponse;
@@ -237,6 +241,43 @@ test('deleting removes the point, its images and the submission', function (): v
         ->and(FormSubmission::count())->toBe(0)
         ->and(SubmissionField::count())->toBe(0)
         ->and(Storage::disk('images')->allFiles())->toBe([]);
+});
+
+test('deleting keeps a submission that also asked for an advice and notes who deleted the point', function (): void {
+    Http::fake();
+    submitEditLinkForm($this->config);
+    $mapPoint = MapPoint::sole();
+    $submission = FormSubmission::sole();
+    $submission->update(['advice_id' => Advice::factory()->create()->id]);
+
+    $this->get(route('map-point.manage.show', $token = createdMailToken()))
+        ->assertInertia(fn (Assert $page): Assert => $page->where('mapPoint.has_advice', true));
+    $this->delete(route('map-point.manage.destroy', $token));
+
+    $submission->refresh();
+    expect(MapPoint::count())->toBe(0)
+        ->and(Storage::disk('images')->allFiles($mapPoint->imageDirectory()))->toBe([])
+        ->and(Storage::disk('images')->allFiles($submission->imageDirectory()))->toHaveCount(1)
+        ->and($submission->map_point_deleted_by)->toBe(MapPointDeletedBy::PERSON)
+        ->and($submission->map_point_deleted_at)->not->toBeNull();
+});
+
+test('a point an admin deletes is noted on its submission and shown in the list of submissions', function (): void {
+    submitEditLinkForm($this->config);
+    $admin = User::factory()->create();
+    $this->form->group->users()->attach($admin, ['is_admin' => true]);
+    app(SessionService::class)->actAsGroup($this->form->group, true);
+    $this->form->update(['type' => FormType::Form]);
+    $this->freezeTime();
+
+    $this->actingAs($admin)->delete(route('mappoints.destroy', MapPoint::sole()))->assertRedirect();
+
+    expect(FormSubmission::sole()->map_point_deleted_by)->toBe(MapPointDeletedBy::ADMIN);
+    $this->actingAs($admin)
+        ->get(route('form-submissions.index'))
+        ->assertInertia(fn (Assert $page): Assert => $page
+            ->where('formSubmissions.0.map_point_deleted', 'Kartenpunkt am '.now()->timezone(config('app.timezone'))->format('d.m.Y').' von einem Admin gelöscht')
+        );
 });
 
 test('an admin can send the manage link to the contact address', function (): void {

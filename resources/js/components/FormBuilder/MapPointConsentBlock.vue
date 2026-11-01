@@ -14,7 +14,7 @@ const show = defineModel<boolean>('show', { required: true });
 const details = defineModel<boolean>('details', { required: true });
 
 const labels = computed(() => consentLabels(props.config, props.values));
-const text = computed(() => consentText(props.config, props.values));
+const text = computed(() => consentText(props.config, props.values, details.value));
 
 function updateShow(checked: boolean | 'indeterminate') {
     show.value = checked === true;
@@ -44,7 +44,12 @@ function updateShow(checked: boolean | 'indeterminate') {
             <Label for="map-point-consent-details" class="text-sm font-normal">zusätzlich diese Angaben zeigen: {{ labels.join(', ') }}</Label>
         </div>
 
-        <p v-if="show" class="text-sm text-muted-foreground" data-test="map-point-consent-text">{{ text }}</p>
+        <p v-if="show" class="text-sm text-muted-foreground" data-test="map-point-consent-text">
+            <template v-for="(segment, index) in text" :key="index">
+                <a v-if="segment.url" :href="segment.url" target="_blank" rel="noopener" class="underline">{{ segment.text }}</a>
+                <template v-else>{{ segment.text }}</template>
+            </template>
+        </p>
         <p v-else class="text-sm text-muted-foreground">Ohne dein Häkchen erscheint dein Eintrag nicht auf der öffentlichen Karte.</p>
     </fieldset>
 </template>

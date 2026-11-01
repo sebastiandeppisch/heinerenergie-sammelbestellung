@@ -29,6 +29,8 @@ class MapPointConsentInfoData extends Data
         public array $field_labels,
         public ?string $contact_email,
         public ?string $submission_id,
+        /** Whether the person consented to the location description, only meaningful for a given consent. */
+        public bool $location_consented = false,
     ) {}
 
     public static function fromModel(MapPoint $model): self
@@ -43,6 +45,7 @@ class MapPointConsentInfoData extends Data
             field_labels: app(MapPointConsentService::class)->labelsOf($model->public_consent_fields ?? []),
             contact_email: $model->contact_email,
             submission_id: $submission instanceof FormSubmission ? $submission->uuid : null,
+            location_consented: in_array(MapPointConsentService::LOCATION, $model->public_consent_fields ?? [], true),
         );
     }
 }

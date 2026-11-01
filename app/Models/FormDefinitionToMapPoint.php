@@ -71,6 +71,17 @@ class FormDefinitionToMapPoint extends Model
     }
 
     /**
+     * A text field of the form whose value becomes the location description of the point, e.g. „Im Herrngarten am
+     * südlichen Brunnen“.
+     *
+     * @return BelongsTo<FormField, $this>
+     */
+    public function locationField(): BelongsTo
+    {
+        return $this->belongsTo(FormField::class, 'location_field_id');
+    }
+
+    /**
      * @return BelongsTo<FormField, $this>
      */
     public function contactEnabledField(): BelongsTo
@@ -155,7 +166,8 @@ class FormDefinitionToMapPoint extends Model
     {
         $categoryId = $this->categoryFor($submission)?->id;
         $characteristicIds = $this->characteristicIdsFor($submission, $categoryId);
-        $consent = app(MapPointConsentService::class)->forTarget($this, $consentChoice, $categoryId, $characteristicIds);
+        $location = $this->location($submission);
+        $consent = app(MapPointConsentService::class)->forTarget($this, $consentChoice, $categoryId, $characteristicIds, $location !== null);
 
         return new MapPointTargetPayload(
             title: $this->titleField->getSubmissionField($submission)->value,
@@ -165,6 +177,7 @@ class FormDefinitionToMapPoint extends Model
             group_id: $this->formDefinition->group_id,
             field_values: $this->mappedValues($submission),
             characteristic_ids: $characteristicIds,
+            location: $location,
             contact_email: $this->contactEmail($submission),
             contact_enabled: $this->contactEnabled($submission),
             public_consent: $consent->consent,
@@ -182,6 +195,13 @@ class FormDefinitionToMapPoint extends Model
         $email = filter_var($this->contactEmailField->getSubmissionField($submission)->value, FILTER_VALIDATE_EMAIL);
 
         return $email === false ? null : $email;
+    }
+
+    private function location(FormSubmission $submission): ?string
+    {
+        $value = $this->locationField?->submissionFields()->where('form_submission_id', $submission->id)->first()?->value;
+
+        return is_string($value) && trim($value) !== '' ? trim($value) : null;
     }
 
     private function contactEnabled(FormSubmission $submission): bool

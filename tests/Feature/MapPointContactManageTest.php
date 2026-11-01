@@ -3,7 +3,9 @@
 use App\Mail\MapPointEditLinks;
 use App\Models\Group;
 use App\Models\MapPoint;
+use App\Models\User;
 use App\Services\MapPointEditLinkService;
+use App\Services\SessionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -85,4 +87,33 @@ test('the request page has no token and does not reveal the address', function (
         ->assertOk()
         ->assertInertia(fn (Assert $page): Assert => $page->component('MapPointManage/Request')->where('mapPointId', $this->point->uuid))
         ->assertDontSee('owner@example.org');
+});
+
+test('an admin changing the contact address invalidates the old link and sends one to the new address', function (): void {
+    $oldToken = app(MapPointEditLinkService::class)->issue($this->point);
+    $admin = User::factory()->create();
+    $this->point->group->users()->attach($admin, ['is_admin' => true]);
+    app(SessionService::class)->actAsGroup($this->point->group, true);
+    $update = fn (string $email) => $this->actingAs($admin)->put(route('mappoints.update', $this->point), [
+        'title' => $this->point->title,
+        'coordinate' => ['lat' => 49.87, 'lng' => 8.65],
+        'published' => true,
+        'group_id' => $this->point->group->uuid,
+        'contact_email' => $email,
+        'contact_enabled' => true,
+    ])->assertSessionHasNoErrors();
+
+    $update('owner@example.org');
+    Mail::assertNothingQueued();
+
+    $update('neu@example.org');
+
+    $this->get(route('map-point.manage.show', $oldToken))
+        ->assertInertia(fn (Assert $page): Assert => $page->component('MapPointManage/Message')->where('status', 'invalid'));
+    Mail::assertQueued(MapPointEditLinks::class, 1);
+    Mail::assertQueued(MapPointEditLinks::class, fn (MapPointEditLinks $mail): bool => $mail->hasTo('neu@example.org'));
+
+    $newToken = basename((string) parse_url(Mail::queued(MapPointEditLinks::class)->sole()->links[0]['url'], PHP_URL_PATH));
+    $this->get(route('map-point.manage.show', $newToken))
+        ->assertInertia(fn (Assert $page): Assert => $page->component('MapPointManage/Manage'));
 });

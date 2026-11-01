@@ -27,6 +27,8 @@ class FormSubmissionData extends Data
         public bool $seen,
         public bool $awaiting_confirmation = false,
         public bool $targets_failed = false,
+        /** E.g. „Kartenpunkt am 01.11.2026 von einem Admin gelöscht“, when the point the submission created is gone. */
+        public ?string $map_point_deleted = null,
     ) {}
 
     public static function fromModel(FormSubmission $model): self
@@ -38,6 +40,9 @@ class FormSubmissionData extends Data
             seen: $model->seen,
             awaiting_confirmation: $model->isAwaitingConfirmation(),
             targets_failed: $model->targets_failed_at !== null,
+            map_point_deleted: $model->map_point_deleted_at === null || $model->map_point_deleted_by === null
+                ? null
+                : 'Kartenpunkt am '.$model->map_point_deleted_at->timezone(config('app.timezone'))->format('d.m.Y').' '.$model->map_point_deleted_by->label().' gelöscht',
             fields: $model->submissionFields->map(fn (SubmissionField $field): SubmissionFieldData => SubmissionFieldData::fromModel($field)),
         );
     }

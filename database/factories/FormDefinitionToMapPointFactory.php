@@ -56,7 +56,8 @@ class FormDefinitionToMapPointFactory extends Factory
             'title_field_id' => $titleField->id,
             'description_field_id' => $descriptionField->id,
             'coordinate_field_id' => $coordinateField->id,
-            'consent_text' => MapPointConsentService::DEFAULT_TEXT,
+            'consent_text' => MapPointConsentService::DEFAULT_DETAILS_TEXT,
+            'consent_point_text' => MapPointConsentService::DEFAULT_POINT_TEXT,
         ];
     }
 

@@ -164,6 +164,27 @@ const locationInput = computed({
 
 const locationError = ref<string | null>(null);
 
+/** With a given consent the location is public only if the person consented to it. Then a loaded address would be public too. */
+const locationConsent = computed<'public' | 'private' | null>(() => {
+    if (props.consent?.public_consent !== 'given') {
+        return null;
+    }
+
+    return props.consent.location_consented ? 'public' : 'private';
+});
+const confirmingLocationFetch = ref(false);
+
+function requestLocationFetch() {
+    if (locationConsent.value === 'public' && !confirmingLocationFetch.value) {
+        confirmingLocationFetch.value = true;
+
+        return;
+    }
+
+    confirmingLocationFetch.value = false;
+    fetchLocation();
+}
+
 async function fetchLocation() {
     isFetchingLocation.value = true;
     locationError.value = null;
@@ -190,7 +211,7 @@ async function fetchLocation() {
 watch(
     () => form.coordinate,
     () => {
-        if (!form.location) {
+        if (!form.location && locationConsent.value !== 'public') {
             fetchLocation();
         }
     },
@@ -284,10 +305,24 @@ const errors: Record<string, string> = form.errors;
                         <Label for="location">Ort</Label>
                         <div class="flex gap-2">
                             <Input id="location" v-model="locationInput" placeholder="Adresse" />
-                            <Button type="button" variant="outline" :disabled="isFetchingLocation" @click="fetchLocation">
-                                {{ isFetchingLocation ? 'Lädt...' : 'Adresse laden' }}
+                            <Button type="button" variant="outline" :disabled="isFetchingLocation" @click="requestLocationFetch">
+                                {{ isFetchingLocation ? 'Lädt...' : confirmingLocationFetch ? 'Trotzdem laden' : 'Adresse laden' }}
                             </Button>
                         </div>
+                        <p v-if="confirmingLocationFetch" class="text-sm text-amber-600" data-test="location-fetch-warning">
+                            Die Person hat eingewilligt, dass ihre Ortsbeschreibung öffentlich ist. Eine geladene Adresse ersetzt sie und erscheint
+                            ebenfalls auf der Karte.
+                        </p>
+                        <p v-else-if="locationConsent === 'public'" class="text-xs text-gray-500" data-test="location-consent-public">
+                            Öffentlich: Die Person hat eingewilligt, dass die Ortsbeschreibung auf der Karte erscheint.
+                        </p>
+                        <p
+                            v-else-if="locationConsent === 'private'"
+                            class="flex items-center gap-1 text-xs text-gray-500"
+                            data-test="location-consent-private"
+                        >
+                            <Lock class="h-3 w-3" /> Nicht öffentlich: Die Person hat der Ortsbeschreibung nicht zugestimmt.
+                        </p>
                         <p v-if="errors.location" class="text-sm text-red-500">{{ errors.location }}</p>
                         <p v-if="locationError" class="text-sm text-amber-600">{{ locationError }}</p>
                         <p class="text-xs text-gray-500">

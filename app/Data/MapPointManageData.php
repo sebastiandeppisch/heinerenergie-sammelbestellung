@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Data;
 
 use App\Enums\PublicConsent;
+use App\Models\FormSubmission;
 use App\Models\MapPoint;
 use App\Services\MapPointConsentService;
 use Illuminate\Support\Carbon;
@@ -25,6 +26,7 @@ class MapPointManageData extends Data
     public function __construct(
         public string $title,
         public string $description,
+        public ?string $location,
         public ?string $category,
         public array $characteristics,
         public bool $published,
@@ -33,11 +35,14 @@ class MapPointManageData extends Data
         public ?Carbon $public_consent_at,
         public bool $shows_details,
         public array $consented_labels,
-        public string $consent_text,
+        public string $point_text,
+        public string $details_text,
         public array $offered_labels,
         public bool $has_contact_email,
         public bool $contact_enabled,
         public bool $contact_email_confirmed,
+        /** The submission also asked for an advice, deleting the point keeps it. */
+        public bool $has_advice,
     ) {}
 
     public static function fromModel(MapPoint $model): self
@@ -50,6 +55,7 @@ class MapPointManageData extends Data
         return new self(
             title: $model->title,
             description: $model->description ?? '',
+            location: $model->location,
             category: $model->category?->name,
             characteristics: $model->characteristics->pluck('name')->all(),
             published: $model->published,
@@ -58,11 +64,13 @@ class MapPointManageData extends Data
             public_consent_at: $model->public_consent_at,
             shows_details: $model->public_consent === PublicConsent::GIVEN && array_diff($fields, [MapPointConsentService::COORDINATE]) !== [],
             consented_labels: $model->public_consent === PublicConsent::GIVEN ? $consents->labelsOf($fields) : [],
-            consent_text: $preview['text'],
+            point_text: $preview['point_text'],
+            details_text: $preview['details_text'],
             offered_labels: $preview['labels'],
             has_contact_email: $model->contact_email !== null,
             contact_enabled: $model->contact_enabled,
             contact_email_confirmed: $model->contact_email_verified_at !== null,
+            has_advice: $model->pointable instanceof FormSubmission && $model->pointable->advice_id !== null,
         );
     }
 }

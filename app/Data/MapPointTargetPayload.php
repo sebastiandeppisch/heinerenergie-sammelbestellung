@@ -26,6 +26,7 @@ class MapPointTargetPayload extends Data
         public int $group_id,
         public array $field_values,
         public array $characteristic_ids = [],
+        public ?string $location = null,
         public ?string $contact_email = null,
         public bool $contact_enabled = false,
         public PublicConsent $public_consent = PublicConsent::NOT_REQUIRED,

@@ -155,6 +155,7 @@ class FormTargetService
                 'coordinate' => $payload->coordinate,
                 'published' => false,
                 'category_id' => $payload->category_id === null ? null : MapPointCategory::findOrFail($payload->category_id)->id,
+                'location' => $payload->location,
                 'contact_email' => $payload->contact_email,
                 'contact_enabled' => $payload->contact_enabled,
                 'public_consent' => $payload->public_consent,

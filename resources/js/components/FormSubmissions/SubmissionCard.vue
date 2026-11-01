@@ -12,6 +12,9 @@
                 <div class="flex items-center gap-2">
                     <Badge v-if="submission.awaiting_confirmation" variant="destructive" class="text-xs">unbestätigt</Badge>
                     <Badge v-if="submission.targets_failed" variant="destructive" class="text-xs">Ziele fehlgeschlagen</Badge>
+                    <Badge v-if="submission.map_point_deleted" variant="secondary" class="text-xs" data-test="map-point-deleted">{{
+                        submission.map_point_deleted
+                    }}</Badge>
                     <span class="text-xs text-gray-500">{{ formatDateTime(submission.submitted_at) }}</span>
                 </div>
             </div>

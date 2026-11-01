@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Contracts\Pointable;
+use App\Enums\MapPointDeletedBy;
 use App\Enums\PublicConsent;
 use App\Models\Traits\HasUuid;
 use App\Services\ImageStorage;
@@ -124,6 +125,22 @@ class MapPoint extends Model implements HasSends
             DB::afterCommit(fn () => app(ImageStorage::class)->deleteDirectory($this->imageDirectory()));
 
             return parent::delete();
+        });
+    }
+
+    /**
+     * Deletes the point and notes on the submission it was created from who deleted it.
+     */
+    public function deleteBy(MapPointDeletedBy $deletedBy): void
+    {
+        DB::transaction(function () use ($deletedBy): void {
+            $submission = $this->pointable;
+
+            if ($submission instanceof FormSubmission) {
+                $submission->noteMapPointDeleted($deletedBy);
+            }
+
+            $this->delete();
         });
     }
 

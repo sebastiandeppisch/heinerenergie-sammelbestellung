@@ -26,7 +26,17 @@ use Illuminate\Support\Collection;
  */
 class MapPointConsentService
 {
-    public const string DEFAULT_TEXT = 'Ich bin einverstanden, dass mein Eintrag auf der Karte von {initiative} öffentlich angezeigt wird, mit folgenden Angaben: {felder} sowie dem Standort. Ich kann meine Einwilligung jederzeit über den Link in der Bestätigungsmail widerrufen.';
+    /** The text of the first level, the point with its location only. It must not list fields. */
+    public const string DEFAULT_POINT_TEXT = 'Ich bin einverstanden, dass mein Eintrag auf der Karte von {initiative} mit seinem Standort öffentlich angezeigt wird. {widerruf}';
+
+    /** The text of the second level, {felder} lists the details from the form. */
+    public const string DEFAULT_DETAILS_TEXT = 'Ich bin einverstanden, dass mein Eintrag auf der Karte von {initiative} öffentlich angezeigt wird, mit folgenden Angaben: {felder} sowie dem Standort. {widerruf}';
+
+    /** {widerruf} when the form asks for the contact address, which gets the manage link. */
+    public const string REVOCATION_BY_MAIL = 'Ich kann meine Einwilligung jederzeit über den Link widerrufen, den ihr mir per E-Mail schickt.';
+
+    /** {widerruf} without a contact address. The stored text adds the address of the privacy policy. */
+    public const string REVOCATION_BY_POLICY = 'Ich kann meine Einwilligung jederzeit widerrufen. Wie, steht in der Datenschutzerklärung.';
 
     public const string COORDINATE = 'coordinate';
 
@@ -41,6 +51,8 @@ class MapPointConsentService
         self::DESCRIPTION => 'Beschreibung',
     ];
 
+    private const string LOCATION_LABEL = 'Ortsbeschreibung';
+
     public function __construct(private readonly MapPointFieldService $fieldService) {}
 
     public static function fieldKey(string $fieldUuid): string
@@ -49,15 +61,21 @@ class MapPointConsentService
     }
 
     /**
-     * The details offered in the second level, with their labels. The location is not offered, forms do not fill it.
+     * The details offered in the second level, with their labels: title, description, the location, then the public
+     * fields of the category and characteristics. Public fields are offered even without a value, they may be filled in
+     * later by the person. The location only with a value, an admin adding one later must not make it public.
      *
      * @param  array<int, int>  $characteristicIds
      * @return array<string, string>
      */
-    public function offeredKeys(?int $categoryId, array $characteristicIds): array
+    public function offeredKeys(?int $categoryId, array $characteristicIds, bool $withLocation): array
     {
         $publicFieldIds = MapPointCategory::publicFieldIds();
         $keys = self::BASE_LABELS;
+
+        if ($withLocation) {
+            $keys[self::LOCATION] = self::LOCATION_LABEL;
+        }
 
         foreach ($this->fieldService->effectiveFields($categoryId, $characteristicIds) as $field) {
             if (in_array($field->id, $publicFieldIds, true)) {
@@ -71,27 +89,34 @@ class MapPointConsentService
     /**
      * @param  array<int, string>  $labels
      */
-    public function render(string $template, string $initiative, array $labels): string
+    public function render(string $template, string $initiative, array $labels, string $revocation): string
     {
-        return strtr($template, ['{initiative}' => $initiative, '{felder}' => implode(', ', $labels)]);
+        return strtr($template, ['{initiative}' => $initiative, '{felder}' => implode(', ', $labels), '{widerruf}' => $revocation]);
     }
 
     /**
-     * Nothing chosen refuses, the first level consents to the point only, the second level to all offered details.
+     * The revocation sentence as it is stored, with the address of the privacy policy when there is no manage link.
+     */
+    public function revocation(bool $byMail): string
+    {
+        return $byMail ? self::REVOCATION_BY_MAIL : self::REVOCATION_BY_POLICY.' ('.route('datapolicy').')';
+    }
+
+    /**
+     * Nothing chosen refuses. Each level stores its own text and exactly its keys: the first level the point only,
+     * the second level the point and all offered details.
      *
      * @param  array<string, string>  $offered
      */
-    public function decide(ConsentChoiceData $choice, array $offered, string $text): MapPointConsentData
+    public function decide(ConsentChoiceData $choice, array $offered, string $pointText, string $detailsText): MapPointConsentData
     {
         if (! $choice->show) {
             return new MapPointConsentData(PublicConsent::REFUSED);
         }
 
-        return new MapPointConsentData(
-            consent: PublicConsent::GIVEN,
-            text: $text,
-            fields: $choice->details ? [self::COORDINATE, ...array_keys($offered)] : [self::COORDINATE],
-        );
+        return $choice->details
+            ? new MapPointConsentData(PublicConsent::GIVEN, $detailsText, [self::COORDINATE, ...array_keys($offered)])
+            : new MapPointConsentData(PublicConsent::GIVEN, $pointText, [self::COORDINATE]);
     }
 
     /**
@@ -99,41 +124,37 @@ class MapPointConsentService
      *
      * @param  array<int, int>  $characteristicIds
      */
-    public function forTarget(FormDefinitionToMapPoint $target, ConsentChoiceData $choice, ?int $categoryId, array $characteristicIds): MapPointConsentData
+    public function forTarget(FormDefinitionToMapPoint $target, ConsentChoiceData $choice, ?int $categoryId, array $characteristicIds, bool $hasLocation): MapPointConsentData
     {
-        $offered = $this->offeredKeys($categoryId, $characteristicIds);
+        $offered = $this->offeredKeys($categoryId, $characteristicIds, $target->location_field_id !== null && $hasLocation);
+        [$pointText, $detailsText] = $this->texts($target, $this->initiativeOf($target), array_values($offered), $this->revocation($target->contact_email_field_id !== null));
 
-        return $this->decide($choice, $offered, $this->render($this->templateOf($target), $this->initiativeOf($target), array_values($offered)));
+        return $this->decide($choice, $offered, $pointText, $detailsText);
     }
 
     /**
-     * A new consent given on the manage page, for the point's current category and characteristics.
+     * A new consent given on the manage page, for the point's current category, characteristics and location. The person
+     * came by the manage link, so the revocation names it.
      */
     public function forPoint(MapPoint $mapPoint, ConsentChoiceData $choice): MapPointConsentData
     {
-        $mapPoint->loadMissing(['characteristics', 'group']);
-        $target = $this->targetOf($mapPoint);
-        $offered = $this->offeredKeys($mapPoint->category_id, $mapPoint->characteristics->modelKeys());
-        $template = $target === null ? self::DEFAULT_TEXT : $this->templateOf($target);
-        $initiative = $target === null ? $mapPoint->group->name : $this->initiativeOf($target);
+        $offered = $this->offeredForPoint($mapPoint);
+        [$pointText, $detailsText] = $this->textsForPoint($mapPoint, array_values($offered), $this->revocation($mapPoint->contact_email !== null));
 
-        return $this->decide($choice, $offered, $this->render($template, $initiative, array_values($offered)));
+        return $this->decide($choice, $offered, $pointText, $detailsText);
     }
 
     /**
-     * The text and labels the manage page shows for the point's current category and characteristics.
+     * The texts and labels the manage page shows for the point as it is now.
      *
-     * @return array{text: string, labels: array<int, string>}
+     * @return array{point_text: string, details_text: string, labels: array<int, string>}
      */
     public function previewForPoint(MapPoint $mapPoint): array
     {
-        $mapPoint->loadMissing(['characteristics', 'group']);
-        $target = $this->targetOf($mapPoint);
-        $labels = array_values($this->offeredKeys($mapPoint->category_id, $mapPoint->characteristics->modelKeys()));
-        $template = $target === null ? self::DEFAULT_TEXT : $this->templateOf($target);
-        $initiative = $target === null ? $mapPoint->group->name : $this->initiativeOf($target);
+        $labels = array_values($this->offeredForPoint($mapPoint));
+        [$pointText, $detailsText] = $this->textsForPoint($mapPoint, $labels, $this->revocation($mapPoint->contact_email !== null));
 
-        return ['text' => $this->render($template, $initiative, $labels), 'labels' => $labels];
+        return ['point_text' => $pointText, 'details_text' => $detailsText, 'labels' => $labels];
     }
 
     /**
@@ -149,7 +170,7 @@ class MapPointConsentService
 
         return array_map(fn (string $key): string => match (true) {
             $key === self::COORDINATE => 'Standort',
-            $key === self::LOCATION => 'Ortsbeschreibung',
+            $key === self::LOCATION => self::LOCATION_LABEL,
             array_key_exists($key, self::BASE_LABELS) => self::BASE_LABELS[$key],
             str_starts_with($key, 'field:') => $fieldLabels->get(substr($key, 6), $key),
             default => $key,
@@ -158,7 +179,7 @@ class MapPointConsentService
 
     public function frontendConfig(FormDefinitionToMapPoint $target): MapPointConsentConfigData
     {
-        $target->loadMissing(['category', 'subcategoryField', 'subcategories', 'characteristicsField', 'characteristicMappings.characteristic']);
+        $target->loadMissing(['category', 'subcategoryField', 'subcategories', 'characteristicsField', 'characteristicMappings.characteristic', 'locationField']);
         $tree = MapPointCategory::tree();
         $publicFieldIds = MapPointCategory::publicFieldIds();
         $categoryId = $target->category?->id;
@@ -177,9 +198,16 @@ class MapPointConsentService
             ))
             ->values();
 
+        $byMail = $target->contact_email_field_id !== null;
+
         return new MapPointConsentConfigData(
-            text: strtr($this->templateOf($target), ['{initiative}' => $this->initiativeOf($target)]),
+            point_text: strtr($this->pointTemplateOf($target), ['{initiative}' => $this->initiativeOf($target)]),
+            details_text: strtr($this->detailsTemplateOf($target), ['{initiative}' => $this->initiativeOf($target)]),
+            revocation_text: $byMail ? self::REVOCATION_BY_MAIL : self::REVOCATION_BY_POLICY,
+            revocation_url: $byMail ? null : route('datapolicy'),
             base_labels: array_values(self::BASE_LABELS),
+            location_field_id: $target->locationField?->uuid,
+            location_label: self::LOCATION_LABEL,
             subcategory_field_id: $target->subcategoryField?->uuid,
             default_category_labels: $this->categoryLabels($categoryId, $publicFieldIds, $tree),
             category_labels: $categoryIdsByOption->map(fn (int $id): array => $this->categoryLabels($id, $publicFieldIds, $tree))->all(),
@@ -188,9 +216,48 @@ class MapPointConsentService
         );
     }
 
-    private function templateOf(FormDefinitionToMapPoint $target): string
+    private function pointTemplateOf(?FormDefinitionToMapPoint $target): string
     {
-        return $target->consent_text ?: self::DEFAULT_TEXT;
+        return $target?->consent_point_text ?: self::DEFAULT_POINT_TEXT;
+    }
+
+    private function detailsTemplateOf(?FormDefinitionToMapPoint $target): string
+    {
+        return $target?->consent_text ?: self::DEFAULT_DETAILS_TEXT;
+    }
+
+    /**
+     * @param  array<int, string>  $labels
+     * @return array{0: string, 1: string}
+     */
+    private function texts(?FormDefinitionToMapPoint $target, string $initiative, array $labels, string $revocation): array
+    {
+        return [
+            $this->render($this->pointTemplateOf($target), $initiative, [], $revocation),
+            $this->render($this->detailsTemplateOf($target), $initiative, $labels, $revocation),
+        ];
+    }
+
+    /**
+     * @param  array<int, string>  $labels
+     * @return array{0: string, 1: string}
+     */
+    private function textsForPoint(MapPoint $mapPoint, array $labels, string $revocation): array
+    {
+        $mapPoint->loadMissing('group');
+        $target = $this->targetOf($mapPoint);
+
+        return $this->texts($target, $target === null ? $mapPoint->group->name : $this->initiativeOf($target), $labels, $revocation);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function offeredForPoint(MapPoint $mapPoint): array
+    {
+        $mapPoint->loadMissing('characteristics');
+
+        return $this->offeredKeys($mapPoint->category_id, $mapPoint->characteristics->modelKeys(), filled($mapPoint->location));
     }
 
     private function initiativeOf(FormDefinitionToMapPoint $target): string

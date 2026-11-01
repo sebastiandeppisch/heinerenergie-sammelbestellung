@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Contracts\Pointable;
 use App\Data\FormTargetPayload;
 use App\Enums\FieldType;
+use App\Enums\MapPointDeletedBy;
 use App\Models\Traits\HasUuid;
 use App\Services\ImageStorage;
 use App\Traits\HasPoints;
@@ -29,6 +30,8 @@ use Override;
  * @property Carbon|null $confirmation_expires_at
  * @property FormTargetPayload|null $target_payload
  * @property Carbon|null $targets_failed_at
+ * @property Carbon|null $map_point_deleted_at
+ * @property MapPointDeletedBy|null $map_point_deleted_by
  *
  * @implements Pointable<self>
  */
@@ -55,6 +58,8 @@ class FormSubmission extends Model implements Pointable
         'target_payload',
         'targets_failed_at',
         'targets_error',
+        'map_point_deleted_at',
+        'map_point_deleted_by',
     ];
 
     protected $hidden = [
@@ -75,6 +80,8 @@ class FormSubmission extends Model implements Pointable
             'confirmation_expires_at' => 'datetime',
             'target_payload' => FormTargetPayload::class,
             'targets_failed_at' => 'datetime',
+            'map_point_deleted_at' => 'datetime',
+            'map_point_deleted_by' => MapPointDeletedBy::class,
         ];
     }
 
@@ -132,6 +139,14 @@ class FormSubmission extends Model implements Pointable
     public function imageDirectory(): string
     {
         return 'form-images/'.$this->uuid;
+    }
+
+    /**
+     * The submission is kept when its point is deleted, e.g. for an advice it also asked for. It notes who deleted it.
+     */
+    public function noteMapPointDeleted(MapPointDeletedBy $deletedBy): void
+    {
+        $this->update(['map_point_deleted_at' => now(), 'map_point_deleted_by' => $deletedBy]);
     }
 
     public function isAwaitingConfirmation(): bool

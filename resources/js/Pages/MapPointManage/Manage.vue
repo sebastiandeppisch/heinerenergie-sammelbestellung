@@ -66,6 +66,7 @@ function destroy() {
                         }}<template v-if="mapPoint.characteristics.length > 0"> · {{ mapPoint.characteristics.join(', ') }}</template>
                     </p>
                     <p v-if="mapPoint.description" class="mt-2 text-sm whitespace-pre-line">{{ mapPoint.description }}</p>
+                    <p v-if="mapPoint.location" class="text-sm text-muted-foreground">Ortsbeschreibung: {{ mapPoint.location }}</p>
                 </div>
 
                 <p v-if="success" class="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-800" data-test="manage-success">
@@ -104,7 +105,9 @@ function destroy() {
                             >zusätzlich diese Angaben zeigen: {{ mapPoint.offered_labels.join(', ') }}</Label
                         >
                     </div>
-                    <p v-if="form.show" class="text-sm text-muted-foreground">{{ mapPoint.consent_text }}</p>
+                    <p v-if="form.show" class="text-sm text-muted-foreground" data-test="manage-consent-text">
+                        {{ form.details ? mapPoint.details_text : mapPoint.point_text }}
+                    </p>
                     <div>
                         <Button type="submit" :disabled="form.processing">Auswahl speichern</Button>
                     </div>
@@ -138,8 +141,11 @@ function destroy() {
                 <section class="flex flex-col gap-3 rounded-md border p-4">
                     <h2 class="font-semibold">Widerrufen oder löschen</h2>
                     <p class="text-sm text-muted-foreground">
-                        Nach dem Widerruf erscheint dein Eintrag nicht mehr auf der Karte, bleibt aber bei uns gespeichert. Beim Löschen entfernen wir
-                        den Eintrag, seine Bilder und deine Angaben aus dem Formular endgültig.
+                        Nach dem Widerruf erscheint dein Eintrag nicht mehr auf der Karte, bleibt aber bei uns gespeichert.
+                        <template v-if="mapPoint.has_advice">
+                            Beim Löschen entfernen wir den Eintrag und seine Bilder endgültig. Deine Beratungsanfrage bleibt davon unberührt.
+                        </template>
+                        <template v-else>Beim Löschen entfernen wir den Eintrag, seine Bilder und deine Angaben aus dem Formular endgültig.</template>
                     </p>
                     <div class="flex flex-wrap gap-2">
                         <Button v-if="mapPoint.public_consent !== 'refused'" variant="outline" @click="revoke">Einwilligung widerrufen</Button>

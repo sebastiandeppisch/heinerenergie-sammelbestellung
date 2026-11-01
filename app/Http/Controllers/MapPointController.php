@@ -14,6 +14,7 @@ use App\Data\MapPointContactRequestData;
 use App\Data\MapPointData;
 use App\Data\MapPointSpreadsheetMappingData;
 use App\Data\SpreadsheetFormatData;
+use App\Enums\MapPointDeletedBy;
 use App\Enums\SpreadsheetFormat;
 use App\Http\Requests\DestroyMapPointsRequest;
 use App\Http\Requests\UpdateMapPointsCategoryRequest;
@@ -28,6 +29,7 @@ use App\Models\MapPointCategory;
 use App\Models\MapPointContactRequest;
 use App\Services\CurrentGroupService;
 use App\Services\MapPointCharacteristicService;
+use App\Services\MapPointEditLinkService;
 use App\Services\MapPointFieldService;
 use App\Services\MapPointVisibilityService;
 use App\Services\PublicMapPointPresenter;
@@ -121,15 +123,22 @@ class MapPointController extends Controller
         ]);
     }
 
-    public function update(MapPoint $mappoint, UpsertMapPointRequest $request, MapPointFieldService $fieldService): RedirectResponse
+    public function update(MapPoint $mappoint, UpsertMapPointRequest $request, MapPointFieldService $fieldService, MapPointEditLinkService $editLinks): RedirectResponse
     {
         $this->authorize('update', $mappoint);
+
+        $contactEmailChanged = $request->contactEmailChanged();
 
         DB::transaction(function () use ($mappoint, $request, $fieldService): void {
             $mappoint->update($request->getData());
             $mappoint->characteristics()->sync($request->characteristicIds());
             $fieldService->syncValues($mappoint, $request->fieldValues(), $request->pointFields());
         });
+
+        if ($contactEmailChanged) {
+            $editLinks->invalidate($mappoint);
+            $editLinks->send($mappoint);
+        }
 
         return redirect()->back()->with('success', 'Der Kartenpunkt wurde aktualisiert');
     }
@@ -140,7 +149,7 @@ class MapPointController extends Controller
 
         $name = $mappoint->title;
 
-        $mappoint->delete();
+        $mappoint->deleteBy(MapPointDeletedBy::ADMIN);
 
         return redirect()->back()->with('info', 'Der Kartenpunkt '.e($name).' wurde gelöscht');
     }
@@ -152,7 +161,7 @@ class MapPointController extends Controller
     {
         $mapPoints = $request->mapPoints();
 
-        DB::transaction(fn () => $mapPoints->each->delete());
+        DB::transaction(fn () => $mapPoints->each(fn (MapPoint $mapPoint) => $mapPoint->deleteBy(MapPointDeletedBy::ADMIN)));
 
         return redirect()->back()->with('info', $mapPoints->count() === 1 ? 'Ein Kartenpunkt wurde gelöscht' : "{$mapPoints->count()} Kartenpunkte wurden gelöscht");
     }
@@ -217,7 +226,7 @@ class MapPointController extends Controller
         return Inertia::render('MapPoints/Upsert', $this->formProps($visibility, $fieldService));
     }
 
-    public function store(UpsertMapPointRequest $request, MapPointFieldService $fieldService): RedirectResponse
+    public function store(UpsertMapPointRequest $request, MapPointFieldService $fieldService, MapPointEditLinkService $editLinks): RedirectResponse
     {
         $this->authorize('create', MapPoint::class);
 
@@ -228,6 +237,8 @@ class MapPointController extends Controller
 
             return $mapPoint;
         });
+
+        $editLinks->send($mapPoint);
 
         return redirect()->route('mappoints.edit', $mapPoint)->with('success', 'Der Kartenpunkt wurde erstellt');
     }

@@ -204,11 +204,12 @@ test('an address entered by an admin counts as confirmed', function (): void {
     expect($point->contact_email)->toBe('admin-set@example.org');
     expect($point->contact_email_verified_at)->not->toBeNull();
     expect($point->hasContact())->toBeTrue();
-    Mail::assertNothingQueued();
+    Mail::assertQueued(MapPointEditLinks::class, 1);
 
     $this->actingAs($admin)->post(route('mappoints.send-edit-link', $point))->assertRedirect();
 
     expect($point->fresh()->contact_email_verified_at)->not->toBeNull();
+    Mail::assertQueued(MapPointEditLinks::class, 2);
     Mail::assertQueued(MapPointEditLinks::class, fn ($mail) => $mail->hasTo('admin-set@example.org'));
 });
 

@@ -40,10 +40,13 @@ test('the map point form template asks for the fields of the category and maps e
         ->assertRedirect();
 
     $form = FormDefinition::where('name', 'Formular für Photovoltaik')->with('fields.options')->sole();
-    expect($form->fields->pluck('label')->all())->toBe(['Titel', 'Beschreibung', 'Standort', 'E-Mail-Adresse', 'PV-Leistung (kWp)', 'Anlagenart'])
+    expect($form->fields->pluck('label')->all())->toBe(['Titel', 'Beschreibung', 'Standort', 'Ortsbeschreibung', 'E-Mail-Adresse', 'PV-Leistung (kWp)', 'Anlagenart'])
         ->and($form->fields->firstWhere('label', 'Anlagenart')->options->pluck('label')->all())->toBe(['Dachanlage'])
         ->and($form->mapPointCreator->contactEmailField->label)->toBe('E-Mail-Adresse')
-        ->and($form->mapPointCreator->consent_text)->toBe(MapPointConsentService::DEFAULT_TEXT);
+        ->and($form->mapPointCreator->locationField->label)->toBe('Ortsbeschreibung')
+        ->and($form->mapPointCreator->locationField->required)->toBeFalse()
+        ->and($form->mapPointCreator->consent_point_text)->toBe(MapPointConsentService::DEFAULT_POINT_TEXT)
+        ->and($form->mapPointCreator->consent_text)->toBe(MapPointConsentService::DEFAULT_DETAILS_TEXT);
 
     $formFields = $form->fields->keyBy('label');
     $this->post(route('form.submit', $form), [
@@ -92,7 +95,7 @@ test('the map point form template lets people check the characteristics of the c
         ->assertRedirect();
 
     $form = FormDefinition::where('name', 'Formular für Wiese')->with('fields.options')->sole();
-    expect($form->fields->pluck('label')->all())->toBe(['Titel', 'Beschreibung', 'Standort', 'E-Mail-Adresse', 'Maßnahmen', 'Igeltor: Breite (cm)'])
+    expect($form->fields->pluck('label')->all())->toBe(['Titel', 'Beschreibung', 'Standort', 'Ortsbeschreibung', 'E-Mail-Adresse', 'Maßnahmen', 'Igeltor: Breite (cm)'])
         ->and($form->fields->firstWhere('label', 'Maßnahmen')->options->pluck('label')->all())->toBe(['Igeltor', 'Blühstreifen'])
         ->and($form->fields->firstWhere('label', 'Igeltor: Breite (cm)')->only(['visible_if_field_id', 'visible_if_option_value']))
         ->toBe(['visible_if_field_id' => $form->fields->firstWhere('label', 'Maßnahmen')->id, 'visible_if_option_value' => $hedgehogGate->uuid]);

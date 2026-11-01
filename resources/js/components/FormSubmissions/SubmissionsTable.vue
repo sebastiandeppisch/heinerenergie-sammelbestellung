@@ -68,6 +68,7 @@
                                 </Badge>
                                 <Badge v-if="submission.awaiting_confirmation" variant="destructive">unbestätigt</Badge>
                                 <Badge v-if="submission.targets_failed" variant="destructive">Ziele fehlgeschlagen</Badge>
+                                <Badge v-if="submission.map_point_deleted" variant="secondary">{{ submission.map_point_deleted }}</Badge>
                             </div>
                         </TableCell>
                         <template v-if="isSingleForm">
