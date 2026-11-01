@@ -199,6 +199,7 @@ class FormDefinitionToMapPoint extends Model
 
     private function location(FormSubmission $submission): ?string
     {
+        /** @var mixed $value stored as json, a string for text fields */
         $value = $this->locationField?->submissionFields()->where('form_submission_id', $submission->id)->first()?->value;
 
         return is_string($value) && trim($value) !== '' ? trim($value) : null;
