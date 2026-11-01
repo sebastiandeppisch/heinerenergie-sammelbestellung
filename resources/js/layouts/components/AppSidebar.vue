@@ -15,7 +15,7 @@ import {
     SidebarMenuItem,
 } from '@/shadcn/components/ui/sidebar';
 import { Link } from '@inertiajs/vue3';
-import { Database, FileText, LayoutGrid, Map, MessageSquare, Settings, Table, User, UserCog, Users } from '@lucide/vue';
+import { Database, FileText, Flower2, LayoutGrid, Map, MessageSquare, Settings, Table, User, UserCog, Users } from '@lucide/vue';
 import { route } from 'ziggy-js';
 import AppLogo from './AppLogo.vue';
 import AppVersion from './AppVersion.vue';
@@ -92,6 +92,12 @@ const mainNavItems: NavItem[] = [
                 icon: Map,
             },
         ],
+    },
+    {
+        title: 'Kampagnen',
+        href: '/hexnets',
+        icon: Flower2,
+        role: 'group-admin',
     },
     {
         title: 'Einstellungen',
