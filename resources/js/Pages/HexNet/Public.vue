@@ -6,13 +6,15 @@ import HexNetPointInfo from '@/components/HexNet/HexNetPointInfo.vue';
 import HexNetScoreboard from '@/components/HexNet/HexNetScoreboard.vue';
 import HexNetViewControls from '@/components/HexNet/HexNetViewControls.vue';
 import { BASEMAPS, type Basemap, type HexCells, levelFor, type MarkerStyle } from '@/components/HexNet/hexnet';
+import { isIframe } from '@/helpers';
 import NoLayout from '@/layouts/NoLayout.vue';
+import PublicLayout from '@/layouts/PublicLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { ChevronDown, Info, Plus } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 import { route } from 'ziggy-js';
 
-defineOptions({ layout: NoLayout });
+defineOptions({ layout: isIframe ? NoLayout : PublicLayout });
 
 const props = defineProps<{
     hexNet: App.HexNet.Data.HexNetPublicData;
@@ -78,7 +80,7 @@ function store(key: string, value: string) {
 
 <template>
     <Head :title="hexNet.title" />
-    <div class="hexnet-app">
+    <div class="hexnet-app" :class="{ embedded: isIframe }">
         <aside class="hexnet-side">
             <div class="brand">
                 <div class="tag">Point of Insects</div>
@@ -155,8 +157,13 @@ function store(key: string, value: string) {
 <style scoped>
 .hexnet-app {
     display: flex;
-    height: 100vh;
-    height: 100dvh;
+    height: min(calc(100dvh - 180px), 860px);
+    min-height: 560px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #dde5da;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(22, 33, 28, 0.08);
     color: #16211c;
     font-family:
         Inter,
@@ -167,6 +174,14 @@ function store(key: string, value: string) {
         sans-serif;
     font-size: 13px;
     -webkit-font-smoothing: antialiased;
+}
+.hexnet-app.embedded {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
 }
 .hexnet-side {
     width: 348px;
@@ -297,11 +312,16 @@ h1 {
 @media (max-width: 820px) {
     .hexnet-app {
         flex-direction: column;
+        height: auto;
+        min-height: 0;
+    }
+    .hexnet-app.embedded {
+        height: 100dvh;
     }
     .hexnet-side {
         width: 100%;
         flex: 0 0 auto;
-        max-height: 62%;
+        max-height: 55vh;
         border-right: 0;
         border-bottom: 1px solid #dde5da;
     }
@@ -358,7 +378,13 @@ h1 {
         display: none;
     }
     .hexnet-main {
+        flex: 0 0 auto;
+        height: 65vh;
+        min-height: 380px;
+    }
+    .hexnet-app.embedded .hexnet-main {
         flex: 1;
+        height: auto;
         min-height: 0;
     }
     .fab {
