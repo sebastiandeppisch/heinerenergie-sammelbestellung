@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { BASEMAPS, type Basemap, type MarkerStyle } from './hexnet';
+import type { RingWidth } from './rings';
 
 defineProps<{
     measures: App.Data.MapPointCharacteristicData[];
@@ -8,6 +9,8 @@ defineProps<{
 const measureId = defineModel<string | null>('measure', { required: true });
 const basemap = defineModel<Basemap>('basemap', { required: true });
 const markerStyle = defineModel<MarkerStyle>('markerStyle', { required: true });
+const cellStyle = defineModel<'levels' | 'rings'>('cellStyle', { required: true });
+const ringWidth = defineModel<RingWidth>('ringWidth', { required: true });
 </script>
 
 <template>
@@ -29,6 +32,19 @@ const markerStyle = defineModel<MarkerStyle>('markerStyle', { required: true });
                 <span class="dot"><img v-if="measure.icon_path" :src="measure.icon_path" alt="" /></span>
                 {{ measure.name }}
             </button>
+        </div>
+
+        <h2>Waben zeigen</h2>
+        <div class="toggle" role="group" aria-label="Waben zeigen">
+            <button :class="{ on: cellStyle === 'levels' }" :aria-pressed="cellStyle === 'levels'" @click="cellStyle = 'levels'">Grünstufen</button>
+            <button :class="{ on: cellStyle === 'rings' }" :aria-pressed="cellStyle === 'rings'" @click="cellStyle = 'rings'">Maßnahmen-Ringe</button>
+        </div>
+        <div v-if="cellStyle === 'rings'" class="sub">
+            <span>Ringbreite</span>
+            <div class="toggle small" role="group" aria-label="Ringbreite">
+                <button :class="{ on: ringWidth === 'equal' }" :aria-pressed="ringWidth === 'equal'" @click="ringWidth = 'equal'">gleich</button>
+                <button :class="{ on: ringWidth === 'count' }" :aria-pressed="ringWidth === 'count'" @click="ringWidth = 'count'">nach Anzahl</button>
+            </div>
         </div>
 
         <h2>Karte</h2>
@@ -123,6 +139,18 @@ h2:first-child {
     background: #fff;
     border: 0;
     cursor: pointer;
+}
+.sub {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 11.5px;
+    color: #46564e;
+}
+.toggle.small button {
+    padding: 4px 10px;
+    font-size: 11.5px;
 }
 .toggle button.on {
     background: #1f7a34;

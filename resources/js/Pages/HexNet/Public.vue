@@ -5,6 +5,7 @@ import HexNetMap from '@/components/HexNet/HexNetMap.vue';
 import HexNetPointInfo from '@/components/HexNet/HexNetPointInfo.vue';
 import HexNetScoreboard from '@/components/HexNet/HexNetScoreboard.vue';
 import HexNetViewControls from '@/components/HexNet/HexNetViewControls.vue';
+import type { RingWidth } from '@/components/HexNet/rings';
 import { BASEMAPS, type Basemap, type HexCells, levelFor, type MarkerStyle } from '@/components/HexNet/hexnet';
 import { isIframe } from '@/helpers';
 import NoLayout from '@/layouts/NoLayout.vue';
@@ -34,6 +35,18 @@ const measure = computed(() => props.measures.find((m) => m.id === measureId.val
 const mapMeasure = computed(() => (measure.value ? { id: measure.value.id, color: measure.value.color ?? '#1f7a34' } : null));
 const basemap = ref<Basemap>(validBasemap(stored('hexnet.basemap', 'soft')));
 const markerStyle = ref<MarkerStyle>(stored('hexnet.markerStyle', 'card') as MarkerStyle);
+const cellStyle = ref<'levels' | 'rings'>(stored('hexnet.cellStyle', 'levels') === 'rings' ? 'rings' : 'levels');
+const ringWidth = ref<RingWidth>(stored('hexnet.ringWidth', 'equal') === 'count' ? 'count' : 'equal');
+watch(cellStyle, (value) => store('hexnet.cellStyle', value));
+watch(ringWidth, (value) => store('hexnet.ringWidth', value));
+
+/** Rings keep one order everywhere, the measure with most stepping stones outermost. */
+const ringOrder = computed(() =>
+    props.measures
+        .map((m) => ({ id: m.id, color: m.color ?? '#7d8d85', total: Object.values(props.measureCounts[m.id] ?? {}).reduce((a, b) => a + b, 0) }))
+        .sort((a, b) => b.total - a.total)
+        .map(({ id, color }) => ({ id, color })),
+);
 watch(basemap, (value) => store('hexnet.basemap', value));
 watch(markerStyle, (value) => store('hexnet.markerStyle', value));
 
@@ -104,7 +117,14 @@ function store(key: string, value: string) {
                     <button @click="measureId = null">alle zeigen</button>
                 </div>
                 <HexNetScoreboard :stats="shownStats" :thresholds="thresholds" :color="measure?.color ?? null" />
-                <HexNetViewControls v-model:measure="measureId" v-model:basemap="basemap" v-model:marker-style="markerStyle" :measures="measures" />
+                <HexNetViewControls
+                    v-model:measure="measureId"
+                    v-model:basemap="basemap"
+                    v-model:marker-style="markerStyle"
+                    v-model:cell-style="cellStyle"
+                    v-model:ring-width="ringWidth"
+                    :measures="measures"
+                />
                 <div class="join">
                     <h2>Mitmachen</h2>
                     <p v-if="hexNet.cta_text" class="note">{{ hexNet.cta_text }}</p>
@@ -135,6 +155,9 @@ function store(key: string, value: string) {
                 :measure-counts="measureCounts"
                 :marker-style="markerStyle"
                 :basemap="basemap"
+                :cell-style="cellStyle"
+                :ring-width="ringWidth"
+                :ring-order="ringOrder"
             >
                 <template #cell="{ cell }">
                     <HexNetCellInfo

@@ -17,6 +17,7 @@ import {
     ZOOM_LIGHT_CELLS,
 } from './hexnet';
 import { markerFor } from './markers';
+import { type RingMeasure, ringLayers, type RingWidth } from './rings';
 
 export type CellSelection = { id: string; count: number; level: number; center: { lat: number; lng: number } };
 
@@ -34,6 +35,10 @@ const props = withDefaults(
         measureCounts?: Record<string, Record<string, number>>;
         markerStyle?: MarkerStyle;
         basemap?: Basemap;
+        /** Rings: concentric hexagons per measure instead of the green levels. */
+        cellStyle?: 'levels' | 'rings';
+        ringWidth?: RingWidth;
+        ringOrder?: RingMeasure[];
     }>(),
     {
         points: () => [],
@@ -44,6 +49,9 @@ const props = withDefaults(
         measureCounts: () => ({}),
         markerStyle: 'card',
         basemap: 'soft',
+        cellStyle: 'levels',
+        ringWidth: 'equal',
+        ringOrder: () => [],
     },
 );
 
@@ -67,6 +75,18 @@ const hasSelection = computed(() => selectedCell.value !== null || selectedPoint
 
 let hexLayer: L.GeoJSON | null = null;
 let tileLayer: L.TileLayer | null = null;
+let ringLayer: L.LayerGroup | null = null;
+
+/** Counts per cell and measure, turned around from the counts per measure and cell. */
+const countsByCell = computed(() => {
+    const byCell: Record<string, Record<string, number>> = {};
+    for (const [measureId, cells] of Object.entries(props.measureCounts)) {
+        for (const [cell, count] of Object.entries(cells)) {
+            (byCell[cell] ??= {})[measureId] = count;
+        }
+    }
+    return byCell;
+});
 let pointLayer: L.LayerGroup | null = null;
 let highlightLayer: L.Polygon | null = null;
 let popup: L.Popup | null = null;
@@ -84,6 +104,15 @@ function styleFor(feature?: GeoJSON.Feature): L.PathOptions {
     const level = levelFor(activeCounts.value[id] ?? 0, props.thresholds);
     const measureColor = props.measure && level > 0 ? props.measure.color : null;
     const lighten = (map.value?.getZoom() ?? 0) >= ZOOM_LIGHT_CELLS ? 0.45 : 1;
+    if (props.cellStyle === 'rings') {
+        return {
+            color: '#ffffff',
+            weight: 1,
+            opacity: 0.85,
+            fillColor: LEVELS[0].color,
+            fillOpacity: (id in countsByCell.value ? 0.15 : LEVELS[0].opacity) * lighten,
+        };
+    }
     return {
         color: '#ffffff',
         weight: 1,
@@ -133,7 +162,30 @@ function renderCells() {
             });
         },
     }).addTo(map.value);
+    renderRings();
     renderHighlight();
+}
+
+function renderRings() {
+    ringLayer?.remove();
+    ringLayer = null;
+    if (!map.value || props.cellStyle !== 'rings') return;
+    ringLayer = L.layerGroup().addTo(map.value);
+    const lighten = map.value.getZoom() >= ZOOM_LIGHT_CELLS;
+    for (const feature of props.cells.features) {
+        const counts = countsByCell.value[feature.properties.id];
+        if (!counts) continue;
+        for (const layer of ringLayers(feature, counts, props.ringOrder, {
+            width: props.ringWidth,
+            thresholds: props.thresholds,
+            focus: props.measure?.id ?? null,
+            renderer: canvasRenderer,
+            stones: props.counts[feature.properties.id] ?? 0,
+        })) {
+            if (lighten) layer.setStyle({ fillOpacity: (layer.options.fillOpacity ?? 1) * 0.5, opacity: (layer.options.opacity ?? 1) * 0.6 });
+            layer.addTo(ringLayer);
+        }
+    }
 }
 
 function renderPoints() {
@@ -232,6 +284,7 @@ onMounted(() => {
     map.value.on('zoomend', () => {
         renderPoints();
         hexLayer?.setStyle(styleFor);
+        renderRings();
     });
     map.value.on('popupclose', () => {
         if (!isMobile.value) {
@@ -262,8 +315,16 @@ watch(
     () => {
         close();
         hexLayer?.setStyle(styleFor);
+        renderRings();
     },
     { deep: true },
+);
+watch(
+    () => [props.cellStyle, props.ringWidth],
+    () => {
+        hexLayer?.setStyle(styleFor);
+        renderRings();
+    },
 );
 watch(() => [visiblePoints.value, props.markerStyle], renderPoints);
 watch(() => props.basemap, renderTiles);
