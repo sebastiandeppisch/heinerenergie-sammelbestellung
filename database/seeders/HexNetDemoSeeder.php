@@ -80,7 +80,7 @@ class HexNetDemoSeeder extends Seeder
         mt_srand(4711);
 
         $group = Group::firstOrCreate(['name' => 'BUND Darmstadt'], ['description' => 'Demo-Initiative für HexaNetz', 'accepts_transfers' => false]);
-        $this->createAdmin($group);
+        $this->attachAdmin($group);
 
         $polygon = new Polygon(array_map(fn (array $c): array => ['lat' => $c[0], 'lng' => $c[1]], self::CITY));
         $center = $polygon->getCenter();
@@ -116,17 +116,20 @@ class HexNetDemoSeeder extends Seeder
         $this->createPoints($hexNet, $group, $category, $polygon, 130);
     }
 
-    private function createAdmin(Group $group): void
+    /**
+     * The first system admin, e.g. from AdminSeeder, administers the demo group.
+     */
+    private function attachAdmin(Group $group): void
     {
-        $user = User::firstOrCreate(
-            ['email' => 'admin@example.com'],
-            ['first_name' => 'Demo', 'last_name' => 'Admin', 'password' => 'password', 'email_verified_at' => now()],
-        );
-        $user->forceFill(['is_admin' => true])->save();
+        $admin = User::where('is_admin', true)->orderBy('id')->first();
 
-        if (! $group->users()->whereKey($user->id)->exists()) {
-            $group->users()->attach($user, ['is_admin' => true]);
+        if ($admin === null) {
+            $this->command?->warn('Kein Systemadmin vorhanden, siehe SEED_ADMIN_* in der .env.');
+
+            return;
         }
+
+        $group->users()->syncWithoutDetaching([$admin->id => ['is_admin' => true]]);
     }
 
     private function createPoints(HexNet $hexNet, Group $group, MapPointCategory $category, Polygon $polygon, int $count): void
