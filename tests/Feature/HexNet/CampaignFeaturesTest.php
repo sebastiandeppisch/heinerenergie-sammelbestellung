@@ -49,10 +49,12 @@ test('measures from the template get a placeholder icon and an optional public p
         ->and($measure->publicFields()->pluck('id')->all())->toBe([$photo->id]);
 });
 
-test('the join form asks whether others may get in contact', function (): void {
+test('the join form asks whether others may get in contact and for an optional name', function (): void {
     $form = app(HexNetSetupService::class)->createForm($this->hexNet->refresh());
+    $name = $form->fields()->where('label', 'Name')->first();
 
-    expect($form->mapPointCreator->contactEnabledField?->label)->toBe('Kontakt');
+    expect($form->mapPointCreator->contactEnabledField?->label)->toBe('Kontakt')
+        ->and($name?->required)->toBeFalse();
 });
 
 test('stepping stones are counted per measure', function (): void {

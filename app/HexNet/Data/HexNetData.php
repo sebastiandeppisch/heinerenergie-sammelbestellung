@@ -20,6 +20,7 @@ class HexNetData extends Data
 {
     /**
      * @param  array<int, string>  $category_ids
+     * @param  array<int, string>  $level_colors  open, light, medium, dark
      */
     public function __construct(
         public string $id,
@@ -36,6 +37,7 @@ class HexNetData extends Data
         public bool $grid_locked,
         public int $threshold_medium,
         public int $threshold_dark,
+        public array $level_colors,
         public int $jitter_m,
         public bool $auto_publish,
         public string $group_id,
@@ -67,6 +69,7 @@ class HexNetData extends Data
             grid_locked: $hexNet->grid_locked,
             threshold_medium: $hexNet->threshold_medium,
             threshold_dark: $hexNet->threshold_dark,
+            level_colors: $hexNet->levelColors(),
             jitter_m: $hexNet->jitter_m,
             auto_publish: $hexNet->auto_publish,
             group_id: $hexNet->group->uuid,

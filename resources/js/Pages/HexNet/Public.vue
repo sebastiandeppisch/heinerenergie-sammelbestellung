@@ -32,7 +32,9 @@ const scoreOpen = ref(false);
 
 const measureId = ref<string | null>(null);
 const measure = computed(() => props.measures.find((m) => m.id === measureId.value) ?? null);
-const mapMeasure = computed(() => (measure.value ? { id: measure.value.id, color: measure.value.color ?? '#1f7a34' } : null));
+const mapMeasure = computed(() =>
+    measure.value ? { id: measure.value.id, color: measure.value.color ?? '#1f7a34', icon: measure.value.icon_path } : null,
+);
 const basemap = ref<Basemap>(validBasemap(stored('hexnet.basemap', 'soft')));
 const markerStyle = ref<MarkerStyle>(stored('hexnet.markerStyle', 'card') as MarkerStyle);
 const cellStyle = ref<'levels' | 'rings'>(stored('hexnet.cellStyle', 'levels') === 'rings' ? 'rings' : 'levels');
@@ -113,10 +115,12 @@ function store(key: string, value: string) {
 
             <div class="details" :class="{ open: scoreOpen }">
                 <div v-if="measure" class="measure-head" :style="{ '--c': measure.color ?? '#1f7a34' }">
-                    Spielstand nur für <b>{{ measure.name }}</b>
+                    <span
+                        >Spielstand nur für <b>{{ measure.name }}</b></span
+                    >
                     <button @click="measureId = null">alle zeigen</button>
                 </div>
-                <HexNetScoreboard :stats="shownStats" :thresholds="thresholds" :color="measure?.color ?? null" />
+                <HexNetScoreboard :stats="shownStats" :thresholds="thresholds" :color="measure?.color ?? null" :level-colors="hexNet.level_colors" />
                 <HexNetViewControls
                     v-model:measure="measureId"
                     v-model:basemap="basemap"
@@ -158,6 +162,7 @@ function store(key: string, value: string) {
                 :cell-style="cellStyle"
                 :ring-width="ringWidth"
                 :ring-order="ringOrder"
+                :level-colors="hexNet.level_colors"
             >
                 <template #cell="{ cell }">
                     <HexNetCellInfo
@@ -166,10 +171,11 @@ function store(key: string, value: string) {
                         :form-url="hexNet.form_url"
                         :measure-name="measure?.name"
                         :measure-color="measure?.color"
+                        :level-colors="hexNet.level_colors"
                     />
                 </template>
                 <template #point="{ point }">
-                    <HexNetPointInfo :entry="point" :contact-url="contactUrl(point)" />
+                    <HexNetPointInfo :entry="point" :contact-url="contactUrl(point)" :measures="measures" />
                 </template>
             </HexNetMap>
             <a v-if="hexNet.form_url" :href="hexNet.form_url" class="fab"><Plus class="h-5 w-5" /> Trittstein anmelden</a>
@@ -260,8 +266,12 @@ h1 {
     border-bottom: 1px solid #dde5da;
     font-size: 12px;
 }
+.measure-head span {
+    flex: 1;
+}
 .measure-head button {
     margin-left: auto;
+    white-space: nowrap;
     border: 0;
     background: none;
     color: #46564e;

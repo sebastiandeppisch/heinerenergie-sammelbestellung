@@ -283,6 +283,10 @@ class HexNetController extends Controller
             'threshold_medium' => ['required', 'integer', 'min:1', 'max:50'],
             'threshold_dark' => ['required', 'integer', 'gt:threshold_medium', 'max:100'],
             'jitter_m' => ['required', 'integer', 'multiple_of:10', 'min:'.HexNet::MIN_JITTER_M, 'max:'.HexNet::MAX_JITTER_M],
+            'color_open' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'color_light' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'color_medium' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'color_dark' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'confirm_radius_change' => ['sometimes', 'boolean'],
         ]);
 

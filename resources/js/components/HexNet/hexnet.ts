@@ -9,6 +9,9 @@ export const LEVELS = [
     { name: 'Dunkelgrün', color: '#1f7a34', opacity: 0.8 },
 ] as const;
 
+/** Level colors when a HexaNetz does not bring its own: open, light, medium, dark. */
+export const DEFAULT_LEVEL_COLORS = LEVELS.map((level) => level.color);
+
 export const SIGNAL = '#e8720c';
 
 export function levelFor(count: number, t: Thresholds): number {

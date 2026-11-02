@@ -8,6 +8,7 @@ import {
     BASEMAPS,
     type Basemap,
     cellCenter,
+    DEFAULT_LEVEL_COLORS,
     type HexCells,
     LEVELS,
     levelFor,
@@ -31,7 +32,7 @@ const props = withDefaults(
         highlight?: { cell: string; coordinate: App.ValueObjects.Coordinate } | null;
         interactive?: boolean;
         /** With a measure, cells take its color and count only stepping stones with it, markers are filtered. */
-        measure?: { id: string; color: string } | null;
+        measure?: { id: string; color: string; icon?: string | null } | null;
         measureCounts?: Record<string, Record<string, number>>;
         markerStyle?: MarkerStyle;
         basemap?: Basemap;
@@ -39,6 +40,7 @@ const props = withDefaults(
         cellStyle?: 'levels' | 'rings';
         ringWidth?: RingWidth;
         ringOrder?: RingMeasure[];
+        levelColors?: string[];
     }>(),
     {
         points: () => [],
@@ -52,6 +54,7 @@ const props = withDefaults(
         cellStyle: 'levels',
         ringWidth: 'equal',
         ringOrder: () => [],
+        levelColors: () => DEFAULT_LEVEL_COLORS,
     },
 );
 
@@ -76,6 +79,65 @@ const hasSelection = computed(() => selectedCell.value !== null || selectedPoint
 let hexLayer: L.GeoJSON | null = null;
 let tileLayer: L.TileLayer | null = null;
 let ringLayer: L.LayerGroup | null = null;
+let cellIconLayer: L.LayerGroup | null = null;
+let ownPosition: L.LayerGroup | null = null;
+const locateMessage = ref<string | null>(null);
+
+/** Flies to the visitor's position. The position stays in the browser. */
+function locate() {
+    if (!navigator.geolocation) {
+        showLocateMessage('Dein Browser kann den Standort nicht bestimmen.');
+        return;
+    }
+    navigator.geolocation.getCurrentPosition(
+        ({ coords }) => {
+            if (!map.value) return;
+            const latlng = L.latLng(coords.latitude, coords.longitude);
+            ownPosition?.remove();
+            ownPosition = L.layerGroup([
+                L.circle(latlng, {
+                    radius: coords.accuracy,
+                    renderer: svgRenderer,
+                    color: '#1a73e8',
+                    weight: 1,
+                    fillOpacity: 0.1,
+                    interactive: false,
+                }),
+                L.circleMarker(latlng, {
+                    radius: 7,
+                    renderer: svgRenderer,
+                    color: '#fff',
+                    weight: 2,
+                    fillColor: '#1a73e8',
+                    fillOpacity: 1,
+                    interactive: false,
+                }),
+            ]).addTo(map.value);
+            map.value.flyTo(latlng, Math.max(map.value.getZoom(), 16), { duration: 1 });
+        },
+        () => showLocateMessage('Standort nicht verfügbar. Bitte erlaube den Zugriff auf deinen Standort.'),
+        { enableHighAccuracy: true, timeout: 10000 },
+    );
+}
+
+function showLocateMessage(message: string) {
+    locateMessage.value = message;
+    setTimeout(() => (locateMessage.value = null), 4000);
+}
+
+const LocateControl = L.Control.extend({
+    onAdd() {
+        const button = L.DomUtil.create('button', 'leaflet-bar hexnet-locate');
+        button.type = 'button';
+        button.title = 'Zu meinem Standort';
+        button.setAttribute('aria-label', 'Zu meinem Standort');
+        button.innerHTML =
+            '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" x2="5" y1="12" y2="12"/><line x1="19" x2="22" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="5"/><line x1="12" x2="12" y1="19" y2="22"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/></svg>';
+        L.DomEvent.disableClickPropagation(button);
+        L.DomEvent.on(button, 'click', locate);
+        return button;
+    },
+});
 
 /** Counts per cell and measure, turned around from the counts per measure and cell. */
 const countsByCell = computed(() => {
@@ -109,7 +171,7 @@ function styleFor(feature?: GeoJSON.Feature): L.PathOptions {
             color: '#ffffff',
             weight: 1,
             opacity: 0.85,
-            fillColor: LEVELS[0].color,
+            fillColor: props.levelColors[0],
             fillOpacity: (id in countsByCell.value ? 0.15 : LEVELS[0].opacity) * lighten,
         };
     }
@@ -117,7 +179,7 @@ function styleFor(feature?: GeoJSON.Feature): L.PathOptions {
         color: '#ffffff',
         weight: 1,
         opacity: 0.85,
-        fillColor: measureColor ?? LEVELS[level].color,
+        fillColor: measureColor ?? props.levelColors[level],
         fillOpacity: (measureColor ? MEASURE_OPACITY[level] : LEVELS[level].opacity) * lighten,
     };
 }
@@ -163,7 +225,27 @@ function renderCells() {
         },
     }).addTo(map.value);
     renderRings();
+    renderCellIcons();
     renderHighlight();
+}
+
+/** With a measure shown, its icon marks every cell that has it. */
+function renderCellIcons() {
+    cellIconLayer?.remove();
+    cellIconLayer = null;
+    const icon = props.measure?.icon;
+    if (!map.value || !props.measure || !icon) return;
+    cellIconLayer = L.layerGroup().addTo(map.value);
+    const html = `<span class="hexnet-cell-icon" style="--c:${props.measure.color}"><img src="${icon}" alt=""></span>`;
+    for (const feature of props.cells.features) {
+        if ((activeCounts.value[feature.properties.id] ?? 0) === 0) continue;
+        const center = cellCenter(feature);
+        L.marker([center.lat, center.lng], {
+            icon: L.divIcon({ html, className: 'hexnet-cell-icon-wrap', iconSize: [22, 22], iconAnchor: [11, 11] }),
+            interactive: false,
+            keyboard: false,
+        }).addTo(cellIconLayer);
+    }
 }
 
 function renderRings() {
@@ -181,6 +263,7 @@ function renderRings() {
             focus: props.measure?.id ?? null,
             renderer: canvasRenderer,
             stones: props.counts[feature.properties.id] ?? 0,
+            levelColors: props.levelColors,
         })) {
             if (lighten) layer.setStyle({ fillOpacity: (layer.options.fillOpacity ?? 1) * 0.5, opacity: (layer.options.opacity ?? 1) * 0.6 });
             layer.addTo(ringLayer);
@@ -277,6 +360,7 @@ onMounted(() => {
     if (!container.value) return;
     map.value = L.map(container.value, { preferCanvas: true, zoomSnap: 0.25, zoomDelta: 1 });
     map.value.setMaxZoom(19);
+    if (props.interactive) new LocateControl({ position: 'topleft' }).addTo(map.value);
     renderTiles();
     fit();
     renderCells();
@@ -311,11 +395,12 @@ watch(
     },
 );
 watch(
-    () => [activeCounts.value, props.thresholds, props.measure?.id, props.measure?.color],
+    () => [activeCounts.value, props.thresholds, props.measure?.id, props.measure?.color, props.levelColors],
     () => {
         close();
         hexLayer?.setStyle(styleFor);
         renderRings();
+        renderCellIcons();
     },
     { deep: true },
 );
@@ -336,6 +421,7 @@ defineExpose({ flyTo, close, invalidateSize: () => map.value?.invalidateSize() }
 <template>
     <div class="relative h-full w-full">
         <div ref="container" class="hexnet-map h-full w-full" />
+        <div v-if="locateMessage" class="hexnet-toast" role="status">{{ locateMessage }}</div>
         <Teleport v-if="!isMobile && hasSelection" :to="popupContent">
             <slot v-if="selectedCell" name="cell" :cell="selectedCell" />
             <slot v-else-if="selectedPoint" name="point" :point="selectedPoint" />
@@ -375,6 +461,52 @@ defineExpose({ flyTo, close, invalidateSize: () => map.value?.invalidateSize() }
 }
 .hexnet-tiles-hot {
     filter: saturate(0.75) brightness(1.04);
+}
+.hexnet-locate {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    background: #fff;
+    color: #16211c;
+    cursor: pointer;
+}
+.hexnet-locate:hover {
+    background: #f4f4f4;
+}
+.hexnet-toast {
+    position: absolute;
+    left: 50%;
+    top: 12px;
+    z-index: 1100;
+    transform: translateX(-50%);
+    max-width: 90%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: #16211c;
+    color: #fff;
+    font-size: 12.5px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+.hexnet-cell-icon-wrap {
+    background: none;
+    border: none;
+}
+.hexnet-cell-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    background: #fff;
+    border: 2px solid var(--c);
+    box-shadow: 0 1px 2px rgba(22, 33, 28, 0.3);
+}
+.hexnet-cell-icon img {
+    width: 13px;
+    height: 13px;
 }
 .hexnet-lolly {
     background: none;

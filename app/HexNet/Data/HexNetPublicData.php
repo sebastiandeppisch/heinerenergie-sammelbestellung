@@ -17,6 +17,7 @@ class HexNetPublicData extends Data
 {
     /**
      * @param  array<int, Coordinate>  $bounds  south west and north east of the play area
+     * @param  array<int, string>  $level_colors  open, light, medium, dark
      */
     public function __construct(
         public string $id,
@@ -27,6 +28,7 @@ class HexNetPublicData extends Data
         public ?string $cta_text,
         public int $threshold_medium,
         public int $threshold_dark,
+        public array $level_colors,
         public int $hex_radius_m,
         public ?string $form_url,
         public array $bounds,
@@ -49,6 +51,7 @@ class HexNetPublicData extends Data
             cta_text: $hexNet->cta_text,
             threshold_medium: $hexNet->threshold_medium,
             threshold_dark: $hexNet->threshold_dark,
+            level_colors: $hexNet->levelColors(),
             hex_radius_m: $hexNet->hex_radius_m,
             form_url: $hexNet->formDefinition !== null ? route('form.show', $hexNet->formDefinition) : null,
             bounds: $coordinates === [] ? [] : [new Coordinate(min($lats), min($lngs)), new Coordinate(max($lats), max($lngs))],

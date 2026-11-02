@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\HexNet\Models;
 
 use App\HexNet\Enums\HexNetStatus;
+use App\HexNet\HexNetDefaults;
 use App\HexNet\Services\HexGrid;
 use App\Models\FormDefinition;
 use App\Models\Group;
@@ -38,6 +39,10 @@ use Illuminate\Support\Carbon;
  * @property bool $grid_locked
  * @property int $threshold_medium
  * @property int $threshold_dark
+ * @property string $color_open
+ * @property string $color_light
+ * @property string $color_medium
+ * @property string $color_dark
  * @property int $jitter_m
  * @property bool $auto_publish
  * @property int|null $form_definition_id
@@ -74,6 +79,10 @@ class HexNet extends Model
         'grid_locked',
         'threshold_medium',
         'threshold_dark',
+        'color_open',
+        'color_light',
+        'color_medium',
+        'color_dark',
         'jitter_m',
         'auto_publish',
         'form_definition_id',
@@ -85,6 +94,10 @@ class HexNet extends Model
         'grid_locked' => false,
         'threshold_medium' => 2,
         'threshold_dark' => 3,
+        'color_open' => HexNetDefaults::COLOR_OPEN,
+        'color_light' => HexNetDefaults::COLOR_LIGHT,
+        'color_medium' => HexNetDefaults::COLOR_MEDIUM,
+        'color_dark' => HexNetDefaults::COLOR_DARK,
         'jitter_m' => 40,
         'auto_publish' => false,
     ];
@@ -160,6 +173,16 @@ class HexNet extends Model
         $origin = $this->origin();
 
         return $origin === null ? null : new HexGrid($origin, $this->hex_radius_m);
+    }
+
+    /**
+     * Colors of the levels 0 open, 1 light, 2 medium, 3 dark.
+     *
+     * @return array<int, string>
+     */
+    public function levelColors(): array
+    {
+        return [$this->color_open, $this->color_light, $this->color_medium, $this->color_dark];
     }
 
     /**

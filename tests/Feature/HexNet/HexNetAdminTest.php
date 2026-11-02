@@ -26,6 +26,14 @@ beforeEach(function (): void {
     $this->hexNet = HexNet::factory()->withPlayArea()->create(['group_id' => $this->child->id]);
 });
 
+/**
+ * @return array<string, string>
+ */
+function hexNetColors(): array
+{
+    return ['color_open' => '#e4e9e2', 'color_light' => '#b7e4a8', 'color_medium' => '#52b45a', 'color_dark' => '#1f7a34'];
+}
+
 function hexNetGroupAdmin(Group $group): User
 {
     $user = User::factory()->create(['is_admin' => false]);
@@ -85,17 +93,20 @@ test('the wizard creates categories, form and starts the HexaNetz', function ():
 
 test('the grid rules are validated', function (): void {
     hexNetGroupAdmin($this->child);
-    $valid = ['hex_radius_m' => 150, 'grid_locked' => false, 'threshold_medium' => 2, 'threshold_dark' => 3, 'jitter_m' => 40];
+    $valid = ['hex_radius_m' => 150, 'grid_locked' => false, 'threshold_medium' => 2, 'threshold_dark' => 3, 'jitter_m' => 40, ...hexNetColors()];
 
     $this->put(route('hexnets.update-step', [$this->hexNet, 'grid']), [...$valid, 'hex_radius_m' => 99])->assertSessionHasErrors('hex_radius_m');
     $this->put(route('hexnets.update-step', [$this->hexNet, 'grid']), [...$valid, 'threshold_dark' => 2])->assertSessionHasErrors('threshold_dark');
-    $this->put(route('hexnets.update-step', [$this->hexNet, 'grid']), $valid)->assertSessionHasNoErrors();
+    $this->put(route('hexnets.update-step', [$this->hexNet, 'grid']), [...$valid, 'color_dark' => 'dunkelgrün'])->assertSessionHasErrors('color_dark');
+    $this->put(route('hexnets.update-step', [$this->hexNet, 'grid']), [...$valid, 'color_dark' => '#123456'])->assertSessionHasNoErrors();
+
+    expect($this->hexNet->fresh()->levelColors()[3])->toBe('#123456');
 });
 
 test('a locked grid or an active HexaNetz protects the radius', function (): void {
     hexNetGroupAdmin($this->child);
     $this->hexNet->update(['grid_locked' => true]);
-    $data = ['hex_radius_m' => 200, 'grid_locked' => true, 'threshold_medium' => 2, 'threshold_dark' => 3, 'jitter_m' => 40];
+    $data = ['hex_radius_m' => 200, 'grid_locked' => true, 'threshold_medium' => 2, 'threshold_dark' => 3, 'jitter_m' => 40, ...hexNetColors()];
 
     $this->put(route('hexnets.update-step', [$this->hexNet, 'grid']), $data)->assertSessionHasErrors('hex_radius_m');
 
@@ -151,7 +162,7 @@ test('categories and forms of other groups cannot be chosen', function (): void 
 
 test('a locked grid also protects the jitter, which has a minimum', function (): void {
     hexNetGroupAdmin($this->child);
-    $data = ['hex_radius_m' => 150, 'grid_locked' => false, 'threshold_medium' => 2, 'threshold_dark' => 3, 'jitter_m' => 0];
+    $data = ['hex_radius_m' => 150, 'grid_locked' => false, 'threshold_medium' => 2, 'threshold_dark' => 3, 'jitter_m' => 0, ...hexNetColors()];
 
     $this->put(route('hexnets.update-step', [$this->hexNet, 'grid']), $data)->assertSessionHasErrors('jitter_m');
 

@@ -1,5 +1,5 @@
 import L from 'leaflet';
-import { LEVELS, levelFor, type Thresholds } from './hexnet';
+import { levelFor, type Thresholds } from './hexnet';
 
 export type RingWidth = 'equal' | 'count';
 
@@ -24,7 +24,7 @@ export function ringLayers(
     feature: GeoJSON.Feature<GeoJSON.Polygon, { id: string }>,
     countsByMeasure: Record<string, number>,
     order: RingMeasure[],
-    options: { width: RingWidth; thresholds: Thresholds; focus: string | null; renderer: L.Renderer; stones: number },
+    options: { width: RingWidth; thresholds: Thresholds; focus: string | null; renderer: L.Renderer; stones: number; levelColors: string[] },
 ): L.Polygon[] {
     const present = order.filter((m) => (countsByMeasure[m.id] ?? 0) > 0);
     if (present.length === 0) return [];
@@ -61,7 +61,7 @@ export function ringLayers(
             color: '#ffffff',
             weight: 1.5,
             opacity: 1,
-            fillColor: LEVELS[level].color,
+            fillColor: options.levelColors[level],
             fillOpacity: 1,
         }),
     );

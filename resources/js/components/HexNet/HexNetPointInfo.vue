@@ -7,7 +7,11 @@ import { computed } from 'vue';
 const props = defineProps<{
     entry: App.HexNet.Data.HexNetPointData;
     contactUrl?: string | null;
+    /** All measures of the campaign, the ones of this stepping stone in color, the others greyed out. */
+    measures?: App.Data.MapPointCharacteristicData[];
 }>();
+
+const doneIds = computed(() => new Set(props.entry.point.characteristics.map((c) => c.id)));
 
 const point = computed(() => props.entry.point);
 const images = computed(() => point.value.fields.flatMap((field) => field.images));
@@ -20,6 +24,20 @@ const fieldsWithoutImages = computed(() => point.value.fields.filter((field) => 
             <h3 class="m-0 text-sm font-bold">{{ point.title }}</h3>
             <div class="text-[11.5px] text-[#7d8d85]">Trittstein seit {{ entry.since }}</div>
         </div>
+
+        <ul v-if="measures?.length" class="m-0 flex list-none flex-wrap gap-1.5 p-0" aria-label="Maßnahmen">
+            <li
+                v-for="measure in measures"
+                :key="measure.id"
+                class="hexnet-measure"
+                :class="{ missing: !doneIds.has(measure.id) }"
+                :style="{ '--c': measure.color ?? '#7d8d85' }"
+                :title="`${measure.name}${doneIds.has(measure.id) ? '' : ' (noch nicht)'}`"
+            >
+                <img v-if="measure.icon_path" :src="measure.icon_path" alt="" />
+                <span class="sr-only">{{ measure.name }}{{ doneIds.has(measure.id) ? '' : ': noch nicht' }}</span>
+            </li>
+        </ul>
 
         <div v-if="images.length > 0" class="-mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1">
             <img
@@ -46,3 +64,27 @@ const fieldsWithoutImages = computed(() => point.value.fields.filter((field) => 
         </div>
     </div>
 </template>
+
+<style scoped>
+.hexnet-measure {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    border: 2px solid var(--c);
+    background: color-mix(in srgb, var(--c) 22%, #fff);
+}
+.hexnet-measure img {
+    width: 14px;
+    height: 14px;
+}
+.hexnet-measure.missing {
+    border-color: #dde5da;
+    background: #f4f6f3;
+}
+.hexnet-measure.missing img {
+    opacity: 0.3;
+}
+</style>

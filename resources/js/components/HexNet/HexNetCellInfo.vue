@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { CellSelection } from './HexNetMap.vue';
-import { LEVELS, missingToNextLevel, SIGNAL, steppingStones, type Thresholds } from './hexnet';
+import { DEFAULT_LEVEL_COLORS, LEVELS, missingToNextLevel, SIGNAL, steppingStones, type Thresholds } from './hexnet';
 
 const props = defineProps<{
     cell: CellSelection;
@@ -9,6 +9,7 @@ const props = defineProps<{
     formUrl?: string | null;
     measureName?: string | null;
     measureColor?: string | null;
+    levelColors?: string[];
 }>();
 
 const missing = computed(() => missingToNextLevel(props.cell.count, props.thresholds));
@@ -24,7 +25,10 @@ const joinUrl = computed(() => {
 <template>
     <div class="space-y-1 text-[13px] text-[#16211c]">
         <div class="flex items-center gap-2">
-            <span class="hexnet-swatch" :style="{ background: measureColor && cell.level > 0 ? measureColor : LEVELS[cell.level].color }" />
+            <span
+                class="hexnet-swatch"
+                :style="{ background: measureColor && cell.level > 0 ? measureColor : (levelColors ?? DEFAULT_LEVEL_COLORS)[cell.level] }"
+            />
             <h3 class="m-0 text-sm font-bold">{{ LEVELS[cell.level].name }}</h3>
         </div>
         <div>

@@ -24,6 +24,7 @@ onMounted(() => setTimeout(() => mapRef.value?.flyTo(props.highlight.coordinate,
                 :bounds="highlight.hex_net.bounds"
                 :highlight="{ cell: highlight.cell, coordinate: highlight.coordinate }"
                 :interactive="false"
+                :level-colors="highlight.hex_net.level_colors"
             />
         </div>
         <p class="text-base font-semibold">

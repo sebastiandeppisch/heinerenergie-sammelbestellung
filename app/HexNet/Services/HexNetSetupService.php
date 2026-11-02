@@ -120,6 +120,15 @@ class HexNetSetupService
             ]);
             $creator?->contactEmailField?->update(['required' => true]);
 
+            $form->fields()->create([
+                'type' => FieldType::TEXT,
+                'label' => 'Name',
+                'help_text' => 'Optional. Wird nicht veröffentlicht.',
+                'max_length' => 255,
+                'required' => false,
+                'sort_order' => ($form->fields()->max('sort_order') ?? 0) + 1,
+            ]);
+
             $consultation = $form->fields()->create([
                 'type' => FieldType::CHECKBOX,
                 'label' => 'Stadtnaturberatung',

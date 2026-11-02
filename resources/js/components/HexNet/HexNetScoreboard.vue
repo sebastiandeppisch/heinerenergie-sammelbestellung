@@ -1,17 +1,23 @@
 <script setup lang="ts">
 import './hexnet.css';
 import { computed } from 'vue';
-import { LEVELS, MEASURE_OPACITY } from './hexnet';
+import { DEFAULT_LEVEL_COLORS, LEVELS, MEASURE_OPACITY } from './hexnet';
 
 const props = defineProps<{
     stats: App.HexNet.Data.HexNetStatsData;
     thresholds: { medium: number; dark: number };
     /** A measure color replaces the greens, with the same steps of strength as on the map. */
     color?: string | null;
+    levelColors?: string[];
 }>();
 
+const levelColors = computed(() => props.levelColors ?? DEFAULT_LEVEL_COLORS);
 const fill = (level: number) =>
-    props.color ? (level === 0 ? LEVELS[0].color : `color-mix(in srgb, ${props.color} ${MEASURE_OPACITY[level] * 100}%, #fff)`) : LEVELS[level].color;
+    props.color
+        ? level === 0
+            ? levelColors.value[0]
+            : `color-mix(in srgb, ${props.color} ${MEASURE_OPACITY[level] * 100}%, #fff)`
+        : levelColors.value[level];
 
 const width = (level: number) => (props.stats.playable_cells ? (100 * props.stats.levels[level]) / props.stats.playable_cells : 0) + '%';
 

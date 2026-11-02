@@ -52,6 +52,7 @@ final class HexNetDefaults
         return asset('hexnet/icons/'.$icon.'.svg');
     }
 
+    /** Colors of the levels open, light, medium and dark, changeable per HexaNetz. */
     public const string COLOR_OPEN = '#e4e9e2';
 
     public const string COLOR_LIGHT = '#b7e4a8';

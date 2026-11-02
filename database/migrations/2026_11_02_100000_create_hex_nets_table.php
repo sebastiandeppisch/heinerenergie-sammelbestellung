@@ -27,6 +27,10 @@ return new class extends Migration
             $table->boolean('grid_locked')->default(false);
             $table->unsignedInteger('threshold_medium')->default(2);
             $table->unsignedInteger('threshold_dark')->default(3);
+            $table->string('color_open', 7)->default('#e4e9e2');
+            $table->string('color_light', 7)->default('#b7e4a8');
+            $table->string('color_medium', 7)->default('#52b45a');
+            $table->string('color_dark', 7)->default('#1f7a34');
             $table->unsignedInteger('jitter_m')->default(40);
             $table->boolean('auto_publish')->default(false);
             $table->foreignId('form_definition_id')->nullable()->constrained()->nullOnDelete();

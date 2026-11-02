@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import HexNetMap from '@/components/HexNet/HexNetMap.vue';
-import type { HexCells } from '@/components/HexNet/hexnet';
+import { DEFAULT_LEVEL_COLORS, type HexCells } from '@/components/HexNet/hexnet';
 import { Button } from '@/shadcn/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/shadcn/components/ui/dialog';
 import { Label } from '@/shadcn/components/ui/label';
@@ -25,6 +25,10 @@ const form = useForm({
     threshold_medium: props.hexNet.threshold_medium,
     threshold_dark: props.hexNet.threshold_dark,
     jitter_m: props.hexNet.jitter_m,
+    color_open: props.hexNet.level_colors[0],
+    color_light: props.hexNet.level_colors[1],
+    color_medium: props.hexNet.level_colors[2],
+    color_dark: props.hexNet.level_colors[3],
     confirm_radius_change: false,
 });
 
@@ -33,6 +37,18 @@ const previewError = ref<string | null>(null);
 const confirmOpen = ref(false);
 const radiusLocked = computed(() => props.hexNet.grid_locked);
 const radiusChanged = computed(() => form.hex_radius_m !== props.hexNet.hex_radius_m);
+const levelFields = [
+    { key: 'color_open', label: 'offen' },
+    { key: 'color_light', label: 'hell' },
+    { key: 'color_medium', label: 'mittel' },
+    { key: 'color_dark', label: 'dunkel' },
+] as const;
+const levelColors = computed(() => [form.color_open, form.color_light, form.color_medium, form.color_dark]);
+
+function resetColors() {
+    [form.color_open, form.color_light, form.color_medium, form.color_dark] = DEFAULT_LEVEL_COLORS;
+}
+
 let timer: ReturnType<typeof setTimeout> | undefined;
 let requestId = 0;
 
@@ -161,6 +177,22 @@ function save(confirmed = false) {
                 </p>
             </div>
 
+            <div class="space-y-2">
+                <Label>Farben der Stufen</Label>
+                <div class="grid grid-cols-4 gap-2">
+                    <label v-for="level in levelFields" :key="level.key" class="flex flex-col items-center gap-1 text-xs text-muted-foreground">
+                        <input
+                            v-model="form[level.key]"
+                            type="color"
+                            class="h-9 w-full cursor-pointer rounded border"
+                            :aria-label="`Farbe ${level.label}`"
+                        />
+                        {{ level.label }}
+                    </label>
+                </div>
+                <button type="button" class="text-xs text-muted-foreground underline" @click="resetColors">Standardfarben</button>
+            </div>
+
             <Button :disabled="form.processing" @click="save()">Speichern</Button>
         </div>
 
@@ -171,6 +203,7 @@ function save(confirmed = false) {
                 :counts="preview.counts"
                 :thresholds="{ medium: form.threshold_medium, dark: form.threshold_dark }"
                 :interactive="false"
+                :level-colors="levelColors"
             />
             <div v-else class="flex h-full items-center justify-center p-6 text-center text-sm text-muted-foreground">
                 {{ previewError ?? (hexNet.play_area ? 'Vorschau wird geladen …' : 'Zeichne zuerst das Spielfeld.') }}
