@@ -144,7 +144,13 @@ const allDone = computed(() => Object.values(props.checklist).every(Boolean));
             </template>
         </PageHeader>
 
-        <Stepper :model-value="currentIndex + 1" class="mb-6 flex w-full items-start gap-2" data-test="hexnet-stepper">
+        <Stepper
+            :model-value="currentIndex + 1"
+            :linear="false"
+            class="mb-6 flex w-full items-start gap-2"
+            data-test="hexnet-stepper"
+            @update:model-value="(value) => value && value !== currentIndex + 1 && go(steps[value - 1])"
+        >
             <StepperItem
                 v-for="(step, index) in steps"
                 :key="step"
@@ -168,7 +174,6 @@ const allDone = computed(() => Object.values(props.checklist).every(Boolean));
                             state === 'active' && 'ring-2 ring-green-700 ring-offset-2',
                         ]"
                         :disabled="!hexNet && index > 0"
-                        @click="go(step)"
                     >
                         <Check v-if="state === 'completed'" class="size-5" />
                         <span v-else class="text-xs">{{ index + 1 }}</span>

@@ -40,8 +40,9 @@ test('measures from the template get a placeholder icon and an optional public p
     $measure = $this->measures->first();
     $photo = $measure->formDefinition->fields->first();
 
-    expect($measure->icon_path)->toBe('characteristics/hexnet-wheat.svg')
-        ->and(Storage::disk('public')->exists('characteristics/hexnet-wheat.svg'))->toBeTrue()
+    expect($measure->icon_path)->toStartWith('characteristics/hexnet-wheat-')
+        ->and(Storage::disk('public')->exists($measure->icon_path))->toBeTrue()
+        ->and($this->measures->pluck('icon_path')->unique())->toHaveCount(3)
         ->and($photo->type->value)->toBe('image')
         ->and($photo->max_images)->toBe(1)
         ->and($photo->required)->toBeFalse()
@@ -74,6 +75,33 @@ test('a HexaNetz with auto publish publishes new stepping stones', function (boo
 
     expect($point->fresh()->published)->toBe($autoPublish);
 })->with([true, false]);
+
+test('auto publish only publishes points of the group of the HexaNetz and its subgroups', function (): void {
+    $this->hexNet->update(['auto_publish' => true]);
+    $parent = Group::factory()->create();
+    $this->group->update(['parent_id' => $parent->id]);
+    $own = hexNetStone($this->category, ['published' => false]);
+    $foreign = hexNetStone($this->category, ['published' => false, 'group_id' => $parent->id]);
+
+    foreach ([$own, $foreign] as $point) {
+        event(new MapPointCreatedByFormSubmission($point, FormSubmission::factory()->create()));
+    }
+
+    expect($own->fresh()->published)->toBeTrue()
+        ->and($foreign->fresh()->published)->toBeFalse();
+});
+
+test('measure counts follow measures added without saving the point', function (): void {
+    $point = hexNetStone($this->category);
+    $service = app(HexNetGridService::class);
+    expect($service->measureCounts($this->hexNet->fresh()))->toBe([]);
+
+    $point->characteristics()->attach($this->measures[0]->id);
+    expect($service->measureCounts($this->hexNet->fresh()))->toHaveKey($this->measures[0]->uuid);
+
+    $point->characteristics()->detach();
+    expect($service->measureCounts($this->hexNet->fresh()))->toBe([]);
+});
 
 test('visible stepping stones with contact can be contacted through the campaign', function (): void {
     $withContact = hexNetStone($this->category, ['published' => true, 'contact_email' => 'owner@example.com', 'contact_email_verified_at' => now(), 'contact_enabled' => true]);

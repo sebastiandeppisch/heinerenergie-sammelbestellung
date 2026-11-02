@@ -10,7 +10,7 @@ use Throwable;
 
 /**
  * A HexaNetz can publish new stepping stones right away instead of waiting for an admin. The consent still decides
- * whether the point is visible.
+ * whether the point is visible. Only points of its own group or subgroups, which its admins may publish anyway.
  */
 class PublishHexNetPoint
 {
@@ -19,8 +19,11 @@ class PublishHexNetPoint
     public function handle(MapPointCreatedByFormSubmission $event): void
     {
         try {
-            if ($this->resolver->forMapPoint($event->mapPoint)?->auto_publish === true) {
-                $event->mapPoint->update(['published' => true]);
+            $mapPoint = $event->mapPoint;
+            $hexNet = $this->resolver->forMapPoint($mapPoint);
+
+            if ($hexNet?->auto_publish === true && in_array((int) $mapPoint->group_id, array_map(intval(...), $hexNet->group->getSubtreeIds()), true)) {
+                $mapPoint->update(['published' => true]);
             }
         } catch (Throwable $exception) {
             report($exception);

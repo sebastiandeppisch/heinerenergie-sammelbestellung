@@ -13,6 +13,7 @@ use App\Models\MapPointCharacteristic;
 use App\Services\FormDefinitionService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use RuntimeException;
 
 /**
@@ -63,7 +64,8 @@ class HexNetSetupService
     }
 
     /**
-     * Copies a placeholder icon to the public disk, where uploaded icons of measures live too.
+     * Copies a placeholder icon to the public disk, where uploaded icons of measures live too. Each measure gets its own
+     * copy, because the core deletes the file when a measure or its icon is replaced.
      */
     private function storeIcon(?string $icon): ?string
     {
@@ -71,11 +73,8 @@ class HexNetSetupService
             return null;
         }
 
-        $path = 'characteristics/hexnet-'.$icon.'.svg';
-
-        if (! Storage::disk('public')->exists($path)) {
-            Storage::disk('public')->put($path, (string) file_get_contents(public_path('hexnet/icons/'.$icon.'.svg')));
-        }
+        $path = 'characteristics/hexnet-'.$icon.'-'.Str::uuid().'.svg';
+        Storage::disk('public')->put($path, (string) file_get_contents(public_path('hexnet/icons/'.$icon.'.svg')));
 
         return $path;
     }

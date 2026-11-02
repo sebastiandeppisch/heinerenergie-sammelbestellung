@@ -13,8 +13,8 @@ const markerStyle = defineModel<MarkerStyle>('markerStyle', { required: true });
 <template>
     <div class="hexnet-controls">
         <h2>Waben färben nach</h2>
-        <div class="chips" role="radiogroup" aria-label="Waben färben nach">
-            <button class="chip" :class="{ on: measureId === null }" role="radio" :aria-checked="measureId === null" @click="measureId = null">
+        <div class="chips" role="group" aria-label="Waben färben nach">
+            <button class="chip" :class="{ on: measureId === null }" :aria-pressed="measureId === null" @click="measureId = null">
                 <span class="dot all" /> Alle Trittsteine
             </button>
             <button
@@ -22,8 +22,7 @@ const markerStyle = defineModel<MarkerStyle>('markerStyle', { required: true });
                 :key="measure.id"
                 class="chip"
                 :class="{ on: measureId === measure.id }"
-                role="radio"
-                :aria-checked="measureId === measure.id"
+                :aria-pressed="measureId === measure.id"
                 :style="{ '--c': measure.color ?? '#7d8d85' }"
                 @click="measureId = measureId === measure.id ? null : measure.id"
             >
@@ -38,13 +37,9 @@ const markerStyle = defineModel<MarkerStyle>('markerStyle', { required: true });
         </select>
 
         <h2>Marker in der Nahansicht</h2>
-        <div class="toggle" role="radiogroup" aria-label="Marker in der Nahansicht">
-            <button :class="{ on: markerStyle === 'card' }" role="radio" :aria-checked="markerStyle === 'card'" @click="markerStyle = 'card'">
-                Card
-            </button>
-            <button :class="{ on: markerStyle === 'wheel' }" role="radio" :aria-checked="markerStyle === 'wheel'" @click="markerStyle = 'wheel'">
-                Glücksrad
-            </button>
+        <div class="toggle" role="group" aria-label="Marker in der Nahansicht">
+            <button :class="{ on: markerStyle === 'card' }" :aria-pressed="markerStyle === 'card'" @click="markerStyle = 'card'">Card</button>
+            <button :class="{ on: markerStyle === 'wheel' }" :aria-pressed="markerStyle === 'wheel'" @click="markerStyle = 'wheel'">Glücksrad</button>
         </div>
     </div>
 </template>

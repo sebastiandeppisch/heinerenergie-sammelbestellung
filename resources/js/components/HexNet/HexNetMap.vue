@@ -189,7 +189,10 @@ function renderHighlight() {
 /** A view given as #map=zoom/lat/lng, like on openstreetmap.org, wins over fitting the play area. */
 function viewFromHash(): { zoom: number; lat: number; lng: number } | null {
     const match = window.location.hash.match(/map=([\d.]+)\/(-?[\d.]+)\/(-?[\d.]+)/);
-    return match ? { zoom: Number(match[1]), lat: Number(match[2]), lng: Number(match[3]) } : null;
+    if (!match) return null;
+    const view = { zoom: Math.min(19, Math.max(3, Number(match[1]))), lat: Number(match[2]), lng: Number(match[3]) };
+    const valid = [view.zoom, view.lat, view.lng].every(Number.isFinite) && Math.abs(view.lat) <= 90 && Math.abs(view.lng) <= 180;
+    return valid ? view : null;
 }
 
 function fit() {
@@ -255,7 +258,7 @@ watch(
     },
 );
 watch(
-    () => [activeCounts.value, props.thresholds, props.measure],
+    () => [activeCounts.value, props.thresholds, props.measure?.id, props.measure?.color],
     () => {
         close();
         hexLayer?.setStyle(styleFor);

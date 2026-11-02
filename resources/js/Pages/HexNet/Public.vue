@@ -29,6 +29,7 @@ const scoreOpen = ref(false);
 
 const measureId = ref<string | null>(null);
 const measure = computed(() => props.measures.find((m) => m.id === measureId.value) ?? null);
+const mapMeasure = computed(() => (measure.value ? { id: measure.value.id, color: measure.value.color ?? '#1f7a34' } : null));
 const basemap = ref<Basemap>(validBasemap(stored('hexnet.basemap', 'soft')));
 const markerStyle = ref<MarkerStyle>(stored('hexnet.markerStyle', 'card') as MarkerStyle);
 watch(basemap, (value) => store('hexnet.basemap', value));
@@ -87,11 +88,11 @@ function store(key: string, value: string) {
             </div>
 
             <button class="mobile-score" @click="scoreOpen = !scoreOpen">
-                <span class="pct">{{ stats.percent }} %</span>
+                <span class="pct">{{ shownStats.percent }} %</span>
                 <span class="track-mini">
-                    <i :style="{ width: stats.percent + '%' }" />
+                    <i :style="{ width: shownStats.percent + '%', background: measure?.color ?? undefined }" />
                 </span>
-                <span class="sum">{{ stats.total_points }} Trittsteine</span>
+                <span class="sum">{{ shownStats.total_points }} Trittsteine</span>
                 <ChevronDown class="h-4 w-4 transition-transform" :class="{ 'rotate-180': scoreOpen }" />
             </button>
 
@@ -128,7 +129,7 @@ function store(key: string, value: string) {
                 :thresholds="thresholds"
                 :points="points"
                 :bounds="hexNet.bounds"
-                :measure="measure ? { id: measure.id, color: measure.color ?? '#1f7a34' } : null"
+                :measure="mapMeasure"
                 :measure-counts="measureCounts"
                 :marker-style="markerStyle"
                 :basemap="basemap"

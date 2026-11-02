@@ -14,6 +14,7 @@ use App\ValueObjects\Polygon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
@@ -131,7 +132,7 @@ class HexNetGridService
      */
     public function measureCounts(HexNet $hexNet): array
     {
-        $key = sprintf('hexnet:%d:measure-counts:%s:%s', $hexNet->id, Cache::get(self::POINTS_VERSION_KEY, '0'), $this->configHash($hexNet));
+        $key = sprintf('hexnet:%d:measure-counts:%s:%s:%s', $hexNet->id, Cache::get(self::POINTS_VERSION_KEY, '0'), $this->configHash($hexNet), $this->measuresVersion());
 
         return Cache::remember($key, now()->addDay(), function () use ($hexNet): array {
             $grid = $hexNet->grid();
@@ -155,6 +156,17 @@ class HexNetGridService
 
             return $counts;
         });
+    }
+
+    /**
+     * Measures are added to and removed from points without saving the point, e.g. by bulk actions, so the pivot
+     * table itself is part of the key.
+     */
+    private function measuresVersion(): string
+    {
+        $pivot = DB::table('map_point_characteristic_map_point')->selectRaw('count(*) as total, max(updated_at) as latest')->first();
+
+        return md5(($pivot->total ?? 0).'|'.($pivot->latest ?? ''));
     }
 
     /**
