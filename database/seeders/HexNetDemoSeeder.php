@@ -13,13 +13,20 @@ use App\HexNet\Services\HexNetSetupService;
 use App\Models\Group;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
+use App\Models\MapPointCharacteristic;
 use App\Models\User;
+use App\Services\ImageStorage;
 use App\Services\MapPointConsentService;
+use App\Services\MapPointFieldService;
 use App\ValueObjects\Coordinate;
 use App\ValueObjects\Polygon;
+use App\ValueObjects\StoredImage;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 /**
  * Demo HexaNetz "Darmstadt wird grün" with about 130 stepping stones. For development and demos only.
@@ -125,7 +132,13 @@ class HexNetDemoSeeder extends Seeder
     private function createPoints(HexNet $hexNet, Group $group, MapPointCategory $category, Polygon $polygon, int $count): void
     {
         $grid = new HexGrid($polygon->getCenter(), 1);
-        $characteristicIds = $category->parent?->characteristics()->pluck('id')->all() ?? [];
+        $characteristics = $category->parent?->characteristics()->with('formDefinition.fields')->get()->keyBy('id') ?? collect();
+        $characteristicIds = $characteristics->keys()->all();
+        $photoFieldKeys = $characteristics->map(fn (MapPointCharacteristic $c): ?string => $c->formDefinition?->fields->first()?->uuid)->filter()
+            ->map(fn (string $uuid): string => MapPointConsentService::fieldKey($uuid))->values()->all();
+        $photos = $this->photos();
+        $contactEmail = User::where('is_admin', true)->orderBy('id')->value('email');
+        $fieldService = app(MapPointFieldService::class);
 
         for ($i = 0; $i < $count; $i++) {
             $coordinate = $this->randomCoordinate($grid, $polygon);
@@ -147,18 +160,82 @@ class HexNetDemoSeeder extends Seeder
                 'public_consent' => $consent,
                 'public_consent_at' => $consent === PublicConsent::NOT_REQUIRED ? null : $createdAt,
                 'public_consent_fields' => $consent === PublicConsent::GIVEN
-                    ? [MapPointConsentService::COORDINATE, MapPointConsentService::TITLE, MapPointConsentService::DESCRIPTION]
+                    ? [MapPointConsentService::COORDINATE, MapPointConsentService::TITLE, MapPointConsentService::DESCRIPTION, ...$photoFieldKeys]
                     : null,
             ]);
+
+            if ($contactEmail !== null && mt_rand(1, 100) <= 50) {
+                $point->contact_email = $contactEmail;
+                $point->contact_email_verified_at = $createdAt;
+                $point->contact_enabled = true;
+            }
+
             $point->created_at = $createdAt;
             $point->updated_at = $createdAt;
             $point->save();
 
             shuffle($characteristicIds);
-            $point->characteristics()->attach(array_slice($characteristicIds, 0, mt_rand(1, 3)));
+            $measureIds = array_slice($characteristicIds, 0, mt_rand(1, 3));
+            $point->characteristics()->attach($measureIds);
+
+            $photoField = $characteristics->get($measureIds[0])?->formDefinition?->fields->first();
+
+            if ($photoField !== null && $photos !== [] && mt_rand(1, 100) <= 55) {
+                $fieldService->syncValues($point, [$photoField->uuid => [new StoredImage($photos[mt_rand(0, count($photos) - 1)])]]);
+            }
         }
 
         $hexNet->touch();
+    }
+
+    /**
+     * Five photos, downloaded once from picsum.photos and kept on the image disk. Without network, plain green
+     * placeholders stand in.
+     *
+     * @return array<int, string>
+     */
+    private function photos(): array
+    {
+        $disk = Storage::disk(ImageStorage::DISK);
+        $paths = [];
+
+        foreach (range(1, 5) as $i) {
+            $path = 'hexnet-demo/photo-'.$i.'.jpg';
+
+            if (! $disk->exists($path)) {
+                $disk->put($path, $this->downloadPhoto($i) ?? $this->placeholderPhoto($i));
+            }
+
+            $paths[] = $path;
+        }
+
+        return $paths;
+    }
+
+    private function downloadPhoto(int $i): ?string
+    {
+        try {
+            $response = Http::timeout(10)->get('https://picsum.photos/seed/hexanetz-'.$i.'/1200/800.jpg');
+
+            return $response->successful() && str_starts_with((string) $response->header('Content-Type'), 'image/') ? $response->body() : null;
+        } catch (Throwable) {
+            return null;
+        }
+    }
+
+    private function placeholderPhoto(int $i): string
+    {
+        $image = imagecreatetruecolor(1200, 800);
+
+        for ($y = 0; $y < 800; $y++) {
+            $shade = (int) (60 + 120 * $y / 800);
+            imagefilledrectangle($image, 0, $y, 1199, $y, (int) imagecolorallocate($image, 40 + 10 * $i, $shade, 50));
+        }
+
+        ob_start();
+        imagejpeg($image, null, 85);
+
+        return (string) ob_get_clean();
     }
 
     private function randomCoordinate(HexGrid $grid, Polygon $polygon): ?Coordinate

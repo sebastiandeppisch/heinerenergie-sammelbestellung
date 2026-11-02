@@ -104,7 +104,10 @@ class HexNetController extends Controller
             'categories' => $this->updateCategories($request, $hexNet),
             'play-area' => $this->updatePlayArea($request, $hexNet),
             'grid' => $this->updateGrid($request, $hexNet),
-            'form' => $hexNet->update(['form_definition_id' => $this->validateForm($request, $hexNet)]),
+            'form' => $hexNet->update([
+                'form_definition_id' => $this->validateForm($request, $hexNet),
+                'auto_publish' => $request->boolean('auto_publish'),
+            ]),
             'launch' => $this->updateStatus($request, $hexNet),
         };
 
@@ -125,6 +128,7 @@ class HexNetController extends Controller
             'measures' => ['required', 'array', 'min:1'],
             'measures.*.name' => ['required', 'string', 'max:255'],
             'measures.*.color' => ['required', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'measures.*.icon' => ['nullable', Rule::in(HexNetDefaults::ICONS)],
         ]);
 
         $setup->createCategories($hexNet, $data['main_name'], $data['sub_name'], $data['measures']);
@@ -428,6 +432,7 @@ class HexNetController extends Controller
                 'main_category' => HexNetDefaults::MAIN_CATEGORY,
                 'sub_category' => HexNetDefaults::MAIN_CATEGORY.' '.now()->addYear()->year,
                 'measures' => HexNetDefaults::MEASURES,
+                'icons' => array_map(fn (string $icon): array => ['key' => $icon, 'url' => HexNetDefaults::iconUrl($icon)], HexNetDefaults::ICONS),
                 'min_radius' => HexNet::MIN_RADIUS_M,
                 'max_radius' => HexNet::MAX_RADIUS_M,
             ],

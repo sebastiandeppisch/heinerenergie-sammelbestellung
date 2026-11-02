@@ -6,6 +6,7 @@ import { computed } from 'vue';
 
 const props = defineProps<{
     entry: App.HexNet.Data.HexNetPointData;
+    contactUrl?: string | null;
 }>();
 
 const point = computed(() => props.entry.point);
@@ -34,7 +35,7 @@ const fieldsWithoutImages = computed(() => point.value.fields.filter((field) => 
 
         <MapPointFieldList :fields="fieldsWithoutImages" :characteristics="point.characteristics" />
 
-        <Button v-if="point.has_contact" variant="outline" size="sm" class="w-full" disabled title="Kommt bald">
+        <Button v-if="point.has_contact && contactUrl" as="a" :href="contactUrl" variant="outline" size="sm" class="w-full">
             <MessageCircle class="mr-1 h-4 w-4" />
             Kontakt aufnehmen
         </Button>

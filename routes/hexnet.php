@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
+use App\HexNet\Http\Controllers\HexNetContactController;
 use App\HexNet\Http\Controllers\HexNetController;
 use App\HexNet\Http\Controllers\HexNetPublicController;
+use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function (): void {
@@ -16,3 +18,9 @@ Route::middleware('auth')->group(function (): void {
 
 Route::get('hexanetz/{slug}', [HexNetPublicController::class, 'show'])->name('hexnet.public');
 Route::get('hexanetz/{slug}/stand', [HexNetPublicController::class, 'score'])->name('hexnet.score');
+Route::get('hexanetz/{slug}/trittsteine/{mapPoint}/kontakt', [HexNetContactController::class, 'create'])
+    ->middleware('throttle:map-contact')
+    ->name('hexnet.contact.create');
+Route::post('hexanetz/{slug}/trittsteine/{mapPoint}/kontakt', [HexNetContactController::class, 'store'])
+    ->middleware([HandlePrecognitiveRequests::class, 'throttle:map-contact'])
+    ->name('hexnet.contact.store');

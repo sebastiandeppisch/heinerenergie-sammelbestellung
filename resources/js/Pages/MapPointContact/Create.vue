@@ -16,14 +16,19 @@ defineOptions({
 });
 
 const props = defineProps<{
-    mapEmbedId: string;
+    mapEmbedId?: string;
     mapPoint: { id: string; title: string };
     messageMaxLength: number;
+    /** Other maps than embeds, e.g. a campaign, pass their own urls. */
+    storeUrl?: string;
+    backUrl?: string;
 }>();
+
+const backHref = props.backUrl ?? route('map.public', props.mapEmbedId ?? '');
 
 useAutoResizeIframeIfIsIframe();
 
-const form = useForm('post', route('map-contact.store', [props.mapEmbedId, props.mapPoint.id]), {
+const form = useForm('post', props.storeUrl ?? route('map-contact.store', [props.mapEmbedId ?? '', props.mapPoint.id]), {
     name: '',
     email: '',
     message: '',
@@ -38,7 +43,7 @@ function submit() {
 
 <template>
     <div class="mx-auto w-full max-w-2xl space-y-4">
-        <Link :href="route('map.public', mapEmbedId)" class="inline-flex items-center gap-1 text-sm text-muted-foreground hover:underline">
+        <Link :href="backHref" class="inline-flex items-center gap-1 text-sm text-muted-foreground hover:underline">
             <ArrowLeft class="h-4 w-4" />
             Zurück zur Karte
         </Link>

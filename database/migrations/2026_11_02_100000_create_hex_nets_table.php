@@ -28,6 +28,7 @@ return new class extends Migration
             $table->unsignedInteger('threshold_medium')->default(2);
             $table->unsignedInteger('threshold_dark')->default(3);
             $table->unsignedInteger('jitter_m')->default(40);
+            $table->boolean('auto_publish')->default(false);
             $table->foreignId('form_definition_id')->nullable()->constrained()->nullOnDelete();
             $table->timestamps();
         });

@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import './hexnet.css';
 import { computed } from 'vue';
-import { LEVELS } from './hexnet';
+import { LEVELS, MEASURE_OPACITY } from './hexnet';
 
 const props = defineProps<{
     stats: App.HexNet.Data.HexNetStatsData;
     thresholds: { medium: number; dark: number };
+    /** A measure color replaces the greens, with the same steps of strength as on the map. */
+    color?: string | null;
 }>();
+
+const fill = (level: number) =>
+    props.color ? (level === 0 ? LEVELS[0].color : `color-mix(in srgb, ${props.color} ${MEASURE_OPACITY[level] * 100}%, #fff)`) : LEVELS[level].color;
 
 const width = (level: number) => (props.stats.playable_cells ? (100 * props.stats.levels[level]) / props.stats.playable_cells : 0) + '%';
 
@@ -24,15 +29,15 @@ const steps = computed(() => [
             <div class="big">{{ stats.percent }}<span> %</span></div>
             <div class="cap">der bespielbaren Fläche hat mindestens einen Trittstein</div>
             <div class="track">
-                <i :style="{ width: width(3), background: LEVELS[3].color }" />
-                <i :style="{ width: width(2), background: LEVELS[2].color }" />
-                <i :style="{ width: width(1), background: LEVELS[1].color }" />
+                <i :style="{ width: width(3), background: fill(3) }" />
+                <i :style="{ width: width(2), background: fill(2) }" />
+                <i :style="{ width: width(1), background: fill(1) }" />
             </div>
         </div>
         <div class="hexnet-group">
             <h2>Spielstand</h2>
             <div v-for="step in steps" :key="step.level" class="step">
-                <span class="hexnet-swatch" :style="{ background: LEVELS[step.level].color }" />
+                <span class="hexnet-swatch" :style="{ background: fill(step.level) }" />
                 <div class="lbl">
                     <b>{{ LEVELS[step.level].name }}</b
                     ><small>{{ step.hint }}</small>

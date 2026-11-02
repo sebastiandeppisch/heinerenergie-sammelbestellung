@@ -4,11 +4,13 @@ import HexNetLogo from '@/components/HexNet/HexNetLogo.vue';
 import HexNetMap from '@/components/HexNet/HexNetMap.vue';
 import HexNetPointInfo from '@/components/HexNet/HexNetPointInfo.vue';
 import HexNetScoreboard from '@/components/HexNet/HexNetScoreboard.vue';
-import type { HexCells } from '@/components/HexNet/hexnet';
+import HexNetViewControls from '@/components/HexNet/HexNetViewControls.vue';
+import { BASEMAPS, type Basemap, type HexCells, levelFor, type MarkerStyle } from '@/components/HexNet/hexnet';
 import NoLayout from '@/layouts/NoLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import { ChevronDown, Plus } from '@lucide/vue';
-import { computed, ref } from 'vue';
+import { ChevronDown, Info, Plus } from '@lucide/vue';
+import { computed, ref, watch } from 'vue';
+import { route } from 'ziggy-js';
 
 defineOptions({ layout: NoLayout });
 
@@ -18,10 +20,59 @@ const props = defineProps<{
     counts: Record<string, number>;
     stats: App.HexNet.Data.HexNetStatsData;
     points: App.HexNet.Data.HexNetPointData[];
+    measures: App.Data.MapPointCharacteristicData[];
+    measureCounts: Record<string, Record<string, number>>;
 }>();
 
 const thresholds = computed(() => ({ medium: props.hexNet.threshold_medium, dark: props.hexNet.threshold_dark }));
 const scoreOpen = ref(false);
+
+const measureId = ref<string | null>(null);
+const measure = computed(() => props.measures.find((m) => m.id === measureId.value) ?? null);
+const basemap = ref<Basemap>(validBasemap(stored('hexnet.basemap', 'soft')));
+const markerStyle = ref<MarkerStyle>(stored('hexnet.markerStyle', 'card') as MarkerStyle);
+watch(basemap, (value) => store('hexnet.basemap', value));
+watch(markerStyle, (value) => store('hexnet.markerStyle', value));
+
+/** The score of the shown measure, built like the overall score from the counts per cell. */
+const shownStats = computed<App.HexNet.Data.HexNetStatsData>(() => {
+    if (!measure.value) return props.stats;
+    const counts = Object.values(props.measureCounts[measure.value.id] ?? {});
+    const levels = [0, 0, 0, 0];
+    counts.forEach((count) => levels[levelFor(count, thresholds.value)]++);
+    const green = levels[1] + levels[2] + levels[3];
+    levels[0] = Math.max(0, props.stats.playable_cells - green);
+    return {
+        percent: props.stats.playable_cells ? Math.round((100 * green) / props.stats.playable_cells) : 0,
+        playable_cells: props.stats.playable_cells,
+        levels,
+        total_points: counts.reduce((a, b) => a + b, 0),
+    };
+});
+
+function contactUrl(entry: App.HexNet.Data.HexNetPointData): string {
+    return route('hexnet.contact.create', [props.hexNet.slug, entry.point.id]);
+}
+
+function validBasemap(value: string): Basemap {
+    return value in BASEMAPS ? (value as Basemap) : 'soft';
+}
+
+function stored(key: string, fallback: string): string {
+    try {
+        return localStorage.getItem(key) ?? fallback;
+    } catch {
+        return fallback;
+    }
+}
+
+function store(key: string, value: string) {
+    try {
+        localStorage.setItem(key, value);
+    } catch {
+        // per-viewer convenience only
+    }
+}
 </script>
 
 <template>
@@ -29,14 +80,9 @@ const scoreOpen = ref(false);
     <div class="hexnet-app">
         <aside class="hexnet-side">
             <div class="brand">
-                <div class="brand-row">
-                    <div>
-                        <div class="tag">Point of Insects</div>
-                        <h1>{{ hexNet.title }}</h1>
-                        <p v-if="hexNet.subtitle">{{ hexNet.subtitle }}</p>
-                    </div>
-                    <HexNetLogo :wordmark="false" class="logo" />
-                </div>
+                <div class="tag">Point of Insects</div>
+                <h1>{{ hexNet.title }}</h1>
+                <p v-if="hexNet.subtitle">{{ hexNet.subtitle }}</p>
                 <div v-if="hexNet.is_draft" class="draft">Vorschau – dieses HexaNetz ist noch ein Entwurf</div>
             </div>
 
@@ -50,25 +96,54 @@ const scoreOpen = ref(false);
             </button>
 
             <div class="details" :class="{ open: scoreOpen }">
-                <HexNetScoreboard :stats="stats" :thresholds="thresholds" />
+                <div v-if="measure" class="measure-head" :style="{ '--c': measure.color ?? '#1f7a34' }">
+                    Spielstand nur für <b>{{ measure.name }}</b>
+                    <button @click="measureId = null">alle zeigen</button>
+                </div>
+                <HexNetScoreboard :stats="shownStats" :thresholds="thresholds" :color="measure?.color ?? null" />
+                <HexNetViewControls v-model:measure="measureId" v-model:basemap="basemap" v-model:marker-style="markerStyle" :measures="measures" />
                 <div class="join">
                     <h2>Mitmachen</h2>
                     <p v-if="hexNet.cta_text" class="note">{{ hexNet.cta_text }}</p>
                     <a v-if="hexNet.form_url" :href="hexNet.form_url" class="act">Trittstein anmelden</a>
                 </div>
-                <div class="powered">
-                    <HexNetLogo class="h-10 w-auto" />
-                </div>
+                <details class="about">
+                    <summary><Info class="h-3.5 w-3.5" /> Über diese Karte</summary>
+                    <div class="about-body">
+                        <HexNetLogo class="about-logo" />
+                        <p>
+                            Die Karte ist mit <b>HexaNetz</b> gebaut, einem Kampagnen-Baustein der Plattform heiner*energie. Waben werden aus den
+                            gemeldeten Trittsteinen berechnet, einzelne Gärten sind nur ungefähr verortet.
+                        </p>
+                        <p>Ihr wollt so eine Kampagne für eure Initiative? Sprecht uns an.</p>
+                    </div>
+                </details>
             </div>
         </aside>
 
         <main class="hexnet-main">
-            <HexNetMap :cells="cells" :counts="counts" :thresholds="thresholds" :points="points" :bounds="hexNet.bounds">
+            <HexNetMap
+                :cells="cells"
+                :counts="counts"
+                :thresholds="thresholds"
+                :points="points"
+                :bounds="hexNet.bounds"
+                :measure="measure ? { id: measure.id, color: measure.color ?? '#1f7a34' } : null"
+                :measure-counts="measureCounts"
+                :marker-style="markerStyle"
+                :basemap="basemap"
+            >
                 <template #cell="{ cell }">
-                    <HexNetCellInfo :cell="cell" :thresholds="thresholds" :form-url="hexNet.form_url" />
+                    <HexNetCellInfo
+                        :cell="cell"
+                        :thresholds="thresholds"
+                        :form-url="hexNet.form_url"
+                        :measure-name="measure?.name"
+                        :measure-color="measure?.color"
+                    />
                 </template>
                 <template #point="{ point }">
-                    <HexNetPointInfo :entry="point" />
+                    <HexNetPointInfo :entry="point" :contact-url="contactUrl(point)" />
                 </template>
             </HexNetMap>
             <a v-if="hexNet.form_url" :href="hexNet.form_url" class="fab"><Plus class="h-5 w-5" /> Trittstein anmelden</a>
@@ -110,16 +185,6 @@ const scoreOpen = ref(false);
     padding: 16px 18px 14px;
     border-bottom: 1px solid #dde5da;
 }
-.brand-row {
-    display: flex;
-    gap: 10px;
-    justify-content: space-between;
-    align-items: flex-start;
-}
-.logo {
-    width: 72px;
-    flex: 0 0 72px;
-}
 .tag {
     font-size: 10.5px;
     font-weight: 700;
@@ -146,6 +211,24 @@ h1 {
     color: #a24f06;
     font-size: 11.5px;
     font-weight: 600;
+}
+.measure-head {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    padding: 8px 18px;
+    background: color-mix(in srgb, var(--c) 14%, #fff);
+    border-bottom: 1px solid #dde5da;
+    font-size: 12px;
+}
+.measure-head button {
+    margin-left: auto;
+    border: 0;
+    background: none;
+    color: #46564e;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 11.5px;
 }
 .join {
     padding: 15px 18px;
@@ -178,12 +261,32 @@ h1 {
 .act:hover {
     background: #cf6408;
 }
-.powered {
+.about {
     margin-top: auto;
-    padding: 18px;
-    display: flex;
-    justify-content: center;
-    opacity: 0.85;
+    padding: 10px 18px 14px;
+    font-size: 11px;
+    color: #7d8d85;
+}
+.about summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    list-style: none;
+}
+.about summary::-webkit-details-marker {
+    display: none;
+}
+.about-body {
+    margin-top: 8px;
+    line-height: 1.5;
+}
+.about-body p {
+    margin: 0 0 6px;
+}
+.about-logo {
+    width: 110px;
+    margin-bottom: 6px;
 }
 .mobile-score,
 .fab {
@@ -205,7 +308,6 @@ h1 {
         padding: 10px 14px;
     }
     .brand p,
-    .logo,
     .tag {
         display: none;
     }
@@ -251,8 +353,7 @@ h1 {
     .details.open {
         display: block;
     }
-    .details .act,
-    .powered {
+    .details .act {
         display: none;
     }
     .hexnet-main {

@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\HexNet\Http\Controllers;
 
+use App\Data\MapPointCharacteristicData;
 use App\HexNet\Data\HexNetPublicData;
 use App\HexNet\Models\HexNet;
 use App\HexNet\Services\HexNetGridService;
 use App\HexNet\Services\HexNetPointPresenter;
 use App\Http\Controllers\Controller;
+use App\Models\MapPointCharacteristic;
 use App\Services\CurrentGroupService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -31,6 +33,8 @@ class HexNetPublicController extends Controller
             'counts' => (object) $counts,
             'stats' => $this->gridService->stats($hexNet, $counts),
             'points' => $presenter->presentAll($hexNet),
+            'measures' => $this->gridService->measures($hexNet)->map(fn (MapPointCharacteristic $measure): MapPointCharacteristicData => MapPointCharacteristicData::fromModel($measure))->values(),
+            'measureCounts' => (object) $this->gridService->measureCounts($hexNet),
         ]);
     }
 

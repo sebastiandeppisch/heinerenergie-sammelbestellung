@@ -3,10 +3,10 @@ export type HexCells = GeoJSON.FeatureCollection<GeoJSON.Polygon, { id: string }
 export type Thresholds = { medium: number; dark: number };
 
 export const LEVELS = [
-    { name: 'Noch offen', color: '#e4e9e2', opacity: 0.34 },
-    { name: 'Hellgrün', color: '#b7e4a8', opacity: 0.62 },
-    { name: 'Mittelgrün', color: '#52b45a', opacity: 0.66 },
-    { name: 'Dunkelgrün', color: '#1f7a34', opacity: 0.72 },
+    { name: 'Noch offen', color: '#e4e9e2', opacity: 0.3 },
+    { name: 'Hellgrün', color: '#b7e4a8', opacity: 0.72 },
+    { name: 'Mittelgrün', color: '#52b45a', opacity: 0.74 },
+    { name: 'Dunkelgrün', color: '#1f7a34', opacity: 0.8 },
 ] as const;
 
 export const SIGNAL = '#e8720c';
@@ -36,27 +36,43 @@ export function cellCenter(feature: GeoJSON.Feature<GeoJSON.Polygon>): { lat: nu
     return { lat, lng };
 }
 
-export function lollySvg(colors: string[], size: number): string {
-    const r = size / 2;
-    const stick = Math.round(size * 0.6);
-    const segments = colors.length === 0 ? ['#7d8d85'] : colors;
-    const step = (2 * Math.PI) / segments.length;
-    const paths = segments
-        .map((color, i) => {
-            if (segments.length === 1) {
-                return `<circle cx="${r}" cy="${r}" r="${r - 1}" fill="${color}"/>`;
-            }
-            const a0 = i * step - Math.PI / 2;
-            const a1 = a0 + step;
-            const x0 = r + (r - 1) * Math.cos(a0);
-            const y0 = r + (r - 1) * Math.sin(a0);
-            const x1 = r + (r - 1) * Math.cos(a1);
-            const y1 = r + (r - 1) * Math.sin(a1);
-            const large = step > Math.PI ? 1 : 0;
-            return `<path d="M${r},${r} L${x0.toFixed(2)},${y0.toFixed(2)} A${r - 1},${r - 1} 0 ${large} 1 ${x1.toFixed(2)},${y1.toFixed(2)} Z" fill="${color}"/>`;
-        })
-        .join('');
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size + stick}" viewBox="0 0 ${size} ${size + stick}">
-<line x1="${r}" y1="${r}" x2="${r}" y2="${size + stick - 1}" stroke="#4c5b51" stroke-width="${Math.max(1.5, size / 12)}" stroke-linecap="round"/>
-${paths}<circle cx="${r}" cy="${r}" r="${r - 1}" fill="none" stroke="#ffffff" stroke-width="1.5"/><circle cx="${r}" cy="${r}" r="${Math.max(1.5, size / 9)}" fill="#ffffff"/></svg>`;
-}
+export type MarkerStyle = 'card' | 'wheel';
+
+export type Basemap = 'soft' | 'muted' | 'osmde' | 'hot';
+
+export const BASEMAPS: Record<Basemap, { label: string; url: string; subdomains: string; attribution: string; className: string }> = {
+    soft: {
+        label: 'OSM, sanft gedämpft',
+        url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+        subdomains: 'abc',
+        attribution: '&copy; OpenStreetMap',
+        className: 'hexnet-tiles-soft',
+    },
+    muted: {
+        label: 'OSM, entsättigt',
+        url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+        subdomains: 'abc',
+        attribution: '&copy; OpenStreetMap',
+        className: 'hexnet-tiles-muted',
+    },
+    osmde: {
+        label: 'OSM Deutschland',
+        url: 'https://tile.openstreetmap.de/{z}/{x}/{y}.png',
+        subdomains: 'abc',
+        attribution: '&copy; OpenStreetMap',
+        className: 'hexnet-tiles-soft',
+    },
+    hot: {
+        label: 'OSM Humanitarian',
+        url: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+        subdomains: 'abc',
+        attribution: '&copy; OpenStreetMap, Tiles HOT/OSM France',
+        className: 'hexnet-tiles-hot',
+    },
+};
+
+/** From this zoom the cells get lighter, so streets and gardens below stay visible. */
+export const ZOOM_LIGHT_CELLS = 16.5;
+
+/** Fill of a cell when only one measure is shown: its color, stronger with more stepping stones. */
+export const MEASURE_OPACITY = [0, 0.3, 0.55, 0.8] as const;

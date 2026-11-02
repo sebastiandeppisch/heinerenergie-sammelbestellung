@@ -3,6 +3,7 @@ import CategoryVisibilityFilter from '@/components/CategoryVisibilityFilter.vue'
 import { Button } from '@/shadcn/components/ui/button';
 import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/shadcn/components/ui/popover';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shadcn/components/ui/tabs';
 import { isIncludedByAncestor } from '@/utils/categoryTree';
 import { useForm } from '@inertiajs/vue3';
@@ -13,7 +14,12 @@ import { route } from 'ziggy-js';
 const props = defineProps<{
     hexNet: App.HexNet.Data.HexNetData;
     categories: Array<App.Data.MapPointCategoryData>;
-    defaults: { main_category: string; sub_category: string; measures: Array<{ name: string; color: string }> };
+    defaults: {
+        main_category: string;
+        sub_category: string;
+        measures: Array<{ name: string; color: string; icon: string }>;
+        icons: Array<{ key: string; url: string }>;
+    };
 }>();
 
 const emit = defineEmits<{ saved: [] }>();
@@ -54,7 +60,11 @@ function saveExisting() {
 }
 
 function addMeasure() {
-    template.measures.push({ name: '', color: '#7cb342' });
+    template.measures.push({ name: '', color: '#7cb342', icon: 'sprout' });
+}
+
+function iconUrl(key: string | null): string | undefined {
+    return props.defaults.icons.find((icon) => icon.key === key)?.url;
 }
 
 watch(
@@ -101,6 +111,36 @@ watch(
                             class="h-9 w-10 cursor-pointer rounded border"
                             :aria-label="`Farbe ${measure.name}`"
                         />
+                        <Popover>
+                            <PopoverTrigger as-child>
+                                <button
+                                    type="button"
+                                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2"
+                                    :style="{ borderColor: measure.color, background: `color-mix(in srgb, ${measure.color} 22%, #fff)` }"
+                                    :aria-label="`Icon für ${measure.name} wählen`"
+                                >
+                                    <img v-if="iconUrl(measure.icon)" :src="iconUrl(measure.icon)" alt="" class="h-5 w-5" />
+                                </button>
+                            </PopoverTrigger>
+                            <PopoverContent class="w-64">
+                                <div class="grid grid-cols-6 gap-1">
+                                    <button
+                                        v-for="icon in defaults.icons"
+                                        :key="icon.key"
+                                        type="button"
+                                        class="flex h-9 w-9 items-center justify-center rounded-md hover:bg-muted"
+                                        :class="{ 'ring-2 ring-green-700': measure.icon === icon.key }"
+                                        :title="icon.key"
+                                        @click="measure.icon = icon.key"
+                                    >
+                                        <img :src="icon.url" alt="" class="h-5 w-5" />
+                                    </button>
+                                </div>
+                                <p class="mt-2 text-xs text-muted-foreground">
+                                    Platzhalter-Icons. Eigene Icons lassen sich später an der Maßnahme hochladen.
+                                </p>
+                            </PopoverContent>
+                        </Popover>
                         <Input v-model="measure.name" class="flex-1" />
                         <Button variant="ghost" size="sm" @click="template.measures.splice(index, 1)"><Trash2 class="h-4 w-4" /></Button>
                     </div>
@@ -108,7 +148,9 @@ watch(
                     <p v-if="template.errors.measures" class="text-sm text-red-500">{{ template.errors.measures }}</p>
                 </div>
                 <Button :disabled="template.processing" @click="createFromTemplate">Kategorien &amp; Maßnahmen anlegen</Button>
-                <p class="text-xs text-muted-foreground">Gibt es die Hauptkategorie schon, werden nur fehlende Maßnahmen ergänzt.</p>
+                <p class="text-xs text-muted-foreground">
+                    Gibt es die Hauptkategorie schon, werden nur fehlende Maßnahmen ergänzt. Jede neue Maßnahme bekommt ein optionales Foto-Feld.
+                </p>
             </TabsContent>
 
             <TabsContent value="existing" class="space-y-4 pt-2">

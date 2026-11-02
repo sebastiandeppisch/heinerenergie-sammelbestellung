@@ -26,5 +26,6 @@ class HexNetHighlightData extends Data
         public string $cell,
         public Coordinate $coordinate,
         public string $public_url,
+        public bool $published,
     ) {}
 }

@@ -11,10 +11,13 @@ defineOptions({
     layout: isIframe ? NoLayout : PublicLayout,
 });
 
-defineProps<{
-    mapEmbedId: string;
+const props = defineProps<{
+    mapEmbedId?: string;
     expiresHours: number;
+    backUrl?: string;
 }>();
+
+const backHref = props.backUrl ?? route('map.public', props.mapEmbedId ?? '');
 
 useAutoResizeIframeIfIsIframe();
 </script>
@@ -32,7 +35,7 @@ useAutoResizeIframeIfIsIframe();
             </CardContent>
         </Card>
 
-        <Link :href="route('map.public', mapEmbedId)" class="inline-flex items-center gap-1 text-sm text-muted-foreground hover:underline">
+        <Link :href="backHref" class="inline-flex items-center gap-1 text-sm text-muted-foreground hover:underline">
             <ArrowLeft class="h-4 w-4" />
             Zurück zur Karte
         </Link>

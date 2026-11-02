@@ -39,6 +39,7 @@ use Illuminate\Support\Carbon;
  * @property int $threshold_medium
  * @property int $threshold_dark
  * @property int $jitter_m
+ * @property bool $auto_publish
  * @property int|null $form_definition_id
  * @property Carbon $created_at
  * @property Carbon $updated_at
@@ -74,6 +75,7 @@ class HexNet extends Model
         'threshold_medium',
         'threshold_dark',
         'jitter_m',
+        'auto_publish',
         'form_definition_id',
     ];
 
@@ -84,6 +86,7 @@ class HexNet extends Model
         'threshold_medium' => 2,
         'threshold_dark' => 3,
         'jitter_m' => 40,
+        'auto_publish' => false,
     ];
 
     protected function casts(): array
@@ -100,6 +103,7 @@ class HexNet extends Model
             'threshold_medium' => 'integer',
             'threshold_dark' => 'integer',
             'jitter_m' => 'integer',
+            'auto_publish' => 'boolean',
         ];
     }
 

@@ -26,7 +26,11 @@ onMounted(() => setTimeout(() => mapRef.value?.flyTo(props.highlight.coordinate,
                 :interactive="false"
             />
         </div>
-        <p class="text-base font-semibold">Deine Wabe zählt jetzt. Dein Garten erscheint nach Freigabe auf der Karte.</p>
+        <p class="text-base font-semibold">
+            Deine Wabe zählt jetzt.
+            <template v-if="highlight.published">Dein Garten ist schon auf der Karte zu sehen.</template>
+            <template v-else>Dein Garten erscheint nach Freigabe auf der Karte.</template>
+        </p>
         <div class="flex flex-wrap gap-2">
             <Button disabled title="Kommt bald">Erzähl mehr</Button>
             <Button as="a" variant="outline" :href="highlight.public_url">Zum Spielstand von „{{ highlight.hex_net.title }}“</Button>

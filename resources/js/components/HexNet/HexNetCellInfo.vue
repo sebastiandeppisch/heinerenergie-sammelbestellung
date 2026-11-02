@@ -7,6 +7,8 @@ const props = defineProps<{
     cell: CellSelection;
     thresholds: Thresholds;
     formUrl?: string | null;
+    measureName?: string | null;
+    measureColor?: string | null;
 }>();
 
 const missing = computed(() => missingToNextLevel(props.cell.count, props.thresholds));
@@ -22,10 +24,12 @@ const joinUrl = computed(() => {
 <template>
     <div class="space-y-1 text-[13px] text-[#16211c]">
         <div class="flex items-center gap-2">
-            <span class="hexnet-swatch" :style="{ background: LEVELS[cell.level].color }" />
+            <span class="hexnet-swatch" :style="{ background: measureColor && cell.level > 0 ? measureColor : LEVELS[cell.level].color }" />
             <h3 class="m-0 text-sm font-bold">{{ LEVELS[cell.level].name }}</h3>
         </div>
-        <div>{{ cell.count }} {{ steppingStones(cell.count) }} in dieser Wabe</div>
+        <div>
+            {{ cell.count }} {{ steppingStones(cell.count) }} <template v-if="measureName">mit „{{ measureName }}“ </template>in dieser Wabe
+        </div>
         <div class="font-semibold" :style="{ color: SIGNAL }">
             <template v-if="missing">Noch {{ missing.missing }} {{ steppingStones(missing.missing) }} bis {{ missing.next }}.</template>
             <template v-else>Höchste Stufe erreicht.</template>

@@ -10,6 +10,7 @@ use App\HexNet\Data\HexNetPublicData;
 use App\HexNet\Services\HexNetGridService;
 use App\HexNet\Services\HexNetJitter;
 use App\HexNet\Services\HexNetResolver;
+use App\Services\PublicMapPointPresenter;
 use Inertia\Inertia;
 use Throwable;
 
@@ -56,6 +57,7 @@ class ShareHexNetHighlight
             cell: $grid->cellOf($mapPoint->coordinate),
             coordinate: $this->jitter->apply($mapPoint->coordinate, $mapPoint->uuid, $hexNet->jitter_m),
             public_url: route('hexnet.public', $hexNet->slug),
+            published: app(PublicMapPointPresenter::class)->isVisible($mapPoint),
         ));
     }
 }

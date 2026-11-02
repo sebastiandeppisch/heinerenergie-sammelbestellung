@@ -26,20 +26,31 @@ final class HexNetDefaults
     public const int JITTER_M = 40;
 
     /**
-     * @var array<int, array{name: string, color: string}>
+     * @var array<int, array{name: string, color: string, icon: string}>
      */
     public const array MEASURES = [
-        ['name' => '5 m² Rasen ungemäht', 'color' => '#7cb342'],
-        ['name' => 'Blühstreifen angelegt', 'color' => '#f4b400'],
-        ['name' => 'Totholzhaufen', 'color' => '#8d6e63'],
-        ['name' => 'Wildsträucher gepflanzt', 'color' => '#2e7d32'],
-        ['name' => 'Sandlinse für Wildbienen', 'color' => '#e0c068'],
-        ['name' => 'Regentonne & feuchte Ecke', 'color' => '#4fc3f7'],
-        ['name' => 'Efeu an der Mauer stehen lassen', 'color' => '#558b2f'],
-        ['name' => 'Steinhaufen als Unterschlupf', 'color' => '#9e9e9e'],
-        ['name' => 'Laubhaufen überwintert', 'color' => '#e8720c'],
-        ['name' => 'Staudenbeet statt Schotter', 'color' => '#ab47bc'],
+        ['name' => '5 m² Rasen ungemäht', 'color' => '#7cb342', 'icon' => 'wheat'],
+        ['name' => 'Blühstreifen angelegt', 'color' => '#f4b400', 'icon' => 'flower'],
+        ['name' => 'Totholzhaufen', 'color' => '#8d6e63', 'icon' => 'bug'],
+        ['name' => 'Wildsträucher gepflanzt', 'color' => '#2e7d32', 'icon' => 'tree-deciduous'],
+        ['name' => 'Sandlinse für Wildbienen', 'color' => '#e0c068', 'icon' => 'hexagon'],
+        ['name' => 'Regentonne & feuchte Ecke', 'color' => '#4fc3f7', 'icon' => 'droplets'],
+        ['name' => 'Efeu an der Mauer stehen lassen', 'color' => '#558b2f', 'icon' => 'leaf'],
+        ['name' => 'Steinhaufen als Unterschlupf', 'color' => '#9e9e9e', 'icon' => 'mountain'],
+        ['name' => 'Laubhaufen überwintert', 'color' => '#e8720c', 'icon' => 'leafy-green'],
+        ['name' => 'Staudenbeet statt Schotter', 'color' => '#ab47bc', 'icon' => 'flower-2'],
     ];
+
+    /** Placeholder icons in public/hexnet/icons, admins pick one per measure. */
+    public const array ICONS = [
+        'wheat', 'flower', 'flower-2', 'bug', 'tree-deciduous', 'tree-pine', 'hexagon', 'droplets', 'leaf', 'leafy-green',
+        'mountain', 'sprout', 'clover', 'bird', 'snail', 'worm', 'squirrel', 'feather', 'sun', 'shovel', 'fence',
+    ];
+
+    public static function iconUrl(string $icon): string
+    {
+        return asset('hexnet/icons/'.$icon.'.svg');
+    }
 
     public const string COLOR_OPEN = '#e4e9e2';
 

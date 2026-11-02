@@ -9,6 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
+import { Stepper, StepperItem, StepperSeparator, StepperTitle, StepperTrigger } from '@/shadcn/components/ui/stepper';
+import { Switch } from '@/shadcn/components/ui/switch';
 import { Textarea } from '@/shadcn/components/ui/textarea';
 import { router, setLayoutProps, useForm } from '@inertiajs/vue3';
 import { Check, ChevronLeft, ChevronRight, CircleAlert, ExternalLink, FileText, Pencil, Rocket, Sparkles } from '@lucide/vue';
@@ -28,7 +30,8 @@ const props = defineProps<{
     defaults: {
         main_category: string;
         sub_category: string;
-        measures: Array<{ name: string; color: string }>;
+        measures: Array<{ name: string; color: string; icon: string }>;
+        icons: Array<{ key: string; url: string }>;
         min_radius: number;
         max_radius: number;
     };
@@ -106,7 +109,7 @@ const texts = useForm({
 
 const playArea = useForm({ play_area: props.hexNet?.play_area ?? { coordinates: [] } });
 
-const formStep = useForm({ form_definition_id: props.hexNet?.form_definition_id ?? null });
+const formStep = useForm({ form_definition_id: props.hexNet?.form_definition_id ?? null, auto_publish: props.hexNet?.auto_publish ?? false });
 const creatingForm = ref(false);
 
 function createForm() {
@@ -141,34 +144,43 @@ const allDone = computed(() => Object.values(props.checklist).every(Boolean));
             </template>
         </PageHeader>
 
-        <ol class="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7" data-test="hexnet-stepper">
-            <li v-for="(step, index) in steps" :key="step">
-                <button
-                    class="flex w-full items-center gap-2 rounded-md border px-3 py-2 text-left text-xs transition"
-                    :class="[
-                        step === current ? 'border-green-700 bg-green-50 font-semibold text-green-900' : 'bg-white hover:border-green-600',
-                        !hexNet && index > 0 ? 'cursor-not-allowed opacity-50' : '',
-                    ]"
-                    :disabled="!hexNet && index > 0"
-                    @click="go(step)"
-                >
-                    <span
-                        class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px]"
-                        :class="
-                            index < currentIndex
-                                ? 'bg-green-700 text-white'
-                                : step === current
-                                  ? 'bg-green-800 text-white'
-                                  : 'bg-gray-200 text-gray-600'
-                        "
+        <Stepper :model-value="currentIndex + 1" class="mb-6 flex w-full items-start gap-2" data-test="hexnet-stepper">
+            <StepperItem
+                v-for="(step, index) in steps"
+                :key="step"
+                v-slot="{ state }"
+                :step="index + 1"
+                class="relative flex w-full flex-col items-center justify-center"
+                :disabled="!hexNet && index > 0"
+                :completed="!!hexNet && index < currentIndex"
+            >
+                <StepperSeparator
+                    v-if="index !== steps.length - 1"
+                    class="absolute top-5 right-[calc(-50%+10px)] left-[calc(50%+20px)] block h-0.5 shrink-0 rounded-full bg-muted group-data-[state=completed]:bg-green-700"
+                />
+                <StepperTrigger as-child>
+                    <Button
+                        :variant="state === 'inactive' ? 'outline' : 'default'"
+                        size="icon"
+                        class="z-10 shrink-0 rounded-full"
+                        :class="[
+                            state === 'completed' && 'bg-green-700 hover:bg-green-800',
+                            state === 'active' && 'ring-2 ring-green-700 ring-offset-2',
+                        ]"
+                        :disabled="!hexNet && index > 0"
+                        @click="go(step)"
                     >
-                        <Check v-if="index < currentIndex" class="h-3 w-3" />
-                        <template v-else>{{ index + 1 }}</template>
-                    </span>
-                    {{ STEP_META[step].title }}
-                </button>
-            </li>
-        </ol>
+                        <Check v-if="state === 'completed'" class="size-5" />
+                        <span v-else class="text-xs">{{ index + 1 }}</span>
+                    </Button>
+                </StepperTrigger>
+                <div class="mt-2 flex flex-col items-center text-center">
+                    <StepperTitle :class="[state === 'active' && 'text-primary']" class="text-xs font-semibold transition lg:text-sm">
+                        {{ STEP_META[step].title }}
+                    </StepperTitle>
+                </div>
+            </StepperItem>
+        </Stepper>
 
         <Card>
             <CardHeader>
@@ -284,6 +296,16 @@ const allDone = computed(() => Object.values(props.checklist).every(Boolean));
                         </Select>
                         <p v-if="formStep.errors.form_definition_id" class="text-sm text-red-500">{{ formStep.errors.form_definition_id }}</p>
                     </div>
+                    <div class="flex items-start justify-between gap-4 rounded-md border p-3">
+                        <div>
+                            <Label for="auto_publish">Neue Trittsteine sofort veröffentlichen</Label>
+                            <p class="mt-1 text-xs text-muted-foreground">
+                                Sonst erscheinen sie erst nach Freigabe durch euch auf der Karte. Gezählt werden sie immer, sichtbar sind sie nur mit
+                                Einwilligung.
+                            </p>
+                        </div>
+                        <Switch id="auto_publish" v-model="formStep.auto_publish" />
+                    </div>
                     <div class="flex flex-wrap gap-2">
                         <Button :disabled="formStep.processing" @click="saveStep('form', formStep)">Speichern & weiter</Button>
                         <Button
@@ -324,6 +346,8 @@ const allDone = computed(() => Object.values(props.checklist).every(Boolean));
                             <dd>{{ hexNet.stats?.percent ?? 0 }} %</dd>
                             <dt class="text-muted-foreground">Radius / Schwellen</dt>
                             <dd>{{ hexNet.hex_radius_m }} m · {{ hexNet.threshold_medium }} / {{ hexNet.threshold_dark }}</dd>
+                            <dt class="text-muted-foreground">Veröffentlichung</dt>
+                            <dd>{{ hexNet.auto_publish ? 'sofort' : 'nach Freigabe' }}</dd>
                             <dt class="text-muted-foreground">Formular</dt>
                             <dd>{{ hexNet.form_definition_name ?? '–' }}</dd>
                         </dl>

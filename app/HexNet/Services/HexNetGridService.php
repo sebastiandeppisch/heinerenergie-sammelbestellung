@@ -8,6 +8,7 @@ use App\HexNet\Data\HexNetStatsData;
 use App\HexNet\Models\HexNet;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
+use App\Models\MapPointCharacteristic;
 use App\ValueObjects\Coordinate;
 use App\ValueObjects\Polygon;
 use Illuminate\Database\Eloquent\Builder;
@@ -120,6 +121,52 @@ class HexNetGridService
 
             return $grid === null || $hexNet->play_area === null ? [] : $this->countIn($hexNet, $grid, $hexNet->play_area, $this->cellIds($hexNet));
         });
+    }
+
+    /**
+     * Number of points per cell for each measure, keyed by the uuid of the measure. A point with two measures counts
+     * for both. Same rules and cache lifetime as counts().
+     *
+     * @return array<string, array<string, int>>
+     */
+    public function measureCounts(HexNet $hexNet): array
+    {
+        $key = sprintf('hexnet:%d:measure-counts:%s:%s', $hexNet->id, Cache::get(self::POINTS_VERSION_KEY, '0'), $this->configHash($hexNet));
+
+        return Cache::remember($key, now()->addDay(), function () use ($hexNet): array {
+            $grid = $hexNet->grid();
+            $counts = [];
+
+            if ($grid === null) {
+                return [];
+            }
+
+            $points = $this->pointsInPlayArea($hexNet, ['id', 'lat', 'lng'], function (Builder $query): void {
+                $query->with('characteristics:map_point_characteristics.id,map_point_characteristics.uuid');
+            });
+
+            foreach ($points as $point) {
+                $cell = $grid->cellOf($point->coordinate);
+
+                foreach ($point->characteristics as $characteristic) {
+                    $counts[$characteristic->uuid][$cell] = ($counts[$characteristic->uuid][$cell] ?? 0) + 1;
+                }
+            }
+
+            return $counts;
+        });
+    }
+
+    /**
+     * The measures the points of the HexaNetz can have. All its categories share them, see HexNetCategoryValidator.
+     *
+     * @return Collection<int, MapPointCharacteristic>
+     */
+    public function measures(HexNet $hexNet): Collection
+    {
+        $categoryId = $hexNet->categories()->value('map_point_categories.id');
+
+        return $categoryId === null ? new Collection : MapPointCharacteristic::selectableFor((int) $categoryId)->with('category')->get()->toBase();
     }
 
     /**

@@ -4,7 +4,19 @@ import 'leaflet/dist/leaflet.css';
 import { X } from '@lucide/vue';
 import './hexnet.css';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue';
-import { cellCenter, type HexCells, LEVELS, levelFor, lollySvg, type Thresholds } from './hexnet';
+import {
+    BASEMAPS,
+    type Basemap,
+    cellCenter,
+    type HexCells,
+    LEVELS,
+    levelFor,
+    MEASURE_OPACITY,
+    type MarkerStyle,
+    type Thresholds,
+    ZOOM_LIGHT_CELLS,
+} from './hexnet';
+import { markerFor } from './markers';
 
 export type CellSelection = { id: string; count: number; level: number; center: { lat: number; lng: number } };
 
@@ -17,8 +29,27 @@ const props = withDefaults(
         bounds?: App.ValueObjects.Coordinate[];
         highlight?: { cell: string; coordinate: App.ValueObjects.Coordinate } | null;
         interactive?: boolean;
+        /** With a measure, cells take its color and count only stepping stones with it, markers are filtered. */
+        measure?: { id: string; color: string } | null;
+        measureCounts?: Record<string, Record<string, number>>;
+        markerStyle?: MarkerStyle;
+        basemap?: Basemap;
     }>(),
-    { points: () => [], bounds: () => [], highlight: null, interactive: true },
+    {
+        points: () => [],
+        bounds: () => [],
+        highlight: null,
+        interactive: true,
+        measure: null,
+        measureCounts: () => ({}),
+        markerStyle: 'card',
+        basemap: 'soft',
+    },
+);
+
+const activeCounts = computed<Record<string, number>>(() => (props.measure ? (props.measureCounts[props.measure.id] ?? {}) : props.counts));
+const visiblePoints = computed(() =>
+    props.measure ? props.points.filter((entry) => entry.point.characteristics.some((c) => c.id === props.measure?.id)) : props.points,
 );
 
 defineSlots<{
@@ -35,6 +66,7 @@ const isMobile = ref(window.matchMedia('(max-width: 820px)').matches);
 const hasSelection = computed(() => selectedCell.value !== null || selectedPoint.value !== null);
 
 let hexLayer: L.GeoJSON | null = null;
+let tileLayer: L.TileLayer | null = null;
 let pointLayer: L.LayerGroup | null = null;
 let highlightLayer: L.Polygon | null = null;
 let popup: L.Popup | null = null;
@@ -49,13 +81,15 @@ function onMediaChange(event: MediaQueryListEvent) {
 
 function styleFor(feature?: GeoJSON.Feature): L.PathOptions {
     const id = (feature?.properties as { id: string } | undefined)?.id ?? '';
-    const level = levelFor(props.counts[id] ?? 0, props.thresholds);
+    const level = levelFor(activeCounts.value[id] ?? 0, props.thresholds);
+    const measureColor = props.measure && level > 0 ? props.measure.color : null;
+    const lighten = (map.value?.getZoom() ?? 0) >= ZOOM_LIGHT_CELLS ? 0.45 : 1;
     return {
-        color: '#4c5b51',
-        weight: 0.5,
-        opacity: 0.35,
-        fillColor: LEVELS[level].color,
-        fillOpacity: LEVELS[level].opacity,
+        color: '#ffffff',
+        weight: 1,
+        opacity: 0.85,
+        fillColor: measureColor ?? LEVELS[level].color,
+        fillOpacity: (measureColor ? MEASURE_OPACITY[level] : LEVELS[level].opacity) * lighten,
     };
 }
 
@@ -87,7 +121,7 @@ function renderCells() {
             if (!props.interactive) return;
             layer.on('click', (event: L.LeafletMouseEvent) => {
                 const id = (feature.properties as { id: string }).id;
-                const count = props.counts[id] ?? 0;
+                const count = activeCounts.value[id] ?? 0;
                 selectedPoint.value = null;
                 selectedCell.value = {
                     id,
@@ -102,34 +136,36 @@ function renderCells() {
     renderHighlight();
 }
 
-function lollySize(zoom: number): number {
-    if (zoom >= 16.75) return 26;
-    if (zoom >= 14.75) return 14;
-    return 0;
-}
-
 function renderPoints() {
     if (!map.value) return;
     pointLayer?.clearLayers();
     pointLayer ??= L.layerGroup().addTo(map.value);
-    const size = lollySize(map.value.getZoom());
-    if (size === 0) return;
-    for (const entry of props.points) {
-        const colors = entry.point.characteristics.map((c) => c.color ?? '#7d8d85');
-        const icon = L.divIcon({
-            html: lollySvg(colors, size),
-            className: 'hexnet-lolly',
-            iconSize: [size, size * 1.6],
-            iconAnchor: [size / 2, size * 1.6],
-        });
+    const zoom = map.value.getZoom();
+    for (const entry of visiblePoints.value) {
+        const measures = entry.point.characteristics.map((c) => ({ id: c.id, color: c.color ?? '#7d8d85', icon: c.icon_path, name: c.name }));
+        const marker = markerFor(measures, zoom, props.markerStyle);
+        if (!marker) return;
+        const icon = L.divIcon({ html: marker.html, className: 'hexnet-lolly', iconSize: marker.size, iconAnchor: marker.anchor });
         L.marker([entry.point.coordinate.lat, entry.point.coordinate.lng], { icon, riseOnHover: true })
             .on('click', () => {
                 selectedCell.value = null;
                 selectedPoint.value = entry;
-                select([entry.point.coordinate.lat, entry.point.coordinate.lng], -size * 1.4);
+                select([entry.point.coordinate.lat, entry.point.coordinate.lng], marker.popupOffset);
             })
             .addTo(pointLayer);
     }
+}
+
+function renderTiles() {
+    if (!map.value) return;
+    tileLayer?.remove();
+    const basemap = BASEMAPS[props.basemap];
+    tileLayer = L.tileLayer(basemap.url, {
+        attribution: basemap.attribution,
+        subdomains: basemap.subdomains,
+        maxZoom: 19,
+        className: basemap.className,
+    }).addTo(map.value);
 }
 
 function renderHighlight() {
@@ -150,8 +186,19 @@ function renderHighlight() {
     }).addTo(map.value);
 }
 
+/** A view given as #map=zoom/lat/lng, like on openstreetmap.org, wins over fitting the play area. */
+function viewFromHash(): { zoom: number; lat: number; lng: number } | null {
+    const match = window.location.hash.match(/map=([\d.]+)\/(-?[\d.]+)\/(-?[\d.]+)/);
+    return match ? { zoom: Number(match[1]), lat: Number(match[2]), lng: Number(match[3]) } : null;
+}
+
 function fit() {
     if (!map.value) return;
+    const view = props.interactive ? viewFromHash() : null;
+    if (view) {
+        map.value.setView([view.lat, view.lng], view.zoom);
+        return;
+    }
     if (props.bounds.length === 2) {
         map.value.fitBounds(
             [
@@ -174,15 +221,15 @@ function flyTo(coordinate: App.ValueObjects.Coordinate, zoom = 16) {
 onMounted(() => {
     if (!container.value) return;
     map.value = L.map(container.value, { preferCanvas: true, zoomSnap: 0.25, zoomDelta: 1 });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap',
-        maxZoom: 19,
-        className: 'hexnet-tiles',
-    }).addTo(map.value);
+    map.value.setMaxZoom(19);
+    renderTiles();
     fit();
     renderCells();
     renderPoints();
-    map.value.on('zoomend', renderPoints);
+    map.value.on('zoomend', () => {
+        renderPoints();
+        hexLayer?.setStyle(styleFor);
+    });
     map.value.on('popupclose', () => {
         if (!isMobile.value) {
             selectedCell.value = null;
@@ -208,11 +255,15 @@ watch(
     },
 );
 watch(
-    () => [props.counts, props.thresholds],
-    () => hexLayer?.setStyle(styleFor),
+    () => [activeCounts.value, props.thresholds, props.measure],
+    () => {
+        close();
+        hexLayer?.setStyle(styleFor);
+    },
     { deep: true },
 );
-watch(() => props.points, renderPoints);
+watch(() => [visiblePoints.value, props.markerStyle], renderPoints);
+watch(() => props.basemap, renderTiles);
 watch(() => props.highlight, renderHighlight);
 
 defineExpose({ flyTo, close, invalidateSize: () => map.value?.invalidateSize() });
@@ -252,8 +303,14 @@ defineExpose({ flyTo, close, invalidateSize: () => map.value?.invalidateSize() }
         Roboto,
         sans-serif;
 }
-.hexnet-tiles {
+.hexnet-tiles-muted {
     filter: grayscale(0.85) brightness(1.09) contrast(0.86) opacity(0.75);
+}
+.hexnet-tiles-soft {
+    filter: saturate(0.55) brightness(1.05) contrast(0.9);
+}
+.hexnet-tiles-hot {
+    filter: saturate(0.75) brightness(1.04);
 }
 .hexnet-lolly {
     background: none;
