@@ -25,7 +25,7 @@ useAutoResizeIframeIfIsIframe();
 <template>
     <div class="mx-auto w-full max-w-2xl space-y-4">
         <Card>
-            <CardHeader class="items-center text-center">
+            <CardHeader class="justify-items-center text-center">
                 <MailCheck :size="64" class="text-primary" />
                 <CardTitle>Bitte bestätige deine E-Mail-Adresse</CardTitle>
             </CardHeader>
