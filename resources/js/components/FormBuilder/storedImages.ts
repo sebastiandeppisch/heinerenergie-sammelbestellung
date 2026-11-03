@@ -7,7 +7,11 @@ export const storedImagesKey: InjectionKey<Ref<Record<string, App.Data.ImageData
  * Image fields hold the file names of kept images and new files. Only new files are uploaded, the stored images
  * the person removed are sent by name.
  */
-export function withImageChanges(data: Record<string, any>, storedImages: Record<string, App.Data.ImageData[]>): Record<string, any> {
+export function withImageChanges(
+    data: Record<string, any>,
+    storedImages: Record<string, App.Data.ImageData[]>,
+    isVisible: (fieldId: string) => boolean = () => true,
+): Record<string, any> {
     if (Object.keys(storedImages).length === 0) {
         return data;
     }
@@ -16,7 +20,8 @@ export function withImageChanges(data: Record<string, any>, storedImages: Record
     const result = { ...data };
 
     for (const [fieldId, images] of Object.entries(storedImages)) {
-        if (!(fieldId in result)) {
+        // A hidden field keeps its images, only what the person sees can be removed.
+        if (!(fieldId in result) || !isVisible(fieldId)) {
             continue;
         }
 

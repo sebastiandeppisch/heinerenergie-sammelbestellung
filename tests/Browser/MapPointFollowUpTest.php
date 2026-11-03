@@ -56,7 +56,9 @@ test('after confirming, the person adds a photo with the follow-up form and it a
         ->assertNoJavaScriptErrors();
 
     $mapPoint = MapPoint::sole();
-    expect($mapPoint->fields()->where('form_field_id', $photo->id)->sole()->value)->toHaveCount(1);
+    $submission = FormSubmission::where('map_point_id', $mapPoint->id)->sole();
+    expect($submission->submissionFields()->where('label', 'Das ist mein Garten')->sole()->value)->toHaveCount(1)
+        ->and($mapPoint->fields()->pluck('value', 'form_field_id')->all())->toHaveKey($photo->id);
     $mapPoint->update(['published' => true]);
     $embed = MapEmbed::factory()->for($group)->create(['lat' => 49.8728, 'lng' => 8.6510, 'zoom' => 14]);
     $embed->mapPointCategories()->sync([$category->id]);

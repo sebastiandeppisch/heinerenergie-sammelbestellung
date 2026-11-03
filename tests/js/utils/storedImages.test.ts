@@ -25,7 +25,8 @@ describe('withImageChanges', () => {
         expect(withImageChanges({ photo: [] }, stored)).toEqual({ photo: [], _removed_images: { photo: ['a.jpg', 'b.jpg'] } });
     });
 
-    it('keeps the images of a hidden field', () => {
+    it('keeps the images of a field that is not sent or hidden', () => {
         expect(withImageChanges({ title: 'Garten' }, stored)).toEqual({ title: 'Garten', _removed_images: {} });
+        expect(withImageChanges({ photo: [] }, stored, () => false)).toEqual({ photo: [], _removed_images: {} });
     });
 });
