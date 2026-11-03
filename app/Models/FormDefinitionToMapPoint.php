@@ -21,6 +21,14 @@ use Illuminate\Support\Str;
 use LogicException;
 use Override;
 
+/**
+ * @property MapPointTargetMode $mode
+ * @property int|null $title_field_id
+ * @property int|null $description_field_id
+ * @property int|null $coordinate_field_id
+ * @property int|null $follow_up_form_definition_id
+ * @property string|null $follow_up_button_text
+ */
 class FormDefinitionToMapPoint extends Model
 {
     /** @use HasFactory<FormDefinitionToMapPointFactory> */
