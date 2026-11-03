@@ -45,7 +45,8 @@ watch(
 );
 
 function handleValidation() {
-    if (props.fieldName && props.isPreview) {
+    // Precognition does not send files, so images are only checked when the form is submitted.
+    if (props.fieldName && props.isPreview && props.field.type !== 'image') {
         emit('validate', props.fieldName);
     }
 }
