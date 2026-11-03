@@ -39,7 +39,7 @@ class MapPointFollowUpController extends Controller
         private readonly ImageStorage $imageStorage,
     ) {}
 
-    public function show(string $token): Response
+    public function show(Request $request, string $token): Response
     {
         $mapPoint = $this->editLinks->findByToken($token);
 
@@ -54,6 +54,7 @@ class MapPointFollowUpController extends Controller
 
         return Inertia::render('MapPointManage/FollowUp', [
             'token' => $token,
+            'proof' => $this->mailProof($request, $token),
             'title' => $mapPoint->title,
             'formDefinition' => FormDefinitionData::forPublic($followUp),
             'initialData' => (object) $this->followUps->initialData($mapPoint, $followUp),
@@ -93,6 +94,7 @@ class MapPointFollowUpController extends Controller
 
         return Inertia::render('MapPointManage/FollowUpSubmitted', [
             'token' => $token,
+            'proof' => $this->mailProof($request, $token),
             'successMessage' => $followUp->success_message ?: 'Danke, deine Angaben sind gespeichert.',
             'newDetails' => $newLabels === [] ? null : [
                 'labels' => $newLabels,
@@ -123,6 +125,16 @@ class MapPointFollowUpController extends Controller
         }
 
         RateLimiter::hit($key, self::DECAY_SECONDS);
+    }
+
+    /**
+     * The proof that the manage link came by mail is carried along, so the manage page still confirms the address.
+     */
+    private function mailProof(Request $request, string $token): ?string
+    {
+        $proof = $request->query('nachweis');
+
+        return $this->editLinks->hasMailProof($token, $proof) ? (string) $proof : null;
     }
 
     private function invalid(): Response

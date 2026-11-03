@@ -82,7 +82,7 @@ function destroy() {
                     <p class="text-sm">Erzähl mehr über deinen Eintrag, z. B. mit Fotos. Was du schon eingetragen hast, siehst du im Formular.</p>
                     <div>
                         <Button as-child>
-                            <Link :href="route('map-point.manage.follow-up', token)">{{ mapPoint.follow_up_button_text }}</Link>
+                            <Link :href="route('map-point.manage.follow-up', params)">{{ mapPoint.follow_up_button_text }}</Link>
                         </Button>
                     </div>
                 </section>

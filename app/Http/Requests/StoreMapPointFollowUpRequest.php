@@ -46,8 +46,10 @@ class StoreMapPointFollowUpRequest extends FormRequest
         $rules = $followUp->getValidationRules();
         $storedNames = app(MapPointFollowUpService::class)->storedImageNames($mapPoint, $followUp);
 
-        // Stored images may come back by their file names, they stay unless they were removed.
+        // Stored images may come back by their file names, they stay unless they were removed. Kept images count for a
+        // required field, so that is checked after the rules.
         foreach ($followUp->fields->where('type', FieldType::IMAGE) as $field) {
+            $rules[$field->uuid] = array_values(array_diff((array) ($rules[$field->uuid] ?? []), ['required']));
             $imageRules = $rules[$field->uuid.'.*'] ?? [];
             $rules[$field->uuid.'.*'] = Rule::forEach(fn (mixed $entry): array => $entry instanceof UploadedFile
                 ? $imageRules
@@ -63,7 +65,8 @@ class StoreMapPointFollowUpRequest extends FormRequest
     }
 
     /**
-     * Kept and new images together must fit the field.
+     * Kept and new images together must fit the field and the category field they are stored in, and a required
+     * field needs at least one.
      *
      * @return array<int, callable(Validator): void>
      */
@@ -78,15 +81,20 @@ class StoreMapPointFollowUpRequest extends FormRequest
                     return;
                 }
 
+                $followUps = app(MapPointFollowUpService::class);
                 $removed = $this->removedImages();
+                $storedNames = $followUps->storedImageNames($mapPoint, $followUp);
+                $limits = $followUps->imageLimits($followUp);
 
-                foreach (app(MapPointFollowUpService::class)->storedImageNames($mapPoint, $followUp) as $fieldUuid => $names) {
-                    $maxImages = $followUp->fields->firstWhere('uuid', $fieldUuid)->max_images ?? 1;
-                    $kept = count(array_diff($names, $removed[$fieldUuid] ?? []));
-                    $added = count(array_filter((array) $this->file($fieldUuid), fn (mixed $file): bool => $file instanceof UploadedFile));
+                foreach ($followUp->fields->where('type', FieldType::IMAGE) as $field) {
+                    $maxImages = $limits[$field->uuid] ?? $field->max_images ?? 1;
+                    $kept = count(array_diff($storedNames[$field->uuid] ?? [], $removed[$field->uuid] ?? []));
+                    $added = count(array_filter((array) $this->file($field->uuid), fn (mixed $file): bool => $file instanceof UploadedFile));
 
                     if ($added > 0 && $kept + $added > $maxImages) {
-                        $validator->errors()->add($fieldUuid, "Hier passen höchstens {$maxImages} Bilder, entferne erst ein vorhandenes.");
+                        $validator->errors()->add($field->uuid, $maxImages === 1 ? 'Hier passt ein Bild, entferne erst das vorhandene.' : "Hier passen höchstens {$maxImages} Bilder, entferne erst ein vorhandenes.");
+                    } elseif ($field->required && $kept + $added === 0) {
+                        $validator->errors()->add($field->uuid, "{$field->label} braucht ein Bild.");
                     }
                 }
             },
