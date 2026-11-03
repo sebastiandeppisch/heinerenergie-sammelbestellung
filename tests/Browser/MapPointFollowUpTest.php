@@ -9,7 +9,6 @@ use App\Models\MapPointCategory;
 use App\Services\FormDefinitionService;
 use App\Services\FormSubmissionConfirmationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Tests\Concerns\AutoAttachesFormEmbedToken;
@@ -42,7 +41,7 @@ test('after confirming, the person adds a photo with the follow-up form and it a
     ])->assertSessionHasNoErrors();
 
     $image = sys_get_temp_dir().'/garten-'.uniqid().'.jpg';
-    copy(UploadedFile::fake()->image('garten.jpg', 640, 480)->getPathname(), $image);
+    imagejpeg(imagecreatetruecolor(640, 480), $image);
 
     visit(route('form.confirm.show', app(FormSubmissionConfirmationService::class)->issueToken(FormSubmission::sole())))
         ->click('E-Mail-Adresse bestätigen')

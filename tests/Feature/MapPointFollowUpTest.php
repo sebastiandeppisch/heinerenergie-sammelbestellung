@@ -118,12 +118,15 @@ function followUpImagePaths(MapPoint $mapPoint, FormField $field): array
     return (array) $mapPoint->fields()->where('form_field_id', $field->id)->first()?->value;
 }
 
-function followUpAdmin(Group $group): User
+function followUpAdmin(Group $group, bool $globalContext = true): User
 {
     $admin = User::factory()->create();
     $group->users()->attach($admin, ['is_admin' => true]);
     app(SessionService::class)->actAsGroup($group, true);
-    Config::set('app.group_context', 'global');
+
+    if ($globalContext) {
+        Config::set('app.group_context', 'global');
+    }
 
     return $admin;
 }
@@ -258,7 +261,7 @@ test('a new image is added, a removed one is deleted with its file, the limit co
 
 test('the form shows the current values with their options and images, the images only with the token', function (): void {
     $token = followUpTokenFromNotice(followUpSubmitFirstForm($this->form, ['Größe' => '200 m²', 'Art' => 'teich', 'Maßnahmen' => [$this->hedgehogGate->uuid], 'Igeltor: Breite' => '13']));
-    followUpSubmit($this->followUp, $token, ['Foto' => [UploadedFile::fake()->image('teich.jpg')]]);
+    followUpSubmit($this->followUp, $token, ['Foto' => [UploadedFile::fake()->image('teich.jpg')], 'Maßnahmen' => [$this->hedgehogGate->uuid]]);
     $mapPoint = MapPoint::sole();
     $name = basename(followUpImagePaths($mapPoint, $this->photo)[0]);
     $artOption = $this->followUp->fields()->where('label', 'Art')->sole()->options()->where('label', 'Teich')->sole()->value;
@@ -332,6 +335,7 @@ test('the follow-up form is rate limited per point', function (): void {
 test('the token of the page after submitting does not confirm the address, the link of the mail does', function (): void {
     $token = followUpTokenFromNotice(followUpSubmitFirstForm($this->form));
     $mapPoint = MapPoint::sole();
+    $mapPoint->update(['published' => true]);
 
     $this->get(route('map-point.manage.show', $token))->assertInertia(fn (Assert $page): Assert => $page->where('proof', null));
     $this->put(route('map-point.manage.contact', $token), ['enabled' => true])->assertRedirect(route('map-point.manage.show', $token));
@@ -357,8 +361,8 @@ test('deleting the point on the manage page deletes the follow-up submissions wi
     followUpSubmit($this->followUp, $token, ['Größe' => '300 m²']);
     [$withImage, $withAdvice] = FormSubmission::whereNotNull('map_point_id')->orderBy('id')->get()->all();
     $withAdvice->update(['advice_id' => Advice::factory()->create()->id]);
-    $imageDirectory = $withImage->imageDirectory();
-    Storage::disk('images')->assertDirectoryExists($imageDirectory);
+    $uploaded = $withImage->submissionFields()->where('type', FieldType::IMAGE->value)->sole()->value[0];
+    Storage::disk('images')->assertExists($uploaded);
 
     $this->delete(route('map-point.manage.destroy', $token))->assertInertia(fn (Assert $page): Assert => $page->where('status', 'deleted'));
 
@@ -366,14 +370,14 @@ test('deleting the point on the manage page deletes the follow-up submissions wi
         ->and(FormSubmission::find($withImage->id))->toBeNull()
         ->and($withAdvice->fresh()->map_point_id)->toBeNull()
         ->and($withAdvice->fresh()->map_point_deleted_by?->value)->toBe('person');
-    Storage::disk('images')->assertDirectoryMissing($imageDirectory);
+    Storage::disk('images')->assertMissing($uploaded);
 });
 
 test('admins see the follow-up submissions at the point and keep them when they delete it', function (): void {
     $token = followUpTokenFromNotice(followUpSubmitFirstForm($this->form));
     followUpSubmit($this->followUp, $token, ['Größe' => '300 m²']);
     $mapPoint = MapPoint::sole();
-    $admin = followUpAdmin($this->group);
+    $admin = followUpAdmin($this->group, globalContext: false);
 
     $this->actingAs($admin)->get(route('mappoints.edit', $mapPoint))
         ->assertInertia(fn (Assert $page): Assert => $page->has('consent.follow_up_submissions', 1)
