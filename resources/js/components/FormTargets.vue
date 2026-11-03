@@ -203,10 +203,17 @@ const mapPointMode = computed({
         if (!mapping) return;
 
         mapping.mode = mode;
-        // A follow-up form neither picks a sub category nor has a follow-up form of its own.
+        // A follow-up form only writes fields and characteristics, the mappings for creating a point no longer apply.
+        mapping.title_field_id = null;
+        mapping.description_field_id = null;
+        mapping.coordinate_field_id = null;
+        mapping.contact_email_field_id = null;
+        mapping.contact_enabled_field_id = null;
+        mapping.location_field_id = null;
         mapping.subcategory_field_id = null;
         mapping.subcategory_options = [];
         mapping.follow_up_form_definition_id = null;
+        mapping.follow_up_button_text = null;
     },
 });
 

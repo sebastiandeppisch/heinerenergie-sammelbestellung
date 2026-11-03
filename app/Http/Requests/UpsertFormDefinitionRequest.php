@@ -28,6 +28,8 @@ use Override;
 
 class UpsertFormDefinitionRequest extends FormRequest
 {
+    private const array CREATE_ONLY_MAPPINGS = ['title_field_id', 'description_field_id', 'coordinate_field_id', 'contact_email_field_id', 'contact_enabled_field_id', 'location_field_id', 'subcategory_field_id', 'subcategory_options', 'subcategory_options.*.option_value', 'subcategory_options.*.category_id'];
+
     /**
      * Forms belong to an initiative, so only its admins may change them, and only admins of the target
      * initiative may move a form there. Fields of a map point category or characteristic follow the rights on the category.
@@ -137,6 +139,15 @@ class UpsertFormDefinitionRequest extends FormRequest
             $rules['map_point_mapping.field_mappings.*.target_field_id'] = ['required', 'uuid', 'exists:form_fields,uuid'];
             $rules['map_point_mapping.field_mappings.*.source_field_id'] = ['required', 'string', new FormFieldExistsInRequest];
             $rules['map_point_mapping.mode'] = ['nullable', Rule::enum(MapPointTargetMode::class)];
+        }
+
+        if ($this->isMapPointFollowUpForm()) {
+            // A follow-up form writes fields of the category, it ignores the mappings of a form that creates points.
+            foreach (self::CREATE_ONLY_MAPPINGS as $key) {
+                unset($rules["map_point_mapping.{$key}"]);
+            }
+
+            $rules['map_point_mapping.category_id'] = ['required', 'uuid', 'exists:map_point_categories,uuid'];
         }
 
         if ($this->isMapPointMappingEnabled() && ! $this->isMapPointFollowUpForm()) {
@@ -369,13 +380,14 @@ class UpsertFormDefinitionRequest extends FormRequest
         $submittedFields = $this->collect('fields')->keyBy('id');
         $tree = MapPointCategory::tree();
 
-        $subcategoryField = $submittedFields->get($this->input('map_point_mapping.subcategory_field_id'));
+        $subcategoryField = $this->isMapPointFollowUpForm() ? null : $submittedFields->get($this->input('map_point_mapping.subcategory_field_id'));
 
         if ($subcategoryField !== null && ! in_array($subcategoryField['type'] ?? null, [FieldType::SELECT->value, FieldType::RADIO->value], true)) {
             $validator->errors()->add('map_point_mapping.subcategory_field_id', 'Die Unterkategorie kann nur ein Auswahlfeld oder Radio-Buttons bestimmen.');
         }
 
-        $subcategoryOptions = $this->collect('map_point_mapping.subcategory_options');
+        // A follow-up form keeps the category of the point, its sub category options are ignored.
+        $subcategoryOptions = $this->isMapPointFollowUpForm() ? collect() : $this->collect('map_point_mapping.subcategory_options');
         $subcategories = MapPointCategory::whereIn('uuid', $subcategoryOptions->pluck('category_id'))->get()->keyBy('uuid');
 
         foreach ($subcategoryOptions as $index => $option) {
@@ -479,6 +491,7 @@ class UpsertFormDefinitionRequest extends FormRequest
             'map_point_mapping.location_field_id' => 'Ortsbeschreibung Feld',
             'map_point_mapping.follow_up_form_definition_id' => 'Folgeformular',
             'map_point_mapping.follow_up_button_text' => 'Button-Text für das Folgeformular',
+            'map_point_mapping.category_id' => 'Kategorie der Kartenpunkte',
         ];
     }
 

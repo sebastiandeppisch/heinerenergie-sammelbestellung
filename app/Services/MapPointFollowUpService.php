@@ -36,9 +36,22 @@ class MapPointFollowUpService
      */
     public function formFor(MapPoint $mapPoint): ?FormDefinition
     {
-        $followUp = $this->creatorOf($mapPoint)?->followUpFormDefinition;
+        $creator = $this->creatorOf($mapPoint);
+        $followUp = $creator?->followUpFormDefinition;
 
-        return $followUp?->isMapPointFollowUp() === true ? $followUp : null;
+        return $creator !== null && $followUp !== null && $this->stillFits($creator, $followUp) ? $followUp : null;
+    }
+
+    /**
+     * Either form may have changed since they were linked, so the link counts only while it would still be accepted.
+     */
+    public function stillFits(FormDefinitionToMapPoint $creator, FormDefinition $followUp): bool
+    {
+        $followUpCreator = $followUp->mapPointCreator;
+
+        return $followUpCreator?->isUpdate() === true
+            && $followUp->group_id === $creator->formDefinition?->group_id
+            && $this->fits($this->intOrNull($creator->map_point_category_id), $this->intOrNull($followUpCreator->map_point_category_id));
     }
 
     public function buttonTextFor(MapPoint $mapPoint): ?string
@@ -52,8 +65,9 @@ class MapPointFollowUpService
      */
     public function fits(?int $createCategoryId, ?int $followUpCategoryId): bool
     {
+        // Without a category a follow-up form has no fields to write.
         if ($createCategoryId === null || $followUpCategoryId === null) {
-            return $createCategoryId === $followUpCategoryId;
+            return false;
         }
 
         $tree = MapPointCategory::tree();
@@ -130,6 +144,24 @@ class MapPointFollowUpService
         }
 
         return $names;
+    }
+
+    /**
+     * How many images each image field of the follow-up form takes: no more than the category field it fills holds.
+     *
+     * @return array<string, int>
+     */
+    public function imageLimits(FormDefinition $followUp): array
+    {
+        $limits = [];
+
+        foreach ($this->updateCreatorOf($followUp)->fieldMappings()->with(['targetField', 'sourceField'])->get() as $mapping) {
+            if ($mapping->sourceField->type === FieldType::IMAGE && $mapping->targetField->type === FieldType::IMAGE) {
+                $limits[$mapping->sourceField->uuid] = min($mapping->sourceField->max_images ?? 1, $mapping->targetField->max_images ?? 1);
+            }
+        }
+
+        return $limits;
     }
 
     /**
@@ -217,6 +249,11 @@ class MapPointFollowUpService
     private function characteristicIdsOf(MapPoint $mapPoint): array
     {
         return $mapPoint->characteristics()->pluck('map_point_characteristics.id')->map(fn (mixed $id): int => (int) $id)->all();
+    }
+
+    private function intOrNull(mixed $value): ?int
+    {
+        return $value === null ? null : (int) $value;
     }
 
     private function isEmpty(mixed $value): bool

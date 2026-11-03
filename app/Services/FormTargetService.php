@@ -41,6 +41,7 @@ class FormTargetService
     public function __construct(
         private readonly MapPointFieldService $mapPointFields,
         private readonly MapPointEditLinkService $editLinks,
+        private readonly MapPointFollowUpService $followUps,
     ) {}
 
     /**
@@ -105,7 +106,8 @@ class FormTargetService
 
         if ($payload->map_point !== null) {
             $creator = $submission->formDefinition?->mapPointCreator;
-            $followUp = $creator?->followUpFormDefinition?->isMapPointFollowUp() === true ? $creator : null;
+            $followUpForm = $creator?->followUpFormDefinition;
+            $followUp = $creator !== null && $followUpForm !== null && $this->followUps->stillFits($creator, $followUpForm) ? $creator : null;
             [$mapPoint, $token] = $this->createMapPoint($submission, $payload->map_point, issueToken: $payload->map_point->contact_email !== null || $followUp !== null);
             $notice = $this->mapPointNotice($mapPoint, $token, $followUp);
 

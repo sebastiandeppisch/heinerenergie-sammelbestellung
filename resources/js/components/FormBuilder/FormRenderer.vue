@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button } from '@/shadcn/components/ui/button';
-import { dependentFieldsByOption, topLevelFields, withoutHiddenValues } from '@/utils/formFieldVisibility';
+import { dependentFieldsByOption, isFieldVisible, topLevelFields, withoutHiddenValues } from '@/utils/formFieldVisibility';
 import { useForm } from '@inertiajs/vue3';
 import { computed, provide, toRef } from 'vue';
 import ConditionalFormField from './ConditionalFormField.vue';
@@ -72,7 +72,13 @@ function validateField(fieldName: string) {
 
 function submitForm() {
     emit('submit', form.data());
-    form.transform((data) => withImageChanges(withoutHiddenValues(props.formDefinition.fields, data), props.storedImages)).submit({
+    const fieldsById = new Map(props.formDefinition.fields.map((field) => [field.id, field]));
+    const isVisible = (data: Record<string, unknown>) => (fieldId: string) => {
+        const field = fieldsById.get(fieldId);
+        return field !== undefined && isFieldVisible(field, data, fieldsById);
+    };
+
+    form.transform((data) => withImageChanges(withoutHiddenValues(props.formDefinition.fields, data), props.storedImages, isVisible(data))).submit({
         onSuccess: (page) => emit('success', page),
         onError: (errors) => emit('error', errors),
     });

@@ -464,3 +464,60 @@ test('the wizard needs a category for a follow-up form', function (): void {
     expect($created->fields()->pluck('label')->all())->not->toContain('Größe')->toContain('Foto')
         ->and($created->mapPointCreator->followUpFormDefinition->fields()->pluck('label')->all())->toContain('Größe');
 });
+
+test('a required image field counts the kept images and takes no more than the category field holds', function (): void {
+    $token = followUpTokenFromNotice(followUpSubmitFirstForm($this->form));
+    $photo = $this->followUp->fields()->where('label', 'Foto')->sole();
+    $photo->update(['required' => true]);
+
+    followUpSubmit($this->followUp, $token, ['Größe' => '1'])->assertSessionHasErrors([$photo->uuid => 'Foto braucht ein Bild.']);
+    followUpSubmit($this->followUp, $token, ['Foto' => [UploadedFile::fake()->image('teich.jpg')]])->assertSessionHasNoErrors();
+    followUpSubmit($this->followUp, $token, ['Größe' => '2'])->assertSessionHasNoErrors();
+
+    $this->photo->update(['max_images' => 1]);
+    followUpSubmit($this->followUp, $token, ['Foto' => [UploadedFile::fake()->image('beet.jpg')]])
+        ->assertSessionHasErrors([$photo->uuid => 'Hier passt ein Bild, entferne erst das vorhandene.']);
+    expect(followUpImagePaths(MapPoint::sole(), $this->photo))->toHaveCount(1);
+});
+
+test('the proof of the mail link is kept through the follow-up form', function (): void {
+    followUpSubmitFirstForm($this->form);
+    $mailUrl = Mail::queued(MapPointCreated::class)->sole()->manageUrl;
+    $token = basename((string) parse_url($mailUrl, PHP_URL_PATH));
+    parse_str((string) parse_url($mailUrl, PHP_URL_QUERY), $query);
+    $params = ['token' => $token, 'nachweis' => $query['nachweis']];
+
+    $this->get(route('map-point.manage.follow-up', $params))->assertInertia(fn (Assert $page): Assert => $page->where('proof', $query['nachweis']));
+    $this->post(route('map-point.manage.follow-up.submit', $params), [followUpFieldUuid($this->followUp, 'Größe') => '300 m²'])
+        ->assertInertia(fn (Assert $page): Assert => $page->where('proof', $query['nachweis']));
+    $this->get(route('map-point.manage.follow-up', ['token' => $token, 'nachweis' => 'gefälscht']))->assertInertia(fn (Assert $page): Assert => $page->where('proof', null));
+});
+
+test('a follow-up form that no longer fits the points is not offered', function (): void {
+    $otherCategory = MapPointCategory::factory()->for($this->group)->create(['name' => 'Balkon']);
+    $token = followUpTokenFromNotice(followUpSubmitFirstForm($this->form));
+    $this->followUp->mapPointCreator->category()->associate($otherCategory)->save();
+
+    $this->get(route('map-point.manage.show', $token))->assertInertia(fn (Assert $page): Assert => $page->where('mapPoint.follow_up_button_text', null));
+    $this->get(route('map-point.manage.follow-up', $token))->assertNotFound();
+    followUpSubmitFirstForm($this->form)->assertInertia(fn (Assert $page): Assert => $page->where('notices.0.url', null));
+});
+
+test('a form can become a follow-up form while its fields for creating points are removed, it needs a category', function (): void {
+    $admin = followUpAdmin($this->group);
+    $data = FormDefinitionData::fromModel($this->form->load('fields.options'))->toArray();
+    $data['map_point_mapping']['mode'] = 'update';
+    $data['fields'] = array_values(array_filter($data['fields'], fn (array $field): bool => ! in_array($field['label'], ['Titel', 'Beschreibung', 'Standort', 'Ortsbeschreibung', 'E-Mail-Adresse'], true)));
+
+    $withoutCategory = $data;
+    $withoutCategory['map_point_mapping']['category_id'] = null;
+    $this->actingAs($admin)->put(route('form-definitions.update', $this->form), $withoutCategory)->assertSessionHasErrors('map_point_mapping.category_id');
+
+    $this->actingAs($admin)->put(route('form-definitions.update', $this->form), $data)->assertSessionHasNoErrors();
+
+    $creator = $this->form->mapPointCreator->fresh();
+    expect($creator->mode)->toBe(MapPointTargetMode::UPDATE)
+        ->and($creator->title_field_id)->toBeNull()
+        ->and($creator->follow_up_form_definition_id)->toBeNull()
+        ->and($this->form->fields()->pluck('label')->all())->not->toContain('Titel');
+});

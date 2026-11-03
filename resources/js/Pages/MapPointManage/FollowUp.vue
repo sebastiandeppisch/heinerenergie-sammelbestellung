@@ -4,20 +4,25 @@ import PublicLayout from '@/layouts/PublicLayout.vue';
 import Card from '@/shadcn/components/ui/card/Card.vue';
 import CardContent from '@/shadcn/components/ui/card/CardContent.vue';
 import { Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import { route } from 'ziggy-js';
 
 defineOptions({
     layout: PublicLayout,
 });
 
-defineProps<{
+const props = defineProps<{
     token: string;
+    /** The proof of a link from our mail, kept on the way back to the manage page. */
+    proof: string | null;
     /** The title of the point the form adds to. */
     title: string;
     formDefinition: App.Data.FormDefinitionData;
     initialData: Record<string, unknown>;
     storedImages: Record<string, App.Data.ImageData[]>;
 }>();
+
+const params = computed(() => (props.proof ? { token: props.token, nachweis: props.proof } : { token: props.token }));
 </script>
 
 <template>
@@ -26,11 +31,11 @@ defineProps<{
             <CardContent class="flex flex-col gap-4">
                 <p class="text-sm text-muted-foreground">
                     Dein Eintrag „{{ title }}“ ·
-                    <Link :href="route('map-point.manage.show', token)" class="underline">Eintrag verwalten</Link>
+                    <Link :href="route('map-point.manage.show', params)" class="underline">Eintrag verwalten</Link>
                 </p>
                 <FormRenderer
                     :form-definition="formDefinition"
-                    :submit-url="route('map-point.manage.follow-up.submit', token)"
+                    :submit-url="route('map-point.manage.follow-up.submit', params)"
                     :initial-data="initialData"
                     :stored-images="storedImages"
                 />

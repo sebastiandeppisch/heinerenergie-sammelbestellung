@@ -46,6 +46,11 @@ class FormDefinitionService
 
             $formDefinition->update($data);
 
+            // A form turned into a follow-up form may delete the fields it no longer maps in the same save.
+            if ($formDefinitionData->map_point_mapping?->enabled === true && $formDefinitionData->map_point_mapping->mode === MapPointTargetMode::UPDATE && $formDefinition->mapPointCreator !== null) {
+                $this->releaseCreateOnlyFields($formDefinition->mapPointCreator);
+            }
+
             $this->updateFields($formDefinitionData->fields, $formDefinition);
 
             $this->updateAdviceMapping($formDefinition, $formDefinitionData->advice_mapping);
@@ -319,6 +324,20 @@ class FormDefinitionService
         $this->updateMapPointFieldMappings($creator, $category === null ? new Collection : $mapping->field_mappings);
     }
 
+    private function releaseCreateOnlyFields(FormDefinitionToMapPoint $creator): void
+    {
+        $creator->titleField()->dissociate();
+        $creator->descriptionField()->dissociate();
+        $creator->coordinateField()->dissociate();
+        $creator->subcategoryField()->dissociate();
+        $creator->contactEmailField()->dissociate();
+        $creator->contactEnabledField()->dissociate();
+        $creator->locationField()->dissociate();
+        $creator->followUpFormDefinition()->dissociate();
+        $creator->save();
+        $creator->subcategories()->delete();
+    }
+
     /**
      * A follow-up form only fills fields and characteristics of the existing point. Title, description, location,
      * category, consent and contact stay as the person entered them first, so their mappings are cleared.
@@ -330,14 +349,7 @@ class FormDefinitionService
             ? null
             : FormField::where('uuid', $mapping->characteristics_field_id)->first();
 
-        $creator->titleField()->dissociate();
-        $creator->descriptionField()->dissociate();
-        $creator->coordinateField()->dissociate();
-        $creator->subcategoryField()->dissociate();
-        $creator->contactEmailField()->dissociate();
-        $creator->contactEnabledField()->dissociate();
-        $creator->locationField()->dissociate();
-        $creator->followUpFormDefinition()->dissociate();
+        $this->releaseCreateOnlyFields($creator);
         $creator->category()->associate($category);
         $creator->characteristicsField()->associate($characteristicsField);
         $creator->consent_text = null;
