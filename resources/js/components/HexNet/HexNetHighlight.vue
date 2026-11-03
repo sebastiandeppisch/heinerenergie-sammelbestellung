@@ -33,7 +33,9 @@ onMounted(() => setTimeout(() => mapRef.value?.flyTo(props.highlight.coordinate,
             <template v-else>Dein Garten erscheint nach Freigabe auf der Karte.</template>
         </p>
         <div class="flex flex-wrap gap-2">
-            <Button disabled title="Kommt bald">Erzähl mehr</Button>
+            <Button v-if="highlight.follow_up_url" as="a" :href="highlight.follow_up_url" data-test="hexnet-follow-up">{{
+                highlight.follow_up_label
+            }}</Button>
             <Button as="a" variant="outline" :href="highlight.public_url">Zum Spielstand von „{{ highlight.hex_net.title }}“</Button>
         </div>
     </div>

@@ -17,6 +17,19 @@ final class HexNetDefaults
 
     public const string MAIN_CATEGORY = 'Trittsteine';
 
+    /**
+     * Fields of the HexaNetz category the follow-up form „Erzähl mehr“ asks for, the join form does not.
+     *
+     * @var array<int, array{type: string, label: string, public: bool, help_text?: string, option?: string}>
+     */
+    public const array STORY_FIELDS = [
+        ['type' => 'image', 'label' => 'Das ist mein Stadtnaturgarten', 'public' => true],
+        ['type' => 'image', 'label' => 'Welches Tier hat mich schon besucht?', 'public' => true],
+        ['type' => 'image', 'label' => 'Mein Lieblingsplatz', 'public' => true],
+        ['type' => 'textarea', 'label' => 'Beschreibung Lieblingsplatz', 'public' => true],
+        ['type' => 'checkbox', 'label' => 'Ich möchte ein Stadtnatur-Treffen in meinem Garten anbieten', 'public' => false, 'help_text' => 'Wir melden uns mit Terminvorschlägen', 'option' => 'Stadtnatur-Treffen anbieten'],
+    ];
+
     public const int RADIUS_M = 150;
 
     public const int THRESHOLD_MEDIUM = 2;

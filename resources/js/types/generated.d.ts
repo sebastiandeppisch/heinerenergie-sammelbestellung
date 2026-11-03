@@ -649,6 +649,8 @@ cell: string,
 coordinate: App.ValueObjects.Coordinate,
 public_url: string,
 published: boolean,
+follow_up_url: string | null,
+follow_up_label: string | null,
 };
 export type HexNetPointData = {
 point: App.Data.PublicMapPointData,

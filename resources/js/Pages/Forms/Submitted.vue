@@ -64,7 +64,7 @@ function handleNextFormButton() {
                         <div v-for="(notice, index) in notices" :key="index" class="rounded-md border p-4">
                             <div class="font-semibold">{{ notice.title }}</div>
                             <p v-if="notice.text" class="mt-1 text-sm">{{ notice.text }}</p>
-                            <Button v-if="notice.url" as-child class="mt-3">
+                            <Button v-if="notice.url && notice.url !== hexNetHighlight?.follow_up_url" as-child class="mt-3">
                                 <a :href="notice.url" data-test="form-target-notice-link">{{ notice.url_label || notice.url }}</a>
                             </Button>
                         </div>

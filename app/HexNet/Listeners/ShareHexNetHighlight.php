@@ -10,6 +10,8 @@ use App\HexNet\Data\HexNetPublicData;
 use App\HexNet\Services\HexNetGridService;
 use App\HexNet\Services\HexNetJitter;
 use App\HexNet\Services\HexNetResolver;
+use App\Services\MapPointEditLinkService;
+use App\Services\MapPointFollowUpService;
 use App\Services\PublicMapPointPresenter;
 use Inertia\Inertia;
 use Throwable;
@@ -23,6 +25,8 @@ class ShareHexNetHighlight
         private readonly HexNetResolver $resolver,
         private readonly HexNetGridService $gridService,
         private readonly HexNetJitter $jitter,
+        private readonly MapPointFollowUpService $followUps,
+        private readonly MapPointEditLinkService $editLinks,
     ) {}
 
     /**
@@ -48,6 +52,8 @@ class ShareHexNetHighlight
         }
 
         $counts = $this->gridService->counts($hexNet);
+        // The token of the event is the one the mail carries, issuing another would make that link invalid.
+        $followUpLabel = $event->editToken === null ? null : $this->followUps->buttonTextFor($mapPoint);
 
         Inertia::share('hexNetHighlight', new HexNetHighlightData(
             hex_net: HexNetPublicData::fromModel($hexNet),
@@ -58,6 +64,8 @@ class ShareHexNetHighlight
             coordinate: $this->jitter->apply($mapPoint->coordinate, $mapPoint->uuid, $hexNet->jitter_m),
             public_url: route('hexnet.public', $hexNet->slug),
             published: app(PublicMapPointPresenter::class)->isVisible($mapPoint),
+            follow_up_url: $followUpLabel === null || $event->editToken === null ? null : $this->editLinks->followUpUrl($event->editToken),
+            follow_up_label: $followUpLabel,
         ));
     }
 }

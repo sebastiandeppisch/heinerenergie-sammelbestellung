@@ -27,5 +27,8 @@ class HexNetHighlightData extends Data
         public Coordinate $coordinate,
         public string $public_url,
         public bool $published,
+        /** The follow-up form „Erzähl mehr“ with the token issued for the point, null when there is none. */
+        public ?string $follow_up_url = null,
+        public ?string $follow_up_label = null,
     ) {}
 }

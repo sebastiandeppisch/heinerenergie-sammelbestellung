@@ -8,6 +8,7 @@ use App\Enums\FieldType;
 use App\HexNet\HexNetDefaults;
 use App\HexNet\Models\HexNet;
 use App\Models\FormDefinition;
+use App\Models\FormField;
 use App\Models\MapPointCategory;
 use App\Models\MapPointCharacteristic;
 use App\Services\FormDefinitionService;
@@ -55,12 +56,49 @@ class HexNetSetupService
             $sub = MapPointCategory::firstOrCreate(
                 ['group_id' => $hexNet->group_id, 'parent_id' => $main->id, 'name' => $subName],
             );
+            $this->addStoryFields($sub);
 
             $hexNet->categories()->sync([$sub->id]);
             $hexNet->touch();
 
             return $sub;
         });
+    }
+
+    /**
+     * The fields of the follow-up form „Erzähl mehr“, e.g. photos of the garden. Fields that exist already are kept.
+     */
+    private function addStoryFields(MapPointCategory $category): void
+    {
+        $formDefinition = $category->findOrCreateFormDefinition();
+        $existing = $formDefinition->fields()->pluck('label')->all();
+        $sortOrder = $formDefinition->fields()->max('sort_order') ?? -1;
+        $publicFieldIds = $category->publicFields()->pluck('id')->all();
+
+        foreach (HexNetDefaults::STORY_FIELDS as $story) {
+            if (in_array($story['label'], $existing, true)) {
+                continue;
+            }
+
+            $field = $formDefinition->fields()->create([
+                'type' => FieldType::from($story['type']),
+                'label' => $story['label'],
+                'help_text' => $story['help_text'] ?? null,
+                'max_images' => 1,
+                'required' => false,
+                'sort_order' => ++$sortOrder,
+            ]);
+
+            if (isset($story['option'])) {
+                $field->options()->create(['label' => $story['option'], 'value' => 'ja', 'sort_order' => 0]);
+            }
+
+            if ($story['public']) {
+                $publicFieldIds[] = $field->id;
+            }
+        }
+
+        $category->syncPublicFields($publicFieldIds);
     }
 
     /**
@@ -95,7 +133,7 @@ class HexNetSetupService
 
     /**
      * The join form based on the map point template: measures are required, email confirmation is on and an extra
-     * question asks for a consultation.
+     * question asks for a consultation. The story fields are left to the linked follow-up form „Erzähl mehr“.
      */
     public function createForm(HexNet $hexNet): FormDefinition
     {
@@ -104,7 +142,12 @@ class HexNetSetupService
 
         return DB::transaction(function () use ($hexNet, $category): FormDefinition {
             $hexNet->loadMissing('group');
-            $form = $this->formDefinitionService->createFromTemplate('map_point', $hexNet->group->uuid, $category);
+            $storyFieldUuids = FormField::where('form_definition_id', $category->form_definition_id)
+                ->whereIn('label', array_column(HexNetDefaults::STORY_FIELDS, 'label'))
+                ->pluck('uuid')
+                ->all();
+            $form = $this->formDefinitionService->createFromTemplate('map_point', $hexNet->group->uuid, $category, withFollowUp: true, followUpOnlyFieldUuids: $storyFieldUuids);
+            $form->mapPointCreator?->followUpFormDefinition?->update(['name' => 'Erzähl mehr – '.$hexNet->name]);
 
             $form->update([
                 'name' => 'Trittstein anmelden – '.$hexNet->name,
