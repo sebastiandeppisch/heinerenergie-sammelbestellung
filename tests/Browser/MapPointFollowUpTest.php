@@ -43,7 +43,7 @@ test('after confirming, the person adds a photo with the follow-up form and it a
     $image = sys_get_temp_dir().'/garten-'.uniqid().'.jpg';
     imagejpeg(imagecreatetruecolor(640, 480), $image);
 
-    visit(route('form.confirm.show', app(FormSubmissionConfirmationService::class)->issueToken(FormSubmission::sole())))
+    $page = visit(route('form.confirm.show', app(FormSubmissionConfirmationService::class)->issueToken(FormSubmission::sole())))
         ->click('E-Mail-Adresse bestätigen')
         ->assertSee('Dein Eintrag ist angelegt.')
         ->click('Erzähl mehr')
@@ -52,8 +52,10 @@ test('after confirming, the person adds a photo with the follow-up form and it a
         ->attach('input[type="file"]', $image)
         ->assertPresent('img[alt="Vorschau"]')
         ->click('Absenden')
-        ->assertSee('Danke, deine Angaben sind gespeichert.')
-        ->assertNoJavaScriptErrors();
+        ->wait(2);
+
+    expect((string) $page->text('body'))->toContain('Danke, deine Angaben sind gespeichert.');
+    $page->assertNoJavaScriptErrors();
 
     $mapPoint = MapPoint::sole();
     $submission = FormSubmission::where('map_point_id', $mapPoint->id)->sole();
