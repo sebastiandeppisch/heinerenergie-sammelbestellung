@@ -22,6 +22,7 @@ use App\Services\SessionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -288,7 +289,12 @@ test('a new value in a consented field is public at once, fields of a new charac
     $mapPoint->update(['published' => true]);
     $embed = MapEmbed::factory()->for($this->group)->create();
     $embed->mapPointCategories()->sync([$this->category->id]);
-    $publicLabels = fn (): array => collect($this->get(route('map.public', $embed))->viewData('page')['props']['pointsByCategory'][$this->category->uuid][0]['fields'])->pluck('label')->all();
+    $publicLabels = function () use ($embed): array {
+        /** @var array<int, array{label: string}> $fields */
+        $fields = $this->get(route('map.public', $embed))->viewData('page')['props']['pointsByCategory'][$this->category->uuid][0]['fields'];
+
+        return array_column($fields, 'label');
+    };
 
     followUpSubmit($this->followUp, $token, ['Größe' => '300 m²', 'Maßnahmen' => [$this->hedgehogGate->uuid], 'Igeltor: Breite' => '13'])
         ->assertInertia(fn (Assert $page): Assert => $page
@@ -431,7 +437,12 @@ test('the follow-up form must belong to the initiative, add to points and fit th
     expect($this->form->mapPointCreator->fresh()->follow_up_button_text)->toBe('Mehr erzählen');
 
     $this->actingAs($admin)->get(route('form-definitions.edit', $this->form))
-        ->assertInertia(fn (Assert $page): Assert => $page->where('mapPointFollowUpForms', fn ($forms): bool => collect($forms)->firstWhere('id', $this->followUp->uuid)['category_ids'] === [$this->category->uuid]));
+        ->assertInertia(fn (Assert $page): Assert => $page->where('mapPointFollowUpForms', function (mixed $forms): bool {
+            /** @var array<int, array{id: string, category_ids: array<int, string>}> $candidates */
+            $candidates = $forms instanceof Collection ? $forms->toArray() : (array) $forms;
+
+            return array_column($candidates, 'category_ids', 'id')[$this->followUp->uuid] === [$this->category->uuid];
+        }));
 });
 
 test('the button for the next form stays as it is next to the follow-up button', function (): void {
