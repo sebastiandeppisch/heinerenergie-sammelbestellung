@@ -54,7 +54,8 @@ test('after confirming, the person adds a photo with the follow-up form and it a
         ->click('Absenden')
         ->wait(2);
 
-    expect((string) $page->text('body'))->toContain('Danke, deine Angaben sind gespeichert.');
+    $text = trim((string) preg_replace('/\s+/', ' ', strip_tags((string) preg_replace('#<(script|style)\b.*?</\1>#s', '', $page->content()))));
+    expect(str_contains($text, 'Danke, deine Angaben sind gespeichert.'))->toBeTrue($page->url().' '.mb_substr($text, 0, 1500));
     $page->assertNoJavaScriptErrors();
 
     $mapPoint = MapPoint::sole();
