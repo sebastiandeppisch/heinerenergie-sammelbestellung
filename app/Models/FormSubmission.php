@@ -60,6 +60,7 @@ class FormSubmission extends Model implements Pointable
         'targets_error',
         'map_point_deleted_at',
         'map_point_deleted_by',
+        'map_point_id',
     ];
 
     protected $hidden = [
@@ -109,6 +110,16 @@ class FormSubmission extends Model implements Pointable
     public function advice(): BelongsTo
     {
         return $this->belongsTo(Advice::class);
+    }
+
+    /**
+     * The existing point a follow-up form added to. Points a form created are linked through HasPoints.
+     *
+     * @return BelongsTo<MapPoint, $this>
+     */
+    public function mapPoint(): BelongsTo
+    {
+        return $this->belongsTo(MapPoint::class);
     }
 
     /**

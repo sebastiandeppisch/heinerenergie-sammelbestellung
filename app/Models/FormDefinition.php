@@ -147,6 +147,14 @@ class FormDefinition extends Model
     }
 
     /**
+     * A follow-up form adds to an existing point and is only reachable with the manage link of that point.
+     */
+    public function isMapPointFollowUp(): bool
+    {
+        return $this->mapPointCreator?->isUpdate() ?? false;
+    }
+
+    /**
      * @return BelongsTo<Group, $this>
      */
     public function group(): BelongsTo

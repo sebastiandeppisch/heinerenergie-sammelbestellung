@@ -15,6 +15,7 @@ use App\Data\FormToMapPointSubcategoryData;
 use App\Enums\AdviceType;
 use App\Enums\FieldType;
 use App\Enums\FormType;
+use App\Enums\MapPointTargetMode;
 use App\Models\FormDefinition;
 use App\Models\FormDefinitionToAdvice;
 use App\Models\FormDefinitionToMapPoint;
@@ -30,6 +31,8 @@ use InvalidArgumentException;
 
 class FormDefinitionService
 {
+    public const string DEFAULT_FOLLOW_UP_BUTTON_TEXT = 'Erzähl mehr';
+
     public function updateFormDefinitionData(FormDefinitionData $formDefinitionData): FormDefinition
     {
         return DB::transaction(function () use ($formDefinitionData) {
@@ -266,6 +269,13 @@ class FormDefinitionService
 
         $creator = $formDefinition->mapPointCreator ?: new FormDefinitionToMapPoint;
         $creator->formDefinition()->associate($formDefinition);
+        $creator->mode = $mapping->mode;
+
+        if ($mapping->mode === MapPointTargetMode::UPDATE) {
+            $this->updateMapPointFollowUpMapping($creator, $mapping);
+
+            return;
+        }
 
         $title = FormField::where('uuid', $mapping->title_field_id)->first();
         $description = FormField::where('uuid', $mapping->description_field_id)->first();
@@ -298,10 +308,44 @@ class FormDefinitionService
         $creator->locationField()->associate(FormField::where('uuid', $mapping->location_field_id)->first());
         $creator->consent_text = $mapping->consent_text ?: MapPointConsentService::DEFAULT_DETAILS_TEXT;
         $creator->consent_point_text = $mapping->consent_point_text ?: MapPointConsentService::DEFAULT_POINT_TEXT;
+        $followUp = $mapping->follow_up_form_definition_id === null ? null : FormDefinition::where('uuid', $mapping->follow_up_form_definition_id)->first();
+        $creator->followUpFormDefinition()->associate($followUp);
+        $creator->follow_up_button_text = $followUp === null ? null : ($mapping->follow_up_button_text ?: self::DEFAULT_FOLLOW_UP_BUTTON_TEXT);
 
         $creator->save();
 
         $this->updateMapPointSubcategories($creator, $subcategoryField === null ? new Collection : $mapping->subcategory_options);
+        $this->updateMapPointCharacteristics($creator, $characteristicsField === null ? new Collection : $mapping->characteristic_options);
+        $this->updateMapPointFieldMappings($creator, $category === null ? new Collection : $mapping->field_mappings);
+    }
+
+    /**
+     * A follow-up form only fills fields and characteristics of the existing point. Title, description, location,
+     * category, consent and contact stay as the person entered them first, so their mappings are cleared.
+     */
+    private function updateMapPointFollowUpMapping(FormDefinitionToMapPoint $creator, FormToMapPointMappingData $mapping): void
+    {
+        $category = $mapping->category_id === null ? null : MapPointCategory::where('uuid', $mapping->category_id)->first();
+        $characteristicsField = $category === null || $mapping->characteristics_field_id === null
+            ? null
+            : FormField::where('uuid', $mapping->characteristics_field_id)->first();
+
+        $creator->titleField()->dissociate();
+        $creator->descriptionField()->dissociate();
+        $creator->coordinateField()->dissociate();
+        $creator->subcategoryField()->dissociate();
+        $creator->contactEmailField()->dissociate();
+        $creator->contactEnabledField()->dissociate();
+        $creator->locationField()->dissociate();
+        $creator->followUpFormDefinition()->dissociate();
+        $creator->category()->associate($category);
+        $creator->characteristicsField()->associate($characteristicsField);
+        $creator->consent_text = null;
+        $creator->consent_point_text = null;
+        $creator->follow_up_button_text = null;
+        $creator->save();
+
+        $this->updateMapPointSubcategories($creator, new Collection);
         $this->updateMapPointCharacteristics($creator, $characteristicsField === null ? new Collection : $mapping->characteristic_options);
         $this->updateMapPointFieldMappings($creator, $category === null ? new Collection : $mapping->field_mappings);
     }
@@ -355,19 +399,20 @@ class FormDefinitionService
     }
 
     /**
-     * Create a FormDefinition from a template
-     */
-    /**
+     * Creates a form definition from a template.
+     *
      * @param  MapPointCategory|null  $mapPointCategory  Only for map point forms: the category of the points, whose fields the form asks for.
+     * @param  bool  $withFollowUp  Only for map point forms with a category: also create a follow-up form and link it.
+     * @param  array<int, string>  $followUpOnlyFieldUuids  fields of the category only the follow-up form asks for
      */
-    public function createFromTemplate(string $templateType, string $groupUuid, ?MapPointCategory $mapPointCategory = null): FormDefinition
+    public function createFromTemplate(string $templateType, string $groupUuid, ?MapPointCategory $mapPointCategory = null, bool $withFollowUp = false, array $followUpOnlyFieldUuids = []): FormDefinition
     {
-        return DB::transaction(function () use ($templateType, $groupUuid, $mapPointCategory): FormDefinition {
+        return DB::transaction(function () use ($templateType, $groupUuid, $mapPointCategory, $withFollowUp, $followUpOnlyFieldUuids): FormDefinition {
             $group = Group::where('uuid', $groupUuid)->firstOrFail();
 
             return match ($templateType) {
                 'advice' => $this->createAdviceFormTemplate($group),
-                'map_point' => $this->createMapPointFormTemplate($group, $mapPointCategory),
+                'map_point' => $this->createMapPointFormTemplate($group, $mapPointCategory, $withFollowUp && $mapPointCategory !== null, $followUpOnlyFieldUuids),
                 default => throw new InvalidArgumentException("Unknown template type: {$templateType}"),
             };
         });
@@ -377,7 +422,10 @@ class FormDefinitionService
      * A form that creates map points: title, description, location, location description and the contact address, and with a category one question per field
      * of the category, already mapped to it. The form fields copy type, label and options of the category fields.
      */
-    private function createMapPointFormTemplate(Group $group, ?MapPointCategory $category): FormDefinition
+    /**
+     * @param  array<int, string>  $followUpOnlyFieldUuids
+     */
+    private function createMapPointFormTemplate(Group $group, ?MapPointCategory $category, bool $withFollowUp = false, array $followUpOnlyFieldUuids = []): FormDefinition
     {
         $formDefinition = new FormDefinition;
         $formDefinition->name = $category === null ? 'Kartenpunkt-Formular für '.$group->name : 'Formular für '.$category->name;
@@ -400,11 +448,56 @@ class FormDefinitionService
         $creator->consent_text = MapPointConsentService::DEFAULT_DETAILS_TEXT;
         $creator->consent_point_text = MapPointConsentService::DEFAULT_POINT_TEXT;
         $creator->category()->associate($category);
+
+        if ($withFollowUp && $category !== null) {
+            $creator->followUpFormDefinition()->associate($this->createMapPointFollowUpTemplate($group, $category));
+            $creator->follow_up_button_text = self::DEFAULT_FOLLOW_UP_BUTTON_TEXT;
+        }
+
         $creator->save();
 
-        $sortOrder = 5;
+        $this->addCategoryQuestions($formDefinition, $creator, $category, 5, $withFollowUp ? $followUpOnlyFieldUuids : []);
 
+        return $formDefinition->fresh();
+    }
+
+    /**
+     * A form that adds to existing points of the category: every field of the category, the characteristics and
+     * their fields, already mapped. It is opened with the manage link of a point and shows its current values.
+     */
+    private function createMapPointFollowUpTemplate(Group $group, MapPointCategory $category): FormDefinition
+    {
+        $formDefinition = new FormDefinition;
+        $formDefinition->name = 'Erzähl mehr: '.$category->name;
+        $formDefinition->description = 'Ergänze deinen Eintrag, z. B. mit Fotos. Was du leer lässt, bleibt wie es ist.';
+        $formDefinition->success_message = 'Danke, deine Angaben sind gespeichert.';
+        $formDefinition->group()->associate($group);
+        $formDefinition->is_active = true;
+        $formDefinition->save();
+
+        $creator = $formDefinition->mapPointCreator()->make();
+        $creator->mode = MapPointTargetMode::UPDATE;
+        $creator->category()->associate($category);
+        $creator->save();
+
+        $this->addCategoryQuestions($formDefinition, $creator, $category, 0);
+
+        return $formDefinition;
+    }
+
+    /**
+     * One question per field of the category, the characteristics as checkboxes and below each checked one the
+     * questions for its fields, all mapped to the point.
+     *
+     * @param  array<int, string>  $excludedFieldUuids  fields of the category left out
+     */
+    private function addCategoryQuestions(FormDefinition $formDefinition, FormDefinitionToMapPoint $creator, ?MapPointCategory $category, int $sortOrder, array $excludedFieldUuids = []): void
+    {
         foreach (app(MapPointFieldService::class)->fieldsOfCategory($category?->id) as $categoryField) {
+            if (in_array($categoryField->uuid, $excludedFieldUuids, true)) {
+                continue;
+            }
+
             $formField = $this->copyMapPointField($formDefinition, $categoryField, $sortOrder++);
             $creator->fieldMappings()->create(['target_field_id' => $categoryField->id, 'source_field_id' => $formField->id]);
         }
@@ -430,8 +523,6 @@ class FormDefinitionService
                 }
             }
         }
-
-        return $formDefinition->fresh();
     }
 
     /**
@@ -448,6 +539,7 @@ class FormDefinitionService
             'max_length' => $field->max_length,
             'min_value' => $field->min_value,
             'max_value' => $field->max_value,
+            'max_images' => $field->max_images,
             'required' => false,
             'sort_order' => $sortOrder,
         ]);

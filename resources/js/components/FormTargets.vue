@@ -4,6 +4,7 @@ import { Badge } from '@/shadcn/components/ui/badge';
 import { Card, CardContent } from '@/shadcn/components/ui/card';
 import { Checkbox } from '@/shadcn/components/ui/checkbox';
 import { FormItem } from '@/shadcn/components/ui/form';
+import { Input } from '@/shadcn/components/ui/input';
 import { Label } from '@/shadcn/components/ui/label';
 import { Select } from '@/shadcn/components/ui/select';
 import SelectContent from '@/shadcn/components/ui/select/SelectContent.vue';
@@ -17,7 +18,7 @@ type FormDefinitionData = App.Data.FormDefinitionData;
 
 const formDefinition = defineModel<FormDefinitionData>('formDefinition', { required: true });
 
-withDefaults(
+const props = withDefaults(
     defineProps<{
         /** The categories map points of this form can be created in. */
         mapPointCategories?: Array<App.Data.MapPointCategoryData>;
@@ -26,8 +27,11 @@ withDefaults(
         mapPointCharacteristics?: Array<App.Data.MapPointCharacteristicData>;
         mapPointCharacteristicIdsByCategory?: Record<string, Array<string>>;
         mapPointFieldsByCharacteristic?: Record<string, Array<App.Data.FormFieldData>>;
+        /** The forms of the initiative that add to existing points, the candidates for the follow-up form. */
+        mapPointFollowUpForms?: Array<App.Data.MapPointFollowUpFormData>;
     }>(),
     {
+        mapPointFollowUpForms: () => [],
         mapPointCharacteristics: () => [],
         mapPointCharacteristicIdsByCategory: () => ({}),
         mapPointFieldsByCharacteristic: () => ({}),
@@ -59,6 +63,7 @@ const mappingLabels: Record<string, string> = {
     consent_point_text_without_fields: 'Einwilligungstext für den Eintrag ohne {felder}, er listet keine Angaben',
     location_field_max_length: 'Maximale Länge des Ortsbeschreibung-Felds (höchstens 255 Zeichen)',
     consent_text: 'Einwilligungstext für Eintrag und Angaben',
+    category_id: 'Kategorie der Kartenpunkte',
 };
 
 function labelFor(field: string): string {
@@ -118,6 +123,12 @@ const adviceValidation = computed(() => {
 const mapPointValidation = computed(() => {
     const mapping = formDefinition.value.map_point_mapping;
     if (!mapping?.enabled) return { status: 'disabled', missing: [], warnings: [] };
+
+    if (mapping.mode === 'update') {
+        const missing = mapping.category_id ? [] : ['category_id'];
+
+        return { status: missing.length === 0 ? 'complete' : 'incomplete', missing, warnings: [] as string[] };
+    }
 
     const required = ['title_field_id', 'description_field_id', 'coordinate_field_id', 'consent_point_text', 'consent_text'] as const;
     const missing: string[] = required.filter((field) => !mapping[field]?.trim());
@@ -181,6 +192,43 @@ const selectFields = computed(() => formDefinition.value.fields.filter((f: any) 
 const singleCheckboxFields = computed(() => formDefinition.value.fields.filter((f) => f.type === 'checkbox' && f.options.length === 1));
 
 const NO_CONDITION = 'none';
+const NO_FOLLOW_UP = 'none';
+
+const isFollowUpMode = computed(() => formDefinition.value.map_point_mapping?.mode === 'update');
+
+const mapPointMode = computed({
+    get: () => formDefinition.value.map_point_mapping?.mode ?? 'create',
+    set: (mode: App.Enums.MapPointTargetMode) => {
+        const mapping = formDefinition.value.map_point_mapping;
+        if (!mapping) return;
+
+        mapping.mode = mode;
+        // A follow-up form neither picks a sub category nor has a follow-up form of its own.
+        mapping.subcategory_field_id = null;
+        mapping.subcategory_options = [];
+        mapping.follow_up_form_definition_id = null;
+    },
+});
+
+/** Only follow-up forms whose fields fit the points of the chosen category. */
+const followUpCandidates = computed(() => {
+    const categoryId = formDefinition.value.map_point_mapping?.category_id ?? null;
+
+    return props.mapPointFollowUpForms.filter(
+        (form) => form.id !== formDefinition.value.id && (categoryId === null ? form.category_id === null : form.category_ids.includes(categoryId)),
+    );
+});
+
+const followUpSelection = computed({
+    get: () => formDefinition.value.map_point_mapping?.follow_up_form_definition_id ?? NO_FOLLOW_UP,
+    set: (value: string) => {
+        const mapping = formDefinition.value.map_point_mapping;
+        if (!mapping) return;
+
+        mapping.follow_up_form_definition_id = value === NO_FOLLOW_UP ? null : value;
+        mapping.follow_up_button_text = value === NO_FOLLOW_UP ? null : (mapping.follow_up_button_text ?? 'Erzähl mehr');
+    },
+});
 
 const adviceConditionValue = computed({
     get: () => formDefinition.value.advice_mapping?.condition_field_id ?? NO_CONDITION,
@@ -471,7 +519,7 @@ const adviceTypeSelectValue = computed({
                 <CardContent class="space-y-4" v-if="formDefinition.map_point_mapping !== null">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
-                            <h3 class="font-semibold">Kartenpunkt erstellen</h3>
+                            <h3 class="font-semibold">Kartenpunkt</h3>
                             <Badge
                                 data-test="map-point-status"
                                 :variant="
@@ -530,7 +578,25 @@ const adviceTypeSelectValue = computed({
                             </div>
                         </div>
 
-                        <div class="grid gap-3">
+                        <FormItem>
+                            <Label>Was soll das Formular tun?</Label>
+                            <Select v-model="mapPointMode">
+                                <SelectTrigger data-test="map-point-mode">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="create">Kartenpunkt anlegen</SelectItem>
+                                    <SelectItem value="update">Bestehenden Kartenpunkt ergänzen</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <p v-if="isFollowUpMode" class="text-xs text-muted-foreground" data-test="map-point-follow-up-hint">
+                                Ein Folgeformular öffnet die Person über den Link zu ihrem Eintrag. Es zeigt die vorhandenen Angaben und schreibt nur
+                                Felder und Maßnahmen. Titel, Beschreibung, Standort, Kategorie, Einwilligung und Kontakt bleiben, wie sie sind. Leere
+                                Felder löschen nichts.
+                            </p>
+                        </FormItem>
+
+                        <div v-if="!isFollowUpMode" class="grid gap-3">
                             <FormItem>
                                 <Label>Titel *</Label>
                                 <Select v-model="formDefinition.map_point_mapping.title_field_id">
@@ -655,6 +721,36 @@ const adviceTypeSelectValue = computed({
                                     Formular, dazu <code>{initiative}</code> und <code>{widerruf}</code>.
                                 </p>
                             </FormItem>
+
+                            <FormItem>
+                                <Label>Folgeformular (optional)</Label>
+                                <Select v-model="followUpSelection">
+                                    <SelectTrigger data-test="map-point-follow-up-form">
+                                        <SelectValue placeholder="Kein Folgeformular" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem :value="NO_FOLLOW_UP">Kein Folgeformular</SelectItem>
+                                        <SelectItem v-for="form in followUpCandidates" :key="form.id" :value="form.id">
+                                            {{ form.name }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <p class="text-xs text-muted-foreground">
+                                    Nach dem Absenden und auf der Seite zum Verwalten kann die Person damit weitere Angaben ergänzen, z. B. Fotos.
+                                    Wählbar sind Formulare der Initiative, die bestehende Kartenpunkte derselben Kategorie ergänzen.
+                                </p>
+                            </FormItem>
+
+                            <FormItem v-if="formDefinition.map_point_mapping.follow_up_form_definition_id">
+                                <Label for="map-point-follow-up-button-text">Button-Text für das Folgeformular</Label>
+                                <Input
+                                    id="map-point-follow-up-button-text"
+                                    :model-value="formDefinition.map_point_mapping.follow_up_button_text ?? ''"
+                                    placeholder="Erzähl mehr"
+                                    data-test="map-point-follow-up-button-text"
+                                    @update:model-value="(value) => (formDefinition.map_point_mapping!.follow_up_button_text = String(value))"
+                                />
+                            </FormItem>
                         </div>
 
                         <MapPointCategoryMapping
@@ -666,6 +762,7 @@ const adviceTypeSelectValue = computed({
                             :characteristics="mapPointCharacteristics"
                             :characteristic-ids-by-category="mapPointCharacteristicIdsByCategory"
                             :fields-by-characteristic="mapPointFieldsByCharacteristic"
+                            :allow-subcategory="!isFollowUpMode"
                             class="border-t pt-4"
                         />
                     </div>

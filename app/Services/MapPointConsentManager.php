@@ -46,12 +46,14 @@ class MapPointConsentManager
     }
 
     /**
-     * Deletes the point with its values and images, and the submission it was created from, so nothing personal is
-     * left. A submission that also asked for an advice is kept for it and notes that the person deleted the point.
+     * Deletes the point with its values and images, and the submissions it was created from and added to by
+     * follow-up forms, so nothing personal is left. A submission that also asked for an advice is kept for it and
+     * notes that the person deleted the point.
      */
     public function delete(MapPoint $mapPoint): void
     {
         DB::transaction(function () use ($mapPoint): void {
+            $mapPoint->followUpSubmissions()->whereNull('advice_id')->get()->each->delete();
             $submission = $mapPoint->pointable;
 
             if (! $submission instanceof FormSubmission || $submission->advice_id !== null) {
@@ -60,6 +62,7 @@ class MapPointConsentManager
                 return;
             }
 
+            $mapPoint->followUpSubmissions()->get()->each->noteMapPointDeleted(MapPointDeletedBy::PERSON);
             $mapPoint->delete();
             $submission->points()->get()->each->delete();
             $submission->delete();

@@ -16,6 +16,7 @@ use App\Events\MapPointCreatedByFormSubmission;
 use App\Jobs\SendNewAdviceInfoToAdvisors;
 use App\Mail\AdviceCreated;
 use App\Models\Advice;
+use App\Models\FormDefinitionToMapPoint;
 use App\Models\FormField;
 use App\Models\FormSubmission;
 use App\Models\MapPoint;
@@ -39,6 +40,7 @@ class FormTargetService
 {
     public function __construct(
         private readonly MapPointFieldService $mapPointFields,
+        private readonly MapPointEditLinkService $editLinks,
     ) {}
 
     /**
@@ -47,10 +49,12 @@ class FormTargetService
     public function prepare(FormSubmission $submission, ConsentChoiceData $consentChoice = new ConsentChoiceData): FormTargetPayload
     {
         $formDefinition = $submission->formDefinition;
+        $mapPointCreator = $formDefinition->mapPointCreator;
 
         return new FormTargetPayload(
             advice: $formDefinition->adviceCreator?->prepare($submission),
-            map_point: $formDefinition->mapPointCreator?->prepare($submission, $consentChoice),
+            // Follow-up forms write into an existing point when they are submitted, see MapPointFollowUpService.
+            map_point: $mapPointCreator === null || $mapPointCreator->isUpdate() ? null : $mapPointCreator->prepare($submission, $consentChoice),
         );
     }
 
@@ -100,17 +104,41 @@ class FormTargetService
         }
 
         if ($payload->map_point !== null) {
-            $mapPoint = $this->createMapPoint($submission, $payload->map_point);
+            $creator = $submission->formDefinition?->mapPointCreator;
+            $followUp = $creator?->followUpFormDefinition?->isMapPointFollowUp() === true ? $creator : null;
+            [$mapPoint, $token] = $this->createMapPoint($submission, $payload->map_point, issueToken: $payload->map_point->contact_email !== null || $followUp !== null);
+            $notice = $this->mapPointNotice($mapPoint, $token, $followUp);
 
-            if ($mapPoint->contact_email !== null) {
-                $notices->push(new FormTargetNoticeData(
-                    title: 'Dein Eintrag ist angelegt.',
-                    text: 'Den Link zum Verwalten haben wir dir per E-Mail geschickt.',
-                ));
+            if ($notice !== null) {
+                $notices->push($notice);
             }
         }
 
         return $notices;
+    }
+
+    /**
+     * The mail and the follow-up button carry the same token, a second one would make the link in the mail invalid.
+     */
+    private function mapPointNotice(MapPoint $mapPoint, ?string $token, ?FormDefinitionToMapPoint $followUp): ?FormTargetNoticeData
+    {
+        if ($token === null) {
+            return null;
+        }
+
+        $byMail = $mapPoint->contact_email !== null;
+        $text = match (true) {
+            $byMail && $followUp !== null => 'Den Link zum Verwalten haben wir dir per E-Mail geschickt. Möchtest du noch mehr erzählen, z. B. mit Fotos?',
+            $byMail => 'Den Link zum Verwalten haben wir dir per E-Mail geschickt.',
+            default => 'Möchtest du noch mehr erzählen, z. B. mit Fotos? Der Link gilt nur hier und für '.config('forms.map_point_edit.expires_days').' Tage.',
+        };
+
+        return new FormTargetNoticeData(
+            title: 'Dein Eintrag ist angelegt.',
+            text: $text,
+            url: $followUp === null ? null : $this->editLinks->followUpUrl($token),
+            url_label: $followUp?->follow_up_button_text,
+        );
     }
 
     private function createAdvice(FormSubmission $submission, AdviceTargetPayload $payload): Advice
@@ -145,9 +173,12 @@ class FormTargetService
         return $advice;
     }
 
-    private function createMapPoint(FormSubmission $submission, MapPointTargetPayload $payload): MapPoint
+    /**
+     * @return array{0: MapPoint, 1: string|null} the point and the token of its manage link
+     */
+    private function createMapPoint(FormSubmission $submission, MapPointTargetPayload $payload, bool $issueToken): array
     {
-        return DB::transaction(function () use ($submission, $payload): MapPoint {
+        return DB::transaction(function () use ($submission, $payload, $issueToken): array {
             $mapPoint = MapPoint::create([
                 'group_id' => $payload->group_id,
                 'title' => $payload->title,
@@ -179,9 +210,11 @@ class FormTargetService
             $mapPoint->pointable()->associate($submission);
             $mapPoint->save();
 
-            event(new MapPointCreatedByFormSubmission($mapPoint, $submission));
+            $token = $issueToken ? $this->editLinks->issue($mapPoint) : null;
 
-            return $mapPoint->fresh() ?? $mapPoint;
+            event(new MapPointCreatedByFormSubmission($mapPoint, $submission, $token));
+
+            return [$mapPoint->fresh() ?? $mapPoint, $token];
         });
     }
 

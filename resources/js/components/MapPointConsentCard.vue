@@ -17,8 +17,8 @@ function refuse() {
     router.post(route('mappoints.refuse-consent', props.mapPointId), {}, { preserveScroll: true, onFinish: () => (confirmingRefuse.value = false) });
 }
 
-function formatDate(date: string): string {
-    return new Date(date).toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' });
+function formatDate(date: string | null): string {
+    return date === null ? '' : new Date(date).toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' });
 }
 </script>
 
@@ -58,6 +58,18 @@ function formatDate(date: string): string {
                         <a :href="route('form-submissions.index', { submission: consent.submission_id })" class="underline">
                             Einsendung mit allen Angaben öffnen
                         </a>
+                    </dd>
+                </template>
+                <template v-if="consent.follow_up_submissions.length > 0">
+                    <dt class="text-gray-500">Ergänzungen</dt>
+                    <dd>
+                        <ul class="space-y-1" data-test="map-point-follow-up-submissions">
+                            <li v-for="submission in consent.follow_up_submissions" :key="submission.id">
+                                <a :href="route('form-submissions.index', { submission: submission.id })" class="underline">
+                                    {{ submission.form_name }} vom {{ formatDate(submission.submitted_at) }}
+                                </a>
+                            </li>
+                        </ul>
                     </dd>
                 </template>
             </dl>

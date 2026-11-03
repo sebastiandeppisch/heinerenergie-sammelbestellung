@@ -58,7 +58,7 @@ class MapPointManageController extends Controller
         return $this->message('sent');
     }
 
-    public function show(string $token): Response
+    public function show(Request $request, string $token): Response
     {
         $mapPoint = $this->editLinks->findByToken($token);
 
@@ -67,10 +67,12 @@ class MapPointManageController extends Controller
         }
 
         app(CurrentGroupService::class)->setGroup($mapPoint->group);
+        $proof = $this->mailProof($request, $token);
 
         return Inertia::render('MapPointManage/Manage', [
             'token' => $token,
             'mapPoint' => MapPointManageData::fromModel($mapPoint),
+            'proof' => $proof,
         ]);
     }
 
@@ -85,12 +87,12 @@ class MapPointManageController extends Controller
         $validated = $request->validate(['show' => ['required', 'boolean'], 'details' => ['required', 'boolean']]);
 
         $this->consents->change($mapPoint, new ConsentChoiceData(show: $validated['show'], details: $validated['show'] && $validated['details']));
-        $this->contact->confirmAddress($mapPoint);
+        $proof = $this->confirmAddress($request, $mapPoint, $token);
 
-        return redirect()->route('map-point.manage.show', $token)->with('success', 'Deine Auswahl ist gespeichert.');
+        return redirect()->route('map-point.manage.show', ['token' => $token, 'nachweis' => $proof])->with('success', 'Deine Auswahl ist gespeichert.');
     }
 
-    public function revoke(string $token): RedirectResponse|Response
+    public function revoke(Request $request, string $token): RedirectResponse|Response
     {
         $mapPoint = $this->editLinks->findByToken($token);
 
@@ -99,9 +101,9 @@ class MapPointManageController extends Controller
         }
 
         $this->consents->refuse($mapPoint);
-        $this->contact->confirmAddress($mapPoint);
+        $proof = $this->confirmAddress($request, $mapPoint, $token);
 
-        return redirect()->route('map-point.manage.show', $token)->with('success', 'Deine Einwilligung ist widerrufen. Der Eintrag wird nicht mehr öffentlich angezeigt.');
+        return redirect()->route('map-point.manage.show', ['token' => $token, 'nachweis' => $proof])->with('success', 'Deine Einwilligung ist widerrufen. Der Eintrag wird nicht mehr öffentlich angezeigt.');
     }
 
     public function updateContact(Request $request, string $token): RedirectResponse|Response
@@ -115,11 +117,13 @@ class MapPointManageController extends Controller
         $enabled = $request->validate(['enabled' => ['required', 'boolean']])['enabled'];
 
         $mapPoint->forceFill(['contact_enabled' => $enabled])->save();
-        $this->contact->confirmAddress($mapPoint);
+        $proof = $this->confirmAddress($request, $mapPoint, $token);
 
-        return redirect()->route('map-point.manage.show', $token)->with('success', $enabled
-            ? 'Kontaktanfragen sind eingeschaltet. Wir leiten sie an deine E-Mail-Adresse weiter.'
-            : 'Kontaktanfragen sind ausgeschaltet.');
+        return redirect()->route('map-point.manage.show', ['token' => $token, 'nachweis' => $proof])->with('success', match (true) {
+            ! $enabled => 'Kontaktanfragen sind ausgeschaltet.',
+            $mapPoint->contact_email_verified_at === null => 'Kontaktanfragen sind eingeschaltet. Freigeschaltet werden sie, sobald du den Link aus unserer E-Mail öffnest.',
+            default => 'Kontaktanfragen sind eingeschaltet. Wir leiten sie an deine E-Mail-Adresse weiter.',
+        });
     }
 
     public function destroy(string $token): Response
@@ -135,6 +139,28 @@ class MapPointManageController extends Controller
         $this->consents->delete($mapPoint);
 
         return $this->message('deleted');
+    }
+
+    /**
+     * The page after submitting a form carries the token too, so only the proof of a link from a mail confirms the
+     * address. Returns the proof to keep it on the page.
+     */
+    private function confirmAddress(Request $request, MapPoint $mapPoint, string $token): ?string
+    {
+        $proof = $this->mailProof($request, $token);
+
+        if ($proof !== null) {
+            $this->contact->confirmAddress($mapPoint);
+        }
+
+        return $proof;
+    }
+
+    private function mailProof(Request $request, string $token): ?string
+    {
+        $proof = $request->query('nachweis');
+
+        return $this->editLinks->hasMailProof($token, $proof) ? (string) $proof : null;
     }
 
     private function message(string $status): Response

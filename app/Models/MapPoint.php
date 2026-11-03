@@ -143,6 +143,7 @@ class MapPoint extends Model implements HasSends
                 $submission->noteMapPointDeleted($deletedBy);
             }
 
+            $this->followUpSubmissions()->get()->each->noteMapPointDeleted($deletedBy);
             $this->delete();
         });
     }
@@ -150,6 +151,16 @@ class MapPoint extends Model implements HasSends
     public function imageDirectory(): string
     {
         return 'map-point-images/'.$this->uuid;
+    }
+
+    /**
+     * Submissions of follow-up forms that added to this point.
+     *
+     * @return HasMany<FormSubmission, $this>
+     */
+    public function followUpSubmissions(): HasMany
+    {
+        return $this->hasMany(FormSubmission::class);
     }
 
     /**

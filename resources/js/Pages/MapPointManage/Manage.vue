@@ -7,7 +7,7 @@ import CardContent from '@/shadcn/components/ui/card/CardContent.vue';
 import { Checkbox } from '@/shadcn/components/ui/checkbox';
 import { Label } from '@/shadcn/components/ui/label';
 import type { CustomPageProps } from '@/types/pageProps';
-import { router, useForm, usePage } from '@inertiajs/vue3';
+import { Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { route } from 'ziggy-js';
 
@@ -18,7 +18,11 @@ defineOptions({
 const props = defineProps<{
     token: string;
     mapPoint: App.Data.MapPointManageData;
+    /** Only a link from our mail proves the address, a link from the page after submitting does not. It is kept on the page. */
+    proof: string | null;
 }>();
+
+const params = computed(() => (props.proof ? { token: props.token, nachweis: props.proof } : { token: props.token }));
 
 const page = usePage<CustomPageProps>();
 const success = computed(() => page.props.flashMessages?.success ?? null);
@@ -39,19 +43,19 @@ function updateShow(checked: boolean | 'indeterminate') {
 }
 
 function save() {
-    form.put(route('map-point.manage.consent', props.token), { preserveScroll: true });
+    form.put(route('map-point.manage.consent', params.value), { preserveScroll: true });
 }
 
 function setContact(enabled: boolean) {
-    router.put(route('map-point.manage.contact', props.token), { enabled }, { preserveScroll: true });
+    router.put(route('map-point.manage.contact', params.value), { enabled }, { preserveScroll: true });
 }
 
 function revoke() {
-    router.post(route('map-point.manage.revoke', props.token), {}, { preserveScroll: true });
+    router.post(route('map-point.manage.revoke', params.value), {}, { preserveScroll: true });
 }
 
 function destroy() {
-    router.delete(route('map-point.manage.destroy', props.token));
+    router.delete(route('map-point.manage.destroy', params.value));
 }
 </script>
 
@@ -72,6 +76,16 @@ function destroy() {
                 <p v-if="success" class="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-800" data-test="manage-success">
                     {{ success }}
                 </p>
+
+                <section v-if="mapPoint.follow_up_button_text" class="flex flex-col gap-3 rounded-md border p-4" data-test="manage-follow-up">
+                    <h2 class="font-semibold">Angaben ergänzen</h2>
+                    <p class="text-sm">Erzähl mehr über deinen Eintrag, z. B. mit Fotos. Was du schon eingetragen hast, siehst du im Formular.</p>
+                    <div>
+                        <Button as-child>
+                            <Link :href="route('map-point.manage.follow-up', token)">{{ mapPoint.follow_up_button_text }}</Link>
+                        </Button>
+                    </div>
+                </section>
 
                 <section class="flex flex-col gap-2">
                     <h2 class="font-semibold">Was ist öffentlich?</h2>
@@ -131,6 +145,14 @@ function destroy() {
                             >
                             <template v-else>Kontaktanfragen über die Karte sind ausgeschaltet.</template>
                             Eingeschaltet können dir Besucher:innen der Karte schreiben, ohne deine Adresse zu sehen.
+                        </p>
+                        <p
+                            v-if="!proof && !mapPoint.contact_email_confirmed"
+                            class="text-sm text-muted-foreground"
+                            data-test="manage-contact-needs-mail"
+                        >
+                            Freigeschaltet werden Kontaktanfragen, sobald du den Link aus unserer E-Mail öffnest. So wissen wir, dass die Adresse dir
+                            gehört.
                         </p>
                         <div>
                             <Button @click="setContact(true)">Kontaktanfragen einschalten</Button>

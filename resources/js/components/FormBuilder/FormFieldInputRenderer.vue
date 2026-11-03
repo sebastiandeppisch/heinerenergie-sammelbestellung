@@ -5,10 +5,11 @@ import { Label } from '@/shadcn/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/shadcn/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/ui/select';
 import { Textarea } from '@/shadcn/components/ui/textarea';
-import { computed } from 'vue';
+import { computed, inject } from 'vue';
 import PinLocationMap from '../PinLocationMap.vue';
 import AddressInput from './AddressInput.vue';
 import ImageUploadInput from './ImageUploadInput.vue';
+import { storedImagesKey } from './storedImages';
 
 type FormFieldData = App.Data.FormFieldData;
 type FieldType = App.Enums.FieldType;
@@ -44,6 +45,8 @@ const props = withDefaults(
 );
 
 const modelValue = defineModel<any>();
+
+const storedImages = inject(storedImagesKey, null);
 
 const emit = defineEmits<{
     (e: 'change'): void;
@@ -214,6 +217,7 @@ const inputClasses = computed(() => ({
         :disabled="disabled"
         :has-error="hasError"
         :stored-paths="disabled && Array.isArray(modelValue) && typeof modelValue[0] === 'string' ? modelValue : []"
+        :stored-images="storedImages?.[field.id] ?? []"
         @change="handleChange"
     />
 

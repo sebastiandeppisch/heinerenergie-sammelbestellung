@@ -7,6 +7,7 @@ namespace App\Http\Requests;
 use App\Context\GroupContextContract;
 use App\Enums\FieldType;
 use App\Enums\FormType;
+use App\Enums\MapPointTargetMode;
 use App\Models\FormDefinition;
 use App\Models\Group;
 use App\Models\MapPoint;
@@ -16,6 +17,7 @@ use App\Rules\FormFieldExistsInRequest;
 use App\Rules\Hostname;
 use App\Rules\MappedFormFieldMustBeRequired;
 use App\Services\MapPointFieldService;
+use App\Services\MapPointFollowUpService;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -134,8 +136,17 @@ class UpsertFormDefinitionRequest extends FormRequest
             $rules['map_point_mapping.field_mappings'] = ['array'];
             $rules['map_point_mapping.field_mappings.*.target_field_id'] = ['required', 'uuid', 'exists:form_fields,uuid'];
             $rules['map_point_mapping.field_mappings.*.source_field_id'] = ['required', 'string', new FormFieldExistsInRequest];
+            $rules['map_point_mapping.mode'] = ['nullable', Rule::enum(MapPointTargetMode::class)];
+        }
+
+        if ($this->isMapPointMappingEnabled() && ! $this->isMapPointFollowUpForm()) {
+            $rules['map_point_mapping.title_field_id'][] = 'required';
+            $rules['map_point_mapping.description_field_id'][] = 'required';
+            $rules['map_point_mapping.coordinate_field_id'][] = 'required';
             $rules['map_point_mapping.consent_text'] = ['required', 'string', 'max:5000'];
             $rules['map_point_mapping.consent_point_text'] = ['required', 'string', 'max:5000', 'not_regex:/\{felder\}/'];
+            $rules['map_point_mapping.follow_up_form_definition_id'] = ['nullable', 'uuid', 'exists:form_definitions,uuid'];
+            $rules['map_point_mapping.follow_up_button_text'] = ['nullable', 'string', 'max:255'];
         }
 
         if ($this->has('advice_mapping') && ! is_null($this->input('advice_mapping')) && $this->input('advice_mapping.enabled') === true) {
@@ -203,7 +214,66 @@ class UpsertFormDefinitionRequest extends FormRequest
                     $this->validateMapPointCategoryMapping($validator);
                 }
             },
+            function (Validator $validator): void {
+                if ($this->isMapPointFollowUpForm()) {
+                    $this->validateFollowUpForm($validator);
+                } elseif ($this->isMapPointMappingEnabled() && $this->input('map_point_mapping.follow_up_form_definition_id') !== null && ! $validator->errors()->hasAny(['group_id', 'map_point_mapping.*'])) {
+                    $this->validateFollowUpLink($validator);
+                }
+            },
         ];
+    }
+
+    /**
+     * A follow-up form is opened with the manage link of a point, which proves the person, and adds to a point
+     * that exists. It neither asks for a confirmation nor creates an advice.
+     */
+    private function validateFollowUpForm(Validator $validator): void
+    {
+        if ($this->boolean('requires_email_confirmation')) {
+            $validator->errors()->add('requires_email_confirmation', 'Ein Formular, das bestehende Kartenpunkte ergänzt, wird über den Verwaltungslink geöffnet und braucht keine E-Mail-Bestätigung.');
+        }
+
+        if ($this->boolean('advice_mapping.enabled')) {
+            $validator->errors()->add('advice_mapping.enabled', 'Ein Formular, das bestehende Kartenpunkte ergänzt, kann keine Beratung anlegen.');
+        }
+    }
+
+    /**
+     * The follow-up form must add to points of this form: in the same initiative and with fields that fit the points.
+     */
+    private function validateFollowUpLink(Validator $validator): void
+    {
+        $key = 'map_point_mapping.follow_up_form_definition_id';
+        $followUp = FormDefinition::where('uuid', $this->input($key))->with('mapPointCreator')->first();
+        $existing = $this->route('form_definition');
+        $group = Group::where('uuid', $this->input('group_id'))->first();
+
+        if ($followUp === null || ! $followUp->isMapPointFollowUp() || ($existing instanceof FormDefinition && $existing->is($followUp))) {
+            $validator->errors()->add($key, 'Als Folgeformular eignet sich nur ein Formular, das bestehende Kartenpunkte ergänzt.');
+
+            return;
+        }
+
+        if ($group === null || $followUp->group_id !== $group->id) {
+            $validator->errors()->add($key, 'Das Folgeformular muss zur selben Initiative gehören.');
+
+            return;
+        }
+
+        $categoryUuid = $this->input('map_point_mapping.category_id');
+        $categoryId = $categoryUuid === null ? null : MapPointCategory::where('uuid', $categoryUuid)->value('id');
+
+        $followUpCategoryId = $followUp->mapPointCreator?->map_point_category_id;
+
+        if (! app(MapPointFollowUpService::class)->fits($categoryId === null ? null : (int) $categoryId, $followUpCategoryId === null ? null : (int) $followUpCategoryId)) {
+            $validator->errors()->add($key, 'Das Folgeformular passt nicht zur Kategorie: Es muss im selben Zweig liegen und dieselben Felder haben.');
+        }
+    }
+
+    private function isMapPointFollowUpForm(): bool
+    {
+        return $this->isMapPointMappingEnabled() && $this->input('map_point_mapping.mode') === MapPointTargetMode::UPDATE->value;
     }
 
     /**
@@ -407,6 +477,8 @@ class UpsertFormDefinitionRequest extends FormRequest
             'map_point_mapping.consent_text' => 'Einwilligungstext für Eintrag und Angaben',
             'map_point_mapping.consent_point_text' => 'Einwilligungstext für den Eintrag',
             'map_point_mapping.location_field_id' => 'Ortsbeschreibung Feld',
+            'map_point_mapping.follow_up_form_definition_id' => 'Folgeformular',
+            'map_point_mapping.follow_up_button_text' => 'Button-Text für das Folgeformular',
         ];
     }
 
@@ -425,9 +497,6 @@ class UpsertFormDefinitionRequest extends FormRequest
     }
 
     /**
-     * The mapped field must have the given type in the submitted fields.
-     */
-    /**
      * The mapped field must not take longer answers than the column of the point holds.
      */
     private function mappedFieldWithMaxLength(int $maxLength): Closure
@@ -443,6 +512,8 @@ class UpsertFormDefinitionRequest extends FormRequest
     }
 
     /**
+     * The mapped field must have the given type in the submitted fields.
+     *
      * @param  string|array<int, string>  $types
      */
     private function mappedFieldOfType(string|array $types, bool $exactlyOneOption = false): Closure

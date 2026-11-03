@@ -22,6 +22,7 @@ use App\Http\Controllers\MapPointContactController;
 use App\Http\Controllers\MapPointContactManageController;
 use App\Http\Controllers\MapPointController;
 use App\Http\Controllers\MapPointExportController;
+use App\Http\Controllers\MapPointFollowUpController;
 use App\Http\Controllers\MapPointImportController;
 use App\Http\Controllers\MapPointManageController;
 use App\Http\Controllers\MapPointSpreadsheetMappingController;
@@ -211,6 +212,13 @@ Route::post('/eintrag/{mapPoint}/link', [MapPointManageController::class, 'sendF
     ->name('map-point.manage.send-for-point')
     ->middleware('throttle:form-submit');
 Route::get('/eintrag/verwalten/{token}', [MapPointManageController::class, 'show'])->name('map-point.manage.show');
+Route::get('/eintrag/verwalten/{token}/ergaenzen', [MapPointFollowUpController::class, 'show'])->name('map-point.manage.follow-up');
+Route::post('/eintrag/verwalten/{token}/ergaenzen', [MapPointFollowUpController::class, 'submit'])
+    ->name('map-point.manage.follow-up.submit')
+    ->middleware([HandlePrecognitiveRequests::class, 'throttle:form-submit']);
+Route::get('/eintrag/verwalten/{token}/bilder/{image}', [MapPointFollowUpController::class, 'image'])
+    ->name('map-point.manage.image')
+    ->middleware('throttle:map-point-images');
 Route::middleware('throttle:form-submit')->group(function (): void {
     Route::put('/eintrag/verwalten/{token}/einwilligung', [MapPointManageController::class, 'updateConsent'])->name('map-point.manage.consent');
     Route::post('/eintrag/verwalten/{token}/widerrufen', [MapPointManageController::class, 'revoke'])->name('map-point.manage.revoke');

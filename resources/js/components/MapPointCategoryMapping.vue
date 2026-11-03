@@ -9,20 +9,25 @@ import { computed } from 'vue';
 type FormFieldData = App.Data.FormFieldData;
 type FieldType = App.Enums.FieldType;
 
-const props = defineProps<{
-    /** The fields of the form, which fill the category fields. */
-    formFields: Array<FormFieldData>;
-    categories: Array<App.Data.MapPointCategoryData>;
-    /** The fields of each category including the inherited ones, keyed by category id. */
-    fieldsByCategory: Record<string, Array<FormFieldData>>;
-    /** Which form field types can fill a category field of the given type. */
-    fieldSourceTypes: Partial<Record<FieldType, Array<FieldType>>>;
-    /** The characteristics („Maßnahmen“) the categories offer. */
-    characteristics: Array<App.Data.MapPointCharacteristicData>;
-    /** The characteristics points of each category can have, keyed by category id. */
-    characteristicIdsByCategory: Record<string, Array<string>>;
-    fieldsByCharacteristic: Record<string, Array<FormFieldData>>;
-}>();
+const props = withDefaults(
+    defineProps<{
+        /** The fields of the form, which fill the category fields. */
+        formFields: Array<FormFieldData>;
+        categories: Array<App.Data.MapPointCategoryData>;
+        /** The fields of each category including the inherited ones, keyed by category id. */
+        fieldsByCategory: Record<string, Array<FormFieldData>>;
+        /** Which form field types can fill a category field of the given type. */
+        fieldSourceTypes: Partial<Record<FieldType, Array<FieldType>>>;
+        /** The characteristics („Maßnahmen“) the categories offer. */
+        characteristics: Array<App.Data.MapPointCharacteristicData>;
+        /** The characteristics points of each category can have, keyed by category id. */
+        characteristicIdsByCategory: Record<string, Array<string>>;
+        fieldsByCharacteristic: Record<string, Array<FormFieldData>>;
+        /** Forms that add to existing points cannot change their category. */
+        allowSubcategory?: boolean;
+    }>(),
+    { allowSubcategory: true },
+);
 
 const mapping = defineModel<App.Data.FormToMapPointMappingData>('mapping', { required: true });
 
@@ -155,7 +160,7 @@ function setSource(targetFieldId: string, sourceFieldId: string) {
         </FormItem>
 
         <template v-if="mapping.category_id">
-            <FormItem>
+            <FormItem v-if="allowSubcategory">
                 <Label>Unterkategorie aus Formularfeld</Label>
                 <Select v-model="subcategoryFieldSelection">
                     <SelectTrigger data-test="map-point-subcategory-field">
@@ -172,7 +177,7 @@ function setSource(targetFieldId: string, sourceFieldId: string) {
                 </p>
             </FormItem>
 
-            <div v-if="mapping.subcategory_field_id" class="space-y-3 rounded-md border border-gray-200 bg-gray-50 p-4">
+            <div v-if="allowSubcategory && mapping.subcategory_field_id" class="space-y-3 rounded-md border border-gray-200 bg-gray-50 p-4">
                 <h4 class="text-sm font-medium text-gray-900">Unterkategorie je Option</h4>
                 <FormItem v-for="option in subcategoryOptions" :key="option.id">
                     <Label class="text-xs">{{ option.label }}</Label>

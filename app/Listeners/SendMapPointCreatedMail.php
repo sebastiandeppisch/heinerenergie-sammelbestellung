@@ -17,6 +17,8 @@ class SendMapPointCreatedMail implements ShouldHandleEventsAfterCommit
 
     public function handle(MapPointCreatedByFormSubmission $event): void
     {
-        $this->editLinks->sendCreated($event->mapPoint);
+        if ($event->editToken !== null) {
+            $this->editLinks->sendCreated($event->mapPoint, $event->editToken);
+        }
     }
 }

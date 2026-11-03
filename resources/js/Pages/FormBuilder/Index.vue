@@ -22,6 +22,7 @@ const props = defineProps<{
     groups: App.Data.GroupData[];
     mapPointCategories: Array<App.Data.MapPointCategoryData>;
     usableMapPointCategoryIdsByGroup: Record<string, Array<string>>;
+    mapPointFieldsByCategory: Record<string, Array<App.Data.FormFieldData>>;
 }>();
 
 const page = usePage<CustomPageProps>();
@@ -122,6 +123,7 @@ function openMapPointTemplate() {
             :groups="props.groups"
             :categories="mapPointCategories"
             :usable-category-ids-by-group="usableMapPointCategoryIdsByGroup"
+            :fields-by-category="mapPointFieldsByCategory"
             :initial-group-id="page.props.auth.currentGroup?.id"
             :initial-category-id="query.get('category') ?? undefined"
         />

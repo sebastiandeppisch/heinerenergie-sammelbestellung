@@ -2,19 +2,27 @@
 import { Button } from '@/shadcn/components/ui/button';
 import { dependentFieldsByOption, topLevelFields, withoutHiddenValues } from '@/utils/formFieldVisibility';
 import { useForm } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, provide, toRef } from 'vue';
 import ConditionalFormField from './ConditionalFormField.vue';
 import MapPointConsentBlock from './MapPointConsentBlock.vue';
+import { storedImagesKey, withImageChanges } from './storedImages';
 
 type FormDefinitionData = App.Data.FormDefinitionData;
 
-const props = defineProps<{
-    formDefinition: FormDefinitionData;
-    submitUrl: string;
-    method?: 'post' | 'put' | 'patch';
-    initialData?: Record<string, any>;
-    formToken?: string;
-}>();
+const props = withDefaults(
+    defineProps<{
+        formDefinition: FormDefinitionData;
+        submitUrl: string;
+        method?: 'post' | 'put' | 'patch';
+        initialData?: Record<string, any>;
+        formToken?: string;
+        /** Images the fields already hold, keyed by field id. Their file names in initialData keep them. */
+        storedImages?: Record<string, App.Data.ImageData[]>;
+    }>(),
+    { method: 'post', initialData: undefined, formToken: undefined, storedImages: () => ({}) },
+);
+
+provide(storedImagesKey, toRef(props, 'storedImages'));
 
 const emit = defineEmits<{
     (e: 'submit', data: any): void;
@@ -56,7 +64,7 @@ const createInitialFormData = () => {
     return data;
 };
 
-const form = useForm(props.method || 'post', props.submitUrl, createInitialFormData());
+const form = useForm(props.method, props.submitUrl, createInitialFormData());
 form.setValidationTimeout(100);
 function validateField(fieldName: string) {
     form.validate(fieldName);
@@ -64,7 +72,7 @@ function validateField(fieldName: string) {
 
 function submitForm() {
     emit('submit', form.data());
-    form.transform((data) => withoutHiddenValues(props.formDefinition.fields, data)).submit({
+    form.transform((data) => withImageChanges(withoutHiddenValues(props.formDefinition.fields, data), props.storedImages)).submit({
         onSuccess: (page) => emit('success', page),
         onError: (errors) => emit('error', errors),
     });

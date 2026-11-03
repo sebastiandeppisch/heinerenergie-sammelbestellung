@@ -158,6 +158,25 @@ class MapPointConsentService
     }
 
     /**
+     * The details the point offers now that its consent to the details does not cover, e.g. the fields of a
+     * characteristic chosen later. A consent to the point alone stays as it is, so it has none.
+     *
+     * @return array<int, string>
+     */
+    public function unconsentedLabels(MapPoint $mapPoint): array
+    {
+        $consented = $mapPoint->public_consent_fields ?? [];
+
+        if ($mapPoint->public_consent !== PublicConsent::GIVEN || array_diff($consented, [self::COORDINATE]) === []) {
+            return [];
+        }
+
+        $mapPoint->unsetRelation('characteristics');
+
+        return array_values(array_diff_key($this->offeredForPoint($mapPoint), array_flip($consented)));
+    }
+
+    /**
      * Readable labels of consented keys, for admins. Keys of fields that were deleted since are shown as they are.
      *
      * @param  array<int, string>  $keys

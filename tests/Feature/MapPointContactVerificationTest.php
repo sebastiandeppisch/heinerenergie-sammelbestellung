@@ -119,12 +119,14 @@ test('a form point can only be contacted after the manage link was used', functi
     ])->assertNotFound();
 
     $token = manageToken();
+    $mailUrl = Mail::queued(MapPointCreated::class)->last()->manageUrl;
+    parse_str((string) parse_url($mailUrl, PHP_URL_QUERY), $query);
 
-    $this->get(route('map-point.manage.show', $token))
+    $this->get($mailUrl)
         ->assertInertia(fn ($page) => $page->component('MapPointManage/Manage')->where('mapPoint.contact_email_confirmed', false));
     expect($point->fresh()->contact_email_verified_at)->toBeNull();
 
-    $this->put(route('map-point.manage.contact', $token), ['enabled' => true])->assertRedirect();
+    $this->put(route('map-point.manage.contact', ['token' => $token, 'nachweis' => $query['nachweis']]), ['enabled' => true])->assertRedirect();
     expect($point->fresh()->contact_email_verified_at)->not->toBeNull();
 
     $this->get(route('map.public', $embed))
