@@ -35,14 +35,23 @@ class MapPointImageAccess
 
     public function allows(?User $user, MapPoint $mapPoint, string $path): bool
     {
-        $mapPoint->loadMissing('fields.formField');
-        $field = $mapPoint->fields->first(fn (MapPointField $field): bool => $field->type === FieldType::IMAGE && in_array($path, (array) $field->value, true));
+        $field = $this->fieldOf($mapPoint, $path);
 
         if ($field === null) {
             return false;
         }
 
         return ($user !== null && Gate::forUser($user)->allows('update', $mapPoint)) || $this->isPublic($mapPoint, $field);
+    }
+
+    /**
+     * The stored value holding the image, including former values.
+     */
+    public function fieldOf(MapPoint $mapPoint, string $path): ?MapPointField
+    {
+        $mapPoint->loadMissing('fields.formField');
+
+        return $mapPoint->fields->first(fn (MapPointField $field): bool => $field->type === FieldType::IMAGE && in_array($path, (array) $field->value, true));
     }
 
     /**

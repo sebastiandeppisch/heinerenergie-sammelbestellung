@@ -20,4 +20,8 @@ return [
         'max_per_address_per_hour' => (int) env('MAP_POINT_EDIT_LINK_MAX_PER_ADDRESS_PER_HOUR', 3),
         'max_per_point_per_hour' => (int) env('MAP_POINT_EDIT_LINK_MAX_PER_POINT_PER_HOUR', 3),
     ],
+
+    'map_point_follow_up' => [
+        'max_per_point_per_hour' => (int) env('MAP_POINT_FOLLOW_UP_MAX_PER_POINT_PER_HOUR', 10),
+    ],
 ];

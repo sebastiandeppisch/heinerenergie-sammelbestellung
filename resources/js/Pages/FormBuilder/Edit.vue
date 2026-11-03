@@ -46,6 +46,7 @@ const props = defineProps<{
     mapPointCharacteristics: Array<App.Data.MapPointCharacteristicData>;
     mapPointCharacteristicIdsByCategory: Record<string, Array<string>>;
     mapPointFieldsByCharacteristic: Record<string, Array<FormFieldData>>;
+    mapPointFollowUpForms: Array<App.Data.MapPointFollowUpFormData>;
 }>();
 
 const formDefinition = reactive<FormDefinitionData>(
@@ -71,6 +72,17 @@ const formDefinition = reactive<FormDefinitionData>(
 const isChecklist = computed(() => formDefinition.type === (1 as FormType));
 const isMapPointFields = computed(() => formDefinition.type === (2 as FormType));
 const isForm = computed(() => formDefinition.type === (0 as FormType));
+/** A follow-up form adds to existing map points and is only opened with the manage link of a point. */
+const isFollowUp = computed(() => formDefinition.map_point_mapping?.enabled === true && formDefinition.map_point_mapping.mode === 'update');
+const savedAsFollowUp = computed(
+    () => props.formDefinition?.map_point_mapping?.enabled === true && props.formDefinition.map_point_mapping.mode === 'update',
+);
+
+watch(isFollowUp, (followUp) => {
+    if (followUp) {
+        formDefinition.requires_email_confirmation = false;
+    }
+});
 
 const pageTitle = computed(() => {
     if (isMapPointFields.value) {
@@ -282,8 +294,11 @@ const allowedEmbedDomainsText = computed<string>({
     <div>
         <PageHeader :title="pageTitle">
             <template #actions>
-                <FormEmbedDialog :form-definition="props.formDefinition" v-if="props.isEdit && props.formDefinition !== null && isForm" />
-                <Button @click="openFormular" variant="outline" v-if="props.isEdit && isForm">
+                <FormEmbedDialog
+                    :form-definition="props.formDefinition"
+                    v-if="props.isEdit && props.formDefinition !== null && isForm && !savedAsFollowUp"
+                />
+                <Button @click="openFormular" variant="outline" v-if="props.isEdit && isForm && !savedAsFollowUp">
                     Formular öffnen
                     <ArrowUpRightFromSquare />
                 </Button>
@@ -416,7 +431,7 @@ const allowedEmbedDomainsText = computed<string>({
                 </CardContent>
             </Card>
 
-            <Card class="form-builder__header" v-if="isForm">
+            <Card class="form-builder__header" v-if="isForm && !isFollowUp">
                 <CardContent>
                     <h3 class="mb-4 text-lg font-semibold">E-Mail-Bestätigung</h3>
                     <Form class="grid grid-cols-1 gap-4">
@@ -436,7 +451,7 @@ const allowedEmbedDomainsText = computed<string>({
                 </CardContent>
             </Card>
 
-            <Card class="form-builder__header" v-if="isForm">
+            <Card class="form-builder__header" v-if="isForm && !isFollowUp">
                 <CardContent>
                     <h3 class="mb-4 text-lg font-semibold">Einbettung (iframe)</h3>
                     <Form class="grid grid-cols-1 gap-4">
@@ -499,6 +514,7 @@ const allowedEmbedDomainsText = computed<string>({
                         :map-point-characteristics="mapPointCharacteristics"
                         :map-point-characteristic-ids-by-category="mapPointCharacteristicIdsByCategory"
                         :map-point-fields-by-characteristic="mapPointFieldsByCharacteristic"
+                        :map-point-follow-up-forms="mapPointFollowUpForms"
                     />
                 </TabsContent>
             </Tabs>

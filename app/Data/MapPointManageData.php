@@ -8,6 +8,7 @@ use App\Enums\PublicConsent;
 use App\Models\FormSubmission;
 use App\Models\MapPoint;
 use App\Services\MapPointConsentService;
+use App\Services\MapPointFollowUpService;
 use Illuminate\Support\Carbon;
 use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
@@ -43,6 +44,8 @@ class MapPointManageData extends Data
         public bool $contact_email_confirmed,
         /** The submission also asked for an advice, deleting the point keeps it. */
         public bool $has_advice,
+        /** The button to the follow-up form, null when the form that created the point has none. */
+        public ?string $follow_up_button_text = null,
     ) {}
 
     public static function fromModel(MapPoint $model): self
@@ -71,6 +74,7 @@ class MapPointManageData extends Data
             contact_enabled: $model->contact_enabled,
             contact_email_confirmed: $model->contact_email_verified_at !== null,
             has_advice: $model->pointable instanceof FormSubmission && $model->pointable->advice_id !== null,
+            follow_up_button_text: app(MapPointFollowUpService::class)->buttonTextFor($model),
         );
     }
 }

@@ -9,6 +9,8 @@ use App\Models\FormSubmission;
 use App\Models\MapPoint;
 use App\Services\MapPointConsentService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
+use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
@@ -20,6 +22,7 @@ class MapPointConsentInfoData extends Data
 {
     /**
      * @param  array<int, string>  $field_labels  the consented keys as readable labels
+     * @param  Collection<int, MapPointFollowUpSubmissionData>  $follow_up_submissions  what follow-up forms added, newest first
      */
     public function __construct(
         public PublicConsent $public_consent,
@@ -31,6 +34,8 @@ class MapPointConsentInfoData extends Data
         public ?string $submission_id,
         /** Whether the person consented to the location description, only meaningful for a given consent. */
         public bool $location_consented = false,
+        #[DataCollectionOf(MapPointFollowUpSubmissionData::class)]
+        public Collection $follow_up_submissions = new Collection,
     ) {}
 
     public static function fromModel(MapPoint $model): self
@@ -46,6 +51,7 @@ class MapPointConsentInfoData extends Data
             contact_email: $model->contact_email,
             submission_id: $submission instanceof FormSubmission ? $submission->uuid : null,
             location_consented: in_array(MapPointConsentService::LOCATION, $model->public_consent_fields ?? [], true),
+            follow_up_submissions: $model->followUpSubmissions()->latest('submitted_at')->get()->map(MapPointFollowUpSubmissionData::fromModel(...))->toBase(),
         );
     }
 }

@@ -483,3 +483,49 @@ describe('FormTargets missing mapping list', () => {
         expect(missingOf(wrapper, 'map-point')).toEqual(['Koordinaten']);
     });
 });
+
+describe('FormTargets follow-up forms', () => {
+    const followUpForms: App.Data.MapPointFollowUpFormData[] = [
+        { id: 'form-garden', name: 'Erzähl mehr: Garten', category_id: 'cat-garden', category_ids: ['cat-garden', 'cat-meadow'] },
+        { id: 'form-balcony', name: 'Erzähl mehr: Balkon', category_id: 'cat-balcony', category_ids: ['cat-balcony'] },
+        { id: 'form-plain', name: 'Ohne Kategorie', category_id: null, category_ids: [] },
+    ];
+
+    it('asks only for the category when the form adds to existing points', () => {
+        const wrapper = mountWith(makeFormDefinition({ map_point_mapping: makeMapPointMapping({ mode: 'update' }) }));
+
+        expect(missingOf(wrapper, 'map-point')).toEqual(['Kategorie der Kartenpunkte']);
+        expect(wrapper.find('[data-test="map-point-follow-up-hint"]').exists()).toBe(true);
+        expect(wrapper.find('[data-test="map-point-consent-text"]').exists()).toBe(false);
+        expect(wrapper.find('[data-test="map-point-follow-up-form"]').exists()).toBe(false);
+    });
+
+    it('is complete as a follow-up form once it has a category', () => {
+        const wrapper = mountWith(makeFormDefinition({ map_point_mapping: makeMapPointMapping({ mode: 'update', category_id: 'cat-garden' }) }));
+
+        expect(statusOf(wrapper, 'map-point')).toBe('Vollständig');
+    });
+
+    it('offers the follow-up forms that fit the category of the created points', () => {
+        const wrapper = mount(FormTargets, {
+            props: {
+                formDefinition: makeFormDefinition({ map_point_mapping: makeMapPointMapping({ category_id: 'cat-meadow' }) }),
+                mapPointFollowUpForms: followUpForms,
+            },
+        });
+
+        const candidates = (wrapper.vm as unknown as { followUpCandidates: App.Data.MapPointFollowUpFormData[] }).followUpCandidates;
+        expect(candidates.map((form) => form.id)).toEqual(['form-garden']);
+        expect(wrapper.find('[data-test="map-point-follow-up-button-text"]').exists()).toBe(false);
+    });
+
+    it('shows the button text once a follow-up form is chosen', () => {
+        const wrapper = mountWith(
+            makeFormDefinition({
+                map_point_mapping: makeMapPointMapping({ follow_up_form_definition_id: 'form-garden', follow_up_button_text: 'Erzähl mehr' }),
+            }),
+        );
+
+        expect((wrapper.find('[data-test="map-point-follow-up-button-text"]').element as HTMLInputElement).value).toBe('Erzähl mehr');
+    });
+});

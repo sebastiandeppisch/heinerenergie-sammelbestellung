@@ -9,8 +9,10 @@ use App\Data\FormDefinitionData;
 use App\Data\FormFieldData;
 use App\Data\MapPointCategoryData;
 use App\Data\MapPointCharacteristicData;
+use App\Data\MapPointFollowUpFormData;
 use App\Enums\FieldType;
 use App\Enums\FormType;
+use App\Enums\MapPointTargetMode;
 use App\Http\Requests\StoreFormDefinitionFromTemplateRequest;
 use App\Http\Requests\UpsertFormDefinitionRequest;
 use App\Models\FormDefinition;
@@ -19,7 +21,9 @@ use App\Models\MapPointCategory;
 use App\Services\FormDefinitionService;
 use App\Services\MapPointCharacteristicService;
 use App\Services\MapPointFieldService;
+use App\Services\MapPointFollowUpService;
 use App\Services\MapPointVisibilityService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -59,6 +63,11 @@ class FormDefinitionController extends Controller
             // A map point form can ask for the fields of a category usable in its initiative.
             'mapPointCategories' => $mapPointCategories->map(fn (MapPointCategory $category): MapPointCategoryData => MapPointCategoryData::fromModel($category, tree: $tree))->all(),
             'usableMapPointCategoryIdsByGroup' => $visibility->usableCategoryIdsByGroup(Group::all(), $mapPointCategories),
+            // The wizard can leave fields of the category to a follow-up form.
+            'mapPointFieldsByCategory' => array_map(
+                fn (Collection $fields): array => $fields->map(FormFieldData::fromModel(...))->all(),
+                app(MapPointFieldService::class)->fieldsByCategory($mapPointCategories, $tree),
+            ),
         ]);
     }
 
@@ -101,7 +110,7 @@ class FormDefinitionController extends Controller
      */
     public function edit(FormDefinition $formDefinition): Response
     {
-        $formDefinition->load('fields.options', 'adviceCreator.firstNameField', 'adviceCreator.lastNameField', 'adviceCreator.addressField', 'adviceCreator.emailField', 'adviceCreator.phoneField', 'adviceCreator.adviceTypeField', 'mapPointCreator.titleField', 'mapPointCreator.descriptionField', 'mapPointCreator.coordinateField', 'mapPointCreator.category', 'mapPointCreator.subcategoryField', 'mapPointCreator.subcategories.category', 'mapPointCreator.characteristicsField', 'mapPointCreator.characteristicMappings.characteristic', 'mapPointCreator.fieldMappings.targetField', 'mapPointCreator.fieldMappings.sourceField');
+        $formDefinition->load('fields.options', 'mapPointCreator.followUpFormDefinition', 'adviceCreator.firstNameField', 'adviceCreator.lastNameField', 'adviceCreator.addressField', 'adviceCreator.emailField', 'adviceCreator.phoneField', 'adviceCreator.adviceTypeField', 'mapPointCreator.titleField', 'mapPointCreator.descriptionField', 'mapPointCreator.coordinateField', 'mapPointCreator.category', 'mapPointCreator.subcategoryField', 'mapPointCreator.subcategories.category', 'mapPointCreator.characteristicsField', 'mapPointCreator.characteristicMappings.characteristic', 'mapPointCreator.fieldMappings.targetField', 'mapPointCreator.fieldMappings.sourceField');
         $formDefinitionData = FormDefinitionData::fromModel($formDefinition);
 
         $groups = Group::all()->map(fn (Group $group): array => [
@@ -131,7 +140,7 @@ class FormDefinitionController extends Controller
      * The categories a form of the group can create its points in, with the fields each of them has, and which form
      * field types can fill which category field.
      *
-     * @return array{mapPointCategories: array<int, MapPointCategoryData>, mapPointFieldsByCategory: array<string, array<int, FormFieldData>>, mapPointFieldSourceTypes: array<string, array<int, FieldType>>, mapPointCharacteristics: array<int, MapPointCharacteristicData>, mapPointCharacteristicIdsByCategory: array<string, array<int, string>>, mapPointFieldsByCharacteristic: array<string, array<int, FormFieldData>>}
+     * @return array{mapPointCategories: array<int, MapPointCategoryData>, mapPointFieldsByCategory: array<string, array<int, FormFieldData>>, mapPointFieldSourceTypes: array<string, array<int, FieldType>>, mapPointCharacteristics: array<int, MapPointCharacteristicData>, mapPointCharacteristicIdsByCategory: array<string, array<int, string>>, mapPointFieldsByCharacteristic: array<string, array<int, FormFieldData>>, mapPointFollowUpForms: array<int, MapPointFollowUpFormData>}
      */
     private function mapPointTargetProps(?Group $group): array
     {
@@ -151,7 +160,44 @@ class FormDefinitionController extends Controller
             'mapPointFieldSourceTypes' => collect(FieldType::typesForMapPointFields)
                 ->mapWithKeys(fn (FieldType $type): array => [$type->value => $type->mapPointFieldSourceTypes()])
                 ->all(),
+            'mapPointFollowUpForms' => $this->followUpForms($group, $categories),
         ];
+    }
+
+    /**
+     * The forms of the group that add to existing points, with the categories whose points they fit.
+     *
+     * @param  Collection<int, MapPointCategory>  $categories
+     * @return array<int, MapPointFollowUpFormData>
+     */
+    private function followUpForms(?Group $group, Collection $categories): array
+    {
+        if ($group === null) {
+            return [];
+        }
+
+        $followUps = app(MapPointFollowUpService::class);
+
+        return FormDefinition::where('group_id', $group->id)
+            ->whereHas('mapPointCreator', fn (Builder $query) => $query->where('mode', MapPointTargetMode::UPDATE->value))
+            ->with('mapPointCreator.category')
+            ->orderBy('name')
+            ->get()
+            ->map(function (FormDefinition $form) use ($followUps, $categories): MapPointFollowUpFormData {
+                $categoryId = $form->mapPointCreator?->map_point_category_id;
+
+                return new MapPointFollowUpFormData(
+                    id: $form->uuid,
+                    name: $form->name,
+                    category_id: $form->mapPointCreator?->category?->uuid,
+                    category_ids: $categories
+                        ->filter(fn (MapPointCategory $category): bool => $followUps->fits($category->id, $categoryId === null ? null : (int) $categoryId))
+                        ->pluck('uuid')
+                        ->values()
+                        ->all(),
+                );
+            })
+            ->all();
     }
 
     /**
@@ -184,6 +230,8 @@ class FormDefinitionController extends Controller
             $request->input('template_type'),
             $request->input('group_id'),
             $request->mapPointCategory(),
+            $request->boolean('with_follow_up'),
+            $request->followUpOnlyFieldUuids(),
         );
 
         return redirect()->route('form-definitions.edit', $formDefinition->uuid)

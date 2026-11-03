@@ -16,7 +16,9 @@ use Illuminate\Support\Str;
 
 /**
  * Links that let the person behind a point manage it. They are requested by mail and not kept: each point has one
- * token of its own, a new link replaces the old one and it expires after a few days.
+ * token of its own, a new link replaces the old one and it expires after a few days. After a form created the point,
+ * the page shown after submitting carries the same token for the follow-up form. Only links in mails carry a proof
+ * that their address received them, which confirms the contact address.
  */
 class MapPointEditLinkService
 {
@@ -47,15 +49,15 @@ class MapPointEditLinkService
     }
 
     /**
-     * Sent once after a form created the point.
+     * Sent once after a form created the point, with the token issued then.
      */
-    public function sendCreated(MapPoint $mapPoint): void
+    public function sendCreated(MapPoint $mapPoint, string $token): void
     {
         if ($mapPoint->contact_email === null) {
             return;
         }
 
-        Mail::to($mapPoint->contact_email)->send(new MapPointCreated($mapPoint, $this->url($this->issue($mapPoint))));
+        Mail::to($mapPoint->contact_email)->send(new MapPointCreated($mapPoint, $this->url($token)));
     }
 
     public function send(MapPoint $mapPoint): void
@@ -93,9 +95,31 @@ class MapPointEditLinkService
             )));
     }
 
+    /**
+     * The link for mails, with the proof that it was sent to the contact address.
+     */
     public function url(string $token): string
     {
-        return route('map-point.manage.show', $token);
+        return route('map-point.manage.show', ['token' => $token, 'nachweis' => $this->mailProof($token)]);
+    }
+
+    public function followUpUrl(string $token): string
+    {
+        return route('map-point.manage.follow-up', $token);
+    }
+
+    /**
+     * Whether the link was opened from a mail. Then the actions on the manage page confirm the contact address,
+     * the page carries the proof along. Opening it alone confirms nothing, mail scanners follow links on their own.
+     */
+    public function hasMailProof(string $token, mixed $proof): bool
+    {
+        return is_string($proof) && hash_equals($this->mailProof($token), $proof);
+    }
+
+    private function mailProof(string $token): string
+    {
+        return TokenHash::make('mail:'.$token);
     }
 
     /**

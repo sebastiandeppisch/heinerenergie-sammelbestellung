@@ -292,9 +292,10 @@ class MapPointFieldService
      *
      * @param  Collection<int, FormField>  $fields
      * @param  array<string, mixed>  $valuesByFieldUuid
+     * @param  MapPoint|null  $mapPoint  the point the values are for, its images may be kept by their file names
      * @return array<string, mixed>
      */
-    public function validValues(Collection $fields, array $valuesByFieldUuid): array
+    public function validValues(Collection $fields, array $valuesByFieldUuid, ?MapPoint $mapPoint = null): array
     {
         $validValues = [];
 
@@ -305,7 +306,7 @@ class MapPointFieldService
 
             $data = ['values' => [$field->uuid => $valuesByFieldUuid[$field->uuid]]];
 
-            if (Validator::make($data, $this->validationRules(new Collection([$field]), 'values'))->passes()) {
+            if (Validator::make($data, $this->validationRules(new Collection([$field]), 'values', $mapPoint))->passes()) {
                 $validValues[$field->uuid] = $valuesByFieldUuid[$field->uuid];
             }
         }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Data;
 
+use App\Enums\MapPointTargetMode;
 use App\Models\FormDefinitionToMapPoint;
 use App\Services\MapPointConsentService;
 use Illuminate\Support\Collection;
@@ -42,6 +43,10 @@ class FormToMapPointMappingData extends Data
         public ?string $consent_point_text = null,
         /** A text field whose value becomes the location description of the point. */
         public ?string $location_field_id = null,
+        public MapPointTargetMode $mode = MapPointTargetMode::CREATE,
+        /** A form with an update target that adds to the created points, offered after submitting and on the manage page. */
+        public ?string $follow_up_form_definition_id = null,
+        public ?string $follow_up_button_text = null,
     ) {}
 
     public static function fromModel(?FormDefinitionToMapPoint $model): self
@@ -50,7 +55,7 @@ class FormToMapPointMappingData extends Data
             return new self(enabled: false, consent_text: MapPointConsentService::DEFAULT_DETAILS_TEXT, consent_point_text: MapPointConsentService::DEFAULT_POINT_TEXT);
         }
 
-        $model->loadMissing(['titleField', 'descriptionField', 'coordinateField', 'category', 'subcategoryField', 'subcategories.category', 'fieldMappings.targetField', 'fieldMappings.sourceField', 'characteristicsField', 'characteristicMappings.characteristic', 'contactEmailField', 'contactEnabledField', 'locationField']);
+        $model->loadMissing(['titleField', 'descriptionField', 'coordinateField', 'category', 'subcategoryField', 'subcategories.category', 'fieldMappings.targetField', 'fieldMappings.sourceField', 'characteristicsField', 'characteristicMappings.characteristic', 'contactEmailField', 'contactEnabledField', 'locationField', 'followUpFormDefinition']);
 
         return new self(
             enabled: true,
@@ -68,6 +73,9 @@ class FormToMapPointMappingData extends Data
             consent_text: $model->consent_text,
             consent_point_text: $model->consent_point_text,
             location_field_id: $model->locationField?->uuid,
+            mode: $model->mode,
+            follow_up_form_definition_id: $model->followUpFormDefinition?->uuid,
+            follow_up_button_text: $model->follow_up_button_text,
         );
     }
 }

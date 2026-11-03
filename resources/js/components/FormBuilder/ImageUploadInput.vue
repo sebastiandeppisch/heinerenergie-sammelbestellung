@@ -2,21 +2,24 @@
 import ImageLightbox from '@/components/ImageLightbox.vue';
 import { Button } from '@/shadcn/components/ui/button';
 import { ImageIcon, XIcon } from '@lucide/vue';
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, ref } from 'vue';
 
 const props = withDefaults(
     defineProps<{
         maxImages?: number;
         disabled?: boolean;
         hasError?: boolean;
-        /** Urls of stored images. */
+        /** Urls of stored images, shown while disabled and nothing is entered. */
         storedPaths?: string[];
+        /** Images the field already holds. Entries keep them by their file names and can remove them. */
+        storedImages?: App.Data.ImageData[];
     }>(),
     {
         maxImages: 1,
         disabled: false,
         hasError: false,
         storedPaths: () => [],
+        storedImages: () => [],
     },
 );
 
@@ -28,21 +31,27 @@ const emit = defineEmits<{
 
 const inputRef = ref<HTMLInputElement | null>(null);
 const lightboxSrc = ref<string | null>(null);
+const objectUrls = new Map<File, string>();
 
 /** Stored images are served by a route that scales them down to the height the thumbnails are shown at. */
 function thumbnail(url: string): string {
     return url.startsWith('blob:') ? url : `${url}?h=192`;
 }
 
-const previews = computed<Array<{ src: string; thumbnail: string }>>(() => {
-    let urls: string[] = props.storedPaths;
-
-    if (modelValue.value && modelValue.value.length > 0) {
-        urls =
-            modelValue.value[0] instanceof File
-                ? (modelValue.value as File[]).map((file) => URL.createObjectURL(file))
-                : (modelValue.value as string[]);
+/** A file name of a stored image, or a url when submitted values are shown. */
+function sourceOf(entry: File | string): string {
+    if (entry instanceof File) {
+        if (!objectUrls.has(entry)) {
+            objectUrls.set(entry, URL.createObjectURL(entry));
+        }
+        return objectUrls.get(entry)!;
     }
+
+    return props.storedImages.find((image) => image.name === entry)?.url ?? entry;
+}
+
+const previews = computed<Array<{ src: string; thumbnail: string }>>(() => {
+    const urls = modelValue.value && modelValue.value.length > 0 ? modelValue.value.map(sourceOf) : props.storedPaths;
 
     return urls.map((url) => ({ src: url, thumbnail: thumbnail(url) }));
 });
@@ -70,6 +79,8 @@ function removeFile(index: number) {
     modelValue.value = updated;
     emit('change');
 }
+
+onBeforeUnmount(() => objectUrls.forEach((url) => URL.revokeObjectURL(url)));
 </script>
 
 <template>
@@ -86,8 +97,10 @@ function removeFile(index: number) {
                 <button
                     v-if="!disabled"
                     type="button"
+                    aria-label="Bild entfernen"
+                    data-test="image-upload-remove"
                     @click="removeFile(index)"
-                    class="absolute -top-2 -right-2 hidden rounded-full bg-destructive p-0.5 text-destructive-foreground group-hover:flex"
+                    class="absolute -top-2 -right-2 flex rounded-full bg-destructive p-0.5 text-destructive-foreground"
                 >
                     <XIcon class="h-3 w-3" />
                 </button>

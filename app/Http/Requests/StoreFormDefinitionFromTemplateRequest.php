@@ -15,9 +15,6 @@ use Override;
 class StoreFormDefinitionFromTemplateRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
-     */
-    /**
      * Forms belong to an initiative, so only its admins may create one there.
      */
     public function authorize(): bool
@@ -44,6 +41,9 @@ class StoreFormDefinitionFromTemplateRequest extends FormRequest
             'template_type' => ['required', 'string', 'in:advice,map_point'],
             'group_id' => ['required', 'string', 'exists:groups,uuid'],
             'map_point_category_id' => ['nullable', 'bail', 'uuid', 'exists:map_point_categories,uuid'],
+            'with_follow_up' => ['boolean'],
+            'follow_up_only_field_ids' => ['array'],
+            'follow_up_only_field_ids.*' => ['uuid'],
         ];
     }
 
@@ -56,6 +56,11 @@ class StoreFormDefinitionFromTemplateRequest extends FormRequest
     {
         return [
             function (Validator $validator): void {
+                if ($this->boolean('with_follow_up') && $this->mapPointCategory() === null) {
+                    $validator->errors()->add('with_follow_up', 'Für ein Folgeformular braucht die Vorlage eine Kategorie, nach deren Feldern es fragt.');
+                }
+            },
+            function (Validator $validator): void {
                 $category = $this->mapPointCategory();
 
                 if ($validator->errors()->isNotEmpty() || $category === null) {
@@ -67,6 +72,16 @@ class StoreFormDefinitionFromTemplateRequest extends FormRequest
                 }
             },
         ];
+    }
+
+    /**
+     * Fields of the category the first form leaves out, because only the follow-up form asks for them.
+     *
+     * @return array<int, string>
+     */
+    public function followUpOnlyFieldUuids(): array
+    {
+        return $this->boolean('with_follow_up') ? array_values(array_filter((array) $this->input('follow_up_only_field_ids', []), is_string(...))) : [];
     }
 
     public function mapPointCategory(): ?MapPointCategory
@@ -88,6 +103,7 @@ class StoreFormDefinitionFromTemplateRequest extends FormRequest
             'template_type' => 'Template-Typ',
             'group_id' => 'Initiative',
             'map_point_category_id' => 'Kategorie',
+            'with_follow_up' => 'Folgeformular anlegen',
         ];
     }
 

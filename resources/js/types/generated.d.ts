@@ -216,6 +216,9 @@ contact_enabled_field_id: string | null,
 consent_text: string | null,
 consent_point_text: string | null,
 location_field_id: string | null,
+mode: App.Enums.MapPointTargetMode,
+follow_up_form_definition_id: string | null,
+follow_up_button_text: string | null,
 };
 export type FormToMapPointSubcategoryData = {
 option_value: string,
@@ -378,6 +381,7 @@ field_labels: string[],
 contact_email: string | null,
 submission_id: string | null,
 location_consented: boolean,
+follow_up_submissions: App.Data.MapPointFollowUpSubmissionData[],
 };
 export type MapPointContactRequestData = {
 id: string,
@@ -415,6 +419,17 @@ display_value: string,
 is_public: boolean,
 images: App.Data.ImageData[],
 characteristic_id: string | null,
+};
+export type MapPointFollowUpFormData = {
+id: string,
+name: string,
+category_id: string | null,
+category_ids: string[],
+};
+export type MapPointFollowUpSubmissionData = {
+id: string,
+form_name: string,
+submitted_at: string | null,
 };
 export type MapPointImportResultData = {
 created_count: number,
@@ -455,6 +470,7 @@ has_contact_email: boolean,
 contact_enabled: boolean,
 contact_email_confirmed: boolean,
 has_advice: boolean,
+follow_up_button_text: string | null,
 };
 export type MapPointSpreadsheetColumnData = {
 header: string,
@@ -592,6 +608,7 @@ export type GeocodingStatus = 'pending' | 'success' | 'not_found' | 'failed' | '
 export type HouseType = 0 | 1 | 2;
 export type MapPointDeletedBy = 'person' | 'admin';
 export type MapPointSpreadsheetField = 'ignore' | 'id' | 'title' | 'description' | 'lat' | 'lng' | 'location' | 'category' | 'published' | 'field' | 'characteristic' | 'new_category_field';
+export type MapPointTargetMode = 'create' | 'update';
 export type PublicConsent = 'not_required' | 'given' | 'refused';
 export type SpreadsheetFormat = 'xlsx' | 'ods' | 'xls' | 'csv';
 }

@@ -71,7 +71,8 @@ class FormDefinitionData extends Data
     {
         $data = self::fromModel($model);
         $data->allowed_embed_domains = null;
-        $data->map_point_consent = $model->mapPointCreator === null ? null : app(MapPointConsentService::class)->frontendConfig($model->mapPointCreator);
+        // A follow-up form adds to a point whose consent was given before, it does not ask again.
+        $data->map_point_consent = $model->mapPointCreator === null || $model->mapPointCreator->isUpdate() ? null : app(MapPointConsentService::class)->frontendConfig($model->mapPointCreator);
 
         return $data;
     }

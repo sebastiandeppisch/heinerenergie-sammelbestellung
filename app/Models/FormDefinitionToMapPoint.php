@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Data\ConsentChoiceData;
 use App\Data\MapPointTargetPayload;
 use App\Enums\FieldType;
+use App\Enums\MapPointTargetMode;
 use App\Models\Traits\HasUuid;
 use App\Services\ImageStorage;
 use App\Services\MapPointConsentService;
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use LogicException;
 use Override;
 
 class FormDefinitionToMapPoint extends Model
@@ -27,6 +29,36 @@ class FormDefinitionToMapPoint extends Model
     use HasUuid;
 
     protected $table = 'form_definition_to_map_points';
+
+    protected $attributes = [
+        'mode' => 'create',
+    ];
+
+    /**
+     * @return array<string, string>
+     */
+    #[Override]
+    protected function casts(): array
+    {
+        return [
+            'mode' => MapPointTargetMode::class,
+        ];
+    }
+
+    public function isUpdate(): bool
+    {
+        return $this->mode === MapPointTargetMode::UPDATE;
+    }
+
+    /**
+     * A form whose update target adds to the points this target creates, e.g. photos asked for after the point exists.
+     *
+     * @return BelongsTo<FormDefinition, $this>
+     */
+    public function followUpFormDefinition(): BelongsTo
+    {
+        return $this->belongsTo(FormDefinition::class, 'follow_up_form_definition_id');
+    }
 
     /**
      * @return BelongsTo<FormDefinition, $this>
@@ -164,15 +196,23 @@ class FormDefinitionToMapPoint extends Model
      */
     public function prepare(FormSubmission $submission, ConsentChoiceData $consentChoice): MapPointTargetPayload
     {
+        $titleField = $this->titleField;
+        $descriptionField = $this->descriptionField;
+        $coordinateField = $this->coordinateField;
+
+        if ($this->isUpdate() || $titleField === null || $descriptionField === null || $coordinateField === null) {
+            throw new LogicException('Only a complete create target prepares a new map point.');
+        }
+
         $categoryId = $this->categoryFor($submission)?->id;
         $characteristicIds = $this->characteristicIdsFor($submission, $categoryId);
         $location = $this->location($submission);
         $consent = app(MapPointConsentService::class)->forTarget($this, $consentChoice, $categoryId, $characteristicIds, $location !== null);
 
         return new MapPointTargetPayload(
-            title: $this->titleField->getSubmissionField($submission)->value,
-            description: $this->descriptionField->getSubmissionField($submission)->value,
-            coordinate: $this->coordinateField->getSubmissionField($submission)->value,
+            title: $titleField->getSubmissionField($submission)->value,
+            description: $descriptionField->getSubmissionField($submission)->value,
+            coordinate: $coordinateField->getSubmissionField($submission)->value,
             category_id: $categoryId,
             group_id: $this->formDefinition->group_id,
             field_values: $this->mappedValues($submission),
@@ -246,7 +286,7 @@ class FormDefinitionToMapPoint extends Model
      *
      * @return array<int, int>
      */
-    private function characteristicIdsFor(FormSubmission $submission, ?int $categoryId): array
+    public function characteristicIdsFor(FormSubmission $submission, ?int $categoryId): array
     {
         if ($this->characteristicsField === null) {
             return [];
@@ -263,11 +303,31 @@ class FormDefinitionToMapPoint extends Model
     }
 
     /**
+     * The characteristics the options of the characteristics field can pick for points of the category.
+     *
+     * @return array<int, int>
+     */
+    public function offeredCharacteristicIds(?int $categoryId): array
+    {
+        if ($this->characteristicsField === null) {
+            return [];
+        }
+
+        $tree = MapPointCategory::tree();
+
+        return MapPointCharacteristic::query()
+            ->whereIn('id', $this->characteristicMappings()->select('map_point_characteristic_id'))
+            ->get()
+            ->filter(fn (MapPointCharacteristic $characteristic): bool => $characteristic->isSelectableFor($categoryId, $tree))
+            ->modelKeys();
+    }
+
+    /**
      * The submitted values keyed by the uuid of the category field they are stored in.
      *
      * @return array<string, mixed>
      */
-    private function mappedValues(FormSubmission $submission): array
+    public function mappedValues(FormSubmission $submission): array
     {
         $values = [];
         $submissionFields = $submission->submissionFields()->with('options')->get()->keyBy('form_field_id');

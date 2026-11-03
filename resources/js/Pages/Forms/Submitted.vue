@@ -64,9 +64,9 @@ function handleNextFormButton() {
                         <div v-for="(notice, index) in notices" :key="index" class="rounded-md border p-4">
                             <div class="font-semibold">{{ notice.title }}</div>
                             <p v-if="notice.text" class="mt-1 text-sm">{{ notice.text }}</p>
-                            <a v-if="notice.url" :href="notice.url" class="mt-2 inline-block text-sm font-medium underline">
-                                {{ notice.url_label || notice.url }}
-                            </a>
+                            <Button v-if="notice.url" as-child class="mt-3">
+                                <a :href="notice.url" data-test="form-target-notice-link">{{ notice.url_label || notice.url }}</a>
+                            </Button>
                         </div>
                     </div>
                     <div v-if="formDefinition.show_next_form_button" style="margin-top: 32px">
