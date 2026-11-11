@@ -1,5 +1,28 @@
 <?php
 
+/**
+ * Uploaded media (public files, images and their variants) can live in an S3 bucket, e.g. on staging, with
+ * MEDIA_DISK_DRIVER=s3. Each disk gets its own prefix in the bucket. Backups and spreadsheet uploads stay local.
+ *
+ * @param  array<string, mixed>  $local
+ * @param  array<string, mixed>  $s3
+ * @return array<string, mixed>
+ */
+$media = fn (string $prefix, array $local, array $s3 = []): array => env('MEDIA_DISK_DRIVER', 'local') === 's3'
+    ? [
+        'driver' => 's3',
+        'key' => env('AWS_ACCESS_KEY_ID'),
+        'secret' => env('AWS_SECRET_ACCESS_KEY'),
+        'region' => env('AWS_DEFAULT_REGION'),
+        'bucket' => env('AWS_BUCKET'),
+        'endpoint' => env('AWS_ENDPOINT'),
+        'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+        'root' => $prefix,
+        'throw' => true,
+        ...$s3,
+    ]
+    : $local;
+
 return [
 
     /*
@@ -13,7 +36,7 @@ return [
     |
     */
 
-    'default' => env('FILESYSTEM_DRIVER', 'local'),
+    'default' => env('FILESYSTEM_DISK', env('FILESYSTEM_DRIVER', 'local')),
 
     /*
     |--------------------------------------------------------------------------
@@ -35,24 +58,29 @@ return [
             'root' => storage_path('app'),
         ],
 
-        'public' => [
+        // Logos, markers, category images and icons, linked directly. On S3 the bucket must allow public reads.
+        'public' => $media('public', [
             'driver' => 'local',
             'root' => storage_path('app/public'),
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
-        ],
+        ], [
+            // The prefix "public" is added to this address.
+            'url' => env('AWS_URL'),
+            'visibility' => 'public',
+        ]),
 
         // Images of form submissions and map points. Not public: they are served by routes that check access.
-        'images' => [
+        'images' => $media('images', [
             'driver' => 'local',
             'root' => storage_path('app/private/images'),
-        ],
+        ]),
 
         // Scaled down variants of the images, created when they are requested first.
-        'image-cache' => [
+        'image-cache' => $media('image-cache', [
             'driver' => 'local',
             'root' => storage_path('app/image-cache'),
-        ],
+        ]),
 
         'uploads' => [
             'driver' => 'local',
