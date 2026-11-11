@@ -31,6 +31,7 @@ class HexNetPublicController extends Controller
             'hexNet' => HexNetPublicData::fromModel($hexNet),
             'cells' => $this->gridService->cellsGeoJson($hexNet),
             'counts' => (object) $counts,
+            'stoneCounts' => (object) $this->gridService->stoneCounts($hexNet),
             'stats' => $this->gridService->stats($hexNet, $counts),
             'points' => $presenter->presentAll($hexNet),
             'measures' => $this->gridService->measures($hexNet)->map(fn (MapPointCharacteristic $measure): MapPointCharacteristicData => MapPointCharacteristicData::fromModel($measure))->values(),

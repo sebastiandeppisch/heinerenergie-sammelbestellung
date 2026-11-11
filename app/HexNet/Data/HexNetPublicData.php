@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\HexNet\Data;
 
+use App\HexNet\Enums\HexNetScoringMode;
 use App\HexNet\Models\HexNet;
 use App\ValueObjects\Coordinate;
 use Spatie\LaravelData\Data;
@@ -28,6 +29,7 @@ class HexNetPublicData extends Data
         public ?string $cta_text,
         public int $threshold_medium,
         public int $threshold_dark,
+        public HexNetScoringMode $scoring_mode,
         public array $level_colors,
         public int $hex_radius_m,
         public ?string $form_url,
@@ -51,6 +53,7 @@ class HexNetPublicData extends Data
             cta_text: $hexNet->cta_text,
             threshold_medium: $hexNet->threshold_medium,
             threshold_dark: $hexNet->threshold_dark,
+            scoring_mode: $hexNet->scoring_mode,
             level_colors: $hexNet->levelColors(),
             hex_radius_m: $hexNet->hex_radius_m,
             form_url: $hexNet->formDefinition !== null ? route('form.show', $hexNet->formDefinition) : null,

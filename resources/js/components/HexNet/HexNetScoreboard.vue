@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import './hexnet.css';
 import { computed } from 'vue';
-import { DEFAULT_LEVEL_COLORS, LEVELS, MEASURE_OPACITY } from './hexnet';
+import { DEFAULT_LEVEL_COLORS, LEVELS, MEASURE_OPACITY, type ScoringMode, scoreUnit, scoreUnitDative } from './hexnet';
 
 const props = defineProps<{
     stats: App.HexNet.Data.HexNetStatsData;
@@ -9,7 +9,10 @@ const props = defineProps<{
     /** A measure color replaces the greens, with the same steps of strength as on the map. */
     color?: string | null;
     levelColors?: string[];
+    mode?: ScoringMode;
 }>();
+
+const mode = computed<ScoringMode>(() => props.mode ?? 'stones');
 
 const levelColors = computed(() => props.levelColors ?? DEFAULT_LEVEL_COLORS);
 const fill = (level: number) =>
@@ -22,10 +25,10 @@ const fill = (level: number) =>
 const width = (level: number) => (props.stats.playable_cells ? (100 * props.stats.levels[level]) / props.stats.playable_cells : 0) + '%';
 
 const steps = computed(() => [
-    { level: 3, hint: `ab ${props.thresholds.dark} Trittsteinen` },
-    { level: 2, hint: `ab ${props.thresholds.medium} Trittsteinen` },
-    { level: 1, hint: '1 Trittstein' },
-    { level: 0, hint: 'hier fehlt der erste' },
+    { level: 3, hint: `ab ${props.thresholds.dark} ${scoreUnitDative(props.thresholds.dark, mode.value)}` },
+    { level: 2, hint: `ab ${props.thresholds.medium} ${scoreUnitDative(props.thresholds.medium, mode.value)}` },
+    { level: 1, hint: `ab 1 ${scoreUnit(1, mode.value)}` },
+    { level: 0, hint: mode.value === 'stones' ? 'hier fehlt der erste' : 'hier fehlt noch etwas' },
 ]);
 </script>
 
@@ -33,7 +36,9 @@ const steps = computed(() => [
     <div>
         <div class="hexnet-progress">
             <div class="big">{{ stats.percent }}<span> %</span></div>
-            <div class="cap">der bespielbaren Fläche hat mindestens einen Trittstein</div>
+            <div class="cap">
+                der bespielbaren Fläche {{ mode === 'stones' ? 'hat mindestens einen Trittstein' : `hat mindestens 1 ${scoreUnit(1, mode)}` }}
+            </div>
             <div class="track">
                 <i :style="{ width: width(3), background: fill(3) }" />
                 <i :style="{ width: width(2), background: fill(2) }" />

@@ -32,6 +32,41 @@ export function steppingStones(n: number): string {
     return n === 1 ? 'Trittstein' : 'Trittsteine';
 }
 
+export type ScoringMode = App.HexNet.Enums.HexNetScoringMode;
+
+export const SCORING_MODES: Record<ScoringMode, { label: string; description: string }> = {
+    stones: { label: 'Trittsteine', description: 'Jeder Garten zählt eins, egal wie viele Maßnahmen er hat.' },
+    measures: { label: 'Maßnahmen', description: 'Jede Maßnahme jedes Gartens zählt. Ein Garten mit drei Maßnahmen zählt drei.' },
+    distinct_measures: {
+        label: 'Verschiedene Maßnahmen',
+        description: 'Zählt, wie viele verschiedene Maßnahmen es in der Wabe gibt. Dunkelgrün heißt dann: alle Maßnahmen erfüllt.',
+    },
+};
+
+/** The unit a cell counts in, e.g. "3 Maßnahmen". */
+export function scoreUnit(n: number, mode: ScoringMode): string {
+    if (mode === 'stones') return steppingStones(n);
+    const measures = n === 1 ? 'Maßnahme' : 'Maßnahmen';
+    return mode === 'measures' ? measures : `verschiedene ${measures}`;
+}
+
+/** The unit after "ab", e.g. "ab 3 verschiedenen Maßnahmen". */
+export function scoreUnitDative(n: number, mode: ScoringMode): string {
+    if (mode === 'stones') return n === 1 ? 'Trittstein' : 'Trittsteinen';
+    const measures = n === 1 ? 'Maßnahme' : 'Maßnahmen';
+    return mode === 'measures' ? measures : `verschiedenen ${measures}`;
+}
+
+/** Thresholds a new scoring mode starts with, with distinct measures dark means all measures. */
+export function defaultThresholds(mode: ScoringMode, measureCount: number): Thresholds {
+    if (mode === 'measures') return { medium: 3, dark: 6 };
+    if (mode === 'distinct_measures') {
+        const dark = Math.max(3, measureCount);
+        return { medium: Math.min(dark - 1, Math.max(2, Math.ceil(dark / 2))), dark };
+    }
+    return { medium: 2, dark: 3 };
+}
+
 export function cellCenter(feature: GeoJSON.Feature<GeoJSON.Polygon>): { lat: number; lng: number } {
     const ring = feature.geometry.coordinates[0].slice(0, -1);
     const lng = ring.reduce((sum, c) => sum + c[0], 0) / ring.length;

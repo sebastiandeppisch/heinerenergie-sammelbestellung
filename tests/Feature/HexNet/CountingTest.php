@@ -1,11 +1,13 @@
 <?php
 
 use App\Enums\PublicConsent;
+use App\HexNet\Enums\HexNetScoringMode;
 use App\HexNet\Models\HexNet;
 use App\HexNet\Services\HexNetGridService;
 use App\Models\Group;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
+use App\Models\MapPointCharacteristic;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -97,4 +99,80 @@ test('stats use the thresholds', function (): void {
         ->and($stats->total_points)->toBe(4)
         ->and($stats->levels[0])->toBe($stats->playable_cells - 2)
         ->and($stats->percent)->toBe((int) round(200 / $stats->playable_cells));
+});
+
+/**
+ * Two gardens in one cell: one with lawn and flowers, one with lawn and deadwood and counted only.
+ *
+ * @return array<int, MapPoint>
+ */
+function hexNetTwoGardens(MapPointCategory $main, MapPointCategory $category): array
+{
+    [$lawn, $flowers, $deadwood] = collect(['Rasen', 'Blühstreifen', 'Totholz'])
+        ->map(fn (string $name): MapPointCharacteristic => MapPointCharacteristic::factory()->for($main, 'category')->create(['name' => $name]))
+        ->all();
+
+    $first = hexNetPoint($category, attributes: ['published' => true]);
+    $first->characteristics()->attach([$lawn->id, $flowers->id]);
+    $second = hexNetPoint($category, 49.8728 + 0.0002, 8.6512, ['published' => false, 'public_consent' => PublicConsent::REFUSED]);
+    $second->characteristics()->attach([$lawn->id, $deadwood->id]);
+
+    return [$first, $second];
+}
+
+dataset('scoring modes', [
+    // mode, score and level with one garden, score and level with two gardens; medium from 2, dark from 4
+    'stones' => [HexNetScoringMode::STONES, 1, 1, 2, 2],
+    'measures' => [HexNetScoringMode::MEASURES, 2, 2, 4, 3],
+    'distinct measures' => [HexNetScoringMode::DISTINCT_MEASURES, 2, 2, 3, 2],
+]);
+
+test('one garden scores in the unit of the scoring mode', function (HexNetScoringMode $mode, int $oneScore, int $oneLevel): void {
+    $this->hexNet->update(['scoring_mode' => $mode, 'threshold_medium' => 2, 'threshold_dark' => 4]);
+    [, $second] = hexNetTwoGardens($this->main, $this->category);
+    $second->delete();
+    $hexNet = $this->hexNet->fresh();
+
+    $counts = $this->service->counts($hexNet);
+
+    expect($counts)->toBe(['0:0' => $oneScore])
+        ->and($hexNet->levelFor($counts['0:0']))->toBe($oneLevel);
+})->with('scoring modes');
+
+test('two gardens with different measures score in the unit of the scoring mode, counted-only ones included', function (HexNetScoringMode $mode, int $oneScore, int $oneLevel, int $twoScore, int $twoLevel): void {
+    $this->hexNet->update(['scoring_mode' => $mode, 'threshold_medium' => 2, 'threshold_dark' => 4]);
+    hexNetTwoGardens($this->main, $this->category);
+    $hexNet = $this->hexNet->fresh();
+
+    $counts = $this->service->counts($hexNet);
+
+    expect($counts)->toBe(['0:0' => $twoScore])
+        ->and($hexNet->levelFor($counts['0:0']))->toBe($twoLevel)
+        ->and($this->service->stoneCounts($hexNet))->toBe(['0:0' => 2])
+        ->and($this->service->stats($hexNet)->total_points)->toBe(2);
+})->with('scoring modes');
+
+test('measures added to a point change the score without saving the point', function (): void {
+    $this->hexNet->update(['scoring_mode' => HexNetScoringMode::DISTINCT_MEASURES]);
+    $lawn = MapPointCharacteristic::factory()->for($this->main, 'category')->create(['name' => 'Rasen']);
+    $flowers = MapPointCharacteristic::factory()->for($this->main, 'category')->create(['name' => 'Blühstreifen']);
+    $point = hexNetPoint($this->category);
+    $point->characteristics()->attach($lawn->id);
+    $hexNet = $this->hexNet->fresh();
+    expect($this->service->counts($hexNet))->toBe(['0:0' => 1]);
+
+    $this->travel(1)->seconds();
+    $point->characteristics()->attach($flowers->id);
+
+    expect($this->service->counts($hexNet))->toBe(['0:0' => 2]);
+});
+
+test('a garden without measures counts as stone but not as measure', function (): void {
+    hexNetPoint($this->category);
+    $this->hexNet->update(['scoring_mode' => HexNetScoringMode::MEASURES]);
+    $hexNet = $this->hexNet->fresh();
+
+    expect($this->service->counts($hexNet))->toBe([])
+        ->and($this->service->stats($hexNet)->total_points)->toBe(1)
+        ->and($this->service->stats($hexNet)->levels[1])->toBe(0);
 });

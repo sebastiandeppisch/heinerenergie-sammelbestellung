@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\HexNet\Models;
 
+use App\HexNet\Enums\HexNetScoringMode;
 use App\HexNet\Enums\HexNetStatus;
 use App\HexNet\HexNetDefaults;
 use App\HexNet\Services\HexGrid;
@@ -39,6 +40,7 @@ use Illuminate\Support\Carbon;
  * @property bool $grid_locked
  * @property int $threshold_medium
  * @property int $threshold_dark
+ * @property HexNetScoringMode $scoring_mode
  * @property string $color_open
  * @property string $color_light
  * @property string $color_medium
@@ -79,6 +81,7 @@ class HexNet extends Model
         'grid_locked',
         'threshold_medium',
         'threshold_dark',
+        'scoring_mode',
         'color_open',
         'color_light',
         'color_medium',
@@ -94,6 +97,7 @@ class HexNet extends Model
         'grid_locked' => false,
         'threshold_medium' => 2,
         'threshold_dark' => 3,
+        'scoring_mode' => 'stones',
         'color_open' => HexNetDefaults::COLOR_OPEN,
         'color_light' => HexNetDefaults::COLOR_LIGHT,
         'color_medium' => HexNetDefaults::COLOR_MEDIUM,
@@ -115,6 +119,7 @@ class HexNet extends Model
             'grid_locked' => 'boolean',
             'threshold_medium' => 'integer',
             'threshold_dark' => 'integer',
+            'scoring_mode' => HexNetScoringMode::class,
             'jitter_m' => 'integer',
             'auto_publish' => 'boolean',
         ];

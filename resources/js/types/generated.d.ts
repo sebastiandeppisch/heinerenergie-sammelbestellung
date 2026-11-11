@@ -629,6 +629,7 @@ hex_radius_m: number,
 grid_locked: boolean,
 threshold_medium: number,
 threshold_dark: number,
+scoring_mode: App.HexNet.Enums.HexNetScoringMode,
 level_colors: string[],
 jitter_m: number,
 auto_publish: boolean,
@@ -665,6 +666,7 @@ subtitle: string | null,
 cta_text: string | null,
 threshold_medium: number,
 threshold_dark: number,
+scoring_mode: App.HexNet.Enums.HexNetScoringMode,
 level_colors: string[],
 hex_radius_m: number,
 form_url: string | null,
@@ -679,6 +681,7 @@ total_points: number,
 };
 }
 namespace Enums {
+export type HexNetScoringMode = 'stones' | 'measures' | 'distinct_measures';
 export type HexNetStatus = 'draft' | 'active';
 }
 }

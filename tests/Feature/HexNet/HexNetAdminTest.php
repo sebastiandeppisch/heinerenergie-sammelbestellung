@@ -1,5 +1,6 @@
 <?php
 
+use App\HexNet\Enums\HexNetScoringMode;
 use App\HexNet\Enums\HexNetStatus;
 use App\HexNet\HexNetDefaults;
 use App\HexNet\Models\HexNet;
@@ -158,6 +159,39 @@ test('categories and forms of other groups cannot be chosen', function (): void 
 
     expect($this->hexNet->categories()->count())->toBe(0)
         ->and($this->hexNet->fresh()->form_definition_id)->toBeNull();
+});
+
+test('changing the scoring mode of an active HexaNetz needs a confirmation', function (): void {
+    hexNetGroupAdmin($this->child);
+    $data = ['hex_radius_m' => 150, 'grid_locked' => false, 'threshold_medium' => 2, 'threshold_dark' => 3, 'jitter_m' => 40, ...hexNetColors()];
+
+    $this->put(route('hexnets.update-step', [$this->hexNet, 'grid']), [...$data, 'scoring_mode' => 'variety'])->assertSessionHasErrors('scoring_mode');
+    $this->put(route('hexnets.update-step', [$this->hexNet, 'grid']), [...$data, 'scoring_mode' => 'measures'])->assertSessionHasNoErrors();
+    expect($this->hexNet->fresh()->scoring_mode)->toBe(HexNetScoringMode::MEASURES);
+
+    $this->hexNet->update(['status' => HexNetStatus::ACTIVE]);
+    $data = [...$data, 'scoring_mode' => 'distinct_measures', 'threshold_medium' => 5, 'threshold_dark' => 10];
+    $this->put(route('hexnets.update-step', [$this->hexNet, 'grid']), $data)->assertSessionHasErrors('confirm_scoring_mode_change');
+    expect($this->hexNet->fresh()->scoring_mode)->toBe(HexNetScoringMode::MEASURES);
+
+    $this->put(route('hexnets.update-step', [$this->hexNet, 'grid']), [...$data, 'confirm_scoring_mode_change' => true])->assertSessionHasNoErrors();
+    expect($this->hexNet->fresh())
+        ->scoring_mode->toBe(HexNetScoringMode::DISTINCT_MEASURES)
+        ->threshold_dark->toBe(10);
+});
+
+test('the grid preview counts in the scoring mode it is asked for', function (): void {
+    hexNetGroupAdmin($this->child);
+    $main = MapPointCategory::create(['group_id' => $this->child->id, 'name' => 'Trittsteine']);
+    $category = MapPointCategory::create(['group_id' => $this->child->id, 'parent_id' => $main->id, 'name' => 'Trittsteine 2027']);
+    $this->hexNet->categories()->sync([$category->id]);
+    $measures = MapPointCharacteristic::factory()->count(3)->for($main, 'category')->create();
+    $point = MapPoint::factory()->create(['group_id' => $this->child->id, 'category_id' => $category->id, 'lat' => 49.8728, 'lng' => 8.6512]);
+    $point->characteristics()->attach($measures->pluck('id'));
+
+    $this->postJson(route('hexnets.grid-preview', $this->hexNet), ['hex_radius_m' => 150])->assertJsonPath('counts.0:0', 1);
+    $this->postJson(route('hexnets.grid-preview', $this->hexNet), ['hex_radius_m' => 150, 'scoring_mode' => 'measures'])->assertJsonPath('counts.0:0', 3);
+    expect($this->hexNet->fresh()->scoring_mode)->toBe(HexNetScoringMode::STONES);
 });
 
 test('a locked grid also protects the jitter, which has a minimum', function (): void {

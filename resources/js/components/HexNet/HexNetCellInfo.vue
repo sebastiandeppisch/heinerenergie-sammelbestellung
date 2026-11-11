@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { CellSelection } from './HexNetMap.vue';
-import { DEFAULT_LEVEL_COLORS, LEVELS, missingToNextLevel, SIGNAL, steppingStones, type Thresholds } from './hexnet';
+import { DEFAULT_LEVEL_COLORS, LEVELS, missingToNextLevel, type ScoringMode, scoreUnit, SIGNAL, steppingStones, type Thresholds } from './hexnet';
 
 const props = defineProps<{
     cell: CellSelection;
@@ -10,7 +10,10 @@ const props = defineProps<{
     measureName?: string | null;
     measureColor?: string | null;
     levelColors?: string[];
+    mode?: ScoringMode;
 }>();
+
+const mode = computed<ScoringMode>(() => props.mode ?? 'stones');
 
 const missing = computed(() => missingToNextLevel(props.cell.count, props.thresholds));
 const joinUrl = computed(() => {
@@ -32,10 +35,11 @@ const joinUrl = computed(() => {
             <h3 class="m-0 text-sm font-bold">{{ LEVELS[cell.level].name }}</h3>
         </div>
         <div>
-            {{ cell.count }} {{ steppingStones(cell.count) }} <template v-if="measureName">mit „{{ measureName }}“ </template>in dieser Wabe
+            {{ cell.stones }} {{ steppingStones(cell.stones) }} <template v-if="measureName">mit „{{ measureName }}“ </template>in dieser Wabe
+            <template v-if="mode !== 'stones'"> · {{ cell.count }} {{ scoreUnit(cell.count, mode) }}</template>
         </div>
         <div class="font-semibold" :style="{ color: SIGNAL }">
-            <template v-if="missing">Noch {{ missing.missing }} {{ steppingStones(missing.missing) }} bis {{ missing.next }}.</template>
+            <template v-if="missing">Noch {{ missing.missing }} {{ scoreUnit(missing.missing, mode) }} bis {{ missing.next }}.</template>
             <template v-else>Höchste Stufe erreicht.</template>
         </div>
         <a

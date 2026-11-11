@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\HexNet\Services;
 
 use App\HexNet\Data\HexNetStatsData;
+use App\HexNet\Enums\HexNetScoringMode;
 use App\HexNet\Models\HexNet;
 use App\Models\MapPoint;
 use App\Models\MapPointCategory;
@@ -109,18 +110,45 @@ class HexNetGridService
     }
 
     /**
-     * Number of points per cell of the play area, counted regardless of published and consent.
+     * The score per cell of the play area in the unit of the scoring mode, counted regardless of published and consent.
      *
      * @return array<string, int>
      */
     public function counts(HexNet $hexNet): array
     {
-        $key = sprintf('hexnet:%d:counts:%s:%s', $hexNet->id, Cache::get(self::POINTS_VERSION_KEY, '0'), $this->configHash($hexNet));
+        return $this->tally($hexNet)['counts'];
+    }
+
+    /**
+     * Number of stepping stones per cell, whatever the scoring mode.
+     *
+     * @return array<string, int>
+     */
+    public function stoneCounts(HexNet $hexNet): array
+    {
+        return $this->tally($hexNet)['stones'];
+    }
+
+    /**
+     * @return array{counts: array<string, int>, stones: array<string, int>}
+     */
+    private function tally(HexNet $hexNet): array
+    {
+        $key = sprintf(
+            'hexnet:%d:tally:%s:%s:%s:%s',
+            $hexNet->id,
+            $hexNet->scoring_mode->value,
+            Cache::get(self::POINTS_VERSION_KEY, '0'),
+            $this->configHash($hexNet),
+            $hexNet->scoring_mode === HexNetScoringMode::STONES ? '' : $this->measuresVersion(),
+        );
 
         return Cache::remember($key, now()->addDay(), function () use ($hexNet): array {
             $grid = $hexNet->grid();
 
-            return $grid === null || $hexNet->play_area === null ? [] : $this->countIn($hexNet, $grid, $hexNet->play_area, $this->cellIds($hexNet));
+            return $grid === null || $hexNet->play_area === null
+                ? ['counts' => [], 'stones' => []]
+                : $this->tallyIn($hexNet, $grid, $hexNet->play_area, $this->cellIds($hexNet));
         });
     }
 
@@ -189,17 +217,50 @@ class HexNetGridService
      */
     public function countIn(HexNet $hexNet, HexGrid $grid, Polygon $playArea, array $cellIds): array
     {
-        $cells = array_flip($cellIds);
-        $counts = [];
+        return $this->tallyIn($hexNet, $grid, $playArea, $cellIds)['counts'];
+    }
 
-        foreach ($this->pointsQuery($hexNet, $playArea)->get(['id', 'lat', 'lng']) as $point) {
-            if (self::countsAt($grid, $playArea, $cells, $point->coordinate)) {
-                $cell = $grid->cellOf($point->coordinate);
-                $counts[$cell] = ($counts[$cell] ?? 0) + 1;
+    /**
+     * The score per cell in the unit of the scoring mode and the stepping stones per cell. Cells without a score are
+     * left out, a stepping stone without measures still counts as stone.
+     *
+     * @param  array<int, string>  $cellIds
+     * @return array{counts: array<string, int>, stones: array<string, int>}
+     */
+    private function tallyIn(HexNet $hexNet, HexGrid $grid, Polygon $playArea, array $cellIds): array
+    {
+        $mode = $hexNet->scoring_mode;
+        $cells = array_flip($cellIds);
+        $stones = [];
+        $measures = [];
+        $query = $this->pointsQuery($hexNet, $playArea);
+
+        if ($mode !== HexNetScoringMode::STONES) {
+            $query->with('characteristics:map_point_characteristics.id');
+        }
+
+        foreach ($query->get(['id', 'lat', 'lng']) as $point) {
+            if (! self::countsAt($grid, $playArea, $cells, $point->coordinate)) {
+                continue;
+            }
+
+            $cell = $grid->cellOf($point->coordinate);
+            $stones[$cell] = ($stones[$cell] ?? 0) + 1;
+
+            if ($mode !== HexNetScoringMode::STONES) {
+                foreach ($point->characteristics as $characteristic) {
+                    $measures[$cell][] = (int) $characteristic->id;
+                }
             }
         }
 
-        return $counts;
+        $counts = match ($mode) {
+            HexNetScoringMode::STONES => $stones,
+            HexNetScoringMode::MEASURES => array_map(count(...), $measures),
+            HexNetScoringMode::DISTINCT_MEASURES => array_map(fn (array $ids): int => count(array_unique($ids)), $measures),
+        };
+
+        return ['counts' => $counts, 'stones' => $stones];
     }
 
     /**
@@ -222,7 +283,7 @@ class HexNetGridService
             percent: $playable === 0 ? 0 : (int) round(100 * $green / $playable),
             playable_cells: $playable,
             levels: $levels,
-            total_points: array_sum($counts),
+            total_points: array_sum($this->stoneCounts($hexNet)),
         );
     }
 

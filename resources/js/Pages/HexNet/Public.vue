@@ -6,7 +6,7 @@ import HexNetPointInfo from '@/components/HexNet/HexNetPointInfo.vue';
 import HexNetScoreboard from '@/components/HexNet/HexNetScoreboard.vue';
 import HexNetViewControls from '@/components/HexNet/HexNetViewControls.vue';
 import type { RingWidth } from '@/components/HexNet/rings';
-import { BASEMAPS, type Basemap, type HexCells, levelFor, type MarkerStyle } from '@/components/HexNet/hexnet';
+import { BASEMAPS, type Basemap, defaultThresholds, type HexCells, levelFor, type MarkerStyle } from '@/components/HexNet/hexnet';
 import { isIframe } from '@/helpers';
 import NoLayout from '@/layouts/NoLayout.vue';
 import PublicLayout from '@/layouts/PublicLayout.vue';
@@ -21,17 +21,24 @@ const props = defineProps<{
     hexNet: App.HexNet.Data.HexNetPublicData;
     cells: HexCells;
     counts: Record<string, number>;
+    stoneCounts: Record<string, number>;
     stats: App.HexNet.Data.HexNetStatsData;
     points: App.HexNet.Data.HexNetPointData[];
     measures: App.Data.MapPointCharacteristicData[];
     measureCounts: Record<string, Record<string, number>>;
 }>();
 
-const thresholds = computed(() => ({ medium: props.hexNet.threshold_medium, dark: props.hexNet.threshold_dark }));
-const scoreOpen = ref(false);
-
 const measureId = ref<string | null>(null);
 const measure = computed(() => props.measures.find((m) => m.id === measureId.value) ?? null);
+/** With a measure shown, cells count the stepping stones with it, so variety has no meaning there. */
+const mode = computed<App.HexNet.Enums.HexNetScoringMode>(() => (measure.value ? 'stones' : props.hexNet.scoring_mode));
+const thresholds = computed(() =>
+    measure.value && props.hexNet.scoring_mode === 'distinct_measures'
+        ? defaultThresholds('stones', 0)
+        : { medium: props.hexNet.threshold_medium, dark: props.hexNet.threshold_dark },
+);
+const scoreOpen = ref(false);
+
 const mapMeasure = computed(() =>
     measure.value ? { id: measure.value.id, color: measure.value.color ?? '#1f7a34', icon: measure.value.icon_path } : null,
 );
@@ -120,7 +127,13 @@ function store(key: string, value: string) {
                     >
                     <button @click="measureId = null">alle zeigen</button>
                 </div>
-                <HexNetScoreboard :stats="shownStats" :thresholds="thresholds" :color="measure?.color ?? null" :level-colors="hexNet.level_colors" />
+                <HexNetScoreboard
+                    :stats="shownStats"
+                    :thresholds="thresholds"
+                    :color="measure?.color ?? null"
+                    :level-colors="hexNet.level_colors"
+                    :mode="mode"
+                />
                 <HexNetViewControls
                     v-model:measure="measureId"
                     v-model:basemap="basemap"
@@ -152,6 +165,7 @@ function store(key: string, value: string) {
             <HexNetMap
                 :cells="cells"
                 :counts="counts"
+                :stone-counts="stoneCounts"
                 :thresholds="thresholds"
                 :points="points"
                 :bounds="hexNet.bounds"
@@ -172,6 +186,7 @@ function store(key: string, value: string) {
                         :measure-name="measure?.name"
                         :measure-color="measure?.color"
                         :level-colors="hexNet.level_colors"
+                        :mode="mode"
                     />
                 </template>
                 <template #point="{ point }">

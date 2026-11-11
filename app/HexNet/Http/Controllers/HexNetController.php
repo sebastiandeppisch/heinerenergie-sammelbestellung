@@ -8,6 +8,7 @@ use App\Context\GroupContextContract;
 use App\Data\GroupBaseData;
 use App\Data\MapPointCategoryData;
 use App\HexNet\Data\HexNetData;
+use App\HexNet\Enums\HexNetScoringMode;
 use App\HexNet\Enums\HexNetStatus;
 use App\HexNet\HexNetDefaults;
 use App\HexNet\Models\HexNet;
@@ -168,7 +169,12 @@ class HexNetController extends Controller
 
         $data = $request->validate([
             'hex_radius_m' => ['required', 'integer', 'multiple_of:10', 'min:'.HexNet::MIN_RADIUS_M, 'max:'.HexNet::MAX_RADIUS_M],
+            'scoring_mode' => ['sometimes', Rule::enum(HexNetScoringMode::class)],
         ]);
+
+        if (isset($data['scoring_mode'])) {
+            $hexNet->scoring_mode = HexNetScoringMode::from($data['scoring_mode']);
+        }
 
         $origin = $hexNet->origin();
         $playArea = $hexNet->play_area;
@@ -282,12 +288,14 @@ class HexNetController extends Controller
             'grid_locked' => ['required', 'boolean'],
             'threshold_medium' => ['required', 'integer', 'min:1', 'max:50'],
             'threshold_dark' => ['required', 'integer', 'gt:threshold_medium', 'max:100'],
+            'scoring_mode' => ['sometimes', Rule::enum(HexNetScoringMode::class)],
             'jitter_m' => ['required', 'integer', 'multiple_of:10', 'min:'.HexNet::MIN_JITTER_M, 'max:'.HexNet::MAX_JITTER_M],
             'color_open' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'color_light' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'color_medium' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'color_dark' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'confirm_radius_change' => ['sometimes', 'boolean'],
+            'confirm_scoring_mode_change' => ['sometimes', 'boolean'],
         ]);
 
         $radiusChanged = (int) $data['hex_radius_m'] !== $hexNet->hex_radius_m;
@@ -305,7 +313,11 @@ class HexNetController extends Controller
             throw ValidationException::withMessages(['confirm_radius_change' => 'Das HexaNetz läuft bereits. Bestätige die Änderung des Radius.']);
         }
 
-        unset($data['confirm_radius_change']);
+        if (($data['scoring_mode'] ?? $hexNet->scoring_mode->value) !== $hexNet->scoring_mode->value && $hexNet->isActive() && ! ($data['confirm_scoring_mode_change'] ?? false)) {
+            throw ValidationException::withMessages(['confirm_scoring_mode_change' => 'Das HexaNetz läuft bereits. Bestätige die Änderung der Zählweise, die Waben färben sich danach neu.']);
+        }
+
+        unset($data['confirm_radius_change'], $data['confirm_scoring_mode_change']);
         $hexNet->update($data);
     }
 
@@ -424,6 +436,7 @@ class HexNetController extends Controller
         return [
             'hexNet' => $hexNet === null ? null : HexNetData::fromModel($hexNet, $this->gridService->stats($hexNet)),
             'checklist' => $hexNet === null ? [] : $this->checklist($hexNet),
+            'measureCount' => $hexNet === null ? 0 : $this->gridService->measures($hexNet)->count(),
             'groups' => $this->visibility()->selectableGroups()->map(fn (Group $group): GroupBaseData => GroupBaseData::fromModel($group))->values(),
             'categories' => $categories->map(function (MapPointCategory $category) use ($tree): MapPointCategoryData {
                 $data = MapPointCategoryData::fromModel($category, tree: $tree);

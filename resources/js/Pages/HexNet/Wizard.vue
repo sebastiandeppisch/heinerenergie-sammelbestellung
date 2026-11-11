@@ -2,6 +2,7 @@
 import HexNetLogo from '@/components/HexNet/HexNetLogo.vue';
 import StepCategories from '@/components/HexNet/Wizard/StepCategories.vue';
 import StepGrid from '@/components/HexNet/Wizard/StepGrid.vue';
+import { SCORING_MODES } from '@/components/HexNet/hexnet';
 import PageHeader from '@/components/PageHeader.vue';
 import PolygonMap from '@/components/PolygonMap.vue';
 import { Button } from '@/shadcn/components/ui/button';
@@ -24,6 +25,7 @@ const props = defineProps<{
     step: Step;
     steps: Step[];
     checklist: Record<string, boolean>;
+    measureCount: number;
     groups: Array<App.Data.GroupBaseData>;
     categories: Array<App.Data.MapPointCategoryData>;
     forms: Array<{ id: string; name: string }>;
@@ -277,6 +279,7 @@ const allDone = computed(() => Object.values(props.checklist).every(Boolean));
                     :hex-net="hexNet"
                     :min-radius="defaults.min_radius"
                     :max-radius="defaults.max_radius"
+                    :measure-count="measureCount"
                 />
 
                 <div v-else-if="current === 'form' && hexNet" class="grid max-w-2xl gap-6">
@@ -350,7 +353,10 @@ const allDone = computed(() => Object.values(props.checklist).every(Boolean));
                             <dt class="text-muted-foreground">Spielstand</dt>
                             <dd>{{ hexNet.stats?.percent ?? 0 }} %</dd>
                             <dt class="text-muted-foreground">Radius / Schwellen</dt>
-                            <dd>{{ hexNet.hex_radius_m }} m · {{ hexNet.threshold_medium }} / {{ hexNet.threshold_dark }}</dd>
+                            <dd>
+                                {{ hexNet.hex_radius_m }} m · {{ hexNet.threshold_medium }} / {{ hexNet.threshold_dark }}
+                                {{ SCORING_MODES[hexNet.scoring_mode].label }}
+                            </dd>
                             <dt class="text-muted-foreground">Veröffentlichung</dt>
                             <dd>{{ hexNet.auto_publish ? 'sofort' : 'nach Freigabe' }}</dd>
                             <dt class="text-muted-foreground">Formular</dt>

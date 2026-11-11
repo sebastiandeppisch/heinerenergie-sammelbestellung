@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import HexNetMap from '@/components/HexNet/HexNetMap.vue';
-import { DEFAULT_LEVEL_COLORS, type HexCells } from '@/components/HexNet/hexnet';
+import { DEFAULT_LEVEL_COLORS, defaultThresholds, type HexCells, SCORING_MODES, type ScoringMode, scoreUnit } from '@/components/HexNet/hexnet';
 import { Button } from '@/shadcn/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/shadcn/components/ui/dialog';
 import { Label } from '@/shadcn/components/ui/label';
@@ -15,6 +15,7 @@ const props = defineProps<{
     hexNet: App.HexNet.Data.HexNetData;
     minRadius: number;
     maxRadius: number;
+    measureCount: number;
 }>();
 
 const emit = defineEmits<{ saved: [] }>();
@@ -24,12 +25,14 @@ const form = useForm({
     grid_locked: props.hexNet.grid_locked,
     threshold_medium: props.hexNet.threshold_medium,
     threshold_dark: props.hexNet.threshold_dark,
+    scoring_mode: props.hexNet.scoring_mode,
     jitter_m: props.hexNet.jitter_m,
     color_open: props.hexNet.level_colors[0],
     color_light: props.hexNet.level_colors[1],
     color_medium: props.hexNet.level_colors[2],
     color_dark: props.hexNet.level_colors[3],
     confirm_radius_change: false,
+    confirm_scoring_mode_change: false,
 });
 
 const preview = ref<{ cells: HexCells; counts: Record<string, number>; count: number; cell_area_ha: number } | null>(null);
@@ -37,6 +40,20 @@ const previewError = ref<string | null>(null);
 const confirmOpen = ref(false);
 const radiusLocked = computed(() => props.hexNet.grid_locked);
 const radiusChanged = computed(() => form.hex_radius_m !== props.hexNet.hex_radius_m);
+const modeChanged = computed(() => form.scoring_mode !== props.hexNet.scoring_mode);
+const maxDark = computed(() => {
+    if (form.scoring_mode === 'distinct_measures') return Math.max(3, props.measureCount);
+    return form.scoring_mode === 'measures' ? 20 : 10;
+});
+const maxMedium = computed(() => (form.scoring_mode === 'stones' ? 6 : maxDark.value - 1));
+
+function chooseMode(mode: ScoringMode) {
+    if (mode === form.scoring_mode) return;
+    form.scoring_mode = mode;
+    const thresholds = defaultThresholds(mode, props.measureCount);
+    form.threshold_medium = thresholds.medium;
+    form.threshold_dark = thresholds.dark;
+}
 const levelFields = [
     { key: 'color_open', label: 'offen' },
     { key: 'color_light', label: 'hell' },
@@ -56,7 +73,10 @@ async function loadPreview() {
     if (!props.hexNet.play_area) return;
     const id = ++requestId;
     try {
-        const { data } = await axios.post(route('hexnets.grid-preview', props.hexNet.id), { hex_radius_m: form.hex_radius_m });
+        const { data } = await axios.post(route('hexnets.grid-preview', props.hexNet.id), {
+            hex_radius_m: form.hex_radius_m,
+            scoring_mode: form.scoring_mode,
+        });
         if (id !== requestId) return;
         preview.value = data;
         previewError.value = null;
@@ -68,7 +88,7 @@ async function loadPreview() {
 }
 
 watch(
-    () => form.hex_radius_m,
+    () => [form.hex_radius_m, form.scoring_mode],
     () => {
         clearTimeout(timer);
         timer = setTimeout(loadPreview, 250);
@@ -83,11 +103,12 @@ watch(
 onMounted(loadPreview);
 
 function save(confirmed = false) {
-    if (radiusChanged.value && props.hexNet.status === 'active' && !confirmed) {
+    if ((radiusChanged.value || modeChanged.value) && props.hexNet.status === 'active' && !confirmed) {
         confirmOpen.value = true;
         return;
     }
     form.confirm_radius_change = confirmed;
+    form.confirm_scoring_mode_change = confirmed;
     confirmOpen.value = false;
     form.put(route('hexnets.update-step', [props.hexNet.id, 'grid']), { preserveScroll: true, onSuccess: () => emit('saved') });
 }
@@ -133,24 +154,57 @@ function save(confirmed = false) {
                 Gesperrt lassen sich Radius und Versatz nicht ändern. Zum Ändern erst entsperren und speichern.
             </p>
 
+            <fieldset class="space-y-2">
+                <legend class="text-sm font-medium">Was zählt in einer Wabe?</legend>
+                <label
+                    v-for="(mode, key) in SCORING_MODES"
+                    :key="key"
+                    class="flex cursor-pointer gap-2 rounded-md border p-2.5 text-sm"
+                    :class="form.scoring_mode === key ? 'border-green-700 bg-green-50' : ''"
+                >
+                    <input
+                        type="radio"
+                        name="scoring_mode"
+                        :value="key"
+                        :checked="form.scoring_mode === key"
+                        class="mt-0.5 accent-green-800"
+                        @change="chooseMode(key)"
+                    />
+                    <span>
+                        <span class="font-medium">{{ mode.label }}</span>
+                        <span class="block text-xs text-muted-foreground">{{ mode.description }}</span>
+                    </span>
+                </label>
+                <p v-if="form.scoring_mode === 'distinct_measures'" class="text-xs text-muted-foreground">
+                    Die Kampagne hat {{ measureCount }} Maßnahmen. Setze Dunkelgrün auf {{ measureCount }}, wenn alle erfüllt sein sollen.
+                </p>
+                <p v-if="form.errors.scoring_mode" class="text-sm text-red-500">{{ form.errors.scoring_mode }}</p>
+                <p v-if="form.errors.confirm_scoring_mode_change" class="text-sm text-red-500">{{ form.errors.confirm_scoring_mode_change }}</p>
+            </fieldset>
+
+            <p class="text-xs text-muted-foreground">Hellgrün ab 1 {{ scoreUnit(1, form.scoring_mode) }}.</p>
             <div class="space-y-1">
                 <div class="flex items-center justify-between">
                     <Label for="medium">Schwelle Mittelgrün</Label>
-                    <span class="font-mono text-sm font-semibold text-green-800">{{ form.threshold_medium }}</span>
+                    <span class="font-mono text-sm font-semibold text-green-800"
+                        >{{ form.threshold_medium }} {{ scoreUnit(form.threshold_medium, form.scoring_mode) }}</span
+                    >
                 </div>
-                <input id="medium" v-model.number="form.threshold_medium" type="range" min="2" max="6" class="w-full accent-green-800" />
+                <input id="medium" v-model.number="form.threshold_medium" type="range" min="2" :max="maxMedium" class="w-full accent-green-800" />
             </div>
             <div class="space-y-1">
                 <div class="flex items-center justify-between">
                     <Label for="dark">Schwelle Dunkelgrün</Label>
-                    <span class="font-mono text-sm font-semibold text-green-800">{{ form.threshold_dark }}</span>
+                    <span class="font-mono text-sm font-semibold text-green-800"
+                        >{{ form.threshold_dark }} {{ scoreUnit(form.threshold_dark, form.scoring_mode) }}</span
+                    >
                 </div>
                 <input
                     id="dark"
                     v-model.number="form.threshold_dark"
                     type="range"
                     :min="form.threshold_medium + 1"
-                    max="10"
+                    :max="maxDark"
                     class="w-full accent-green-800"
                 />
                 <p class="text-xs text-muted-foreground">Zusammen mit dem Radius die eigentliche Spielbalance.</p>
@@ -214,15 +268,19 @@ function save(confirmed = false) {
     <Dialog v-model:open="confirmOpen">
         <DialogContent>
             <DialogHeader>
-                <DialogTitle>Radius einer laufenden Kampagne ändern?</DialogTitle>
-                <DialogDescription>
+                <DialogTitle>{{ radiusChanged ? 'Radius' : 'Zählweise' }} einer laufenden Kampagne ändern?</DialogTitle>
+                <DialogDescription v-if="radiusChanged">
                     Alle Waben werden neu berechnet. Spielstand und Prozentzahl ändern sich sofort, Teilnehmende finden ihre Wabe ggf. an anderer
                     Stelle.
+                </DialogDescription>
+                <DialogDescription v-if="modeChanged">
+                    Die Waben färben sich nach der neuen Zählweise „{{ SCORING_MODES[form.scoring_mode].label }}“ neu. Spielstand und Prozentzahl
+                    ändern sich sofort.
                 </DialogDescription>
             </DialogHeader>
             <DialogFooter>
                 <Button variant="outline" @click="confirmOpen = false">Abbrechen</Button>
-                <Button variant="destructive" @click="save(true)">Radius ändern</Button>
+                <Button variant="destructive" @click="save(true)">Ändern</Button>
             </DialogFooter>
         </DialogContent>
     </Dialog>

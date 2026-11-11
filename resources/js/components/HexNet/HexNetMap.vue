@@ -20,12 +20,15 @@ import {
 import { markerFor } from './markers';
 import { type RingMeasure, ringLayers, type RingWidth } from './rings';
 
-export type CellSelection = { id: string; count: number; level: number; center: { lat: number; lng: number } };
+/** count is in the unit of the scoring mode, stones the stepping stones of the cell. */
+export type CellSelection = { id: string; count: number; stones: number; level: number; center: { lat: number; lng: number } };
 
 const props = withDefaults(
     defineProps<{
         cells: HexCells;
         counts: Record<string, number>;
+        /** Stepping stones per cell when counts are in another unit. */
+        stoneCounts?: Record<string, number> | null;
         thresholds: Thresholds;
         points?: App.HexNet.Data.HexNetPointData[];
         bounds?: App.ValueObjects.Coordinate[];
@@ -45,6 +48,7 @@ const props = withDefaults(
     {
         points: () => [],
         bounds: () => [],
+        stoneCounts: null,
         highlight: null,
         interactive: true,
         measure: null,
@@ -217,6 +221,7 @@ function renderCells() {
                 selectedCell.value = {
                     id,
                     count,
+                    stones: props.measure || !props.stoneCounts ? count : (props.stoneCounts[id] ?? 0),
                     level: levelFor(count, props.thresholds),
                     center: cellCenter(feature as GeoJSON.Feature<GeoJSON.Polygon>),
                 };
