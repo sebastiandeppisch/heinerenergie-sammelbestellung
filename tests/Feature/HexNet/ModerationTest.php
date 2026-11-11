@@ -57,6 +57,9 @@ function moderationJoin(object $test, string $title = 'Garten Müller'): MapPoin
     return MapPoint::where('title', $title)->sole();
 }
 
+/**
+ * @param  array<string, mixed>  $attributes
+ */
 function moderationPoint(object $test, array $attributes = []): MapPoint
 {
     return MapPoint::factory()->create([
@@ -146,7 +149,7 @@ test('withdrawing hides the stepping stone but it still counts', function (): vo
 test('deleting removes the stepping stone and notes it at the submission', function (): void {
     $submission = FormSubmission::factory()->create(['form_definition_id' => $this->form->id]);
     $point = moderationPoint($this, ['public_consent' => PublicConsent::REFUSED]);
-    $point->pointable()->associate($submission)->save();
+    $point->forceFill(['pointable_type' => $submission->getMorphClass(), 'pointable_id' => $submission->id])->save();
 
     $this->post(moderationUrl($this, $point, HexNetModerationAction::DELETE))->assertOk()
         ->assertInertia(fn ($page) => $page->where('done', true)->where('point.consent', 'Nur mitzählen, nicht öffentlich'));
