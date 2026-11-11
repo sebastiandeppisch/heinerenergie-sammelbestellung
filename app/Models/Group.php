@@ -148,6 +148,7 @@ class Group extends Model
      */
     public function ancestors(): Collection
     {
+        /** @var Collection<int, Group> $ancestors */
         $ancestors = new Collection;
         $this->loadMissing('parent');
         $current = $this->parent;
@@ -168,6 +169,7 @@ class Group extends Model
      */
     public function descendants(): Collection
     {
+        /** @var Collection<int, Group> $descendants */
         $descendants = new Collection;
         $queue = $this->children()->get();
 
