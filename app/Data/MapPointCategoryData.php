@@ -41,8 +41,8 @@ class MapPointCategoryData extends Data
         return new self(
             id: $category->uuid,
             name: $category->name,
-            image_path: $category->image_path !== null ? asset('storage/'.$category->image_path) : null,
-            marker_image_path: $markerImagePath !== null ? asset('storage/'.$markerImagePath) : null,
+            image_path: $category->image_path !== null ? public_storage_url($category->image_path) : null,
+            marker_image_path: $markerImagePath !== null ? public_storage_url($markerImagePath) : null,
             parent_id: $tree->parentUuid($category->id),
             group_id: $category->group->uuid,
             group_name: $category->group->name,

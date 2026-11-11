@@ -38,7 +38,7 @@ class MapPointCharacteristicData extends Data
         return new self(
             id: $characteristic->uuid,
             name: $characteristic->name,
-            icon_path: $characteristic->icon_path !== null ? asset('storage/'.$characteristic->icon_path) : null,
+            icon_path: $characteristic->icon_path !== null ? public_storage_url($characteristic->icon_path) : null,
             color: $characteristic->color,
             category_id: $characteristic->category->uuid,
             category_name: $characteristic->category->name,

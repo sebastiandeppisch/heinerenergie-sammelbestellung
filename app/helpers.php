@@ -2,6 +2,7 @@
 
 use App\Context\GroupContextContract;
 use App\Models\Setting;
+use Illuminate\Support\Facades\Storage;
 
 if (! function_exists('app_name')) {
     /**
@@ -40,7 +41,7 @@ if (! function_exists('app_logo')) {
             $currentGroup = $groupContext->getCurrentGroup();
 
             if ($currentGroup !== null && $currentGroup->logo_path) {
-                return url('storage/'.$currentGroup->logo_path);
+                return public_storage_url($currentGroup->logo_path);
             }
         }
 
@@ -76,5 +77,18 @@ if (! function_exists('group_url')) {
         }
 
         return config('app.url');
+    }
+}
+
+if (! function_exists('public_storage_url')) {
+    /**
+     * Link to a file of the public disk. Locally it is served below /storage of the current host, in a bucket the
+     * disk knows its address.
+     */
+    function public_storage_url(string $path): string
+    {
+        return config('filesystems.disks.public.driver') === 'local'
+            ? asset('storage/'.$path)
+            : Storage::disk('public')->url($path);
     }
 }

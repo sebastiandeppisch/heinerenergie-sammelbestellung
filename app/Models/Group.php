@@ -186,7 +186,7 @@ class Group extends Model
             return $this->logo_path;
         }
 
-        return $this->logo_path ? Storage::url($this->logo_path) : null;
+        return $this->logo_path ? public_storage_url($this->logo_path) : null;
     }
 
     public function getFullMarkerPathAttribute(): ?string
@@ -195,7 +195,7 @@ class Group extends Model
             return $this->marker_path;
         }
 
-        return $this->marker_path ? Storage::url($this->marker_path) : null;
+        return $this->marker_path ? public_storage_url($this->marker_path) : null;
     }
 
     #[Override]
