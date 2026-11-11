@@ -115,9 +115,15 @@ arch()->expect('App\Mail')
     ->classes()
     ->toImplement(ShouldQueue::class)->ignoring(BaseNotificationMail::class);
 
+// The HexaNetz plugin keeps its mails in its own namespace, so removing the plugin removes them too.
+arch()->expect('App\HexNet\Mail')
+    ->classes()
+    ->toExtend(Mailable::class)
+    ->toImplement(ShouldQueue::class);
+
 arch()->expect('App')
     ->not->toExtend(Mailable::class)
-    ->ignoring('App\Mail');
+    ->ignoring(['App\Mail', 'App\HexNet\Mail']);
 
 arch()->expect('App\Jobs')
     ->classes()
