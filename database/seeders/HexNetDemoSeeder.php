@@ -64,8 +64,11 @@ class HexNetDemoSeeder extends Seeder
             return;
         }
 
-        if (HexNet::where('slug', self::SLUG)->exists()) {
-            $this->command?->info('Das Demo-HexaNetz existiert bereits.');
+        $existing = HexNet::where('slug', self::SLUG)->first();
+
+        if ($existing !== null) {
+            $this->addNewMeasures($existing);
+            $this->command?->info('Das Demo-HexaNetz existiert bereits, neue Standard-Maßnahmen wurden ergänzt.');
 
             return;
         }
@@ -114,6 +117,18 @@ class HexNetDemoSeeder extends Seeder
         ]);
 
         $this->createPoints($hexNet, $group, $category, $polygon, 130);
+    }
+
+    /**
+     * Measures added to the defaults since the demo was seeded, e.g. trees. Existing measures and points stay.
+     */
+    private function addNewMeasures(HexNet $hexNet): void
+    {
+        $sub = $hexNet->categories()->first();
+
+        if ($sub?->parent !== null) {
+            app(HexNetSetupService::class)->createCategories($hexNet, $sub->parent->name, $sub->name, HexNetDefaults::MEASURES);
+        }
     }
 
     /**
