@@ -2,9 +2,14 @@ import type { MarkerStyle } from './hexnet';
 
 export type MarkerMeasure = { id: string; color: string; icon: string | null; name: string };
 
-export type MarkerIcon = { html: string; size: [number, number]; anchor: [number, number]; popupOffset: number };
+/** Mini markers are only a hint that there are gardens to discover, they take no clicks. */
+export type MarkerIcon = { html: string; size: [number, number]; anchor: [number, number]; popupOffset: number; interactive: boolean };
 
-/** Zoom from which markers are shown, from which they are larger and from which they show the icons. */
+/**
+ * Zoom from which mini markers are shown, from which full markers are shown, from which they are larger and from which
+ * they show the icons. Mini markers already appear in the city overview.
+ */
+export const ZOOM_MINI = 10.5;
 export const ZOOM_SMALL = 14.75;
 export const ZOOM_LARGE = 16.75;
 export const ZOOM_DETAIL = 18;
@@ -17,10 +22,20 @@ const NEUTRAL = '#7d8d85';
 
 export function markerFor(measures: MarkerMeasure[], zoom: number, style: MarkerStyle): MarkerIcon | null {
     const sorted = [...measures].sort((a, b) => a.id.localeCompare(b.id));
-    if (zoom < ZOOM_SMALL) return null;
+    if (zoom < ZOOM_MINI) return null;
+    if (zoom < ZOOM_SMALL) return mini(zoom < 12.5 ? 9 : 12);
     if (zoom < ZOOM_LARGE) return bud(sorted, 18);
     if (zoom < ZOOM_DETAIL) return bud(sorted, 28);
     return style === 'card' ? leafCard(sorted) : flowerWheel(sorted);
+}
+
+/** A small lollipop without segments: a green head on a short stem. */
+export function mini(size: number): MarkerIcon {
+    const height = size * 1.6;
+    const html = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${height}" viewBox="0 0 10 16">
+<path d="M5 8.5V15.4" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><path d="M5 8.5V15.4" stroke="${STEM}" stroke-width="1.2" stroke-linecap="round"/>
+<circle cx="5" cy="5" r="4.2" fill="${LEAF}" stroke="#fff" stroke-width="1.4"/><circle cx="5" cy="5" r="1.5" fill="${STEM}"/></svg>`;
+    return { html, size: [size, height], anchor: [size / 2, height - 0.5], popupOffset: -height, interactive: false };
 }
 
 /** "Knospe": a white button with a segmented ring in the measure colors on a stem with a leaf. */
@@ -43,7 +58,7 @@ export function bud(measures: MarkerMeasure[], size: number): MarkerIcon {
 <circle cx="12" cy="12" r="11" fill="#fff" stroke="${INK}" stroke-opacity=".18"/>
 <g transform="rotate(-90 12 12)" fill="none" stroke-width="4">${ring}</g>
 <circle cx="12" cy="12" r="2.6" fill="${STEM}"/></svg>`;
-    return { html, size: [size, height], anchor: [size / 2, (height * 35) / 36], popupOffset: -height + 4 };
+    return { html, size: [size, height], anchor: [size / 2, (height * 35) / 36], popupOffset: -height + 4, interactive: true };
 }
 
 function badge(m: MarkerMeasure, cx: number, cy: number): string {
@@ -70,7 +85,7 @@ export function leafCard(measures: MarkerMeasure[]): MarkerIcon {
 <path d="M${cx} 57.5c3-.4 4.9-2.3 5.3-5-3 .3-4.9 2.1-5.3 5z" fill="${LEAF}"/>
 <path d="M14 2H${w - 14}A12 12 0 0 1 ${w - 2} 14V30A12 12 0 0 1 ${w - 14} 42H${cx + 6}L${cx} 48L${cx - 6} 42H14A12 12 0 0 1 2 30V14A12 12 0 0 1 14 2Z" fill="#fff" stroke="${INK}" stroke-opacity=".16" stroke-linejoin="round"/>
 ${badges}${more}</svg>`;
-    return { html, size: [w, 64], anchor: [cx, 62], popupOffset: -60 };
+    return { html, size: [w, 64], anchor: [cx, 62], popupOffset: -60, interactive: true };
 }
 
 function pt(radius: number, deg: number): [number, number] {
@@ -127,7 +142,7 @@ export function flowerWheel(measures: MarkerMeasure[]): MarkerIcon {
 <path d="M38 72V89" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M38 72V89" stroke="${STEM}" stroke-width="2.4" stroke-linecap="round"/>
 <path d="M38 84c3.6-.4 5.8-2.7 6.3-6-3.6.3-5.8 2.5-6.3 6z" fill="${LEAF}"/>
 <circle cx="38" cy="38" r="35.5" fill="#fff" stroke="${INK}" stroke-opacity=".16"/>${body}</svg>`;
-    return { html, size: [76, 92], anchor: [38, 89], popupOffset: -86 };
+    return { html, size: [76, 92], anchor: [38, 89], popupOffset: -86, interactive: true };
 }
 
 function escapeXml(value: string): string {

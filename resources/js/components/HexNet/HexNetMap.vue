@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { X } from '@lucide/vue';
+import { Search, X } from '@lucide/vue';
 import './hexnet.css';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue';
 import {
@@ -17,7 +17,7 @@ import {
     type Thresholds,
     ZOOM_LIGHT_CELLS,
 } from './hexnet';
-import { markerFor } from './markers';
+import { markerFor, ZOOM_SMALL } from './markers';
 import { type RingMeasure, ringLayers, type RingWidth } from './rings';
 
 /** count is in the unit of the scoring mode, stones the stepping stones of the cell. */
@@ -78,6 +78,11 @@ const map = shallowRef<L.Map | null>(null);
 const selectedCell = ref<CellSelection | null>(null);
 const selectedPoint = ref<App.HexNet.Data.HexNetPointData | null>(null);
 const isMobile = ref(window.matchMedia('(max-width: 820px)').matches);
+const currentZoom = ref(0);
+/** Set once the visitor zoomed in beyond the first view, then the hint to zoom in is gone for good. */
+const zoomedIn = ref(false);
+let initialZoom = Infinity;
+const showZoomHint = computed(() => props.interactive && !zoomedIn.value && visiblePoints.value.length > 0 && currentZoom.value < ZOOM_SMALL);
 const hasSelection = computed(() => selectedCell.value !== null || selectedPoint.value !== null);
 
 let hexLayer: L.GeoJSON | null = null;
@@ -206,6 +211,54 @@ function close() {
     popup?.remove();
 }
 
+function stonesIn(id: string): number {
+    if (props.measure || !props.stoneCounts) return activeCounts.value[id] ?? 0;
+    return props.stoneCounts[id] ?? 0;
+}
+
+/** In the overview a cell with stepping stones invites to zoom in: a click flies there, then shows the cell. */
+function openCell(feature: GeoJSON.Feature<GeoJSON.Polygon>, latlng: L.LatLng) {
+    const id = (feature.properties as { id: string }).id;
+    const count = activeCounts.value[id] ?? 0;
+    const center = cellCenter(feature);
+    const cell = { id, count, stones: stonesIn(id), level: levelFor(count, props.thresholds), center };
+    const show = (at: L.LatLngExpression) => {
+        selectedPoint.value = null;
+        selectedCell.value = cell;
+        select(at);
+    };
+
+    if (!map.value || cell.stones === 0 || map.value.getZoom() >= ZOOM_SMALL) {
+        show(latlng);
+        return;
+    }
+    close();
+    map.value.once('moveend', () => show([center.lat, center.lng]));
+    map.value.flyTo([center.lat, center.lng], ZOOM_SMALL + 1, { duration: 0.9 });
+}
+
+let hoverTooltip: L.Tooltip | null = null;
+
+/** In the overview, hovering a cell with stepping stones tells how many there are to discover. */
+function showZoomTooltip(id: string, latlng: L.LatLng) {
+    hideZoomTooltip();
+    const stones = stonesIn(id);
+    if (!map.value || isMobile.value || stones === 0 || map.value.getZoom() >= ZOOM_SMALL) return;
+    hoverTooltip = L.tooltip({ direction: 'top', offset: [0, -8], className: 'hexnet-cell-tooltip' })
+        .setLatLng(latlng)
+        .setContent(`${stones} ${stones === 1 ? 'Trittstein' : 'Trittsteine'} – zoom rein`)
+        .addTo(map.value);
+}
+
+function hideZoomTooltip() {
+    hoverTooltip?.remove();
+    hoverTooltip = null;
+}
+
+function zoomInHint() {
+    map.value?.flyTo(map.value.getCenter(), Math.max(ZOOM_SMALL, map.value.getZoom() + 2), { duration: 0.9 });
+}
+
 function renderCells() {
     if (!map.value) return;
     hexLayer?.remove();
@@ -214,19 +267,10 @@ function renderCells() {
         interactive: props.interactive,
         onEachFeature: (feature, layer) => {
             if (!props.interactive) return;
-            layer.on('click', (event: L.LeafletMouseEvent) => {
-                const id = (feature.properties as { id: string }).id;
-                const count = activeCounts.value[id] ?? 0;
-                selectedPoint.value = null;
-                selectedCell.value = {
-                    id,
-                    count,
-                    stones: props.measure || !props.stoneCounts ? count : (props.stoneCounts[id] ?? 0),
-                    level: levelFor(count, props.thresholds),
-                    center: cellCenter(feature as GeoJSON.Feature<GeoJSON.Polygon>),
-                };
-                select(event.latlng);
-            });
+            layer.on('click', (event: L.LeafletMouseEvent) => openCell(feature as GeoJSON.Feature<GeoJSON.Polygon>, event.latlng));
+            layer.on('mouseover', (event: L.LeafletMouseEvent) => showZoomTooltip((feature.properties as { id: string }).id, event.latlng));
+            layer.on('mousemove', (event: L.LeafletMouseEvent) => hoverTooltip?.setLatLng(event.latlng));
+            layer.on('mouseout', hideZoomTooltip);
         },
     }).addTo(map.value);
     renderRings();
@@ -286,6 +330,10 @@ function renderPoints() {
         const marker = markerFor(measures, zoom, props.markerStyle);
         if (!marker) return;
         const icon = L.divIcon({ html: marker.html, className: 'hexnet-lolly', iconSize: marker.size, iconAnchor: marker.anchor });
+        if (!marker.interactive) {
+            L.marker([entry.point.coordinate.lat, entry.point.coordinate.lng], { icon, interactive: false, keyboard: false }).addTo(pointLayer);
+            continue;
+        }
         L.marker([entry.point.coordinate.lat, entry.point.coordinate.lng], { icon, riseOnHover: true })
             .on('click', () => {
                 selectedCell.value = null;
@@ -368,9 +416,13 @@ onMounted(() => {
     if (props.interactive) new LocateControl({ position: 'topleft' }).addTo(map.value);
     renderTiles();
     fit();
+    currentZoom.value = initialZoom = map.value.getZoom();
     renderCells();
     renderPoints();
+    map.value.on('zoomstart', hideZoomTooltip);
     map.value.on('zoomend', () => {
+        currentZoom.value = map.value?.getZoom() ?? 0;
+        if (currentZoom.value > initialZoom + 0.1) zoomedIn.value = true;
         renderPoints();
         hexLayer?.setStyle(styleFor);
         renderRings();
@@ -427,6 +479,10 @@ defineExpose({ flyTo, close, invalidateSize: () => map.value?.invalidateSize() }
     <div class="relative h-full w-full">
         <div ref="container" class="hexnet-map h-full w-full" />
         <div v-if="locateMessage" class="hexnet-toast" role="status">{{ locateMessage }}</div>
+        <button v-else-if="showZoomHint" type="button" class="hexnet-zoom-hint" data-test="hexnet-zoom-hint" @click="zoomInHint">
+            <Search class="h-4 w-4" />
+            Zoom rein und entdecke {{ visiblePoints.length }} {{ visiblePoints.length === 1 ? 'Garten' : 'Gärten' }}
+        </button>
         <Teleport v-if="!isMobile && hasSelection" :to="popupContent">
             <slot v-if="selectedCell" name="cell" :cell="selectedCell" />
             <slot v-else-if="selectedPoint" name="point" :point="selectedPoint" />
@@ -493,6 +549,80 @@ defineExpose({ flyTo, close, invalidateSize: () => map.value?.invalidateSize() }
     color: #fff;
     font-size: 12.5px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+.hexnet-zoom-hint {
+    position: absolute;
+    left: 50%;
+    top: 12px;
+    z-index: 1000;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transform: translateX(-50%);
+    padding: 8px 14px;
+    border: 0;
+    border-radius: 999px;
+    background: #e8720c;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(232, 114, 12, 0.4);
+    animation: hexnet-hint-bob 2.4s ease-in-out infinite;
+}
+.hexnet-zoom-hint:hover {
+    background: #cf6408;
+}
+@keyframes hexnet-hint-bob {
+    0%,
+    100% {
+        transform: translate(-50%, 0);
+    }
+    50% {
+        transform: translate(-50%, 3px);
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .hexnet-zoom-hint {
+        animation: none;
+    }
+}
+.hexnet-map .leaflet-control-zoom {
+    border: none;
+    box-shadow: 0 2px 8px rgba(22, 33, 28, 0.28);
+}
+.hexnet-map .leaflet-control-zoom a {
+    width: 40px;
+    height: 40px;
+    line-height: 38px;
+    font-size: 24px;
+    font-weight: 700;
+    color: #1f7a34;
+}
+.hexnet-map .leaflet-control-zoom-in {
+    background: #1f7a34;
+    color: #fff !important;
+}
+.hexnet-map .leaflet-control-zoom-in:hover {
+    background: #2b8f43;
+}
+.hexnet-map .leaflet-control-zoom-in.leaflet-disabled {
+    background: #f4f4f4;
+    color: #bbb !important;
+}
+.hexnet-cell-tooltip {
+    padding: 4px 8px;
+    border: none;
+    border-radius: 6px;
+    background: #16211c;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+.hexnet-cell-tooltip::before {
+    border-top-color: #16211c;
 }
 .hexnet-cell-icon-wrap {
     background: none;
