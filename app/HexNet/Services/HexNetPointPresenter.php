@@ -43,13 +43,14 @@ class HexNetPointPresenter
                 $this->presenter->scopeVisible($query)
                     ->with(['category', 'group', 'characteristics.category', 'fields.options', 'fields.formField']);
             })
-            ->map(function (MapPoint $mapPoint) use ($hexNet, $tree, $publicFieldIds): HexNetPointData {
+            ->map(function (MapPoint $mapPoint) use ($hexNet, $grid, $tree, $publicFieldIds): HexNetPointData {
                 $data = PublicMapPointData::fromModel($mapPoint, $tree, $publicFieldIds);
                 $data->coordinate = $this->jitter->apply($mapPoint->coordinate, $mapPoint->uuid, $hexNet->jitter_m);
 
                 return new HexNetPointData(
                     point: $data,
                     since: (int) $mapPoint->created_at->format('Y'),
+                    cell: $grid->cellOf($mapPoint->coordinate),
                 );
             })
             ->values();

@@ -61,8 +61,8 @@ export function scoreUnitDative(n: number, mode: ScoringMode): string {
 export function defaultThresholds(mode: ScoringMode, measureCount: number): Thresholds {
     if (mode === 'measures') return { medium: 3, dark: 6 };
     if (mode === 'distinct_measures') {
-        const dark = Math.max(3, measureCount);
-        return { medium: Math.min(dark - 1, Math.max(2, Math.ceil(dark / 2))), dark };
+        const dark = Math.max(2, measureCount);
+        return { medium: Math.max(1, Math.min(dark - 1, Math.ceil(dark / 2))), dark };
     }
     return { medium: 2, dark: 3 };
 }

@@ -9,7 +9,7 @@ use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
 /**
- * A visible point of a HexaNetz. Its coordinate is already moved by the jitter.
+ * A visible point of a HexaNetz. Its coordinate is already moved by the jitter, cell is the cell it counts in.
  */
 #[TypeScript]
 class HexNetPointData extends Data
@@ -17,5 +17,6 @@ class HexNetPointData extends Data
     public function __construct(
         public PublicMapPointData $point,
         public int $since,
+        public string $cell,
     ) {}
 }
