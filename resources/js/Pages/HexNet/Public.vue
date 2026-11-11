@@ -146,6 +146,7 @@ function store(key: string, value: string) {
                     <h2>Mitmachen</h2>
                     <p v-if="hexNet.cta_text" class="note">{{ hexNet.cta_text }}</p>
                     <a v-if="hexNet.form_url" :href="hexNet.form_url" class="act">Trittstein anmelden</a>
+                    <a :href="route('map-point.manage.request')" class="manage" data-test="hexnet-manage-own">Eigenen Eintrag bearbeiten</a>
                 </div>
                 <details class="about">
                     <summary><Info class="h-3.5 w-3.5" /> Über diese Karte</summary>
@@ -190,7 +191,12 @@ function store(key: string, value: string) {
                     />
                 </template>
                 <template #point="{ point }">
-                    <HexNetPointInfo :entry="point" :contact-url="contactUrl(point)" :measures="measures" />
+                    <HexNetPointInfo
+                        :entry="point"
+                        :contact-url="contactUrl(point)"
+                        :manage-url="route('map-point.manage.request-for-point', point.point.id)"
+                        :measures="measures"
+                    />
                 </template>
             </HexNetMap>
             <a v-if="hexNet.form_url" :href="hexNet.form_url" class="fab"><Plus class="h-5 w-5" /> Trittstein anmelden</a>
@@ -324,6 +330,14 @@ h1 {
 }
 .act:hover {
     background: #cf6408;
+}
+.manage {
+    display: block;
+    margin-top: 9px;
+    text-align: center;
+    font-size: 11.5px;
+    color: #46564e;
+    text-decoration: underline;
 }
 .about {
     margin-top: auto;

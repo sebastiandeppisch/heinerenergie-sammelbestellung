@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import MapPointFieldList from '@/components/MapPointFieldList.vue';
 import { Button } from '@/shadcn/components/ui/button';
-import { MapPin, MessageCircle } from '@lucide/vue';
+import { MapPin, MessageCircle, Pencil } from '@lucide/vue';
 import { computed } from 'vue';
 
 const props = defineProps<{
     entry: App.HexNet.Data.HexNetPointData;
     contactUrl?: string | null;
+    /** Where the person behind the stepping stone asks for the manage link. */
+    manageUrl?: string | null;
     /** All measures of the campaign, the ones of this stepping stone in color, the others greyed out. */
     measures?: App.Data.MapPointCharacteristicData[];
 }>();
@@ -58,9 +60,11 @@ const fieldsWithoutImages = computed(() => point.value.fields.filter((field) => 
             Kontakt aufnehmen
         </Button>
 
-        <div class="flex items-center gap-1 text-[11px] text-[#7d8d85]">
-            <MapPin class="h-3 w-3" />
-            Standort leicht verschoben
+        <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-[11px] text-[#7d8d85]">
+            <span class="flex items-center gap-1"><MapPin class="h-3 w-3" /> Standort leicht verschoben</span>
+            <a v-if="manageUrl" :href="manageUrl" class="flex items-center gap-1 !text-[#7d8d85] underline" data-test="hexnet-manage-point">
+                <Pencil class="h-3 w-3" /> Ist das dein Garten? Eintrag bearbeiten
+            </a>
         </div>
     </div>
 </template>

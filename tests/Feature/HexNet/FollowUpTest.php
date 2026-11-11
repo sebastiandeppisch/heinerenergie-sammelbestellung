@@ -1,11 +1,14 @@
 <?php
 
+use App\HexNet\Enums\HexNetScoringMode;
 use App\HexNet\HexNetDefaults;
 use App\HexNet\Models\HexNet;
+use App\HexNet\Services\HexNetGridService;
 use App\HexNet\Services\HexNetSetupService;
 use App\Mail\FormSubmissionConfirmation;
 use App\Models\FormDefinition;
 use App\Models\Group;
+use App\Models\MapPoint;
 use App\Models\MapPointCategory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
@@ -70,4 +73,37 @@ test('after the confirmation the highlight links to the follow-up form with the 
     expect($props['hexNetHighlight']['follow_up_label'])->toBe('Erzähl mehr')
         ->and($props['hexNetHighlight']['follow_up_url'])->toBe($props['notices'][0]['url'])
         ->and($props['notices'][0]['url'])->toEndWith('/ergaenzen');
+});
+
+test('the follow-up form adds and removes measures, the cell follows in the measure modes', function (): void {
+    $this->hexNet->update(['scoring_mode' => HexNetScoringMode::DISTINCT_MEASURES]);
+    $fields = $this->form->fields()->get()->keyBy('label');
+    [$lawn, $flowers] = $this->category->parent->characteristics()->orderBy('sort_order')->get()->all();
+
+    $this->post(route('form.submit', $this->form), [
+        $fields['Titel']->uuid => 'Garten Müller',
+        $fields['Beschreibung']->uuid => 'Mit Teich',
+        $fields['Standort']->uuid => ['lat' => 49.8728, 'lng' => 8.6512],
+        $fields['E-Mail-Adresse']->uuid => 'erika@example.org',
+        $fields['Maßnahmen']->uuid => [$lawn->uuid],
+        '_consent_show' => true,
+    ])->assertSessionHasNoErrors();
+    $token = basename((string) parse_url(Mail::queued(FormSubmissionConfirmation::class)->sole()->confirmationUrl, PHP_URL_PATH));
+    $followUpUrl = $this->post(route('form.confirm', $token))->viewData('page')['props']['hexNetHighlight']['follow_up_url'];
+    $manageToken = basename(dirname((string) parse_url($followUpUrl, PHP_URL_PATH)));
+    $measuresUuid = $this->followUp->fields()->where('label', 'Maßnahmen')->value('uuid');
+    $grid = app(HexNetGridService::class);
+
+    expect($grid->counts($this->hexNet->fresh()))->toBe(['0:0' => 1]);
+
+    $this->get(route('map-point.manage.follow-up', $manageToken))
+        ->assertInertia(fn ($page) => $page->where("initialData.{$measuresUuid}", [$lawn->uuid]));
+
+    $this->post(route('map-point.manage.follow-up.submit', $manageToken), [$measuresUuid => [$lawn->uuid, $flowers->uuid]])->assertSessionHasNoErrors();
+    expect($grid->counts($this->hexNet->fresh()))->toBe(['0:0' => 2]);
+
+    $this->travel(1)->seconds();
+    $this->post(route('map-point.manage.follow-up.submit', $manageToken), [$measuresUuid => [$flowers->uuid]])->assertSessionHasNoErrors();
+    expect(MapPoint::where('title', 'Garten Müller')->sole()->characteristics->pluck('uuid')->all())->toBe([$flowers->uuid])
+        ->and($grid->counts($this->hexNet->fresh()))->toBe(['0:0' => 1]);
 });
