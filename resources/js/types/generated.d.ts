@@ -653,6 +653,16 @@ published: boolean,
 follow_up_url: string | null,
 follow_up_label: string | null,
 };
+export type HexNetModerationPointData = {
+campaign: string,
+title: string,
+category: string | null,
+measures: string[],
+consent: string,
+published: boolean,
+created_at: string,
+backend_url: string,
+};
 export type HexNetPointData = {
 point: App.Data.PublicMapPointData,
 since: number,
@@ -681,6 +691,7 @@ total_points: number,
 };
 }
 namespace Enums {
+export type HexNetModerationAction = 'freigeben' | 'zurueckziehen' | 'loeschen';
 export type HexNetScoringMode = 'stones' | 'measures' | 'distinct_measures';
 export type HexNetStatus = 'draft' | 'active';
 }

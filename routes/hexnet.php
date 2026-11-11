@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\HexNet\Http\Controllers\HexNetContactController;
 use App\HexNet\Http\Controllers\HexNetController;
+use App\HexNet\Http\Controllers\HexNetModerationController;
 use App\HexNet\Http\Controllers\HexNetPublicController;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 use Illuminate\Support\Facades\Route;
@@ -24,3 +25,10 @@ Route::get('hexanetz/{slug}/trittsteine/{mapPoint}/kontakt', [HexNetContactContr
 Route::post('hexanetz/{slug}/trittsteine/{mapPoint}/kontakt', [HexNetContactController::class, 'store'])
     ->middleware([HandlePrecognitiveRequests::class, 'throttle:map-contact'])
     ->name('hexnet.contact.store');
+
+Route::get('hexanetz/moderation/{hexNet}/{mapPoint}/{action}/{admin}', [HexNetModerationController::class, 'show'])
+    ->middleware('throttle:60,1')
+    ->name('hexnet.moderation.show');
+Route::post('hexanetz/moderation/{hexNet}/{mapPoint}/{action}/{admin}', [HexNetModerationController::class, 'store'])
+    ->middleware('throttle:60,1')
+    ->name('hexnet.moderation.store');
