@@ -30,6 +30,8 @@ const props = withDefaults(
         /** Stepping stones per cell when counts are in another unit. */
         stoneCounts?: Record<string, number> | null;
         thresholds: Thresholds;
+        /** Thresholds of the overall score, for the core of the rings when the cells show a measure. */
+        scoreThresholds?: Thresholds | null;
         points?: App.HexNet.Data.HexNetPointData[];
         bounds?: App.ValueObjects.Coordinate[];
         highlight?: { cell: string; coordinate: App.ValueObjects.Coordinate } | null;
@@ -49,6 +51,7 @@ const props = withDefaults(
         points: () => [],
         bounds: () => [],
         stoneCounts: null,
+        scoreThresholds: null,
         highlight: null,
         interactive: true,
         measure: null,
@@ -82,6 +85,12 @@ const currentZoom = ref(0);
 /** Set once the visitor zoomed in beyond the first view, then the hint to zoom in is gone for good. */
 const zoomedIn = ref(false);
 let initialZoom = Infinity;
+/** Shown stepping stones per cell, the ones a visitor finds when zooming in. */
+const shownByCell = computed(() => {
+    const byCell: Record<string, number> = {};
+    for (const entry of visiblePoints.value) byCell[entry.cell] = (byCell[entry.cell] ?? 0) + 1;
+    return byCell;
+});
 const showZoomHint = computed(() => props.interactive && !zoomedIn.value && visiblePoints.value.length > 0 && currentZoom.value < ZOOM_SMALL);
 const hasSelection = computed(() => selectedCell.value !== null || selectedPoint.value !== null);
 
@@ -228,21 +237,27 @@ function openCell(feature: GeoJSON.Feature<GeoJSON.Polygon>, latlng: L.LatLng) {
         select(at);
     };
 
-    if (!map.value || cell.stones === 0 || map.value.getZoom() >= ZOOM_SMALL) {
+    if (!map.value || (shownByCell.value[id] ?? 0) === 0 || map.value.getZoom() >= ZOOM_SMALL) {
         show(latlng);
         return;
     }
     close();
-    map.value.once('moveend', () => show([center.lat, center.lng]));
+    const target = L.latLng(center.lat, center.lng);
+    const ticket = ++flight;
+    map.value.once('moveend', () => {
+        // The visitor may have dragged or zoomed elsewhere during the flight, then the cell is not what they look at.
+        if (ticket === flight && map.value && map.value.getCenter().distanceTo(target) < 30) show(target);
+    });
     map.value.flyTo([center.lat, center.lng], ZOOM_SMALL + 1, { duration: 0.9 });
 }
 
 let hoverTooltip: L.Tooltip | null = null;
+let flight = 0;
 
 /** In the overview, hovering a cell with stepping stones tells how many there are to discover. */
 function showZoomTooltip(id: string, latlng: L.LatLng) {
     hideZoomTooltip();
-    const stones = stonesIn(id);
+    const stones = shownByCell.value[id] ?? 0;
     if (!map.value || isMobile.value || stones === 0 || map.value.getZoom() >= ZOOM_SMALL) return;
     hoverTooltip = L.tooltip({ direction: 'top', offset: [0, -8], className: 'hexnet-cell-tooltip' })
         .setLatLng(latlng)
@@ -308,7 +323,7 @@ function renderRings() {
         if (!counts) continue;
         for (const layer of ringLayers(feature, counts, props.ringOrder, {
             width: props.ringWidth,
-            thresholds: props.thresholds,
+            thresholds: props.scoreThresholds ?? props.thresholds,
             focus: props.measure?.id ?? null,
             renderer: canvasRenderer,
             stones: props.counts[feature.properties.id] ?? 0,

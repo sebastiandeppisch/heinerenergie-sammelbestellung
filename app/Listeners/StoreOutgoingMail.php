@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
+use App\HexNet\Mail\HexNetStoneCreated;
 use App\Mail\FormSubmissionConfirmation;
 use App\Mail\MapPointContact\ContactRequestConfirmation;
 use App\Mail\MapPointCreated;
@@ -22,6 +23,7 @@ class StoreOutgoingMail extends StoreOutgoingMailListener
         ContactRequestConfirmation::class,
         MapPointCreated::class,
         MapPointEditLinks::class,
+        HexNetStoneCreated::class,
     ];
 
     /**

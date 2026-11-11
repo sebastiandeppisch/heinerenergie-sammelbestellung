@@ -28,7 +28,8 @@ onMounted(() => setTimeout(() => mapRef.value?.flyTo(props.highlight.coordinate,
             />
         </div>
         <p class="text-base font-semibold">
-            Deine Wabe zählt jetzt.
+            <template v-if="(highlight.counts[highlight.cell] ?? 0) > 0">Deine Wabe zählt jetzt.</template>
+            <template v-else>Dein Garten ist dabei. Mit Maßnahmen färbt er deine Wabe grün.</template>
             <template v-if="highlight.published">Dein Garten ist schon auf der Karte zu sehen.</template>
             <template v-else>Dein Garten erscheint nach Freigabe auf der Karte.</template>
         </p>

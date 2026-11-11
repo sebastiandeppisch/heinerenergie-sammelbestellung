@@ -666,6 +666,7 @@ backend_url: string,
 export type HexNetPointData = {
 point: App.Data.PublicMapPointData,
 since: number,
+cell: string,
 };
 export type HexNetPublicData = {
 id: string,

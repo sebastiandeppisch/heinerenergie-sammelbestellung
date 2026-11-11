@@ -168,6 +168,7 @@ function store(key: string, value: string) {
                 :counts="counts"
                 :stone-counts="stoneCounts"
                 :thresholds="thresholds"
+                :score-thresholds="{ medium: hexNet.threshold_medium, dark: hexNet.threshold_dark }"
                 :points="points"
                 :bounds="hexNet.bounds"
                 :measure="mapMeasure"

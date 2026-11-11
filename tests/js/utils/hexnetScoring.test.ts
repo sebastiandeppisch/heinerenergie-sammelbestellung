@@ -12,7 +12,7 @@ describe('scoring modes of a HexaNetz', () => {
 
     it('suggests all measures as dark for variety', () => {
         expect(defaultThresholds('distinct_measures', 11)).toEqual({ medium: 6, dark: 11 });
-        expect(defaultThresholds('distinct_measures', 2)).toEqual({ medium: 2, dark: 3 });
+        expect(defaultThresholds('distinct_measures', 2)).toEqual({ medium: 1, dark: 2 });
         expect(defaultThresholds('stones', 11)).toEqual({ medium: 2, dark: 3 });
         expect(defaultThresholds('measures', 11)).toEqual({ medium: 3, dark: 6 });
     });

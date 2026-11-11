@@ -42,7 +42,7 @@ const radiusLocked = computed(() => props.hexNet.grid_locked);
 const radiusChanged = computed(() => form.hex_radius_m !== props.hexNet.hex_radius_m);
 const modeChanged = computed(() => form.scoring_mode !== props.hexNet.scoring_mode);
 const maxDark = computed(() => {
-    if (form.scoring_mode === 'distinct_measures') return Math.max(3, props.measureCount);
+    if (form.scoring_mode === 'distinct_measures') return Math.max(2, props.measureCount);
     return form.scoring_mode === 'measures' ? 20 : 10;
 });
 const maxMedium = computed(() => (form.scoring_mode === 'stones' ? 6 : maxDark.value - 1));
@@ -50,7 +50,10 @@ const maxMedium = computed(() => (form.scoring_mode === 'stones' ? 6 : maxDark.v
 function chooseMode(mode: ScoringMode) {
     if (mode === form.scoring_mode) return;
     form.scoring_mode = mode;
-    const thresholds = defaultThresholds(mode, props.measureCount);
+    const thresholds =
+        mode === props.hexNet.scoring_mode
+            ? { medium: props.hexNet.threshold_medium, dark: props.hexNet.threshold_dark }
+            : defaultThresholds(mode, props.measureCount);
     form.threshold_medium = thresholds.medium;
     form.threshold_dark = thresholds.dark;
 }
@@ -190,7 +193,14 @@ function save(confirmed = false) {
                         >{{ form.threshold_medium }} {{ scoreUnit(form.threshold_medium, form.scoring_mode) }}</span
                     >
                 </div>
-                <input id="medium" v-model.number="form.threshold_medium" type="range" min="2" :max="maxMedium" class="w-full accent-green-800" />
+                <input
+                    id="medium"
+                    v-model.number="form.threshold_medium"
+                    :min="form.scoring_mode === 'distinct_measures' ? 1 : 2"
+                    type="range"
+                    :max="maxMedium"
+                    class="w-full accent-green-800"
+                />
             </div>
             <div class="space-y-1">
                 <div class="flex items-center justify-between">
