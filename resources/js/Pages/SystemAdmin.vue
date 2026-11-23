@@ -223,8 +223,7 @@ function executeGeocoding() {
                             Adressen werden über OpenStreetMap in Koordinaten übersetzt. Der Dienst erlaubt nur wenige Anfragen, deshalb wartet der
                             Server zwischen zwei Anfragen
                             <strong>{{ geocoding.interval }} Sekunden</strong>. Die Ermittlung läuft über die Queue-Verbindung
-                            <strong>{{ geocoding.queueConnection }}</strong
-                            >.
+                            <strong>{{ geocoding.queueConnection }}</strong>.
                         </p>
 
                         <div class="mb-4 rounded-md border px-4 py-3">
