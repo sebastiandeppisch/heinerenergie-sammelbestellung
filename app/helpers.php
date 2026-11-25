@@ -82,13 +82,13 @@ if (! function_exists('group_url')) {
 
 if (! function_exists('public_storage_url')) {
     /**
-     * Link to a file of the public disk. Locally it is served below /storage of the current host, in a bucket the
-     * disk knows its address.
+     * Link to a file of the public disk. A bucket with a public address is linked directly, otherwise the file is
+     * served below /storage of the current host: by the web server locally, by PublicFileController from a bucket.
      */
     function public_storage_url(string $path): string
     {
-        return config('filesystems.disks.public.driver') === 'local'
-            ? asset('storage/'.$path)
-            : Storage::disk('public')->url($path);
+        return config('filesystems.disks.public.driver') !== 'local' && filled(config('filesystems.disks.public.url'))
+            ? Storage::disk('public')->url($path)
+            : asset('storage/'.$path);
     }
 }

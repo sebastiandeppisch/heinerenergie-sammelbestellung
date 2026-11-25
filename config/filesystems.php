@@ -4,19 +4,54 @@
  * Uploaded media (public files, images and their variants) can live in an S3 bucket, e.g. on staging, with
  * MEDIA_DISK_DRIVER=s3. Each disk gets its own prefix in the bucket. Backups and spreadsheet uploads stay local.
  *
- * @param  array<string, mixed>  $local
- * @param  array<string, mixed>  $s3
- * @return array<string, mixed>
+ * On Laravel Cloud the attached bucket comes in LARAVEL_CLOUD_DISK_CONFIG, the media use it without further settings.
  */
-$media = fn (string $prefix, array $local, array $s3 = []): array => env('MEDIA_DISK_DRIVER', 'local') === 's3'
+$cloudDisks = json_decode((string) env('LARAVEL_CLOUD_DISK_CONFIG', '[]'), true) ?: [];
+$cloudBucket = array_values(array_filter($cloudDisks, fn (array $disk): bool => (bool) ($disk['is_default'] ?? false)))[0] ?? $cloudDisks[0] ?? null;
+
+$bucket = $cloudBucket !== null
     ? [
-        'driver' => 's3',
+        'key' => $cloudBucket['access_key_id'],
+        'secret' => $cloudBucket['access_key_secret'],
+        'region' => $cloudBucket['default_region'],
+        'bucket' => $cloudBucket['bucket'],
+        'endpoint' => $cloudBucket['endpoint'],
+        'url' => $cloudBucket['url'] ?? null,
+        'use_path_style_endpoint' => $cloudBucket['use_path_style_endpoint'] ?? false,
+    ]
+    : [
         'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION'),
         'bucket' => env('AWS_BUCKET'),
         'endpoint' => env('AWS_ENDPOINT'),
+        'url' => env('AWS_URL'),
         'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+    ];
+
+/** Each bucket of Laravel Cloud is a disk of its name, e.g. "private" as FILESYSTEM_DISK. */
+$cloudBucketDisks = array_column(array_map(fn (array $disk): array => ['name' => $disk['disk'], 'config' => [
+    'driver' => 's3',
+    'key' => $disk['access_key_id'],
+    'secret' => $disk['access_key_secret'],
+    'region' => $disk['default_region'],
+    'bucket' => $disk['bucket'],
+    'endpoint' => $disk['endpoint'],
+    'url' => $disk['url'] ?? null,
+    'use_path_style_endpoint' => $disk['use_path_style_endpoint'] ?? false,
+    'throw' => true,
+]], $cloudDisks), 'config', 'name');
+
+/**
+ * @param  array<string, mixed>  $local
+ * @param  array<string, mixed>  $s3
+ * @return array<string, mixed>
+ */
+$media = fn (string $prefix, array $local, array $s3 = []): array => env('MEDIA_DISK_DRIVER', $cloudBucket !== null ? 's3' : 'local') === 's3'
+    ? [
+        'driver' => 's3',
+        ...$bucket,
+        'url' => null,
         'root' => $prefix,
         'throw' => true,
         ...$s3,
@@ -58,17 +93,19 @@ return [
             'root' => storage_path('app'),
         ],
 
-        // Logos, markers, category images and icons, linked directly. On S3 the bucket must allow public reads.
+        // Logos, markers, category images and icons. With a public address of the bucket they are linked there, otherwise
+        // the app serves them below /storage, e.g. from the private bucket of Laravel Cloud.
         'public' => $media('public', [
             'driver' => 'local',
             'root' => storage_path('app/public'),
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
-        ], [
+        ], array_filter([
             // The prefix "public" is added to this address.
-            'url' => env('AWS_URL'),
-            'visibility' => 'public',
-        ]),
+            'url' => $bucket['url'],
+            // Buckets of Laravel Cloud (Cloudflare R2) know no object ACLs.
+            'visibility' => $cloudBucket === null ? 'public' : null,
+        ])),
 
         // Images of form submissions and map points. Not public: they are served by routes that check access.
         'images' => $media('images', [
@@ -97,6 +134,8 @@ return [
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
         ],
+
+        ...$cloudBucketDisks,
 
     ],
 
