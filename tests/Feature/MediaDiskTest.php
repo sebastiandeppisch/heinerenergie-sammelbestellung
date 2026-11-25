@@ -48,6 +48,7 @@ test('public files link into the bucket on s3', function (): void {
 });
 
 test('media disks use the bucket of Laravel Cloud without further settings', function (): void {
+    $_SERVER['MEDIA_DISK_DRIVER'] = $_ENV['MEDIA_DISK_DRIVER'] = '';
     $_SERVER['LARAVEL_CLOUD_DISK_CONFIG'] = $_ENV['LARAVEL_CLOUD_DISK_CONFIG'] = json_encode([[
         'disk' => 'private',
         'is_default' => true,

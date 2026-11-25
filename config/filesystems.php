@@ -47,7 +47,7 @@ $cloudBucketDisks = array_column(array_map(fn (array $disk): array => ['name' =>
  * @param  array<string, mixed>  $s3
  * @return array<string, mixed>
  */
-$media = fn (string $prefix, array $local, array $s3 = []): array => env('MEDIA_DISK_DRIVER', $cloudBucket !== null ? 's3' : 'local') === 's3'
+$media = fn (string $prefix, array $local, array $s3 = []): array => (env('MEDIA_DISK_DRIVER') ?: ($cloudBucket !== null ? 's3' : 'local')) === 's3'
     ? [
         'driver' => 's3',
         ...$bucket,
