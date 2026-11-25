@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\HexNet;
 
+use App\HexNet\Enums\HexNetScoringMode;
+
 /**
  * Starting values of a new HexaNetz. Admins change them in the wizard.
  */
 final class HexNetDefaults
 {
-    public const string TITLE = 'Darmstadt wird grün';
+    public const string TITLE = 'Highway der Tiere';
 
     public const string SUBTITLE = 'Live-Spielstand der Trittstein-Kampagne';
 
@@ -32,9 +34,11 @@ final class HexNetDefaults
 
     public const int RADIUS_M = 150;
 
-    public const int THRESHOLD_MEDIUM = 2;
+    public const int THRESHOLD_MEDIUM = 6;
 
-    public const int THRESHOLD_DARK = 3;
+    public const int THRESHOLD_DARK = 12;
+
+    public const HexNetScoringMode SCORING_MODE = HexNetScoringMode::DISTINCT_MEASURES;
 
     public const int JITTER_M = 40;
 
@@ -42,28 +46,36 @@ final class HexNetDefaults
      * @var array<int, array{name: string, color: string, icon: string}>
      */
     public const array MEASURES = [
-        ['name' => '5 m² Rasen ungemäht', 'color' => '#7cb342', 'icon' => 'wheat'],
-        ['name' => 'Blühstreifen angelegt', 'color' => '#f4b400', 'icon' => 'flower'],
-        ['name' => 'Totholzhaufen', 'color' => '#8d6e63', 'icon' => 'bug'],
-        ['name' => 'Wildsträucher gepflanzt', 'color' => '#2e7d32', 'icon' => 'sprout'],
-        ['name' => 'Baum gepflanzt', 'color' => '#33691e', 'icon' => 'tree-deciduous'],
-        ['name' => 'Sandlinse für Wildbienen', 'color' => '#e0c068', 'icon' => 'hexagon'],
-        ['name' => 'Regentonne & feuchte Ecke', 'color' => '#4fc3f7', 'icon' => 'droplets'],
-        ['name' => 'Efeu an der Mauer stehen lassen', 'color' => '#558b2f', 'icon' => 'leaf'],
-        ['name' => 'Steinhaufen als Unterschlupf', 'color' => '#9e9e9e', 'icon' => 'mountain'],
-        ['name' => 'Laubhaufen überwintert', 'color' => '#e8720c', 'icon' => 'leafy-green'],
-        ['name' => 'Staudenbeet statt Schotter', 'color' => '#ab47bc', 'icon' => 'flower-2'],
+        ['name' => 'Vogel-Spa', 'color' => '#29b6f6', 'icon' => 'vogel'],
+        ['name' => 'Schmetterlingswiese', 'color' => '#ab47bc', 'icon' => 'schmetterling'],
+        ['name' => 'Igeltore', 'color' => '#8d6e63', 'icon' => 'fence'],
+        ['name' => 'Käfer-Keller', 'color' => '#5d4037', 'icon' => 'bug'],
+        ['name' => 'Haselmaus-Hecke', 'color' => '#2e7d32', 'icon' => 'rat'],
+        ['name' => 'Sandkasten für Wildbienen', 'color' => '#e0c068', 'icon' => 'hexagon'],
+        ['name' => 'Eidechsenburg', 'color' => '#9e9e9e', 'icon' => 'castle'],
+        ['name' => 'Fledermaus-Fassaden', 'color' => '#5c6bc0', 'icon' => 'moon'],
+        ['name' => 'Humusfabrik der Regenwürmer', 'color' => '#c2185b', 'icon' => 'worm'],
+        ['name' => 'Badeparadies für Frösche', 'color' => '#26a69a', 'icon' => 'waves'],
+        ['name' => 'Hotel „Zum Baum“', 'color' => '#33691e', 'icon' => 'tree-deciduous'],
+        ['name' => 'Neupflanzgebiet: Abpflastern', 'color' => '#7cb342', 'icon' => 'sprout'],
     ];
 
     /** Placeholder icons in public/hexnet/icons, admins pick one per measure. */
     public const array ICONS = [
         'wheat', 'flower', 'flower-2', 'bug', 'tree-deciduous', 'tree-pine', 'hexagon', 'droplets', 'leaf', 'leafy-green',
         'mountain', 'sprout', 'clover', 'bird', 'snail', 'worm', 'squirrel', 'feather', 'sun', 'shovel', 'fence',
+        'vogel', 'schmetterling', 'rat', 'castle', 'moon', 'waves',
     ];
+
+    /** Icons are SVG, except for a few PNG drafts until their SVG arrives. */
+    public static function iconFile(string $icon): string
+    {
+        return file_exists(public_path('hexnet/icons/'.$icon.'.svg')) ? $icon.'.svg' : $icon.'.png';
+    }
 
     public static function iconUrl(string $icon): string
     {
-        return asset('hexnet/icons/'.$icon.'.svg');
+        return asset('hexnet/icons/'.self::iconFile($icon));
     }
 
     /** Colors of the levels open, light, medium and dark, changeable per HexaNetz. */

@@ -11,7 +11,7 @@ class HexNetDemoCommand extends Command
 {
     protected $signature = 'hexnet:demo';
 
-    protected $description = 'Legt das Demo-HexaNetz „Darmstadt wird grün“ mit ca. 130 Trittsteinen an (nicht in Produktion)';
+    protected $description = 'Legt das Demo-HexaNetz „Highway der Tiere“ mit ca. 130 Trittsteinen an (nicht in Produktion)';
 
     public function handle(): int
     {

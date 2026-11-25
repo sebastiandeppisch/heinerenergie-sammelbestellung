@@ -111,8 +111,9 @@ class HexNetSetupService
             return null;
         }
 
-        $path = 'characteristics/hexnet-'.$icon.'-'.Str::uuid().'.svg';
-        Storage::disk('public')->put($path, (string) file_get_contents(public_path('hexnet/icons/'.$icon.'.svg')));
+        $file = HexNetDefaults::iconFile($icon);
+        $path = 'characteristics/hexnet-'.$icon.'-'.Str::uuid().'.'.pathinfo($file, PATHINFO_EXTENSION);
+        Storage::disk('public')->put($path, (string) file_get_contents(public_path('hexnet/icons/'.$file)));
 
         return $path;
     }

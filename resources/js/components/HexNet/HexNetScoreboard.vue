@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import './hexnet.css';
 import { computed } from 'vue';
-import { DEFAULT_LEVEL_COLORS, LEVELS, MEASURE_OPACITY, type ScoringMode, scoreUnit, scoreUnitDative } from './hexnet';
+import { DEFAULT_LEVEL_COLORS, LEVELS, MEASURE_OPACITY, type ScoringMode, scoreUnit } from './hexnet';
 
 const props = defineProps<{
     stats: App.HexNet.Data.HexNetStatsData;
@@ -10,6 +10,7 @@ const props = defineProps<{
     color?: string | null;
     levelColors?: string[];
     mode?: ScoringMode;
+    measureCount?: number;
 }>();
 
 const mode = computed<ScoringMode>(() => props.mode ?? 'stones');
@@ -24,11 +25,19 @@ const fill = (level: number) =>
 
 const width = (level: number) => (props.stats.playable_cells ? (100 * props.stats.levels[level]) / props.stats.playable_cells : 0) + '%';
 
+const atLeast = (n: number) => `Auf diesem Trittstein gibt es mindestens ${n} ${scoreUnit(n, mode.value)}.`;
+const allZones = computed(() => mode.value === 'distinct_measures' && !!props.measureCount && props.thresholds.dark >= props.measureCount);
+
 const steps = computed(() => [
-    { level: 3, hint: `ab ${props.thresholds.dark} ${scoreUnitDative(props.thresholds.dark, mode.value)}` },
-    { level: 2, hint: `ab ${props.thresholds.medium} ${scoreUnitDative(props.thresholds.medium, mode.value)}` },
-    { level: 1, hint: `ab 1 ${scoreUnit(1, mode.value)}` },
-    { level: 0, hint: mode.value === 'stones' ? 'hier fehlt der erste' : 'hier fehlt noch etwas' },
+    {
+        level: 3,
+        hint: allZones.value
+            ? `Auf diesem Trittstein gibt es alle ${props.thresholds.dark} Wohlfühlzonen. Wunderbar, hier sind unsere tierischen Mitbürger besonders gerne!`
+            : atLeast(props.thresholds.dark),
+    },
+    { level: 2, hint: atLeast(props.thresholds.medium) },
+    { level: 1, hint: atLeast(1) },
+    { level: 0, hint: 'Hier ist noch viel Gestaltungsspielraum.' },
 ]);
 </script>
 
@@ -37,7 +46,7 @@ const steps = computed(() => [
         <div class="hexnet-progress">
             <div class="big">{{ stats.percent }}<span> %</span></div>
             <div class="cap">
-                der bespielbaren Fläche {{ mode === 'stones' ? 'hat mindestens einen Trittstein' : `hat mindestens 1 ${scoreUnit(1, mode)}` }}
+                der bespielbaren Trittsteine hat mindestens {{ mode === 'stones' ? 'einen teilnehmenden Garten' : 'eine Wohlfühlzone' }}
             </div>
             <div class="track">
                 <i :style="{ width: width(3), background: fill(3) }" />
@@ -56,7 +65,7 @@ const steps = computed(() => [
                 <div class="cnt">{{ stats.levels[step.level] }}</div>
             </div>
             <div class="total">
-                <span>Trittsteine insgesamt</span><b>{{ stats.total_points }}</b>
+                <span>teilnehmende Gärten insgesamt</span><b>{{ stats.total_points }}</b>
             </div>
         </div>
     </div>

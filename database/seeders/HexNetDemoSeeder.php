@@ -29,11 +29,11 @@ use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 /**
- * Demo HexaNetz "Darmstadt wird grün" with about 130 stepping stones. For development and demos only.
+ * Demo HexaNetz "Highway der Tiere" with about 130 stepping stones. For development and demos only.
  */
 class HexNetDemoSeeder extends Seeder
 {
-    public const string SLUG = 'darmstadt-wird-gruen';
+    public const string SLUG = 'highway-der-tiere';
 
     private const array CITY = [
         [49.8952, 8.6292], [49.8978, 8.6598], [49.8872, 8.6842],
@@ -90,7 +90,7 @@ class HexNetDemoSeeder extends Seeder
 
         $hexNet = HexNet::create([
             'group_id' => $group->id,
-            'name' => 'Darmstadt wird grün 2027',
+            'name' => 'Highway der Tiere 2027',
             'slug' => self::SLUG,
             'status' => HexNetStatus::ACTIVE,
             'title' => HexNetDefaults::TITLE,
@@ -100,6 +100,9 @@ class HexNetDemoSeeder extends Seeder
             'grid_origin_lat' => $center->lat,
             'grid_origin_lng' => $center->lng,
             'hex_radius_m' => HexNetDefaults::RADIUS_M,
+            'threshold_medium' => HexNetDefaults::THRESHOLD_MEDIUM,
+            'threshold_dark' => HexNetDefaults::THRESHOLD_DARK,
+            'scoring_mode' => HexNetDefaults::SCORING_MODE,
             'grid_locked' => true,
         ]);
 
@@ -107,9 +110,9 @@ class HexNetDemoSeeder extends Seeder
         $category = $setup->createCategories($hexNet, HexNetDefaults::MAIN_CATEGORY, HexNetDefaults::MAIN_CATEGORY.' 2027', HexNetDefaults::MEASURES);
         $setup->createForm($hexNet->refresh());
 
-        HexNet::firstOrCreate(['slug' => 'darmstadt-wird-gruen-2028'], [
+        HexNet::firstOrCreate(['slug' => 'highway-der-tiere-2028'], [
             'group_id' => $group->id,
-            'name' => 'Darmstadt wird grün 2028',
+            'name' => 'Highway der Tiere 2028',
             'status' => HexNetStatus::DRAFT,
             'title' => HexNetDefaults::TITLE,
             'subtitle' => 'Entwurf für das nächste Jahr',

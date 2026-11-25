@@ -116,7 +116,7 @@ function store(key: string, value: string) {
                 <span class="track-mini">
                     <i :style="{ width: shownStats.percent + '%', background: measure?.color ?? undefined }" />
                 </span>
-                <span class="sum">{{ shownStats.total_points }} Trittsteine</span>
+                <span class="sum">{{ shownStats.total_points }} teilnehmende Gärten</span>
                 <ChevronDown class="h-4 w-4 transition-transform" :class="{ 'rotate-180': scoreOpen }" />
             </button>
 
@@ -133,6 +133,7 @@ function store(key: string, value: string) {
                     :color="measure?.color ?? null"
                     :level-colors="hexNet.level_colors"
                     :mode="mode"
+                    :measure-count="measures.length"
                 />
                 <HexNetViewControls
                     v-model:measure="measureId"

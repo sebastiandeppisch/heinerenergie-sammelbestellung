@@ -1,13 +1,13 @@
-import { defaultThresholds, levelFor, missingToNextLevel, scoreUnit, scoreUnitDative } from '@/components/HexNet/hexnet';
+import { defaultThresholds, levelFor, missingToNextLevel, scoreUnit } from '@/components/HexNet/hexnet';
 import { describe, expect, it } from 'vitest';
 
 describe('scoring modes of a HexaNetz', () => {
     it('names the unit of each mode', () => {
-        expect(scoreUnit(1, 'stones')).toBe('Trittstein');
-        expect(scoreUnit(3, 'measures')).toBe('Maßnahmen');
-        expect(scoreUnit(2, 'distinct_measures')).toBe('verschiedene Maßnahmen');
-        expect(scoreUnitDative(3, 'stones')).toBe('Trittsteinen');
-        expect(scoreUnitDative(4, 'distinct_measures')).toBe('verschiedenen Maßnahmen');
+        expect(scoreUnit(1, 'stones')).toBe('teilnehmender Garten');
+        expect(scoreUnit(3, 'stones')).toBe('teilnehmende Gärten');
+        expect(scoreUnit(3, 'measures')).toBe('Wohlfühlzonen');
+        expect(scoreUnit(1, 'distinct_measures')).toBe('Wohlfühlzone');
+        expect(scoreUnit(2, 'distinct_measures')).toBe('verschiedene Wohlfühlzonen');
     });
 
     it('suggests all measures as dark for variety', () => {

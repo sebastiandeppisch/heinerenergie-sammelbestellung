@@ -74,6 +74,7 @@ class HexNetController extends Controller
             'hex_radius_m' => HexNetDefaults::RADIUS_M,
             'threshold_medium' => HexNetDefaults::THRESHOLD_MEDIUM,
             'threshold_dark' => HexNetDefaults::THRESHOLD_DARK,
+            'scoring_mode' => HexNetDefaults::SCORING_MODE,
             'jitter_m' => HexNetDefaults::JITTER_M,
         ]);
 

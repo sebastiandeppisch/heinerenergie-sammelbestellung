@@ -198,7 +198,7 @@ const allDone = computed(() => Object.values(props.checklist).every(Boolean));
                 <form v-if="current === 'basics'" class="grid max-w-xl gap-4" @submit.prevent="submitBasics">
                     <div class="space-y-1">
                         <Label for="name">Name</Label>
-                        <Input id="name" v-model="basics.name" placeholder="Darmstadt wird grün 2027" />
+                        <Input id="name" v-model="basics.name" placeholder="Highway der Tiere 2027" />
                         <p v-if="basics.errors.name" class="text-sm text-red-500">{{ basics.errors.name }}</p>
                     </div>
                     <div class="space-y-1">

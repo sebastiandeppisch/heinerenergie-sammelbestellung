@@ -40,7 +40,8 @@ test('measures from the template get a placeholder icon and an optional public p
     $measure = $this->measures->first();
     $photo = $measure->formDefinition->fields->first();
 
-    expect($measure->icon_path)->toStartWith('characteristics/hexnet-wheat-')
+    expect($measure->icon_path)->toStartWith('characteristics/hexnet-vogel-')
+        ->and($measure->icon_path)->toEndWith('.png')
         ->and(Storage::disk('public')->exists($measure->icon_path))->toBeTrue()
         ->and($this->measures->pluck('icon_path')->unique())->toHaveCount(3)
         ->and($photo->type->value)->toBe('image')

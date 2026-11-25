@@ -15,10 +15,10 @@ const ringWidth = defineModel<RingWidth>('ringWidth', { required: true });
 
 <template>
     <div class="hexnet-controls">
-        <h2>Waben färben nach</h2>
-        <div class="chips" role="group" aria-label="Waben färben nach">
+        <h2>Trittsteine färben nach</h2>
+        <div class="chips" role="group" aria-label="Trittsteine färben nach">
             <button class="chip" :class="{ on: measureId === null }" :aria-pressed="measureId === null" @click="measureId = null">
-                <span class="dot all" /> Alle Trittsteine
+                <span class="dot all" /> Alle Wohlfühlzonen
             </button>
             <button
                 v-for="measure in measures"

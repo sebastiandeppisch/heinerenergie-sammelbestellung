@@ -43,18 +43,11 @@ export const SCORING_MODES: Record<ScoringMode, { label: string; description: st
     },
 };
 
-/** The unit a cell counts in, e.g. "3 Maßnahmen". */
+/** The unit a cell counts in, e.g. "3 verschiedene Wohlfühlzonen". */
 export function scoreUnit(n: number, mode: ScoringMode): string {
-    if (mode === 'stones') return steppingStones(n);
-    const measures = n === 1 ? 'Maßnahme' : 'Maßnahmen';
-    return mode === 'measures' ? measures : `verschiedene ${measures}`;
-}
-
-/** The unit after "ab", e.g. "ab 3 verschiedenen Maßnahmen". */
-export function scoreUnitDative(n: number, mode: ScoringMode): string {
-    if (mode === 'stones') return n === 1 ? 'Trittstein' : 'Trittsteinen';
-    const measures = n === 1 ? 'Maßnahme' : 'Maßnahmen';
-    return mode === 'measures' ? measures : `verschiedenen ${measures}`;
+    if (mode === 'stones') return n === 1 ? 'teilnehmender Garten' : 'teilnehmende Gärten';
+    if (n === 1) return 'Wohlfühlzone';
+    return mode === 'measures' ? 'Wohlfühlzonen' : 'verschiedene Wohlfühlzonen';
 }
 
 /** Thresholds a new scoring mode starts with, with distinct measures dark means all measures. */
